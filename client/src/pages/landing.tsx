@@ -1,26 +1,19 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { useAuth } from "@/hooks/use-auth";
+import { Loader2 } from "lucide-react";
 
 export default function Landing() {
-  const handleLogin = () => {
-    // Direct OKTA authorization URL
-    const authUrl = `https://mazetx.okta.com/oauth2/default/v1/authorize?` +
-      `client_id=0oarrurqf9mvVKYRj4x7&` +
-      `response_type=code&` +
-      `scope=openid email profile&` +
-      `redirect_uri=${encodeURIComponent('https://mazetx.replit.app/api/okta-callback')}&` +
-      `state=oauth_state`;
-    window.location.href = authUrl;
-  };
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const { loginMutation } = useAuth();
 
-  const handleSSOLogin = () => {
-    // Direct OKTA authorization URL
-    const authUrl = `https://mazetx.okta.com/oauth2/default/v1/authorize?` +
-      `client_id=0oarrurqf9mvVKYRj4x7&` +
-      `response_type=code&` +
-      `scope=openid email profile&` +
-      `redirect_uri=${encodeURIComponent('https://mazetx.replit.app/api/okta-callback')}&` +
-      `state=oauth_state`;
-    window.location.href = authUrl;
+  const handleLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    loginMutation.mutate({ username, password });
   };
 
   return (

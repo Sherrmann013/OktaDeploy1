@@ -3,7 +3,7 @@ import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { useAuth } from "@/hooks/useAuth";
+import { AuthProvider, useAuth } from "@/hooks/use-auth";
 import SSOLayout from "@/components/sso-layout";
 import Landing from "@/pages/landing";
 import Home from "@/pages/home";
@@ -16,7 +16,7 @@ import Settings from "@/pages/settings";
 import NotFound from "@/pages/not-found";
 
 function Router() {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { user, isLoading } = useAuth();
 
   if (isLoading) {
     return (
@@ -31,7 +31,7 @@ function Router() {
 
   return (
     <Switch>
-      {!isAuthenticated ? (
+      {!user ? (
         <Route path="/" component={Landing} />
       ) : (
         <>
@@ -52,12 +52,14 @@ function Router() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <SSOLayout>
-          <Toaster />
-          <Router />
-        </SSOLayout>
-      </TooltipProvider>
+      <AuthProvider>
+        <TooltipProvider>
+          <SSOLayout>
+            <Toaster />
+            <Router />
+          </SSOLayout>
+        </TooltipProvider>
+      </AuthProvider>
     </QueryClientProvider>
   );
 }
