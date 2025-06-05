@@ -121,11 +121,37 @@ class OktaService {
     }
   }
 
-  // Future methods for user management will go here
-  // async getUsers() { ... }
-  // async createUser() { ... }
-  // async updateUser() { ... }
-  // etc.
+  async getUserByEmail(email: string): Promise<any> {
+    try {
+      const response = await this.makeRequest(`/users/${email}`);
+      
+      if (response.ok) {
+        const userData = await response.json();
+        return userData;
+      } else {
+        const errorText = await response.text();
+        throw new Error(`Failed to get user: ${response.status} ${response.statusText} - ${errorText}`);
+      }
+    } catch (error) {
+      throw new Error(`OKTA API error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  async getUsers(limit: number = 10): Promise<any[]> {
+    try {
+      const response = await this.makeRequest(`/users?limit=${limit}`);
+      
+      if (response.ok) {
+        const users = await response.json();
+        return users;
+      } else {
+        const errorText = await response.text();
+        throw new Error(`Failed to get users: ${response.status} ${response.statusText} - ${errorText}`);
+      }
+    } catch (error) {
+      throw new Error(`OKTA API error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
 }
 
 export const oktaService = new OktaService();

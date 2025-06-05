@@ -4,6 +4,7 @@ import { storage } from "./storage";
 import { insertUserSchema, updateUserSchema } from "@shared/schema";
 import { z } from "zod";
 import { oktaService } from "./okta-service";
+import { syncSpecificUser } from "./okta-sync";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Get all users with optional filtering and pagination
@@ -195,6 +196,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({
         success: false,
         message: "Failed to test OKTA connection",
+        error: error instanceof Error ? error.message : "Unknown error"
+      });
+    }
+  });
+
+  // Sync specific user from OKTA
+  app.post("/api/okta/sync-user", async (req, res) => {
+    try {
+      const { email } = z.object({
+        email: z.string().email()
+      }).parse(req.body);
+
+      await syncSpecificUser(email);
+      
+      res.json({
+        success: true,
+        message: `User ${email} synced successfully from OKTA`
+      });
+    } catch (error) {
+      console.error("OKTA user sync error:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to sync user from OKTA",
         error: error instanceof Error ? error.message : "Unknown error"
       });
     }
