@@ -32,18 +32,30 @@ export function getSession() {
 }
 
 async function getUserProfile(accessToken: string) {
-  const response = await fetch(`${process.env.ISSUER_URL}/v1/userinfo`, {
-    headers: {
-      'Authorization': `Bearer ${accessToken}`,
-      'Accept': 'application/json'
+  try {
+    console.log('Fetching user profile with token:', accessToken ? 'present' : 'missing');
+    const response = await fetch(`${process.env.ISSUER_URL}/v1/userinfo`, {
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+        'Accept': 'application/json'
+      }
+    });
+    
+    console.log('User profile response status:', response.status);
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Failed to fetch user profile:', response.status, errorText);
+      throw new Error(`Failed to fetch user profile: ${response.status} ${response.statusText}`);
     }
-  });
-  
-  if (!response.ok) {
-    throw new Error(`Failed to fetch user profile: ${response.statusText}`);
+    
+    const profile = await response.json();
+    console.log('User profile received:', { email: profile.email, sub: profile.sub });
+    return profile;
+  } catch (error) {
+    console.error('getUserProfile error:', error);
+    throw error;
   }
-  
-  return await response.json();
 }
 
 export async function setupAuth(app: Express) {
@@ -196,12 +208,23 @@ export async function setupAuth(app: Express) {
       const userProfile = await getUserProfile(tokens.access_token);
       console.log('User profile:', userProfile);
       
-      // Check if user exists in our system
-      const existingUser = await storage.getUserByEmail(userProfile.email);
+      // Check if user exists in our system or create admin user
+      let existingUser = await storage.getUserByEmail(userProfile.email);
       
       if (!existingUser) {
-        console.log('User not found in admin system:', userProfile.email);
-        return res.redirect('/?error=access_denied');
+        console.log('Creating new admin user:', userProfile.email);
+        // Create a new admin user for OKTA authenticated users
+        existingUser = await storage.createUser({
+          firstName: userProfile.given_name || userProfile.name?.split(' ')[0] || 'Admin',
+          lastName: userProfile.family_name || userProfile.name?.split(' ').slice(1).join(' ') || 'User',
+          email: userProfile.email,
+          login: userProfile.email,
+          status: 'ACTIVE',
+          title: 'Administrator',
+          department: 'IT',
+          oktaId: userProfile.sub
+        });
+        console.log('Created new admin user:', existingUser.id);
       }
       
       // Create session
