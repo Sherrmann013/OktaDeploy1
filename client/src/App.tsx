@@ -8,6 +8,7 @@ import SSOLayout from "@/components/sso-layout";
 import Landing from "@/pages/landing";
 import Home from "@/pages/home";
 import Dashboard from "@/pages/dashboard";
+import Users from "@/pages/users";
 import UserDetail from "@/pages/user-detail";
 import Groups from "@/pages/groups";
 import Applications from "@/pages/applications";
@@ -37,6 +38,7 @@ function Router() {
         <>
           <Route path="/" component={Home} />
           <Route path="/dashboard" component={Dashboard} />
+          <Route path="/users" component={Users} />
           <Route path="/users/:id" component={UserDetail} />
           <Route path="/groups" component={Groups} />
           <Route path="/applications" component={Applications} />

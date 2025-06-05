@@ -3,7 +3,7 @@ import { Shield, Users, UsersRound, Grid3x3, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const navigation = [
-  { name: "Users", href: "/", icon: Users, current: true },
+  { name: "Users", href: "/users", icon: Users, current: true },
   { name: "Groups", href: "/groups", icon: UsersRound, current: false },
   { name: "Applications", href: "/applications", icon: Grid3x3, current: false },
   { name: "Security", href: "/security", icon: Shield, current: false },
