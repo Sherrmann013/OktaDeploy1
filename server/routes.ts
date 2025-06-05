@@ -107,7 +107,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           usersPerPage: limit,
           source: 'okta'
         });
-      } catch (oktaError) {
+      } catch (oktaError: any) {
         console.log("OKTA API unavailable, falling back to local storage:", oktaError.message);
         
         // Fallback to local storage

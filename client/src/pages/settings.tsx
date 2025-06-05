@@ -44,7 +44,7 @@ export default function Settings() {
       <div className="flex-1 overflow-auto p-6">
         <div className="max-w-4xl mx-auto">
           <Tabs defaultValue="general" className="space-y-6">
-              <TabsList>
+            <TabsList>
                 <TabsTrigger value="general">General</TabsTrigger>
                 <TabsTrigger value="security">Security</TabsTrigger>
                 <TabsTrigger value="authentication">Authentication</TabsTrigger>
