@@ -152,6 +152,86 @@ class OktaService {
       throw new Error(`OKTA API error: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
+
+  async getUserGroups(userId: string): Promise<any[]> {
+    try {
+      const response = await this.makeRequest(`/users/${userId}/groups`);
+      
+      if (response.ok) {
+        return await response.json();
+      } else {
+        const errorText = await response.text();
+        throw new Error(`Failed to get user groups: ${response.status} ${response.statusText} - ${errorText}`);
+      }
+    } catch (error) {
+      throw new Error(`OKTA API error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  async getUserApplications(userId: string): Promise<any[]> {
+    try {
+      const response = await this.makeRequest(`/users/${userId}/appLinks`);
+      
+      if (response.ok) {
+        return await response.json();
+      } else {
+        const errorText = await response.text();
+        throw new Error(`Failed to get user applications: ${response.status} ${response.statusText} - ${errorText}`);
+      }
+    } catch (error) {
+      throw new Error(`OKTA API error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  async getUserLogs(userId: string, limit: number = 50): Promise<any[]> {
+    try {
+      // Get logs for the last 30 days
+      const since = new Date();
+      since.setDate(since.getDate() - 30);
+      const sinceParam = since.toISOString();
+      
+      const response = await this.makeRequest(`/logs?filter=actor.id eq "${userId}"&since=${sinceParam}&limit=${limit}&sortOrder=DESCENDING`);
+      
+      if (response.ok) {
+        return await response.json();
+      } else {
+        const errorText = await response.text();
+        throw new Error(`Failed to get user logs: ${response.status} ${response.statusText} - ${errorText}`);
+      }
+    } catch (error) {
+      throw new Error(`OKTA API error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  async getApplications(limit: number = 200): Promise<any[]> {
+    try {
+      const response = await this.makeRequest(`/apps?limit=${limit}`);
+      
+      if (response.ok) {
+        return await response.json();
+      } else {
+        const errorText = await response.text();
+        throw new Error(`Failed to get applications: ${response.status} ${response.statusText} - ${errorText}`);
+      }
+    } catch (error) {
+      throw new Error(`OKTA API error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  async getGroups(limit: number = 200): Promise<any[]> {
+    try {
+      const response = await this.makeRequest(`/groups?limit=${limit}`);
+      
+      if (response.ok) {
+        return await response.json();
+      } else {
+        const errorText = await response.text();
+        throw new Error(`Failed to get groups: ${response.status} ${response.statusText} - ${errorText}`);
+      }
+    } catch (error) {
+      throw new Error(`OKTA API error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
 }
 
 export const oktaService = new OktaService();

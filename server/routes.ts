@@ -390,6 +390,137 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get user groups from OKTA
+  app.get("/api/users/:id/groups", isAuthenticated, async (req, res) => {
+    try {
+      const userId = parseInt(req.params.id);
+      const user = await storage.getUser(userId);
+      
+      if (!user || !user.oktaId) {
+        return res.status(404).json({ message: "User not found or no OKTA ID" });
+      }
+
+      const groups = await oktaService.getUserGroups(user.oktaId);
+      res.json(groups);
+    } catch (error) {
+      console.error("Error fetching user groups:", error);
+      res.status(500).json({ message: "Failed to fetch user groups" });
+    }
+  });
+
+  // Get user applications from OKTA
+  app.get("/api/users/:id/applications", isAuthenticated, async (req, res) => {
+    try {
+      const userId = parseInt(req.params.id);
+      const user = await storage.getUser(userId);
+      
+      if (!user || !user.oktaId) {
+        return res.status(404).json({ message: "User not found or no OKTA ID" });
+      }
+
+      const applications = await oktaService.getUserApplications(user.oktaId);
+      
+      // Transform to show only app name and status
+      const transformedApps = applications.map(app => ({
+        id: app.id,
+        name: app.label,
+        status: app.status === "ACTIVE" ? "ACTIVE" : "INACTIVE"
+      }));
+      
+      res.json(transformedApps);
+    } catch (error) {
+      console.error("Error fetching user applications:", error);
+      res.status(500).json({ message: "Failed to fetch user applications" });
+    }
+  });
+
+  // Get user logs from OKTA (enhanced with 30-day timeframe)
+  app.get("/api/users/:id/logs", isAuthenticated, async (req, res) => {
+    try {
+      const userId = parseInt(req.params.id);
+      const user = await storage.getUser(userId);
+      
+      if (!user || !user.oktaId) {
+        return res.status(404).json({ message: "User not found or no OKTA ID" });
+      }
+
+      const logs = await oktaService.getUserLogs(user.oktaId, 100);
+      
+      // Transform logs to include more detailed information
+      const enhancedLogs = logs.map(log => ({
+        id: log.uuid,
+        eventType: log.eventType,
+        displayMessage: log.displayMessage,
+        outcome: log.outcome?.result || "UNKNOWN",
+        published: log.published,
+        actor: {
+          id: log.actor?.id,
+          displayName: log.actor?.displayName,
+          type: log.actor?.type
+        },
+        client: {
+          userAgent: log.client?.userAgent?.rawUserAgent,
+          ipAddress: log.client?.ipAddress,
+          geographicalContext: log.client?.geographicalContext
+        },
+        target: log.target?.map(t => ({
+          id: t.id,
+          type: t.type,
+          displayName: t.displayName
+        })) || []
+      }));
+      
+      res.json(enhancedLogs);
+    } catch (error) {
+      console.error("Error fetching user logs:", error);
+      res.status(500).json({ message: "Failed to fetch user logs" });
+    }
+  });
+
+  // Get all applications from OKTA
+  app.get("/api/applications", isAuthenticated, async (req, res) => {
+    try {
+      const applications = await oktaService.getApplications();
+      
+      // Transform to show only app name and status
+      const transformedApps = applications.map(app => ({
+        id: app.id,
+        name: app.label,
+        status: app.status === "ACTIVE" ? "ACTIVE" : "INACTIVE",
+        signOnMode: app.signOnMode,
+        created: app.created,
+        lastUpdated: app.lastUpdated
+      }));
+      
+      res.json(transformedApps);
+    } catch (error) {
+      console.error("Error fetching applications:", error);
+      res.status(500).json({ message: "Failed to fetch applications" });
+    }
+  });
+
+  // Get all groups from OKTA
+  app.get("/api/groups", isAuthenticated, async (req, res) => {
+    try {
+      const groups = await oktaService.getGroups();
+      
+      const transformedGroups = groups.map(group => ({
+        id: group.id,
+        name: group.profile?.name,
+        description: group.profile?.description,
+        type: group.type,
+        created: group.created,
+        lastUpdated: group.lastUpdated,
+        lastMembershipUpdated: group.lastMembershipUpdated
+      }));
+      
+      res.json(transformedGroups);
+    } catch (error) {
+      console.error("Error fetching groups:", error);
+      res.status(500).json({ message: "Failed to fetch groups" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

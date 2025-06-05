@@ -38,6 +38,39 @@ export default function UserDetail() {
     enabled: !!userId,
   });
 
+  // Query for user groups
+  const { data: userGroups, isLoading: groupsLoading } = useQuery({
+    queryKey: ["/api/users", userId, "groups"],
+    queryFn: async () => {
+      const response = await fetch(`/api/users/${userId}/groups`);
+      if (!response.ok) throw new Error("Failed to fetch user groups");
+      return response.json();
+    },
+    enabled: !!userId && activeTab === "groups",
+  });
+
+  // Query for user applications
+  const { data: userApplications, isLoading: appsLoading } = useQuery({
+    queryKey: ["/api/users", userId, "applications"],
+    queryFn: async () => {
+      const response = await fetch(`/api/users/${userId}/applications`);
+      if (!response.ok) throw new Error("Failed to fetch user applications");
+      return response.json();
+    },
+    enabled: !!userId && activeTab === "applications",
+  });
+
+  // Query for enhanced user logs (30-day timeframe)
+  const { data: userLogs, isLoading: logsLoading } = useQuery({
+    queryKey: ["/api/users", userId, "logs"],
+    queryFn: async () => {
+      const response = await fetch(`/api/users/${userId}/logs`);
+      if (!response.ok) throw new Error("Failed to fetch user logs");
+      return response.json();
+    },
+    enabled: !!userId && activeTab === "activity",
+  });
+
   const updateStatusMutation = useMutation({
     mutationFn: async ({ status }: { status: string }) => {
       return apiRequest("PATCH", `/api/users/${userId}/status`, { status });
@@ -270,7 +303,7 @@ export default function UserDetail() {
               <TabsTrigger value="groups">Groups</TabsTrigger>
               <TabsTrigger value="devices">Devices</TabsTrigger>
               <TabsTrigger value="admin">Admin roles</TabsTrigger>
-              <TabsTrigger value="logs">Logs</TabsTrigger>
+              <TabsTrigger value="activity">Activity</TabsTrigger>
             </TabsList>
 
             <TabsContent value="profile">
@@ -321,7 +354,27 @@ export default function UserDetail() {
                   <CardTitle>Applications</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-gray-600">No applications assigned to this user.</p>
+                  {appsLoading ? (
+                    <div className="flex items-center justify-center py-8">
+                      <RefreshCw className="w-6 h-6 animate-spin text-gray-400" />
+                    </div>
+                  ) : userApplications && userApplications.length > 0 ? (
+                    <div className="space-y-3">
+                      {userApplications.map((app: any) => (
+                        <div key={app.id} className="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
+                          <div>
+                            <h4 className="font-medium text-gray-900">{app.name}</h4>
+                            <p className="text-sm text-gray-600">Application ID: {app.id}</p>
+                          </div>
+                          <Badge variant={app.status === "ACTIVE" ? "default" : "secondary"}>
+                            {app.status}
+                          </Badge>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-gray-600 py-8 text-center">No applications assigned to this user.</p>
+                  )}
                 </CardContent>
               </Card>
             </TabsContent>
@@ -332,7 +385,26 @@ export default function UserDetail() {
                   <CardTitle>Groups</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-gray-600">No groups assigned to this user.</p>
+                  {groupsLoading ? (
+                    <div className="flex items-center justify-center py-8">
+                      <RefreshCw className="w-6 h-6 animate-spin text-gray-400" />
+                    </div>
+                  ) : userGroups && userGroups.length > 0 ? (
+                    <div className="space-y-3">
+                      {userGroups.map((group: any) => (
+                        <div key={group.id} className="p-3 border border-gray-200 rounded-lg">
+                          <h4 className="font-medium text-gray-900">{group.profile?.name || group.name}</h4>
+                          <p className="text-sm text-gray-600 mt-1">{group.profile?.description || "No description"}</p>
+                          <div className="flex items-center gap-2 mt-2">
+                            <Badge variant="outline">{group.type}</Badge>
+                            <span className="text-xs text-gray-500">ID: {group.id}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-gray-600 py-8 text-center">No groups assigned to this user.</p>
+                  )}
                 </CardContent>
               </Card>
             </TabsContent>
