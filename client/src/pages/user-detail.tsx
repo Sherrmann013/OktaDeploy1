@@ -446,29 +446,65 @@ export default function UserDetail() {
               </Card>
             </TabsContent>
 
-            <TabsContent value="logs">
+            <TabsContent value="activity">
               <Card>
                 <CardHeader>
-                  <CardTitle>Recent Activity</CardTitle>
+                  <CardTitle>Activity Logs (Last 30 Days)</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-3">
-                    <div className="flex items-start gap-3 p-3 border-l-4 border-green-500 bg-green-50">
-                      <Shield className="w-4 h-4 text-green-600 mt-0.5" />
-                      <div className="flex-1">
-                        <p className="text-sm font-medium">Successful login</p>
-                        <p className="text-xs text-gray-600">
-                          {user.lastLogin ? format(new Date(user.lastLogin), "MMM d, yyyy 'at' h:mm a") : 'Never'}
-                        </p>
-                      </div>
+                  {logsLoading ? (
+                    <div className="flex items-center justify-center py-8">
+                      <RefreshCw className="w-6 h-6 animate-spin text-gray-400" />
                     </div>
-                    <div className="flex justify-center pt-4">
-                      <Button variant="outline" size="sm">
-                        <Eye className="w-4 h-4 mr-2" />
-                        View All Logs
-                      </Button>
+                  ) : userLogs && userLogs.length > 0 ? (
+                    <div className="space-y-3 max-h-96 overflow-y-auto">
+                      {userLogs.map((log: any) => {
+                        const getEventIcon = (eventType: string) => {
+                          if (eventType.includes("user.session")) return Shield;
+                          if (eventType.includes("user.authentication")) return KeyRound;
+                          if (eventType.includes("application")) return Monitor;
+                          return Eye;
+                        };
+
+                        const getEventColor = (outcome: string) => {
+                          if (outcome === "SUCCESS") return "green";
+                          if (outcome === "FAILURE") return "red";
+                          return "gray";
+                        };
+
+                        const Icon = getEventIcon(log.eventType);
+                        const color = getEventColor(log.outcome);
+
+                        return (
+                          <div key={log.id} className={`flex items-start gap-3 p-3 border-l-4 border-${color}-500 bg-${color}-50`}>
+                            <Icon className={`w-4 h-4 text-${color}-600 mt-0.5`} />
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-medium">{log.displayMessage}</p>
+                              <p className="text-xs text-gray-600 mt-1">
+                                {format(new Date(log.published), "MMM d, yyyy 'at' h:mm a")}
+                              </p>
+                              {log.client?.ipAddress && (
+                                <p className="text-xs text-gray-500 mt-1">
+                                  IP: {log.client.ipAddress}
+                                  {log.client.geographicalContext?.city && 
+                                    ` • ${log.client.geographicalContext.city}, ${log.client.geographicalContext.state || log.client.geographicalContext.country}`
+                                  }
+                                </p>
+                              )}
+                              <div className="flex items-center gap-2 mt-2">
+                                <Badge variant={log.outcome === "SUCCESS" ? "default" : "destructive"} className="text-xs">
+                                  {log.outcome}
+                                </Badge>
+                                <span className="text-xs text-gray-500">{log.eventType}</span>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
                     </div>
-                  </div>
+                  ) : (
+                    <p className="text-gray-600 py-8 text-center">No activity logs found for the last 30 days.</p>
+                  )}
                 </CardContent>
               </Card>
             </TabsContent>
