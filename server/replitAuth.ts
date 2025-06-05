@@ -110,8 +110,43 @@ export async function setupAuth(app: Express) {
   });
 
   app.get("/api/login", (req, res, next) => {
-    console.log('Login request received, redirecting to OKTA...');
-    passport.authenticate('okta')(req, res, next);
+    console.log('=== LOGIN REQUEST RECEIVED ===');
+    console.log('Request URL:', req.url);
+    console.log('Request headers:', req.headers);
+    console.log('Passport strategies:', Object.keys(passport._strategies || {}));
+    console.log('Attempting OKTA authentication...');
+    
+    try {
+      passport.authenticate('okta', (err, user, info) => {
+        console.log('OKTA authenticate callback:', { err, user, info });
+        if (err) {
+          console.error('Authentication error:', err);
+          return res.status(500).send('Authentication failed');
+        }
+        if (!user) {
+          console.log('No user returned, redirecting to authorization URL');
+          // Manually redirect to OKTA authorization URL
+          const authUrl = `${process.env.ISSUER_URL}/v1/authorize?` +
+            `client_id=${process.env.CLIENT_ID}&` +
+            `response_type=code&` +
+            `scope=openid email profile groups&` +
+            `redirect_uri=${encodeURIComponent('https://mazetx.replit.app/api/callback')}&` +
+            `state=oauth_state`;
+          console.log('Redirecting to:', authUrl);
+          return res.redirect(authUrl);
+        }
+        req.logIn(user, (err) => {
+          if (err) {
+            console.error('Login error:', err);
+            return res.status(500).send('Login failed');
+          }
+          return res.redirect('/');
+        });
+      })(req, res, next);
+    } catch (error) {
+      console.error('Exception in login handler:', error);
+      res.status(500).send('Server error');
+    }
   });
 
   app.get("/api/callback", 
