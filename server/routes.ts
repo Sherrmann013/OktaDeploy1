@@ -141,7 +141,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Delete user
-  app.delete("/api/users/:id", async (req, res) => {
+  app.delete("/api/users/:id", requireAdmin, async (req, res) => {
     try {
       const id = z.coerce.number().parse(req.params.id);
       
@@ -162,7 +162,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Update user status (activate/suspend)
-  app.patch("/api/users/:id/status", async (req, res) => {
+  app.patch("/api/users/:id/status", requireAdmin, async (req, res) => {
     try {
       const id = z.coerce.number().parse(req.params.id);
       const { status } = z.object({
