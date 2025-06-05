@@ -18,11 +18,11 @@ class OktaService {
     }
 
     this.config = {
-      domain,
+      domain: domain.replace(/^https?:\/\//, ''), // Remove protocol if present
       apiToken
     };
     
-    this.baseUrl = `https://${domain}/api/v1`;
+    this.baseUrl = `https://${this.config.domain}/api/v1`;
   }
 
   private async makeRequest(endpoint: string, options: { method?: string; body?: string } = {}): Promise<any> {
