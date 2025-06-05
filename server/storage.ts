@@ -34,10 +34,10 @@ export class MemStorage implements IStorage {
     const sampleUsers = [
       {
         oktaId: "00u1abc2def3ghi4jkl5",
-        firstName: "John",
-        lastName: "Doe",
-        email: "john.doe@company.com",
-        login: "john.doe",
+        firstName: "Sherrmann",
+        lastName: "User",
+        email: "sherrmann@mazetx.com",
+        login: "sherrmann",
         mobilePhone: "+1 (555) 123-4567",
         department: "Engineering",
         title: "Senior Software Engineer",
