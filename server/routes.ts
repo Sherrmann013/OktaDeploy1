@@ -189,7 +189,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Test OKTA connection endpoint
-  app.get("/api/okta/test-connection", async (req, res) => {
+  app.get("/api/okta/test-connection", isAuthenticated, async (req, res) => {
     try {
       const result = await oktaService.testConnection();
       
@@ -217,7 +217,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Sync specific user from OKTA
-  app.post("/api/okta/sync-user", async (req, res) => {
+  app.post("/api/okta/sync-user", requireAdmin, async (req, res) => {
     try {
       const { email } = z.object({
         email: z.string().email()
@@ -240,7 +240,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Password reset endpoints
-  app.post("/api/users/:id/password/reset", async (req, res) => {
+  app.post("/api/users/:id/password/reset", requireAdmin, async (req, res) => {
     try {
       const id = z.coerce.number().parse(req.params.id);
       
@@ -258,7 +258,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/users/:id/password/expire", async (req, res) => {
+  app.post("/api/users/:id/password/expire", requireAdmin, async (req, res) => {
     try {
       const id = z.coerce.number().parse(req.params.id);
       

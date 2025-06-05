@@ -15,14 +15,23 @@ import Settings from "@/pages/settings";
 import NotFound from "@/pages/not-found";
 
 function Router() {
+  const { isAuthenticated, isLoading } = useAuth();
+
   return (
     <Switch>
-      <Route path="/" component={Dashboard} />
-      <Route path="/users/:id" component={UserDetail} />
-      <Route path="/groups" component={Groups} />
-      <Route path="/applications" component={Applications} />
-      <Route path="/security" component={Security} />
-      <Route path="/settings" component={Settings} />
+      {isLoading || !isAuthenticated ? (
+        <Route path="/" component={Landing} />
+      ) : (
+        <>
+          <Route path="/" component={Home} />
+          <Route path="/dashboard" component={Dashboard} />
+          <Route path="/users/:id" component={UserDetail} />
+          <Route path="/groups" component={Groups} />
+          <Route path="/applications" component={Applications} />
+          <Route path="/security" component={Security} />
+          <Route path="/settings" component={Settings} />
+        </>
+      )}
       <Route component={NotFound} />
     </Switch>
   );
