@@ -14,8 +14,8 @@ if (!process.env.REPLIT_DOMAINS) {
 const getOidcConfig = memoize(
   async () => {
     return await client.discovery(
-      new URL(process.env.ISSUER_URL ?? "https://replit.com/oidc"),
-      process.env.REPL_ID!
+      new URL(process.env.ISSUER_URL!),
+      process.env.CLIENT_ID!
     );
   },
   { maxAge: 3600 * 1000 }
@@ -100,9 +100,9 @@ export async function setupAuth(app: Express) {
   for (const domain of process.env.REPLIT_DOMAINS!.split(",")) {
     const strategy = new Strategy(
       {
-        name: `replitauth:${domain}`,
+        name: `oktaauth:${domain}`,
         config,
-        scope: "openid email profile",
+        scope: "openid email profile groups",
         callbackURL: `https://${domain}/api/callback`,
       },
       verify,
@@ -114,14 +114,14 @@ export async function setupAuth(app: Express) {
   passport.deserializeUser((user: Express.User, cb) => cb(null, user));
 
   app.get("/api/login", (req, res, next) => {
-    passport.authenticate(`replitauth:${req.hostname}`, {
+    passport.authenticate(`oktaauth:${req.hostname}`, {
       prompt: "login consent",
-      scope: ["openid", "email", "profile"],
+      scope: ["openid", "email", "profile", "groups"],
     })(req, res, next);
   });
 
   app.get("/api/callback", (req, res, next) => {
-    passport.authenticate(`replitauth:${req.hostname}`, {
+    passport.authenticate(`oktaauth:${req.hostname}`, {
       successReturnToOrRedirect: "/",
       failureRedirect: "/api/login",
     })(req, res, next);
@@ -131,7 +131,7 @@ export async function setupAuth(app: Express) {
     req.logout(() => {
       res.redirect(
         client.buildEndSessionUrl(config, {
-          client_id: process.env.REPL_ID!,
+          client_id: process.env.CLIENT_ID!,
           post_logout_redirect_uri: `${req.protocol}://${req.hostname}`,
         }).href
       );
