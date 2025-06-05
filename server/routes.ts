@@ -141,7 +141,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/users/:id", isAuthenticated, async (req, res) => {
     try {
       const id = z.coerce.number().parse(req.params.id);
+      console.log(`Fetching user with ID: ${id}`);
+      
       const user = await storage.getUser(id);
+      console.log(`User found:`, user ? 'Yes' : 'No');
       
       if (!user) {
         return res.status(404).json({ message: "User not found" });
