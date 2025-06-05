@@ -19,28 +19,87 @@ export default function Landing() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
       <div className="container mx-auto px-4 py-16">
-        <div className="text-center">
-          <h1 className="text-4xl md:text-6xl font-bold text-gray-900 dark:text-white mb-16">
-            Maze User Management
-          </h1>
-          
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <Button 
-              onClick={handleLogin}
-              size="lg"
-              className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 text-lg"
-            >
-              Sign In
-            </Button>
+        <div className="grid lg:grid-cols-2 gap-12 items-center">
+          {/* Left Column - Hero Content */}
+          <div className="space-y-8">
+            <div className="space-y-4">
+              <h1 className="text-4xl lg:text-6xl font-bold text-gray-900 dark:text-white leading-tight">
+                Maze User
+                <span className="text-blue-600 dark:text-blue-400"> Management</span>
+              </h1>
+              <p className="text-xl text-gray-600 dark:text-gray-300">
+                Streamline your OKTA tenant administration with our comprehensive user management platform. Efficiently manage users, groups, and access controls with intelligent automation.
+              </p>
+            </div>
             
-            <Button 
-              onClick={handleSSOLogin}
-              size="lg"
-              variant="outline"
-              className="border-blue-600 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950 px-8 py-3 text-lg"
-            >
-              SSO Sign In
-            </Button>
+            <div className="flex flex-wrap gap-6 text-sm text-gray-500 dark:text-gray-400">
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                <span>OKTA Integration</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                <span>Advanced Filtering</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                <span>Secure Access</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Right Column - Login Form */}
+          <div className="flex justify-center">
+            <Card className="w-full max-w-md">
+              <CardHeader>
+                <CardTitle className="text-2xl text-center">Admin Login</CardTitle>
+                <CardDescription className="text-center">
+                  Sign in to access the user management dashboard
+                </CardDescription>
+              </CardHeader>
+              <form onSubmit={handleLogin}>
+                <CardContent className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="username">Username</Label>
+                    <Input
+                      id="username"
+                      type="text"
+                      value={username}
+                      onChange={(e) => setUsername(e.target.value)}
+                      placeholder="Enter your username"
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="password">Password</Label>
+                    <Input
+                      id="password"
+                      type="password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="Enter your password"
+                      required
+                    />
+                  </div>
+                </CardContent>
+                <CardFooter>
+                  <Button 
+                    type="submit" 
+                    className="w-full"
+                    disabled={loginMutation.isPending}
+                  >
+                    {loginMutation.isPending ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Signing in...
+                      </>
+                    ) : (
+                      "Sign In"
+                    )}
+                  </Button>
+                </CardFooter>
+              </form>
+            </Card>
           </div>
         </div>
       </div>
