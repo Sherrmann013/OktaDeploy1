@@ -52,13 +52,23 @@ export async function setupAuth(app: Express) {
   app.use(passport.initialize());
   app.use(passport.session());
 
+  // Use the production domain for callback URL
+  const domain = 'mazetx.replit.app';
+  
+  console.log('Using domain for callback:', domain);
+  console.log('OKTA Auth URLs:', {
+    authorizationURL: `${process.env.ISSUER_URL}/v1/authorize`,
+    tokenURL: `${process.env.ISSUER_URL}/v1/token`,
+    callbackURL: `https://${domain}/api/callback`
+  });
+
   // Configure OKTA OAuth2 strategy
   const oktaStrategy = new OAuthStrategy({
     authorizationURL: `${process.env.ISSUER_URL}/v1/authorize`,
     tokenURL: `${process.env.ISSUER_URL}/v1/token`,
     clientID: process.env.CLIENT_ID!,
     clientSecret: process.env.CLIENT_SECRET!,
-    callbackURL: `https://${process.env.REPLIT_DOMAINS?.split(',')[0]}/api/callback`,
+    callbackURL: `https://${domain}/api/callback`,
     scope: 'openid email profile groups'
   }, async (accessToken: string, refreshToken: string, profile: any, done: any) => {
     try {
@@ -99,7 +109,10 @@ export async function setupAuth(app: Express) {
     done(null, user);
   });
 
-  app.get("/api/login", passport.authenticate('okta'));
+  app.get("/api/login", (req, res, next) => {
+    console.log('Login request received, redirecting to OKTA...');
+    passport.authenticate('okta')(req, res, next);
+  });
 
   app.get("/api/callback", 
     passport.authenticate('okta', { failureRedirect: '/api/login' }),
