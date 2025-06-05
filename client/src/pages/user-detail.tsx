@@ -6,7 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { ArrowLeft, Edit, RotateCcw, Trash2, Play, Pause } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { ArrowLeft, Edit, RotateCcw, Trash2, Play, Pause, ChevronDown, Smartphone, Monitor, Shield, Eye, RefreshCw, KeyRound } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import ConfirmationModal from "@/components/confirmation-modal";
@@ -23,6 +25,8 @@ export default function UserDetail() {
     message: string;
     action: () => void;
   } | null>(null);
+  
+  const [activeTab, setActiveTab] = useState("profile");
 
   const userId = params?.id ? parseInt(params.id) : null;
 
