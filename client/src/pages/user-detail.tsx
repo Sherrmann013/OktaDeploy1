@@ -1,7 +1,7 @@
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useRoute, useLocation } from "wouter";
 import { format } from "date-fns";
-import Sidebar from "@/components/sidebar";
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -142,41 +142,32 @@ export default function UserDetail() {
 
   if (isLoading) {
     return (
-      <div className="flex min-h-screen bg-gray-50">
-        <Sidebar />
-        <main className="flex-1 flex items-center justify-center">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-            <p className="text-gray-600">Loading user details...</p>
-          </div>
-        </main>
-      </div>
+      <main className="flex-1 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading user details...</p>
+        </div>
+      </main>
     );
   }
 
   if (!user) {
     return (
-      <div className="flex min-h-screen bg-gray-50">
-        <Sidebar />
-        <main className="flex-1 flex items-center justify-center">
-          <div className="text-center">
-            <h2 className="text-2xl font-semibold text-gray-900 mb-2">User Not Found</h2>
-            <p className="text-gray-600 mb-4">The user you're looking for doesn't exist.</p>
-            <Button onClick={() => setLocation("/")} variant="outline">
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Users
-            </Button>
-          </div>
-        </main>
-      </div>
+      <main className="flex-1 flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-2xl font-semibold text-gray-900 mb-2">User Not Found</h2>
+          <p className="text-gray-600 mb-4">The user you're looking for doesn't exist.</p>
+          <Button onClick={() => setLocation("/")} variant="outline">
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back to Users
+          </Button>
+        </div>
+      </main>
     );
   }
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
-      <Sidebar />
-      
-      <main className="flex-1 overflow-auto">
+    <main className="flex-1 overflow-auto">
         <div className="p-6 max-w-6xl mx-auto">
           {/* Header */}
           <div className="flex items-center justify-between mb-6">
@@ -495,22 +486,21 @@ export default function UserDetail() {
             </TabsContent>
           </Tabs>
         </div>
+        
+        {/* Confirmation Modal */}
+        {confirmAction && (
+          <ConfirmationModal
+            open={!!confirmAction}
+            onClose={() => setConfirmAction(null)}
+            onConfirm={() => {
+              confirmAction.action();
+              setConfirmAction(null);
+            }}
+            title={confirmAction.title}
+            message={confirmAction.message}
+            variant={confirmAction.type === "delete" ? "destructive" : "default"}
+          />
+        )}
       </main>
-      
-      {/* Confirmation Modal */}
-      {confirmAction && (
-        <ConfirmationModal
-          open={!!confirmAction}
-          onClose={() => setConfirmAction(null)}
-          onConfirm={() => {
-            confirmAction.action();
-            setConfirmAction(null);
-          }}
-          title={confirmAction.title}
-          message={confirmAction.message}
-          variant={confirmAction.type === "delete" ? "destructive" : "default"}
-        />
-      )}
-    </div>
   );
 }
