@@ -12,10 +12,10 @@ export default function Landing() {
       <div className="container mx-auto px-4 py-16">
         <div className="text-center mb-16">
           <h1 className="text-4xl md:text-6xl font-bold text-gray-900 dark:text-white mb-6">
-            Admin Console
+            Emergency Admin Access
           </h1>
           <p className="text-xl text-gray-600 dark:text-gray-300 mb-8 max-w-2xl mx-auto">
-            Secure identity and access management platform for your organization
+            Break glass administrative access for emergency situations
           </p>
           <Button 
             onClick={handleLogin}
@@ -77,27 +77,30 @@ export default function Landing() {
         </div>
 
         <div className="max-w-4xl mx-auto">
-          <Card className="border-0 shadow-xl">
+          <Card className="border-2 border-red-200 shadow-xl bg-red-50 dark:bg-red-950/20">
             <CardHeader className="text-center">
-              <CardTitle className="text-2xl">Secure Access Required</CardTitle>
-              <CardDescription className="text-lg">
-                This administrative console requires authentication to access user management features
+              <CardTitle className="text-2xl text-red-700 dark:text-red-400">Emergency Administrative Access</CardTitle>
+              <CardDescription className="text-lg text-red-600 dark:text-red-300">
+                This break glass access is for emergency administrative purposes only
               </CardDescription>
             </CardHeader>
             <CardContent className="text-center">
-              <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-6 mb-6">
-                <Shield className="h-16 w-16 text-blue-600 mx-auto mb-4" />
-                <p className="text-gray-700 dark:text-gray-300">
-                  Your organization's identity and access management platform provides secure,
-                  centralized control over user accounts, applications, and security policies.
+              <div className="bg-red-100 dark:bg-red-900/30 rounded-lg p-6 mb-6 border border-red-200">
+                <Shield className="h-16 w-16 text-red-600 mx-auto mb-4" />
+                <p className="text-red-800 dark:text-red-200 font-medium mb-2">
+                  ⚠️ Emergency Access Warning
+                </p>
+                <p className="text-red-700 dark:text-red-300 text-sm">
+                  This interface is intended for emergency situations when normal SSO access is unavailable.
+                  All access is logged and monitored. Use only when authorized.
                 </p>
               </div>
               <Button 
                 onClick={handleLogin}
                 size="lg"
-                className="bg-blue-600 hover:bg-blue-700 text-white"
+                className="bg-red-600 hover:bg-red-700 text-white"
               >
-                Authenticate to Continue
+                Emergency Sign In
               </Button>
             </CardContent>
           </Card>
