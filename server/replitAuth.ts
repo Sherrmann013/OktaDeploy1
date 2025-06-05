@@ -15,7 +15,8 @@ const getOidcConfig = memoize(
   async () => {
     return await client.discovery(
       new URL(process.env.ISSUER_URL!),
-      process.env.CLIENT_ID!
+      process.env.CLIENT_ID!,
+      process.env.CLIENT_SECRET!
     );
   },
   { maxAge: 3600 * 1000 }
