@@ -33,27 +33,81 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   });
 
-  // Get all users with optional filtering and pagination
+  // Get all users from OKTA with optional filtering and pagination
   app.get("/api/users", isAuthenticated, async (req, res) => {
     try {
       const searchQuery = z.string().optional().parse(req.query.search);
       const statusFilter = z.string().optional().parse(req.query.status);
       const departmentFilter = z.string().optional().parse(req.query.department);
-      const limit = z.coerce.number().optional().parse(req.query.limit);
-      const offset = z.coerce.number().optional().parse(req.query.offset);
+      const page = z.coerce.number().default(1).parse(req.query.page);
+      const limit = z.coerce.number().default(10).parse(req.query.limit);
 
-      const result = await storage.getAllUsers({
-        search: searchQuery,
-        status: statusFilter,
-        department: departmentFilter,
-        limit,
-        offset,
+      // Fetch users from OKTA
+      const oktaUsers = await oktaService.getUsers(200);
+      
+      let filteredUsers = oktaUsers;
+      
+      // Apply search filter
+      if (searchQuery) {
+        const searchTerm = searchQuery.toLowerCase();
+        filteredUsers = filteredUsers.filter(user => 
+          user.profile.firstName?.toLowerCase().includes(searchTerm) ||
+          user.profile.lastName?.toLowerCase().includes(searchTerm) ||
+          user.profile.email?.toLowerCase().includes(searchTerm) ||
+          user.profile.login?.toLowerCase().includes(searchTerm)
+        );
+      }
+      
+      // Apply status filter
+      if (statusFilter) {
+        filteredUsers = filteredUsers.filter(user => user.status === statusFilter);
+      }
+      
+      // Apply department filter
+      if (departmentFilter) {
+        filteredUsers = filteredUsers.filter(user => 
+          user.profile.department?.toLowerCase() === departmentFilter.toLowerCase()
+        );
+      }
+      
+      // Pagination
+      const offset = (page - 1) * limit;
+      const paginatedUsers = filteredUsers.slice(offset, offset + limit);
+      const totalPages = Math.ceil(filteredUsers.length / limit);
+      
+      // Transform OKTA users to our format
+      const transformedUsers = paginatedUsers.map((oktaUser, index) => ({
+        id: offset + index + 1,
+        oktaId: oktaUser.id,
+        firstName: oktaUser.profile.firstName || '',
+        lastName: oktaUser.profile.lastName || '',
+        email: oktaUser.profile.email || '',
+        login: oktaUser.profile.login || '',
+        mobilePhone: oktaUser.profile.mobilePhone || null,
+        department: oktaUser.profile.department || null,
+        title: oktaUser.profile.title || null,
+        employeeType: null,
+        profileImageUrl: null,
+        managerId: oktaUser.profile.managerId || null,
+        status: oktaUser.status,
+        groups: [],
+        applications: [],
+        created: new Date(oktaUser.created),
+        lastUpdated: new Date(oktaUser.lastUpdated),
+        lastLogin: oktaUser.lastLogin ? new Date(oktaUser.lastLogin) : null,
+        passwordChanged: oktaUser.passwordChanged ? new Date(oktaUser.passwordChanged) : null
+      }));
+      
+      res.json({
+        users: transformedUsers,
+        total: filteredUsers.length,
+        currentPage: page,
+        totalPages,
+        usersPerPage: limit
       });
-
-      res.json(result);
     } catch (error) {
-      console.error("Error fetching users:", error);
-      res.status(500).json({ message: "Failed to fetch users" });
+      console.error("Error fetching users from OKTA:", error);
+      res.status(500).json({ message: "Failed to fetch users from OKTA. Please verify your OKTA credentials are configured correctly." });
     }
   });
 

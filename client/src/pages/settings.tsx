@@ -288,7 +288,7 @@ export default function Settings() {
             </Tabs>
           </div>
         </div>
-      </main>
+      </div>
     </div>
   );
 }
