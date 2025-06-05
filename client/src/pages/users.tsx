@@ -26,21 +26,18 @@ import {
 
 export default function Users() {
   const [searchQuery, setSearchQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState("");
-  const [departmentFilter, setDepartmentFilter] = useState("");
+
   const [currentPage, setCurrentPage] = useState(1);
   const [usersPerPage] = useState(10);
   const [showCreateModal, setShowCreateModal] = useState(false);
 
   const { data: usersData, isLoading, refetch } = useQuery({
-    queryKey: ["/api/users", currentPage, usersPerPage, searchQuery, statusFilter, departmentFilter],
+    queryKey: ["/api/users", currentPage, usersPerPage, searchQuery],
     queryFn: async () => {
       const params = new URLSearchParams({
         page: currentPage.toString(),
         limit: usersPerPage.toString(),
-        ...(searchQuery && { search: searchQuery }),
-        ...(statusFilter && { status: statusFilter }),
-        ...(departmentFilter && { department: departmentFilter })
+        ...(searchQuery && { search: searchQuery })
       });
       
       const response = await fetch(`/api/users?${params}`, {
@@ -81,8 +78,6 @@ export default function Users() {
 
   const resetFilters = () => {
     setSearchQuery("");
-    setStatusFilter("");
-    setDepartmentFilter("");
     setCurrentPage(1);
   };
 
@@ -151,37 +146,11 @@ export default function Users() {
             />
           </div>
           
-          <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-40">
-              <SelectValue placeholder="Status" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Statuses</SelectItem>
-              <SelectItem value="ACTIVE">Active</SelectItem>
-              <SelectItem value="STAGED">Staged</SelectItem>
-              <SelectItem value="SUSPENDED">Suspended</SelectItem>
-              <SelectItem value="DEPROVISIONED">Deprovisioned</SelectItem>
-            </SelectContent>
-          </Select>
 
-          <Select value={departmentFilter} onValueChange={setDepartmentFilter}>
-            <SelectTrigger className="w-40">
-              <SelectValue placeholder="Department" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Departments</SelectItem>
-              <SelectItem value="Engineering">Engineering</SelectItem>
-              <SelectItem value="Sales">Sales</SelectItem>
-              <SelectItem value="Marketing">Marketing</SelectItem>
-              <SelectItem value="HR">HR</SelectItem>
-              <SelectItem value="Finance">Finance</SelectItem>
-              <SelectItem value="Operations">Operations</SelectItem>
-            </SelectContent>
-          </Select>
 
           <Button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white">
-            <Filter className="w-4 h-4 mr-2" />
-            Filter
+            <Search className="w-4 h-4 mr-2" />
+            Search
           </Button>
           
           <Button type="button" variant="outline" onClick={resetFilters}>
