@@ -13,6 +13,7 @@ export const users = pgTable("users", {
   department: text("department"),
   title: text("title"),
   employeeType: text("employee_type"),
+  profileImageUrl: text("profile_image_url"),
   managerId: integer("manager_id").references(() => users.id),
   status: text("status").notNull().default("ACTIVE"), // ACTIVE, SUSPENDED, DEPROVISIONED
   groups: text("groups").array().default([]),
