@@ -276,6 +276,8 @@ export class DatabaseStorage implements IStorage {
         mobilePhone: insertUser.mobilePhone || null,
         department: insertUser.department || null,
         title: insertUser.title || null,
+        employeeType: insertUser.employeeType || null,
+        managerId: insertUser.managerId || null,
         status: insertUser.status || "ACTIVE",
         groups: insertUser.groups || [],
         applications: insertUser.applications || [],

@@ -75,9 +75,35 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
   });
 
   const onSubmit = (data: InsertUser) => {
+    // Automatically assign groups based on employee type
+    let autoGroups = ["All Employees"];
+    if (data.employeeType) {
+      switch (data.employeeType) {
+        case "Employee":
+          autoGroups.push("Employees");
+          break;
+        case "Contractor":
+          autoGroups.push("Contractors");
+          break;
+        case "Intern":
+          autoGroups.push("Interns");
+          break;
+        case "Part Time":
+          autoGroups.push("Part Time");
+          break;
+      }
+    }
+
+    // Handle manager assignment
+    let managerId = data.managerId;
+    if (managerId === "none") {
+      managerId = undefined;
+    }
+
     createUserMutation.mutate({
       ...data,
-      groups: selectedGroups,
+      managerId,
+      groups: [...autoGroups, ...selectedGroups],
     });
   };
 
@@ -275,7 +301,7 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="">No Manager</SelectItem>
+                      <SelectItem value="none">No Manager</SelectItem>
                       {availableManagers.map((manager) => (
                         <SelectItem key={manager.id} value={manager.id.toString()}>
                           {manager.firstName} {manager.lastName} - {manager.title || manager.department}
