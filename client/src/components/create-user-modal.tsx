@@ -87,21 +87,21 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
   });
 
   const onSubmit = (data: InsertUser) => {
-    // Automatically assign groups based on employee type
-    let autoGroups = ["All Employees"];
+    // Automatically assign groups based on employee type (OKTA group mapping)
+    const autoGroups: string[] = [];
     if (data.employeeType) {
       switch (data.employeeType) {
         case "Employee":
-          autoGroups.push("Employees");
+          autoGroups.push("MTX-ET-Employee");
           break;
         case "Contractor":
-          autoGroups.push("Contractors");
+          autoGroups.push("MTX-ET-Contractor");
           break;
         case "Intern":
-          autoGroups.push("Interns");
+          autoGroups.push("MTX-ET-Intern");
           break;
         case "Part Time":
-          autoGroups.push("Part Time");
+          autoGroups.push("MTX-ET-Part_Time");
           break;
       }
     }
