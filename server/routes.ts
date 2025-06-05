@@ -3,6 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertUserSchema, updateUserSchema } from "@shared/schema";
 import { z } from "zod";
+import { oktaService } from "./okta-service";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Get all users with optional filtering and pagination
@@ -168,6 +169,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       console.error("Error updating user status:", error);
       res.status(500).json({ message: "Failed to update user status" });
+    }
+  });
+
+  // Test OKTA connection endpoint
+  app.get("/api/okta/test-connection", async (req, res) => {
+    try {
+      const result = await oktaService.testConnection();
+      
+      if (result.success) {
+        res.json({
+          success: true,
+          message: result.message,
+          details: result.details
+        });
+      } else {
+        res.status(400).json({
+          success: false,
+          message: result.message,
+          details: result.details
+        });
+      }
+    } catch (error) {
+      console.error("OKTA connection test error:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to test OKTA connection",
+        error: error instanceof Error ? error.message : "Unknown error"
+      });
     }
   });
 
