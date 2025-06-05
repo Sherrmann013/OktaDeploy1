@@ -1,4 +1,6 @@
 import { users, type User, type InsertUser, type UpdateUser } from "@shared/schema";
+import { db } from "./db";
+import { eq, and, or, ilike, desc } from "drizzle-orm";
 
 export interface IStorage {
   getUser(id: number): Promise<User | undefined>;
@@ -187,4 +189,121 @@ export class MemStorage implements IStorage {
   }
 }
 
-export const storage = new MemStorage();
+export class DatabaseStorage implements IStorage {
+  async getUser(id: number): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user || undefined;
+  }
+
+  async getUserByOktaId(oktaId: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.oktaId, oktaId));
+    return user || undefined;
+  }
+
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.email, email));
+    return user || undefined;
+  }
+
+  async getUserByLogin(login: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.login, login));
+    return user || undefined;
+  }
+
+  async getAllUsers(options?: {
+    search?: string;
+    status?: string;
+    department?: string;
+    limit?: number;
+    offset?: number;
+  }): Promise<{ users: User[]; total: number }> {
+    let whereConditions: any[] = [];
+
+    // Apply filters
+    if (options?.search) {
+      const searchTerm = `%${options.search}%`;
+      whereConditions.push(
+        or(
+          ilike(users.firstName, searchTerm),
+          ilike(users.lastName, searchTerm),
+          ilike(users.email, searchTerm),
+          ilike(users.login, searchTerm)
+        )
+      );
+    }
+
+    if (options?.status) {
+      whereConditions.push(eq(users.status, options.status));
+    }
+
+    if (options?.department) {
+      whereConditions.push(eq(users.department, options.department));
+    }
+
+    const whereClause = whereConditions.length > 0 ? and(...whereConditions) : undefined;
+
+    // Get total count
+    const totalResult = await db
+      .select({ count: users.id })
+      .from(users)
+      .where(whereClause);
+    const total = totalResult.length;
+
+    // Get paginated results
+    let query = db.select().from(users).where(whereClause).orderBy(desc(users.created));
+
+    if (options?.offset) {
+      query = query.offset(options.offset);
+    }
+    if (options?.limit) {
+      query = query.limit(options.limit);
+    }
+
+    const userResults = await query;
+
+    return { users: userResults, total };
+  }
+
+  async createUser(insertUser: InsertUser & { oktaId?: string }): Promise<User> {
+    const [user] = await db
+      .insert(users)
+      .values({
+        oktaId: insertUser.oktaId || `okta_${Date.now()}`,
+        firstName: insertUser.firstName,
+        lastName: insertUser.lastName,
+        email: insertUser.email,
+        login: insertUser.login,
+        mobilePhone: insertUser.mobilePhone || null,
+        department: insertUser.department || null,
+        title: insertUser.title || null,
+        status: insertUser.status || "ACTIVE",
+        groups: insertUser.groups || [],
+        applications: insertUser.applications || [],
+        created: new Date(),
+        lastUpdated: new Date(),
+        lastLogin: null,
+        passwordChanged: null,
+      })
+      .returning();
+    return user;
+  }
+
+  async updateUser(id: number, updates: UpdateUser): Promise<User | undefined> {
+    const [updatedUser] = await db
+      .update(users)
+      .set({
+        ...updates,
+        lastUpdated: new Date(),
+      })
+      .where(eq(users.id, id))
+      .returning();
+    return updatedUser || undefined;
+  }
+
+  async deleteUser(id: number): Promise<boolean> {
+    const result = await db.delete(users).where(eq(users.id, id));
+    return result.rowCount > 0;
+  }
+}
+
+export const storage = new DatabaseStorage();
