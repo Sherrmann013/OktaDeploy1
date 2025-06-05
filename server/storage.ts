@@ -252,11 +252,11 @@ export class DatabaseStorage implements IStorage {
     // Get paginated results
     let query = db.select().from(users).where(whereClause).orderBy(desc(users.created));
 
-    if (options?.offset) {
-      query = query.offset(options.offset);
-    }
     if (options?.limit) {
       query = query.limit(options.limit);
+    }
+    if (options?.offset) {
+      query = query.offset(options.offset);
     }
 
     const userResults = await query;
@@ -302,7 +302,7 @@ export class DatabaseStorage implements IStorage {
 
   async deleteUser(id: number): Promise<boolean> {
     const result = await db.delete(users).where(eq(users.id, id));
-    return result.rowCount > 0;
+    return (result.rowCount || 0) > 0;
   }
 }
 
