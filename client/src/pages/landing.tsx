@@ -2,11 +2,25 @@ import { Button } from "@/components/ui/button";
 
 export default function Landing() {
   const handleLogin = () => {
-    window.location.href = "/api/okta-login";
+    // Direct OKTA authorization URL
+    const authUrl = `https://mazetx.okta.com/oauth2/default/v1/authorize?` +
+      `client_id=0oarrurqf9mvVKYRj4x7&` +
+      `response_type=code&` +
+      `scope=openid email profile groups&` +
+      `redirect_uri=${encodeURIComponent('https://mazetx.replit.app/api/okta-callback')}&` +
+      `state=oauth_state`;
+    window.location.href = authUrl;
   };
 
   const handleSSOLogin = () => {
-    window.location.href = "/api/okta-login";
+    // Direct OKTA authorization URL
+    const authUrl = `https://mazetx.okta.com/oauth2/default/v1/authorize?` +
+      `client_id=0oarrurqf9mvVKYRj4x7&` +
+      `response_type=code&` +
+      `scope=openid email profile groups&` +
+      `redirect_uri=${encodeURIComponent('https://mazetx.replit.app/api/okta-callback')}&` +
+      `state=oauth_state`;
+    window.location.href = authUrl;
   };
 
   return (
