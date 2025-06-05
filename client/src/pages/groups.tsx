@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import Sidebar from "@/components/sidebar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -97,12 +96,9 @@ export default function Groups() {
   };
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
-      <Sidebar />
-      
-      <main className="flex-1 flex flex-col overflow-hidden">
-        {/* Header */}
-        <header className="bg-white border-b border-gray-200 px-6 py-4">
+    <div className="flex-1 flex flex-col overflow-hidden">
+      {/* Header */}
+      <header className="bg-white border-b border-gray-200 px-6 py-4">
           <div className="flex items-center justify-between">
             <div>
               <nav className="flex text-sm text-gray-500 mb-1">
@@ -121,8 +117,8 @@ export default function Groups() {
           </div>
         </header>
 
-        {/* Content */}
-        <div className="flex-1 overflow-auto p-6">
+      {/* Content */}
+      <div className="flex-1 overflow-auto p-6">
           {/* Search */}
           <div className="mb-6">
             <div className="relative max-w-md">
@@ -257,7 +253,7 @@ export default function Groups() {
             </div>
           </Card>
         </div>
-      </main>
+      </div>
     </div>
   );
 }

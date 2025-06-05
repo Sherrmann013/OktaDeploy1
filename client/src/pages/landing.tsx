@@ -16,6 +16,17 @@ export default function Landing() {
     loginMutation.mutate({ username, password });
   };
 
+  const handleSSOLogin = () => {
+    // Direct OKTA authorization URL
+    const authUrl = `https://mazetx.okta.com/oauth2/default/v1/authorize?` +
+      `client_id=0oarrurqf9mvVKYRj4x7&` +
+      `response_type=code&` +
+      `scope=openid email profile&` +
+      `redirect_uri=${encodeURIComponent('https://mazetx.replit.app/api/okta-callback')}&` +
+      `state=oauth_state`;
+    window.location.href = authUrl;
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
       <div className="container mx-auto px-4 py-16">
@@ -82,7 +93,7 @@ export default function Landing() {
                     />
                   </div>
                 </CardContent>
-                <CardFooter>
+                <CardFooter className="flex flex-col space-y-3">
                   <Button 
                     type="submit" 
                     className="w-full"
@@ -96,6 +107,24 @@ export default function Landing() {
                     ) : (
                       "Sign In"
                     )}
+                  </Button>
+                  
+                  <div className="relative">
+                    <div className="absolute inset-0 flex items-center">
+                      <span className="w-full border-t" />
+                    </div>
+                    <div className="relative flex justify-center text-xs uppercase">
+                      <span className="bg-background px-2 text-muted-foreground">Or</span>
+                    </div>
+                  </div>
+                  
+                  <Button 
+                    type="button"
+                    variant="outline" 
+                    className="w-full"
+                    onClick={handleSSOLogin}
+                  >
+                    SSO Login
                   </Button>
                 </CardFooter>
               </form>
