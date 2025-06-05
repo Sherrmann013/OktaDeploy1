@@ -22,28 +22,28 @@ export default function Settings() {
 
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Header */}
-        <header className="bg-white border-b border-gray-200 px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <nav className="flex text-sm text-gray-500 mb-1">
-                <span>Settings</span>
-                <span className="mx-2">/</span>
-                <span className="text-gray-900 font-medium">General</span>
-              </nav>
-              <h2 className="text-2xl font-semibold text-gray-900">Organization Settings</h2>
-            </div>
-            <Button onClick={handleSave} className="bg-blue-600 hover:bg-blue-700 text-white">
-              <Save className="w-4 h-4 mr-2" />
-              Save Changes
-            </Button>
+      {/* Header */}
+      <header className="bg-white border-b border-gray-200 px-6 py-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <nav className="flex text-sm text-gray-500 mb-1">
+              <span>Settings</span>
+              <span className="mx-2">/</span>
+              <span className="text-gray-900 font-medium">General</span>
+            </nav>
+            <h2 className="text-2xl font-semibold text-gray-900">Organization Settings</h2>
           </div>
-        </header>
+          <Button onClick={handleSave} className="bg-blue-600 hover:bg-blue-700 text-white">
+            <Save className="w-4 h-4 mr-2" />
+            Save Changes
+          </Button>
+        </div>
+      </header>
 
-        {/* Content */}
-        <div className="flex-1 overflow-auto p-6">
-          <div className="max-w-4xl mx-auto">
-            <Tabs defaultValue="general" className="space-y-6">
+      {/* Content */}
+      <div className="flex-1 overflow-auto p-6">
+        <div className="max-w-4xl mx-auto">
+          <Tabs defaultValue="general" className="space-y-6">
               <TabsList>
                 <TabsTrigger value="general">General</TabsTrigger>
                 <TabsTrigger value="security">Security</TabsTrigger>
@@ -288,7 +288,6 @@ export default function Settings() {
             </Tabs>
           </div>
         </div>
-      </div>
     </div>
   );
 }
