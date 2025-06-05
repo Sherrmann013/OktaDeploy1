@@ -142,8 +142,8 @@ export async function setupAuth(app: Express) {
           const authUrl = `${process.env.ISSUER_URL}/v1/authorize?` +
             `client_id=${process.env.CLIENT_ID}&` +
             `response_type=code&` +
-            `scope=openid email profile groups&` +
-            `redirect_uri=${encodeURIComponent('https://mazetx.replit.app/api/callback')}&` +
+            `scope=openid email profile&` +
+            `redirect_uri=${encodeURIComponent('https://mazetx.replit.app/api/okta-callback')}&` +
             `state=oauth_state`;
           console.log('Redirecting to:', authUrl);
           return res.redirect(authUrl);

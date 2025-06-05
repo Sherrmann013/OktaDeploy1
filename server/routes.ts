@@ -5,11 +5,11 @@ import { insertUserSchema, updateUserSchema } from "@shared/schema";
 import { z } from "zod";
 import { oktaService } from "./okta-service";
 import { syncSpecificUser } from "./okta-sync";
-import { setupAuth, isAuthenticated, requireAdmin } from "./replitAuth";
+import { setupSimpleAuth, isAuthenticated, requireAdmin } from "./simple-auth";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Setup authentication
-  await setupAuth(app);
+  await setupSimpleAuth(app);
 
   // Auth routes
   app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
