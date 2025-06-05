@@ -1,4 +1,4 @@
-import { pgTable, text, serial, timestamp, boolean } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, timestamp, boolean, integer } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -12,6 +12,8 @@ export const users = pgTable("users", {
   mobilePhone: text("mobile_phone"),
   department: text("department"),
   title: text("title"),
+  employeeType: text("employee_type"),
+  managerId: integer("manager_id").references(() => users.id),
   status: text("status").notNull().default("ACTIVE"), // ACTIVE, SUSPENDED, DEPROVISIONED
   groups: text("groups").array().default([]),
   applications: text("applications").array().default([]),

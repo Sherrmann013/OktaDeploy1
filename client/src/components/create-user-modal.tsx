@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -11,7 +11,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { insertUserSchema, type InsertUser } from "@shared/schema";
+import { insertUserSchema, type InsertUser, type User } from "@shared/schema";
 import { X } from "lucide-react";
 
 interface CreateUserModalProps {
@@ -24,6 +24,14 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
   const { toast } = useToast();
   const [selectedGroups, setSelectedGroups] = useState<string[]>([]);
 
+  // Fetch existing users for manager dropdown
+  const { data: usersData } = useQuery({
+    queryKey: ["/api/users"],
+    enabled: open,
+  });
+
+  const availableManagers = usersData?.users || [];
+
   const form = useForm<InsertUser>({
     resolver: zodResolver(insertUserSchema),
     defaultValues: {
@@ -34,6 +42,8 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
       mobilePhone: "",
       department: "",
       title: "",
+      employeeType: "",
+      managerId: undefined,
       status: "ACTIVE",
       groups: [],
       applications: [],
@@ -223,6 +233,56 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
                   <FormControl>
                     <Input placeholder="Enter job title" {...field} />
                   </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="employeeType"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Employee Type</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value || ""}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select Employee Type" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="Employee">Employee</SelectItem>
+                      <SelectItem value="Contractor">Contractor</SelectItem>
+                      <SelectItem value="Intern">Intern</SelectItem>
+                      <SelectItem value="Part Time">Part Time</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="managerId"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Manager</FormLabel>
+                  <Select onValueChange={(value) => field.onChange(value ? parseInt(value) : undefined)} value={field.value?.toString() || ""}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select Manager" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="">No Manager</SelectItem>
+                      {availableManagers.map((manager) => (
+                        <SelectItem key={manager.id} value={manager.id.toString()}>
+                          {manager.firstName} {manager.lastName} - {manager.title || manager.department}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                   <FormMessage />
                 </FormItem>
               )}
