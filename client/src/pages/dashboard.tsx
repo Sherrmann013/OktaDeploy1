@@ -25,8 +25,8 @@ export default function Dashboard() {
     queryFn: async () => {
       const params = new URLSearchParams();
       if (searchQuery) params.append("search", searchQuery);
-      if (statusFilter) params.append("status", statusFilter);
-      if (departmentFilter) params.append("department", departmentFilter);
+      if (statusFilter && statusFilter !== "all") params.append("status", statusFilter);
+      if (departmentFilter && departmentFilter !== "all") params.append("department", departmentFilter);
       params.append("limit", usersPerPage.toString());
       params.append("offset", ((currentPage - 1) * usersPerPage).toString());
 
@@ -103,7 +103,7 @@ export default function Dashboard() {
                     <SelectValue placeholder="All Status" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All Status</SelectItem>
+                    <SelectItem value="all">All Status</SelectItem>
                     <SelectItem value="ACTIVE">Active</SelectItem>
                     <SelectItem value="SUSPENDED">Suspended</SelectItem>
                     <SelectItem value="DEPROVISIONED">Deprovisioned</SelectItem>
@@ -114,7 +114,7 @@ export default function Dashboard() {
                     <SelectValue placeholder="All Departments" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All Departments</SelectItem>
+                    <SelectItem value="all">All Departments</SelectItem>
                     <SelectItem value="Engineering">Engineering</SelectItem>
                     <SelectItem value="Marketing">Marketing</SelectItem>
                     <SelectItem value="Sales">Sales</SelectItem>
