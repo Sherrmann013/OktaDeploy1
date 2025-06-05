@@ -10,6 +10,15 @@ app.use((req, res, next) => {
   const start = Date.now();
   const path = req.path;
   let capturedJsonResponse: Record<string, any> | undefined = undefined;
+  
+  // Log all requests to /api/login specifically
+  if (path === '/api/login') {
+    console.log('=== REQUEST TO /api/login INTERCEPTED ===');
+    console.log('Method:', req.method);
+    console.log('URL:', req.url);
+    console.log('Headers:', req.headers);
+    console.log('Time:', new Date().toISOString());
+  }
 
   const originalResJson = res.json;
   res.json = function (bodyJson, ...args) {
