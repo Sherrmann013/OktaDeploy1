@@ -5,10 +5,25 @@ import { insertUserSchema, updateUserSchema } from "@shared/schema";
 import { z } from "zod";
 import { oktaService } from "./okta-service";
 import { syncSpecificUser } from "./okta-sync";
+import { setupAuth, isAuthenticated, requireAdmin } from "./replitAuth";
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Setup authentication
+  await setupAuth(app);
+
+  // Auth routes
+  app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
+    try {
+      const user = req.user;
+      res.json(user);
+    } catch (error) {
+      console.error("Error fetching user:", error);
+      res.status(500).json({ message: "Failed to fetch user" });
+    }
+  });
+
   // Get all users with optional filtering and pagination
-  app.get("/api/users", async (req, res) => {
+  app.get("/api/users", isAuthenticated, async (req, res) => {
     try {
       const searchQuery = z.string().optional().parse(req.query.search);
       const statusFilter = z.string().optional().parse(req.query.status);
@@ -32,7 +47,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get single user by ID
-  app.get("/api/users/:id", async (req, res) => {
+  app.get("/api/users/:id", isAuthenticated, async (req, res) => {
     try {
       const id = z.coerce.number().parse(req.params.id);
       const user = await storage.getUser(id);
@@ -49,7 +64,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Create new user
-  app.post("/api/users", async (req, res) => {
+  app.post("/api/users", requireAdmin, async (req, res) => {
     try {
       const userData = insertUserSchema.parse(req.body);
       
@@ -86,7 +101,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Update user
-  app.patch("/api/users/:id", async (req, res) => {
+  app.patch("/api/users/:id", requireAdmin, async (req, res) => {
     try {
       const id = z.coerce.number().parse(req.params.id);
       const updates = updateUserSchema.parse(req.body);
