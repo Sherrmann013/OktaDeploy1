@@ -41,8 +41,8 @@ export default function Applications() {
           id: "0oa2def3ghi4jkl5mno6",
           name: "Slack",
           label: "Slack Workspace",
-          status: "ACTIVE",
-          signOnMode: "OPENID_CONNECT",
+          status: "ACTIVE" as const,
+          signOnMode: "OPENID_CONNECT" as const,
           userCount: 89,
           created: "2023-02-01T09:00:00Z",
           lastUpdated: "2024-11-25T14:20:00Z"
@@ -51,8 +51,8 @@ export default function Applications() {
           id: "0oa3ghi4jkl5mno6pqr7",
           name: "GitHub",
           label: "GitHub Enterprise",
-          status: "ACTIVE",
-          signOnMode: "SAML_2_0",
+          status: "ACTIVE" as const,
+          signOnMode: "SAML_2_0" as const,
           userCount: 42,
           created: "2023-02-15T11:00:00Z",
           lastUpdated: "2024-11-20T11:45:00Z"
@@ -61,8 +61,8 @@ export default function Applications() {
           id: "0oa4jkl5mno6pqr7stu8",
           name: "Jira",
           label: "Atlassian Jira",
-          status: "ACTIVE",
-          signOnMode: "SAML_2_0",
+          status: "ACTIVE" as const,
+          signOnMode: "SAML_2_0" as const,
           userCount: 35,
           created: "2023-03-01T08:00:00Z",
           lastUpdated: "2024-11-15T16:10:00Z"
@@ -71,8 +71,8 @@ export default function Applications() {
           id: "0oa5mno6pqr7stu8vwx9",
           name: "Salesforce",
           label: "Salesforce CRM",
-          status: "INACTIVE",
-          signOnMode: "SAML_2_0",
+          status: "INACTIVE" as const,
+          signOnMode: "SAML_2_0" as const,
           userCount: 0,
           created: "2023-04-01T09:30:00Z",
           lastUpdated: "2024-10-28T12:00:00Z"
