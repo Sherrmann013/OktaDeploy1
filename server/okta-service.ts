@@ -1,3 +1,5 @@
+import https from 'https';
+
 interface OktaConfig {
   domain: string;
   apiToken: string;
@@ -23,22 +25,60 @@ class OktaService {
     this.baseUrl = `https://${domain}/api/v1`;
   }
 
-  private async makeRequest(endpoint: string, options: RequestInit = {}): Promise<Response> {
-    const url = `${this.baseUrl}${endpoint}`;
-    
-    const headers = {
-      'Authorization': `SSWS ${this.config.apiToken}`,
-      'Accept': 'application/json',
-      'Content-Type': 'application/json',
-      ...options.headers
-    };
+  private async makeRequest(endpoint: string, options: { method?: string; body?: string } = {}): Promise<any> {
+    return new Promise((resolve, reject) => {
+      const requestOptions = {
+        hostname: this.config.domain,
+        port: 443,
+        path: `/api/v1${endpoint}`,
+        method: options.method || 'GET',
+        headers: {
+          'Authorization': `SSWS ${this.config.apiToken}`,
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          ...(options.body && { 'Content-Length': Buffer.byteLength(options.body) })
+        }
+      };
 
-    const response = await fetch(url, {
-      ...options,
-      headers
+      const req = https.request(requestOptions, (res) => {
+        let data = '';
+        
+        res.on('data', (chunk) => {
+          data += chunk;
+        });
+        
+        res.on('end', () => {
+          try {
+            const jsonData = JSON.parse(data);
+            resolve({
+              ok: res.statusCode! >= 200 && res.statusCode! < 300,
+              status: res.statusCode,
+              statusText: res.statusMessage,
+              json: () => Promise.resolve(jsonData),
+              text: () => Promise.resolve(data)
+            });
+          } catch (error) {
+            resolve({
+              ok: res.statusCode! >= 200 && res.statusCode! < 300,
+              status: res.statusCode,
+              statusText: res.statusMessage,
+              json: () => Promise.reject(new Error('Invalid JSON')),
+              text: () => Promise.resolve(data)
+            });
+          }
+        });
+      });
+
+      req.on('error', (error) => {
+        reject(error);
+      });
+
+      if (options.body) {
+        req.write(options.body);
+      }
+      
+      req.end();
     });
-
-    return response;
   }
 
   async testConnection(): Promise<{ success: boolean; message: string; details?: any }> {
