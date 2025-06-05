@@ -77,27 +77,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const totalPages = Math.ceil(filteredUsers.length / limit);
         
         // Transform OKTA users to our format
-        const transformedUsers = paginatedUsers.map((oktaUser, index) => ({
-          id: offset + index + 1,
-          oktaId: oktaUser.id,
-          firstName: oktaUser.profile.firstName || '',
-          lastName: oktaUser.profile.lastName || '',
-          email: oktaUser.profile.email || '',
-          login: oktaUser.profile.login || '',
-          mobilePhone: oktaUser.profile.mobilePhone || null,
-          department: oktaUser.profile.department || null,
-          title: oktaUser.profile.title || null,
-          employeeType: null,
-          profileImageUrl: null,
-          managerId: oktaUser.profile.managerId || null,
-          status: oktaUser.status,
-          groups: [],
-          applications: [],
-          created: new Date(oktaUser.created),
-          lastUpdated: new Date(oktaUser.lastUpdated),
-          lastLogin: oktaUser.lastLogin ? new Date(oktaUser.lastLogin) : null,
-          passwordChanged: oktaUser.passwordChanged ? new Date(oktaUser.passwordChanged) : null
-        }));
+        // Sync OKTA users to database and return database records
+        const transformedUsers = [];
+        for (const oktaUser of paginatedUsers) {
+          // Check if user exists in database
+          let dbUser = await storage.getUserByOktaId(oktaUser.id);
+          
+          if (!dbUser) {
+            // Create user in database if doesn't exist
+            dbUser = await storage.createUser({
+              oktaId: oktaUser.id,
+              firstName: oktaUser.profile.firstName || '',
+              lastName: oktaUser.profile.lastName || '',
+              email: oktaUser.profile.email || '',
+              login: oktaUser.profile.login || '',
+              mobilePhone: oktaUser.profile.mobilePhone || null,
+              department: oktaUser.profile.department || null,
+              title: oktaUser.profile.title || null,
+              employeeType: null,
+              profileImageUrl: null,
+              status: oktaUser.status,
+              groups: [],
+              applications: []
+            });
+          } else {
+            // Update existing user with latest OKTA data
+            dbUser = await storage.updateUser(dbUser.id, {
+              firstName: oktaUser.profile.firstName || '',
+              lastName: oktaUser.profile.lastName || '',
+              email: oktaUser.profile.email || '',
+              login: oktaUser.profile.login || '',
+              mobilePhone: oktaUser.profile.mobilePhone || null,
+              department: oktaUser.profile.department || null,
+              title: oktaUser.profile.title || null,
+              status: oktaUser.status
+            });
+          }
+          
+          if (dbUser) {
+            transformedUsers.push(dbUser);
+          }
+        }
         
         res.json({
           users: transformedUsers,
