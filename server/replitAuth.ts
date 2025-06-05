@@ -69,7 +69,7 @@ export async function setupAuth(app: Express) {
     clientID: process.env.CLIENT_ID!,
     clientSecret: process.env.CLIENT_SECRET!,
     callbackURL: `https://${domain}/api/okta-callback`,
-    scope: 'openid email profile groups'
+    scope: 'openid email profile'
   }, async (accessToken: string, refreshToken: string, profile: any, done: any) => {
     try {
       // Get user profile from OKTA
