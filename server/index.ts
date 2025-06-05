@@ -11,12 +11,12 @@ app.use((req, res, next) => {
   const path = req.path;
   let capturedJsonResponse: Record<string, any> | undefined = undefined;
   
-  // Log all requests to /api/login specifically
-  if (path === '/api/login') {
-    console.log('=== REQUEST TO /api/login INTERCEPTED ===');
+  // Log all requests to authentication endpoints
+  if (path === '/api/login' || path === '/api/okta-login') {
+    console.log('=== REQUEST TO AUTHENTICATION ENDPOINT ===');
+    console.log('Path:', path);
     console.log('Method:', req.method);
     console.log('URL:', req.url);
-    console.log('Headers:', req.headers);
     console.log('Time:', new Date().toISOString());
   }
 

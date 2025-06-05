@@ -2,11 +2,11 @@ import { Button } from "@/components/ui/button";
 
 export default function Landing() {
   const handleLogin = () => {
-    window.location.href = "/api/login";
+    window.location.href = "/api/okta-login";
   };
 
   const handleSSOLogin = () => {
-    window.location.href = "/api/login";
+    window.location.href = "/api/okta-login";
   };
 
   return (

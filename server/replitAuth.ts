@@ -59,7 +59,7 @@ export async function setupAuth(app: Express) {
   console.log('OKTA Auth URLs:', {
     authorizationURL: `${process.env.ISSUER_URL}/v1/authorize`,
     tokenURL: `${process.env.ISSUER_URL}/v1/token`,
-    callbackURL: `https://${domain}/api/callback`
+    callbackURL: `https://${domain}/api/okta-callback`
   });
 
   // Configure OKTA OAuth2 strategy
@@ -68,7 +68,7 @@ export async function setupAuth(app: Express) {
     tokenURL: `${process.env.ISSUER_URL}/v1/token`,
     clientID: process.env.CLIENT_ID!,
     clientSecret: process.env.CLIENT_SECRET!,
-    callbackURL: `https://${domain}/api/callback`,
+    callbackURL: `https://${domain}/api/okta-callback`,
     scope: 'openid email profile groups'
   }, async (accessToken: string, refreshToken: string, profile: any, done: any) => {
     try {
@@ -109,7 +109,8 @@ export async function setupAuth(app: Express) {
     done(null, user);
   });
 
-  app.get("/api/login", (req, res, next) => {
+  // Custom login route that bypasses Replit's built-in auth
+  app.get("/api/okta-login", (req, res, next) => {
     console.log('=== LOGIN REQUEST RECEIVED ===');
     console.log('Request URL:', req.url);
     console.log('Request headers:', req.headers);
@@ -149,9 +150,11 @@ export async function setupAuth(app: Express) {
     }
   });
 
-  app.get("/api/callback", 
-    passport.authenticate('okta', { failureRedirect: '/api/login' }),
+  app.get("/api/okta-callback", 
+    passport.authenticate('okta', { failureRedirect: '/api/okta-login' }),
     (req, res) => {
+      console.log('=== OKTA CALLBACK SUCCESSFUL ===');
+      console.log('User:', req.user);
       res.redirect('/');
     }
   );
