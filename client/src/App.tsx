@@ -5,6 +5,10 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import Dashboard from "@/pages/dashboard";
 import UserDetail from "@/pages/user-detail";
+import Groups from "@/pages/groups";
+import Applications from "@/pages/applications";
+import Security from "@/pages/security";
+import Settings from "@/pages/settings";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -12,6 +16,10 @@ function Router() {
     <Switch>
       <Route path="/" component={Dashboard} />
       <Route path="/users/:id" component={UserDetail} />
+      <Route path="/groups" component={Groups} />
+      <Route path="/applications" component={Applications} />
+      <Route path="/security" component={Security} />
+      <Route path="/settings" component={Settings} />
       <Route component={NotFound} />
     </Switch>
   );

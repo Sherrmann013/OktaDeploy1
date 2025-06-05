@@ -200,7 +200,7 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="">Select Department</SelectItem>
+                        <SelectItem value="none">Select Department</SelectItem>
                         <SelectItem value="Engineering">Engineering</SelectItem>
                         <SelectItem value="Marketing">Marketing</SelectItem>
                         <SelectItem value="Sales">Sales</SelectItem>
