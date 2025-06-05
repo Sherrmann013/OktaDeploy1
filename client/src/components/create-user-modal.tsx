@@ -12,7 +12,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { insertUserSchema, type InsertUser, type User } from "@shared/schema";
-import { X } from "lucide-react";
+import { X, Check } from "lucide-react";
 
 interface CreateUserModalProps {
   open: boolean;
@@ -23,6 +23,9 @@ interface CreateUserModalProps {
 export default function CreateUserModal({ open, onClose, onSuccess }: CreateUserModalProps) {
   const { toast } = useToast();
   const [selectedGroups, setSelectedGroups] = useState<string[]>([]);
+  const [managerSearch, setManagerSearch] = useState("");
+  const [selectedManager, setSelectedManager] = useState<User | null>(null);
+  const [showManagerDropdown, setShowManagerDropdown] = useState(false);
 
   // Fetch existing users for manager dropdown
   const { data: usersData } = useQuery({
@@ -31,6 +34,15 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
   });
 
   const availableManagers = usersData?.users || [];
+  
+  // Filter managers based on search input
+  const filteredManagers = availableManagers.filter(user => {
+    const searchTerm = managerSearch.toLowerCase();
+    const fullName = `${user.firstName} ${user.lastName}`.toLowerCase();
+    return fullName.includes(searchTerm) || 
+           (user.email && user.email.toLowerCase().includes(searchTerm)) ||
+           (user.title && user.title.toLowerCase().includes(searchTerm));
+  }).slice(0, 5); // Limit to 5 results
 
   const form = useForm<InsertUser>({
     resolver: zodResolver(insertUserSchema),
@@ -94,15 +106,9 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
       }
     }
 
-    // Handle manager assignment
-    let managerId = data.managerId;
-    if (managerId === "none") {
-      managerId = undefined;
-    }
-
     createUserMutation.mutate({
       ...data,
-      managerId,
+      managerId: selectedManager?.id || undefined,
       groups: [...autoGroups, ...selectedGroups],
     });
   };
@@ -115,9 +121,26 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
     }
   };
 
+  const handleManagerSelect = (user: User) => {
+    setSelectedManager(user);
+    setManagerSearch(`${user.firstName} ${user.lastName}`);
+    setShowManagerDropdown(false);
+  };
+
+  const handleManagerSearchChange = (value: string) => {
+    setManagerSearch(value);
+    setShowManagerDropdown(value.length > 0);
+    if (value === "") {
+      setSelectedManager(null);
+    }
+  };
+
   const handleClose = () => {
     form.reset();
     setSelectedGroups([]);
+    setManagerSearch("");
+    setSelectedManager(null);
+    setShowManagerDropdown(false);
     onClose();
   };
 
@@ -288,31 +311,51 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
               )}
             />
 
-            <FormField
-              control={form.control}
-              name="managerId"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Manager</FormLabel>
-                  <Select onValueChange={(value) => field.onChange(value ? parseInt(value) : undefined)} value={field.value?.toString() || ""}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select Manager" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="none">No Manager</SelectItem>
-                      {availableManagers.map((manager) => (
-                        <SelectItem key={manager.id} value={manager.id.toString()}>
-                          {manager.firstName} {manager.lastName} - {manager.title || manager.department}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <div className="relative">
+              <FormLabel className="text-sm font-medium text-gray-700">Manager</FormLabel>
+              <div className="relative">
+                <Input
+                  type="text"
+                  placeholder="Start typing manager name..."
+                  value={managerSearch}
+                  onChange={(e) => handleManagerSearchChange(e.target.value)}
+                  onFocus={() => setShowManagerDropdown(managerSearch.length > 0)}
+                  className="w-full"
+                />
+                {selectedManager && (
+                  <div className="absolute right-2 top-1/2 transform -translate-y-1/2">
+                    <Check className="h-4 w-4 text-green-600" />
+                  </div>
+                )}
+                
+                {showManagerDropdown && filteredManagers.length > 0 && (
+                  <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto">
+                    {filteredManagers.map((manager) => (
+                      <div
+                        key={manager.id}
+                        className="px-3 py-2 cursor-pointer hover:bg-gray-100 border-b border-gray-100 last:border-b-0"
+                        onClick={() => handleManagerSelect(manager)}
+                      >
+                        <div className="font-medium text-sm text-gray-900">
+                          {manager.firstName} {manager.lastName}
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          {manager.title} {manager.title && manager.department && "•"} {manager.department}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                
+                {showManagerDropdown && managerSearch.length > 0 && filteredManagers.length === 0 && (
+                  <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg">
+                    <div className="px-3 py-2 text-sm text-gray-500">
+                      No managers found matching "{managerSearch}"
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
 
             <div>
               <Label className="text-sm font-medium text-gray-700 mb-2 block">Groups</Label>
