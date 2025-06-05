@@ -224,6 +224,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Password reset endpoints
+  app.post("/api/users/:id/password/reset", async (req, res) => {
+    try {
+      const id = z.coerce.number().parse(req.params.id);
+      
+      // In a real implementation, this would call OKTA API to reset password
+      res.json({
+        success: true,
+        message: "Password reset initiated successfully"
+      });
+    } catch (error) {
+      console.error("Password reset error:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to reset password"
+      });
+    }
+  });
+
+  app.post("/api/users/:id/password/expire", async (req, res) => {
+    try {
+      const id = z.coerce.number().parse(req.params.id);
+      
+      // In a real implementation, this would call OKTA API to expire password
+      res.json({
+        success: true,
+        message: "Password expiration initiated successfully"
+      });
+    } catch (error) {
+      console.error("Password expire error:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to expire password"
+      });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
