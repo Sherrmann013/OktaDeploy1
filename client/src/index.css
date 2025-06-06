@@ -30,30 +30,30 @@
 }
 
 .dark {
-  --background: 0 0% 15%; /* Comfortable dark grey */
-  --foreground: 0 0% 92%; /* Soft white text */
-  --muted: 0 0% 20%; /* Medium grey for muted areas */
-  --muted-foreground: 0 0% 65%; /* Muted text */
-  --popover: 0 0% 18%;
-  --popover-foreground: 0 0% 92%;
-  --card: 0 0% 18%; /* Slightly lighter cards */
-  --card-foreground: 0 0% 92%;
-  --border: 0 0% 28%; /* Visible but subtle borders */
-  --input: 0 0% 22%; /* Input backgrounds */
+  --background: 215 28% 17%; /* Navy blue like your examples */
+  --foreground: 0 0% 98%; /* High contrast white text */
+  --muted: 215 22% 22%; /* Slightly lighter navy for muted areas */
+  --muted-foreground: 220 10% 65%; /* Muted text with blue tint */
+  --popover: 215 28% 17%;
+  --popover-foreground: 0 0% 98%;
+  --card: 215 25% 20%; /* Card backgrounds matching your example */
+  --card-foreground: 0 0% 98%;
+  --border: 215 15% 25%; /* Subtle borders */
+  --input: 215 20% 18%; /* Input backgrounds */
   --primary: 207 90% 58%; /* Blue accent */
   --primary-foreground: 0 0% 100%;
-  --secondary: 0 0% 25%;
-  --secondary-foreground: 0 0% 88%;
-  --accent: 0 0% 25%;
-  --accent-foreground: 0 0% 88%;
-  --destructive: 0 75% 55%; /* Red for destructive actions */
+  --secondary: 215 15% 25%;
+  --secondary-foreground: 0 0% 90%;
+  --accent: 215 15% 25%;
+  --accent-foreground: 0 0% 90%;
+  --destructive: 0 75% 55%;
   --destructive-foreground: 0 0% 98%;
   --ring: 207 90% 58%;
   --radius: 0.5rem;
-  --success: 123 45% 48%; /* Green for success */
-  --warning: 35 85% 65%; /* Orange for warnings */
-  --surface: 0 0% 18%;
-  --surface-background: 0 0% 12%;
+  --success: 123 45% 48%;
+  --warning: 35 85% 65%;
+  --surface: 215 25% 20%;
+  --surface-background: 215 30% 15%; /* Darker navy background */
 }
 
 @layer base {

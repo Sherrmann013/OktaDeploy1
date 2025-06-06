@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import UserTable from "@/components/user-table";
 import CreateUserModal from "@/components/create-user-modal";
+import ColumnManager, { ColumnConfig, FilterConfig, AVAILABLE_COLUMNS } from "@/components/column-manager";
 import { User } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
@@ -300,14 +301,7 @@ export default function Users() {
             </CardContent>
           </Card>
           
-          <Card 
-            onClick={() => handleEmployeeTypeFilter('EMPLOYEE')}
-            className={`cursor-pointer transition-all hover:shadow-md ${
-              employeeTypeFilter === 'EMPLOYEE' 
-                ? 'ring-2 ring-blue-500 bg-blue-50 dark:bg-blue-950' 
-                : 'hover:bg-gray-50 dark:hover:bg-gray-800'
-            }`}
-          >
+          <Card>
             <CardContent className="p-3">
               <div className="flex flex-col items-center text-center">
                 <UsersIcon className={`w-6 h-6 mb-1 ${
@@ -321,14 +315,7 @@ export default function Users() {
             </CardContent>
           </Card>
           
-          <Card 
-            onClick={() => handleEmployeeTypeFilter('CONTRACTOR')}
-            className={`cursor-pointer transition-all hover:shadow-md ${
-              employeeTypeFilter === 'CONTRACTOR' 
-                ? 'ring-2 ring-green-500 bg-green-50 dark:bg-green-950' 
-                : 'hover:bg-gray-50 dark:hover:bg-gray-800'
-            }`}
-          >
+          <Card>
             <CardContent className="p-3">
               <div className="flex flex-col items-center text-center">
                 <Building className={`w-6 h-6 mb-1 ${
