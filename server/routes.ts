@@ -367,7 +367,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.log(`OKTA GROUP MANAGEMENT SKIPPED: employeeType=${updates.employeeType}, same=${currentUser.employeeType === updates.employeeType}, oktaId=${!!updatedUser.oktaId}`);
       }
 
-      res.json(updatedUser);
+      // Return enhanced response with sync status
+      const response = {
+        ...updatedUser,
+        syncStatus: {
+          oktaProfileSync: updatedUser.oktaId ? 'success' : 'skipped_no_okta_id',
+          employeeTypeGroupSync: updates.employeeType && currentUser.employeeType !== updates.employeeType && updatedUser.oktaId ? 'attempted_with_limitations' : 'not_needed'
+        }
+      };
+      
+      res.json(response);
     } catch (error) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ 

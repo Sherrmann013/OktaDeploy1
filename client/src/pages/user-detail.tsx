@@ -234,14 +234,47 @@ export default function UserDetail() {
 
   const updateUserMutation = useMutation({
     mutationFn: async (userData: z.infer<typeof editUserSchema>) => {
-      return apiRequest("PATCH", `/api/users/${userId}`, userData);
+      const response = await apiRequest("PATCH", `/api/users/${userId}`, userData);
+      return response.json();
     },
-    onSuccess: () => {
+    onSuccess: (updatedUser) => {
+      // Enhanced success feedback with detailed OKTA sync information
+      const hasOktaId = updatedUser?.oktaId;
+      const syncStatus = updatedUser?.syncStatus;
+      
+      let syncMessage = "User profile updated successfully";
+      let syncDetails = [];
+      
+      if (hasOktaId) {
+        syncDetails.push("✓ Profile synced to OKTA");
+        
+        // Check employee type sync status
+        if (syncStatus?.employeeTypeGroupSync === 'attempted_with_limitations') {
+          syncDetails.push("⚠ Employee type group change attempted (limited permissions)");
+        }
+      } else {
+        syncDetails.push("• Local update only (no OKTA ID)");
+      }
+      
+      const fullMessage = syncDetails.length > 0 
+        ? `${syncMessage}\n${syncDetails.join('\n')}`
+        : syncMessage;
+      
       toast({
         title: "Success",
-        description: "User profile updated successfully",
+        description: fullMessage,
+        duration: 5000, // Show for 5 seconds for detailed info
       });
+      
+      // Invalidate cache and refresh the page data
       queryClient.invalidateQueries({ queryKey: ["/api/users", userId] });
+      queryClient.invalidateQueries({ queryKey: ["/api/users"] });
+      
+      // Auto-refresh the page after a short delay
+      setTimeout(() => {
+        queryClient.refetchQueries({ queryKey: ["/api/users", userId] });
+      }, 500);
+      
       setIsEditing(false);
     },
     onError: (error) => {
@@ -249,6 +282,7 @@ export default function UserDetail() {
         title: "Error",
         description: error.message,
         variant: "destructive",
+        duration: 5000,
       });
     },
   });
