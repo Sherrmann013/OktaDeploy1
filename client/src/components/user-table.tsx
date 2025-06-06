@@ -228,14 +228,14 @@ export default function UserTable({
               {users.map((user) => (
                 <TableRow 
                   key={user.id} 
-                  className="hover:bg-gray-50 cursor-pointer"
+                  className="table-row-light cursor-pointer"
                   onClick={() => onUserClick(user.id)}
                 >
                   <TableCell className="px-6 py-4">
                     <div className="flex items-center">
                       <div className="flex-shrink-0 h-10 w-10">
-                        <div className="h-10 w-10 rounded-full bg-gray-300 flex items-center justify-center">
-                          <span className="text-sm font-medium text-gray-700">
+                        <div className="h-10 w-10 rounded-full bg-blue-600 flex items-center justify-center">
+                          <span className="text-sm font-medium text-white">
                             {getUserInitials(user.firstName, user.lastName)}
                           </span>
                         </div>

@@ -29,6 +29,15 @@
   --surface-background: 210 20% 98%; /* #FAFAFA */
 }
 
+/* Custom very light gray for table rows */
+.table-row-light {
+  background-color: #f8f9fa;
+}
+
+.table-row-light:hover {
+  background-color: #f1f3f4;
+}
+
 .dark {
   --background: 215 28% 17%; /* Navy blue like your examples */
   --foreground: 0 0% 98%; /* High contrast white text */

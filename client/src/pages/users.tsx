@@ -307,14 +307,14 @@ export default function Users() {
       </div>
 
       {/* Stats Cards */}
-      <div className="bg-gray-50 px-6 py-4">
+      <div className="bg-gray-100 px-6 py-4">
         <div className="grid grid-cols-5 gap-3">
           <Card>
             <CardContent className="p-3">
               <div className="flex flex-col items-center text-center">
                 <UsersIcon className="w-6 h-6 text-blue-600 mb-1" />
                 <p className="text-xs font-medium text-gray-600">Total Users</p>
-                <p className="text-xl font-bold text-gray-900">{total}</p>
+                <p className="text-xl font-bold text-white">{total}</p>
               </div>
             </CardContent>
           </Card>
