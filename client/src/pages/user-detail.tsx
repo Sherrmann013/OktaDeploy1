@@ -339,6 +339,10 @@ export default function UserDetail() {
                       <label className="text-sm font-medium text-gray-500">Email</label>
                       <p className="text-gray-900">{user.email}</p>
                     </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-500">Manager</label>
+                      <p className="text-gray-900">{user.manager || 'Not specified'}</p>
+                    </div>
                   </CardContent>
                 </Card>
 
@@ -355,6 +359,46 @@ export default function UserDetail() {
                     <div>
                       <label className="text-sm font-medium text-gray-500">Department</label>
                       <p className="text-gray-900">{user.department || 'Not specified'}</p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-500">Employee Type</label>
+                      <p className="text-gray-900">{user.employeeType || 'Not specified'}</p>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Account Information */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Account Information</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div>
+                      <label className="text-sm font-medium text-gray-500">Account Created</label>
+                      <p className="text-gray-900">
+                        {user.created ? format(new Date(user.created), "MMM d, yyyy 'at' h:mm a") : 'Not available'}
+                      </p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-500">Last Update</label>
+                      <p className="text-gray-900">
+                        {user.lastUpdated ? format(new Date(user.lastUpdated), "MMM d, yyyy 'at' h:mm a") : 'Not available'}
+                      </p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-500">Last Password Change</label>
+                      <p className="text-gray-900">
+                        {user.passwordChanged ? format(new Date(user.passwordChanged), "MMM d, yyyy 'at' h:mm a") : 'Never changed'}
+                      </p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-500">Disabled On</label>
+                      <p className="text-gray-900">
+                        {user.status === 'DEPROVISIONED' && user.lastUpdated ? 
+                          format(new Date(user.lastUpdated), "MMM d, yyyy 'at' h:mm a") : 
+                          'Not disabled'
+                        }
+                      </p>
                     </div>
                   </CardContent>
                 </Card>

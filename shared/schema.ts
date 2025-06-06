@@ -1,6 +1,17 @@
-import { pgTable, text, serial, timestamp, boolean, integer } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, timestamp, boolean, integer, varchar, jsonb, index } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
+
+// Session storage table for authentication
+export const sessions = pgTable(
+  "sessions",
+  {
+    sid: varchar("sid").primaryKey(),
+    sess: jsonb("sess").notNull(),
+    expire: timestamp("expire").notNull(),
+  },
+  (table) => [index("IDX_session_expire").on(table.expire)],
+);
 
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
@@ -15,6 +26,7 @@ export const users = pgTable("users", {
   employeeType: text("employee_type"),
   profileImageUrl: text("profile_image_url"),
   managerId: integer("manager_id").references(() => users.id),
+  manager: text("manager"), // Manager's name from OKTA
   status: text("status").notNull().default("ACTIVE"), // ACTIVE, SUSPENDED, DEPROVISIONED
   groups: text("groups").array().default([]),
   applications: text("applications").array().default([]),
