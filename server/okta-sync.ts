@@ -25,6 +25,12 @@ export interface OktaUserProfile {
 }
 
 function transformOktaUserToInsertUser(oktaUser: OktaUserProfile): InsertUser & { oktaId: string } {
+  const managerName = oktaUser.profile.manager || null;
+  console.log(`=== OKTA SYNC TRANSFORM ===`);
+  console.log(`User: ${oktaUser.profile.email}`);
+  console.log(`Manager from OKTA: "${managerName}"`);
+  console.log(`Manager type: ${typeof managerName}`);
+  
   return {
     oktaId: oktaUser.id,
     firstName: oktaUser.profile.firstName,
@@ -34,7 +40,7 @@ function transformOktaUserToInsertUser(oktaUser: OktaUserProfile): InsertUser & 
     title: oktaUser.profile.title || null,
     department: oktaUser.profile.department || null,
     mobilePhone: oktaUser.profile.mobilePhone || null,
-    manager: oktaUser.profile.manager || null, // Manager name from OKTA
+    manager: managerName, // Manager name from OKTA
     status: oktaUser.status,
     // Map OKTA status to our system
     activated: oktaUser.activated ? new Date(oktaUser.activated) : new Date(),

@@ -522,7 +522,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { email } = req.params;
       console.log(`\n=== RAW OKTA API DEBUG FOR ${email} ===`);
       
-      const oktaUser = await oktaService.getUserByEmail(email);
+      const oktaUser = await oktaService.getUserWithManager(email);
       if (!oktaUser) {
         console.log(`User ${email} not found in OKTA`);
         return res.status(404).json({ message: "User not found in OKTA" });

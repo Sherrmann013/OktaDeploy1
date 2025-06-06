@@ -143,6 +143,54 @@ class OktaService {
     }
   }
 
+  // Get user with expanded manager information using relationships API
+  async getUserWithManager(email: string): Promise<any> {
+    try {
+      // First get the basic user data
+      const userResponse = await this.makeRequest(`/users/${email}`);
+      
+      if (!userResponse.ok) {
+        const errorText = await userResponse.text();
+        throw new Error(`Failed to get user: ${userResponse.status} ${userResponse.statusText} - ${errorText}`);
+      }
+
+      const userData = await userResponse.json();
+      
+      // Try to get manager information through relationships API
+      try {
+        const relationshipsResponse = await this.makeRequest(`/users/${userData.id}/relationships`);
+        if (relationshipsResponse.ok) {
+          const relationships = await relationshipsResponse.json();
+          console.log('User relationships:', JSON.stringify(relationships, null, 2));
+          
+          // Look for manager relationship
+          const managerRelationship = relationships.find((rel: any) => 
+            rel.type === 'manager' || rel.type === 'MANAGER'
+          );
+          
+          if (managerRelationship) {
+            // Get manager user details
+            const managerResponse = await this.makeRequest(`/users/${managerRelationship.targetId}`);
+            if (managerResponse.ok) {
+              const managerData = await managerResponse.json();
+              userData.managerInfo = {
+                id: managerData.id,
+                name: `${managerData.profile.firstName} ${managerData.profile.lastName}`,
+                email: managerData.profile.email
+              };
+            }
+          }
+        }
+      } catch (relationshipError) {
+        console.log('Relationships API not available or no manager relationship found');
+      }
+
+      return userData;
+    } catch (error) {
+      throw new Error(`OKTA API error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
   async getUsers(limit: number = 200): Promise<any[]> {
     try {
       let allUsers: any[] = [];
