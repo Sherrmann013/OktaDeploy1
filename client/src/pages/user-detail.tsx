@@ -266,14 +266,18 @@ export default function UserDetail() {
         duration: 5000, // Show for 5 seconds for detailed info
       });
       
-      // Invalidate cache and refresh the page data
+      // Invalidate cache and force immediate refresh
       queryClient.invalidateQueries({ queryKey: ["/api/users", userId] });
       queryClient.invalidateQueries({ queryKey: ["/api/users"] });
       
-      // Auto-refresh the page after a short delay
-      setTimeout(() => {
-        queryClient.refetchQueries({ queryKey: ["/api/users", userId] });
-      }, 500);
+      // Force immediate refetch with proper await
+      setTimeout(async () => {
+        await queryClient.refetchQueries({ queryKey: ["/api/users", userId] });
+        // Also refresh related data
+        await queryClient.refetchQueries({ queryKey: ["/api/users", userId, "groups"] });
+        await queryClient.refetchQueries({ queryKey: ["/api/users", userId, "applications"] });
+        await queryClient.refetchQueries({ queryKey: ["/api/users", userId, "devices"] });
+      }, 1000); // Increased delay for server processing
       
       setIsEditing(false);
     },

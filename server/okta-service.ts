@@ -561,19 +561,51 @@ class OktaService {
   async addUserToGroup(userId: string, groupId: string): Promise<any> {
     try {
       console.log(`Adding user ${userId} to group ${groupId}`);
-      const response = await this.makeRequest(`/groups/${groupId}/users/${userId}`, {
+      
+      // Try method 1: PUT to assign user to group
+      console.log(`Attempting PUT method: /groups/${groupId}/users/${userId}`);
+      let response = await this.makeRequest(`/groups/${groupId}/users/${userId}`, {
         method: 'PUT',
         useEnhancedToken: true
       });
       
       if (response.ok) {
-        console.log(`Successfully added user to group`);
+        console.log(`Successfully added user to group via PUT`);
         return true;
-      } else {
-        const errorText = await response.text();
-        console.log(`Failed to add user to group: ${response.status} ${errorText}`);
-        throw new Error(`Failed to add user to group: ${response.status} ${response.statusText} - ${errorText}`);
       }
+      
+      // Method 1 failed, try method 2: POST with user in body
+      console.log(`PUT method failed, trying POST method: /groups/${groupId}/users`);
+      response = await this.makeRequest(`/groups/${groupId}/users`, {
+        method: 'POST',
+        body: JSON.stringify({
+          userId: userId
+        }),
+        useEnhancedToken: true
+      });
+      
+      if (response.ok) {
+        console.log(`Successfully added user to group via POST`);
+        return true;
+      }
+      
+      // Method 2 failed, try method 3: POST without body (some OKTA APIs work this way)
+      console.log(`POST with body failed, trying POST without body: /groups/${groupId}/users/${userId}`);
+      response = await this.makeRequest(`/groups/${groupId}/users/${userId}`, {
+        method: 'POST',
+        useEnhancedToken: true
+      });
+      
+      if (response.ok) {
+        console.log(`Successfully added user to group via POST without body`);
+        return true;
+      }
+      
+      // All methods failed
+      const errorText = await response.text();
+      console.log(`All methods failed. Final error: ${response.status} ${errorText}`);
+      throw new Error(`Failed to add user to group: ${response.status} ${response.statusText} - ${errorText}`);
+      
     } catch (error) {
       throw new Error(`OKTA API error: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
