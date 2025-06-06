@@ -58,6 +58,9 @@ export async function syncSpecificUser(email: string): Promise<void> {
     // Get user from OKTA
     const oktaUser = await oktaService.getUserByEmail(email);
     console.log('Retrieved OKTA user:', oktaUser.profile.firstName, oktaUser.profile.lastName);
+    console.log('OKTA Manager field:', oktaUser.profile.manager);
+    console.log('OKTA ManagerId field:', oktaUser.profile.managerId);
+    console.log('OKTA Profile keys:', Object.keys(oktaUser.profile));
     
     // Transform to our schema
     const insertUser = transformOktaUserToInsertUser(oktaUser);
