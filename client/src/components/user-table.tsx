@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Edit, Pause, Trash2, Play, ChevronLeft, ChevronRight, ArrowUpDown } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -21,6 +22,7 @@ interface UserTableProps {
   isLoading: boolean;
   onUserClick: (userId: number) => void;
   onPageChange: (page: number) => void;
+  onPerPageChange: (perPage: number) => void;
   onRefresh: () => void;
   sortBy?: string;
   sortOrder?: 'asc' | 'desc';
@@ -36,6 +38,7 @@ export default function UserTable({
   isLoading,
   onUserClick,
   onPageChange,
+  onPerPageChange,
   onRefresh,
   sortBy,
   sortOrder,
@@ -314,10 +317,27 @@ export default function UserTable({
 
         {/* Pagination */}
         <div className="bg-white px-6 py-3 border-t border-gray-200 flex items-center justify-between">
-          <div className="flex items-center text-sm text-gray-500">
-            Showing <span className="font-medium mx-1">{startIndex}</span> to{" "}
-            <span className="font-medium mx-1">{endIndex}</span> of{" "}
-            <span className="font-medium mx-1">{total}</span> users
+          <div className="flex items-center space-x-4">
+            <div className="flex items-center text-sm text-gray-500">
+              Showing <span className="font-medium mx-1">{startIndex}</span> to{" "}
+              <span className="font-medium mx-1">{endIndex}</span> of{" "}
+              <span className="font-medium mx-1">{total}</span> users
+            </div>
+            <div className="flex items-center space-x-2 text-sm text-gray-500">
+              <span>Show:</span>
+              <Select value={usersPerPage.toString()} onValueChange={(value) => onPerPageChange(parseInt(value))}>
+                <SelectTrigger className="w-20 h-8">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="10">10</SelectItem>
+                  <SelectItem value="25">25</SelectItem>
+                  <SelectItem value="50">50</SelectItem>
+                  <SelectItem value="100">100</SelectItem>
+                </SelectContent>
+              </Select>
+              <span>per page</span>
+            </div>
           </div>
           <div className="flex items-center space-x-2">
             <Button
@@ -328,17 +348,64 @@ export default function UserTable({
             >
               <ChevronLeft className="w-4 h-4" />
             </Button>
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-              <Button
-                key={page}
-                variant={currentPage === page ? "default" : "outline"}
-                size="sm"
-                onClick={() => onPageChange(page)}
-                className={currentPage === page ? "bg-blue-600 hover:bg-blue-700 text-white" : ""}
-              >
-                {page}
-              </Button>
-            ))}
+            {(() => {
+              const pages = [];
+              const maxVisiblePages = 5;
+              
+              if (totalPages <= maxVisiblePages) {
+                // Show all pages if total is small
+                for (let i = 1; i <= totalPages; i++) {
+                  pages.push(i);
+                }
+              } else {
+                // Smart pagination: 1, 2, 3, 4, ..., last
+                if (currentPage <= 3) {
+                  // Show first 4 pages, then ellipsis and last
+                  pages.push(1, 2, 3, 4);
+                  if (totalPages > 5) {
+                    pages.push('...', totalPages);
+                  } else {
+                    pages.push(5);
+                  }
+                } else if (currentPage >= totalPages - 2) {
+                  // Show first, ellipsis, then last 4 pages
+                  pages.push(1, '...');
+                  for (let i = totalPages - 3; i <= totalPages; i++) {
+                    pages.push(i);
+                  }
+                } else {
+                  // Show first, ellipsis, current-1, current, current+1, ellipsis, last
+                  pages.push(1, '...');
+                  for (let i = currentPage - 1; i <= currentPage + 1; i++) {
+                    pages.push(i);
+                  }
+                  pages.push('...', totalPages);
+                }
+              }
+              
+              return pages.map((page, index) => {
+                if (page === '...') {
+                  return (
+                    <span key={`ellipsis-${index}`} className="px-2 text-gray-400">
+                      ...
+                    </span>
+                  );
+                }
+                
+                const pageNum = page as number;
+                return (
+                  <Button
+                    key={pageNum}
+                    variant={currentPage === pageNum ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => onPageChange(pageNum)}
+                    className={currentPage === pageNum ? "bg-blue-600 hover:bg-blue-700 text-white" : ""}
+                  >
+                    {pageNum}
+                  </Button>
+                );
+              });
+            })()}
             <Button
               variant="outline"
               size="sm"

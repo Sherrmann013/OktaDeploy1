@@ -30,7 +30,7 @@ import {
 export default function Users() {
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const [usersPerPage] = useState(10);
+  const [usersPerPage, setUsersPerPage] = useState(10);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [sortBy, setSortBy] = useState("firstName");
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
@@ -158,6 +158,11 @@ export default function Users() {
       setSortBy(column);
       setSortOrder('asc');
     }
+  };
+
+  const handlePerPageChange = (perPage: number) => {
+    setUsersPerPage(perPage);
+    setCurrentPage(1); // Reset to first page when changing per-page count
   };
 
   const handleSearch = (e: React.FormEvent) => {
@@ -331,6 +336,7 @@ export default function Users() {
           isLoading={isLoading}
           onUserClick={handleUserClick}
           onPageChange={setCurrentPage}
+          onPerPageChange={handlePerPageChange}
           onRefresh={handleRefresh}
           sortBy={sortBy}
           sortOrder={sortOrder}
