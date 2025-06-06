@@ -288,19 +288,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Handle employee type group management if employee type changed
+      console.log(`Checking employee type change: updates.employeeType=${updates.employeeType}, currentUser.employeeType=${currentUser.employeeType}, oktaId=${updatedUser.oktaId}`);
       if (updates.employeeType && currentUser.employeeType !== updates.employeeType && updatedUser.oktaId) {
+        console.log(`OKTA GROUP MANAGEMENT: Employee type changed from ${currentUser.employeeType} to ${updates.employeeType} for user ${updatedUser.firstName} ${updatedUser.lastName}`);
         try {
           // Get all groups for the user to find current employee type groups
+          console.log(`Getting user groups for ${updatedUser.oktaId}...`);
           const userGroups = await oktaService.getUserGroups(updatedUser.oktaId);
+          console.log(`Found ${userGroups.length} total groups for user`);
+          
           const employeeTypeGroups = userGroups.filter(group => 
             group.profile?.name?.startsWith('MTX-ET-')
           );
+          console.log(`Found ${employeeTypeGroups.length} employee type groups:`, employeeTypeGroups.map(g => g.profile?.name));
 
           // Remove from old employee type groups
           for (const group of employeeTypeGroups) {
             try {
-              console.log(`Removing user from old group: ${group.profile.name}`);
+              console.log(`REMOVING user from old group: ${group.profile.name} (ID: ${group.id})`);
               await oktaService.removeUserFromGroup(updatedUser.oktaId, group.id);
+              console.log(`Successfully removed user from group ${group.profile.name}`);
             } catch (removeError) {
               console.error(`Failed to remove user from group ${group.profile.name}:`, removeError);
             }
@@ -308,26 +315,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
           // Add to new employee type group
           const newGroupName = `MTX-ET-${updates.employeeType}`;
+          console.log(`Looking for new group: ${newGroupName}`);
           try {
             // Find the group by name
             const allGroups = await oktaService.getGroups();
+            console.log(`Retrieved ${allGroups.length} total groups from OKTA`);
             const targetGroup = allGroups.find(group => group.profile?.name === newGroupName);
             
             if (targetGroup) {
-              console.log(`Adding user to new group: ${newGroupName}`);
+              console.log(`ADDING user to new group: ${newGroupName} (ID: ${targetGroup.id})`);
               await oktaService.addUserToGroup(updatedUser.oktaId, targetGroup.id);
+              console.log(`Successfully added user to group ${newGroupName}`);
             } else {
-              console.error(`Group ${newGroupName} not found in OKTA`);
+              console.error(`Group ${newGroupName} not found in OKTA. Available groups:`, allGroups.map(g => g.profile?.name).filter(name => name?.startsWith('MTX-ET-')));
             }
           } catch (addError) {
             console.error(`Failed to add user to group ${newGroupName}:`, addError);
           }
           
-          console.log(`Employee type changed for user ${updatedUser.firstName} ${updatedUser.lastName}: ${currentUser.employeeType} -> ${updates.employeeType}`);
+          console.log(`OKTA GROUP MANAGEMENT COMPLETED for user ${updatedUser.firstName} ${updatedUser.lastName}: ${currentUser.employeeType} -> ${updates.employeeType}`);
         } catch (groupError) {
           console.error("Error managing employee type groups:", groupError);
           // Don't fail the entire update if group management fails
         }
+      } else {
+        console.log(`OKTA GROUP MANAGEMENT SKIPPED: employeeType=${updates.employeeType}, same=${currentUser.employeeType === updates.employeeType}, oktaId=${!!updatedUser.oktaId}`);
       }
 
       res.json(updatedUser);

@@ -225,11 +225,11 @@ export default function Users() {
           <Card>
             <CardContent className="p-4">
               <div className="flex items-center">
-                <Eye className="w-8 h-8 text-green-600" />
+                <UsersIcon className="w-8 h-8 text-blue-600" />
                 <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">Active Users</p>
+                  <p className="text-sm font-medium text-gray-600">Employees</p>
                   <p className="text-2xl font-bold text-gray-900">
-                    {users.filter((u: User) => u.status === 'ACTIVE').length}
+                    {users.filter((u: User) => u.employeeType === 'EMPLOYEE').length}
                   </p>
                 </div>
               </div>
@@ -239,11 +239,11 @@ export default function Users() {
           <Card>
             <CardContent className="p-4">
               <div className="flex items-center">
-                <Calendar className="w-8 h-8 text-yellow-600" />
+                <Building className="w-8 h-8 text-green-600" />
                 <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">Staged Users</p>
+                  <p className="text-sm font-medium text-gray-600">Contractors</p>
                   <p className="text-2xl font-bold text-gray-900">
-                    {users.filter((u: User) => u.status === 'STAGED').length}
+                    {users.filter((u: User) => u.employeeType === 'CONTRACTOR').length}
                   </p>
                 </div>
               </div>
@@ -253,11 +253,25 @@ export default function Users() {
           <Card>
             <CardContent className="p-4">
               <div className="flex items-center">
-                <Building className="w-8 h-8 text-purple-600" />
+                <Calendar className="w-8 h-8 text-purple-600" />
                 <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">Data Source</p>
-                  <p className="text-lg font-bold text-gray-900">
-                    {dataSource === 'okta' ? 'OKTA' : 'Local'}
+                  <p className="text-sm font-medium text-gray-600">Consultants</p>
+                  <p className="text-2xl font-bold text-gray-900">
+                    {users.filter((u: User) => u.employeeType === 'PART_TIME').length}
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardContent className="p-4">
+              <div className="flex items-center">
+                <Eye className="w-8 h-8 text-orange-600" />
+                <div className="ml-4">
+                  <p className="text-sm font-medium text-gray-600">Interns</p>
+                  <p className="text-2xl font-bold text-gray-900">
+                    {users.filter((u: User) => u.employeeType === 'INTERN').length}
                   </p>
                 </div>
               </div>
