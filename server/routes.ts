@@ -219,7 +219,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userData = insertUserSchema.parse(req.body);
       
-      // Check if email or login already exists
+      // Check if email or login already exists in our local storage
       const existingEmail = await storage.getUserByEmail(userData.email);
       if (existingEmail) {
         return res.status(400).json({ message: "User with this email already exists" });
@@ -230,13 +230,108 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "User with this login already exists" });
       }
 
-      // In a real implementation, this would create the user in OKTA first
-      // const oktaUser = await oktaClient.createUser(userData);
+      // Check if user already exists in OKTA
+      try {
+        const existingOktaUser = await oktaService.getUserByEmail(userData.email);
+        if (existingOktaUser) {
+          return res.status(400).json({ message: "User with this email already exists in OKTA" });
+        }
+      } catch (error) {
+        // User doesn't exist in OKTA, which is expected for new users
+        console.log('User not found in OKTA (expected for new user)');
+      }
+
+      // Create user in OKTA first
+      console.log('Creating user in OKTA:', userData.email);
       
-      const user = await storage.createUser({
-        ...userData,
-        oktaId: `okta_${Date.now()}`, // Mock OKTA ID
+      const oktaUserData = {
+        profile: {
+          firstName: userData.firstName,
+          lastName: userData.lastName,
+          email: userData.email,
+          login: userData.login || userData.email,
+          title: userData.title || null,
+          department: userData.department || null,
+          mobilePhone: userData.mobilePhone || null,
+          manager: userData.manager || null,
+        },
+        credentials: {
+          password: {
+            value: Math.random().toString(36).slice(-12) + "A1!" // Generate temporary password
+          }
+        },
+        groupIds: userData.groups || []
+      };
+
+      // Create user in OKTA
+      const oktaResponse = await fetch(`${process.env.OKTA_DOMAIN}/api/v1/users?activate=${userData.sendActivationEmail}`, {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          'Authorization': `SSWS ${process.env.OKTA_API_TOKEN}`
+        },
+        body: JSON.stringify(oktaUserData)
       });
+
+      if (!oktaResponse.ok) {
+        const errorData = await oktaResponse.json();
+        console.error('OKTA user creation failed:', errorData);
+        return res.status(400).json({ 
+          message: "Failed to create user in OKTA", 
+          error: errorData.errorSummary || 'Unknown OKTA error'
+        });
+      }
+
+      const oktaUser = await oktaResponse.json();
+      console.log('User created in OKTA:', oktaUser.id);
+
+      // Create user in local storage with OKTA ID
+      const user = await storage.createUser({
+        oktaId: oktaUser.id,
+        firstName: oktaUser.profile.firstName,
+        lastName: oktaUser.profile.lastName,
+        email: oktaUser.profile.email,
+        login: oktaUser.profile.login,
+        title: oktaUser.profile.title,
+        department: oktaUser.profile.department,
+        mobilePhone: oktaUser.profile.mobilePhone,
+        manager: oktaUser.profile.manager,
+        status: oktaUser.status,
+        created: new Date(oktaUser.created),
+        lastUpdated: new Date(oktaUser.lastUpdated),
+        lastLogin: oktaUser.lastLogin ? new Date(oktaUser.lastLogin) : null,
+        passwordChanged: oktaUser.passwordChanged ? new Date(oktaUser.passwordChanged) : null,
+        employeeType: userData.employeeType,
+        sendActivationEmail: userData.sendActivationEmail,
+      });
+
+      // Add user to employee type groups if specified
+      if (userData.employeeType) {
+        try {
+          const groupMapping = {
+            'EMPLOYEE': 'MTX-ET-Employee',
+            'CONTRACTOR': 'MTX-ET-Contractor', 
+            'INTERN': 'MTX-ET-Intern',
+            'PART_TIME': 'MTX-ET-Part_Time'
+          };
+          
+          const groupName = groupMapping[userData.employeeType.toUpperCase()];
+          if (groupName) {
+            // Find the group ID in OKTA
+            const groups = await oktaService.getGroups();
+            const targetGroup = groups.find(g => g.profile.name === groupName);
+            
+            if (targetGroup) {
+              await oktaService.addUserToGroup(oktaUser.id, targetGroup.id);
+              console.log(`Added user to group: ${groupName}`);
+            }
+          }
+        } catch (error) {
+          console.error('Error adding user to employee type group:', error);
+          // Don't fail the entire request for group assignment issues
+        }
+      }
 
       res.status(201).json(user);
     } catch (error) {
