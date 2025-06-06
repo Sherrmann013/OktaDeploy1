@@ -356,6 +356,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               title: oktaUser.profile.title || null,
               department: oktaUser.profile.department || null,
               mobilePhone: oktaUser.profile.mobilePhone || null,
+              manager: oktaUser.profile.manager || null,
               status: oktaUser.status,
               activated: oktaUser.activated ? new Date(oktaUser.activated) : new Date(),
               created: new Date(oktaUser.created),

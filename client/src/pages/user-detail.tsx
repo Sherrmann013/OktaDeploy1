@@ -31,6 +31,31 @@ export default function UserDetail() {
 
   const userId = params?.id ? parseInt(params.id) : null;
 
+  // Function to derive Employee Type from MTX-ET group membership
+  const getEmployeeType = (groups: any[]) => {
+    if (!groups) return 'Not specified';
+    
+    const employeeTypeGroup = groups.find((group: any) => 
+      group.profile?.name?.startsWith('MTX-ET-')
+    );
+    
+    if (!employeeTypeGroup) return 'Not specified';
+    
+    const groupName = employeeTypeGroup.profile.name;
+    switch (groupName) {
+      case 'MTX-ET-EMPLOYEE':
+        return 'Employee';
+      case 'MTX-ET-CONTRACTOR':
+        return 'Contractor';
+      case 'MTX-ET-PART_TIME':
+        return 'Part Time';
+      case 'MTX-ET-INTERN':
+        return 'Intern';
+      default:
+        return 'Not specified';
+    }
+  };
+
   const { data: user, isLoading } = useQuery<User>({
     queryKey: ["/api/users", userId],
     queryFn: async () => {
@@ -49,7 +74,7 @@ export default function UserDetail() {
       if (!response.ok) throw new Error("Failed to fetch user groups");
       return response.json();
     },
-    enabled: !!userId && activeTab === "groups",
+    enabled: !!userId && (activeTab === "groups" || activeTab === "profile"),
   });
 
   // Query for user applications
@@ -362,7 +387,7 @@ export default function UserDetail() {
                     </div>
                     <div>
                       <label className="text-sm font-medium text-gray-500">Employee Type</label>
-                      <p className="text-gray-900">{user.employeeType || 'Not specified'}</p>
+                      <p className="text-gray-900">{getEmployeeType(userGroups)}</p>
                     </div>
                   </CardContent>
                 </Card>
