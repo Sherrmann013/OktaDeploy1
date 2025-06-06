@@ -516,6 +516,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Test OKTA manager field mapping
+  app.post("/api/test-manager-field", isAuthenticated, async (req, res) => {
+    try {
+      const { email } = req.body;
+      if (!email) {
+        return res.status(400).json({ message: "Email is required" });
+      }
+
+      const oktaUser = await oktaService.getUserByEmail(email);
+      if (!oktaUser) {
+        return res.status(404).json({ message: "User not found in OKTA" });
+      }
+
+      // Analyze manager field structure
+      const profileKeys = Object.keys(oktaUser.profile || {});
+      const managerKeys = profileKeys.filter(key => key.toLowerCase().includes('manager'));
+      
+      res.json({
+        success: true,
+        email: email,
+        profileKeys: profileKeys,
+        managerField: oktaUser.profile?.manager,
+        managerIdField: oktaUser.profile?.managerId,
+        allManagerKeys: managerKeys,
+        profileSample: oktaUser.profile
+      });
+    } catch (error) {
+      res.status(500).json({ 
+        success: false, 
+        error: error instanceof Error ? error.message : 'Unknown error' 
+      });
+    }
+  });
+
   // Debug endpoint to test OKTA API response for specific user
   app.get("/api/debug-okta-user/:email", isAuthenticated, async (req, res) => {
     try {
