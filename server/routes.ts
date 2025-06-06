@@ -516,6 +516,65 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Raw OKTA API output for debugging (no auth required for testing)
+  app.get("/api/debug-okta-raw/:email", async (req, res) => {
+    try {
+      const { email } = req.params;
+      console.log(`\n=== RAW OKTA API DEBUG FOR ${email} ===`);
+      
+      const oktaUser = await oktaService.getUserByEmail(email);
+      if (!oktaUser) {
+        console.log(`User ${email} not found in OKTA`);
+        return res.status(404).json({ message: "User not found in OKTA" });
+      }
+
+      // Log the complete response structure
+      console.log('COMPLETE OKTA USER OBJECT:');
+      console.log(JSON.stringify(oktaUser, null, 2));
+      
+      // Analyze profile fields
+      const profile = oktaUser.profile || {};
+      const profileKeys = Object.keys(profile);
+      console.log('\nPROFILE KEYS:', profileKeys);
+      
+      // Look for manager-related fields
+      const managerKeys = profileKeys.filter(key => 
+        key.toLowerCase().includes('manager') || 
+        key.toLowerCase().includes('supervisor') ||
+        key.toLowerCase().includes('boss')
+      );
+      console.log('MANAGER-RELATED KEYS:', managerKeys);
+      
+      // Check all profile fields for "Susan" or "Limb"
+      const susanFields = {};
+      for (const [key, value] of Object.entries(profile)) {
+        if (value && typeof value === 'string' && 
+            (value.toLowerCase().includes('susan') || value.toLowerCase().includes('limb'))) {
+          susanFields[key] = value;
+        }
+      }
+      console.log('FIELDS CONTAINING SUSAN/LIMB:', susanFields);
+      
+      console.log('=== END OKTA DEBUG ===\n');
+      
+      res.json({
+        success: true,
+        email: email,
+        profileKeys: profileKeys,
+        managerKeys: managerKeys,
+        susanFields: susanFields,
+        managerField: profile.manager,
+        managerIdField: profile.managerId,
+        completeProfile: profile
+      });
+    } catch (error) {
+      console.error('OKTA API error:', error);
+      res.status(500).json({ 
+        error: error instanceof Error ? error.message : 'Unknown error' 
+      });
+    }
+  });
+
   // Test OKTA manager field mapping
   app.post("/api/test-manager-field", isAuthenticated, async (req, res) => {
     try {
