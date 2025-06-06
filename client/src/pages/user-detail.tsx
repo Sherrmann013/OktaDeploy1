@@ -73,6 +73,11 @@ export default function UserDetail() {
     enabled: !!userId,
   });
 
+  const { data: userDevices = [] } = useQuery<any[]>({
+    queryKey: [`/api/users/${userId}/devices`],
+    enabled: !!userId,
+  });
+
   // Set form values when user data loads
   useEffect(() => {
     if (user && !isEditing) {
@@ -392,10 +397,11 @@ export default function UserDetail() {
         <div className="flex-1 overflow-auto">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full flex flex-col">
             <div className="flex-shrink-0 px-6 pt-4">
-              <TabsList className="grid w-full grid-cols-4">
+              <TabsList className="grid w-full grid-cols-5">
                 <TabsTrigger value="profile">Profile</TabsTrigger>
                 <TabsTrigger value="groups">Groups ({userGroups.length})</TabsTrigger>
                 <TabsTrigger value="applications">Applications ({userApps.length})</TabsTrigger>
+                <TabsTrigger value="devices">Devices ({userDevices.length})</TabsTrigger>
                 <TabsTrigger value="activity">Recent Activity</TabsTrigger>
               </TabsList>
             </div>
@@ -665,6 +671,45 @@ export default function UserDetail() {
                                 {app.status}
                               </Badge>
                               <Badge variant="outline">{app.signOnMode}</Badge>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+              <TabsContent value="devices" className="space-y-4 mt-0">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Registered Devices</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {userDevices.length === 0 ? (
+                      <p className="text-gray-500 text-center py-8">No devices registered</p>
+                    ) : (
+                      <div className="space-y-3">
+                        {userDevices.map((device, index) => (
+                          <div key={device.id || index} className="flex items-center justify-between p-3 border rounded-lg">
+                            <div className="flex items-center gap-3">
+                              <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
+                                <span className="text-lg">📱</span>
+                              </div>
+                              <div>
+                                <h4 className="font-medium">{device.displayName || device.name || 'Unknown Device'}</h4>
+                                <p className="text-sm text-gray-500">{device.platform || 'Unknown Platform'}</p>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Badge variant={device.status === 'ACTIVE' ? 'default' : 'secondary'}>
+                                {device.status || 'UNKNOWN'}
+                              </Badge>
+                              {device.lastUpdated && (
+                                <span className="text-xs text-gray-500">
+                                  Last seen: {new Date(device.lastUpdated).toLocaleDateString()}
+                                </span>
+                              )}
                             </div>
                           </div>
                         ))}
