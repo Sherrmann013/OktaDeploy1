@@ -75,6 +75,22 @@ export default function Users() {
     },
   });
 
+  // Get total user count separately (doesn't change with search)
+  const { data: totalUsersData } = useQuery({
+    queryKey: ["/api/users/total"],
+    queryFn: async () => {
+      const response = await fetch('/api/users?limit=1&page=1', {
+        credentials: 'include'
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch total user count');
+      }
+      
+      return response.json();
+    },
+  });
+
   // Get all users for fallback stats if OKTA counts fail
   const { data: allUsersData } = useQuery({
     queryKey: ["/api/users/all"],
@@ -117,7 +133,7 @@ export default function Users() {
 
   const users = usersData?.users || [];
   const allUsers = allUsersData?.users || [];
-  const total = usersData?.total || 0;
+  const total = totalUsersData?.total || usersData?.total || 0;
   const totalPages = usersData?.totalPages || 1;
   const dataSource = usersData?.source || 'unknown';
 

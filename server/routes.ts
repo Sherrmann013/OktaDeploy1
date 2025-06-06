@@ -274,6 +274,54 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "User not found" });
       }
 
+      // Update user in OKTA first if they have an OKTA ID
+      if (currentUser.oktaId) {
+        console.log(`Updating user in OKTA: ${currentUser.oktaId}`);
+        try {
+          // Prepare OKTA update payload - only include fields that are being updated
+          const oktaUpdates: any = {};
+          
+          if (updates.firstName) oktaUpdates.firstName = updates.firstName;
+          if (updates.lastName) oktaUpdates.lastName = updates.lastName;
+          if (updates.email) oktaUpdates.email = updates.email;
+          if (updates.login) oktaUpdates.login = updates.login;
+          if (updates.title !== undefined) oktaUpdates.title = updates.title;
+          if (updates.department !== undefined) oktaUpdates.department = updates.department;
+          if (updates.mobilePhone !== undefined) oktaUpdates.mobilePhone = updates.mobilePhone;
+          if (updates.manager !== undefined) oktaUpdates.manager = updates.manager;
+
+          // Only update OKTA if there are profile changes
+          if (Object.keys(oktaUpdates).length > 0) {
+            console.log(`Updating OKTA profile for user ${currentUser.oktaId}:`, oktaUpdates);
+            const oktaUpdateResponse = await fetch(`https://${process.env.OKTA_DOMAIN}/api/v1/users/${currentUser.oktaId}`, {
+              method: 'POST',
+              headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'Authorization': `SSWS ${process.env.OKTA_API_TOKEN_ENHANCED}`,
+              },
+              body: JSON.stringify({
+                profile: oktaUpdates
+              })
+            });
+
+            if (!oktaUpdateResponse.ok) {
+              const errorData = await oktaUpdateResponse.text();
+              console.error(`Failed to update user in OKTA: ${oktaUpdateResponse.status} ${oktaUpdateResponse.statusText}`, errorData);
+              throw new Error(`OKTA update failed: ${oktaUpdateResponse.status} ${oktaUpdateResponse.statusText}`);
+            }
+
+            const oktaUpdatedUser = await oktaUpdateResponse.json();
+            console.log(`Successfully updated user in OKTA:`, oktaUpdatedUser.profile);
+          }
+        } catch (oktaError) {
+          console.error("Error updating user in OKTA:", oktaError);
+          // Continue with local update even if OKTA update fails
+          // but log the error for investigation
+        }
+      }
+
+      // Update user in local database
       const updatedUser = await storage.updateUser(id, updates);
       
       if (!updatedUser) {

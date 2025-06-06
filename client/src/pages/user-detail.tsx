@@ -49,7 +49,18 @@ export default function UserDetail() {
   
   // Fetch all users for manager auto-complete
   const { data: allUsersData } = useQuery({
-    queryKey: ["/api/users"],
+    queryKey: ["/api/users/all"],
+    queryFn: async () => {
+      const response = await fetch('/api/users?limit=1000', {
+        credentials: 'include'
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch users for manager selection');
+      }
+      
+      return response.json();
+    },
     enabled: isEditing,
   });
   
