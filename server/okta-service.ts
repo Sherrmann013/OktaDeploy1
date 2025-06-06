@@ -141,6 +141,8 @@ class OktaService {
           console.log('ManagerId field:', userData.profile?.managerId);
           console.log('Full profile keys:', Object.keys(userData.profile || {}));
           console.log('Profile object:', JSON.stringify(userData.profile, null, 2));
+          console.log('Full OKTA response:', JSON.stringify(userData, null, 2));
+          console.log('=== END OKTA DEBUG ===');
         }
         
         return userData;
