@@ -59,7 +59,23 @@ export default function Users() {
     },
   });
 
-  // Get all users for stats
+  // Get employee type counts from OKTA groups
+  const { data: employeeTypeCounts } = useQuery({
+    queryKey: ["/api/employee-type-counts"],
+    queryFn: async () => {
+      const response = await fetch('/api/employee-type-counts', {
+        credentials: 'include'
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch employee type counts');
+      }
+      
+      return response.json();
+    },
+  });
+
+  // Get all users for fallback stats if OKTA counts fail
   const { data: allUsersData } = useQuery({
     queryKey: ["/api/users/all"],
     queryFn: async () => {
@@ -73,6 +89,7 @@ export default function Users() {
       
       return response.json();
     },
+    enabled: !employeeTypeCounts, // Only fetch if OKTA counts aren't available
   });
 
   const { data: usersData, isLoading, refetch } = useQuery({
@@ -243,7 +260,7 @@ export default function Users() {
                 <UsersIcon className="w-6 h-6 text-blue-600 mb-1" />
                 <p className="text-xs font-medium text-gray-600">Employees</p>
                 <p className="text-xl font-bold text-gray-900">
-                  {allUsers.filter((u: User) => u.employeeType === 'EMPLOYEE').length}
+                  {employeeTypeCounts?.EMPLOYEE ?? allUsers.filter((u: User) => u.employeeType === 'EMPLOYEE').length}
                 </p>
               </div>
             </CardContent>
@@ -255,7 +272,7 @@ export default function Users() {
                 <Building className="w-6 h-6 text-green-600 mb-1" />
                 <p className="text-xs font-medium text-gray-600">Contractors</p>
                 <p className="text-xl font-bold text-gray-900">
-                  {allUsers.filter((u: User) => u.employeeType === 'CONTRACTOR').length}
+                  {employeeTypeCounts?.CONTRACTOR ?? allUsers.filter((u: User) => u.employeeType === 'CONTRACTOR').length}
                 </p>
               </div>
             </CardContent>

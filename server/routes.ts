@@ -15,6 +15,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Logout route is handled by setupLocalAuth
 
+  // Get employee type group counts from OKTA
+  app.get("/api/employee-type-counts", isAuthenticated, async (req, res) => {
+    try {
+      const counts = await oktaService.getEmployeeTypeGroupCounts();
+      res.json(counts);
+    } catch (error) {
+      console.error("Error fetching employee type counts:", error);
+      res.status(500).json({ error: "Failed to fetch employee type counts" });
+    }
+  });
+
   // Get all users with fallback from OKTA to local storage
   app.get("/api/users", isAuthenticated, async (req, res) => {
     try {

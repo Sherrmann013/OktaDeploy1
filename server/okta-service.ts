@@ -501,6 +501,63 @@ class OktaService {
     }
   }
 
+  async getGroupMembers(groupId: string): Promise<any[]> {
+    try {
+      let allMembers: any[] = [];
+      let after = '';
+      
+      do {
+        const url = `/groups/${groupId}/users?limit=200${after ? `&after=${after}` : ''}`;
+        const response = await this.makeRequest(url);
+        
+        if (response.ok) {
+          const members = await response.json();
+          allMembers = allMembers.concat(members);
+          
+          // Check for pagination
+          const linkHeader = response.headers.get('link');
+          after = '';
+          
+          if (linkHeader) {
+            const nextMatch = linkHeader.match(/<[^>]+[?&]after=([^&>]+)[^>]*>;\s*rel="next"/);
+            if (nextMatch) {
+              after = nextMatch[1];
+            }
+          }
+        } else {
+          const errorText = await response.text();
+          throw new Error(`Failed to get group members: ${response.status} ${response.statusText} - ${errorText}`);
+        }
+      } while (after);
+      
+      return allMembers;
+    } catch (error) {
+      throw new Error(`OKTA API error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  async getEmployeeTypeGroupCounts(): Promise<{ [key: string]: number }> {
+    try {
+      const groups = await this.getGroups(200);
+      const employeeTypeGroups = groups.filter(group => 
+        group.profile?.name?.startsWith('MTX-ET-')
+      );
+      
+      const counts: { [key: string]: number } = {};
+      
+      for (const group of employeeTypeGroups) {
+        const members = await this.getGroupMembers(group.id);
+        const employeeType = group.profile.name.replace('MTX-ET-', '');
+        counts[employeeType] = members.length;
+      }
+      
+      return counts;
+    } catch (error) {
+      console.error('Failed to get employee type group counts:', error);
+      return {};
+    }
+  }
+
   async addUserToGroup(userId: string, groupId: string): Promise<any> {
     try {
       console.log(`Adding user ${userId} to group ${groupId}`);
