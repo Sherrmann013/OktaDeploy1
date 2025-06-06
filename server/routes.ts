@@ -333,8 +333,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         try {
           console.log(`Updating OKTA user ${user.oktaId} status to ${status}`);
           if (status === "SUSPENDED") {
-            const result = await oktaService.suspendUser(user.oktaId);
-            console.log("OKTA suspend result:", result);
+            const result = await oktaService.deactivateUser(user.oktaId);
+            console.log("OKTA deactivate result:", result);
           } else if (status === "ACTIVE") {
             const result = await oktaService.activateUser(user.oktaId);
             console.log("OKTA activate result:", result);

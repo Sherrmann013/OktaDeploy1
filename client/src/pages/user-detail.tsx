@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { ArrowLeft, ChevronDown, ChevronRight, Smartphone, Monitor, Shield, Eye, RefreshCw, KeyRound, Edit, Play, Pause, Trash2, Search } from "lucide-react";
+import { ArrowLeft, ChevronDown, ChevronRight, Smartphone, Monitor, Shield, Eye, RefreshCw, KeyRound, Edit, Play, Pause, Trash2, Search, UserX } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import ConfirmationModal from "@/components/confirmation-modal";
@@ -170,7 +170,7 @@ export default function UserDetail() {
   });
 
   const handleStatusChange = (status: string) => {
-    const actionText = status === "ACTIVE" ? "activate" : status === "SUSPENDED" ? "suspend" : "deactivate";
+    const actionText = status === "ACTIVE" ? "activate" : status === "SUSPENDED" ? "deactivate" : "deactivate";
     setConfirmAction({
       type: status,
       title: `${actionText.charAt(0).toUpperCase() + actionText.slice(1)} User`,
@@ -290,8 +290,8 @@ export default function UserDetail() {
                   onClick={() => handleStatusChange("SUSPENDED")}
                   className="text-orange-600 hover:text-orange-700 border-orange-200 hover:border-orange-300"
                 >
-                  <Pause className="w-4 h-4 mr-2" />
-                  Suspend
+                  <UserX className="w-4 h-4 mr-2" />
+                  Deactivate
                 </Button>
               ) : (
                 <Button 
