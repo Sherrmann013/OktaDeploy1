@@ -18,10 +18,10 @@ export default function Dashboard() {
   const [departmentFilter, setDepartmentFilter] = useState("");
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const usersPerPage = 10;
+  const [usersPerPage, setUsersPerPage] = useState(10);
 
   const { data, isLoading, refetch } = useQuery<{ users: User[]; total: number }>({
-    queryKey: ["/api/users", searchQuery, statusFilter, departmentFilter, currentPage],
+    queryKey: ["/api/users", searchQuery, statusFilter, departmentFilter, currentPage, usersPerPage],
     queryFn: async () => {
       const params = new URLSearchParams();
       if (searchQuery) params.append("search", searchQuery);

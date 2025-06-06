@@ -56,7 +56,6 @@ export default function UserTable({
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/users"] });
-      onRefresh();
       toast({
         title: "Success",
         description: "User status updated successfully",
@@ -77,7 +76,6 @@ export default function UserTable({
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/users"] });
-      onRefresh();
       toast({
         title: "Success",
         description: "User deleted successfully",
