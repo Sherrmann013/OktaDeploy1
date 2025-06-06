@@ -300,14 +300,32 @@ class OktaService {
         for (const group of userEmployeeTypeGroups) {
           try {
             console.log(`Getting apps for user's group: ${group.profile?.name || group.name}`);
+            // Try both endpoints to get complete application list
             const groupAppsResponse = await this.makeRequest(`/groups/${group.id}/apps`);
             if (groupAppsResponse.ok) {
               const groupApps = await groupAppsResponse.json();
-              console.log(`User's group "${group.profile?.name || group.name}" has ${groupApps.length} applications`);
+              console.log(`User's group "${group.profile?.name || group.name}" has ${groupApps.length} applications via /groups/{id}/apps`);
               groupApps.forEach((app: any) => {
                 userEmployeeTypeAppNames.add(app.label);
-                console.log(`  User group app: "${app.label}"`);
+                console.log(`  Group app: "${app.label}" (${app.name || 'no name field'})`);
               });
+            }
+            
+            // Also try app assignments endpoint
+            try {
+              const assignmentsResponse = await this.makeRequest(`/apps?expand=group,metadata&filter=group.id eq "${group.id}"`);
+              if (assignmentsResponse.ok) {
+                const assignments = await assignmentsResponse.json();
+                console.log(`Found ${assignments.length} app assignments for group via /apps filter`);
+                assignments.forEach((app: any) => {
+                  if (app.label) {
+                    userEmployeeTypeAppNames.add(app.label);
+                    console.log(`  Assignment app: "${app.label}"`);
+                  }
+                });
+              }
+            } catch (error) {
+              console.log(`Failed to get app assignments for group ${group.id}:`, error);
             }
           } catch (error) {
             console.log(`Failed to get apps for user's group ${group.id}:`, error);
