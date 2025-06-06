@@ -1003,7 +1003,7 @@ export default function UserDetail() {
       <AssignAppModal
         open={showAssignAppModal}
         onClose={() => setShowAssignAppModal(false)}
-        userId={userId}
+        userId={userId.toString()}
         userApps={userApps}
       />
     </main>

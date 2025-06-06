@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
@@ -44,11 +44,17 @@ export default function AssignAppModal({ open, onClose, userId, userApps }: Assi
     }
   }, [open, userApps]);
 
-  // Filter applications based on search term
-  const filteredApplications = allApplications.filter((app: Application) => {
-    const appName = app.label || app.name || '';
-    return appName.toLowerCase().includes(searchTerm.toLowerCase());
-  });
+  // Filter and sort applications alphabetically
+  const filteredApplications = allApplications
+    .filter((app: Application) => {
+      const appName = app.label || app.name || '';
+      return appName.toLowerCase().includes(searchTerm.toLowerCase());
+    })
+    .sort((a: Application, b: Application) => {
+      const nameA = (a.label || a.name || '').toLowerCase();
+      const nameB = (b.label || b.name || '').toLowerCase();
+      return nameA.localeCompare(nameB);
+    });
 
   // Handle checkbox change
   const handleAppToggle = (appId: string) => {
@@ -103,6 +109,9 @@ export default function AssignAppModal({ open, onClose, userId, userApps }: Assi
       <DialogContent className="max-w-2xl max-h-[80vh] flex flex-col">
         <DialogHeader>
           <DialogTitle>Assign Applications</DialogTitle>
+          <DialogDescription>
+            Select applications to assign to this user. Checked applications are currently assigned.
+          </DialogDescription>
         </DialogHeader>
         
         <div className="flex flex-col flex-1 min-h-0">
