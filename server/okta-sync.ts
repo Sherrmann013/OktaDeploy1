@@ -75,6 +75,7 @@ export async function syncSpecificUser(email: string): Promise<void> {
         title: insertUser.title,
         department: insertUser.department,
         mobilePhone: insertUser.mobilePhone,
+        manager: insertUser.manager,
         status: insertUser.status,
         lastUpdated: insertUser.lastUpdated,
         lastLogin: insertUser.lastLogin
