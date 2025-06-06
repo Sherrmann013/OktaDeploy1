@@ -518,16 +518,7 @@ export default function UserDetail() {
                   Edit Profile
                 </Button>
               )}
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => syncStatusMutation.mutate()}
-                disabled={syncStatusMutation.isPending}
-                className="flex items-center gap-2"
-              >
-                <RefreshCw className={`w-4 h-4 ${syncStatusMutation.isPending ? 'animate-spin' : ''}`} />
-                Sync Status
-              </Button>
+
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" size="sm">

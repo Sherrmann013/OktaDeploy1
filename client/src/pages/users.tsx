@@ -218,15 +218,6 @@ export default function Users() {
               <RotateCcw className={`w-4 h-4 mr-2 ${oktaSyncMutation.isPending ? 'animate-spin' : ''}`} />
               Sync OKTA
             </Button>
-            <Button
-              variant="outline"
-              onClick={handleRefresh}
-              disabled={isLoading}
-              className="border-gray-300"
-            >
-              <RefreshCw className={`w-4 h-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
-              Refresh
-            </Button>
             <Button onClick={() => setShowCreateModal(true)} className="bg-blue-600 hover:bg-blue-700 text-white">
               <UserPlus className="w-4 h-4 mr-2" />
               Add User

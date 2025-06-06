@@ -70,14 +70,6 @@ export default function Dashboard() {
                 <Plus className="w-4 h-4 mr-2" />
                 Add User
               </Button>
-              <Button 
-                variant="outline" 
-                size="icon"
-                onClick={handleRefresh}
-                disabled={isLoading}
-              >
-                <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
-              </Button>
             </div>
           </div>
         </header>
@@ -136,7 +128,7 @@ export default function Dashboard() {
             isLoading={isLoading}
             onUserClick={handleUserClick}
             onPageChange={setCurrentPage}
-            onRefresh={refetch}
+            onPerPageChange={setUsersPerPage}
           />
         </div>
       </main>

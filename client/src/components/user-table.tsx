@@ -23,7 +23,6 @@ interface UserTableProps {
   onUserClick: (userId: number) => void;
   onPageChange: (page: number) => void;
   onPerPageChange: (perPage: number) => void;
-  onRefresh: () => void;
   sortBy?: string;
   sortOrder?: 'asc' | 'desc';
   onSort?: (column: string) => void;
@@ -39,7 +38,6 @@ export default function UserTable({
   onUserClick,
   onPageChange,
   onPerPageChange,
-  onRefresh,
   sortBy,
   sortOrder,
   onSort,
