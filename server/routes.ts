@@ -290,18 +290,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Handle employee type group management if employee type changed
       if (updates.employeeType && currentUser.employeeType !== updates.employeeType && updatedUser.oktaId) {
         try {
+          // Get all groups for the user to find current employee type groups
+          const userGroups = await oktaService.getUserGroups(updatedUser.oktaId);
+          const employeeTypeGroups = userGroups.filter(group => 
+            group.profile?.name?.startsWith('MTX-ET-')
+          );
+
           // Remove from old employee type groups
-          if (currentUser.employeeType) {
-            const oldGroupName = `MTX-ET-${currentUser.employeeType}`;
-            console.log(`Removing user from old group: ${oldGroupName}`);
-            // In a real implementation, we would remove from OKTA group here
+          for (const group of employeeTypeGroups) {
+            try {
+              console.log(`Removing user from old group: ${group.profile.name}`);
+              await oktaService.removeUserFromGroup(updatedUser.oktaId, group.id);
+            } catch (removeError) {
+              console.error(`Failed to remove user from group ${group.profile.name}:`, removeError);
+            }
           }
 
           // Add to new employee type group
           const newGroupName = `MTX-ET-${updates.employeeType}`;
-          console.log(`Adding user to new group: ${newGroupName}`);
-          // In a real implementation, we would add to OKTA group here
-          // await oktaService.addUserToGroup(updatedUser.oktaId, newGroupName);
+          try {
+            // Find the group by name
+            const allGroups = await oktaService.getGroups();
+            const targetGroup = allGroups.find(group => group.profile?.name === newGroupName);
+            
+            if (targetGroup) {
+              console.log(`Adding user to new group: ${newGroupName}`);
+              await oktaService.addUserToGroup(updatedUser.oktaId, targetGroup.id);
+            } else {
+              console.error(`Group ${newGroupName} not found in OKTA`);
+            }
+          } catch (addError) {
+            console.error(`Failed to add user to group ${newGroupName}:`, addError);
+          }
           
           console.log(`Employee type changed for user ${updatedUser.firstName} ${updatedUser.lastName}: ${currentUser.employeeType} -> ${updates.employeeType}`);
         } catch (groupError) {

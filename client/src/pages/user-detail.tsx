@@ -13,7 +13,7 @@ import { ArrowLeft, ChevronDown, ChevronRight, Smartphone, Monitor, Shield, Eye,
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import ConfirmationModal from "@/components/confirmation-modal";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import type { User } from "@shared/schema";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -43,6 +43,27 @@ export default function UserDetail() {
   } | null>(null);
   
   const [isEditing, setIsEditing] = useState(false);
+  const [managerSearch, setManagerSearch] = useState("");
+  
+  const userId = params?.id ? parseInt(params.id) : null;
+  
+  // Fetch all users for manager auto-complete
+  const { data: allUsersData } = useQuery({
+    queryKey: ["/api/users"],
+    enabled: isEditing,
+  });
+  
+  const availableManagers = useMemo(() => {
+    if (!allUsersData?.users || !managerSearch) return [];
+    return allUsersData.users
+      .filter((u: User) => 
+        u.id !== userId && 
+        (u.firstName?.toLowerCase().includes(managerSearch.toLowerCase()) ||
+         u.lastName?.toLowerCase().includes(managerSearch.toLowerCase()) ||
+         u.email?.toLowerCase().includes(managerSearch.toLowerCase()))
+      )
+      .slice(0, 5); // Limit to 5 suggestions
+  }, [allUsersData, managerSearch, userId]);
   
   const form = useForm<z.infer<typeof editUserSchema>>({
     resolver: zodResolver(editUserSchema),
@@ -61,8 +82,6 @@ export default function UserDetail() {
   
   const [activeTab, setActiveTab] = useState("profile");
   const [appSearchTerm, setAppSearchTerm] = useState("");
-
-  const userId = params?.id ? parseInt(params.id) : null;
 
   // Clear problematic cache entries on mount
   useEffect(() => {
@@ -567,7 +586,37 @@ export default function UserDetail() {
                                 <FormItem>
                                   <FormLabel>Manager</FormLabel>
                                   <FormControl>
-                                    <Input {...field} />
+                                    <div className="relative">
+                                      <Input 
+                                        {...field} 
+                                        onChange={(e) => {
+                                          field.onChange(e);
+                                          setManagerSearch(e.target.value);
+                                        }}
+                                        placeholder="Type to search for manager..."
+                                      />
+                                      {managerSearch && availableManagers.length > 0 && (
+                                        <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto">
+                                          {availableManagers.map((manager: User) => (
+                                            <div
+                                              key={manager.id}
+                                              className="px-3 py-2 cursor-pointer hover:bg-gray-100"
+                                              onClick={() => {
+                                                const fullName = `${manager.firstName} ${manager.lastName}`;
+                                                field.onChange(fullName);
+                                                setManagerSearch("");
+                                              }}
+                                            >
+                                              <div className="font-medium">{manager.firstName} {manager.lastName}</div>
+                                              <div className="text-sm text-gray-500">{manager.email}</div>
+                                              {manager.title && (
+                                                <div className="text-sm text-gray-400">{manager.title}</div>
+                                              )}
+                                            </div>
+                                          ))}
+                                        </div>
+                                      )}
+                                    </div>
                                   </FormControl>
                                   <FormMessage />
                                 </FormItem>
