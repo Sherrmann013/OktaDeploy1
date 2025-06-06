@@ -192,11 +192,19 @@ class OktaService {
   }
 
   async getUsers(limit: number = 200): Promise<any[]> {
+    // Check cache first for user lists
+    const cacheKey = `users_${limit}`;
+    const cached = this.userCache.get(cacheKey);
+    if (cached && (Date.now() - cached.timestamp) < this.USER_CACHE_TTL) {
+      return cached.data;
+    }
+
     try {
       let allUsers: any[] = [];
       let after = '';
       
       do {
+        await this.throttleRequest(); // Add rate limiting
         const url = `/users?limit=${limit}${after ? `&after=${after}` : ''}`;
         const response = await this.makeRequest(url);
         
@@ -227,11 +235,27 @@ class OktaService {
   }
 
   async getUserGroups(userId: string): Promise<any[]> {
+    // Check cache first
+    const cacheKey = `groups_${userId}`;
+    const cached = this.userCache.get(cacheKey);
+    if (cached && (Date.now() - cached.timestamp) < this.USER_CACHE_TTL) {
+      return cached.data;
+    }
+
     try {
+      await this.throttleRequest();
       const response = await this.makeRequest(`/users/${userId}/groups`);
       
       if (response.ok) {
-        return await response.json();
+        const groups = await response.json();
+        
+        // Cache the result
+        this.userCache.set(cacheKey, {
+          data: groups,
+          timestamp: Date.now()
+        });
+        
+        return groups;
       } else {
         const errorText = await response.text();
         throw new Error(`Failed to get user groups: ${response.status} ${response.statusText} - ${errorText}`);
@@ -249,6 +273,19 @@ class OktaService {
   // Add user cache to reduce repeated API calls
   private userCache: Map<string, { data: any; timestamp: number }> = new Map();
   private readonly USER_CACHE_TTL = 2 * 60 * 1000; // 2 minutes
+  
+  // Rate limiting protection
+  private lastRequestTime = 0;
+  private readonly MIN_REQUEST_INTERVAL = 200; // 200ms between requests
+
+  private async throttleRequest(): Promise<void> {
+    const now = Date.now();
+    const timeSinceLastRequest = now - this.lastRequestTime;
+    if (timeSinceLastRequest < this.MIN_REQUEST_INTERVAL) {
+      await new Promise(resolve => setTimeout(resolve, this.MIN_REQUEST_INTERVAL - timeSinceLastRequest));
+    }
+    this.lastRequestTime = Date.now();
+  }
 
   async getEmployeeTypeApplications(): Promise<Set<string>> {
     // Return cached data if still valid
@@ -321,9 +358,16 @@ class OktaService {
   }
 
   async getUserApplications(userId: string): Promise<any[]> {
+    // Check cache first
+    const cacheKey = `apps_${userId}`;
+    const cached = this.userCache.get(cacheKey);
+    if (cached && (Date.now() - cached.timestamp) < this.USER_CACHE_TTL) {
+      return cached.data;
+    }
+
     try {
-      // Clear cache to force reload with new group filtering logic
-      this.employeeTypeAppsCache = null;
+      // Rate limit protection
+      await this.throttleRequest();
       
       // Get user's applications
       const response = await this.makeRequest(`/users/${userId}/appLinks`);
@@ -406,6 +450,12 @@ class OktaService {
             name: app.label,
             isFromEmployeeType
           };
+        });
+        
+        // Cache the result
+        this.userCache.set(cacheKey, {
+          data: enhancedApps,
+          timestamp: Date.now()
         });
         
         return enhancedApps;
