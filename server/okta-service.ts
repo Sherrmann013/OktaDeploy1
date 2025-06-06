@@ -276,6 +276,12 @@ class OktaService {
           const isFromEmployeeType = employeeTypeAppNames.has(app.label);
           console.log(`App "${app.label}" (${app.id}): Employee Type = ${isFromEmployeeType}`);
           
+          // Special debug for IT-Support Ticket
+          if (app.label.includes('IT-Support')) {
+            console.log(`IT-Support Debug: "${app.label}" in Employee Type names?`, employeeTypeAppNames.has(app.label));
+            console.log('Employee Type names containing "IT":', Array.from(employeeTypeAppNames).filter(name => name.includes('IT')));
+          }
+          
           return {
             id: app.id,
             name: app.label,
