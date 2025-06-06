@@ -61,7 +61,15 @@ export default function UserDetail() {
   const { data: user, isLoading, error } = useQuery<User>({
     queryKey: ["/api/users", userId],
     enabled: !!userId,
+    retry: 1,
+    staleTime: 0,
   });
+
+  // Debug logging
+  console.log('User ID:', userId);
+  console.log('User data:', user);
+  console.log('Loading:', isLoading);
+  console.log('Error:', error);
 
   const { data: userGroups = [] } = useQuery<any[]>({
     queryKey: [`/api/users/${userId}/groups`],
