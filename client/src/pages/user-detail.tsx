@@ -419,8 +419,8 @@ export default function UserDetail() {
                     <div>
                       <label className="text-sm font-medium text-gray-500">Disabled On</label>
                       <p className="text-gray-900">
-                        {user.status === 'DEPROVISIONED' && user.lastUpdated ? 
-                          format(new Date(user.lastUpdated), "MMM d, yyyy 'at' h:mm a") : 
+                        {user.status === 'DEPROVISIONED' || user.status === 'SUSPENDED' ? 
+                          (user.lastUpdated ? format(new Date(user.lastUpdated), "MMM d, yyyy 'at' h:mm a") : 'Unknown') : 
                           'Not disabled'
                         }
                       </p>
