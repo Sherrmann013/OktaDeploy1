@@ -501,15 +501,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const id = z.coerce.number().parse(req.params.id);
       
-      // In a real implementation, this would deactivate the user in OKTA
-      // await oktaClient.deactivateUser(user.oktaId);
-      
-      const deleted = await storage.deleteUser(id);
-      
-      if (!deleted) {
+      // Get user data first to check OKTA ID
+      const user = await storage.getUser(id);
+      if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
 
+      console.log(`Deleting user: ${user.firstName} ${user.lastName} (${user.email})`);
+
+      // Deactivate user in OKTA first if they have an OKTA ID
+      if (user.oktaId) {
+        try {
+          console.log(`Deactivating user in OKTA: ${user.oktaId}`);
+          await oktaService.deactivateUser(user.oktaId);
+          console.log(`Successfully deactivated user in OKTA: ${user.oktaId}`);
+        } catch (oktaError) {
+          console.error(`Failed to deactivate user in OKTA: ${user.oktaId}`, oktaError);
+          // Don't fail the entire operation if OKTA deactivation fails
+          // Continue with local deletion for data consistency
+        }
+      } else {
+        console.log('User has no OKTA ID, skipping OKTA deactivation');
+      }
+      
+      // Delete from local storage
+      const deleted = await storage.deleteUser(id);
+      
+      if (!deleted) {
+        return res.status(404).json({ message: "User not found in local storage" });
+      }
+
+      console.log(`Successfully deleted user from local storage: ${user.email}`);
       res.status(204).send();
     } catch (error) {
       console.error("Error deleting user:", error);
