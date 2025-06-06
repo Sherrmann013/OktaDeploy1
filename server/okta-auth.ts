@@ -58,7 +58,7 @@ export async function setupAuth(app: Express) {
   app.use(passport.initialize());
   app.use(passport.session());
 
-  // Configure OKTA OAuth2 strategy
+  // Configure OKTA OAuth2 strategy with state parameter disabled
   const strategy = new OAuthStrategy(
     {
       authorizationURL: `${process.env.OKTA_DOMAIN}/oauth2/default/v1/authorize`,
@@ -66,7 +66,9 @@ export async function setupAuth(app: Express) {
       clientID: process.env.CLIENT_ID!,
       clientSecret: process.env.CLIENT_SECRET!,
       callbackURL: "/api/okta-callback",
-      scope: "openid email profile"
+      scope: "openid email profile",
+      skipUserProfile: true,
+      state: false
     },
     async (accessToken: string, refreshToken: string, profile: any, done: any) => {
       try {
