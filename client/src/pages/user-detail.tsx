@@ -71,6 +71,17 @@ export default function UserDetail() {
     enabled: !!userId && activeTab === "activity",
   });
 
+  // Query for user devices
+  const { data: userDevices, isLoading: devicesLoading } = useQuery({
+    queryKey: ["/api/users", userId, "devices"],
+    queryFn: async () => {
+      const response = await fetch(`/api/users/${userId}/devices`);
+      if (!response.ok) throw new Error("Failed to fetch user devices");
+      return response.json();
+    },
+    enabled: !!userId && activeTab === "devices",
+  });
+
   const updateStatusMutation = useMutation({
     mutationFn: async ({ status }: { status: string }) => {
       return apiRequest("PATCH", `/api/users/${userId}/status`, { status });
@@ -302,7 +313,6 @@ export default function UserDetail() {
               <TabsTrigger value="applications">Applications</TabsTrigger>
               <TabsTrigger value="groups">Groups</TabsTrigger>
               <TabsTrigger value="devices">Devices</TabsTrigger>
-              <TabsTrigger value="admin">Admin roles</TabsTrigger>
               <TabsTrigger value="activity">Activity</TabsTrigger>
             </TabsList>
 
@@ -359,16 +369,10 @@ export default function UserDetail() {
                       <RefreshCw className="w-6 h-6 animate-spin text-gray-400" />
                     </div>
                   ) : userApplications && userApplications.length > 0 ? (
-                    <div className="space-y-3">
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
                       {userApplications.map((app: any) => (
-                        <div key={app.id} className="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
-                          <div>
-                            <h4 className="font-medium text-gray-900">{app.name}</h4>
-                            <p className="text-sm text-gray-600">Application ID: {app.id}</p>
-                          </div>
-                          <Badge variant={app.status === "ACTIVE" ? "default" : "secondary"}>
-                            {app.status}
-                          </Badge>
+                        <div key={app.id} className="p-2 border border-gray-200 rounded text-center bg-gray-50 hover:bg-gray-100 transition-colors">
+                          <h4 className="text-sm font-medium text-gray-900 truncate">{app.name}</h4>
                         </div>
                       ))}
                     </div>
@@ -415,33 +419,48 @@ export default function UserDetail() {
                   <CardTitle>Devices</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-4">
-                    <div className="flex items-center gap-3 p-3 border rounded-lg">
-                      <Monitor className="w-5 h-5 text-gray-400" />
-                      <div>
-                        <p className="font-medium">Chrome on Windows</p>
-                        <p className="text-sm text-gray-600">Last used: 2 hours ago</p>
-                      </div>
+                  {devicesLoading ? (
+                    <div className="flex items-center justify-center py-8">
+                      <RefreshCw className="w-6 h-6 animate-spin text-gray-400" />
                     </div>
-                    <div className="flex items-center gap-3 p-3 border rounded-lg">
-                      <Smartphone className="w-5 h-5 text-gray-400" />
-                      <div>
-                        <p className="font-medium">Mobile Safari on iOS</p>
-                        <p className="text-sm text-gray-600">Last used: 1 day ago</p>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
+                  ) : userDevices && userDevices.length > 0 ? (
+                    <div className="space-y-3">
+                      {userDevices.map((device: any, index: number) => {
+                        const getDeviceIcon = (userAgent: string) => {
+                          if (userAgent?.toLowerCase().includes('mobile') || userAgent?.toLowerCase().includes('iphone') || userAgent?.toLowerCase().includes('android')) {
+                            return Smartphone;
+                          }
+                          return Monitor;
+                        };
 
-            <TabsContent value="admin">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Admin Roles</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-gray-600">No admin roles assigned to this user.</p>
+                        const Icon = getDeviceIcon(device.userAgent?.rawUserAgent);
+
+                        return (
+                          <div key={index} className="flex items-center gap-3 p-3 border border-gray-200 rounded-lg">
+                            <Icon className="w-5 h-5 text-gray-600" />
+                            <div className="flex-1">
+                              <h4 className="font-medium text-gray-900">
+                                {device.deviceType || device.userAgent?.browser || 'Unknown Device'}
+                              </h4>
+                              <p className="text-sm text-gray-600">
+                                {device.userAgent?.rawUserAgent || 'No user agent info'}
+                              </p>
+                              {device.lastSeen && (
+                                <p className="text-xs text-gray-500 mt-1">
+                                  Last seen: {format(new Date(device.lastSeen), "MMM d, yyyy 'at' h:mm a")}
+                                </p>
+                              )}
+                            </div>
+                            <Badge variant={device.status === "TRUSTED" ? "default" : "secondary"}>
+                              {device.status || "Unknown"}
+                            </Badge>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <p className="text-gray-600 py-8 text-center">No devices found for this user.</p>
+                  )}
                 </CardContent>
               </Card>
             </TabsContent>

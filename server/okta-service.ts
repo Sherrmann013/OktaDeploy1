@@ -190,13 +190,30 @@ class OktaService {
       since.setDate(since.getDate() - 30);
       const sinceParam = since.toISOString();
       
-      const response = await this.makeRequest(`/logs?filter=actor.id eq "${userId}"&since=${sinceParam}&limit=${limit}&sortOrder=DESCENDING`);
+      // Properly encode the filter parameter
+      const filter = encodeURIComponent(`actor.id eq "${userId}"`);
+      const response = await this.makeRequest(`/logs?filter=${filter}&since=${sinceParam}&limit=${limit}&sortOrder=DESCENDING`);
       
       if (response.ok) {
         return await response.json();
       } else {
         const errorText = await response.text();
         throw new Error(`Failed to get user logs: ${response.status} ${response.statusText} - ${errorText}`);
+      }
+    } catch (error) {
+      throw new Error(`OKTA API error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  async getUserDevices(userId: string): Promise<any[]> {
+    try {
+      const response = await this.makeRequest(`/users/${userId}/clients`);
+      
+      if (response.ok) {
+        return await response.json();
+      } else {
+        const errorText = await response.text();
+        throw new Error(`Failed to get user devices: ${response.status} ${response.statusText} - ${errorText}`);
       }
     } catch (error) {
       throw new Error(`OKTA API error: ${error instanceof Error ? error.message : 'Unknown error'}`);

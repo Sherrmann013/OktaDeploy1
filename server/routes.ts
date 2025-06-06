@@ -408,7 +408,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get user applications from OKTA
+  // Get user applications from OKTA (includes both direct and group-based assignments)
   app.get("/api/users/:id/applications", isAuthenticated, async (req, res) => {
     try {
       const userId = parseInt(req.params.id);
@@ -420,17 +420,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const applications = await oktaService.getUserApplications(user.oktaId);
       
-      // Transform to show only app name and status
+      // Transform to show only app name
       const transformedApps = applications.map(app => ({
         id: app.id,
-        name: app.label,
-        status: app.status === "ACTIVE" ? "ACTIVE" : "INACTIVE"
+        name: app.label
       }));
       
       res.json(transformedApps);
     } catch (error) {
       console.error("Error fetching user applications:", error);
       res.status(500).json({ message: "Failed to fetch user applications" });
+    }
+  });
+
+  // Get user devices from OKTA
+  app.get("/api/users/:id/devices", isAuthenticated, async (req, res) => {
+    try {
+      const userId = parseInt(req.params.id);
+      const user = await storage.getUser(userId);
+      
+      if (!user || !user.oktaId) {
+        return res.status(404).json({ message: "User not found or no OKTA ID" });
+      }
+
+      const devices = await oktaService.getUserDevices(user.oktaId);
+      res.json(devices);
+    } catch (error) {
+      console.error("Error fetching user devices:", error);
+      res.status(500).json({ message: "Failed to fetch user devices" });
     }
   });
 
