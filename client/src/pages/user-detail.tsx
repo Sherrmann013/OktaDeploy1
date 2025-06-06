@@ -68,7 +68,7 @@ export default function UserDetail() {
     if (!allUsersData?.users || !managerSearch) return [];
     
     const searchTerm = managerSearch.toLowerCase().trim();
-    if (searchTerm.length < 2) return [];
+    if (searchTerm.length < 1) return [];
     
     return allUsersData.users
       .filter((u: User) => {
@@ -113,7 +113,7 @@ export default function UserDetail() {
         // Sort alphabetically as fallback
         return aFullName.localeCompare(bFullName);
       })
-      .slice(0, 10); // Increased to 10 suggestions for better usability
+      .slice(0, 25); // Increased to 25 suggestions for better usability
   }, [allUsersData, managerSearch, userId]);
   
   const form = useForm<z.infer<typeof editUserSchema>>({
