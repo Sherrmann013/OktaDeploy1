@@ -133,6 +133,16 @@ class OktaService {
       
       if (response.ok) {
         const userData = await response.json();
+        
+        // Debug logging for manager field issue
+        if (email === 'kboundy@mazetx.com') {
+          console.log('=== OKTA DEBUG FOR kboundy@mazetx.com ===');
+          console.log('Manager field:', userData.profile?.manager);
+          console.log('ManagerId field:', userData.profile?.managerId);
+          console.log('Full profile keys:', Object.keys(userData.profile || {}));
+          console.log('Profile object:', JSON.stringify(userData.profile, null, 2));
+        }
+        
         return userData;
       } else {
         const errorText = await response.text();

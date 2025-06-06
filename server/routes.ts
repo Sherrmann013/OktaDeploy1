@@ -516,6 +516,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Debug endpoint to test OKTA API response for specific user
+  app.get("/api/debug-okta-user/:email", isAuthenticated, async (req, res) => {
+    try {
+      const { email } = req.params;
+      console.log(`Testing OKTA API for user: ${email}`);
+      
+      const oktaUser = await oktaService.getUserByEmail(email);
+      if (oktaUser) {
+        res.json({
+          success: true,
+          user: oktaUser,
+          managerField: oktaUser.profile?.manager,
+          managerIdField: oktaUser.profile?.managerId,
+          profileKeys: Object.keys(oktaUser.profile || {})
+        });
+      } else {
+        res.status(404).json({ success: false, message: 'User not found in OKTA' });
+      }
+    } catch (error) {
+      console.error('OKTA API test error:', error);
+      res.status(500).json({ 
+        success: false, 
+        error: error instanceof Error ? error.message : 'Unknown error' 
+      });
+    }
+  });
+
   // Get user devices from OKTA
   app.get("/api/users/:id/devices", isAuthenticated, async (req, res) => {
     try {
