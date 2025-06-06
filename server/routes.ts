@@ -342,6 +342,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       for (const oktaUser of allUsers) {
         try {
+          // Debug: Log OKTA user structure to see available fields
+          if (syncedCount === 0) {
+            console.log("Sample OKTA user structure:", JSON.stringify(oktaUser, null, 2));
+          }
+          
           // Check if user already exists
           const existingUser = await storage.getUserByOktaId(oktaUser.id);
           
