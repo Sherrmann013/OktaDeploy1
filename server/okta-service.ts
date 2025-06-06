@@ -228,6 +228,12 @@ class OktaService {
         }
       } while (after);
       
+      // Cache the result
+      this.userCache.set(cacheKey, {
+        data: allUsers,
+        timestamp: Date.now()
+      });
+      
       return allUsers;
     } catch (error) {
       throw new Error(`OKTA API error: ${error instanceof Error ? error.message : 'Unknown error'}`);
