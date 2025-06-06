@@ -1,30 +1,11 @@
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { useAuth } from "@/hooks/use-auth";
-import { Loader2 } from "lucide-react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Shield, Users, Settings, BarChart3 } from "lucide-react";
 
 export default function Landing() {
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const { loginMutation } = useAuth();
-
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    loginMutation.mutate({ username, password });
-  };
-
   const handleSSOLogin = () => {
-    // Direct OKTA authorization URL
-    const authUrl = `https://mazetx.okta.com/oauth2/default/v1/authorize?` +
-      `client_id=0oarrurqf9mvVKYRj4x7&` +
-      `response_type=code&` +
-      `scope=openid email profile&` +
-      `redirect_uri=${encodeURIComponent('https://mazetx.replit.app/api/okta-callback')}&` +
-      `state=oauth_state`;
-    window.location.href = authUrl;
+    // Redirect to the server's login endpoint which handles OKTA OAuth
+    window.location.href = '/api/login';
   };
 
   return (
@@ -38,96 +19,87 @@ export default function Landing() {
                 Maze User
                 <span className="text-blue-600 dark:text-blue-400"> Management</span>
               </h1>
-              <p className="text-xl text-gray-600 dark:text-gray-300">
-                Streamline your OKTA tenant administration with our comprehensive user management platform. Efficiently manage users, groups, and access controls with intelligent automation.
+              <p className="text-xl text-gray-600 dark:text-gray-300 leading-relaxed">
+                Comprehensive admin dashboard for advanced user authentication and access management with sophisticated monitoring capabilities.
               </p>
             </div>
-            
-            <div className="flex flex-wrap gap-6 text-sm text-gray-500 dark:text-gray-400">
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                <span>OKTA Integration</span>
+
+            {/* Feature Grid */}
+            <div className="grid grid-cols-2 gap-6">
+              <div className="flex items-center space-x-3">
+                <div className="flex-shrink-0">
+                  <Shield className="h-8 w-8 text-blue-600 dark:text-blue-400" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-gray-900 dark:text-white">OKTA Integration</h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-300">SSO & Identity Management</p>
+                </div>
               </div>
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                <span>Advanced Filtering</span>
+              
+              <div className="flex items-center space-x-3">
+                <div className="flex-shrink-0">
+                  <Users className="h-8 w-8 text-blue-600 dark:text-blue-400" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-gray-900 dark:text-white">User Operations</h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-300">Complete CRUD Management</p>
+                </div>
               </div>
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-                <span>Secure Access</span>
+              
+              <div className="flex items-center space-x-3">
+                <div className="flex-shrink-0">
+                  <Settings className="h-8 w-8 text-blue-600 dark:text-blue-400" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-gray-900 dark:text-white">Access Control</h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-300">Group & Permission Management</p>
+                </div>
               </div>
+              
+              <div className="flex items-center space-x-3">
+                <div className="flex-shrink-0">
+                  <BarChart3 className="h-8 w-8 text-blue-600 dark:text-blue-400" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-gray-900 dark:text-white">Activity Monitoring</h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-300">30-Day Activity Logging</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-6">
+              <h3 className="font-semibold text-blue-900 dark:text-blue-300 mb-2">Key Features</h3>
+              <ul className="space-y-2 text-blue-800 dark:text-blue-200">
+                <li>• Advanced user search and filtering capabilities</li>
+                <li>• Employee Type to MTX group mapping</li>
+                <li>• Comprehensive profile field management</li>
+                <li>• Real-time synchronization with OKTA</li>
+                <li>• Responsive design with dark mode support</li>
+              </ul>
             </div>
           </div>
 
-          {/* Right Column - Login Form */}
+          {/* Right Column - SSO Login */}
           <div className="flex justify-center">
             <Card className="w-full max-w-md">
-              <CardHeader>
-                <CardTitle className="text-2xl text-center">Admin Login</CardTitle>
+              <CardHeader className="space-y-1">
+                <CardTitle className="text-2xl font-bold text-center">Access Dashboard</CardTitle>
                 <CardDescription className="text-center">
-                  Sign in to access the user management dashboard
+                  Sign in with your organization credentials to access the admin dashboard
                 </CardDescription>
               </CardHeader>
-              <form onSubmit={handleLogin}>
-                <CardContent className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="username">Username</Label>
-                    <Input
-                      id="username"
-                      type="text"
-                      value={username}
-                      onChange={(e) => setUsername(e.target.value)}
-                      placeholder="Enter your username"
-                      required
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="password">Password</Label>
-                    <Input
-                      id="password"
-                      type="password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      placeholder="Enter your password"
-                      required
-                    />
-                  </div>
-                </CardContent>
-                <CardFooter className="flex flex-col space-y-3">
-                  <Button 
-                    type="submit" 
-                    className="w-full"
-                    disabled={loginMutation.isPending}
-                  >
-                    {loginMutation.isPending ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Signing in...
-                      </>
-                    ) : (
-                      "Sign In"
-                    )}
-                  </Button>
-                  
-                  <div className="relative">
-                    <div className="absolute inset-0 flex items-center">
-                      <span className="w-full border-t" />
-                    </div>
-                    <div className="relative flex justify-center text-xs uppercase">
-                      <span className="bg-background px-2 text-muted-foreground">Or</span>
-                    </div>
-                  </div>
-                  
-                  <Button 
-                    type="button"
-                    variant="outline" 
-                    className="w-full"
-                    onClick={handleSSOLogin}
-                  >
-                    SSO Login
-                  </Button>
-                </CardFooter>
-              </form>
+              <CardContent className="space-y-4">
+                <Button 
+                  className="w-full h-12 text-lg"
+                  onClick={handleSSOLogin}
+                >
+                  Sign In with SSO
+                </Button>
+                
+                <div className="text-center text-sm text-muted-foreground">
+                  <p>Secure authentication through your organization's identity provider</p>
+                </div>
+              </CardContent>
             </Card>
           </div>
         </div>

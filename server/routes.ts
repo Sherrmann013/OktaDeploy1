@@ -11,9 +11,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Setup OKTA SSO authentication
   await setupAuth(app);
 
-  // Auth routes are handled by setupLocalAuth
+  // OKTA Initiate Login URI endpoint - required for proper SSO flow
+  app.get("/api/sso-login", (req, res) => {
+    // Redirect to OKTA authentication
+    res.redirect("/api/login");
+  });
 
-  // Logout route is handled by setupLocalAuth
+  // Auth routes are handled by setupAuth
 
   // Get employee type group counts from OKTA
   app.get("/api/employee-type-counts", isAuthenticated, async (req, res) => {
