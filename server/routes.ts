@@ -524,12 +524,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const oktaUser = await oktaService.getUserByEmail(email);
       if (oktaUser) {
+        console.log('=== OKTA API DEBUG RESPONSE ===');
+        console.log('Manager field:', oktaUser.profile?.manager);
+        console.log('ManagerId field:', oktaUser.profile?.managerId);
+        console.log('All profile fields:', JSON.stringify(oktaUser.profile, null, 2));
+        console.log('=== END DEBUG ===');
+        
         res.json({
           success: true,
           user: oktaUser,
           managerField: oktaUser.profile?.manager,
           managerIdField: oktaUser.profile?.managerId,
-          profileKeys: Object.keys(oktaUser.profile || {})
+          profileKeys: Object.keys(oktaUser.profile || {}),
+          fullProfile: oktaUser.profile
         });
       } else {
         res.status(404).json({ success: false, message: 'User not found in OKTA' });
