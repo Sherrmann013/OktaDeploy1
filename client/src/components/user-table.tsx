@@ -178,7 +178,7 @@ export default function UserTable({
         <div className="overflow-x-auto">
           <Table>
             <TableHeader>
-              <TableRow className="bg-muted/50">
+              <TableRow>
                 <TableHead className="px-6 py-4">
                   <div className="flex items-center space-x-2">
                     <Button 
