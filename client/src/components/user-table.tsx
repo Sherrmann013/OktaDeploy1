@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Edit, Pause, Trash2, Play, ChevronLeft, ChevronRight, ArrowUpDown } from "lucide-react";
+import { Edit, Pause, Trash2, Play, ChevronLeft, ChevronRight, ArrowUpDown, Filter } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import ConfirmationModal from "./confirmation-modal";
@@ -180,14 +180,19 @@ export default function UserTable({
             <TableHeader>
               <TableRow className="bg-gray-50">
                 <TableHead className="px-6 py-4">
-                  <Button 
-                    variant="ghost" 
-                    className="h-auto p-0 font-medium text-xs text-gray-500 uppercase tracking-wider hover:text-gray-700"
-                    onClick={() => handleSort('firstName')}
-                  >
-                    User
-                    {getSortIcon('firstName')}
-                  </Button>
+                  <div className="flex items-center space-x-2">
+                    <Button 
+                      variant="ghost" 
+                      className="h-auto p-0 font-medium text-xs text-muted-foreground uppercase tracking-wider hover:text-foreground"
+                      onClick={() => handleSort('firstName')}
+                    >
+                      User
+                      {getSortIcon('firstName')}
+                    </Button>
+                    <Button variant="ghost" size="icon" className="h-6 w-6">
+                      <Filter className="h-3 w-3" />
+                    </Button>
+                  </div>
                 </TableHead>
                 <TableHead className="px-6 py-4">
                   <Button 
@@ -241,20 +246,20 @@ export default function UserTable({
                         </div>
                       </div>
                       <div className="ml-4">
-                        <div className="text-sm font-medium text-gray-900">
+                        <div className="text-sm font-medium text-foreground">
                           {user.firstName} {user.lastName}
                         </div>
-                        <div className="text-sm text-gray-500">{user.login}</div>
+                        <div className="text-sm text-muted-foreground">{user.login}</div>
                       </div>
                     </div>
                   </TableCell>
                   <TableCell className="px-6 py-4">
-                    <div className="text-sm text-gray-900">{user.email}</div>
+                    <div className="text-sm text-foreground">{user.email}</div>
                   </TableCell>
                   <TableCell className="px-6 py-4">
                     {getStatusBadge(user.status)}
                   </TableCell>
-                  <TableCell className="px-6 py-4 text-sm text-gray-500">
+                  <TableCell className="px-6 py-4 text-sm text-muted-foreground">
                     {formatLastLogin(user.lastLogin as Date | string | null)}
                   </TableCell>
                   <TableCell className="px-6 py-4">
