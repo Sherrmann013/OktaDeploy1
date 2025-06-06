@@ -244,13 +244,13 @@ class OktaService {
       }
 
       console.log(`Total Employee Type applications: ${employeeTypeAppIds.size}`);
-      console.log('Employee Type App IDs:', Array.from(employeeTypeAppIds));
+      console.log('Employee Type App Names:', Array.from(employeeTypeAppNames));
       
-      // Cache the results
-      this.employeeTypeAppsCache = employeeTypeAppIds;
+      // Cache the results (use names instead of IDs for comparison)
+      this.employeeTypeAppsCache = employeeTypeAppNames;
       this.cacheTimestamp = Date.now();
       
-      return employeeTypeAppIds;
+      return employeeTypeAppNames;
     } catch (error) {
       console.error('Error loading Employee Type applications:', error);
       return new Set<string>();
@@ -268,12 +268,12 @@ class OktaService {
       if (response.ok) {
         const apps = await response.json();
         
-        // Get Employee Type applications
-        const employeeTypeAppIds = await this.getEmployeeTypeApplications();
+        // Get Employee Type applications (now returns names instead of IDs)
+        const employeeTypeAppNames = await this.getEmployeeTypeApplications();
         
-        // Transform apps with Employee Type detection
+        // Transform apps with Employee Type detection using names
         const enhancedApps = apps.map((app: any) => {
-          const isFromEmployeeType = employeeTypeAppIds.has(app.id);
+          const isFromEmployeeType = employeeTypeAppNames.has(app.label);
           console.log(`App "${app.label}" (${app.id}): Employee Type = ${isFromEmployeeType}`);
           
           return {
