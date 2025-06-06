@@ -273,10 +273,10 @@ export default function Users() {
       </header>
 
       {/* Search and Filters */}
-      <div className="bg-white border-b border-gray-200 px-6 py-4">
+      <div className="bg-background border-b border-border px-6 py-4">
         <form onSubmit={handleSearch} className="flex items-center space-x-4">
           <div className="flex-1 relative">
-            <Search className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+            <Search className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
             <Input
               type="text"
               placeholder="Search users by name, email, or login..."
@@ -309,13 +309,13 @@ export default function Users() {
       </div>
 
       {/* Stats Cards */}
-      <div className="bg-gray-100 px-6 py-4">
+      <div className="bg-background px-6 py-4">
         <div className="grid grid-cols-5 gap-3">
           <Card>
             <CardContent className="p-3">
               <div className="flex flex-col items-center text-center">
                 <UsersIcon className="w-6 h-6 text-blue-600 mb-1" />
-                <p className="text-xs font-medium text-gray-600">Total Users</p>
+                <p className="text-xs font-medium text-muted-foreground">Total Users</p>
                 <p className="text-xl font-bold text-gray-900 dark:text-gray-100">{total}</p>
               </div>
             </CardContent>
@@ -327,7 +327,7 @@ export default function Users() {
                 <UsersIcon className={`w-6 h-6 mb-1 ${
                   employeeTypeFilter === 'EMPLOYEE' ? 'text-blue-700' : 'text-blue-600'
                 }`} />
-                <p className="text-xs font-medium text-gray-600 dark:text-gray-400">Employees</p>
+                <p className="text-xs font-medium text-muted-foreground">Employees</p>
                 <p className="text-xl font-bold text-gray-900 dark:text-gray-100">
                   {employeeTypeCounts?.EMPLOYEE ?? allUsers.filter((u: User) => u.employeeType === 'EMPLOYEE').length}
                 </p>
@@ -341,7 +341,7 @@ export default function Users() {
                 <Building className={`w-6 h-6 mb-1 ${
                   employeeTypeFilter === 'CONTRACTOR' ? 'text-green-700' : 'text-green-600'
                 }`} />
-                <p className="text-xs font-medium text-gray-600 dark:text-gray-400">Contractors</p>
+                <p className="text-xs font-medium text-muted-foreground">Contractors</p>
                 <p className="text-xl font-bold text-gray-900 dark:text-gray-100">
                   {employeeTypeCounts?.CONTRACTOR ?? allUsers.filter((u: User) => u.employeeType === 'CONTRACTOR').length}
                 </p>
@@ -353,7 +353,7 @@ export default function Users() {
             <CardContent className="p-3">
               <div className="flex flex-col items-center text-center">
                 <Calendar className="w-6 h-6 mb-1 text-purple-600" />
-                <p className="text-xs font-medium text-gray-600 dark:text-gray-400">Part Time</p>
+                <p className="text-xs font-medium text-muted-foreground">Part Time</p>
                 <p className="text-xl font-bold text-gray-900 dark:text-gray-100">
                   {employeeTypeCounts?.PART_TIME ?? allUsers.filter((u: User) => u.employeeType === 'PART_TIME').length}
                 </p>

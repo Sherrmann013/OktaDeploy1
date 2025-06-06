@@ -49,21 +49,21 @@
 
 .dark {
   --background: 215 25% 16%; /* Deep slate blue matching screenshot */
-  --foreground: 0 0% 95%; /* High contrast white text for better readability */
+  --foreground: 0 0% 98%; /* Higher contrast white text */
   --muted: 215 20% 20%; /* Slightly lighter slate for muted areas */
-  --muted-foreground: 0 0% 75%; /* Brighter muted text for readability */
+  --muted-foreground: 0 0% 85%; /* Much brighter muted text */
   --popover: 215 25% 18%;
-  --popover-foreground: 0 0% 95%;
+  --popover-foreground: 0 0% 98%;
   --card: 215 22% 18%; /* Card backgrounds matching screenshot depth */
-  --card-foreground: 0 0% 95%;
+  --card-foreground: 0 0% 98%;
   --border: 215 15% 25%; /* More visible borders */
   --input: 215 20% 16%; /* Input backgrounds */
   --primary: 207 90% 58%; /* Blue accent for buttons and links */
   --primary-foreground: 0 0% 100%;
   --secondary: 215 15% 25%;
-  --secondary-foreground: 0 0% 95%;
+  --secondary-foreground: 0 0% 98%;
   --accent: 215 15% 25%;
-  --accent-foreground: 0 0% 95%;
+  --accent-foreground: 0 0% 98%;
   --destructive: 0 75% 55%;
   --destructive-foreground: 0 0% 98%;
   --ring: 207 90% 58%;
