@@ -253,7 +253,22 @@ export default function UserDetail() {
     );
   }
 
-  if (error || !user) {
+  if (error) {
+    return (
+      <main className="flex-1 flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">Error Loading User</h1>
+          <p className="text-gray-600 mb-6">Failed to load user data: {error.message}</p>
+          <Button onClick={() => setLocation("/")} variant="outline">
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back to Users
+          </Button>
+        </div>
+      </main>
+    );
+  }
+
+  if (!user) {
     return (
       <main className="flex-1 flex items-center justify-center">
         <div className="text-center">
@@ -269,12 +284,13 @@ export default function UserDetail() {
   }
 
   const getEmployeeType = (groups: any[]) => {
-    const etGroup = groups.find(group => group.profile.name.startsWith('MTX-ET-'));
+    if (!groups || groups.length === 0) return 'Not specified';
+    const etGroup = groups.find(group => group.profile && group.profile.name && group.profile.name.startsWith('MTX-ET-'));
     return etGroup ? etGroup.profile.name.replace('MTX-ET-', '').replace('_', ' ') : 'Not specified';
   };
 
-  const filteredApps = userApps.filter(app =>
-    app.label.toLowerCase().includes(appSearchTerm.toLowerCase())
+  const filteredApps = (userApps || []).filter(app =>
+    app && app.label && app.label.toLowerCase().includes(appSearchTerm.toLowerCase())
   );
 
   return (
@@ -295,12 +311,12 @@ export default function UserDetail() {
               </Button>
               <div>
                 <h1 className="text-2xl font-bold text-gray-900">
-                  {user.firstName} {user.lastName}
+                  {user.firstName || 'Unknown'} {user.lastName || 'User'}
                 </h1>
                 <div className="flex items-center gap-2 mt-1">
-                  {getStatusBadge(user.status)}
+                  {getStatusBadge(user.status || 'UNKNOWN')}
                   <span className="text-sm text-gray-500">•</span>
-                  <span className="text-sm text-gray-500">{user.email}</span>
+                  <span className="text-sm text-gray-500">{user.email || 'No email'}</span>
                 </div>
               </div>
             </div>
