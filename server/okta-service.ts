@@ -500,6 +500,58 @@ class OktaService {
       throw new Error(`OKTA API error: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
+
+  async suspendUser(userId: string): Promise<any> {
+    try {
+      const response = await this.makeRequest(`/users/${userId}/lifecycle/suspend`, {
+        method: 'POST'
+      });
+      
+      if (response.ok) {
+        return await response.json();
+      } else {
+        const errorText = await response.text();
+        throw new Error(`Failed to suspend user: ${response.status} ${response.statusText} - ${errorText}`);
+      }
+    } catch (error) {
+      throw new Error(`OKTA API error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  async activateUser(userId: string): Promise<any> {
+    try {
+      const response = await this.makeRequest(`/users/${userId}/lifecycle/activate`, {
+        method: 'POST',
+        body: JSON.stringify({ sendEmail: false })
+      });
+      
+      if (response.ok) {
+        return await response.json();
+      } else {
+        const errorText = await response.text();
+        throw new Error(`Failed to activate user: ${response.status} ${response.statusText} - ${errorText}`);
+      }
+    } catch (error) {
+      throw new Error(`OKTA API error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  async deactivateUser(userId: string): Promise<any> {
+    try {
+      const response = await this.makeRequest(`/users/${userId}/lifecycle/deactivate`, {
+        method: 'POST'
+      });
+      
+      if (response.ok) {
+        return await response.json();
+      } else {
+        const errorText = await response.text();
+        throw new Error(`Failed to deactivate user: ${response.status} ${response.statusText} - ${errorText}`);
+      }
+    } catch (error) {
+      throw new Error(`OKTA API error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
 }
 
 export const oktaService = new OktaService();

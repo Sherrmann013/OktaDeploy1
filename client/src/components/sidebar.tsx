@@ -18,7 +18,7 @@ export default function Sidebar() {
           </div>
           <div>
             <h1 className="text-lg font-semibold text-gray-900">OKTA Admin</h1>
-            <p className="text-xs text-gray-500">Tenant: company.okta.com</p>
+            <p className="text-xs text-gray-500">Tenant: mazetx.okta.com</p>
           </div>
         </div>
       </div>

@@ -322,6 +322,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
         status: z.enum(["ACTIVE", "SUSPENDED", "DEPROVISIONED"])
       }).parse(req.body);
 
+      // Get user to find OKTA ID
+      const user = await storage.getUser(id);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      // Update status in OKTA if user has OKTA ID
+      if (user.oktaId) {
+        try {
+          if (status === "SUSPENDED") {
+            await oktaService.suspendUser(user.oktaId);
+          } else if (status === "ACTIVE") {
+            await oktaService.activateUser(user.oktaId);
+          } else if (status === "DEPROVISIONED") {
+            await oktaService.deactivateUser(user.oktaId);
+          }
+        } catch (oktaError) {
+          console.error("OKTA API error:", oktaError);
+          return res.status(500).json({ 
+            message: "Failed to update user status in OKTA",
+            error: oktaError instanceof Error ? oktaError.message : "Unknown OKTA error"
+          });
+        }
+      }
+
+      // Update status in local database
       const updatedUser = await storage.updateUser(id, { status });
       
       if (!updatedUser) {
