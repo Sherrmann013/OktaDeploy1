@@ -34,19 +34,25 @@ export default function AssignAppModal({ open, onClose, userId, userApps }: Assi
     queryKey: ["/api/applications"],
     queryFn: getQueryFn({ on401: "throw" }),
     enabled: open,
-    onSuccess: (data) => {
-      console.log('All Applications:', data);
-      console.log('First few app IDs:', data.slice(0, 5).map((app: any) => ({ id: app.id, name: app.name || app.label })));
-    }
   });
+
+  // Log applications data when it changes
+  useEffect(() => {
+    if (allApplications.length > 0) {
+      console.log('All Applications:', allApplications);
+      console.log('First few app IDs:', allApplications.slice(0, 5).map((app: any) => ({ id: app.id, name: app.name || app.label })));
+    }
+  }, [allApplications]);
 
   // Initialize selected apps when modal opens
   useEffect(() => {
     if (open) {
-      const currentAppIds = new Set(userApps.map(app => app.id));
+      const currentAppIds = userApps.map(app => app.id);
       console.log('User Apps:', userApps);
-      console.log('Current App IDs:', currentAppIds);
-      setSelectedApps(currentAppIds);
+      console.log('Current App IDs Array:', currentAppIds);
+      const selectedSet = new Set(currentAppIds);
+      console.log('Selected Set:', Array.from(selectedSet));
+      setSelectedApps(selectedSet);
     }
   }, [open, userApps]);
 
