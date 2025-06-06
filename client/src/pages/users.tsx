@@ -222,20 +222,20 @@ export default function Users() {
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
       {/* Header */}
-      <header className="bg-white border-b border-gray-200 px-6 py-4">
+      <header className="bg-background border-b border-border px-6 py-4">
         <div className="flex items-center justify-between">
           <div>
-            <nav className="flex text-sm text-gray-500 mb-1">
+            <nav className="flex text-sm text-muted-foreground mb-1">
               <span>Users</span>
               <span className="mx-2">/</span>
-              <span className="text-gray-900 font-medium">All Users</span>
+              <span className="text-foreground font-medium">All Users</span>
             </nav>
-            <h2 className="text-2xl font-semibold text-gray-900">User Management</h2>
+            <h2 className="text-2xl font-semibold text-foreground">User Management</h2>
             {dataSource && (
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-muted-foreground">
                 Data source: {dataSource === 'okta' ? 'OKTA API' : 'Local Storage'}
                 {dataSource === 'local_storage' && (
-                  <span className="text-yellow-600 ml-2">
+                  <span className="text-yellow-600 dark:text-yellow-400 ml-2">
                     (OKTA connection unavailable - using fallback data)
                   </span>
                 )}
@@ -316,7 +316,7 @@ export default function Users() {
               <div className="flex flex-col items-center text-center">
                 <UsersIcon className="w-6 h-6 text-blue-600 mb-1" />
                 <p className="text-xs font-medium text-gray-600">Total Users</p>
-                <p className="text-xl font-bold text-white">{total}</p>
+                <p className="text-xl font-bold text-gray-900 dark:text-gray-100">{total}</p>
               </div>
             </CardContent>
           </Card>
