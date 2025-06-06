@@ -700,7 +700,7 @@ export default function UserDetail() {
                         </div>
                         <div>
                           <label className="text-sm font-medium text-gray-500">Employee Type</label>
-                          <p className="text-gray-900">{getEmployeeType(userGroups)}</p>
+                          <p className="text-gray-900">{user.employeeType || 'Not specified'}</p>
                         </div>
                       </CardContent>
                     </Card>

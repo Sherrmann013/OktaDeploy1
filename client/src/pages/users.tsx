@@ -209,71 +209,61 @@ export default function Users() {
 
       {/* Stats Cards */}
       <div className="bg-gray-50 px-6 py-4">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-5 gap-3">
           <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center">
-                <UsersIcon className="w-8 h-8 text-blue-600" />
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">Total Users</p>
-                  <p className="text-2xl font-bold text-gray-900">{total}</p>
-                </div>
+            <CardContent className="p-3">
+              <div className="flex flex-col items-center text-center">
+                <UsersIcon className="w-6 h-6 text-blue-600 mb-1" />
+                <p className="text-xs font-medium text-gray-600">Total Users</p>
+                <p className="text-xl font-bold text-gray-900">{total}</p>
               </div>
             </CardContent>
           </Card>
           
           <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center">
-                <UsersIcon className="w-8 h-8 text-blue-600" />
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">Employees</p>
-                  <p className="text-2xl font-bold text-gray-900">
-                    {users.filter((u: User) => u.employeeType === 'EMPLOYEE').length}
-                  </p>
-                </div>
+            <CardContent className="p-3">
+              <div className="flex flex-col items-center text-center">
+                <UsersIcon className="w-6 h-6 text-blue-600 mb-1" />
+                <p className="text-xs font-medium text-gray-600">Employees</p>
+                <p className="text-xl font-bold text-gray-900">
+                  {users.filter((u: User) => u.employeeType === 'EMPLOYEE').length}
+                </p>
               </div>
             </CardContent>
           </Card>
           
           <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center">
-                <Building className="w-8 h-8 text-green-600" />
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">Contractors</p>
-                  <p className="text-2xl font-bold text-gray-900">
-                    {users.filter((u: User) => u.employeeType === 'CONTRACTOR').length}
-                  </p>
-                </div>
+            <CardContent className="p-3">
+              <div className="flex flex-col items-center text-center">
+                <Building className="w-6 h-6 text-green-600 mb-1" />
+                <p className="text-xs font-medium text-gray-600">Contractors</p>
+                <p className="text-xl font-bold text-gray-900">
+                  {users.filter((u: User) => u.employeeType === 'CONTRACTOR').length}
+                </p>
               </div>
             </CardContent>
           </Card>
           
           <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center">
-                <Calendar className="w-8 h-8 text-purple-600" />
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">Consultants</p>
-                  <p className="text-2xl font-bold text-gray-900">
-                    {users.filter((u: User) => u.employeeType === 'PART_TIME').length}
-                  </p>
-                </div>
+            <CardContent className="p-3">
+              <div className="flex flex-col items-center text-center">
+                <Calendar className="w-6 h-6 text-purple-600 mb-1" />
+                <p className="text-xs font-medium text-gray-600">Consultants</p>
+                <p className="text-xl font-bold text-gray-900">
+                  {users.filter((u: User) => u.employeeType === 'PART_TIME').length}
+                </p>
               </div>
             </CardContent>
           </Card>
           
           <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center">
-                <Eye className="w-8 h-8 text-orange-600" />
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">Interns</p>
-                  <p className="text-2xl font-bold text-gray-900">
-                    {users.filter((u: User) => u.employeeType === 'INTERN').length}
-                  </p>
-                </div>
+            <CardContent className="p-3">
+              <div className="flex flex-col items-center text-center">
+                <Eye className="w-6 h-6 text-orange-600 mb-1" />
+                <p className="text-xs font-medium text-gray-600">Interns</p>
+                <p className="text-xl font-bold text-gray-900">
+                  {users.filter((u: User) => u.employeeType === 'INTERN').length}
+                </p>
               </div>
             </CardContent>
           </Card>
