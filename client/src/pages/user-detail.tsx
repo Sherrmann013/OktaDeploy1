@@ -282,10 +282,7 @@ export default function UserDetail() {
                 </DropdownMenuContent>
               </DropdownMenu>
 
-              <Button variant="outline" className="text-gray-600 hover:text-gray-900">
-                <Edit className="w-4 h-4 mr-2" />
-                More
-              </Button>
+
 
               {user.status === "ACTIVE" ? (
                 <Button 

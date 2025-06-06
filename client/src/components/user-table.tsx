@@ -22,6 +22,9 @@ interface UserTableProps {
   onUserClick: (userId: number) => void;
   onPageChange: (page: number) => void;
   onRefresh: () => void;
+  sortBy?: string;
+  sortOrder?: 'asc' | 'desc';
+  onSort?: (column: string) => void;
 }
 
 export default function UserTable({
@@ -34,6 +37,9 @@ export default function UserTable({
   onUserClick,
   onPageChange,
   onRefresh,
+  sortBy,
+  sortOrder,
+  onSort,
 }: UserTableProps) {
   const { toast } = useToast();
   const [confirmAction, setConfirmAction] = useState<{
@@ -130,6 +136,21 @@ export default function UserTable({
     }
   };
 
+  const getSortIcon = (column: string) => {
+    if (sortBy !== column || !onSort) {
+      return <ArrowUpDown className="ml-1 w-3 h-3 opacity-50" />;
+    }
+    return sortOrder === 'asc' ? 
+      <ArrowUpDown className="ml-1 w-3 h-3 rotate-180" /> : 
+      <ArrowUpDown className="ml-1 w-3 h-3" />;
+  };
+
+  const handleSort = (column: string) => {
+    if (onSort) {
+      onSort(column);
+    }
+  };
+
   const startIndex = (currentPage - 1) * usersPerPage + 1;
   const endIndex = Math.min(currentPage * usersPerPage, total);
 
@@ -157,9 +178,13 @@ export default function UserTable({
             <TableHeader>
               <TableRow className="bg-gray-50">
                 <TableHead className="px-6 py-4">
-                  <Button variant="ghost" className="h-auto p-0 font-medium text-xs text-gray-500 uppercase tracking-wider hover:text-gray-700">
+                  <Button 
+                    variant="ghost" 
+                    className="h-auto p-0 font-medium text-xs text-gray-500 uppercase tracking-wider hover:text-gray-700"
+                    onClick={() => handleSort('firstName')}
+                  >
                     User
-                    <ArrowUpDown className="ml-1 w-3 h-3" />
+                    {getSortIcon('firstName')}
                   </Button>
                 </TableHead>
                 <TableHead className="px-6 py-4">
