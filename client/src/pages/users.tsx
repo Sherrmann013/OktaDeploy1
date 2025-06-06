@@ -28,6 +28,7 @@ import {
   Calendar,
   RotateCcw
 } from "lucide-react";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 export default function Users() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -242,6 +243,7 @@ export default function Users() {
             )}
           </div>
           <div className="flex items-center space-x-3">
+            <ThemeToggle />
             <Button
               variant="outline"
               onClick={() => oktaSyncMutation.mutate()}
