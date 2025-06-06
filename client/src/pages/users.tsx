@@ -35,6 +35,7 @@ export default function Users() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [sortBy, setSortBy] = useState("firstName");
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
+  const [employeeTypeFilter, setEmployeeTypeFilter] = useState<string>("");
   const { toast } = useToast();
   const { user: currentUser } = useAuth();
 
@@ -111,14 +112,15 @@ export default function Users() {
   });
 
   const { data: usersData, isLoading, refetch } = useQuery({
-    queryKey: ["/api/users", currentPage, usersPerPage, searchQuery, sortBy, sortOrder],
+    queryKey: ["/api/users", currentPage, usersPerPage, searchQuery, sortBy, sortOrder, employeeTypeFilter],
     queryFn: async () => {
       const params = new URLSearchParams({
         page: currentPage.toString(),
         limit: usersPerPage.toString(),
         sortBy: sortBy,
         sortOrder: sortOrder,
-        ...(searchQuery && { search: searchQuery })
+        ...(searchQuery && { search: searchQuery }),
+        ...(employeeTypeFilter && { employeeType: employeeTypeFilter })
       });
       
       const response = await fetch(`/api/users?${params}`, {
@@ -160,6 +162,23 @@ export default function Users() {
       setSortBy(column);
       setSortOrder('asc');
     }
+  };
+
+  const handleEmployeeTypeFilter = (employeeType: string) => {
+    if (employeeTypeFilter === employeeType) {
+      // If already filtered by this type, clear the filter
+      setEmployeeTypeFilter("");
+    } else {
+      // Set new filter
+      setEmployeeTypeFilter(employeeType);
+    }
+    setCurrentPage(1); // Reset to first page when filtering
+  };
+
+  const clearFilters = () => {
+    setEmployeeTypeFilter("");
+    setSearchQuery("");
+    setCurrentPage(1);
   };
 
   const handlePerPageChange = (perPage: number) => {
@@ -260,9 +279,11 @@ export default function Users() {
             Search
           </Button>
           
-          <Button type="button" variant="outline" onClick={resetFilters}>
-            Clear
-          </Button>
+          {(searchQuery || employeeTypeFilter) && (
+            <Button type="button" variant="outline" onClick={clearFilters}>
+              Clear Filters
+            </Button>
+          )}
         </form>
       </div>
 
@@ -279,48 +300,84 @@ export default function Users() {
             </CardContent>
           </Card>
           
-          <Card>
+          <Card 
+            onClick={() => handleEmployeeTypeFilter('EMPLOYEE')}
+            className={`cursor-pointer transition-all hover:shadow-md ${
+              employeeTypeFilter === 'EMPLOYEE' 
+                ? 'ring-2 ring-blue-500 bg-blue-50 dark:bg-blue-950' 
+                : 'hover:bg-gray-50 dark:hover:bg-gray-800'
+            }`}
+          >
             <CardContent className="p-3">
               <div className="flex flex-col items-center text-center">
-                <UsersIcon className="w-6 h-6 text-blue-600 mb-1" />
-                <p className="text-xs font-medium text-gray-600">Employees</p>
-                <p className="text-xl font-bold text-gray-900">
+                <UsersIcon className={`w-6 h-6 mb-1 ${
+                  employeeTypeFilter === 'EMPLOYEE' ? 'text-blue-700' : 'text-blue-600'
+                }`} />
+                <p className="text-xs font-medium text-gray-600 dark:text-gray-400">Employees</p>
+                <p className="text-xl font-bold text-gray-900 dark:text-gray-100">
                   {employeeTypeCounts?.EMPLOYEE ?? allUsers.filter((u: User) => u.employeeType === 'EMPLOYEE').length}
                 </p>
               </div>
             </CardContent>
           </Card>
           
-          <Card>
+          <Card 
+            onClick={() => handleEmployeeTypeFilter('CONTRACTOR')}
+            className={`cursor-pointer transition-all hover:shadow-md ${
+              employeeTypeFilter === 'CONTRACTOR' 
+                ? 'ring-2 ring-green-500 bg-green-50 dark:bg-green-950' 
+                : 'hover:bg-gray-50 dark:hover:bg-gray-800'
+            }`}
+          >
             <CardContent className="p-3">
               <div className="flex flex-col items-center text-center">
-                <Building className="w-6 h-6 text-green-600 mb-1" />
-                <p className="text-xs font-medium text-gray-600">Contractors</p>
-                <p className="text-xl font-bold text-gray-900">
+                <Building className={`w-6 h-6 mb-1 ${
+                  employeeTypeFilter === 'CONTRACTOR' ? 'text-green-700' : 'text-green-600'
+                }`} />
+                <p className="text-xs font-medium text-gray-600 dark:text-gray-400">Contractors</p>
+                <p className="text-xl font-bold text-gray-900 dark:text-gray-100">
                   {employeeTypeCounts?.CONTRACTOR ?? allUsers.filter((u: User) => u.employeeType === 'CONTRACTOR').length}
                 </p>
               </div>
             </CardContent>
           </Card>
           
-          <Card>
+          <Card 
+            onClick={() => handleEmployeeTypeFilter('PART_TIME')}
+            className={`cursor-pointer transition-all hover:shadow-md ${
+              employeeTypeFilter === 'PART_TIME' 
+                ? 'ring-2 ring-purple-500 bg-purple-50 dark:bg-purple-950' 
+                : 'hover:bg-gray-50 dark:hover:bg-gray-800'
+            }`}
+          >
             <CardContent className="p-3">
               <div className="flex flex-col items-center text-center">
-                <Calendar className="w-6 h-6 text-purple-600 mb-1" />
-                <p className="text-xs font-medium text-gray-600">Consultants</p>
-                <p className="text-xl font-bold text-gray-900">
+                <Calendar className={`w-6 h-6 mb-1 ${
+                  employeeTypeFilter === 'PART_TIME' ? 'text-purple-700' : 'text-purple-600'
+                }`} />
+                <p className="text-xs font-medium text-gray-600 dark:text-gray-400">Consultants</p>
+                <p className="text-xl font-bold text-gray-900 dark:text-gray-100">
                   {employeeTypeCounts?.PART_TIME ?? allUsers.filter((u: User) => u.employeeType === 'PART_TIME').length}
                 </p>
               </div>
             </CardContent>
           </Card>
           
-          <Card>
+          <Card 
+            onClick={() => handleEmployeeTypeFilter('INTERN')}
+            className={`cursor-pointer transition-all hover:shadow-md ${
+              employeeTypeFilter === 'INTERN' 
+                ? 'ring-2 ring-orange-500 bg-orange-50 dark:bg-orange-950' 
+                : 'hover:bg-gray-50 dark:hover:bg-gray-800'
+            }`}
+          >
             <CardContent className="p-3">
               <div className="flex flex-col items-center text-center">
-                <Eye className="w-6 h-6 text-orange-600 mb-1" />
-                <p className="text-xs font-medium text-gray-600">Interns</p>
-                <p className="text-xl font-bold text-gray-900">
+                <Eye className={`w-6 h-6 mb-1 ${
+                  employeeTypeFilter === 'INTERN' ? 'text-orange-700' : 'text-orange-600'
+                }`} />
+                <p className="text-xs font-medium text-gray-600 dark:text-gray-400">Interns</p>
+                <p className="text-xl font-bold text-gray-900 dark:text-gray-100">
                   {employeeTypeCounts?.INTERN ?? allUsers.filter((u: User) => u.employeeType === 'INTERN').length}
                 </p>
               </div>
