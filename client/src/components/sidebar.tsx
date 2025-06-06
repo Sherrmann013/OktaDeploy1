@@ -4,10 +4,6 @@ import { cn } from "@/lib/utils";
 
 const navigation = [
   { name: "Users", href: "/users", icon: Users, current: true },
-  { name: "Groups", href: "/groups", icon: UsersRound, current: false },
-  { name: "Applications", href: "/applications", icon: Grid3x3, current: false },
-  { name: "Security", href: "/security", icon: Shield, current: false },
-  { name: "Settings", href: "/settings", icon: Settings, current: false },
 ];
 
 export default function Sidebar() {
