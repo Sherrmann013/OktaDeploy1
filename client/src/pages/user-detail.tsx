@@ -13,6 +13,7 @@ import { ArrowLeft, ChevronDown, ChevronRight, Smartphone, Monitor, Shield, Eye,
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import ConfirmationModal from "@/components/confirmation-modal";
+import AssignAppModal from "@/components/assign-app-modal";
 import { useState, useEffect, useMemo } from "react";
 import type { User } from "@shared/schema";
 import { useForm } from "react-hook-form";
@@ -133,6 +134,7 @@ export default function UserDetail() {
   
   const [activeTab, setActiveTab] = useState("profile");
   const [appSearchTerm, setAppSearchTerm] = useState("");
+  const [showAssignAppModal, setShowAssignAppModal] = useState(false);
 
   // Clear problematic cache entries on mount
   useEffect(() => {
@@ -857,14 +859,23 @@ export default function UserDetail() {
                 <Card>
                   <CardHeader className="flex flex-row items-center justify-between">
                     <CardTitle>Applications ({userApps.length})</CardTitle>
-                    <div className="relative w-64">
-                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                      <Input
-                        placeholder="Search applications..."
-                        value={appSearchTerm}
-                        onChange={(e) => setAppSearchTerm(e.target.value)}
-                        className="pl-10"
-                      />
+                    <div className="flex items-center gap-3">
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => setShowAssignAppModal(true)}
+                      >
+                        Assign App
+                      </Button>
+                      <div className="relative w-64">
+                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                        <Input
+                          placeholder="Search applications..."
+                          value={appSearchTerm}
+                          onChange={(e) => setAppSearchTerm(e.target.value)}
+                          className="pl-10"
+                        />
+                      </div>
                     </div>
                   </CardHeader>
                   <CardContent>
@@ -988,6 +999,13 @@ export default function UserDetail() {
           variant={confirmAction.type === "delete" ? "destructive" : "default"}
         />
       )}
+
+      <AssignAppModal
+        open={showAssignAppModal}
+        onClose={() => setShowAssignAppModal(false)}
+        userId={userId}
+        userApps={userApps}
+      />
     </main>
   );
 }
