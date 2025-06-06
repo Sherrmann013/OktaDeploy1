@@ -273,7 +273,7 @@ export default function Users() {
       </header>
 
       {/* Search and Filters */}
-      <div className="bg-slate-800 border-b border-slate-700 px-6 py-4">
+      <div className="bg-background border-b border-border px-6 py-4">
         <form onSubmit={handleSearch} className="flex items-center space-x-4">
           <div className="flex-1 relative">
             <Search className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
@@ -309,7 +309,7 @@ export default function Users() {
       </div>
 
       {/* Stats Cards */}
-      <div className="bg-slate-800 px-6 py-4">
+      <div className="bg-background px-6 py-4">
         <div className="grid grid-cols-5 gap-3">
           <Card>
             <CardContent className="p-3">
