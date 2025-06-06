@@ -38,31 +38,40 @@
   background-color: #f1f3f4;
 }
 
+/* Dark mode table rows */
+.dark .table-row-light {
+  background-color: hsl(215 22% 18%);
+}
+
+.dark .table-row-light:hover {
+  background-color: hsl(215 20% 20%);
+}
+
 .dark {
-  --background: 215 28% 17%; /* Navy blue like your examples */
-  --foreground: 0 0% 98%; /* High contrast white text */
-  --muted: 215 22% 22%; /* Slightly lighter navy for muted areas */
-  --muted-foreground: 220 10% 65%; /* Muted text with blue tint */
-  --popover: 215 28% 17%;
-  --popover-foreground: 0 0% 98%;
-  --card: 215 25% 20%; /* Card backgrounds matching your example */
-  --card-foreground: 0 0% 98%;
-  --border: 215 15% 25%; /* Subtle borders */
-  --input: 215 20% 18%; /* Input backgrounds */
-  --primary: 207 90% 58%; /* Blue accent */
+  --background: 215 25% 16%; /* Deep slate blue matching screenshot */
+  --foreground: 210 15% 85%; /* Light gray text for readability */
+  --muted: 215 20% 20%; /* Slightly lighter slate for muted areas */
+  --muted-foreground: 210 10% 65%; /* Muted text with subtle blue tint */
+  --popover: 215 25% 18%;
+  --popover-foreground: 210 15% 85%;
+  --card: 215 22% 18%; /* Card backgrounds matching screenshot depth */
+  --card-foreground: 210 15% 85%;
+  --border: 215 15% 22%; /* Subtle slate borders */
+  --input: 215 20% 16%; /* Input backgrounds */
+  --primary: 207 90% 58%; /* Blue accent for buttons and links */
   --primary-foreground: 0 0% 100%;
-  --secondary: 215 15% 25%;
-  --secondary-foreground: 0 0% 90%;
-  --accent: 215 15% 25%;
-  --accent-foreground: 0 0% 90%;
+  --secondary: 215 15% 22%;
+  --secondary-foreground: 210 15% 85%;
+  --accent: 215 15% 22%;
+  --accent-foreground: 210 15% 85%;
   --destructive: 0 75% 55%;
   --destructive-foreground: 0 0% 98%;
   --ring: 207 90% 58%;
   --radius: 0.5rem;
-  --success: 123 45% 48%;
-  --warning: 35 85% 65%;
-  --surface: 215 25% 20%;
-  --surface-background: 215 30% 15%; /* Darker navy background */
+  --success: 123 46% 45%; /* Green for active status */
+  --warning: 35 91% 55%; /* Orange for warnings */
+  --surface: 215 25% 16%; /* Main background slate */
+  --surface-background: 215 22% 18%; /* Card backgrounds */
 }
 
 @layer base {
