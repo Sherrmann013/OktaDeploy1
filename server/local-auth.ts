@@ -42,6 +42,7 @@ export function getSession() {
       httpOnly: true,
       secure: false, // Allow HTTP for development
       maxAge: sessionTtl,
+      sameSite: 'lax'
     },
   });
 }
@@ -49,6 +50,20 @@ export function getSession() {
 export async function setupLocalAuth(app: Express) {
   app.set("trust proxy", 1);
   app.use(getSession());
+  
+  // Enable CORS for session cookies
+  app.use((req, res, next) => {
+    res.header('Access-Control-Allow-Credentials', 'true');
+    const origin = req.headers.origin || req.headers.host;
+    res.header('Access-Control-Allow-Origin', origin);
+    res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Content-Length, X-Requested-With, Cookie');
+    if (req.method === 'OPTIONS') {
+      res.sendStatus(200);
+    } else {
+      next();
+    }
+  });
 
   // Login endpoint
   app.post("/api/login", async (req, res) => {
