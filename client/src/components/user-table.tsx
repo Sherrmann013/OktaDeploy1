@@ -128,10 +128,11 @@ export default function UserTable({
     return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
   };
 
-  const formatLastLogin = (lastLogin: string | null) => {
+  const formatLastLogin = (lastLogin: Date | string | null) => {
     if (!lastLogin) return "Never";
     try {
-      return formatDistanceToNow(new Date(lastLogin), { addSuffix: true });
+      const date = lastLogin instanceof Date ? lastLogin : new Date(lastLogin);
+      return formatDistanceToNow(date, { addSuffix: true });
     } catch {
       return "Unknown";
     }
@@ -254,7 +255,7 @@ export default function UserTable({
                     {getStatusBadge(user.status)}
                   </TableCell>
                   <TableCell className="px-6 py-4 text-sm text-gray-500">
-                    {formatLastLogin(user.lastLogin)}
+                    {formatLastLogin(user.lastLogin as Date | string | null)}
                   </TableCell>
                   <TableCell className="px-6 py-4">
                     <div className="flex items-center space-x-2">

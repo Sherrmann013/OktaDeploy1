@@ -198,6 +198,16 @@ export default function Users() {
     setCurrentPage(1);
   };
 
+  const handleSort = (column: string) => {
+    if (sortBy === column) {
+      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortBy(column);
+      setSortOrder('asc');
+    }
+    setCurrentPage(1);
+  };
+
   const getStatusColor = (status: string) => {
     switch (status?.toUpperCase()) {
       case 'ACTIVE': return 'bg-green-100 text-green-800';
