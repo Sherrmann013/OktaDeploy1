@@ -837,9 +837,9 @@ export default function UserDetail() {
                     {userGroups.length === 0 ? (
                       <p className="text-gray-500 text-center py-8">No groups assigned</p>
                     ) : (
-                      <div className="space-y-3">
+                      <div className="space-y-2">
                         {userGroups.map((group) => (
-                          <div key={group.id} className="flex items-center justify-between p-3 border rounded-lg">
+                          <div key={group.id} className="flex items-center justify-between p-2 border rounded-lg">
                             <div>
                               <h4 className="font-medium">{group.profile.name}</h4>
                               <p className="text-sm text-gray-500">{group.profile.description || 'No description'}</p>
@@ -873,9 +873,9 @@ export default function UserDetail() {
                         {appSearchTerm ? `No applications found matching "${appSearchTerm}"` : 'No applications assigned'}
                       </p>
                     ) : (
-                      <div className="space-y-3">
+                      <div className="space-y-2">
                         {filteredApps.map((app) => (
-                          <div key={app.id} className="flex items-center justify-between p-3 border rounded-lg">
+                          <div key={app.id} className="flex items-center justify-between p-2 border rounded-lg">
                             <div className="flex items-center gap-3">
                               {app.logo && (
                                 <img src={app.logo} alt={app.label} className="w-8 h-8 rounded" />
@@ -908,9 +908,9 @@ export default function UserDetail() {
                     {userDevices.length === 0 ? (
                       <p className="text-gray-500 text-center py-8">No devices registered</p>
                     ) : (
-                      <div className="space-y-3">
+                      <div className="space-y-2">
                         {userDevices.map((device, index) => (
-                          <div key={device.id || index} className="flex items-center justify-between p-3 border rounded-lg">
+                          <div key={device.id || index} className="flex items-center justify-between p-2 border rounded-lg">
                             <div className="flex items-center gap-3">
                               <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
                                 <span className="text-lg">📱</span>
