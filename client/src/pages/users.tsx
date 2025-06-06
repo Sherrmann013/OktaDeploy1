@@ -365,7 +365,7 @@ export default function Users() {
             <CardContent className="p-3">
               <div className="flex flex-col items-center text-center">
                 <Eye className="w-6 h-6 mb-1 text-orange-600" />
-                <p className="text-xs font-medium text-gray-600 dark:text-gray-400">Interns</p>
+                <p className="text-xs font-medium text-muted-foreground">Interns</p>
                 <p className="text-xl font-bold text-gray-900 dark:text-gray-100">
                   {employeeTypeCounts?.INTERN ?? allUsers.filter((u: User) => u.employeeType === 'INTERN').length}
                 </p>
