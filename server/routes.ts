@@ -328,19 +328,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "User not found" });
       }
 
-      // Update status in OKTA if user has OKTA ID
+      // First get current status from OKTA to avoid conflicts
       if (user.oktaId) {
         try {
-          console.log(`Updating OKTA user ${user.oktaId} status to ${status}`);
-          if (status === "SUSPENDED") {
-            const result = await oktaService.deactivateUser(user.oktaId);
-            console.log("OKTA deactivate result:", result);
-          } else if (status === "ACTIVE") {
-            const result = await oktaService.activateUser(user.oktaId);
-            console.log("OKTA activate result:", result);
-          } else if (status === "DEPROVISIONED") {
-            const result = await oktaService.deactivateUser(user.oktaId);
-            console.log("OKTA deactivate result:", result);
+          console.log(`Getting current OKTA status for user ${user.oktaId}`);
+          const oktaUser = await oktaService.getUserByEmail(user.email);
+          const currentOktaStatus = oktaUser?.status;
+          console.log(`Current OKTA status: ${currentOktaStatus}, Requested status: ${status}`);
+          
+          // Only make OKTA API call if status actually needs to change
+          if (currentOktaStatus !== status) {
+            console.log(`Updating OKTA user ${user.oktaId} status from ${currentOktaStatus} to ${status}`);
+            if (status === "SUSPENDED") {
+              const result = await oktaService.deactivateUser(user.oktaId);
+              console.log("OKTA deactivate result:", result);
+            } else if (status === "ACTIVE") {
+              const result = await oktaService.activateUser(user.oktaId);
+              console.log("OKTA activate result:", result);
+            } else if (status === "DEPROVISIONED") {
+              const result = await oktaService.deactivateUser(user.oktaId);
+              console.log("OKTA deactivate result:", result);
+            }
+          } else {
+            console.log(`User already has status ${status} in OKTA, skipping API call`);
           }
         } catch (oktaError) {
           console.error("OKTA API error:", oktaError);
@@ -919,6 +929,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching groups:", error);
       res.status(500).json({ message: "Failed to fetch groups" });
+    }
+  });
+
+  // Reset user status by syncing from OKTA
+  app.post("/api/users/:id/reset-status", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const user = await storage.getUser(id);
+      
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      if (!user.oktaId) {
+        return res.status(400).json({ message: "User has no OKTA ID" });
+      }
+
+      // Get current status from OKTA
+      const oktaUser = await oktaService.getUserByEmail(user.email);
+      if (!oktaUser) {
+        return res.status(404).json({ message: "User not found in OKTA" });
+      }
+
+      console.log(`Resetting user ${user.email} status from ${user.status} to ${oktaUser.status}`);
+      
+      // Update local database to match OKTA
+      const updatedUser = await storage.updateUser(id, { status: oktaUser.status });
+      
+      if (!updatedUser) {
+        return res.status(500).json({ message: "Failed to update user status" });
+      }
+
+      res.json(updatedUser);
+    } catch (error) {
+      console.error("Reset status error:", error);
+      res.status(500).json({ 
+        message: "Failed to reset user status",
+        error: error instanceof Error ? error.message : "Unknown error"
+      });
     }
   });
 
