@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -36,13 +36,53 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
   const availableManagers = usersData?.users || [];
   
   // Filter managers based on search input
-  const filteredManagers = availableManagers.filter(user => {
-    const searchTerm = managerSearch.toLowerCase();
-    const fullName = `${user.firstName} ${user.lastName}`.toLowerCase();
-    return fullName.includes(searchTerm) || 
-           (user.email && user.email.toLowerCase().includes(searchTerm)) ||
-           (user.title && user.title.toLowerCase().includes(searchTerm));
-  }).slice(0, 5); // Limit to 5 results
+  const filteredManagers = useMemo(() => {
+    if (!managerSearch || managerSearch.length < 2) return [];
+    
+    const searchTerm = managerSearch.toLowerCase().trim();
+    
+    return availableManagers
+      .filter(user => {
+        const firstName = user.firstName?.toLowerCase() || '';
+        const lastName = user.lastName?.toLowerCase() || '';
+        const email = user.email?.toLowerCase() || '';
+        const title = user.title?.toLowerCase() || '';
+        const department = user.department?.toLowerCase() || '';
+        const fullName = `${firstName} ${lastName}`;
+        
+        return firstName.includes(searchTerm) ||
+               lastName.includes(searchTerm) ||
+               fullName.includes(searchTerm) ||
+               email.includes(searchTerm) ||
+               title.includes(searchTerm) ||
+               department.includes(searchTerm);
+      })
+      .sort((a, b) => {
+        // Sort by relevance - exact name matches first
+        const aFullName = `${a.firstName} ${a.lastName}`.toLowerCase();
+        const bFullName = `${b.firstName} ${b.lastName}`.toLowerCase();
+        const aFirstName = a.firstName?.toLowerCase() || '';
+        const bFirstName = b.firstName?.toLowerCase() || '';
+        const aLastName = a.lastName?.toLowerCase() || '';
+        const bLastName = b.lastName?.toLowerCase() || '';
+        
+        // Exact first name match gets highest priority
+        if (aFirstName.startsWith(searchTerm) && !bFirstName.startsWith(searchTerm)) return -1;
+        if (bFirstName.startsWith(searchTerm) && !aFirstName.startsWith(searchTerm)) return 1;
+        
+        // Exact last name match gets second priority
+        if (aLastName.startsWith(searchTerm) && !bLastName.startsWith(searchTerm)) return -1;
+        if (bLastName.startsWith(searchTerm) && !aLastName.startsWith(searchTerm)) return 1;
+        
+        // Full name match gets third priority
+        if (aFullName.startsWith(searchTerm) && !bFullName.startsWith(searchTerm)) return -1;
+        if (bFullName.startsWith(searchTerm) && !aFullName.startsWith(searchTerm)) return 1;
+        
+        // Sort alphabetically as fallback
+        return aFullName.localeCompare(bFullName);
+      })
+      .slice(0, 10); // Increased to 10 suggestions for better usability
+  }, [availableManagers, managerSearch]);
 
   const form = useForm<InsertUser>({
     resolver: zodResolver(insertUserSchema),

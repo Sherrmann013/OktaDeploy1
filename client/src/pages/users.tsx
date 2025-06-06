@@ -284,7 +284,7 @@ export default function Users() {
                 <Calendar className="w-6 h-6 text-purple-600 mb-1" />
                 <p className="text-xs font-medium text-gray-600">Consultants</p>
                 <p className="text-xl font-bold text-gray-900">
-                  {allUsers.filter((u: User) => u.employeeType === 'PART_TIME').length}
+                  {employeeTypeCounts?.PART_TIME ?? allUsers.filter((u: User) => u.employeeType === 'PART_TIME').length}
                 </p>
               </div>
             </CardContent>
@@ -296,7 +296,7 @@ export default function Users() {
                 <Eye className="w-6 h-6 text-orange-600 mb-1" />
                 <p className="text-xs font-medium text-gray-600">Interns</p>
                 <p className="text-xl font-bold text-gray-900">
-                  {allUsers.filter((u: User) => u.employeeType === 'INTERN').length}
+                  {employeeTypeCounts?.INTERN ?? allUsers.filter((u: User) => u.employeeType === 'INTERN').length}
                 </p>
               </div>
             </CardContent>

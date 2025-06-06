@@ -55,14 +55,54 @@ export default function UserDetail() {
   
   const availableManagers = useMemo(() => {
     if (!allUsersData?.users || !managerSearch) return [];
+    
+    const searchTerm = managerSearch.toLowerCase().trim();
+    if (searchTerm.length < 2) return [];
+    
     return allUsersData.users
-      .filter((u: User) => 
-        u.id !== userId && 
-        (u.firstName?.toLowerCase().includes(managerSearch.toLowerCase()) ||
-         u.lastName?.toLowerCase().includes(managerSearch.toLowerCase()) ||
-         u.email?.toLowerCase().includes(managerSearch.toLowerCase()))
-      )
-      .slice(0, 5); // Limit to 5 suggestions
+      .filter((u: User) => {
+        if (u.id === userId) return false;
+        
+        const firstName = u.firstName?.toLowerCase() || '';
+        const lastName = u.lastName?.toLowerCase() || '';
+        const email = u.email?.toLowerCase() || '';
+        const title = u.title?.toLowerCase() || '';
+        const department = u.department?.toLowerCase() || '';
+        const fullName = `${firstName} ${lastName}`;
+        
+        // Prioritize exact matches first, then partial matches
+        return firstName.includes(searchTerm) ||
+               lastName.includes(searchTerm) ||
+               fullName.includes(searchTerm) ||
+               email.includes(searchTerm) ||
+               title.includes(searchTerm) ||
+               department.includes(searchTerm);
+      })
+      .sort((a, b) => {
+        // Sort by relevance - exact name matches first
+        const aFullName = `${a.firstName} ${a.lastName}`.toLowerCase();
+        const bFullName = `${b.firstName} ${b.lastName}`.toLowerCase();
+        const aFirstName = a.firstName?.toLowerCase() || '';
+        const bFirstName = b.firstName?.toLowerCase() || '';
+        const aLastName = a.lastName?.toLowerCase() || '';
+        const bLastName = b.lastName?.toLowerCase() || '';
+        
+        // Exact first name match gets highest priority
+        if (aFirstName.startsWith(searchTerm) && !bFirstName.startsWith(searchTerm)) return -1;
+        if (bFirstName.startsWith(searchTerm) && !aFirstName.startsWith(searchTerm)) return 1;
+        
+        // Exact last name match gets second priority
+        if (aLastName.startsWith(searchTerm) && !bLastName.startsWith(searchTerm)) return -1;
+        if (bLastName.startsWith(searchTerm) && !aLastName.startsWith(searchTerm)) return 1;
+        
+        // Full name match gets third priority
+        if (aFullName.startsWith(searchTerm) && !bFullName.startsWith(searchTerm)) return -1;
+        if (bFullName.startsWith(searchTerm) && !aFullName.startsWith(searchTerm)) return 1;
+        
+        // Sort alphabetically as fallback
+        return aFullName.localeCompare(bFullName);
+      })
+      .slice(0, 10); // Increased to 10 suggestions for better usability
   }, [allUsersData, managerSearch, userId]);
   
   const form = useForm<z.infer<typeof editUserSchema>>({
