@@ -6,7 +6,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { ArrowLeft, ChevronDown, Smartphone, Monitor, Shield, Eye, RefreshCw, KeyRound, Edit, Play, Pause, Trash2 } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { ArrowLeft, ChevronDown, ChevronRight, Smartphone, Monitor, Shield, Eye, RefreshCw, KeyRound, Edit, Play, Pause, Trash2, Search } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import ConfirmationModal from "@/components/confirmation-modal";
@@ -25,6 +27,7 @@ export default function UserDetail() {
   } | null>(null);
   
   const [activeTab, setActiveTab] = useState("profile");
+  const [appSearchTerm, setAppSearchTerm] = useState("");
 
   const userId = params?.id ? parseInt(params.id) : null;
 
@@ -369,12 +372,39 @@ export default function UserDetail() {
                       <RefreshCw className="w-6 h-6 animate-spin text-gray-400" />
                     </div>
                   ) : userApplications && userApplications.length > 0 ? (
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                      {userApplications.map((app: any) => (
-                        <div key={app.id} className="p-2 border border-gray-200 rounded text-center bg-gray-50 hover:bg-gray-100 transition-colors">
-                          <h4 className="text-sm font-medium text-gray-900 truncate">{app.name}</h4>
-                        </div>
-                      ))}
+                    <div className="space-y-4">
+                      {/* Search Input */}
+                      <div className="relative">
+                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                        <Input
+                          placeholder="Search applications..."
+                          value={appSearchTerm}
+                          onChange={(e) => setAppSearchTerm(e.target.value)}
+                          className="pl-10"
+                        />
+                      </div>
+                      
+                      {/* Applications Grid */}
+                      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                        {userApplications
+                          .filter((app: any) => 
+                            app.name.toLowerCase().includes(appSearchTerm.toLowerCase())
+                          )
+                          .sort((a: any, b: any) => a.name.localeCompare(b.name))
+                          .map((app: any) => (
+                            <div key={app.id} className="p-2 border border-gray-200 rounded text-center bg-gray-50 hover:bg-gray-100 transition-colors">
+                              <h4 className="text-sm font-medium text-gray-900 truncate" title={app.name}>
+                                {app.name}
+                              </h4>
+                            </div>
+                          ))}
+                      </div>
+                      
+                      {userApplications.filter((app: any) => 
+                        app.name.toLowerCase().includes(appSearchTerm.toLowerCase())
+                      ).length === 0 && appSearchTerm && (
+                        <p className="text-gray-600 py-8 text-center">No applications found matching "{appSearchTerm}".</p>
+                      )}
                     </div>
                   ) : (
                     <p className="text-gray-600 py-8 text-center">No applications assigned to this user.</p>
@@ -395,16 +425,16 @@ export default function UserDetail() {
                     </div>
                   ) : userGroups && userGroups.length > 0 ? (
                     <div className="space-y-3">
-                      {userGroups.map((group: any) => (
-                        <div key={group.id} className="p-3 border border-gray-200 rounded-lg">
-                          <h4 className="font-medium text-gray-900">{group.profile?.name || group.name}</h4>
-                          <p className="text-sm text-gray-600 mt-1">{group.profile?.description || "No description"}</p>
-                          <div className="flex items-center gap-2 mt-2">
-                            <Badge variant="outline">{group.type}</Badge>
-                            <span className="text-xs text-gray-500">ID: {group.id}</span>
+                      {userGroups
+                        .filter((group: any) => 
+                          group.type !== "BUILT_IN" && group.type !== "APP_GROUP"
+                        )
+                        .map((group: any) => (
+                          <div key={group.id} className="p-3 border border-gray-200 rounded-lg">
+                            <h4 className="font-medium text-gray-900">{group.profile?.name || group.name}</h4>
+                            <p className="text-sm text-gray-600 mt-1">{group.profile?.description || "No description"}</p>
                           </div>
-                        </div>
-                      ))}
+                        ))}
                     </div>
                   ) : (
                     <p className="text-gray-600 py-8 text-center">No groups assigned to this user.</p>
@@ -495,29 +525,78 @@ export default function UserDetail() {
                         const color = getEventColor(log.outcome);
 
                         return (
-                          <div key={log.id} className={`flex items-start gap-3 p-3 border-l-4 border-${color}-500 bg-${color}-50`}>
-                            <Icon className={`w-4 h-4 text-${color}-600 mt-0.5`} />
-                            <div className="flex-1 min-w-0">
-                              <p className="text-sm font-medium">{log.displayMessage}</p>
-                              <p className="text-xs text-gray-600 mt-1">
-                                {format(new Date(log.published), "MMM d, yyyy 'at' h:mm a")}
-                              </p>
-                              {log.client?.ipAddress && (
-                                <p className="text-xs text-gray-500 mt-1">
-                                  IP: {log.client.ipAddress}
-                                  {log.client.geographicalContext?.city && 
-                                    ` • ${log.client.geographicalContext.city}, ${log.client.geographicalContext.state || log.client.geographicalContext.country}`
-                                  }
-                                </p>
-                              )}
-                              <div className="flex items-center gap-2 mt-2">
-                                <Badge variant={log.outcome === "SUCCESS" ? "default" : "destructive"} className="text-xs">
-                                  {log.outcome}
-                                </Badge>
-                                <span className="text-xs text-gray-500">{log.eventType}</span>
-                              </div>
+                          <Collapsible key={log.id}>
+                            <div className={`border-l-4 border-${color}-500 bg-${color}-50`}>
+                              <CollapsibleTrigger className="w-full p-3 hover:bg-gray-100 transition-colors">
+                                <div className="flex items-start gap-3">
+                                  <Icon className={`w-4 h-4 text-${color}-600 mt-0.5 flex-shrink-0`} />
+                                  <div className="flex-1 min-w-0 text-left">
+                                    <div className="flex items-center justify-between">
+                                      <p className="text-sm font-medium">{log.displayMessage}</p>
+                                      <ChevronRight className="w-4 h-4 text-gray-400 transition-transform group-data-[state=open]:rotate-90" />
+                                    </div>
+                                    <p className="text-xs text-gray-600 mt-1">
+                                      {format(new Date(log.published), "MMM d, yyyy 'at' h:mm a")}
+                                    </p>
+                                    <div className="flex items-center gap-2 mt-2">
+                                      <Badge variant={log.outcome === "SUCCESS" ? "default" : "destructive"} className="text-xs">
+                                        {log.outcome}
+                                      </Badge>
+                                      <span className="text-xs text-gray-500">{log.eventType}</span>
+                                    </div>
+                                  </div>
+                                </div>
+                              </CollapsibleTrigger>
+                              
+                              <CollapsibleContent className="px-3 pb-3">
+                                <div className="ml-7 space-y-2 text-xs">
+                                  {log.client?.ipAddress && (
+                                    <div>
+                                      <span className="font-medium">IP Address:</span> {log.client.ipAddress}
+                                    </div>
+                                  )}
+                                  
+                                  {log.client?.geographicalContext && (
+                                    <div>
+                                      <span className="font-medium">Location:</span> 
+                                      {log.client.geographicalContext.city && ` ${log.client.geographicalContext.city}`}
+                                      {log.client.geographicalContext.state && `, ${log.client.geographicalContext.state}`}
+                                      {log.client.geographicalContext.country && ` ${log.client.geographicalContext.country}`}
+                                    </div>
+                                  )}
+                                  
+                                  {log.client?.userAgent?.rawUserAgent && (
+                                    <div>
+                                      <span className="font-medium">User Agent:</span> {log.client.userAgent.rawUserAgent}
+                                    </div>
+                                  )}
+                                  
+                                  {log.actor?.displayName && (
+                                    <div>
+                                      <span className="font-medium">Actor:</span> {log.actor.displayName} ({log.actor.type})
+                                    </div>
+                                  )}
+                                  
+                                  {log.target && log.target.length > 0 && (
+                                    <div>
+                                      <span className="font-medium">Target:</span>
+                                      <ul className="mt-1 ml-4">
+                                        {log.target.map((target: any, index: number) => (
+                                          <li key={index}>
+                                            {target.displayName} ({target.type})
+                                          </li>
+                                        ))}
+                                      </ul>
+                                    </div>
+                                  )}
+                                  
+                                  <div>
+                                    <span className="font-medium">Event ID:</span> {log.id}
+                                  </div>
+                                </div>
+                              </CollapsibleContent>
                             </div>
-                          </div>
+                          </Collapsible>
                         );
                       })}
                     </div>

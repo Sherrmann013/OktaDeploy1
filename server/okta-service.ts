@@ -207,7 +207,13 @@ class OktaService {
 
   async getUserDevices(userId: string): Promise<any[]> {
     try {
-      const response = await this.makeRequest(`/users/${userId}/clients`);
+      // Try both endpoints as OKTA may use different endpoints for device info
+      let response = await this.makeRequest(`/users/${userId}/clients`);
+      
+      if (!response.ok) {
+        // Try alternative endpoint for device/session info
+        response = await this.makeRequest(`/users/${userId}/sessions`);
+      }
       
       if (response.ok) {
         return await response.json();
