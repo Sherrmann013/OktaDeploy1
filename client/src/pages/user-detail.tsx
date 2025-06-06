@@ -697,17 +697,24 @@ export default function UserDetail() {
                                 <span className="text-lg">📱</span>
                               </div>
                               <div>
-                                <h4 className="font-medium">{device.displayName || device.name || 'Unknown Device'}</h4>
-                                <p className="text-sm text-gray-500">{device.platform || 'Unknown Platform'}</p>
+                                <h4 className="font-medium">
+                                  {device.displayName || device.name || device.deviceType || device.model || 'Unknown Device'}
+                                </h4>
+                                <p className="text-sm text-gray-500">
+                                  {device.platform || device.os || device.operatingSystem || device.deviceType || 'Unknown Platform'}
+                                </p>
+                                {device.serialNumber && (
+                                  <p className="text-xs text-gray-400">Serial: {device.serialNumber}</p>
+                                )}
                               </div>
                             </div>
                             <div className="flex items-center gap-2">
                               <Badge variant={device.status === 'ACTIVE' ? 'default' : 'secondary'}>
                                 {device.status || 'UNKNOWN'}
                               </Badge>
-                              {device.lastUpdated && (
+                              {(device.lastUpdated || device.created) && (
                                 <span className="text-xs text-gray-500">
-                                  Last seen: {new Date(device.lastUpdated).toLocaleDateString()}
+                                  Last seen: {new Date(device.lastUpdated || device.created).toLocaleDateString()}
                                 </span>
                               )}
                             </div>
