@@ -241,6 +241,7 @@ class OktaService {
       }
 
       console.log(`Total Employee Type applications: ${employeeTypeAppIds.size}`);
+      console.log('Employee Type App IDs:', Array.from(employeeTypeAppIds));
       
       // Cache the results
       this.employeeTypeAppsCache = employeeTypeAppIds;
