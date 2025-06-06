@@ -11,6 +11,7 @@ import UserTable from "@/components/user-table";
 import CreateUserModal from "@/components/create-user-modal";
 import { User } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/use-auth";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { 
   Users as UsersIcon, 
@@ -35,6 +36,7 @@ export default function Users() {
   const [sortBy, setSortBy] = useState("firstName");
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const { toast } = useToast();
+  const { user: currentUser } = useAuth();
 
   // OKTA Sync Mutation
   const oktaSyncMutation = useMutation({
@@ -222,6 +224,17 @@ export default function Users() {
               <UserPlus className="w-4 h-4 mr-2" />
               Add User
             </Button>
+            <div className="flex items-center space-x-2 px-3 py-2 bg-gray-50 rounded-lg border">
+              <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
+                <span className="text-white text-sm font-medium">
+                  {currentUser?.firstName?.[0]}{currentUser?.lastName?.[0]}
+                </span>
+              </div>
+              <div className="text-sm">
+                <p className="font-medium text-gray-900">{currentUser?.firstName} {currentUser?.lastName}</p>
+                <p className="text-gray-500">{currentUser?.email}</p>
+              </div>
+            </div>
           </div>
         </div>
       </header>

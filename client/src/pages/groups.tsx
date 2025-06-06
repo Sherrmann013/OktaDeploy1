@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Search, Plus, Users, Settings, Eye } from "lucide-react";
+import { useAuth } from "@/hooks/use-auth";
 
 interface Group {
   id: string;

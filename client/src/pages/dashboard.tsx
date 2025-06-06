@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Search, Plus, RefreshCw } from "lucide-react";
+import { useAuth } from "@/hooks/use-auth";
 import type { User } from "@shared/schema";
 
 export default function Dashboard() {
@@ -19,6 +20,7 @@ export default function Dashboard() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [usersPerPage, setUsersPerPage] = useState(10);
+  const { user: currentUser } = useAuth();
 
   const { data, isLoading, refetch } = useQuery<{ users: User[]; total: number }>({
     queryKey: ["/api/users", searchQuery, statusFilter, departmentFilter, currentPage, usersPerPage],
@@ -70,6 +72,17 @@ export default function Dashboard() {
                 <Plus className="w-4 h-4 mr-2" />
                 Add User
               </Button>
+              <div className="flex items-center space-x-2 px-3 py-2 bg-gray-50 rounded-lg border">
+                <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
+                  <span className="text-white text-sm font-medium">
+                    {currentUser?.firstName?.[0]}{currentUser?.lastName?.[0]}
+                  </span>
+                </div>
+                <div className="text-sm">
+                  <p className="font-medium text-gray-900">{currentUser?.firstName} {currentUser?.lastName}</p>
+                  <p className="text-gray-500">{currentUser?.email}</p>
+                </div>
+              </div>
             </div>
           </div>
         </header>
