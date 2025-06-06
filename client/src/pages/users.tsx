@@ -40,6 +40,15 @@ export default function Users() {
   const { toast } = useToast();
   const { user: currentUser } = useAuth();
 
+  // Column and filter management
+  const [columns, setColumns] = useState<ColumnConfig[]>(() => 
+    AVAILABLE_COLUMNS.map(col => ({
+      id: col.id,
+      visible: ['firstName', 'lastName', 'email', 'title', 'department', 'employeeType', 'status'].includes(col.id)
+    }))
+  );
+  const [filters, setFilters] = useState<FilterConfig[]>([]);
+
   // OKTA Sync Mutation
   const oktaSyncMutation = useMutation({
     mutationFn: async () => {
@@ -179,6 +188,7 @@ export default function Users() {
   const clearFilters = () => {
     setEmployeeTypeFilter("");
     setSearchQuery("");
+    setFilters([]);
     setCurrentPage(1);
   };
 
@@ -280,7 +290,14 @@ export default function Users() {
             Search
           </Button>
           
-          {(searchQuery || employeeTypeFilter) && (
+          <ColumnManager
+            columns={columns}
+            onColumnsChange={setColumns}
+            filters={filters}
+            onFiltersChange={setFilters}
+          />
+          
+          {(searchQuery || employeeTypeFilter || filters.length > 0) && (
             <Button type="button" variant="outline" onClick={clearFilters}>
               Clear Filters
             </Button>
@@ -329,20 +346,11 @@ export default function Users() {
             </CardContent>
           </Card>
           
-          <Card 
-            onClick={() => handleEmployeeTypeFilter('PART_TIME')}
-            className={`cursor-pointer transition-all hover:shadow-md ${
-              employeeTypeFilter === 'PART_TIME' 
-                ? 'ring-2 ring-purple-500 bg-purple-50 dark:bg-purple-950' 
-                : 'hover:bg-gray-50 dark:hover:bg-gray-800'
-            }`}
-          >
+          <Card>
             <CardContent className="p-3">
               <div className="flex flex-col items-center text-center">
-                <Calendar className={`w-6 h-6 mb-1 ${
-                  employeeTypeFilter === 'PART_TIME' ? 'text-purple-700' : 'text-purple-600'
-                }`} />
-                <p className="text-xs font-medium text-gray-600 dark:text-gray-400">Consultants</p>
+                <Calendar className="w-6 h-6 mb-1 text-purple-600" />
+                <p className="text-xs font-medium text-gray-600 dark:text-gray-400">Part Time</p>
                 <p className="text-xl font-bold text-gray-900 dark:text-gray-100">
                   {employeeTypeCounts?.PART_TIME ?? allUsers.filter((u: User) => u.employeeType === 'PART_TIME').length}
                 </p>
@@ -350,19 +358,10 @@ export default function Users() {
             </CardContent>
           </Card>
           
-          <Card 
-            onClick={() => handleEmployeeTypeFilter('INTERN')}
-            className={`cursor-pointer transition-all hover:shadow-md ${
-              employeeTypeFilter === 'INTERN' 
-                ? 'ring-2 ring-orange-500 bg-orange-50 dark:bg-orange-950' 
-                : 'hover:bg-gray-50 dark:hover:bg-gray-800'
-            }`}
-          >
+          <Card>
             <CardContent className="p-3">
               <div className="flex flex-col items-center text-center">
-                <Eye className={`w-6 h-6 mb-1 ${
-                  employeeTypeFilter === 'INTERN' ? 'text-orange-700' : 'text-orange-600'
-                }`} />
+                <Eye className="w-6 h-6 mb-1 text-orange-600" />
                 <p className="text-xs font-medium text-gray-600 dark:text-gray-400">Interns</p>
                 <p className="text-xl font-bold text-gray-900 dark:text-gray-100">
                   {employeeTypeCounts?.INTERN ?? allUsers.filter((u: User) => u.employeeType === 'INTERN').length}
@@ -389,6 +388,7 @@ export default function Users() {
           sortBy={sortBy}
           sortOrder={sortOrder}
           onSort={handleSort}
+          visibleColumns={columns.filter(col => col.visible).map(col => col.id)}
         />
       </div>
 
