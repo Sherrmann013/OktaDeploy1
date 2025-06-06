@@ -248,8 +248,11 @@ export default function UserDetail() {
       if (hasOktaId) {
         syncDetails.push("✓ Profile synced to OKTA");
         
-        // Check employee type sync status
-        if (syncStatus?.employeeTypeGroupSync === 'attempted_with_limitations') {
+        // Check employee type sync status with detailed messaging
+        if (syncStatus?.employeeTypeGroupSync === 'failed_insufficient_permissions') {
+          syncDetails.push("⚠ Employee type group change failed:");
+          syncDetails.push("  Requires elevated OKTA API permissions");
+        } else if (syncStatus?.employeeTypeGroupSync === 'attempted_with_limitations') {
           syncDetails.push("⚠ Employee type group change attempted (limited permissions)");
         }
       } else {
@@ -266,18 +269,10 @@ export default function UserDetail() {
         duration: 5000, // Show for 5 seconds for detailed info
       });
       
-      // Invalidate cache and force immediate refresh
-      queryClient.invalidateQueries({ queryKey: ["/api/users", userId] });
-      queryClient.invalidateQueries({ queryKey: ["/api/users"] });
-      
-      // Force immediate refetch with proper await
-      setTimeout(async () => {
-        await queryClient.refetchQueries({ queryKey: ["/api/users", userId] });
-        // Also refresh related data
-        await queryClient.refetchQueries({ queryKey: ["/api/users", userId, "groups"] });
-        await queryClient.refetchQueries({ queryKey: ["/api/users", userId, "applications"] });
-        await queryClient.refetchQueries({ queryKey: ["/api/users", userId, "devices"] });
-      }, 1000); // Increased delay for server processing
+      // Force complete page reload to ensure all data is fresh
+      setTimeout(() => {
+        window.location.reload();
+      }, 2000); // Give time for user to see the success message
       
       setIsEditing(false);
     },

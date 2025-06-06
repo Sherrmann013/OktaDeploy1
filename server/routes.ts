@@ -367,12 +367,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.log(`OKTA GROUP MANAGEMENT SKIPPED: employeeType=${updates.employeeType}, same=${currentUser.employeeType === updates.employeeType}, oktaId=${!!updatedUser.oktaId}`);
       }
 
-      // Return enhanced response with sync status
+      // Return enhanced response with detailed sync status
+      let groupSyncStatus = 'not_needed';
+      let groupSyncMessage = '';
+      
+      if (updates.employeeType && currentUser.employeeType !== updates.employeeType && updatedUser.oktaId) {
+        groupSyncStatus = 'failed_insufficient_permissions';
+        groupSyncMessage = 'Employee type group changes require elevated OKTA API permissions (Group Administrator role)';
+      }
+      
       const response = {
         ...updatedUser,
         syncStatus: {
           oktaProfileSync: updatedUser.oktaId ? 'success' : 'skipped_no_okta_id',
-          employeeTypeGroupSync: updates.employeeType && currentUser.employeeType !== updates.employeeType && updatedUser.oktaId ? 'attempted_with_limitations' : 'not_needed'
+          employeeTypeGroupSync: groupSyncStatus,
+          groupSyncMessage: groupSyncMessage
         }
       };
       
