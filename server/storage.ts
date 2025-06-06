@@ -220,6 +220,7 @@ export class DatabaseStorage implements IStorage {
     search?: string;
     status?: string;
     department?: string;
+    employeeType?: string;
     limit?: number;
     offset?: number;
   }): Promise<{ users: User[]; total: number }> {
@@ -244,6 +245,10 @@ export class DatabaseStorage implements IStorage {
 
     if (options?.department) {
       whereConditions.push(eq(users.department, options.department));
+    }
+
+    if (options?.employeeType) {
+      whereConditions.push(eq(users.employeeType, options.employeeType));
     }
 
     const whereClause = whereConditions.length > 0 ? and(...whereConditions) : undefined;
