@@ -152,13 +152,16 @@ export default function UserDetail() {
 
   const passwordResetMutation = useMutation({
     mutationFn: async (action: "reset" | "expire") => {
-      return apiRequest("POST", `/api/users/${userId}/password/${action}`, {});
+      const endpoint = action === "reset" ? "reset" : "expire";
+      return apiRequest("POST", `/api/users/${userId}/password/${endpoint}`, {});
     },
     onSuccess: (_, action) => {
+      const actionText = action === "reset" ? "Password reset email sent" : "Password expired successfully";
       toast({
         title: "Success",
-        description: `Password ${action === "reset" ? "reset" : "expiration"} initiated successfully`,
+        description: actionText,
       });
+      queryClient.invalidateQueries({ queryKey: ["/api/users", userId] });
     },
     onError: (error) => {
       toast({

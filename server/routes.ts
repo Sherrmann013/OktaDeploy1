@@ -528,17 +528,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/users/:id/password/reset", requireAdmin, async (req, res) => {
     try {
       const id = z.coerce.number().parse(req.params.id);
+      const user = await storage.getUser(id);
       
-      // In a real implementation, this would call OKTA API to reset password
+      if (!user) {
+        return res.status(404).json({
+          success: false,
+          message: "User not found"
+        });
+      }
+
+      if (!user.oktaId) {
+        return res.status(400).json({
+          success: false,
+          message: "User has no OKTA ID"
+        });
+      }
+
+      // Call OKTA API to reset password
+      const result = await oktaService.resetUserPassword(user.oktaId);
+      console.log(`Password reset initiated for user ${user.email}:`, result);
+      
       res.json({
         success: true,
-        message: "Password reset initiated successfully"
+        message: "Password reset email sent successfully"
       });
     } catch (error) {
       console.error("Password reset error:", error);
       res.status(500).json({
         success: false,
-        message: "Failed to reset password"
+        message: "Failed to reset password",
+        error: error instanceof Error ? error.message : "Unknown error"
       });
     }
   });
@@ -546,17 +565,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/users/:id/password/expire", requireAdmin, async (req, res) => {
     try {
       const id = z.coerce.number().parse(req.params.id);
+      const user = await storage.getUser(id);
       
-      // In a real implementation, this would call OKTA API to expire password
+      if (!user) {
+        return res.status(404).json({
+          success: false,
+          message: "User not found"
+        });
+      }
+
+      if (!user.oktaId) {
+        return res.status(400).json({
+          success: false,
+          message: "User has no OKTA ID"
+        });
+      }
+
+      // Call OKTA API to expire password
+      const result = await oktaService.expireUserPassword(user.oktaId);
+      console.log(`Password expired for user ${user.email}:`, result);
+      
       res.json({
         success: true,
-        message: "Password expiration initiated successfully"
+        message: "Password expired successfully - user will be required to change it on next login"
       });
     } catch (error) {
       console.error("Password expire error:", error);
       res.status(500).json({
         success: false,
-        message: "Failed to expire password"
+        message: "Failed to expire password",
+        error: error instanceof Error ? error.message : "Unknown error"
       });
     }
   });

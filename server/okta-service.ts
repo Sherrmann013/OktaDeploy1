@@ -559,6 +559,40 @@ class OktaService {
       throw new Error(`OKTA API error: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
+
+  async resetUserPassword(userId: string): Promise<any> {
+    try {
+      const response = await this.makeRequest(`/users/${userId}/lifecycle/reset_password?sendEmail=true`, {
+        method: 'POST'
+      });
+      
+      if (response.ok) {
+        return await response.json();
+      } else {
+        const errorText = await response.text();
+        throw new Error(`Failed to reset password: ${response.status} ${response.statusText} - ${errorText}`);
+      }
+    } catch (error) {
+      throw new Error(`OKTA API error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  async expireUserPassword(userId: string): Promise<any> {
+    try {
+      const response = await this.makeRequest(`/users/${userId}/lifecycle/expire_password`, {
+        method: 'POST'
+      });
+      
+      if (response.ok) {
+        return await response.json();
+      } else {
+        const errorText = await response.text();
+        throw new Error(`Failed to expire password: ${response.status} ${response.statusText} - ${errorText}`);
+      }
+    } catch (error) {
+      throw new Error(`OKTA API error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
 }
 
 export const oktaService = new OktaService();
