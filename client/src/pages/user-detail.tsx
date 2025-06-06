@@ -58,11 +58,23 @@ export default function UserDetail() {
 
   const userId = params?.id ? parseInt(params.id) : null;
 
+  // Clear problematic cache entries on mount
+  useEffect(() => {
+    if (userId) {
+      // Invalidate any cached data that might interfere
+      queryClient.removeQueries({ 
+        queryKey: ["/api/users"], 
+        exact: false 
+      });
+    }
+  }, [userId]);
+
   const { data: user, isLoading, error } = useQuery<User>({
-    queryKey: ["/api/users", userId],
+    queryKey: [`/api/users/${userId}`],
     enabled: !!userId,
     retry: 1,
     staleTime: 0,
+    gcTime: 0, // Prevent caching issues
   });
 
   // Debug logging

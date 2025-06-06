@@ -1,0 +1,171 @@
+> rest-express@1.0.0 dev
+4:36:53 AM [express] serving on port 5000s
+Browserslist: browsers data (caniuse-lite) is 8 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+4:36:57 AM [express] GET /api/auth/user 401 in 2ms :: {"message":"Unauthorized"}
+4:36:58 AM [express] GET /api/auth/user 304 in 34ms :: {"id":1,"username":"CW-Admin","email":"admin@…
+4:36:58 AM [express] GET /api/users/255/groups 304 in 550ms :: [{"id":"00ggu8hz2kPlnDD3j4x6","create…
+Getting groups for user 00upjk1lyuKkVoA084x7...
+4:36:58 AM [express] GET /api/users/255/devices 304 in 635ms :: [{"id":"crpqlmccwaGSTmzIy4x7","facto…
+User is in 0 Employee Type groups: []
+User's Employee Type applications (0): []
+4:36:59 AM [express] GET /api/users/255/applications 304 in 862ms :: []
+4:37:00 AM [express] GET /api/users 200 in 1860ms :: {"users":[{"id":191,"oktaId":"00uf78954oXLDWJoV…
+4:37:23 AM [express] GET /api/users 200 in 1732ms :: {"users":[{"id":191,"oktaId":"00uf78954oXLDWJoV…
+4:38:03 AM [express] GET /api/auth/user 304 in 34ms :: {"id":1,"username":"CW-Admin","email":"admin@…
+Getting groups for user 00uci9nnotvPYnULH4x7...
+User is in 1 Employee Type groups: [ 'MTX-ET-EMPLOYEE' ]
+Getting apps for user's group: MTX-ET-EMPLOYEE
+Approach 1: Using /groups/{id}/apps with pagination...
+4:38:03 AM [express] GET /api/users/110/groups 304 in 578ms :: [{"id":"00ggu8hz2kPlnDD3j4x6","create…
+4:38:03 AM [express] GET /api/users/110/devices 200 in 672ms :: [{"id":"opfqw5ciqwhzX2BEQ4x7","facto…
+4:38:04 AM [express] GET /api/users 200 in 1692ms :: {"users":[{"id":191,"oktaId":"00uf78954oXLDWJoV…
+Retrieved 44 apps from this page (total so far: 44)
+Approach 1 found 44 apps for group MTX-ET-EMPLOYEE
+  Group app: "ADP"
+  Group app: "Chemical Inventory System"
+  Group app: "Atlassian Cloud - "
+  Group app: "Compreg"
+  Group app: "Druva 2.0"
+  Group app: "Envoy"
+  Group app: "GlobalProtect VPN"
+  Group app: "IDBS E-Workbook ELN"
+  Group app: "KnowBe4"
+  Group app: "Expensify"
+  Group app: "Meeting Materials"
+  Group app: "PlanSource Benefits"
+  Group app: "SciFinder"
+  Group app: "OfficeSpace"
+  Group app: "Slack"
+  Group app: "Zoom"
+  Group app: "RightFind"
+  Group app: "IDBS SAML"
+  Group app: "CKAN"
+  Group app: "RStudio Connect"
+  Group app: "Chemical Inventory System SAML"
+  Group app: "Coupa - Prod"
+  Group app: "Greenhouse"
+  Group app: "Google Workspace"
+  Group app: "DocuSign"
+  Group app: "Prendio"
+  Group app: "Pingboard"
+  Group app: "Data Apps"
+  Group app: "SaturnCloud"
+  Group app: "Coupa - Prod Bookmark"
+  Group app: "Addigy Identity"
+  Group app: "Elsevier SAML"
+  Group app: "Sparrow SAML"
+  Group app: "Elsevier"
+  Group app: "Sparrow"
+  Group app: "Saturn Cloud"
+  Group app: "ChemInventory SAML"
+  Group app: "ChemInventory"
+  Group app: "SoniCloud SAML"
+  Group app: "Lattice"
+  Group app: "SoniCloud"
+  Group app: "EverFi"
+  Group app: "Sharepoint"
+  Group app: "IT-Support Ticket"
+User's Employee Type applications (44): [
+  'ADP',
+  'Chemical Inventory System',
+  'Atlassian Cloud - ',
+  'Compreg',
+  'Druva 2.0',
+  'Envoy',
+  'GlobalProtect VPN',
+  'IDBS E-Workbook ELN',
+  'KnowBe4',
+  'Expensify',
+  'Meeting Materials',
+  'PlanSource Benefits',
+  'SciFinder',
+  'OfficeSpace',
+  'Slack',
+  'Zoom',
+  'RightFind',
+  'IDBS SAML',
+  'CKAN',
+  'RStudio Connect',
+  'Chemical Inventory System SAML',
+  'Coupa - Prod',
+  'Greenhouse',
+  'Google Workspace',
+  'DocuSign',
+  'Prendio',
+  'Pingboard',
+  'Data Apps',
+  'SaturnCloud',
+  'Coupa - Prod Bookmark',
+  'Addigy Identity',
+  'Elsevier SAML',
+  'Sparrow SAML',
+  'Elsevier',
+  'Sparrow',
+  'Saturn Cloud',
+  'ChemInventory SAML',
+  'ChemInventory',
+  'SoniCloud SAML',
+  'Lattice',
+  'SoniCloud',
+  'EverFi',
+  'Sharepoint',
+  'IT-Support Ticket'
+]
+App "DocuSign" (auccqo0r1ij18dI7y4x7): Employee Type = true
+App "Coupa - Prod" (auccqpoxax02meFZj4x7): Employee Type = true
+App "ADP Workforce Now" (auccy01g526NpNgZF4x7): Employee Type = false
+App "Atlassian Cloud -  Jira SAML" (auccr23pez6Ejk6Zm4x7): Employee Type = false
+App "Atlassian Cloud -  Confluence SAML" (auccr23pf0YiK0lCg4x7): Employee Type = false
+App "CDD Vault" (auccqnqw9zHjN7eDG4x7): Employee Type = false
+App "ChemInventory" (aucjlmyl205HDrEus4x7): Employee Type = true
+App "ChemTrax" (auccqr6j19uf05D9H4x7): Employee Type = false
+App "CKAN" (auccrqw33vpZxR5aE4x7): Employee Type = true
+App "Compreg" (auccqpfvxsuukYDOE4x7): Employee Type = true
+App "Coupa - Prod Bookmark" (auceay0mbsgPdmESo4x7): Employee Type = true
+App "Data Apps" (auce7i4ophZBDdFe54x7): Employee Type = true
+App "Druva 2.0" (auccqqut3ahSXTy5y4x7): Employee Type = true
+App "Elsevier" (aucg66vcjmF3dNvA14x7): Employee Type = true
+App "Envoy" (auccqr3tskiLT44K44x7): Employee Type = true
+App "EverFi" (aucmvfp9ssXwZtFCd4x7): Employee Type = true
+App "Expensify" (auccqr6g4v3EfS10f4x7): Employee Type = true
+App "Greenhouse" (auccqqy75lNNj5bl54x7): Employee Type = true
+App "IDBS E-Workbook ELN" (auccqpy3pe7JIQngq4x7): Employee Type = true
+App "Inductive Bio" (auclwt6g8vyEGnTlW4x7): Employee Type = false
+App "IT-Support Ticket" (aucqzn9u7mlB2b50A4x7): Employee Type = true
+App "KnowBe4" (auccqq4nptvCKMLJt4x7): Employee Type = true
+App "Lattice" (aucl5ec9vw4PRBUe14x7): Employee Type = true
+App "Meeting Materials" (auccqpuhqsqKjet9D4x7): Employee Type = true
+App "Mimecast Personal Portal" (auccqpsraiDzxsCTY4x7): Employee Type = false
+App "Mosaic" (auccqpplq00W9OJbU4x7): Employee Type = false
+App "Office 365 -  Mail" (auccqphk6gyvZaZrQ4x7): Employee Type = false
+App "Office 365 -  OneDrive" (auccqphk6es2Cdg714x7): Employee Type = false
+App "Office 365 -  Teams" (auccqphk6fooTXo0W4x7): Employee Type = false
+App "OfficeSpace" (auccqp9ftrApaiiSR4x7): Employee Type = true
+App "Pingboard" (auccqp62nfR1VvSsX4x7): Employee Type = true
+App "PlanSource Benefits" (auccqp3czxIj2qHQA4x7): Employee Type = true
+App "Prendio" (auccqp3bvpXw8BKvS4x7): Employee Type = true
+App "RightFind" (auccr2lwomwtJsDpA4x7): Employee Type = true
+App "RStudio Connect" (auchx91kvpSD9GiVD4x7): Employee Type = true
+App "SaturnCloud" (auce1ckmbvWl1gM574x7): Employee Type = true
+App "SciFinder" (auccqox94px2K0nZ34x7): Employee Type = true
+App "Sharepoint" (aucmt212gfPtvlIT14x7): Employee Type = true
+App "Slack" (auccqofe59zGImxJk4x7): Employee Type = true
+App "SoniCloud" (aucjlmin75X8hZcIo4x7): Employee Type = true
+App "Sparrow" (aucgf6j3e41QVnb3U4x7): Employee Type = true
+App "Zoom" (auccqnrei1Tf284AU4x7): Employee Type = true
+4:38:05 AM [express] GET /api/users/110/applications 304 in 1799ms :: [{"id":"auccqo0r1ij18dI7y4x7",…
+^A^A^A^A4:39:07 AM [express] GET /api/users 200 in 1953ms :: {"users":[{"id":191,"oktaId":"00uf78954oXLDWJoV…
+4:39:09 AM [express] GET /api/users 200 in 1644ms :: {"users":[{"id":80,"oktaId":"00uci9nk8tNptA56E4…
+4:39:09 AM [express] GET /api/users 200 in 1411ms :: {"users":[{"id":255,"oktaId":"00upjk1lyuKkVoA08…
+4:39:09 AM [express] GET /api/users 200 in 1524ms :: {"users":[{"id":55,"oktaId":"00uci9nrjlMMmNZI24…
+4:39:09 AM [express] GET /api/users 200 in 1493ms :: {"users":[{"id":255,"oktaId":"00upjk1lyuKkVoA08…
+4:39:11 AM [express] GET /api/auth/user 304 in 34ms :: {"id":1,"username":"CW-Admin","email":"admin@…
+4:39:11 AM [express] GET /api/users/255/groups 304 in 143ms :: [{"id":"00ggu8hz2kPlnDD3j4x6","create…
+4:39:11 AM [express] GET /api/users/255/devices 304 in 194ms :: [{"id":"crpqlmccwaGSTmzIy4x7","facto…
+Getting groups for user 00upjk1lyuKkVoA084x7...
+User is in 0 Employee Type groups: []
+User's Employee Type applications (0): []
+4:39:11 AM [express] GET /api/users/255/applications 304 in 430ms :: []
+4:39:12 AM [express] GET /api/users 200 in 1454ms :: {"users":[{"id":191,"oktaId":"00uf78954oXLDWJoV…
