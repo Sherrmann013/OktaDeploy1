@@ -426,9 +426,12 @@ export default function UserDetail() {
     return etGroup ? etGroup.profile.name.replace('MTX-ET-', '').replace('_', ' ') : 'Not specified';
   };
 
-  const filteredApps = (userApps || []).filter(app =>
-    app && app.label && app.label.toLowerCase().includes(appSearchTerm.toLowerCase())
-  );
+  const filteredApps = (userApps || []).filter(app => {
+    if (!app) return false;
+    
+    const appName = app.label || app.name || '';
+    return appName.toLowerCase().includes(appSearchTerm.toLowerCase());
+  });
 
   return (
     <main className="flex-1 overflow-hidden">
@@ -878,8 +881,8 @@ export default function UserDetail() {
                                 <img src={app.logo} alt={app.label} className="w-8 h-8 rounded" />
                               )}
                               <div>
-                                <h4 className="font-medium">{app.label}</h4>
-                                <p className="text-sm text-gray-500">{app.name}</p>
+                                <h4 className="font-medium">{app.label || app.name || 'Unknown Application'}</h4>
+                                <p className="text-sm text-gray-500">{app.description || app.settings?.app?.authURL || ''}</p>
                               </div>
                             </div>
                             <div className="flex items-center gap-2">
