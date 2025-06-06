@@ -25,7 +25,7 @@ class OktaService {
     this.baseUrl = `https://${this.config.domain}/api/v1`;
   }
 
-  private async makeRequest(endpoint: string, options: { method?: string; body?: string } = {}): Promise<any> {
+  private async makeRequest(endpoint: string, options: { method?: string; body?: string; useEnhancedToken?: boolean } = {}): Promise<any> {
     return new Promise((resolve, reject) => {
       const requestOptions = {
         hostname: this.config.domain,
@@ -33,7 +33,7 @@ class OktaService {
         path: `/api/v1${endpoint}`,
         method: options.method || 'GET',
         headers: {
-          'Authorization': `SSWS ${this.config.apiToken}`,
+          'Authorization': `SSWS ${options.useEnhancedToken && process.env.OKTA_API_TOKEN_ENHANCED ? process.env.OKTA_API_TOKEN_ENHANCED : this.config.apiToken}`,
           'Accept': 'application/json',
           'Content-Type': 'application/json',
           ...(options.body && { 'Content-Length': Buffer.byteLength(options.body) })
@@ -505,7 +505,8 @@ class OktaService {
     try {
       console.log(`Adding user ${userId} to group ${groupId}`);
       const response = await this.makeRequest(`/groups/${groupId}/users/${userId}`, {
-        method: 'PUT'
+        method: 'PUT',
+        useEnhancedToken: true
       });
       
       if (response.ok) {
@@ -525,7 +526,8 @@ class OktaService {
     try {
       console.log(`Removing user ${userId} from group ${groupId}`);
       const response = await this.makeRequest(`/groups/${groupId}/users/${userId}`, {
-        method: 'DELETE'
+        method: 'DELETE',
+        useEnhancedToken: true
       });
       
       if (response.ok || response.status === 404) {

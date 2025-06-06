@@ -11,27 +11,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Setup authentication
   await setupLocalAuth(app);
 
-  // Auth routes
-  app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
-    try {
-      const user = req.user;
-      res.json(user);
-    } catch (error) {
-      console.error("Error fetching user:", error);
-      res.status(500).json({ message: "Failed to fetch user" });
-    }
-  });
+  // Auth routes are handled by setupLocalAuth
 
-  // Logout route
-  app.post('/api/logout', (req, res) => {
-    req.logout((err: any) => {
-      if (err) {
-        console.error("Logout error:", err);
-        return res.status(500).json({ message: "Failed to logout" });
-      }
-      res.json({ message: "Logged out successfully" });
-    });
-  });
+  // Logout route is handled by setupLocalAuth
 
   // Get all users with fallback from OKTA to local storage
   app.get("/api/users", isAuthenticated, async (req, res) => {
