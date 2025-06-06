@@ -301,54 +301,41 @@ class OktaService {
           try {
             console.log(`Getting apps for user's group: ${group.profile?.name || group.name}`);
             
-            // Get ALL applications and filter by group assignment
-            let allApps: any[] = [];
-            let nextUrl = '/apps?limit=200';
+            // Try multiple approaches to get all group applications
+            console.log('Approach 1: Using /groups/{id}/apps with pagination...');
+            let groupApps: any[] = [];
+            let nextUrl: string | null = `/groups/${group.id}/apps?limit=200`;
             
             while (nextUrl) {
-              const appsResponse = await this.makeRequest(nextUrl.replace('/apps', ''));
-              if (appsResponse.ok) {
-                const pageApps = await appsResponse.json();
-                allApps = allApps.concat(pageApps);
+              const response = await this.makeRequest(nextUrl);
+              if (response.ok) {
+                const pageApps = await response.json();
+                groupApps = groupApps.concat(pageApps);
+                console.log(`Retrieved ${pageApps.length} apps from this page (total so far: ${groupApps.length})`);
                 
-                // Check for next page link
-                const linkHeader = appsResponse.headers.get('link');
+                // Check for next page
+                const linkHeader = response.headers.get('link');
                 nextUrl = null;
                 if (linkHeader) {
                   const nextMatch = linkHeader.match(/<([^>]+)>;\s*rel="next"/);
                   if (nextMatch) {
-                    nextUrl = nextMatch[1].replace(this.baseUrl, '');
+                    const fullUrl = nextMatch[1];
+                    nextUrl = fullUrl.replace(this.baseUrl, '');
                   }
                 }
               } else {
+                console.log(`Failed to get group apps: ${response.status}`);
                 break;
               }
             }
             
-            console.log(`Retrieved ${allApps.length} total applications from tenant`);
+            console.log(`Approach 1 found ${groupApps.length} apps for group ${group.profile?.name || group.name}`);
             
-            // Now filter apps that are assigned to this specific group
-            let groupAppCount = 0;
-            for (const app of allApps) {
-              try {
-                // Check if this app has the group assigned
-                const appGroupsResponse = await this.makeRequest(`/apps/${app.id}/groups`);
-                if (appGroupsResponse.ok) {
-                  const appGroups = await appGroupsResponse.json();
-                  const hasGroup = appGroups.some((appGroup: any) => appGroup.id === group.id);
-                  if (hasGroup) {
-                    userEmployeeTypeAppNames.add(app.label);
-                    groupAppCount++;
-                    console.log(`  Group assigned app: "${app.label}"`);
-                  }
-                }
-              } catch (error) {
-                // Continue with next app if one fails
-                continue;
-              }
-            }
-            
-            console.log(`Found ${groupAppCount} apps assigned to group ${group.profile?.name || group.name}`);
+            // Add all found apps to the set
+            groupApps.forEach((app: any) => {
+              userEmployeeTypeAppNames.add(app.label);
+              console.log(`  Group app: "${app.label}"`);
+            });
             
           } catch (error) {
             console.log(`Failed to get apps for user's group ${group.id}:`, error);
