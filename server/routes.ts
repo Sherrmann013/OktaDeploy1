@@ -5,11 +5,11 @@ import { insertUserSchema, updateUserSchema } from "@shared/schema";
 import { z } from "zod";
 import { oktaService } from "./okta-service";
 import { syncSpecificUser } from "./okta-sync";
-import { setupLocalAuth, isAuthenticated, requireAdmin } from "./local-auth";
+import { setupAuth, isAuthenticated, requireAdmin } from "./okta-auth";
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Setup authentication
-  await setupLocalAuth(app);
+  // Setup OKTA SSO authentication
+  await setupAuth(app);
 
   // Auth routes are handled by setupLocalAuth
 
