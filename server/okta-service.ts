@@ -224,6 +224,7 @@ class OktaService {
 
       // Get applications for each Employee Type group
       const employeeTypeAppIds = new Set<string>();
+      const employeeTypeAppNames = new Set<string>();
       
       for (const group of employeeTypeGroups) {
         try {
@@ -233,6 +234,8 @@ class OktaService {
             console.log(`Group "${group.profile?.name || group.name}" has ${groupApps.length} applications`);
             groupApps.forEach((app: any) => {
               employeeTypeAppIds.add(app.id);
+              employeeTypeAppNames.add(app.label);
+              console.log(`  Group app: "${app.label}" (ID: ${app.id})`);
             });
           }
         } catch (error) {
