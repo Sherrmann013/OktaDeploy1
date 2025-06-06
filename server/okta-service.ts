@@ -228,6 +228,7 @@ class OktaService {
       
       for (const group of employeeTypeGroups) {
         try {
+          console.log(`Checking group: ${group.profile?.name || group.name} (${group.id})`);
           const groupAppsResponse = await this.makeRequest(`/groups/${group.id}/apps`);
           if (groupAppsResponse.ok) {
             const groupApps = await groupAppsResponse.json();
@@ -236,12 +237,22 @@ class OktaService {
               employeeTypeAppIds.add(app.id);
               employeeTypeAppNames.add(app.label);
               console.log(`  Group app: "${app.label}" (ID: ${app.id})`);
+              
+              // Special check for IT-Support
+              if (app.label && app.label.includes('IT')) {
+                console.log(`*** Found IT app in group: "${app.label}"`);
+              }
             });
+          } else {
+            console.log(`Failed to get apps for group ${group.id}: ${groupAppsResponse.status}`);
           }
         } catch (error) {
           console.log(`Failed to get apps for group ${group.id}:`, error);
         }
       }
+
+      // Also try to get user's group memberships directly to see if there are more Employee Type groups
+      console.log('Double-checking by looking for all MTX-ET groups in user groups...');
 
       console.log(`Total Employee Type applications: ${employeeTypeAppIds.size}`);
       console.log('Employee Type App Names:', Array.from(employeeTypeAppNames));
@@ -268,19 +279,47 @@ class OktaService {
       if (response.ok) {
         const apps = await response.json();
         
-        // Get Employee Type applications (now returns names instead of IDs)
-        const employeeTypeAppNames = await this.getEmployeeTypeApplications();
+        // Get user's groups first to check their specific Employee Type memberships
+        console.log(`Getting groups for user ${userId}...`);
+        const userGroups = await this.getUserGroups(userId);
+        const userEmployeeTypeGroups = userGroups.filter(group => {
+          const groupName = group.profile?.name || group.name || '';
+          return groupName.startsWith('MTX-ET-') && 
+                 (groupName.includes('EMPLOYEE') || 
+                  groupName.includes('CONTRACTOR') || 
+                  groupName.includes('PART_TIME') || 
+                  groupName.includes('INTERN'));
+        });
         
-        // Transform apps with Employee Type detection using names
-        const enhancedApps = apps.map((app: any) => {
-          const isFromEmployeeType = employeeTypeAppNames.has(app.label);
-          console.log(`App "${app.label}" (${app.id}): Employee Type = ${isFromEmployeeType}`);
-          
-          // Special debug for IT-Support Ticket
-          if (app.label.includes('IT-Support')) {
-            console.log(`IT-Support Debug: "${app.label}" in Employee Type names?`, employeeTypeAppNames.has(app.label));
-            console.log('Employee Type names containing "IT":', Array.from(employeeTypeAppNames).filter(name => name.includes('IT')));
+        console.log(`User is in ${userEmployeeTypeGroups.length} Employee Type groups:`, 
+                   userEmployeeTypeGroups.map(g => g.profile?.name || g.name));
+        
+        // Get applications from user's specific Employee Type groups
+        const userEmployeeTypeAppNames = new Set<string>();
+        
+        for (const group of userEmployeeTypeGroups) {
+          try {
+            console.log(`Getting apps for user's group: ${group.profile?.name || group.name}`);
+            const groupAppsResponse = await this.makeRequest(`/groups/${group.id}/apps`);
+            if (groupAppsResponse.ok) {
+              const groupApps = await groupAppsResponse.json();
+              console.log(`User's group "${group.profile?.name || group.name}" has ${groupApps.length} applications`);
+              groupApps.forEach((app: any) => {
+                userEmployeeTypeAppNames.add(app.label);
+                console.log(`  User group app: "${app.label}"`);
+              });
+            }
+          } catch (error) {
+            console.log(`Failed to get apps for user's group ${group.id}:`, error);
           }
+        }
+        
+        console.log(`User's Employee Type applications (${userEmployeeTypeAppNames.size}):`, Array.from(userEmployeeTypeAppNames));
+        
+        // Transform apps with Employee Type detection using user's specific group memberships
+        const enhancedApps = apps.map((app: any) => {
+          const isFromEmployeeType = userEmployeeTypeAppNames.has(app.label);
+          console.log(`App "${app.label}" (${app.id}): Employee Type = ${isFromEmployeeType}`);
           
           return {
             id: app.id,
