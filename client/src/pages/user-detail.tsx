@@ -23,9 +23,12 @@ const editUserSchema = z.object({
   firstName: z.string().min(1, "First name is required"),
   lastName: z.string().min(1, "Last name is required"),
   email: z.string().email("Invalid email address"),
+  login: z.string().min(1, "Login is required"),
   title: z.string().optional(),
   department: z.string().optional(),
   mobilePhone: z.string().optional(),
+  manager: z.string().optional(),
+  employeeType: z.enum(["EMPLOYEE", "CONTRACTOR", "PART_TIME", "INTERN", ""]).optional(),
 });
 
 export default function UserDetail() {
@@ -47,9 +50,12 @@ export default function UserDetail() {
       firstName: "",
       lastName: "",
       email: "",
+      login: "",
       title: "",
       department: "",
       mobilePhone: "",
+      manager: "",
+      employeeType: "",
     },
   });
   
@@ -105,9 +111,12 @@ export default function UserDetail() {
         firstName: user.firstName || "",
         lastName: user.lastName || "",
         email: user.email || "",
+        login: user.login || "",
         title: user.title || "",
         department: user.department || "",
         mobilePhone: user.mobilePhone || "",
+        manager: user.manager || "",
+        employeeType: (user.employeeType as "EMPLOYEE" | "CONTRACTOR" | "PART_TIME" | "INTERN" | "") || "",
       });
     }
   }, [user, form, isEditing]);
@@ -526,6 +535,19 @@ export default function UserDetail() {
                           </div>
                           <FormField
                             control={form.control}
+                            name="login"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Login</FormLabel>
+                                <FormControl>
+                                  <Input {...field} />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={form.control}
                             name="mobilePhone"
                             render={({ field }) => (
                               <FormItem>
@@ -537,6 +559,43 @@ export default function UserDetail() {
                               </FormItem>
                             )}
                           />
+                          <div className="grid grid-cols-2 gap-4">
+                            <FormField
+                              control={form.control}
+                              name="manager"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Manager</FormLabel>
+                                  <FormControl>
+                                    <Input {...field} />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                            <FormField
+                              control={form.control}
+                              name="employeeType"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Employee Type</FormLabel>
+                                  <FormControl>
+                                    <select
+                                      {...field}
+                                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                    >
+                                      <option value="">Select Employee Type</option>
+                                      <option value="EMPLOYEE">Employee</option>
+                                      <option value="CONTRACTOR">Contractor</option>
+                                      <option value="PART_TIME">Part Time</option>
+                                      <option value="INTERN">Intern</option>
+                                    </select>
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                          </div>
                         </CardContent>
                       </Card>
                     </form>
