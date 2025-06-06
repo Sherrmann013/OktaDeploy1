@@ -637,6 +637,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get user devices from OKTA
+  app.get("/api/users/:id/devices", isAuthenticated, async (req, res) => {
+    try {
+      const userId = parseInt(req.params.id);
+      const user = await storage.getUser(userId);
+      
+      if (!user || !user.oktaId) {
+        return res.status(404).json({ message: "User not found or no OKTA ID" });
+      }
+
+      const devices = await oktaService.getUserDevices(user.oktaId);
+      res.json(devices);
+    } catch (error) {
+      console.error("Error fetching user devices:", error);
+      res.status(500).json({ message: "Failed to fetch user devices" });
+    }
+  });
+
   // Raw OKTA API output for debugging (no auth required for testing)
   app.get("/api/debug-okta-raw/:email", async (req, res) => {
     try {
