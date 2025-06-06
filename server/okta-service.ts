@@ -562,8 +562,19 @@ class OktaService {
     try {
       console.log(`Adding user ${userId} to group ${groupId}`);
       
-      // Try method 1: PUT to assign user to group
-      console.log(`Attempting PUT method: /groups/${groupId}/users/${userId}`);
+      // First, let's verify the group exists and check permissions
+      console.log(`Verifying group exists: ${groupId}`);
+      const groupCheck = await this.makeRequest(`/groups/${groupId}`, {
+        method: 'GET',
+        useEnhancedToken: true
+      });
+      
+      if (!groupCheck.ok) {
+        throw new Error(`Group ${groupId} not found or inaccessible`);
+      }
+      
+      // Method 1: Standard OKTA API approach - PUT to /groups/{groupId}/users/{userId}
+      console.log(`Attempting standard PUT method: /groups/${groupId}/users/${userId}`);
       let response = await this.makeRequest(`/groups/${groupId}/users/${userId}`, {
         method: 'PUT',
         useEnhancedToken: true
@@ -571,40 +582,45 @@ class OktaService {
       
       if (response.ok) {
         console.log(`Successfully added user to group via PUT`);
-        return true;
+        return await response.json();
       }
       
-      // Method 1 failed, try method 2: POST with user in body
-      console.log(`PUT method failed, trying POST method: /groups/${groupId}/users`);
+      // Log detailed error for troubleshooting
+      const errorText = await response.text();
+      let parsedError;
+      try {
+        parsedError = JSON.parse(errorText);
+      } catch {
+        parsedError = { errorSummary: errorText };
+      }
+      
+      console.log(`PUT method failed with ${response.status}: ${parsedError.errorSummary || errorText}`);
+      console.log(`Full error response:`, parsedError);
+      
+      // Method 2: Alternative endpoint structure
+      console.log(`Attempting alternative POST method: /groups/${groupId}/users`);
       response = await this.makeRequest(`/groups/${groupId}/users`, {
-        method: 'POST',
-        body: JSON.stringify({
-          userId: userId
-        }),
+        method: 'POST', 
+        body: JSON.stringify({ userId: userId }),
         useEnhancedToken: true
       });
       
       if (response.ok) {
         console.log(`Successfully added user to group via POST`);
-        return true;
+        return await response.json();
       }
       
-      // Method 2 failed, try method 3: POST without body (some OKTA APIs work this way)
-      console.log(`POST with body failed, trying POST without body: /groups/${groupId}/users/${userId}`);
-      response = await this.makeRequest(`/groups/${groupId}/users/${userId}`, {
-        method: 'POST',
-        useEnhancedToken: true
-      });
+      // Final attempt: Check if it's a permissions scope issue
+      const finalError = await response.text();
+      console.log(`All group membership methods failed. Final error: ${response.status} ${finalError}`);
       
-      if (response.ok) {
-        console.log(`Successfully added user to group via POST without body`);
-        return true;
+      if (response.status === 405) {
+        throw new Error(`OKTA API group management endpoints are returning 405 errors. This may indicate that group management is restricted in this OKTA tenant configuration, even with proper admin roles.`);
+      } else if (response.status === 403) {
+        throw new Error(`Access forbidden despite Group Administrator role. The API token may need additional scopes or the tenant may have additional restrictions.`);
       }
       
-      // All methods failed
-      const errorText = await response.text();
-      console.log(`All methods failed. Final error: ${response.status} ${errorText}`);
-      throw new Error(`Failed to add user to group: ${response.status} ${response.statusText} - ${errorText}`);
+      throw new Error(`Group management failed: ${response.status} ${response.statusText} - ${finalError}`);
       
     } catch (error) {
       throw new Error(`OKTA API error: ${error instanceof Error ? error.message : 'Unknown error'}`);
