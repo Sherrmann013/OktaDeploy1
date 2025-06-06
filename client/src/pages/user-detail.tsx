@@ -392,7 +392,14 @@ export default function UserDetail() {
                           )
                           .sort((a: any, b: any) => a.name.localeCompare(b.name))
                           .map((app: any) => (
-                            <div key={app.id} className="p-2 border border-gray-200 rounded text-center bg-gray-50 hover:bg-gray-100 transition-colors">
+                            <div 
+                              key={app.id} 
+                              className={`p-2 border border-gray-200 rounded text-center transition-colors ${
+                                app.isFromEmployeeType 
+                                  ? 'bg-blue-100 text-black hover:bg-blue-200' 
+                                  : 'bg-gray-50 hover:bg-gray-100'
+                              }`}
+                            >
                               <h4 className="text-sm font-medium text-gray-900 truncate" title={app.name}>
                                 {app.name}
                               </h4>
@@ -425,16 +432,12 @@ export default function UserDetail() {
                     </div>
                   ) : userGroups && userGroups.length > 0 ? (
                     <div className="space-y-3">
-                      {userGroups
-                        .filter((group: any) => 
-                          group.type !== "BUILT_IN" && group.type !== "APP_GROUP"
-                        )
-                        .map((group: any) => (
-                          <div key={group.id} className="p-3 border border-gray-200 rounded-lg">
-                            <h4 className="font-medium text-gray-900">{group.profile?.name || group.name}</h4>
-                            <p className="text-sm text-gray-600 mt-1">{group.profile?.description || "No description"}</p>
-                          </div>
-                        ))}
+                      {userGroups.map((group: any) => (
+                        <div key={group.id} className="p-3 border border-gray-200 rounded-lg">
+                          <h4 className="font-medium text-gray-900">{group.profile?.name || group.name}</h4>
+                          <p className="text-sm text-gray-600 mt-1">{group.profile?.description || "No description"}</p>
+                        </div>
+                      ))}
                     </div>
                   ) : (
                     <p className="text-gray-600 py-8 text-center">No groups assigned to this user.</p>
@@ -456,34 +459,55 @@ export default function UserDetail() {
                   ) : userDevices && userDevices.length > 0 ? (
                     <div className="space-y-3">
                       {userDevices.map((device: any, index: number) => {
-                        const getDeviceIcon = (userAgent: string) => {
-                          if (userAgent?.toLowerCase().includes('mobile') || userAgent?.toLowerCase().includes('iphone') || userAgent?.toLowerCase().includes('android')) {
-                            return Smartphone;
-                          }
+                        const getDeviceIcon = (factorType: string) => {
+                          if (factorType?.includes('push')) return Smartphone;
+                          if (factorType?.includes('token')) return Shield;
                           return Monitor;
                         };
 
-                        const Icon = getDeviceIcon(device.userAgent?.rawUserAgent);
+                        const Icon = getDeviceIcon(device.factorType);
 
                         return (
-                          <div key={index} className="flex items-center gap-3 p-3 border border-gray-200 rounded-lg">
-                            <Icon className="w-5 h-5 text-gray-600" />
-                            <div className="flex-1">
-                              <h4 className="font-medium text-gray-900">
-                                {device.deviceType || device.userAgent?.browser || 'Unknown Device'}
-                              </h4>
-                              <p className="text-sm text-gray-600">
-                                {device.userAgent?.rawUserAgent || 'No user agent info'}
-                              </p>
-                              {device.lastSeen && (
-                                <p className="text-xs text-gray-500 mt-1">
-                                  Last seen: {format(new Date(device.lastSeen), "MMM d, yyyy 'at' h:mm a")}
+                          <div key={device.id || index} className="p-3 border border-gray-200 rounded-lg">
+                            <div className="flex items-start gap-3">
+                              <Icon className="w-5 h-5 text-blue-600 mt-0.5" />
+                              <div className="flex-1">
+                                <h4 className="font-medium text-gray-900">
+                                  {device.profile?.name || device.factorType || "Unknown Device"}
+                                </h4>
+                                <p className="text-sm text-gray-600 mt-1">
+                                  Type: {device.factorType || "Unknown"}
                                 </p>
-                              )}
+                                <p className="text-sm text-gray-600">
+                                  Provider: {device.provider || "Unknown"}
+                                </p>
+                                <div className="flex items-center gap-2 mt-2">
+                                  <Badge variant={device.status === "ACTIVE" ? "default" : "secondary"}>
+                                    {device.status || "Unknown"}
+                                  </Badge>
+                                </div>
+                                {device.created && (
+                                  <p className="text-xs text-gray-500 mt-1">
+                                    Created: {format(new Date(device.created), "MMM d, yyyy 'at' h:mm a")}
+                                  </p>
+                                )}
+                                {device.lastUpdated && (
+                                  <p className="text-xs text-gray-500">
+                                    Last updated: {format(new Date(device.lastUpdated), "MMM d, yyyy 'at' h:mm a")}
+                                  </p>
+                                )}
+                                {device.profile?.deviceType && (
+                                  <p className="text-xs text-gray-500">
+                                    Device type: {device.profile.deviceType}
+                                  </p>
+                                )}
+                                {device.profile?.platform && (
+                                  <p className="text-xs text-gray-500">
+                                    Platform: {device.profile.platform}
+                                  </p>
+                                )}
+                              </div>
                             </div>
-                            <Badge variant={device.status === "TRUSTED" ? "default" : "secondary"}>
-                              {device.status || "Unknown"}
-                            </Badge>
                           </div>
                         );
                       })}
@@ -571,10 +595,81 @@ export default function UserDetail() {
                                     </div>
                                   )}
                                   
+                                  {log.client?.userAgent?.browser && (
+                                    <div>
+                                      <span className="font-medium">Browser:</span> {log.client.userAgent.browser}
+                                    </div>
+                                  )}
+                                  
+                                  {log.client?.userAgent?.os && (
+                                    <div>
+                                      <span className="font-medium">Operating System:</span> {log.client.userAgent.os}
+                                    </div>
+                                  )}
+                                  
                                   {log.actor?.displayName && (
                                     <div>
                                       <span className="font-medium">Actor:</span> {log.actor.displayName} ({log.actor.type})
                                     </div>
+                                  )}
+                                  
+                                  {log.outcome?.reason && (
+                                    <div>
+                                      <span className="font-medium">Reason:</span> {log.outcome.reason}
+                                    </div>
+                                  )}
+                                  
+                                  {log.securityContext?.isp && (
+                                    <div>
+                                      <span className="font-medium">ISP:</span> {log.securityContext.isp}
+                                    </div>
+                                  )}
+                                  
+                                  {log.securityContext?.domain && (
+                                    <div>
+                                      <span className="font-medium">Domain:</span> {log.securityContext.domain}
+                                    </div>
+                                  )}
+                                  
+                                  {log.authenticationContext?.externalSessionId && (
+                                    <div>
+                                      <span className="font-medium">Session ID:</span> {log.authenticationContext.externalSessionId}
+                                    </div>
+                                  )}
+                                  
+                                  {log.authenticationContext?.interface && (
+                                    <div>
+                                      <span className="font-medium">Interface:</span> {log.authenticationContext.interface}
+                                    </div>
+                                  )}
+                                  
+                                  {/* Show Verified and Managed fields for access failures */}
+                                  {log.outcome?.result === 'FAILURE' && (
+                                    <>
+                                      {log.debugContext?.debugData?.deviceFingerprint && (
+                                        <div>
+                                          <span className="font-medium">Device Fingerprint:</span> {log.debugContext.debugData.deviceFingerprint}
+                                        </div>
+                                      )}
+                                      
+                                      {log.debugContext?.debugData?.behaviors && (
+                                        <div>
+                                          <span className="font-medium">Behaviors:</span> {JSON.stringify(log.debugContext.debugData.behaviors)}
+                                        </div>
+                                      )}
+                                      
+                                      {log.debugContext?.debugData?.riskReasons && (
+                                        <div>
+                                          <span className="font-medium">Risk Reasons:</span> {log.debugContext.debugData.riskReasons.join(', ')}
+                                        </div>
+                                      )}
+                                      
+                                      {log.debugContext?.debugData?.threatSuspected !== undefined && (
+                                        <div>
+                                          <span className="font-medium">Threat Suspected:</span> {log.debugContext.debugData.threatSuspected ? 'Yes' : 'No'}
+                                        </div>
+                                      )}
+                                    </>
                                   )}
                                   
                                   {log.target && log.target.length > 0 && (
@@ -584,6 +679,15 @@ export default function UserDetail() {
                                         {log.target.map((target: any, index: number) => (
                                           <li key={index}>
                                             {target.displayName} ({target.type})
+                                            {target.detailEntry && (
+                                              <div className="ml-2 text-gray-500">
+                                                {Object.entries(target.detailEntry).map(([key, value]: [string, any]) => (
+                                                  <div key={key}>
+                                                    <span className="font-medium">{key}:</span> {String(value)}
+                                                  </div>
+                                                ))}
+                                              </div>
+                                            )}
                                           </li>
                                         ))}
                                       </ul>
@@ -592,6 +696,10 @@ export default function UserDetail() {
                                   
                                   <div>
                                     <span className="font-medium">Event ID:</span> {log.id}
+                                  </div>
+                                  
+                                  <div>
+                                    <span className="font-medium">Transaction ID:</span> {log.transaction?.id || 'N/A'}
                                   </div>
                                 </div>
                               </CollapsibleContent>

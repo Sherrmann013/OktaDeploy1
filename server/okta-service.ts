@@ -207,16 +207,30 @@ class OktaService {
 
   async getUserDevices(userId: string): Promise<any[]> {
     try {
-      // Try both endpoints as OKTA may use different endpoints for device info
-      let response = await this.makeRequest(`/users/${userId}/clients`);
+      // Try the factors endpoint which includes device information
+      let response = await this.makeRequest(`/users/${userId}/factors`);
       
       if (!response.ok) {
-        // Try alternative endpoint for device/session info
+        // Try clients endpoint
+        response = await this.makeRequest(`/users/${userId}/clients`);
+      }
+      
+      if (!response.ok) {
+        // Try sessions endpoint as fallback
         response = await this.makeRequest(`/users/${userId}/sessions`);
       }
       
       if (response.ok) {
-        return await response.json();
+        const data = await response.json();
+        // If we got factors, filter for device-related factors
+        if (Array.isArray(data) && data.length > 0 && data[0].factorType) {
+          return data.filter(factor => 
+            factor.factorType === 'push' || 
+            factor.factorType === 'token:software:totp' ||
+            factor.provider === 'OKTA'
+          );
+        }
+        return data;
       } else {
         const errorText = await response.text();
         throw new Error(`Failed to get user devices: ${response.status} ${response.statusText} - ${errorText}`);
