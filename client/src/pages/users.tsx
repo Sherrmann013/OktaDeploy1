@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,6 +10,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import UserTable from "@/components/user-table";
 import CreateUserModal from "@/components/create-user-modal";
 import { User } from "@shared/schema";
+import { useToast } from "@/hooks/use-toast";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 import { 
   Users as UsersIcon, 
   Search, 
@@ -21,15 +23,39 @@ import {
   Mail,
   Phone,
   Building,
-  Calendar
+  Calendar,
+  RotateCcw
 } from "lucide-react";
 
 export default function Users() {
   const [searchQuery, setSearchQuery] = useState("");
-
   const [currentPage, setCurrentPage] = useState(1);
   const [usersPerPage] = useState(10);
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const { toast } = useToast();
+
+  // OKTA Sync Mutation
+  const oktaSyncMutation = useMutation({
+    mutationFn: async () => {
+      const response = await apiRequest("GET", "/api/okta/sync-all");
+      return await response.json();
+    },
+    onSuccess: (data) => {
+      toast({
+        title: "OKTA Sync Completed",
+        description: `${data.message}. Total: ${data.totalUsers}, New: ${data.newUsers}, Updated: ${data.updatedUsers}`,
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/users"] });
+      refetch();
+    },
+    onError: (error) => {
+      toast({
+        title: "OKTA Sync Failed", 
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
 
   const { data: usersData, isLoading, refetch } = useQuery({
     queryKey: ["/api/users", currentPage, usersPerPage, searchQuery],
@@ -115,6 +141,15 @@ export default function Users() {
             )}
           </div>
           <div className="flex items-center space-x-3">
+            <Button
+              variant="outline"
+              onClick={() => oktaSyncMutation.mutate()}
+              disabled={oktaSyncMutation.isPending}
+              className="border-orange-300 text-orange-700 hover:bg-orange-50"
+            >
+              <RotateCcw className={`w-4 h-4 mr-2 ${oktaSyncMutation.isPending ? 'animate-spin' : ''}`} />
+              Sync OKTA
+            </Button>
             <Button
               variant="outline"
               onClick={handleRefresh}
