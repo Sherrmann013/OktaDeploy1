@@ -275,10 +275,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
 
+      // Get current user data to check for employee type changes
+      const currentUser = await storage.getUser(id);
+      if (!currentUser) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
       const updatedUser = await storage.updateUser(id, updates);
       
       if (!updatedUser) {
         return res.status(404).json({ message: "User not found" });
+      }
+
+      // Handle employee type group management if employee type changed
+      if (updates.employeeType && currentUser.employeeType !== updates.employeeType && updatedUser.oktaId) {
+        try {
+          // Remove from old employee type groups
+          if (currentUser.employeeType) {
+            const oldGroupName = `MTX-ET-${currentUser.employeeType}`;
+            console.log(`Removing user from old group: ${oldGroupName}`);
+            // In a real implementation, we would remove from OKTA group here
+          }
+
+          // Add to new employee type group
+          const newGroupName = `MTX-ET-${updates.employeeType}`;
+          console.log(`Adding user to new group: ${newGroupName}`);
+          // In a real implementation, we would add to OKTA group here
+          // await oktaService.addUserToGroup(updatedUser.oktaId, newGroupName);
+          
+          console.log(`Employee type changed for user ${updatedUser.firstName} ${updatedUser.lastName}: ${currentUser.employeeType} -> ${updates.employeeType}`);
+        } catch (groupError) {
+          console.error("Error managing employee type groups:", groupError);
+          // Don't fail the entire update if group management fails
+        }
       }
 
       res.json(updatedUser);

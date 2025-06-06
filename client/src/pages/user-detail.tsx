@@ -621,6 +621,10 @@ export default function UserDetail() {
                           <p className="text-gray-900">{user.email}</p>
                         </div>
                         <div>
+                          <label className="text-sm font-medium text-gray-500">Login</label>
+                          <p className="text-gray-900">{user.login}</p>
+                        </div>
+                        <div>
                           <label className="text-sm font-medium text-gray-500">Mobile Phone</label>
                           <p className="text-gray-900">{user.mobilePhone || 'Not specified'}</p>
                         </div>
@@ -642,12 +646,12 @@ export default function UserDetail() {
                           <p className="text-gray-900">{user.department || 'Not specified'}</p>
                         </div>
                         <div>
-                          <label className="text-sm font-medium text-gray-500">Employee Type</label>
-                          <p className="text-gray-900">{getEmployeeType(userGroups)}</p>
-                        </div>
-                        <div>
                           <label className="text-sm font-medium text-gray-500">Manager</label>
                           <p className="text-gray-900">{user.manager || 'Not specified'}</p>
+                        </div>
+                        <div>
+                          <label className="text-sm font-medium text-gray-500">Employee Type</label>
+                          <p className="text-gray-900">{getEmployeeType(userGroups)}</p>
                         </div>
                       </CardContent>
                     </Card>
