@@ -17,6 +17,87 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.redirect("/api/login");
   });
 
+  // Debug endpoint for troubleshooting user access issues
+  app.get('/api/debug/user-access/:email', isAuthenticated, requireAdmin, async (req, res) => {
+    try {
+      const email = req.params.email;
+      console.log(`Debugging access for user: ${email}`);
+      
+      // Check if user exists in OKTA
+      const oktaUser = await oktaService.getUserByEmail(email);
+      
+      if (!oktaUser) {
+        return res.json({
+          email,
+          exists: false,
+          message: "User not found in OKTA"
+        });
+      }
+      
+      // Check if user is assigned to the application
+      const appAssignmentResponse = await fetch(`${process.env.OKTA_DOMAIN}/api/v1/apps/${process.env.CLIENT_ID}/users/${oktaUser.id}`, {
+        headers: {
+          'Authorization': `SSWS ${process.env.OKTA_API_TOKEN}`,
+          'Accept': 'application/json'
+        }
+      });
+      
+      const isAssigned = appAssignmentResponse.ok;
+      let assignmentDetails = null;
+      
+      if (isAssigned) {
+        assignmentDetails = await appAssignmentResponse.json();
+      }
+      
+      // Check MFA factors
+      const factorsResponse = await fetch(`${process.env.OKTA_DOMAIN}/api/v1/users/${oktaUser.id}/factors`, {
+        headers: {
+          'Authorization': `SSWS ${process.env.OKTA_API_TOKEN}`,
+          'Accept': 'application/json'
+        }
+      });
+      
+      const factors = factorsResponse.ok ? await factorsResponse.json() : [];
+      
+      res.json({
+        email,
+        exists: true,
+        oktaUser: {
+          id: oktaUser.id,
+          status: oktaUser.status,
+          created: oktaUser.created,
+          lastLogin: oktaUser.lastLogin,
+          profile: {
+            firstName: oktaUser.profile.firstName,
+            lastName: oktaUser.profile.lastName,
+            email: oktaUser.profile.email,
+            department: oktaUser.profile.department,
+            title: oktaUser.profile.title
+          }
+        },
+        appAccess: {
+          isAssigned,
+          assignmentStatus: assignmentDetails?.status || 'NOT_ASSIGNED',
+          assignmentDetails
+        },
+        mfaFactors: factors.length,
+        activeMfaFactors: factors.filter((f: any) => f.status === 'ACTIVE').length,
+        recommendation: !isAssigned 
+          ? "User needs to be assigned to the application"
+          : oktaUser.status !== 'ACTIVE'
+          ? "User account is not active"
+          : "User appears properly configured for access"
+      });
+      
+    } catch (error) {
+      console.error("Error debugging user access:", error);
+      res.status(500).json({ 
+        message: "Failed to debug user access",
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
   // Auth routes are handled by setupAuth
 
   // Get employee type group counts from OKTA

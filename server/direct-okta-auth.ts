@@ -53,7 +53,7 @@ export async function setupAuth(app: Express) {
 
   // OKTA callback route
   app.get("/api/okta-callback", async (req, res) => {
-    console.log('Processing OKTA callback');
+    console.log('Processing OKTA callback with query params:', req.query);
     
     try {
       const { code, state, error, error_description } = req.query;
@@ -61,7 +61,8 @@ export async function setupAuth(app: Express) {
       // Handle OAuth errors
       if (error) {
         console.error('OKTA OAuth error:', error, error_description);
-        return res.redirect('/?error=oauth_failed');
+        console.error('Full callback query params:', req.query);
+        return res.redirect(`/?error=oauth_failed&details=${encodeURIComponent(error_description || error)}`);
       }
       
       // Validate state parameter
