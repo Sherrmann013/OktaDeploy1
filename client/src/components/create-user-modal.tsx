@@ -35,7 +35,7 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
 
   const availableManagers = usersData?.users || [];
   
-  // Filter managers based on search input
+  // Filter managers based on search input - matching edit user configuration
   const filteredManagers = useMemo(() => {
     if (!managerSearch || managerSearch.length < 2) return [];
     
@@ -81,7 +81,7 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
         // Sort alphabetically as fallback
         return aFullName.localeCompare(bFullName);
       })
-      .slice(0, 10); // Increased to 10 suggestions for better usability
+      .slice(0, 25); // Match edit user configuration (25 suggestions)
   }, [availableManagers, managerSearch]);
 
   const form = useForm<InsertUser>({
@@ -163,7 +163,9 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
 
   const handleManagerSelect = (user: User) => {
     setSelectedManager(user);
-    setManagerSearch(`${user.firstName} ${user.lastName}`);
+    const fullName = `${user.firstName} ${user.lastName}`;
+    setManagerSearch(fullName);
+    form.setValue('manager', fullName);
     setShowManagerDropdown(false);
   };
 
@@ -244,33 +246,55 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
               />
             </div>
 
-            <FormField
-              control={form.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Email Address *</FormLabel>
-                  <FormControl>
-                    <Input type="email" placeholder="Enter email address" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="login"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Login *</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Enter login username" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Email Username *</FormLabel>
+                    <FormControl>
+                      <div className="flex">
+                        <Input 
+                          placeholder="username" 
+                          value={field.value ? field.value.replace('@mazetx.com', '') : ''}
+                          onChange={(e) => {
+                            const username = e.target.value;
+                            const fullEmail = username ? `${username}@mazetx.com` : '';
+                            field.onChange(fullEmail);
+                            // Auto-update login field
+                            form.setValue('login', fullEmail);
+                          }}
+                          className="rounded-r-none"
+                        />
+                        <div className="flex items-center px-3 bg-gray-50 border border-l-0 border-gray-300 rounded-r-md text-sm text-gray-500">
+                          @mazetx.com
+                        </div>
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="login"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Login *</FormLabel>
+                    <FormControl>
+                      <Input 
+                        placeholder="Login will auto-populate" 
+                        {...field}
+                        className="bg-gray-50"
+                        readOnly
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FormField
@@ -351,51 +375,55 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
               )}
             />
 
-            <div className="relative">
-              <FormLabel className="text-sm font-medium text-gray-700">Manager</FormLabel>
-              <div className="relative">
-                <Input
-                  type="text"
-                  placeholder="Start typing manager name..."
-                  value={managerSearch}
-                  onChange={(e) => handleManagerSearchChange(e.target.value)}
-                  onFocus={() => setShowManagerDropdown(managerSearch.length > 0)}
-                  className="w-full"
-                />
-                {selectedManager && (
-                  <div className="absolute right-2 top-1/2 transform -translate-y-1/2">
-                    <Check className="h-4 w-4 text-green-600" />
-                  </div>
-                )}
-                
-                {showManagerDropdown && filteredManagers.length > 0 && (
-                  <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto">
-                    {filteredManagers.map((manager) => (
-                      <div
-                        key={manager.id}
-                        className="px-3 py-2 cursor-pointer hover:bg-gray-100 border-b border-gray-100 last:border-b-0"
-                        onClick={() => handleManagerSelect(manager)}
-                      >
-                        <div className="font-medium text-sm text-gray-900">
-                          {manager.firstName} {manager.lastName}
+            <FormField
+              control={form.control}
+              name="manager"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Manager</FormLabel>
+                  <FormControl>
+                    <div className="relative">
+                      <Input 
+                        {...field} 
+                        onChange={(e) => {
+                          field.onChange(e);
+                          setManagerSearch(e.target.value);
+                          setShowManagerDropdown(e.target.value.length > 0);
+                          if (e.target.value === "") {
+                            setSelectedManager(null);
+                          }
+                        }}
+                        placeholder="Type to search for manager..."
+                      />
+                      {managerSearch && filteredManagers.length > 0 && (
+                        <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto">
+                          {filteredManagers.map((manager: User) => (
+                            <div
+                              key={manager.id}
+                              className="px-3 py-2 cursor-pointer hover:bg-gray-100"
+                              onClick={() => {
+                                const fullName = `${manager.firstName} ${manager.lastName}`;
+                                field.onChange(fullName);
+                                setSelectedManager(manager);
+                                setManagerSearch("");
+                                setShowManagerDropdown(false);
+                              }}
+                            >
+                              <div className="font-medium">{manager.firstName} {manager.lastName}</div>
+                              <div className="text-sm text-gray-500">{manager.email}</div>
+                              {manager.title && (
+                                <div className="text-sm text-gray-400">{manager.title}</div>
+                              )}
+                            </div>
+                          ))}
                         </div>
-                        <div className="text-xs text-gray-500">
-                          {manager.title} {manager.title && manager.department && "•"} {manager.department}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-                
-                {showManagerDropdown && managerSearch.length > 0 && filteredManagers.length === 0 && (
-                  <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg">
-                    <div className="px-3 py-2 text-sm text-gray-500">
-                      No managers found matching "{managerSearch}"
+                      )}
                     </div>
-                  </div>
-                )}
-              </div>
-            </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
             <div>
               <Label className="text-sm font-medium text-gray-700 mb-2 block">Groups</Label>

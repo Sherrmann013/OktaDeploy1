@@ -259,8 +259,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           password: {
             value: Math.random().toString(36).slice(-12) + "A1!" // Generate temporary password
           }
-        },
-        groupIds: userData.groups || []
+        }
       };
 
       // Create user in OKTA
