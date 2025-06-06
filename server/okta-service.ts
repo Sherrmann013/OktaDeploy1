@@ -193,54 +193,87 @@ class OktaService {
     }
   }
 
+  // Cache for Employee Type applications to avoid repeated API calls
+  private employeeTypeAppsCache: Set<string> | null = null;
+  private cacheTimestamp: number = 0;
+  private readonly CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+
+  async getEmployeeTypeApplications(): Promise<Set<string>> {
+    // Return cached data if still valid
+    if (this.employeeTypeAppsCache && (Date.now() - this.cacheTimestamp) < this.CACHE_TTL) {
+      return this.employeeTypeAppsCache;
+    }
+
+    try {
+      console.log('Loading Employee Type applications...');
+      
+      // Get all groups first
+      const allGroups = await this.getGroups(200);
+      
+      // Filter for Employee Type groups
+      const employeeTypeGroups = allGroups.filter(group => {
+        const groupName = group.profile?.name || group.name || '';
+        return groupName.toLowerCase().includes('employee') || 
+               groupName.toLowerCase().includes('type') ||
+               groupName.toLowerCase().includes('staff') ||
+               groupName.toLowerCase().includes('role');
+      });
+
+      console.log(`Found ${employeeTypeGroups.length} Employee Type groups:`, employeeTypeGroups.map(g => g.profile?.name || g.name));
+
+      // Get applications for each Employee Type group
+      const employeeTypeAppIds = new Set<string>();
+      
+      for (const group of employeeTypeGroups) {
+        try {
+          const groupAppsResponse = await this.makeRequest(`/groups/${group.id}/apps`);
+          if (groupAppsResponse.ok) {
+            const groupApps = await groupAppsResponse.json();
+            console.log(`Group "${group.profile?.name || group.name}" has ${groupApps.length} applications`);
+            groupApps.forEach((app: any) => {
+              employeeTypeAppIds.add(app.id);
+            });
+          }
+        } catch (error) {
+          console.log(`Failed to get apps for group ${group.id}:`, error);
+        }
+      }
+
+      console.log(`Total Employee Type applications: ${employeeTypeAppIds.size}`);
+      
+      // Cache the results
+      this.employeeTypeAppsCache = employeeTypeAppIds;
+      this.cacheTimestamp = Date.now();
+      
+      return employeeTypeAppIds;
+    } catch (error) {
+      console.error('Error loading Employee Type applications:', error);
+      return new Set<string>();
+    }
+  }
+
   async getUserApplications(userId: string): Promise<any[]> {
     try {
-      // Get user's applications with assignment details
+      // Get user's applications
       const response = await this.makeRequest(`/users/${userId}/appLinks`);
       
       if (response.ok) {
         const apps = await response.json();
         
-        // Also get user's groups to determine Employee Type assignments
-        const userGroups = await this.getUserGroups(userId);
-        const employeeTypeGroups = userGroups.filter(group => {
-          const groupName = group.profile?.name || group.name || '';
-          return groupName.toLowerCase().includes('employee') || 
-                 groupName.toLowerCase().includes('type') ||
-                 groupName.toLowerCase().includes('staff') ||
-                 groupName.toLowerCase().includes('role');
-        });
+        // Get Employee Type applications
+        const employeeTypeAppIds = await this.getEmployeeTypeApplications();
         
-        // Get all group applications for Employee Type groups
-        const groupAppPromises = employeeTypeGroups.map(async (group) => {
-          try {
-            const groupAppsResponse = await this.makeRequest(`/groups/${group.id}/apps`);
-            if (groupAppsResponse.ok) {
-              const groupApps = await groupAppsResponse.json();
-              return { groupId: group.id, groupName: group.profile?.name || group.name, apps: groupApps };
-            }
-          } catch (error) {
-            console.log(`Failed to get apps for group ${group.id}:`, error);
-          }
-          return { groupId: group.id, groupName: group.profile?.name || group.name, apps: [] };
-        });
-
-        const groupAppsData = await Promise.all(groupAppPromises);
-        
-        // Create a set of app IDs that are assigned via Employee Type groups
-        const employeeTypeAppIds = new Set();
-        groupAppsData.forEach(groupData => {
-          groupData.apps.forEach((groupApp: any) => {
-            employeeTypeAppIds.add(groupApp.id);
-          });
-        });
-
         // Transform apps with Employee Type detection
-        const enhancedApps = apps.map((app: any) => ({
-          id: app.id,
-          name: app.label,
-          isFromEmployeeType: employeeTypeAppIds.has(app.id)
-        }));
+        const enhancedApps = apps.map((app: any) => {
+          const isFromEmployeeType = employeeTypeAppIds.has(app.id);
+          console.log(`App "${app.label}" (${app.id}): Employee Type = ${isFromEmployeeType}`);
+          
+          return {
+            id: app.id,
+            name: app.label,
+            isFromEmployeeType
+          };
+        });
         
         return enhancedApps;
       } else {
