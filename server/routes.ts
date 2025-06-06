@@ -331,12 +331,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Update status in OKTA if user has OKTA ID
       if (user.oktaId) {
         try {
+          console.log(`Updating OKTA user ${user.oktaId} status to ${status}`);
           if (status === "SUSPENDED") {
-            await oktaService.suspendUser(user.oktaId);
+            const result = await oktaService.suspendUser(user.oktaId);
+            console.log("OKTA suspend result:", result);
           } else if (status === "ACTIVE") {
-            await oktaService.activateUser(user.oktaId);
+            const result = await oktaService.activateUser(user.oktaId);
+            console.log("OKTA activate result:", result);
           } else if (status === "DEPROVISIONED") {
-            await oktaService.deactivateUser(user.oktaId);
+            const result = await oktaService.deactivateUser(user.oktaId);
+            console.log("OKTA deactivate result:", result);
           }
         } catch (oktaError) {
           console.error("OKTA API error:", oktaError);

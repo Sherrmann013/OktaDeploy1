@@ -503,17 +503,24 @@ class OktaService {
 
   async suspendUser(userId: string): Promise<any> {
     try {
+      console.log(`Making OKTA API call to suspend user: ${userId}`);
       const response = await this.makeRequest(`/users/${userId}/lifecycle/suspend`, {
         method: 'POST'
       });
       
+      console.log(`OKTA suspend response - Status: ${response.status}, OK: ${response.ok}`);
+      
       if (response.ok) {
-        return await response.json();
+        const result = await response.json();
+        console.log('OKTA suspend response body:', JSON.stringify(result, null, 2));
+        return result;
       } else {
         const errorText = await response.text();
+        console.log(`OKTA suspend error - Status: ${response.status}, Error: ${errorText}`);
         throw new Error(`Failed to suspend user: ${response.status} ${response.statusText} - ${errorText}`);
       }
     } catch (error) {
+      console.error('OKTA suspend API error:', error);
       throw new Error(`OKTA API error: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
