@@ -692,6 +692,25 @@ class OktaService {
       throw new Error(`OKTA API error: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
+
+  async updateUserProfile(userId: string, profileUpdates: any): Promise<any> {
+    try {
+      console.log(`Updating OKTA user profile for ${userId}:`, profileUpdates);
+      const response = await this.makeRequest(`/users/${userId}`, {
+        method: 'POST',
+        body: JSON.stringify({
+          profile: profileUpdates
+        }),
+        useEnhancedToken: true
+      });
+      
+      console.log(`OKTA profile update successful for user ${userId}`);
+      return response;
+    } catch (error) {
+      console.error(`Failed to update OKTA user profile for ${userId}:`, error);
+      throw new Error(`Failed to update user profile: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
 }
 
 export const oktaService = new OktaService();

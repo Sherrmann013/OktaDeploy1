@@ -293,26 +293,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
           // Only update OKTA if there are profile changes
           if (Object.keys(oktaUpdates).length > 0) {
             console.log(`Updating OKTA profile for user ${currentUser.oktaId}:`, oktaUpdates);
-            const oktaUpdateResponse = await fetch(`https://${process.env.OKTA_DOMAIN}/api/v1/users/${currentUser.oktaId}`, {
-              method: 'POST',
-              headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json',
-                'Authorization': `SSWS ${process.env.OKTA_API_TOKEN_ENHANCED}`,
-              },
-              body: JSON.stringify({
-                profile: oktaUpdates
-              })
-            });
-
-            if (!oktaUpdateResponse.ok) {
-              const errorData = await oktaUpdateResponse.text();
-              console.error(`Failed to update user in OKTA: ${oktaUpdateResponse.status} ${oktaUpdateResponse.statusText}`, errorData);
-              throw new Error(`OKTA update failed: ${oktaUpdateResponse.status} ${oktaUpdateResponse.statusText}`);
-            }
-
-            const oktaUpdatedUser = await oktaUpdateResponse.json();
-            console.log(`Successfully updated user in OKTA:`, oktaUpdatedUser.profile);
+            
+            // Use the OKTA service to update the user profile
+            const updateResult = await oktaService.updateUserProfile(currentUser.oktaId, oktaUpdates);
+            console.log(`Successfully updated user in OKTA:`, updateResult);
           }
         } catch (oktaError) {
           console.error("Error updating user in OKTA:", oktaError);
