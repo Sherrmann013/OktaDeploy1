@@ -58,15 +58,41 @@ export default function AssignAppModal({ open, onClose, userId, userApps }: Assi
 
   // Initialize selected apps when modal opens
   useEffect(() => {
-    if (open) {
-      const currentAppIds = userApps.map(app => app.id);
+    if (open && allApplications.length > 0) {
       console.log('User Apps:', userApps);
-      console.log('Current App IDs Array:', currentAppIds);
-      const selectedSet = new Set(currentAppIds);
-      console.log('Selected Set:', Array.from(selectedSet));
-      setSelectedApps(selectedSet);
+      
+      // First try exact ID matches
+      const currentAppIds = userApps.map(app => app.id);
+      const allAppIds = allApplications.map((app: any) => app.id);
+      const exactMatches = currentAppIds.filter(id => allAppIds.includes(id));
+      
+      // For apps without exact ID matches, try name matching
+      const selectedAppIds = new Set(exactMatches);
+      
+      userApps.forEach(userApp => {
+        if (!exactMatches.includes(userApp.id)) {
+          // Find app in all applications with similar name
+          const matchingApp = allApplications.find((allApp: any) => {
+            const allAppName = (allApp.name || allApp.label || '').toLowerCase().trim();
+            const userAppName = userApp.name.toLowerCase().trim();
+            
+            // Check for exact name match or if one name contains the other
+            return allAppName === userAppName || 
+                   allAppName.includes(userAppName) || 
+                   userAppName.includes(allAppName);
+          });
+          
+          if (matchingApp) {
+            console.log(`Name-matched app: "${userApp.name}" (user ID: ${userApp.id}) -> "${matchingApp.name}" (all apps ID: ${matchingApp.id})`);
+            selectedAppIds.add(matchingApp.id);
+          }
+        }
+      });
+      
+      console.log('Selected App IDs:', Array.from(selectedAppIds));
+      setSelectedApps(selectedAppIds);
     }
-  }, [open, userApps]);
+  }, [open, userApps, allApplications]);
 
   // Filter and sort applications alphabetically
   const filteredApplications = allApplications
