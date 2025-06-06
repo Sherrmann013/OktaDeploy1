@@ -330,6 +330,88 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Full OKTA sync - fetch all users with pagination
+  app.get("/api/okta/sync-all", requireAdmin, async (req, res) => {
+    try {
+      console.log("Starting full OKTA sync with pagination...");
+      const allUsers = await oktaService.getUsers(200); // This will now paginate through all users
+      console.log(`Found ${allUsers.length} users in OKTA`);
+      
+      let syncedCount = 0;
+      let updatedCount = 0;
+      
+      for (const oktaUser of allUsers) {
+        try {
+          // Check if user already exists
+          const existingUser = await storage.getUserByOktaId(oktaUser.id);
+          
+          if (!existingUser) {
+            // Transform and create new user
+            const transformedUser = {
+              oktaId: oktaUser.id,
+              firstName: oktaUser.profile.firstName,
+              lastName: oktaUser.profile.lastName,
+              email: oktaUser.profile.email,
+              login: oktaUser.profile.login,
+              title: oktaUser.profile.title || null,
+              department: oktaUser.profile.department || null,
+              mobilePhone: oktaUser.profile.mobilePhone || null,
+              status: oktaUser.status,
+              activated: oktaUser.activated ? new Date(oktaUser.activated) : new Date(),
+              created: new Date(oktaUser.created),
+              lastUpdated: new Date(oktaUser.lastUpdated),
+              lastLogin: oktaUser.lastLogin ? new Date(oktaUser.lastLogin) : null,
+              passwordChanged: oktaUser.passwordChanged ? new Date(oktaUser.passwordChanged) : null,
+              employeeType: null,
+              managerId: null,
+              groups: null,
+              profileUrl: null,
+              sendActivationEmail: false
+            };
+            
+            await storage.createUser(transformedUser);
+            syncedCount++;
+          } else {
+            // Update existing user
+            const updates = {
+              firstName: oktaUser.profile.firstName,
+              lastName: oktaUser.profile.lastName,
+              email: oktaUser.profile.email,
+              login: oktaUser.profile.login,
+              title: oktaUser.profile.title || null,
+              department: oktaUser.profile.department || null,
+              mobilePhone: oktaUser.profile.mobilePhone || null,
+              status: oktaUser.status,
+              lastUpdated: new Date(oktaUser.lastUpdated),
+              lastLogin: oktaUser.lastLogin ? new Date(oktaUser.lastLogin) : null,
+              passwordChanged: oktaUser.passwordChanged ? new Date(oktaUser.passwordChanged) : null
+            };
+            
+            await storage.updateUser(existingUser.id, updates);
+            updatedCount++;
+          }
+        } catch (userError) {
+          console.error(`Error syncing user ${oktaUser.id}:`, userError);
+        }
+      }
+      
+      res.json({
+        success: true,
+        message: `Full sync completed. Found ${allUsers.length} users in OKTA, created ${syncedCount} new users, updated ${updatedCount} existing users.`,
+        totalUsers: allUsers.length,
+        newUsers: syncedCount,
+        updatedUsers: updatedCount
+      });
+    } catch (error) {
+      console.error("Error during full OKTA sync:", error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to sync all OKTA users",
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
   // Sync specific user from OKTA
   app.post("/api/okta/sync-user", requireAdmin, async (req, res) => {
     try {

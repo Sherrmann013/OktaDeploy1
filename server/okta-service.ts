@@ -54,6 +54,9 @@ class OktaService {
               ok: res.statusCode! >= 200 && res.statusCode! < 300,
               status: res.statusCode,
               statusText: res.statusMessage,
+              headers: {
+                get: (name: string) => res.headers[name.toLowerCase()]
+              },
               json: () => Promise.resolve(jsonData),
               text: () => Promise.resolve(data)
             });
@@ -62,6 +65,9 @@ class OktaService {
               ok: res.statusCode! >= 200 && res.statusCode! < 300,
               status: res.statusCode,
               statusText: res.statusMessage,
+              headers: {
+                get: (name: string) => res.headers[name.toLowerCase()]
+              },
               json: () => Promise.reject(new Error('Invalid JSON')),
               text: () => Promise.resolve(data)
             });
@@ -137,17 +143,36 @@ class OktaService {
     }
   }
 
-  async getUsers(limit: number = 10): Promise<any[]> {
+  async getUsers(limit: number = 200): Promise<any[]> {
     try {
-      const response = await this.makeRequest(`/users?limit=${limit}`);
+      let allUsers: any[] = [];
+      let after = '';
       
-      if (response.ok) {
-        const users = await response.json();
-        return users;
-      } else {
-        const errorText = await response.text();
-        throw new Error(`Failed to get users: ${response.status} ${response.statusText} - ${errorText}`);
-      }
+      do {
+        const url = `/users?limit=${limit}${after ? `&after=${after}` : ''}`;
+        const response = await this.makeRequest(url);
+        
+        if (response.ok) {
+          const users = await response.json();
+          allUsers = allUsers.concat(users);
+          
+          // Check for pagination - OKTA includes Link header for pagination
+          const linkHeader = response.headers.get('link');
+          after = '';
+          
+          if (linkHeader) {
+            const nextMatch = linkHeader.match(/<[^>]+[?&]after=([^&>]+)[^>]*>;\s*rel="next"/);
+            if (nextMatch) {
+              after = nextMatch[1];
+            }
+          }
+        } else {
+          const errorText = await response.text();
+          throw new Error(`Failed to get users: ${response.status} ${response.statusText} - ${errorText}`);
+        }
+      } while (after);
+      
+      return allUsers;
     } catch (error) {
       throw new Error(`OKTA API error: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
