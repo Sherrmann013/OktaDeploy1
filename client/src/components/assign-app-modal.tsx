@@ -36,31 +36,11 @@ export default function AssignAppModal({ open, onClose, userId, userApps }: Assi
     enabled: open,
   });
 
-  // Log applications data when it changes
-  useEffect(() => {
-    if (allApplications.length > 0) {
-      console.log('All Applications:', allApplications);
-      console.log('First few app IDs:', allApplications.slice(0, 5).map((app: any) => ({ id: app.id, name: app.name || app.label })));
-      
-      // Find "Active Disclosure" in all applications
-      const activeDisclosure = allApplications.find((app: any) => 
-        (app.name || app.label || '').toLowerCase().includes('active disclosure')
-      );
-      console.log('Active Disclosure in all apps:', activeDisclosure);
-      
-      // Check if any user app IDs match any all app IDs
-      const userAppIds = userApps.map(app => app.id);
-      const allAppIds = allApplications.map((app: any) => app.id);
-      const matches = userAppIds.filter(id => allAppIds.includes(id));
-      console.log('Matching IDs between user apps and all apps:', matches);
-    }
-  }, [allApplications, userApps]);
+
 
   // Initialize selected apps when modal opens
   useEffect(() => {
     if (open && allApplications.length > 0) {
-      console.log('User Apps:', userApps);
-      
       // First try exact ID matches
       const currentAppIds = userApps.map(app => app.id);
       const allAppIds = allApplications.map((app: any) => app.id);
@@ -83,13 +63,11 @@ export default function AssignAppModal({ open, onClose, userId, userApps }: Assi
           });
           
           if (matchingApp) {
-            console.log(`Name-matched app: "${userApp.name}" (user ID: ${userApp.id}) -> "${matchingApp.name}" (all apps ID: ${matchingApp.id})`);
             selectedAppIds.add(matchingApp.id);
           }
         }
       });
       
-      console.log('Selected App IDs:', Array.from(selectedAppIds));
       setSelectedApps(selectedAppIds);
     }
   }, [open, userApps, allApplications]);
