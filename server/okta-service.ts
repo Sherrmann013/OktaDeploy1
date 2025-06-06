@@ -195,10 +195,60 @@ class OktaService {
 
   async getUserApplications(userId: string): Promise<any[]> {
     try {
-      const response = await this.makeRequest(`/users/${userId}/appLinks`);
+      // Get user's applications with assignment details
+      const response = await this.makeRequest(`/users/${userId}/apps`);
       
       if (response.ok) {
-        return await response.json();
+        const apps = await response.json();
+        
+        // Also get user's groups to determine Employee Type assignments
+        const userGroups = await this.getUserGroups(userId);
+        const employeeTypeGroups = userGroups.filter(group => {
+          const groupName = group.profile?.name || group.name || '';
+          return groupName.toLowerCase().includes('employee') || 
+                 groupName.toLowerCase().includes('type') ||
+                 groupName.toLowerCase().includes('staff') ||
+                 groupName.toLowerCase().includes('role');
+        });
+        
+        // Enhance each app with assignment source information
+        const enhancedApps = await Promise.all(apps.map(async (app: any) => {
+          try {
+            // Check if this app is assigned to any of the user's Employee Type groups
+            let isFromEmployeeType = false;
+            
+            for (const group of employeeTypeGroups) {
+              try {
+                const groupAppsResponse = await this.makeRequest(`/groups/${group.id}/apps`);
+                if (groupAppsResponse.ok) {
+                  const groupApps = await groupAppsResponse.json();
+                  if (groupApps.some((groupApp: any) => groupApp.id === app.id)) {
+                    isFromEmployeeType = true;
+                    break;
+                  }
+                }
+              } catch (groupError) {
+                // Continue checking other groups if one fails
+                continue;
+              }
+            }
+            
+            return {
+              id: app.id,
+              name: app.label,
+              isFromEmployeeType
+            };
+          } catch (appError) {
+            // Fallback for individual app errors
+            return {
+              id: app.id,
+              name: app.label,
+              isFromEmployeeType: false
+            };
+          }
+        }));
+        
+        return enhancedApps;
       } else {
         const errorText = await response.text();
         throw new Error(`Failed to get user applications: ${response.status} ${response.statusText} - ${errorText}`);

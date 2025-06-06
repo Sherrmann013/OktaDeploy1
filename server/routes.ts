@@ -502,15 +502,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const applications = await oktaService.getUserApplications(user.oktaId);
       
-      // Transform to show app name and determine if from Employee Type groups
-      const transformedApps = applications.map(app => ({
-        id: app.id,
-        name: app.label,
-        // Check if app is assigned via group (this would indicate Employee Type assignment)
-        isFromEmployeeType: app.assignmentType === 'GROUP' || app.scope === 'GROUP'
-      }));
-      
-      res.json(transformedApps);
+      res.json(applications);
     } catch (error) {
       console.error("Error fetching user applications:", error);
       res.status(500).json({ message: "Failed to fetch user applications" });
