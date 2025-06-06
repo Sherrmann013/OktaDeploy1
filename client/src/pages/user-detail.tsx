@@ -9,7 +9,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Input } from "@/components/ui/input";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { ArrowLeft, ChevronDown, ChevronRight, Smartphone, Monitor, Shield, Eye, RefreshCw, KeyRound, Edit, Play, Pause, Trash2, Search, UserX, Save, X } from "lucide-react";
+import { ArrowLeft, ChevronDown, ChevronRight, ChevronUp, Smartphone, Monitor, Shield, Eye, RefreshCw, KeyRound, Edit, Play, Pause, Trash2, Search, UserX, Save, X, Download, Copy } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import ConfirmationModal from "@/components/confirmation-modal";
@@ -175,6 +175,50 @@ export default function UserDetail() {
     queryKey: [`/api/users/${userId}/devices`],
     enabled: !!userId,
   });
+
+  const { data: userLogs = [] } = useQuery<any[]>({
+    queryKey: [`/api/users/${userId}/logs`],
+    enabled: !!userId && activeTab === "activity",
+  });
+
+  const [expandedLogs, setExpandedLogs] = useState<Set<string>>(new Set());
+
+  const toggleLogExpansion = (logId: string) => {
+    const newExpanded = new Set(expandedLogs);
+    if (newExpanded.has(logId)) {
+      newExpanded.delete(logId);
+    } else {
+      newExpanded.add(logId);
+    }
+    setExpandedLogs(newExpanded);
+  };
+
+  const getEventIcon = (eventType: string) => {
+    if (eventType.includes('user.authentication')) return '🔐';
+    if (eventType.includes('user.session')) return '🔗';
+    if (eventType.includes('app.oauth2')) return '🔑';
+    if (eventType.includes('user.account')) return '👤';
+    if (eventType.includes('application')) return '📱';
+    return '📋';
+  };
+
+  const getOutcomeColor = (outcome: string) => {
+    switch (outcome.toUpperCase()) {
+      case 'SUCCESS': return 'text-green-600';
+      case 'FAILURE': return 'text-red-600';
+      case 'UNKNOWN': return 'text-gray-600';
+      default: return 'text-blue-600';
+    }
+  };
+
+  const formatEventTime = (timestamp: string) => {
+    try {
+      const date = new Date(timestamp);
+      return format(date, "MMM dd HH:mm:ss");
+    } catch {
+      return timestamp;
+    }
+  };
 
   // Set form values when user data loads
   useEffect(() => {
@@ -976,11 +1020,164 @@ export default function UserDetail() {
 
               <TabsContent value="activity" className="space-y-4 mt-0">
                 <Card>
-                  <CardHeader>
-                    <CardTitle>Recent Activity</CardTitle>
+                  <CardHeader className="flex flex-row items-center justify-between">
+                    <CardTitle>Events: {userLogs.length}</CardTitle>
+                    <div className="flex items-center gap-2">
+                      <Button variant="outline" size="sm">
+                        <Download className="w-4 h-4 mr-2" />
+                        Download CSV
+                      </Button>
+                    </div>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-gray-500 text-center py-8">Activity logs will be displayed here</p>
+                    {userLogs.length === 0 ? (
+                      <p className="text-gray-500 text-center py-8">No recent activity found</p>
+                    ) : (
+                      <div className="space-y-0 border rounded-lg">
+                        <div className="grid grid-cols-12 gap-4 p-3 bg-gray-50 border-b text-sm font-medium text-gray-700">
+                          <div className="col-span-2">Time</div>
+                          <div className="col-span-3">Actor</div>
+                          <div className="col-span-4">Event Info</div>
+                          <div className="col-span-2">Targets</div>
+                          <div className="col-span-1"></div>
+                        </div>
+                        {userLogs.map((log, index) => (
+                          <div key={log.id} className={`${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
+                            <div className="grid grid-cols-12 gap-4 p-3 border-b border-gray-200 hover:bg-blue-50 transition-colors">
+                              <div className="col-span-2 text-sm">
+                                <div className="flex items-center gap-2">
+                                  <span className="text-lg">{getEventIcon(log.eventType)}</span>
+                                  <div>
+                                    <div className="font-medium">{formatEventTime(log.published)}</div>
+                                  </div>
+                                </div>
+                              </div>
+                              <div className="col-span-3 text-sm">
+                                <div className="font-medium">{log.actor?.displayName || 'Unknown Actor'}</div>
+                                <div className="text-gray-500">{log.client?.ipAddress || 'Unknown IP'}</div>
+                              </div>
+                              <div className="col-span-4 text-sm">
+                                <div className="font-medium">{log.displayMessage || log.eventType}</div>
+                                <div className={`${getOutcomeColor(log.outcome)} font-medium`}>
+                                  {log.outcome}
+                                </div>
+                              </div>
+                              <div className="col-span-2 text-sm">
+                                {log.target && log.target.length > 0 && (
+                                  <div>
+                                    <div className="font-medium">{log.target[0].displayName}</div>
+                                    <div className="text-gray-500">({log.target[0].type})</div>
+                                  </div>
+                                )}
+                              </div>
+                              <div className="col-span-1 flex items-center justify-end">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => toggleLogExpansion(log.id)}
+                                  className="h-8 w-8 p-0"
+                                >
+                                  {expandedLogs.has(log.id) ? (
+                                    <ChevronUp className="w-4 h-4" />
+                                  ) : (
+                                    <ChevronDown className="w-4 h-4" />
+                                  )}
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-8 w-8 p-0 ml-1"
+                                >
+                                  <Copy className="w-4 h-4" />
+                                </Button>
+                              </div>
+                            </div>
+                            
+                            {expandedLogs.has(log.id) && (
+                              <div className="bg-gray-100 border-b border-gray-200">
+                                <div className="p-4 space-y-4">
+                                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    {/* Actor Section */}
+                                    <div>
+                                      <div className="flex items-center gap-2 mb-2">
+                                        <ChevronRight className="w-4 h-4" />
+                                        <span className="font-semibold">Actor</span>
+                                        <Button variant="outline" size="sm" className="ml-auto h-6 text-xs">
+                                          Expand All
+                                        </Button>
+                                      </div>
+                                      <div className="bg-white p-3 rounded border space-y-2 text-sm">
+                                        <div><span className="font-medium">ID:</span> {log.actor?.id || 'N/A'}</div>
+                                        <div><span className="font-medium">Display Name:</span> {log.actor?.displayName || 'N/A'}</div>
+                                        <div><span className="font-medium">Type:</span> {log.actor?.type || 'N/A'}</div>
+                                      </div>
+                                    </div>
+
+                                    {/* Client Section */}
+                                    <div>
+                                      <div className="flex items-center gap-2 mb-2">
+                                        <ChevronRight className="w-4 h-4" />
+                                        <span className="font-semibold">Client</span>
+                                      </div>
+                                      <div className="bg-white p-3 rounded border space-y-2 text-sm">
+                                        <div><span className="font-medium">IP Address:</span> {log.client?.ipAddress || 'N/A'}</div>
+                                        <div><span className="font-medium">User Agent:</span> 
+                                          <div className="mt-1 text-xs text-gray-600 break-all">
+                                            {log.client?.userAgent || 'N/A'}
+                                          </div>
+                                        </div>
+                                        {log.client?.geographicalContext && (
+                                          <div><span className="font-medium">Location:</span> 
+                                            {log.client.geographicalContext.city}, {log.client.geographicalContext.state}, {log.client.geographicalContext.country}
+                                          </div>
+                                        )}
+                                      </div>
+                                    </div>
+
+                                    {/* Event Section */}
+                                    <div>
+                                      <div className="flex items-center gap-2 mb-2">
+                                        <ChevronRight className="w-4 h-4" />
+                                        <span className="font-semibold">Event</span>
+                                      </div>
+                                      <div className="bg-white p-3 rounded border space-y-2 text-sm">
+                                        <div><span className="font-medium">Event Type:</span> {log.eventType}</div>
+                                        <div><span className="font-medium">Display Message:</span> {log.displayMessage || 'N/A'}</div>
+                                        <div><span className="font-medium">Outcome:</span> 
+                                          <span className={`ml-1 ${getOutcomeColor(log.outcome)}`}>{log.outcome}</span>
+                                        </div>
+                                        <div><span className="font-medium">Event ID:</span> {log.id}</div>
+                                      </div>
+                                    </div>
+
+                                    {/* Target Section */}
+                                    <div>
+                                      <div className="flex items-center gap-2 mb-2">
+                                        <ChevronRight className="w-4 h-4" />
+                                        <span className="font-semibold">Target</span>
+                                      </div>
+                                      <div className="bg-white p-3 rounded border space-y-2 text-sm">
+                                        {log.target && log.target.length > 0 ? (
+                                          log.target.map((target: any, idx: number) => (
+                                            <div key={idx} className={idx > 0 ? 'pt-2 border-t' : ''}>
+                                              <div><span className="font-medium">ID:</span> {target.id || 'N/A'}</div>
+                                              <div><span className="font-medium">Type:</span> {target.type || 'N/A'}</div>
+                                              <div><span className="font-medium">Display Name:</span> {target.displayName || 'N/A'}</div>
+                                            </div>
+                                          ))
+                                        ) : (
+                                          <div>No target information available</div>
+                                        )}
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               </TabsContent>
