@@ -11,11 +11,11 @@ export default function Sidebar() {
   const [location] = useLocation();
 
   return (
-    <aside className="w-44 bg-white dark:bg-gray-900 shadow-md border-r border-gray-200 dark:border-gray-700 flex-shrink-0 flex flex-col">
-      <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+    <aside className="w-44 bg-background shadow-md border-r border-border flex-shrink-0 flex flex-col">
+      <div className="p-6 border-b border-border">
         <div>
-          <h1 className="text-lg font-semibold text-gray-900 dark:text-gray-100">OKTA Admin</h1>
-          <p className="text-xs text-gray-500 dark:text-gray-400">mazetx.okta.com</p>
+          <h1 className="text-lg font-semibold text-foreground">OKTA Admin</h1>
+          <p className="text-xs text-muted-foreground">mazetx.okta.com</p>
         </div>
       </div>
       
@@ -30,8 +30,8 @@ export default function Sidebar() {
                   className={cn(
                     "flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors",
                     isActive
-                      ? "bg-blue-50 text-blue-600 dark:bg-blue-950 dark:text-blue-400"
-                      : "text-gray-600 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-gray-100"
+                      ? "bg-primary/10 text-primary"
+                      : "text-muted-foreground hover:bg-muted hover:text-foreground"
                   )}
                 >
                   <item.icon className="w-5 h-5" />
@@ -44,7 +44,7 @@ export default function Sidebar() {
       </nav>
       
       {/* Theme Toggle at Bottom */}
-      <div className="p-4 border-t border-gray-200 dark:border-gray-700">
+      <div className="p-4 border-t border-border">
         <div className="flex justify-center">
           <ThemeToggle />
         </div>
