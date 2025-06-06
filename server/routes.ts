@@ -337,7 +337,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
           console.log(`Current OKTA status: ${currentOktaStatus}, Requested status: ${status}`);
           
           // Only make OKTA API call if status actually needs to change
-          if (currentOktaStatus !== status) {
+          // Note: PROVISIONED users in OKTA should be treated as ACTIVE in our system
+          const normalizedOktaStatus = currentOktaStatus === "PROVISIONED" ? "ACTIVE" : currentOktaStatus;
+          
+          if (normalizedOktaStatus !== status) {
             console.log(`Updating OKTA user ${user.oktaId} status from ${currentOktaStatus} to ${status}`);
             if (status === "SUSPENDED") {
               const result = await oktaService.deactivateUser(user.oktaId);
@@ -350,7 +353,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               console.log("OKTA deactivate result:", result);
             }
           } else {
-            console.log(`User already has status ${status} in OKTA, skipping API call`);
+            console.log(`User already has equivalent status ${currentOktaStatus} in OKTA, skipping API call`);
           }
         } catch (oktaError) {
           console.error("OKTA API error:", oktaError);
@@ -952,10 +955,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "User not found in OKTA" });
       }
 
-      console.log(`Resetting user ${user.email} status from ${user.status} to ${oktaUser.status}`);
+      // Normalize OKTA status - PROVISIONED users should be treated as ACTIVE
+      const normalizedStatus = oktaUser.status === "PROVISIONED" ? "ACTIVE" : oktaUser.status;
       
-      // Update local database to match OKTA
-      const updatedUser = await storage.updateUser(id, { status: oktaUser.status });
+      console.log(`Resetting user ${user.email} status from ${user.status} to ${normalizedStatus} (OKTA: ${oktaUser.status})`);
+      
+      // Update local database to match normalized OKTA status
+      const updatedUser = await storage.updateUser(id, { status: normalizedStatus });
       
       if (!updatedUser) {
         return res.status(500).json({ message: "Failed to update user status" });

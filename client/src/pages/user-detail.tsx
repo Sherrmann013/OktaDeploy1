@@ -312,6 +312,32 @@ export default function UserDetail() {
                 <Trash2 className="w-4 h-4 mr-2" />
                 Delete
               </Button>
+
+              <Button 
+                variant="outline"
+                onClick={() => {
+                  fetch(`/api/users/${userId}/reset-status`, { method: 'POST' })
+                    .then(res => res.json())
+                    .then(() => {
+                      toast({
+                        title: "Status Reset",
+                        description: "User status synced from OKTA",
+                      });
+                      queryClient.invalidateQueries({ queryKey: ['/api/users', userId] });
+                    })
+                    .catch(() => {
+                      toast({
+                        title: "Error",
+                        description: "Failed to reset status",
+                        variant: "destructive",
+                      });
+                    });
+                }}
+                className="text-blue-600 hover:text-blue-700 border-blue-200 hover:border-blue-300"
+              >
+                <RefreshCw className="w-4 h-4 mr-2" />
+                Sync Status
+              </Button>
             </div>
           </div>
 
