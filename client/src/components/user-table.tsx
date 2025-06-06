@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Edit, Pause, Trash2, Play, ChevronLeft, ChevronRight, ArrowUpDown, Filter } from "lucide-react";
+import { Edit, Pause, Trash2, Play, ChevronLeft, ChevronRight, ArrowUpDown, FilterIcon } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import ConfirmationModal from "./confirmation-modal";
@@ -178,7 +178,7 @@ export default function UserTable({
         <div className="overflow-x-auto">
           <Table>
             <TableHeader>
-              <TableRow className="bg-gray-50">
+              <TableRow className="bg-muted/50">
                 <TableHead className="px-6 py-4">
                   <div className="flex items-center space-x-2">
                     <Button 
@@ -190,41 +190,56 @@ export default function UserTable({
                       {getSortIcon('firstName')}
                     </Button>
                     <Button variant="ghost" size="icon" className="h-6 w-6">
-                      <Filter className="h-3 w-3" />
+                      <FilterIcon className="h-3 w-3" />
                     </Button>
                   </div>
                 </TableHead>
                 <TableHead className="px-6 py-4">
-                  <Button 
-                    variant="ghost" 
-                    className="h-auto p-0 font-medium text-xs text-gray-500 uppercase tracking-wider hover:text-gray-700"
-                    onClick={() => handleSort('email')}
-                  >
-                    Email
-                    {getSortIcon('email')}
-                  </Button>
+                  <div className="flex items-center space-x-2">
+                    <Button 
+                      variant="ghost" 
+                      className="h-auto p-0 font-medium text-xs text-muted-foreground uppercase tracking-wider hover:text-foreground"
+                      onClick={() => handleSort('email')}
+                    >
+                      Email
+                      {getSortIcon('email')}
+                    </Button>
+                    <Button variant="ghost" size="icon" className="h-6 w-6">
+                      <FilterIcon className="h-3 w-3" />
+                    </Button>
+                  </div>
                 </TableHead>
                 <TableHead className="px-6 py-4">
-                  <Button 
-                    variant="ghost" 
-                    className="h-auto p-0 font-medium text-xs text-gray-500 uppercase tracking-wider hover:text-gray-700"
-                    onClick={() => handleSort('status')}
-                  >
-                    Status
-                    {getSortIcon('status')}
-                  </Button>
+                  <div className="flex items-center space-x-2">
+                    <Button 
+                      variant="ghost" 
+                      className="h-auto p-0 font-medium text-xs text-muted-foreground uppercase tracking-wider hover:text-foreground"
+                      onClick={() => handleSort('status')}
+                    >
+                      Status
+                      {getSortIcon('status')}
+                    </Button>
+                    <Button variant="ghost" size="icon" className="h-6 w-6">
+                      <FilterIcon className="h-3 w-3" />
+                    </Button>
+                  </div>
                 </TableHead>
                 <TableHead className="px-6 py-4">
-                  <Button 
-                    variant="ghost" 
-                    className="h-auto p-0 font-medium text-xs text-gray-500 uppercase tracking-wider hover:text-gray-700"
-                    onClick={() => handleSort('lastLogin')}
-                  >
-                    Last Login
-                    {getSortIcon('lastLogin')}
-                  </Button>
+                  <div className="flex items-center space-x-2">
+                    <Button 
+                      variant="ghost" 
+                      className="h-auto p-0 font-medium text-xs text-muted-foreground uppercase tracking-wider hover:text-foreground"
+                      onClick={() => handleSort('lastLogin')}
+                    >
+                      Last Login
+                      {getSortIcon('lastLogin')}
+                    </Button>
+                    <Button variant="ghost" size="icon" className="h-6 w-6">
+                      <FilterIcon className="h-3 w-3" />
+                    </Button>
+                  </div>
                 </TableHead>
-                <TableHead className="px-6 py-4 text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <TableHead className="px-6 py-4 text-xs font-medium text-muted-foreground uppercase tracking-wider">
                   Actions
                 </TableHead>
               </TableRow>
