@@ -245,6 +245,10 @@ class OktaService {
   private employeeTypeAppsCache: Set<string> | null = null;
   private cacheTimestamp: number = 0;
   private readonly CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+  
+  // Add user cache to reduce repeated API calls
+  private userCache: Map<string, { data: any; timestamp: number }> = new Map();
+  private readonly USER_CACHE_TTL = 2 * 60 * 1000; // 2 minutes
 
   async getEmployeeTypeApplications(): Promise<Set<string>> {
     // Return cached data if still valid

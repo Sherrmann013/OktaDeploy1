@@ -30,30 +30,30 @@
 }
 
 .dark {
-  --background: 240 10% 3.9%;
-  --foreground: 0 0% 98%;
-  --muted: 240 3.7% 15.9%;
-  --muted-foreground: 240 5% 64.9%;
-  --popover: 240 10% 3.9%;
-  --popover-foreground: 0 0% 98%;
-  --card: 240 10% 3.9%;
-  --card-foreground: 0 0% 98%;
-  --border: 240 3.7% 15.9%;
-  --input: 240 3.7% 15.9%;
-  --primary: 207 90% 54%;
-  --primary-foreground: 211 100% 99%;
-  --secondary: 240 3.7% 15.9%;
-  --secondary-foreground: 0 0% 98%;
-  --accent: 240 3.7% 15.9%;
-  --accent-foreground: 0 0% 98%;
-  --destructive: 0 62.8% 30.6%;
+  --background: 222 14% 8%; /* Darker navy blue */
+  --foreground: 0 0% 95%; /* High contrast white */
+  --muted: 222 12% 15%; /* Better visibility */
+  --muted-foreground: 0 0% 72%; /* Higher contrast */
+  --popover: 222 14% 8%;
+  --popover-foreground: 0 0% 95%;
+  --card: 222 14% 10%; /* Slightly lighter for definition */
+  --card-foreground: 0 0% 95%;
+  --border: 222 10% 22%; /* More visible borders */
+  --input: 222 12% 18%; /* Better input visibility */
+  --primary: 207 90% 62%; /* Brighter blue */
+  --primary-foreground: 0 0% 100%;
+  --secondary: 222 10% 20%;
+  --secondary-foreground: 0 0% 90%;
+  --accent: 222 10% 20%;
+  --accent-foreground: 0 0% 90%;
+  --destructive: 0 75% 58%; /* Brighter red */
   --destructive-foreground: 0 0% 98%;
-  --ring: 240 4.9% 83.9%;
+  --ring: 207 90% 62%;
   --radius: 0.5rem;
-  --success: 123 46% 35%;
-  --warning: 35 91% 48%;
-  --surface: 240 10% 3.9%;
-  --surface-background: 240 10% 3.9%;
+  --success: 123 50% 52%; /* Brighter green */
+  --warning: 35 85% 68%; /* More visible orange */
+  --surface: 222 14% 10%;
+  --surface-background: 222 12% 6%;
 }
 
 @layer base {

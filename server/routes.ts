@@ -176,27 +176,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
           );
         }
 
-        // Apply employee type filter
+        // Apply employee type filter - use database employee type to avoid OKTA API rate limits
         if (employeeTypeFilter) {
-          // Get employee type applications to determine group memberships
-          const employeeTypeApps = await oktaService.getEmployeeTypeApplications();
+          // Get all users from database with matching employee type first
+          const dbUsersWithType = await storage.getAllUsers({ employeeType: employeeTypeFilter });
+          const oktaIdsWithType = new Set(dbUsersWithType.users.map(user => user.oktaId).filter(Boolean));
           
-          // Filter users based on employee type group membership
-          const filteredByEmployeeType = [];
-          for (const user of filteredUsers) {
-            try {
-              const userGroups = await oktaService.getUserGroups(user.id);
-              const userEmployeeType = determineEmployeeTypeFromGroups(userGroups, employeeTypeApps);
-              
-              if (userEmployeeType === employeeTypeFilter) {
-                filteredByEmployeeType.push(user);
-              }
-            } catch (error) {
-              console.log(`Error checking groups for user ${user.id}:`, error);
-              // Skip this user if we can't determine their employee type
-            }
-          }
-          filteredUsers = filteredByEmployeeType;
+          // Filter OKTA users to only those with matching employee type in database
+          filteredUsers = filteredUsers.filter(oktaUser => oktaIdsWithType.has(oktaUser.id));
         }
         
         // Apply sorting
