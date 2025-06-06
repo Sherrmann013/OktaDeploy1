@@ -8,12 +8,25 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { ArrowLeft, ChevronDown, ChevronRight, Smartphone, Monitor, Shield, Eye, RefreshCw, KeyRound, Edit, Play, Pause, Trash2, Search, UserX } from "lucide-react";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { ArrowLeft, ChevronDown, ChevronRight, Smartphone, Monitor, Shield, Eye, RefreshCw, KeyRound, Edit, Play, Pause, Trash2, Search, UserX, Save, X } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import ConfirmationModal from "@/components/confirmation-modal";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { User } from "@shared/schema";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+
+const editUserSchema = z.object({
+  firstName: z.string().min(1, "First name is required"),
+  lastName: z.string().min(1, "Last name is required"),
+  email: z.string().email("Invalid email address"),
+  title: z.string().optional(),
+  department: z.string().optional(),
+  mobilePhone: z.string().optional(),
+});
 
 export default function UserDetail() {
   const [, params] = useRoute("/users/:id");
@@ -26,100 +39,106 @@ export default function UserDetail() {
     action: () => void;
   } | null>(null);
   
+  const [isEditing, setIsEditing] = useState(false);
+  
+  const form = useForm<z.infer<typeof editUserSchema>>({
+    resolver: zodResolver(editUserSchema),
+    defaultValues: {
+      firstName: "",
+      lastName: "",
+      email: "",
+      title: "",
+      department: "",
+      mobilePhone: "",
+    },
+  });
+  
   const [activeTab, setActiveTab] = useState("profile");
   const [appSearchTerm, setAppSearchTerm] = useState("");
 
   const userId = params?.id ? parseInt(params.id) : null;
 
-  // Function to derive Employee Type from MTX-ET group membership
-  const getEmployeeType = (groups: any[]) => {
-    if (!groups) return 'Not specified';
-    
-    const employeeTypeGroup = groups.find((group: any) => 
-      group.profile?.name?.startsWith('MTX-ET-')
-    );
-    
-    if (!employeeTypeGroup) return 'Not specified';
-    
-    const groupName = employeeTypeGroup.profile.name;
-    switch (groupName) {
-      case 'MTX-ET-EMPLOYEE':
-        return 'Employee';
-      case 'MTX-ET-CONTRACTOR':
-        return 'Contractor';
-      case 'MTX-ET-PART_TIME':
-        return 'Part Time';
-      case 'MTX-ET-INTERN':
-        return 'Intern';
-      default:
-        return 'Not specified';
-    }
-  };
-
-  const { data: user, isLoading } = useQuery<User>({
+  const { data: user, isLoading, error } = useQuery<User>({
     queryKey: ["/api/users", userId],
-    queryFn: async () => {
-      const response = await fetch(`/api/users/${userId}`);
-      if (!response.ok) throw new Error("Failed to fetch user");
-      return response.json();
-    },
     enabled: !!userId,
   });
 
-  // Query for user groups
-  const { data: userGroups, isLoading: groupsLoading } = useQuery({
-    queryKey: ["/api/users", userId, "groups"],
-    queryFn: async () => {
-      const response = await fetch(`/api/users/${userId}/groups`);
-      if (!response.ok) throw new Error("Failed to fetch user groups");
-      return response.json();
-    },
-    enabled: !!userId && (activeTab === "groups" || activeTab === "profile"),
+  const { data: userGroups = [] } = useQuery<any[]>({
+    queryKey: [`/api/users/${userId}/groups`],
+    enabled: !!userId,
   });
 
-  // Query for user applications
-  const { data: userApplications, isLoading: appsLoading } = useQuery({
-    queryKey: ["/api/users", userId, "applications"],
-    queryFn: async () => {
-      const response = await fetch(`/api/users/${userId}/applications`);
-      if (!response.ok) throw new Error("Failed to fetch user applications");
-      return response.json();
-    },
-    enabled: !!userId && activeTab === "applications",
+  const { data: userApps = [] } = useQuery<any[]>({
+    queryKey: [`/api/users/${userId}/applications`],
+    enabled: !!userId,
   });
 
-  // Query for enhanced user logs (30-day timeframe)
-  const { data: userLogs, isLoading: logsLoading } = useQuery({
-    queryKey: ["/api/users", userId, "logs"],
-    queryFn: async () => {
-      const response = await fetch(`/api/users/${userId}/logs`);
-      if (!response.ok) throw new Error("Failed to fetch user logs");
-      return response.json();
-    },
-    enabled: !!userId && activeTab === "activity",
-  });
-
-  // Query for user devices
-  const { data: userDevices, isLoading: devicesLoading } = useQuery({
-    queryKey: ["/api/users", userId, "devices"],
-    queryFn: async () => {
-      const response = await fetch(`/api/users/${userId}/devices`);
-      if (!response.ok) throw new Error("Failed to fetch user devices");
-      return response.json();
-    },
-    enabled: !!userId && activeTab === "devices",
-  });
+  // Set form values when user data loads
+  useEffect(() => {
+    if (user && !isEditing) {
+      form.reset({
+        firstName: user.firstName || "",
+        lastName: user.lastName || "",
+        email: user.email || "",
+        title: user.title || "",
+        department: user.department || "",
+        mobilePhone: user.mobilePhone || "",
+      });
+    }
+  }, [user, form, isEditing]);
 
   const updateStatusMutation = useMutation({
     mutationFn: async ({ status }: { status: string }) => {
-      return apiRequest("PATCH", `/api/users/${userId}/status`, { status });
+      return apiRequest("PATCH", `/api/users/${userId}`, { status });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/users"] });
       toast({
         title: "Success",
         description: "User status updated successfully",
       });
+      queryClient.invalidateQueries({ queryKey: ["/api/users", userId] });
+      setConfirmAction(null);
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const syncStatusMutation = useMutation({
+    mutationFn: async () => {
+      return apiRequest("POST", `/api/users/${userId}/reset-status`, {});
+    },
+    onSuccess: () => {
+      toast({
+        title: "Success",
+        description: "Status synced with OKTA successfully",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/users", userId] });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const updateUserMutation = useMutation({
+    mutationFn: async (userData: z.infer<typeof editUserSchema>) => {
+      return apiRequest("PATCH", `/api/users/${userId}`, userData);
+    },
+    onSuccess: () => {
+      toast({
+        title: "Success",
+        description: "User profile updated successfully",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/users", userId] });
+      setIsEditing(false);
     },
     onError: (error) => {
       toast({
@@ -201,6 +220,15 @@ export default function UserDetail() {
     });
   };
 
+  const handleEditSubmit = (data: z.infer<typeof editUserSchema>) => {
+    updateUserMutation.mutate(data);
+  };
+
+  const handleCancelEdit = () => {
+    setIsEditing(false);
+    form.reset();
+  };
+
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "ACTIVE":
@@ -218,19 +246,19 @@ export default function UserDetail() {
     return (
       <main className="flex-1 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto mb-4"></div>
           <p className="text-gray-600">Loading user details...</p>
         </div>
       </main>
     );
   }
 
-  if (!user) {
+  if (error || !user) {
     return (
       <main className="flex-1 flex items-center justify-center">
         <div className="text-center">
-          <h2 className="text-2xl font-semibold text-gray-900 mb-2">User Not Found</h2>
-          <p className="text-gray-600 mb-4">The user you're looking for doesn't exist.</p>
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">User Not Found</h1>
+          <p className="text-gray-600 mb-6">The user you're looking for doesn't exist or has been removed.</p>
           <Button onClick={() => setLocation("/")} variant="outline">
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Users
@@ -240,593 +268,421 @@ export default function UserDetail() {
     );
   }
 
-  return (
-    <>
-      <main className="flex-1 overflow-auto">
-        <div className="p-6 max-w-6xl mx-auto">
-          {/* Header */}
-          <div className="flex items-center justify-between mb-6">
-            <Button 
-              variant="ghost" 
-              onClick={() => setLocation("/")}
-              className="text-gray-600 hover:text-gray-900"
-            >
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Users
-            </Button>
-          </div>
+  const getEmployeeType = (groups: any[]) => {
+    const etGroup = groups.find(group => group.profile.name.startsWith('MTX-ET-'));
+    return etGroup ? etGroup.profile.name.replace('MTX-ET-', '').replace('_', ' ') : 'Not specified';
+  };
 
-          {/* User Header */}
-          <div className="mb-6">
-            <h1 className="text-2xl font-bold text-gray-900 mb-2">
-              {user.firstName} {user.lastName}
-            </h1>
-            <p className="text-gray-600 mb-4">{user.email}</p>
-            
-            {/* Action Buttons */}
-            <div className="flex items-center gap-3">
+  const filteredApps = userApps.filter(app =>
+    app.label.toLowerCase().includes(appSearchTerm.toLowerCase())
+  );
+
+  return (
+    <main className="flex-1 overflow-hidden">
+      <div className="h-full flex flex-col">
+        {/* Header */}
+        <div className="flex-shrink-0 bg-white border-b border-gray-200 px-6 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setLocation("/")}
+                className="flex items-center gap-2"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                Back to Users
+              </Button>
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900">
+                  {user.firstName} {user.lastName}
+                </h1>
+                <div className="flex items-center gap-2 mt-1">
+                  {getStatusBadge(user.status)}
+                  <span className="text-sm text-gray-500">•</span>
+                  <span className="text-sm text-gray-500">{user.email}</span>
+                </div>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              {!isEditing && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setIsEditing(true)}
+                  className="flex items-center gap-2"
+                >
+                  <Edit className="w-4 h-4" />
+                  Edit Profile
+                </Button>
+              )}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => syncStatusMutation.mutate()}
+                disabled={syncStatusMutation.isPending}
+                className="flex items-center gap-2"
+              >
+                <RefreshCw className={`w-4 h-4 ${syncStatusMutation.isPending ? 'animate-spin' : ''}`} />
+                Sync Status
+              </Button>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button className="bg-blue-600 hover:bg-blue-700 text-white">
-                    <KeyRound className="w-4 h-4 mr-2" />
-                    Reset or Remove password
-                    <ChevronDown className="w-4 h-4 ml-2" />
+                  <Button variant="outline" size="sm">
+                    Actions
+                    <ChevronDown className="w-4 h-4 ml-1" />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent>
+                <DropdownMenuContent align="end">
+                  {user.status === "ACTIVE" ? (
+                    <DropdownMenuItem
+                      onClick={() => handleStatusChange("SUSPENDED")}
+                      className="text-yellow-600"
+                    >
+                      <Pause className="w-4 h-4 mr-2" />
+                      Deactivate User
+                    </DropdownMenuItem>
+                  ) : (
+                    <DropdownMenuItem
+                      onClick={() => handleStatusChange("ACTIVE")}
+                      className="text-green-600"
+                    >
+                      <Play className="w-4 h-4 mr-2" />
+                      Activate User
+                    </DropdownMenuItem>
+                  )}
                   <DropdownMenuItem onClick={() => handlePasswordAction("reset")}>
-                    <RefreshCw className="w-4 h-4 mr-2" />
+                    <KeyRound className="w-4 h-4 mr-2" />
                     Reset Password
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => handlePasswordAction("expire")}>
                     <KeyRound className="w-4 h-4 mr-2" />
                     Expire Password
                   </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={handleDeleteUser}
+                    className="text-red-600"
+                  >
+                    <Trash2 className="w-4 h-4 mr-2" />
+                    Delete User
+                  </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
-
-
-
-              {user.status === "ACTIVE" ? (
-                <Button 
-                  variant="outline" 
-                  onClick={() => handleStatusChange("SUSPENDED")}
-                  className="text-orange-600 hover:text-orange-700 border-orange-200 hover:border-orange-300"
-                >
-                  <UserX className="w-4 h-4 mr-2" />
-                  Deactivate
-                </Button>
-              ) : (
-                <Button 
-                  variant="outline"
-                  onClick={() => handleStatusChange("ACTIVE")}
-                  className="text-green-600 hover:text-green-700 border-green-200 hover:border-green-300"
-                >
-                  <Play className="w-4 h-4 mr-2" />
-                  Activate
-                </Button>
-              )}
-
-              <Button 
-                variant="outline"
-                onClick={handleDeleteUser}
-                className="text-red-600 hover:text-red-700 border-red-200 hover:border-red-300"
-              >
-                <Trash2 className="w-4 h-4 mr-2" />
-                Delete
-              </Button>
-
-              <Button 
-                variant="outline"
-                onClick={() => {
-                  fetch(`/api/users/${userId}/reset-status`, { method: 'POST' })
-                    .then(res => res.json())
-                    .then(() => {
-                      toast({
-                        title: "Status Reset",
-                        description: "User status synced from OKTA",
-                      });
-                      queryClient.invalidateQueries({ queryKey: ['/api/users', userId] });
-                    })
-                    .catch(() => {
-                      toast({
-                        title: "Error",
-                        description: "Failed to reset status",
-                        variant: "destructive",
-                      });
-                    });
-                }}
-                className="text-blue-600 hover:text-blue-700 border-blue-200 hover:border-blue-300"
-              >
-                <RefreshCw className="w-4 h-4 mr-2" />
-                Sync Status
-              </Button>
             </div>
           </div>
+        </div>
 
-          {/* Profile Info Row */}
-          <div className="flex items-center gap-4 mb-6">
-            <div className="flex items-center gap-2">
-              <span className="w-2 h-2 bg-green-500 rounded-full"></span>
-              <span className="text-sm text-gray-600">User</span>
-              <Button variant="link" className="p-0 h-auto text-blue-600 hover:text-blue-700 text-sm">
-                Change
-              </Button>
-              <span className="w-2 h-2 bg-green-500 rounded-full"></span>
-              {getStatusBadge(user.status)}
+        {/* Content */}
+        <div className="flex-1 overflow-auto">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full flex flex-col">
+            <div className="flex-shrink-0 px-6 pt-4">
+              <TabsList className="grid w-full grid-cols-4">
+                <TabsTrigger value="profile">Profile</TabsTrigger>
+                <TabsTrigger value="groups">Groups ({userGroups.length})</TabsTrigger>
+                <TabsTrigger value="applications">Applications ({userApps.length})</TabsTrigger>
+                <TabsTrigger value="activity">Recent Activity</TabsTrigger>
+              </TabsList>
             </div>
-            <div className="text-sm text-gray-600">
-              Profile sourced by Active Directory
-            </div>
-          </div>
 
-          {/* Tabs */}
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="mb-6">
-              <TabsTrigger value="profile">Profile</TabsTrigger>
-              <TabsTrigger value="applications">Applications</TabsTrigger>
-              <TabsTrigger value="groups">Groups</TabsTrigger>
-              <TabsTrigger value="devices">Devices</TabsTrigger>
-              <TabsTrigger value="activity">Activity</TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="profile">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Personal Information */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Personal Information</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div>
-                      <label className="text-sm font-medium text-gray-500">First Name</label>
-                      <p className="text-gray-900">{user.firstName}</p>
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium text-gray-500">Last Name</label>
-                      <p className="text-gray-900">{user.lastName}</p>
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium text-gray-500">Email</label>
-                      <p className="text-gray-900">{user.email}</p>
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium text-gray-500">Manager</label>
-                      <p className="text-gray-900">{user.manager || 'Not specified'}</p>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* Work Information */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Work Information</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div>
-                      <label className="text-sm font-medium text-gray-500">Title</label>
-                      <p className="text-gray-900">{user.title || 'Not specified'}</p>
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium text-gray-500">Department</label>
-                      <p className="text-gray-900">{user.department || 'Not specified'}</p>
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium text-gray-500">Employee Type</label>
-                      <p className="text-gray-900">{getEmployeeType(userGroups)}</p>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* Account Information */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Account Information</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div>
-                      <label className="text-sm font-medium text-gray-500">Account Created</label>
-                      <p className="text-gray-900">
-                        {user.created ? format(new Date(user.created), "MMM d, yyyy 'at' h:mm a") : 'Not available'}
-                      </p>
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium text-gray-500">Last Update</label>
-                      <p className="text-gray-900">
-                        {user.lastUpdated ? format(new Date(user.lastUpdated), "MMM d, yyyy 'at' h:mm a") : 'Not available'}
-                      </p>
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium text-gray-500">Last Password Change</label>
-                      <p className="text-gray-900">
-                        {user.passwordChanged ? format(new Date(user.passwordChanged), "MMM d, yyyy 'at' h:mm a") : 'Never changed'}
-                      </p>
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium text-gray-500">Disabled On</label>
-                      <p className="text-gray-900">
-                        {user.status === 'DEPROVISIONED' || user.status === 'SUSPENDED' ? 
-                          (user.lastUpdated ? format(new Date(user.lastUpdated), "MMM d, yyyy 'at' h:mm a") : 'Unknown') : 
-                          'Not disabled'
-                        }
-                      </p>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-            </TabsContent>
-
-            <TabsContent value="applications">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Applications</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {appsLoading ? (
-                    <div className="flex items-center justify-center py-8">
-                      <RefreshCw className="w-6 h-6 animate-spin text-gray-400" />
-                    </div>
-                  ) : userApplications && userApplications.length > 0 ? (
-                    <div className="space-y-4">
-                      {/* Search Input */}
-                      <div className="relative">
-                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                        <Input
-                          placeholder="Search applications..."
-                          value={appSearchTerm}
-                          onChange={(e) => setAppSearchTerm(e.target.value)}
-                          className="pl-10"
-                        />
-                      </div>
-                      
-                      {/* Applications Grid */}
-                      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                        {userApplications
-                          .filter((app: any) => 
-                            app.name.toLowerCase().includes(appSearchTerm.toLowerCase())
-                          )
-                          .sort((a: any, b: any) => a.name.localeCompare(b.name))
-                          .map((app: any) => (
-                            <div 
-                              key={app.id} 
-                              className={`p-2 border border-gray-200 rounded text-center transition-colors ${
-                                app.isFromEmployeeType 
-                                  ? 'bg-blue-100 text-black hover:bg-blue-200' 
-                                  : 'bg-gray-50 hover:bg-gray-100'
-                              }`}
+            <div className="flex-1 overflow-auto px-6 py-4">
+              <TabsContent value="profile" className="space-y-6 mt-0">
+                {isEditing ? (
+                  <Form {...form}>
+                    <form onSubmit={form.handleSubmit(handleEditSubmit)} className="space-y-6">
+                      <Card>
+                        <CardHeader className="flex flex-row items-center justify-between">
+                          <CardTitle>Edit Profile Information</CardTitle>
+                          <div className="flex gap-2">
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={handleCancelEdit}
                             >
-                              <h4 className="text-sm font-medium text-gray-900 truncate" title={app.name}>
-                                {app.name}
-                              </h4>
-                            </div>
-                          ))}
-                      </div>
-                      
-                      {userApplications.filter((app: any) => 
-                        app.name.toLowerCase().includes(appSearchTerm.toLowerCase())
-                      ).length === 0 && appSearchTerm && (
-                        <p className="text-gray-600 py-8 text-center">No applications found matching "{appSearchTerm}".</p>
-                      )}
-                    </div>
-                  ) : (
-                    <p className="text-gray-600 py-8 text-center">No applications assigned to this user.</p>
-                  )}
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="groups">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Groups</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {groupsLoading ? (
-                    <div className="flex items-center justify-center py-8">
-                      <RefreshCw className="w-6 h-6 animate-spin text-gray-400" />
-                    </div>
-                  ) : userGroups && userGroups.length > 0 ? (
-                    <div className="space-y-3">
-                      {userGroups.map((group: any) => (
-                        <div key={group.id} className="p-3 border border-gray-200 rounded-lg">
-                          <h4 className="font-medium text-gray-900">{group.profile?.name || group.name}</h4>
-                          <p className="text-sm text-gray-600 mt-1">{group.profile?.description || "No description"}</p>
+                              <X className="w-4 h-4 mr-2" />
+                              Cancel
+                            </Button>
+                            <Button
+                              type="submit"
+                              size="sm"
+                              disabled={updateUserMutation.isPending}
+                            >
+                              <Save className="w-4 h-4 mr-2" />
+                              Save Changes
+                            </Button>
+                          </div>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                          <div className="grid grid-cols-2 gap-4">
+                            <FormField
+                              control={form.control}
+                              name="firstName"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>First Name</FormLabel>
+                                  <FormControl>
+                                    <Input {...field} />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                            <FormField
+                              control={form.control}
+                              name="lastName"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Last Name</FormLabel>
+                                  <FormControl>
+                                    <Input {...field} />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                          </div>
+                          <FormField
+                            control={form.control}
+                            name="email"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Email</FormLabel>
+                                <FormControl>
+                                  <Input {...field} type="email" />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <div className="grid grid-cols-2 gap-4">
+                            <FormField
+                              control={form.control}
+                              name="title"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Job Title</FormLabel>
+                                  <FormControl>
+                                    <Input {...field} />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                            <FormField
+                              control={form.control}
+                              name="department"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Department</FormLabel>
+                                  <FormControl>
+                                    <Input {...field} />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                          </div>
+                          <FormField
+                            control={form.control}
+                            name="mobilePhone"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Mobile Phone</FormLabel>
+                                <FormControl>
+                                  <Input {...field} type="tel" />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </CardContent>
+                      </Card>
+                    </form>
+                  </Form>
+                ) : (
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    {/* Personal Information */}
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Personal Information</CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div>
+                          <label className="text-sm font-medium text-gray-500">First Name</label>
+                          <p className="text-gray-900">{user.firstName}</p>
                         </div>
-                      ))}
+                        <div>
+                          <label className="text-sm font-medium text-gray-500">Last Name</label>
+                          <p className="text-gray-900">{user.lastName}</p>
+                        </div>
+                        <div>
+                          <label className="text-sm font-medium text-gray-500">Email</label>
+                          <p className="text-gray-900">{user.email}</p>
+                        </div>
+                        <div>
+                          <label className="text-sm font-medium text-gray-500">Mobile Phone</label>
+                          <p className="text-gray-900">{user.mobilePhone || 'Not specified'}</p>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    {/* Work Information */}
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Work Information</CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div>
+                          <label className="text-sm font-medium text-gray-500">Title</label>
+                          <p className="text-gray-900">{user.title || 'Not specified'}</p>
+                        </div>
+                        <div>
+                          <label className="text-sm font-medium text-gray-500">Department</label>
+                          <p className="text-gray-900">{user.department || 'Not specified'}</p>
+                        </div>
+                        <div>
+                          <label className="text-sm font-medium text-gray-500">Employee Type</label>
+                          <p className="text-gray-900">{getEmployeeType(userGroups)}</p>
+                        </div>
+                        <div>
+                          <label className="text-sm font-medium text-gray-500">Manager</label>
+                          <p className="text-gray-900">{user.manager || 'Not specified'}</p>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    {/* Account Information */}
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Account Information</CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div>
+                          <label className="text-sm font-medium text-gray-500">Account Created</label>
+                          <p className="text-gray-900">
+                            {user.created ? format(new Date(user.created), "MMM d, yyyy 'at' h:mm a") : 'Not available'}
+                          </p>
+                        </div>
+                        <div>
+                          <label className="text-sm font-medium text-gray-500">Last Update</label>
+                          <p className="text-gray-900">
+                            {user.lastUpdated ? format(new Date(user.lastUpdated), "MMM d, yyyy 'at' h:mm a") : 'Not available'}
+                          </p>
+                        </div>
+                        <div>
+                          <label className="text-sm font-medium text-gray-500">Last Password Change</label>
+                          <p className="text-gray-900">
+                            {user.passwordChanged ? format(new Date(user.passwordChanged), "MMM d, yyyy 'at' h:mm a") : 'Never changed'}
+                          </p>
+                        </div>
+                        <div>
+                          <label className="text-sm font-medium text-gray-500">Last Login</label>
+                          <p className="text-gray-900">
+                            {user.lastLogin ? format(new Date(user.lastLogin), "MMM d, yyyy 'at' h:mm a") : 'Never logged in'}
+                          </p>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+              </TabsContent>
+
+              <TabsContent value="groups" className="space-y-4 mt-0">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>User Groups</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {userGroups.length === 0 ? (
+                      <p className="text-gray-500 text-center py-8">No groups assigned</p>
+                    ) : (
+                      <div className="space-y-3">
+                        {userGroups.map((group) => (
+                          <div key={group.id} className="flex items-center justify-between p-3 border rounded-lg">
+                            <div>
+                              <h4 className="font-medium">{group.profile.name}</h4>
+                              <p className="text-sm text-gray-500">{group.profile.description || 'No description'}</p>
+                            </div>
+                            <Badge variant="secondary">{group.type}</Badge>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+              <TabsContent value="applications" className="space-y-4 mt-0">
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between">
+                    <CardTitle>Applications ({userApps.length})</CardTitle>
+                    <div className="relative w-64">
+                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                      <Input
+                        placeholder="Search applications..."
+                        value={appSearchTerm}
+                        onChange={(e) => setAppSearchTerm(e.target.value)}
+                        className="pl-10"
+                      />
                     </div>
-                  ) : (
-                    <p className="text-gray-600 py-8 text-center">No groups assigned to this user.</p>
-                  )}
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="devices">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Devices</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {devicesLoading ? (
-                    <div className="flex items-center justify-center py-8">
-                      <RefreshCw className="w-6 h-6 animate-spin text-gray-400" />
-                    </div>
-                  ) : userDevices && userDevices.length > 0 ? (
-                    <div className="space-y-3">
-                      {userDevices.map((device: any, index: number) => {
-                        const getDeviceIcon = (factorType: string) => {
-                          if (factorType?.includes('push')) return Smartphone;
-                          if (factorType?.includes('token')) return Shield;
-                          return Monitor;
-                        };
-
-                        const Icon = getDeviceIcon(device.factorType);
-
-                        return (
-                          <div key={device.id || index} className="p-3 border border-gray-200 rounded-lg">
-                            <div className="flex items-start gap-3">
-                              <Icon className="w-5 h-5 text-blue-600 mt-0.5" />
-                              <div className="flex-1">
-                                <h4 className="font-medium text-gray-900">
-                                  {device.profile?.name || device.factorType || "Unknown Device"}
-                                </h4>
-                                <p className="text-sm text-gray-600 mt-1">
-                                  Type: {device.factorType || "Unknown"}
-                                </p>
-                                <p className="text-sm text-gray-600">
-                                  Provider: {device.provider || "Unknown"}
-                                </p>
-                                <div className="flex items-center gap-2 mt-2">
-                                  <Badge variant={device.status === "ACTIVE" ? "default" : "secondary"}>
-                                    {device.status || "Unknown"}
-                                  </Badge>
-                                </div>
-                                {device.created && (
-                                  <p className="text-xs text-gray-500 mt-1">
-                                    Created: {format(new Date(device.created), "MMM d, yyyy 'at' h:mm a")}
-                                  </p>
-                                )}
-                                {device.lastUpdated && (
-                                  <p className="text-xs text-gray-500">
-                                    Last updated: {format(new Date(device.lastUpdated), "MMM d, yyyy 'at' h:mm a")}
-                                  </p>
-                                )}
-                                {device.profile?.deviceType && (
-                                  <p className="text-xs text-gray-500">
-                                    Device type: {device.profile.deviceType}
-                                  </p>
-                                )}
-                                {device.profile?.platform && (
-                                  <p className="text-xs text-gray-500">
-                                    Platform: {device.profile.platform}
-                                  </p>
-                                )}
+                  </CardHeader>
+                  <CardContent>
+                    {filteredApps.length === 0 ? (
+                      <p className="text-gray-500 text-center py-8">
+                        {appSearchTerm ? `No applications found matching "${appSearchTerm}"` : 'No applications assigned'}
+                      </p>
+                    ) : (
+                      <div className="space-y-3">
+                        {filteredApps.map((app) => (
+                          <div key={app.id} className="flex items-center justify-between p-3 border rounded-lg">
+                            <div className="flex items-center gap-3">
+                              {app.logo && (
+                                <img src={app.logo} alt={app.label} className="w-8 h-8 rounded" />
+                              )}
+                              <div>
+                                <h4 className="font-medium">{app.label}</h4>
+                                <p className="text-sm text-gray-500">{app.name}</p>
                               </div>
                             </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  ) : (
-                    <p className="text-gray-600 py-8 text-center">No devices found for this user.</p>
-                  )}
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="activity">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Activity Logs (Last 30 Days)</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {logsLoading ? (
-                    <div className="flex items-center justify-center py-8">
-                      <RefreshCw className="w-6 h-6 animate-spin text-gray-400" />
-                    </div>
-                  ) : userLogs && userLogs.length > 0 ? (
-                    <div className="space-y-3 max-h-96 overflow-y-auto">
-                      {userLogs.map((log: any) => {
-                        const getEventIcon = (eventType: string) => {
-                          if (eventType.includes("user.session")) return Shield;
-                          if (eventType.includes("user.authentication")) return KeyRound;
-                          if (eventType.includes("application")) return Monitor;
-                          return Eye;
-                        };
-
-                        const getEventColor = (outcome: string) => {
-                          if (outcome === "SUCCESS") return "green";
-                          if (outcome === "FAILURE") return "red";
-                          return "gray";
-                        };
-
-                        const Icon = getEventIcon(log.eventType);
-                        const color = getEventColor(log.outcome);
-
-                        return (
-                          <Collapsible key={log.id}>
-                            <div className={`border-l-4 border-${color}-500 bg-${color}-50`}>
-                              <CollapsibleTrigger className="w-full p-3 hover:bg-gray-100 transition-colors">
-                                <div className="flex items-start gap-3">
-                                  <Icon className={`w-4 h-4 text-${color}-600 mt-0.5 flex-shrink-0`} />
-                                  <div className="flex-1 min-w-0 text-left">
-                                    <div className="flex items-center justify-between">
-                                      <p className="text-sm font-medium">{log.displayMessage}</p>
-                                      <ChevronRight className="w-4 h-4 text-gray-400 transition-transform group-data-[state=open]:rotate-90" />
-                                    </div>
-                                    <p className="text-xs text-gray-600 mt-1">
-                                      {format(new Date(log.published), "MMM d, yyyy 'at' h:mm a")}
-                                    </p>
-                                    <div className="flex items-center gap-2 mt-2">
-                                      <Badge variant={log.outcome === "SUCCESS" ? "default" : "destructive"} className="text-xs">
-                                        {log.outcome}
-                                      </Badge>
-                                      <span className="text-xs text-gray-500">{log.eventType}</span>
-                                    </div>
-                                  </div>
-                                </div>
-                              </CollapsibleTrigger>
-                              
-                              <CollapsibleContent className="px-3 pb-3">
-                                <div className="ml-7 space-y-2 text-xs">
-                                  {log.client?.ipAddress && (
-                                    <div>
-                                      <span className="font-medium">IP Address:</span> {log.client.ipAddress}
-                                    </div>
-                                  )}
-                                  
-                                  {log.client?.geographicalContext && (
-                                    <div>
-                                      <span className="font-medium">Location:</span> 
-                                      {log.client.geographicalContext.city && ` ${log.client.geographicalContext.city}`}
-                                      {log.client.geographicalContext.state && `, ${log.client.geographicalContext.state}`}
-                                      {log.client.geographicalContext.country && ` ${log.client.geographicalContext.country}`}
-                                    </div>
-                                  )}
-                                  
-                                  {log.client?.userAgent?.rawUserAgent && (
-                                    <div>
-                                      <span className="font-medium">User Agent:</span> {log.client.userAgent.rawUserAgent}
-                                    </div>
-                                  )}
-                                  
-                                  {log.client?.userAgent?.browser && (
-                                    <div>
-                                      <span className="font-medium">Browser:</span> {log.client.userAgent.browser}
-                                    </div>
-                                  )}
-                                  
-                                  {log.client?.userAgent?.os && (
-                                    <div>
-                                      <span className="font-medium">Operating System:</span> {log.client.userAgent.os}
-                                    </div>
-                                  )}
-                                  
-                                  {log.actor?.displayName && (
-                                    <div>
-                                      <span className="font-medium">Actor:</span> {log.actor.displayName} ({log.actor.type})
-                                    </div>
-                                  )}
-                                  
-                                  {log.outcome?.reason && (
-                                    <div>
-                                      <span className="font-medium">Reason:</span> {log.outcome.reason}
-                                    </div>
-                                  )}
-                                  
-                                  {log.securityContext?.isp && (
-                                    <div>
-                                      <span className="font-medium">ISP:</span> {log.securityContext.isp}
-                                    </div>
-                                  )}
-                                  
-                                  {log.securityContext?.domain && (
-                                    <div>
-                                      <span className="font-medium">Domain:</span> {log.securityContext.domain}
-                                    </div>
-                                  )}
-                                  
-                                  {log.authenticationContext?.externalSessionId && (
-                                    <div>
-                                      <span className="font-medium">Session ID:</span> {log.authenticationContext.externalSessionId}
-                                    </div>
-                                  )}
-                                  
-                                  {log.authenticationContext?.interface && (
-                                    <div>
-                                      <span className="font-medium">Interface:</span> {log.authenticationContext.interface}
-                                    </div>
-                                  )}
-                                  
-                                  {/* Show Verified and Managed fields for access failures */}
-                                  {log.outcome?.result === 'FAILURE' && (
-                                    <>
-                                      {log.debugContext?.debugData?.deviceFingerprint && (
-                                        <div>
-                                          <span className="font-medium">Device Fingerprint:</span> {log.debugContext.debugData.deviceFingerprint}
-                                        </div>
-                                      )}
-                                      
-                                      {log.debugContext?.debugData?.behaviors && (
-                                        <div>
-                                          <span className="font-medium">Behaviors:</span> {JSON.stringify(log.debugContext.debugData.behaviors)}
-                                        </div>
-                                      )}
-                                      
-                                      {log.debugContext?.debugData?.riskReasons && (
-                                        <div>
-                                          <span className="font-medium">Risk Reasons:</span> {log.debugContext.debugData.riskReasons.join(', ')}
-                                        </div>
-                                      )}
-                                      
-                                      {log.debugContext?.debugData?.threatSuspected !== undefined && (
-                                        <div>
-                                          <span className="font-medium">Threat Suspected:</span> {log.debugContext.debugData.threatSuspected ? 'Yes' : 'No'}
-                                        </div>
-                                      )}
-                                    </>
-                                  )}
-                                  
-                                  {log.target && log.target.length > 0 && (
-                                    <div>
-                                      <span className="font-medium">Target:</span>
-                                      <ul className="mt-1 ml-4">
-                                        {log.target.map((target: any, index: number) => (
-                                          <li key={index}>
-                                            {target.displayName} ({target.type})
-                                            {target.detailEntry && (
-                                              <div className="ml-2 text-gray-500">
-                                                {Object.entries(target.detailEntry).map(([key, value]: [string, any]) => (
-                                                  <div key={key}>
-                                                    <span className="font-medium">{key}:</span> {String(value)}
-                                                  </div>
-                                                ))}
-                                              </div>
-                                            )}
-                                          </li>
-                                        ))}
-                                      </ul>
-                                    </div>
-                                  )}
-                                  
-                                  <div>
-                                    <span className="font-medium">Event ID:</span> {log.id}
-                                  </div>
-                                  
-                                  <div>
-                                    <span className="font-medium">Transaction ID:</span> {log.transaction?.id || 'N/A'}
-                                  </div>
-                                </div>
-                              </CollapsibleContent>
+                            <div className="flex items-center gap-2">
+                              <Badge variant={app.status === 'ACTIVE' ? 'default' : 'secondary'}>
+                                {app.status}
+                              </Badge>
+                              <Badge variant="outline">{app.signOnMode}</Badge>
                             </div>
-                          </Collapsible>
-                        );
-                      })}
-                    </div>
-                  ) : (
-                    <p className="text-gray-600 py-8 text-center">No activity logs found for the last 30 days.</p>
-                  )}
-                </CardContent>
-              </Card>
-            </TabsContent>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+              <TabsContent value="activity" className="space-y-4 mt-0">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Recent Activity</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-gray-500 text-center py-8">Activity logs will be displayed here</p>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+            </div>
           </Tabs>
         </div>
-      </main>
-      
-      {/* Confirmation Modal */}
+      </div>
+
       {confirmAction && (
         <ConfirmationModal
-          open={!!confirmAction}
+          open={true}
           onClose={() => setConfirmAction(null)}
-          onConfirm={() => {
-            confirmAction.action();
-            setConfirmAction(null);
-          }}
+          onConfirm={confirmAction.action}
           title={confirmAction.title}
           message={confirmAction.message}
           variant={confirmAction.type === "delete" ? "destructive" : "default"}
         />
       )}
-    </>
+    </main>
   );
 }
