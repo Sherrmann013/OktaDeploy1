@@ -61,8 +61,8 @@ export async function setupAuth(app: Express) {
   // Configure OKTA OAuth2 strategy
   const strategy = new OAuthStrategy(
     {
-      authorizationURL: `${process.env.OKTA_DOMAIN}/oauth2/v1/authorize`,
-      tokenURL: `${process.env.OKTA_DOMAIN}/oauth2/v1/token`,
+      authorizationURL: `${process.env.OKTA_DOMAIN}/oauth2/default/v1/authorize`,
+      tokenURL: `${process.env.OKTA_DOMAIN}/oauth2/default/v1/token`,
       clientID: process.env.CLIENT_ID!,
       clientSecret: process.env.CLIENT_SECRET!,
       callbackURL: "/api/okta-callback",
@@ -140,7 +140,7 @@ export async function setupAuth(app: Express) {
     console.log('Processing OKTA callback');
     passport.authenticate('okta', {
       successRedirect: "/",
-      failureRedirect: "/login?error=auth_failed"
+      failureRedirect: "/?error=auth_failed"
     })(req, res, next);
   });
 
