@@ -59,6 +59,22 @@ export default function Users() {
     },
   });
 
+  // Get all users for stats
+  const { data: allUsersData } = useQuery({
+    queryKey: ["/api/users/all"],
+    queryFn: async () => {
+      const response = await fetch(`/api/users?limit=1000`, {
+        credentials: 'include'
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch all users');
+      }
+      
+      return response.json();
+    },
+  });
+
   const { data: usersData, isLoading, refetch } = useQuery({
     queryKey: ["/api/users", currentPage, usersPerPage, searchQuery, sortBy, sortOrder],
     queryFn: async () => {
@@ -83,6 +99,7 @@ export default function Users() {
   });
 
   const users = usersData?.users || [];
+  const allUsers = allUsersData?.users || [];
   const total = usersData?.total || 0;
   const totalPages = usersData?.totalPages || 1;
   const dataSource = usersData?.source || 'unknown';
@@ -226,7 +243,7 @@ export default function Users() {
                 <UsersIcon className="w-6 h-6 text-blue-600 mb-1" />
                 <p className="text-xs font-medium text-gray-600">Employees</p>
                 <p className="text-xl font-bold text-gray-900">
-                  {users.filter((u: User) => u.employeeType === 'EMPLOYEE').length}
+                  {allUsers.filter((u: User) => u.employeeType === 'EMPLOYEE').length}
                 </p>
               </div>
             </CardContent>
@@ -238,7 +255,7 @@ export default function Users() {
                 <Building className="w-6 h-6 text-green-600 mb-1" />
                 <p className="text-xs font-medium text-gray-600">Contractors</p>
                 <p className="text-xl font-bold text-gray-900">
-                  {users.filter((u: User) => u.employeeType === 'CONTRACTOR').length}
+                  {allUsers.filter((u: User) => u.employeeType === 'CONTRACTOR').length}
                 </p>
               </div>
             </CardContent>
@@ -250,7 +267,7 @@ export default function Users() {
                 <Calendar className="w-6 h-6 text-purple-600 mb-1" />
                 <p className="text-xs font-medium text-gray-600">Consultants</p>
                 <p className="text-xl font-bold text-gray-900">
-                  {users.filter((u: User) => u.employeeType === 'PART_TIME').length}
+                  {allUsers.filter((u: User) => u.employeeType === 'PART_TIME').length}
                 </p>
               </div>
             </CardContent>
@@ -262,7 +279,7 @@ export default function Users() {
                 <Eye className="w-6 h-6 text-orange-600 mb-1" />
                 <p className="text-xs font-medium text-gray-600">Interns</p>
                 <p className="text-xl font-bold text-gray-900">
-                  {users.filter((u: User) => u.employeeType === 'INTERN').length}
+                  {allUsers.filter((u: User) => u.employeeType === 'INTERN').length}
                 </p>
               </div>
             </CardContent>

@@ -830,13 +830,31 @@ export default function UserDetail() {
                               </div>
                               <div>
                                 <h4 className="font-medium">
-                                  {device.displayName || device.name || device.deviceType || device.model || 'Unknown Device'}
+                                  {device.profile?.deviceName || 
+                                   device.profile?.name || 
+                                   device.profile?.displayName || 
+                                   device.displayName || 
+                                   device.name || 
+                                   `${device.factorType || 'Device'} Factor` || 
+                                   'Unknown Device'}
                                 </h4>
                                 <p className="text-sm text-gray-500">
-                                  {device.platform || device.os || device.operatingSystem || device.deviceType || 'Unknown Platform'}
+                                  {device.profile?.platform || 
+                                   device.profile?.deviceType || 
+                                   device.platform || 
+                                   device.deviceType || 
+                                   device.provider || 
+                                   'Unknown Platform'}
                                 </p>
-                                {device.serialNumber && (
-                                  <p className="text-xs text-gray-400">Serial: {device.serialNumber}</p>
+                                {(device.profile?.serialNumber || device.serialNumber) && (
+                                  <p className="text-xs text-gray-400">
+                                    Serial: {device.profile?.serialNumber || device.serialNumber}
+                                  </p>
+                                )}
+                                {device.factorType && (
+                                  <p className="text-xs text-gray-400">
+                                    Type: {device.factorType}
+                                  </p>
                                 )}
                               </div>
                             </div>
