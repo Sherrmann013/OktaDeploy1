@@ -575,6 +575,111 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Test sync process for debugging (no auth required)
+  app.post("/api/debug-sync-user", async (req, res) => {
+    try {
+      const { email } = req.body;
+      if (!email) {
+        return res.status(400).json({ message: "Email is required" });
+      }
+
+      console.log(`\n=== DEBUG SYNC PROCESS FOR ${email} ===`);
+      
+      // 1. Get OKTA user data
+      const oktaUser = await oktaService.getUserByEmail(email);
+      if (!oktaUser) {
+        return res.status(404).json({ message: "User not found in OKTA" });
+      }
+
+      console.log('1. OKTA API Response - Manager field:', oktaUser.profile?.manager);
+      
+      // 2. Transform to database format
+      const transformedUser = {
+        oktaId: oktaUser.id,
+        firstName: oktaUser.profile.firstName,
+        lastName: oktaUser.profile.lastName,
+        email: oktaUser.profile.email,
+        login: oktaUser.profile.login,
+        title: oktaUser.profile.title || null,
+        department: oktaUser.profile.department || null,
+        mobilePhone: oktaUser.profile.mobilePhone || null,
+        manager: oktaUser.profile.manager || null,
+        status: oktaUser.status,
+        activated: oktaUser.activated ? new Date(oktaUser.activated) : new Date(),
+        created: new Date(oktaUser.created),
+        lastUpdated: new Date(oktaUser.lastUpdated),
+        lastLogin: oktaUser.lastLogin ? new Date(oktaUser.lastLogin) : null,
+        passwordChanged: oktaUser.passwordChanged ? new Date(oktaUser.passwordChanged) : null,
+        employeeType: null,
+        managerId: null,
+        groups: null,
+        profileUrl: null,
+        sendActivationEmail: false
+      };
+
+      console.log('2. Transformed User - Manager field:', transformedUser.manager);
+
+      // 3. Check if user exists in database
+      const existingUser = await storage.getUserByOktaId(oktaUser.id);
+      
+      if (existingUser) {
+        console.log('3. Existing user found - Current manager:', existingUser.manager);
+        
+        // Update existing user
+        const updatedUser = await storage.updateUser(existingUser.id, {
+          firstName: transformedUser.firstName,
+          lastName: transformedUser.lastName,
+          email: transformedUser.email,
+          title: transformedUser.title,
+          department: transformedUser.department,
+          mobilePhone: transformedUser.mobilePhone,
+          manager: transformedUser.manager,
+          status: transformedUser.status,
+          lastUpdated: transformedUser.lastUpdated,
+          lastLogin: transformedUser.lastLogin,
+          passwordChanged: transformedUser.passwordChanged
+        });
+        
+        console.log('4. Updated user - Final manager field:', updatedUser?.manager);
+        
+        res.json({
+          success: true,
+          action: 'updated',
+          user: updatedUser,
+          debug: {
+            oktaManager: oktaUser.profile?.manager,
+            transformedManager: transformedUser.manager,
+            finalManager: updatedUser?.manager
+          }
+        });
+      } else {
+        console.log('3. Creating new user');
+        
+        const newUser = await storage.createUser(transformedUser);
+        console.log('4. Created user - Final manager field:', newUser.manager);
+        
+        res.json({
+          success: true,
+          action: 'created',
+          user: newUser,
+          debug: {
+            oktaManager: oktaUser.profile?.manager,
+            transformedManager: transformedUser.manager,
+            finalManager: newUser.manager
+          }
+        });
+      }
+      
+      console.log('=== END DEBUG SYNC ===\n');
+    } catch (error) {
+      console.error('Sync error:', error);
+      res.status(500).json({ 
+        success: false, 
+        error: error instanceof Error ? error.message : 'Unknown error' 
+      });
+    }
+  });
+
   // Test OKTA manager field mapping
   app.post("/api/test-manager-field", isAuthenticated, async (req, res) => {
     try {
