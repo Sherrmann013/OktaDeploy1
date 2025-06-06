@@ -210,13 +210,14 @@ class OktaService {
       // Get all groups first
       const allGroups = await this.getGroups(200);
       
-      // Filter for Employee Type groups
+      // Filter for Employee Type groups (MTX-ET-* pattern)
       const employeeTypeGroups = allGroups.filter(group => {
         const groupName = group.profile?.name || group.name || '';
-        return groupName.toLowerCase().includes('employee') || 
-               groupName.toLowerCase().includes('type') ||
-               groupName.toLowerCase().includes('staff') ||
-               groupName.toLowerCase().includes('role');
+        return groupName.startsWith('MTX-ET-') && 
+               (groupName.includes('EMPLOYEE') || 
+                groupName.includes('CONTRACTOR') || 
+                groupName.includes('PART_TIME') || 
+                groupName.includes('INTERN'));
       });
 
       console.log(`Found ${employeeTypeGroups.length} Employee Type groups:`, employeeTypeGroups.map(g => g.profile?.name || g.name));
@@ -254,6 +255,9 @@ class OktaService {
 
   async getUserApplications(userId: string): Promise<any[]> {
     try {
+      // Clear cache to force reload with new group filtering logic
+      this.employeeTypeAppsCache = null;
+      
       // Get user's applications
       const response = await this.makeRequest(`/users/${userId}/appLinks`);
       
