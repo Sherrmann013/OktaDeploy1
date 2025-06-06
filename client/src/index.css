@@ -30,30 +30,30 @@
 }
 
 .dark {
-  --background: 222 14% 8%; /* Darker navy blue */
-  --foreground: 0 0% 95%; /* High contrast white */
-  --muted: 222 12% 15%; /* Better visibility */
-  --muted-foreground: 0 0% 72%; /* Higher contrast */
-  --popover: 222 14% 8%;
-  --popover-foreground: 0 0% 95%;
-  --card: 222 14% 10%; /* Slightly lighter for definition */
-  --card-foreground: 0 0% 95%;
-  --border: 222 10% 22%; /* More visible borders */
-  --input: 222 12% 18%; /* Better input visibility */
-  --primary: 207 90% 62%; /* Brighter blue */
+  --background: 0 0% 15%; /* Comfortable dark grey */
+  --foreground: 0 0% 92%; /* Soft white text */
+  --muted: 0 0% 20%; /* Medium grey for muted areas */
+  --muted-foreground: 0 0% 65%; /* Muted text */
+  --popover: 0 0% 18%;
+  --popover-foreground: 0 0% 92%;
+  --card: 0 0% 18%; /* Slightly lighter cards */
+  --card-foreground: 0 0% 92%;
+  --border: 0 0% 28%; /* Visible but subtle borders */
+  --input: 0 0% 22%; /* Input backgrounds */
+  --primary: 207 90% 58%; /* Blue accent */
   --primary-foreground: 0 0% 100%;
-  --secondary: 222 10% 20%;
-  --secondary-foreground: 0 0% 90%;
-  --accent: 222 10% 20%;
-  --accent-foreground: 0 0% 90%;
-  --destructive: 0 75% 58%; /* Brighter red */
+  --secondary: 0 0% 25%;
+  --secondary-foreground: 0 0% 88%;
+  --accent: 0 0% 25%;
+  --accent-foreground: 0 0% 88%;
+  --destructive: 0 75% 55%; /* Red for destructive actions */
   --destructive-foreground: 0 0% 98%;
-  --ring: 207 90% 62%;
+  --ring: 207 90% 58%;
   --radius: 0.5rem;
-  --success: 123 50% 52%; /* Brighter green */
-  --warning: 35 85% 68%; /* More visible orange */
-  --surface: 222 14% 10%;
-  --surface-background: 222 12% 6%;
+  --success: 123 45% 48%; /* Green for success */
+  --warning: 35 85% 65%; /* Orange for warnings */
+  --surface: 0 0% 18%;
+  --surface-background: 0 0% 12%;
 }
 
 @layer base {

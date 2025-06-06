@@ -178,12 +178,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         // Apply employee type filter - use database employee type to avoid OKTA API rate limits
         if (employeeTypeFilter) {
-          // Get all users from database with matching employee type first
-          const dbUsersWithType = await storage.getAllUsers({ employeeType: employeeTypeFilter });
+          // Get all users from database with matching employee type first (cached)
+          const dbUsersWithType = await storage.getAllUsers({ 
+            employeeType: employeeTypeFilter,
+            limit: 1000 // Ensure we get all users with this type
+          });
           const oktaIdsWithType = new Set(dbUsersWithType.users.map(user => user.oktaId).filter(Boolean));
           
           // Filter OKTA users to only those with matching employee type in database
           filteredUsers = filteredUsers.filter(oktaUser => oktaIdsWithType.has(oktaUser.id));
+          
+          console.log(`Employee type filter applied: ${employeeTypeFilter}, found ${filteredUsers.length} matching users`);
         }
         
         // Apply sorting
