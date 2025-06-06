@@ -501,6 +501,46 @@ class OktaService {
     }
   }
 
+  async addUserToGroup(userId: string, groupId: string): Promise<any> {
+    try {
+      console.log(`Adding user ${userId} to group ${groupId}`);
+      const response = await this.makeRequest(`/groups/${groupId}/users/${userId}`, {
+        method: 'PUT'
+      });
+      
+      if (response.ok) {
+        console.log(`Successfully added user to group`);
+        return true;
+      } else {
+        const errorText = await response.text();
+        console.log(`Failed to add user to group: ${response.status} ${errorText}`);
+        throw new Error(`Failed to add user to group: ${response.status} ${response.statusText} - ${errorText}`);
+      }
+    } catch (error) {
+      throw new Error(`OKTA API error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  async removeUserFromGroup(userId: string, groupId: string): Promise<any> {
+    try {
+      console.log(`Removing user ${userId} from group ${groupId}`);
+      const response = await this.makeRequest(`/groups/${groupId}/users/${userId}`, {
+        method: 'DELETE'
+      });
+      
+      if (response.ok || response.status === 404) {
+        console.log(`Successfully removed user from group`);
+        return true;
+      } else {
+        const errorText = await response.text();
+        console.log(`Failed to remove user from group: ${response.status} ${errorText}`);
+        throw new Error(`Failed to remove user from group: ${response.status} ${response.statusText} - ${errorText}`);
+      }
+    } catch (error) {
+      throw new Error(`OKTA API error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
   async suspendUser(userId: string): Promise<any> {
     try {
       console.log(`Making OKTA API call to suspend user: ${userId}`);
