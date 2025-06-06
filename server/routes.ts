@@ -5,6 +5,30 @@ import { insertUserSchema, updateUserSchema } from "@shared/schema";
 import { z } from "zod";
 import { oktaService } from "./okta-service";
 import { syncSpecificUser } from "./okta-sync";
+
+// Helper function to determine employee type from user groups
+function determineEmployeeTypeFromGroups(userGroups: any[], employeeTypeApps: Set<string>): string | null {
+  // Check if user has access to any employee type applications
+  for (const group of userGroups) {
+    // Check if this group gives access to employee type applications
+    if (group.profile?.name) {
+      const groupName = group.profile.name.toUpperCase();
+      if (groupName.includes('EMPLOYEE') || groupName.includes('FULL_TIME')) {
+        return 'EMPLOYEE';
+      } else if (groupName.includes('CONTRACTOR')) {
+        return 'CONTRACTOR';
+      } else if (groupName.includes('INTERN')) {
+        return 'INTERN';
+      } else if (groupName.includes('PART_TIME') || groupName.includes('CONSULTANT')) {
+        return 'PART_TIME';
+      }
+    }
+  }
+  
+  // If no specific group match, check application access
+  // This would require additional logic to check user's app assignments
+  return null;
+}
 import { setupAuth, isAuthenticated, requireAdmin } from "./direct-okta-auth";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -117,6 +141,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const searchQuery = z.string().optional().parse(req.query.search);
       const statusFilter = z.string().optional().parse(req.query.status);
       const departmentFilter = z.string().optional().parse(req.query.department);
+      const employeeTypeFilter = z.string().optional().parse(req.query.employeeType);
       const page = z.coerce.number().default(1).parse(req.query.page);
       const limit = z.coerce.number().default(10).parse(req.query.limit);
       const sortBy = z.string().default("firstName").parse(req.query.sortBy);
@@ -149,6 +174,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
           filteredUsers = filteredUsers.filter(user => 
             user.profile.department?.toLowerCase() === departmentFilter.toLowerCase()
           );
+        }
+
+        // Apply employee type filter
+        if (employeeTypeFilter) {
+          // Get employee type applications to determine group memberships
+          const employeeTypeApps = await oktaService.getEmployeeTypeApplications();
+          
+          // Filter users based on employee type group membership
+          const filteredByEmployeeType = [];
+          for (const user of filteredUsers) {
+            try {
+              const userGroups = await oktaService.getUserGroups(user.id);
+              const userEmployeeType = determineEmployeeTypeFromGroups(userGroups, employeeTypeApps);
+              
+              if (userEmployeeType === employeeTypeFilter) {
+                filteredByEmployeeType.push(user);
+              }
+            } catch (error) {
+              console.log(`Error checking groups for user ${user.id}:`, error);
+              // Skip this user if we can't determine their employee type
+            }
+          }
+          filteredUsers = filteredByEmployeeType;
         }
         
         // Apply sorting
@@ -253,6 +301,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           search: searchQuery,
           status: statusFilter,
           department: departmentFilter,
+          employeeType: employeeTypeFilter,
           limit,
           offset,
         });

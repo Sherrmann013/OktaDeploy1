@@ -11,6 +11,7 @@ export interface IStorage {
     search?: string;
     status?: string;
     department?: string;
+    employeeType?: string;
     limit?: number;
     offset?: number;
   }): Promise<{ users: User[]; total: number }>;
@@ -110,6 +111,7 @@ export class MemStorage implements IStorage {
     search?: string;
     status?: string;
     department?: string;
+    employeeType?: string;
     limit?: number;
     offset?: number;
   }): Promise<{ users: User[]; total: number }> {
@@ -132,6 +134,10 @@ export class MemStorage implements IStorage {
 
     if (options?.department) {
       filteredUsers = filteredUsers.filter(user => user.department === options.department);
+    }
+
+    if (options?.employeeType) {
+      filteredUsers = filteredUsers.filter(user => user.employeeType === options.employeeType);
     }
 
     const total = filteredUsers.length;
