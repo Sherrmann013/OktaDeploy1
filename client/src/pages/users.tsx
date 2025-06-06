@@ -165,15 +165,6 @@ export default function Users() {
     refetch();
   };
 
-  const handleSort = (column: string) => {
-    if (sortBy === column) {
-      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
-    } else {
-      setSortBy(column);
-      setSortOrder('asc');
-    }
-  };
-
   const handleEmployeeTypeFilter = (employeeType: string) => {
     if (employeeTypeFilter === employeeType) {
       // If already filtered by this type, clear the filter
