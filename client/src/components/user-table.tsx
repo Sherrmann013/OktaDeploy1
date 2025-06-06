@@ -188,18 +188,33 @@ export default function UserTable({
                   </Button>
                 </TableHead>
                 <TableHead className="px-6 py-4">
-                  <Button variant="ghost" className="h-auto p-0 font-medium text-xs text-gray-500 uppercase tracking-wider hover:text-gray-700">
+                  <Button 
+                    variant="ghost" 
+                    className="h-auto p-0 font-medium text-xs text-gray-500 uppercase tracking-wider hover:text-gray-700"
+                    onClick={() => handleSort('email')}
+                  >
                     Email
-                    <ArrowUpDown className="ml-1 w-3 h-3" />
+                    {getSortIcon('email')}
                   </Button>
                 </TableHead>
-                <TableHead className="px-6 py-4 text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Status
+                <TableHead className="px-6 py-4">
+                  <Button 
+                    variant="ghost" 
+                    className="h-auto p-0 font-medium text-xs text-gray-500 uppercase tracking-wider hover:text-gray-700"
+                    onClick={() => handleSort('status')}
+                  >
+                    Status
+                    {getSortIcon('status')}
+                  </Button>
                 </TableHead>
                 <TableHead className="px-6 py-4">
-                  <Button variant="ghost" className="h-auto p-0 font-medium text-xs text-gray-500 uppercase tracking-wider hover:text-gray-700">
+                  <Button 
+                    variant="ghost" 
+                    className="h-auto p-0 font-medium text-xs text-gray-500 uppercase tracking-wider hover:text-gray-700"
+                    onClick={() => handleSort('lastLogin')}
+                  >
                     Last Login
-                    <ArrowUpDown className="ml-1 w-3 h-3" />
+                    {getSortIcon('lastLogin')}
                   </Button>
                 </TableHead>
                 <TableHead className="px-6 py-4 text-xs font-medium text-gray-500 uppercase tracking-wider">

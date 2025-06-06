@@ -41,6 +41,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const departmentFilter = z.string().optional().parse(req.query.department);
       const page = z.coerce.number().default(1).parse(req.query.page);
       const limit = z.coerce.number().default(10).parse(req.query.limit);
+      const sortBy = z.string().default("firstName").parse(req.query.sortBy);
+      const sortOrder = z.enum(["asc", "desc"]).default("asc").parse(req.query.sortOrder);
 
       try {
         // Try to fetch users from OKTA first
@@ -70,6 +72,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
             user.profile.department?.toLowerCase() === departmentFilter.toLowerCase()
           );
         }
+        
+        // Apply sorting
+        filteredUsers.sort((a, b) => {
+          let aValue, bValue;
+          
+          switch (sortBy) {
+            case 'firstName':
+              aValue = a.profile.firstName || '';
+              bValue = b.profile.firstName || '';
+              break;
+            case 'lastName':
+              aValue = a.profile.lastName || '';
+              bValue = b.profile.lastName || '';
+              break;
+            case 'email':
+              aValue = a.profile.email || '';
+              bValue = b.profile.email || '';
+              break;
+            case 'status':
+              aValue = a.status || '';
+              bValue = b.status || '';
+              break;
+            case 'lastLogin':
+              aValue = a.lastLogin || '';
+              bValue = b.lastLogin || '';
+              break;
+            default:
+              aValue = a.profile.firstName || '';
+              bValue = b.profile.firstName || '';
+          }
+          
+          if (sortOrder === 'desc') {
+            return bValue.localeCompare(aValue);
+          } else {
+            return aValue.localeCompare(bValue);
+          }
+        });
         
         // Pagination
         const offset = (page - 1) * limit;

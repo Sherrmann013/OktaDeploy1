@@ -32,6 +32,8 @@ export default function Users() {
   const [currentPage, setCurrentPage] = useState(1);
   const [usersPerPage] = useState(10);
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [sortBy, setSortBy] = useState("firstName");
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const { toast } = useToast();
 
   // OKTA Sync Mutation
@@ -58,11 +60,13 @@ export default function Users() {
   });
 
   const { data: usersData, isLoading, refetch } = useQuery({
-    queryKey: ["/api/users", currentPage, usersPerPage, searchQuery],
+    queryKey: ["/api/users", currentPage, usersPerPage, searchQuery, sortBy, sortOrder],
     queryFn: async () => {
       const params = new URLSearchParams({
         page: currentPage.toString(),
         limit: usersPerPage.toString(),
+        sortBy: sortBy,
+        sortOrder: sortOrder,
         ...(searchQuery && { search: searchQuery })
       });
       
@@ -95,6 +99,15 @@ export default function Users() {
   const handleCreateSuccess = () => {
     setShowCreateModal(false);
     refetch();
+  };
+
+  const handleSort = (column: string) => {
+    if (sortBy === column) {
+      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortBy(column);
+      setSortOrder('asc');
+    }
   };
 
   const handleSearch = (e: React.FormEvent) => {
@@ -265,6 +278,9 @@ export default function Users() {
           onUserClick={handleUserClick}
           onPageChange={setCurrentPage}
           onRefresh={handleRefresh}
+          sortBy={sortBy}
+          sortOrder={sortOrder}
+          onSort={handleSort}
         />
       </div>
 
