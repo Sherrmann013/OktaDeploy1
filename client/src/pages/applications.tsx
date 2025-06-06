@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Search, Plus, Grid3x3, Settings, Eye, ExternalLink } from "lucide-react";
+import { useAuth } from "@/hooks/use-auth";
 
 interface Application {
   id: string;
@@ -21,6 +22,7 @@ interface Application {
 
 export default function Applications() {
   const [searchQuery, setSearchQuery] = useState("");
+  const { user: currentUser } = useAuth();
 
   const { data: applications = [], isLoading } = useQuery<Application[]>({
     queryKey: ["/api/applications", searchQuery],
@@ -119,6 +121,17 @@ export default function Applications() {
               <Plus className="w-4 h-4 mr-2" />
               Add Application
             </Button>
+            <div className="flex items-center space-x-2 px-3 py-2 bg-gray-50 rounded-lg border">
+              <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
+                <span className="text-white text-sm font-medium">
+                  {currentUser?.firstName?.[0]}{currentUser?.lastName?.[0]}
+                </span>
+              </div>
+              <div className="text-sm">
+                <p className="font-medium text-gray-900">{currentUser?.firstName} {currentUser?.lastName}</p>
+                <p className="text-gray-500">{currentUser?.email}</p>
+              </div>
+            </div>
           </div>
         </div>
       </header>
