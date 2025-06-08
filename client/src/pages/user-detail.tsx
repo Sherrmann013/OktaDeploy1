@@ -9,7 +9,8 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Input } from "@/components/ui/input";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { ArrowLeft, ChevronDown, ChevronRight, ChevronUp, Smartphone, Monitor, Shield, Eye, RefreshCw, KeyRound, Edit, Play, Pause, Trash2, Search, UserX, Save, X, Download, Copy } from "lucide-react";
+import { ArrowLeft, ChevronDown, ChevronRight, ChevronUp, Smartphone, Monitor, Shield, Eye, RefreshCw, KeyRound, Edit, Play, Pause, Trash2, Search, UserX, Save, X, Download, Copy, UserCheck, Plus, Key } from "lucide-react";
+import { DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import ConfirmationModal from "@/components/confirmation-modal";
@@ -484,7 +485,7 @@ export default function UserDetail() {
     <main className="flex-1 overflow-hidden">
       <div className="h-full flex flex-col">
         {/* Header */}
-        <div className="flex-shrink-0 bg-white border-b border-gray-200 px-6 py-4">
+        <div className="flex-shrink-0 bg-background border-b border-border px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <Button
@@ -496,72 +497,87 @@ export default function UserDetail() {
                 <ArrowLeft className="w-4 h-4" />
                 Back to Users
               </Button>
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900">
-                  {user.firstName || 'Unknown'} {user.lastName || 'User'}
-                </h1>
-                <div className="flex items-center gap-2 mt-1">
-                  {getStatusBadge(user.status || 'UNKNOWN')}
-                  <span className="text-sm text-gray-500">•</span>
-                  <span className="text-sm text-gray-500">{user.email || 'No email'}</span>
+              <div className="flex items-center gap-4">
+                <div>
+                  <h1 className="text-2xl font-bold text-foreground">
+                    {user.firstName || 'Unknown'} {user.lastName || 'User'}
+                  </h1>
+                  <div className="flex items-center gap-2 mt-1">
+                    {getStatusBadge(user.status || 'UNKNOWN')}
+                    <span className="text-sm text-muted-foreground">•</span>
+                    <span className="text-sm text-muted-foreground">{user.email || 'No email'}</span>
+                  </div>
+                </div>
+                
+                {/* Actions moved next to user name */}
+                <div className="flex items-center gap-2">
+                  {!isEditing && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setIsEditing(true)}
+                      className="flex items-center gap-2"
+                    >
+                      <Edit className="w-4 h-4" />
+                      Edit Profile
+                    </Button>
+                  )}
+
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="outline" size="sm">
+                        Actions
+                        <ChevronDown className="w-4 h-4 ml-1" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      {user.status === "ACTIVE" ? (
+                        <DropdownMenuItem
+                          onClick={() => handleStatusChange("SUSPENDED")}
+                          className="text-orange-600"
+                        >
+                          <UserX className="w-4 h-4 mr-2" />
+                          Suspend User
+                        </DropdownMenuItem>
+                      ) : (
+                        <DropdownMenuItem
+                          onClick={() => handleStatusChange("ACTIVE")}
+                          className="text-green-600"
+                        >
+                          <UserCheck className="w-4 h-4 mr-2" />
+                          Activate User
+                        </DropdownMenuItem>
+                      )}
+                      <DropdownMenuItem
+                        onClick={() => setShowAssignAppModal(true)}
+                      >
+                        <Plus className="w-4 h-4 mr-2" />
+                        Assign Application
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => handlePasswordReset()}
+                        className="text-blue-600"
+                      >
+                        <Key className="w-4 h-4 mr-2" />
+                        Reset Password
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem
+                        onClick={() => setConfirmAction({
+                          title: "Delete User",
+                          message: "Are you sure you want to delete this user? This action cannot be undone.",
+                          action: () => handleDelete(),
+                          type: "delete"
+                        })}
+                        className="text-red-600"
+                      >
+                        <Trash2 className="w-4 h-4 mr-2" />
+                        Delete User
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </div>
               </div>
-            </div>
-            <div className="flex items-center gap-2">
-              {!isEditing && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setIsEditing(true)}
-                  className="flex items-center gap-2"
-                >
-                  <Edit className="w-4 h-4" />
-                  Edit Profile
-                </Button>
-              )}
-
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="sm">
-                    Actions
-                    <ChevronDown className="w-4 h-4 ml-1" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  {user.status === "ACTIVE" ? (
-                    <DropdownMenuItem
-                      onClick={() => handleStatusChange("SUSPENDED")}
-                      className="text-yellow-600"
-                    >
-                      <Pause className="w-4 h-4 mr-2" />
-                      Deactivate User
-                    </DropdownMenuItem>
-                  ) : (
-                    <DropdownMenuItem
-                      onClick={() => handleStatusChange("ACTIVE")}
-                      className="text-green-600"
-                    >
-                      <Play className="w-4 h-4 mr-2" />
-                      Activate User
-                    </DropdownMenuItem>
-                  )}
-                  <DropdownMenuItem onClick={() => handlePasswordAction("reset")}>
-                    <KeyRound className="w-4 h-4 mr-2" />
-                    Reset Password
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => handlePasswordAction("expire")}>
-                    <KeyRound className="w-4 h-4 mr-2" />
-                    Expire Password
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={handleDeleteUser}
-                    className="text-red-600"
-                  >
-                    <Trash2 className="w-4 h-4 mr-2" />
-                    Delete User
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
             </div>
           </div>
         </div>
