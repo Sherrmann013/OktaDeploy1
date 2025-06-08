@@ -555,7 +555,7 @@ export default function UserDetail() {
                         Assign Application
                       </DropdownMenuItem>
                       <DropdownMenuItem
-                        onClick={() => handlePasswordReset()}
+                        onClick={() => handlePasswordAction("reset")}
                         className="text-blue-600"
                       >
                         <Key className="w-4 h-4 mr-2" />
@@ -566,7 +566,7 @@ export default function UserDetail() {
                         onClick={() => setConfirmAction({
                           title: "Delete User",
                           message: "Are you sure you want to delete this user? This action cannot be undone.",
-                          action: () => handleDelete(),
+                          action: () => handleDeleteUser(),
                           type: "delete"
                         })}
                         className="text-red-600"
@@ -808,24 +808,24 @@ export default function UserDetail() {
                             </CardHeader>
                             <CardContent className="space-y-4">
                               <div>
-                                <label className="text-sm font-medium text-gray-500">First Name</label>
-                                <p className="text-gray-900">{user.firstName}</p>
+                                <label className="text-sm font-medium text-muted-foreground">First Name</label>
+                                <p className="text-foreground">{user.firstName}</p>
                               </div>
                               <div>
-                                <label className="text-sm font-medium text-gray-500">Last Name</label>
-                                <p className="text-gray-900">{user.lastName}</p>
+                                <label className="text-sm font-medium text-muted-foreground">Last Name</label>
+                                <p className="text-foreground">{user.lastName}</p>
                               </div>
                               <div>
-                                <label className="text-sm font-medium text-gray-500">Email</label>
-                                <p className="text-gray-900">{user.email}</p>
+                                <label className="text-sm font-medium text-muted-foreground">Email</label>
+                                <p className="text-foreground">{user.email}</p>
                               </div>
                               <div>
-                                <label className="text-sm font-medium text-gray-500">Login</label>
-                                <p className="text-gray-900">{user.login}</p>
+                                <label className="text-sm font-medium text-muted-foreground">Login</label>
+                                <p className="text-foreground">{user.login}</p>
                               </div>
                               <div>
-                                <label className="text-sm font-medium text-gray-500">Mobile Phone</label>
-                                <p className="text-gray-900">{user.mobilePhone || 'Not specified'}</p>
+                                <label className="text-sm font-medium text-muted-foreground">Mobile Phone</label>
+                                <p className="text-foreground">{user.mobilePhone || 'Not specified'}</p>
                               </div>
                             </CardContent>
                           </Card>
@@ -837,20 +837,20 @@ export default function UserDetail() {
                             </CardHeader>
                             <CardContent className="space-y-4">
                               <div>
-                                <label className="text-sm font-medium text-gray-500">Title</label>
-                                <p className="text-gray-900">{user.title || 'Not specified'}</p>
+                                <label className="text-sm font-medium text-muted-foreground">Title</label>
+                                <p className="text-foreground">{user.title || 'Not specified'}</p>
                               </div>
                               <div>
-                                <label className="text-sm font-medium text-gray-500">Department</label>
-                                <p className="text-gray-900">{user.department || 'Not specified'}</p>
+                                <label className="text-sm font-medium text-muted-foreground">Department</label>
+                                <p className="text-foreground">{user.department || 'Not specified'}</p>
                               </div>
                               <div>
-                                <label className="text-sm font-medium text-gray-500">Manager</label>
-                                <p className="text-gray-900">{user.manager || 'Not specified'}</p>
+                                <label className="text-sm font-medium text-muted-foreground">Manager</label>
+                                <p className="text-foreground">{user.manager || 'Not specified'}</p>
                               </div>
                               <div>
-                                <label className="text-sm font-medium text-gray-500">Employee Type</label>
-                                <p className="text-gray-900">{user.employeeType || 'Not specified'}</p>
+                                <label className="text-sm font-medium text-muted-foreground">Employee Type</label>
+                                <p className="text-foreground">{user.employeeType || 'Not specified'}</p>
                               </div>
                             </CardContent>
                           </Card>
@@ -862,26 +862,26 @@ export default function UserDetail() {
                             </CardHeader>
                             <CardContent className="space-y-4">
                               <div>
-                                <label className="text-sm font-medium text-gray-500">Account Created</label>
-                                <p className="text-gray-900">
+                                <label className="text-sm font-medium text-muted-foreground">Account Created</label>
+                                <p className="text-foreground">
                                   {user.created ? format(new Date(user.created), "MMM d, yyyy 'at' h:mm a") : 'Not available'}
                                 </p>
                               </div>
                               <div>
-                                <label className="text-sm font-medium text-gray-500">Last Update</label>
-                                <p className="text-gray-900">
+                                <label className="text-sm font-medium text-muted-foreground">Last Update</label>
+                                <p className="text-foreground">
                                   {user.lastUpdated ? format(new Date(user.lastUpdated), "MMM d, yyyy 'at' h:mm a") : 'Not available'}
                                 </p>
                               </div>
                               <div>
-                                <label className="text-sm font-medium text-gray-500">Last Password Change</label>
-                                <p className="text-gray-900">
+                                <label className="text-sm font-medium text-muted-foreground">Last Password Change</label>
+                                <p className="text-foreground">
                                   {user.passwordChanged ? format(new Date(user.passwordChanged), "MMM d, yyyy 'at' h:mm a") : 'Never changed'}
                                 </p>
                               </div>
                               <div>
-                                <label className="text-sm font-medium text-gray-500">Last Login</label>
-                                <p className="text-gray-900">
+                                <label className="text-sm font-medium text-muted-foreground">Last Login</label>
+                                <p className="text-foreground">
                                   {user.lastLogin ? format(new Date(user.lastLogin), "MMM d, yyyy 'at' h:mm a") : 'Never logged in'}
                                 </p>
                               </div>
@@ -896,8 +896,8 @@ export default function UserDetail() {
                             <CardTitle>Microsoft Account Information</CardTitle>
                           </CardHeader>
                           <CardContent className="py-8">
-                            <div className="text-center text-gray-500">
-                              <Monitor className="w-12 h-12 mx-auto mb-4 text-gray-400" />
+                            <div className="text-center text-muted-foreground">
+                              <Monitor className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
                               <p className="text-lg font-medium mb-2">Microsoft Integration</p>
                               <p className="text-sm">Microsoft account information will be displayed here when integration is configured.</p>
                             </div>
