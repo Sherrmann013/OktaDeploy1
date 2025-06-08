@@ -45,6 +45,7 @@ export default function UserDetail() {
   
   const [isEditing, setIsEditing] = useState(false);
   const [managerSearch, setManagerSearch] = useState("");
+  const [profileSubTab, setProfileSubTab] = useState("okta");
   
   const userId = params?.id ? parseInt(params.id) : null;
   
@@ -774,93 +775,120 @@ export default function UserDetail() {
                     </form>
                   </Form>
                 ) : (
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    {/* Personal Information */}
-                    <Card>
-                      <CardHeader>
-                        <CardTitle>Personal Information</CardTitle>
-                      </CardHeader>
-                      <CardContent className="space-y-4">
-                        <div>
-                          <label className="text-sm font-medium text-gray-500">First Name</label>
-                          <p className="text-gray-900">{user.firstName}</p>
-                        </div>
-                        <div>
-                          <label className="text-sm font-medium text-gray-500">Last Name</label>
-                          <p className="text-gray-900">{user.lastName}</p>
-                        </div>
-                        <div>
-                          <label className="text-sm font-medium text-gray-500">Email</label>
-                          <p className="text-gray-900">{user.email}</p>
-                        </div>
-                        <div>
-                          <label className="text-sm font-medium text-gray-500">Login</label>
-                          <p className="text-gray-900">{user.login}</p>
-                        </div>
-                        <div>
-                          <label className="text-sm font-medium text-gray-500">Mobile Phone</label>
-                          <p className="text-gray-900">{user.mobilePhone || 'Not specified'}</p>
-                        </div>
-                      </CardContent>
-                    </Card>
+                  <div className="space-y-4">
+                    {/* Profile Sub-tabs */}
+                    <Tabs value={profileSubTab} onValueChange={setProfileSubTab} className="w-full">
+                      <TabsList className="grid w-full grid-cols-2">
+                        <TabsTrigger value="okta">OKTA</TabsTrigger>
+                        <TabsTrigger value="microsoft">Microsoft</TabsTrigger>
+                      </TabsList>
+                      
+                      <TabsContent value="okta" className="space-y-6 mt-4">
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                          {/* Personal Information */}
+                          <Card>
+                            <CardHeader>
+                              <CardTitle>Personal Information</CardTitle>
+                            </CardHeader>
+                            <CardContent className="space-y-4">
+                              <div>
+                                <label className="text-sm font-medium text-gray-500">First Name</label>
+                                <p className="text-gray-900">{user.firstName}</p>
+                              </div>
+                              <div>
+                                <label className="text-sm font-medium text-gray-500">Last Name</label>
+                                <p className="text-gray-900">{user.lastName}</p>
+                              </div>
+                              <div>
+                                <label className="text-sm font-medium text-gray-500">Email</label>
+                                <p className="text-gray-900">{user.email}</p>
+                              </div>
+                              <div>
+                                <label className="text-sm font-medium text-gray-500">Login</label>
+                                <p className="text-gray-900">{user.login}</p>
+                              </div>
+                              <div>
+                                <label className="text-sm font-medium text-gray-500">Mobile Phone</label>
+                                <p className="text-gray-900">{user.mobilePhone || 'Not specified'}</p>
+                              </div>
+                            </CardContent>
+                          </Card>
 
-                    {/* Work Information */}
-                    <Card>
-                      <CardHeader>
-                        <CardTitle>Work Information</CardTitle>
-                      </CardHeader>
-                      <CardContent className="space-y-4">
-                        <div>
-                          <label className="text-sm font-medium text-gray-500">Title</label>
-                          <p className="text-gray-900">{user.title || 'Not specified'}</p>
-                        </div>
-                        <div>
-                          <label className="text-sm font-medium text-gray-500">Department</label>
-                          <p className="text-gray-900">{user.department || 'Not specified'}</p>
-                        </div>
-                        <div>
-                          <label className="text-sm font-medium text-gray-500">Manager</label>
-                          <p className="text-gray-900">{user.manager || 'Not specified'}</p>
-                        </div>
-                        <div>
-                          <label className="text-sm font-medium text-gray-500">Employee Type</label>
-                          <p className="text-gray-900">{user.employeeType || 'Not specified'}</p>
-                        </div>
-                      </CardContent>
-                    </Card>
+                          {/* Work Information */}
+                          <Card>
+                            <CardHeader>
+                              <CardTitle>Work Information</CardTitle>
+                            </CardHeader>
+                            <CardContent className="space-y-4">
+                              <div>
+                                <label className="text-sm font-medium text-gray-500">Title</label>
+                                <p className="text-gray-900">{user.title || 'Not specified'}</p>
+                              </div>
+                              <div>
+                                <label className="text-sm font-medium text-gray-500">Department</label>
+                                <p className="text-gray-900">{user.department || 'Not specified'}</p>
+                              </div>
+                              <div>
+                                <label className="text-sm font-medium text-gray-500">Manager</label>
+                                <p className="text-gray-900">{user.manager || 'Not specified'}</p>
+                              </div>
+                              <div>
+                                <label className="text-sm font-medium text-gray-500">Employee Type</label>
+                                <p className="text-gray-900">{user.employeeType || 'Not specified'}</p>
+                              </div>
+                            </CardContent>
+                          </Card>
 
-                    {/* Account Information */}
-                    <Card>
-                      <CardHeader>
-                        <CardTitle>Account Information</CardTitle>
-                      </CardHeader>
-                      <CardContent className="space-y-4">
-                        <div>
-                          <label className="text-sm font-medium text-gray-500">Account Created</label>
-                          <p className="text-gray-900">
-                            {user.created ? format(new Date(user.created), "MMM d, yyyy 'at' h:mm a") : 'Not available'}
-                          </p>
+                          {/* Account Information */}
+                          <Card>
+                            <CardHeader>
+                              <CardTitle>Account Information</CardTitle>
+                            </CardHeader>
+                            <CardContent className="space-y-4">
+                              <div>
+                                <label className="text-sm font-medium text-gray-500">Account Created</label>
+                                <p className="text-gray-900">
+                                  {user.created ? format(new Date(user.created), "MMM d, yyyy 'at' h:mm a") : 'Not available'}
+                                </p>
+                              </div>
+                              <div>
+                                <label className="text-sm font-medium text-gray-500">Last Update</label>
+                                <p className="text-gray-900">
+                                  {user.lastUpdated ? format(new Date(user.lastUpdated), "MMM d, yyyy 'at' h:mm a") : 'Not available'}
+                                </p>
+                              </div>
+                              <div>
+                                <label className="text-sm font-medium text-gray-500">Last Password Change</label>
+                                <p className="text-gray-900">
+                                  {user.passwordChanged ? format(new Date(user.passwordChanged), "MMM d, yyyy 'at' h:mm a") : 'Never changed'}
+                                </p>
+                              </div>
+                              <div>
+                                <label className="text-sm font-medium text-gray-500">Last Login</label>
+                                <p className="text-gray-900">
+                                  {user.lastLogin ? format(new Date(user.lastLogin), "MMM d, yyyy 'at' h:mm a") : 'Never logged in'}
+                                </p>
+                              </div>
+                            </CardContent>
+                          </Card>
                         </div>
-                        <div>
-                          <label className="text-sm font-medium text-gray-500">Last Update</label>
-                          <p className="text-gray-900">
-                            {user.lastUpdated ? format(new Date(user.lastUpdated), "MMM d, yyyy 'at' h:mm a") : 'Not available'}
-                          </p>
-                        </div>
-                        <div>
-                          <label className="text-sm font-medium text-gray-500">Last Password Change</label>
-                          <p className="text-gray-900">
-                            {user.passwordChanged ? format(new Date(user.passwordChanged), "MMM d, yyyy 'at' h:mm a") : 'Never changed'}
-                          </p>
-                        </div>
-                        <div>
-                          <label className="text-sm font-medium text-gray-500">Last Login</label>
-                          <p className="text-gray-900">
-                            {user.lastLogin ? format(new Date(user.lastLogin), "MMM d, yyyy 'at' h:mm a") : 'Never logged in'}
-                          </p>
-                        </div>
-                      </CardContent>
-                    </Card>
+                      </TabsContent>
+
+                      <TabsContent value="microsoft" className="space-y-6 mt-4">
+                        <Card>
+                          <CardHeader>
+                            <CardTitle>Microsoft Account Information</CardTitle>
+                          </CardHeader>
+                          <CardContent className="py-8">
+                            <div className="text-center text-gray-500">
+                              <Monitor className="w-12 h-12 mx-auto mb-4 text-gray-400" />
+                              <p className="text-lg font-medium mb-2">Microsoft Integration</p>
+                              <p className="text-sm">Microsoft account information will be displayed here when integration is configured.</p>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      </TabsContent>
+                    </Tabs>
                   </div>
                 )}
               </TabsContent>
