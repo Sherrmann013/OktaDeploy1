@@ -220,26 +220,7 @@ export default function Users() {
 
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
-      {/* Header */}
-      {/* Page Header */}
-      <div className="bg-background border-b border-border px-6 py-4">
-        <nav className="flex text-sm text-muted-foreground mb-1">
-          <span>Users</span>
-          <span className="mx-2">/</span>
-          <span className="text-foreground font-medium">All Users</span>
-        </nav>
-        <h2 className="text-2xl font-semibold text-foreground">User Management</h2>
-        {dataSource && (
-          <p className="text-sm text-muted-foreground">
-            Data source: {dataSource === 'okta' ? 'OKTA API' : 'Local Storage'}
-            {dataSource === 'local_storage' && (
-              <span className="text-yellow-600 dark:text-yellow-400 ml-2">
-                (OKTA connection unavailable - using fallback data)
-              </span>
-            )}
-          </p>
-        )}
-      </div>
+      
 
       {/* Stats Cards */}
       <div className="bg-background px-6 py-4">
