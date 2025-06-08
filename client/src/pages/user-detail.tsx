@@ -1469,10 +1469,10 @@ export default function UserDetail() {
                                     {/* Event Section */}
                                     <div>
                                       <div className="flex items-center gap-2 mb-2">
-                                        <ChevronRight className="w-4 h-4" />
-                                        <span className="font-semibold">Event</span>
+                                        <ChevronRight className="w-4 h-4 text-foreground" />
+                                        <span className="font-semibold text-foreground">Event</span>
                                       </div>
-                                      <div className="bg-white p-3 rounded border space-y-2 text-sm">
+                                      <div className="bg-white dark:bg-gray-900 p-3 rounded border border-border space-y-2 text-sm text-foreground">
                                         <div><span className="font-medium">Event Type:</span> {log.eventType}</div>
                                         <div><span className="font-medium">Display Message:</span> {log.displayMessage || 'N/A'}</div>
                                         <div><span className="font-medium">Outcome:</span> 
@@ -1485,13 +1485,13 @@ export default function UserDetail() {
                                     {/* Target Section */}
                                     <div>
                                       <div className="flex items-center gap-2 mb-2">
-                                        <ChevronRight className="w-4 h-4" />
-                                        <span className="font-semibold">Target</span>
+                                        <ChevronRight className="w-4 h-4 text-foreground" />
+                                        <span className="font-semibold text-foreground">Target</span>
                                       </div>
-                                      <div className="bg-white p-3 rounded border space-y-2 text-sm">
+                                      <div className="bg-white dark:bg-gray-900 p-3 rounded border border-border space-y-2 text-sm text-foreground">
                                         {log.target && log.target.length > 0 ? (
                                           log.target.map((target: any, idx: number) => (
-                                            <div key={idx} className={idx > 0 ? 'pt-2 border-t' : ''}>
+                                            <div key={idx} className={idx > 0 ? 'pt-2 border-t border-border' : ''}>
                                               <div><span className="font-medium">ID:</span> {target.id || 'N/A'}</div>
                                               <div><span className="font-medium">Type:</span> {target.type || 'N/A'}</div>
                                               <div><span className="font-medium">Display Name:</span> {target.displayName || 'N/A'}</div>
