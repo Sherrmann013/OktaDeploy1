@@ -239,9 +239,7 @@ export default function UserTable({
                     </Button>
                   </div>
                 </TableHead>
-                <TableHead className="px-6 py-4 text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                  Actions
-                </TableHead>
+
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -277,57 +275,7 @@ export default function UserTable({
                   <TableCell className="px-6 py-4 text-sm text-muted-foreground">
                     {formatLastLogin(user.lastLogin as Date | string | null)}
                   </TableCell>
-                  <TableCell className="px-6 py-4">
-                    <div className="flex items-center space-x-2">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          // Handle edit - could open edit modal or navigate to edit page
-                        }}
-                      >
-                        <Edit className="w-4 h-4" />
-                      </Button>
-                      {user.status === "ACTIVE" ? (
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8 text-gray-500 hover:text-gray-700 hover:bg-gray-50"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleStatusChange(user.id, "SUSPENDED");
-                          }}
-                        >
-                          <Pause className="w-4 h-4" />
-                        </Button>
-                      ) : (
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8 text-green-600 hover:text-green-700 hover:bg-green-50"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleStatusChange(user.id, "ACTIVE");
-                          }}
-                        >
-                          <Play className="w-4 h-4" />
-                        </Button>
-                      )}
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDeleteUser(user.id);
-                        }}
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </TableCell>
+
                 </TableRow>
               ))}
             </TableBody>

@@ -38,6 +38,7 @@ export default function Users() {
   const [sortBy, setSortBy] = useState("firstName");
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [employeeTypeFilter, setEmployeeTypeFilter] = useState<string>("");
+  const [showUserDropdown, setShowUserDropdown] = useState(false);
   const { toast } = useToast();
   const { user: currentUser } = useAuth();
 
@@ -257,16 +258,24 @@ export default function Users() {
               <UserPlus className="w-4 h-4 mr-2" />
               Add User
             </Button>
-            <div className="flex items-center space-x-2 px-3 py-2 bg-gray-50 rounded-lg border">
-              <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
+            <div className="relative">
+              <Button
+                variant="ghost"
+                className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center p-0 hover:bg-blue-700"
+                onClick={() => setShowUserDropdown(!showUserDropdown)}
+              >
                 <span className="text-white text-sm font-medium">
                   {currentUser?.firstName?.[0]}{currentUser?.lastName?.[0]}
                 </span>
-              </div>
-              <div className="text-sm">
-                <p className="font-medium text-gray-900">{currentUser?.firstName} {currentUser?.lastName}</p>
-                <p className="text-gray-500">{currentUser?.email}</p>
-              </div>
+              </Button>
+              {showUserDropdown && (
+                <div className="absolute right-0 top-10 w-64 bg-background border border-border rounded-lg shadow-lg z-50">
+                  <div className="p-3">
+                    <p className="font-medium text-foreground">{currentUser?.firstName} {currentUser?.lastName}</p>
+                    <p className="text-sm text-muted-foreground">{currentUser?.email}</p>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -353,23 +362,7 @@ export default function Users() {
             />
           </div>
           
-          <Select value={employeeTypeFilter} onValueChange={setEmployeeTypeFilter}>
-            <SelectTrigger className="w-48">
-              <SelectValue placeholder="Filter by Employee Type" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Employee Types</SelectItem>
-              <SelectItem value="EMPLOYEE">Employees</SelectItem>
-              <SelectItem value="CONTRACTOR">Contractors</SelectItem>
-              <SelectItem value="PART_TIME">Part Time</SelectItem>
-              <SelectItem value="INTERN">Interns</SelectItem>
-            </SelectContent>
-          </Select>
 
-          <Button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white">
-            <Search className="w-4 h-4 mr-2" />
-            Search
-          </Button>
           
           <ColumnManager
             columns={columns}
