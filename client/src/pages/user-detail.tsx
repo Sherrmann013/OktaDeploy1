@@ -47,6 +47,7 @@ export default function UserDetail() {
   const [isEditing, setIsEditing] = useState(false);
   const [managerSearch, setManagerSearch] = useState("");
   const [profileSubTab, setProfileSubTab] = useState("okta");
+  const [expandedSections, setExpandedSections] = useState<{[logId: string]: {[section: string]: boolean}}>({});
   
   const userId = params?.id ? parseInt(params.id) : null;
   
@@ -412,6 +413,49 @@ export default function UserDetail() {
   const handleCancelEdit = () => {
     setIsEditing(false);
     form.reset();
+  };
+
+  const toggleSection = (logId: string, section: string) => {
+    setExpandedSections(prev => ({
+      ...prev,
+      [logId]: {
+        ...prev[logId],
+        [section]: !prev[logId]?.[section]
+      }
+    }));
+  };
+
+  const expandAllSections = (logId: string) => {
+    setExpandedSections(prev => ({
+      ...prev,
+      [logId]: {
+        actor: true,
+        client: true,
+        event: true,
+        target: true
+      }
+    }));
+  };
+
+  const collapseAllSections = (logId: string) => {
+    setExpandedSections(prev => ({
+      ...prev,
+      [logId]: {
+        actor: false,
+        client: false,
+        event: false,
+        target: false
+      }
+    }));
+  };
+
+  const isSectionExpanded = (logId: string, section: string) => {
+    return expandedSections[logId]?.[section] || false;
+  };
+
+  const areAllSectionsExpanded = (logId: string) => {
+    const sections = expandedSections[logId];
+    return sections?.actor && sections?.client && sections?.event && sections?.target;
   };
 
   const getStatusBadge = (status: string) => {
@@ -1432,75 +1476,132 @@ export default function UserDetail() {
                                     {/* Actor Section */}
                                     <div>
                                       <div className="flex items-center gap-2 mb-2">
-                                        <ChevronRight className="w-4 h-4 text-foreground" />
+                                        <Button
+                                          variant="ghost"
+                                          size="sm"
+                                          className="p-0 h-auto"
+                                          onClick={() => toggleSection(log.id, 'actor')}
+                                        >
+                                          {isSectionExpanded(log.id, 'actor') ? (
+                                            <ChevronDown className="w-4 h-4 text-foreground" />
+                                          ) : (
+                                            <ChevronRight className="w-4 h-4 text-foreground" />
+                                          )}
+                                        </Button>
                                         <span className="font-semibold text-foreground">Actor</span>
-                                        <Button variant="outline" size="sm" className="ml-auto h-6 text-xs">
-                                          Expand All
+                                        <Button 
+                                          variant="outline" 
+                                          size="sm" 
+                                          className="ml-auto h-6 text-xs"
+                                          onClick={() => areAllSectionsExpanded(log.id) ? collapseAllSections(log.id) : expandAllSections(log.id)}
+                                        >
+                                          {areAllSectionsExpanded(log.id) ? 'Collapse All' : 'Expand All'}
                                         </Button>
                                       </div>
-                                      <div className="bg-white dark:bg-gray-900 p-3 rounded border border-border space-y-2 text-sm text-foreground">
-                                        <div><span className="font-medium">ID:</span> {log.actor?.id || 'N/A'}</div>
-                                        <div><span className="font-medium">Display Name:</span> {log.actor?.displayName || 'N/A'}</div>
-                                        <div><span className="font-medium">Type:</span> {log.actor?.type || 'N/A'}</div>
-                                      </div>
+                                      {isSectionExpanded(log.id, 'actor') && (
+                                        <div className="bg-white dark:bg-gray-900 p-3 rounded border border-border space-y-2 text-sm text-foreground">
+                                          <div><span className="font-medium">ID:</span> {log.actor?.id || 'N/A'}</div>
+                                          <div><span className="font-medium">Display Name:</span> {log.actor?.displayName || 'N/A'}</div>
+                                          <div><span className="font-medium">Type:</span> {log.actor?.type || 'N/A'}</div>
+                                        </div>
+                                      )}
                                     </div>
 
                                     {/* Client Section */}
                                     <div>
                                       <div className="flex items-center gap-2 mb-2">
-                                        <ChevronRight className="w-4 h-4 text-foreground" />
+                                        <Button
+                                          variant="ghost"
+                                          size="sm"
+                                          className="p-0 h-auto"
+                                          onClick={() => toggleSection(log.id, 'client')}
+                                        >
+                                          {isSectionExpanded(log.id, 'client') ? (
+                                            <ChevronDown className="w-4 h-4 text-foreground" />
+                                          ) : (
+                                            <ChevronRight className="w-4 h-4 text-foreground" />
+                                          )}
+                                        </Button>
                                         <span className="font-semibold text-foreground">Client</span>
                                       </div>
-                                      <div className="bg-white dark:bg-gray-900 p-3 rounded border border-border space-y-2 text-sm text-foreground">
-                                        <div><span className="font-medium">IP Address:</span> {log.client?.ipAddress || 'N/A'}</div>
-                                        <div><span className="font-medium">User Agent:</span> 
-                                          <div className="mt-1 text-xs text-muted-foreground break-all">
-                                            {log.client?.userAgent || 'N/A'}
+                                      {isSectionExpanded(log.id, 'client') && (
+                                        <div className="bg-white dark:bg-gray-900 p-3 rounded border border-border space-y-2 text-sm text-foreground">
+                                          <div><span className="font-medium">IP Address:</span> {log.client?.ipAddress || 'N/A'}</div>
+                                          <div><span className="font-medium">User Agent:</span> 
+                                            <div className="mt-1 text-xs text-muted-foreground break-all">
+                                              {log.client?.userAgent || 'N/A'}
+                                            </div>
                                           </div>
+                                          {log.client?.geographicalContext && (
+                                            <div><span className="font-medium">Location:</span> 
+                                              {log.client.geographicalContext.city}, {log.client.geographicalContext.state}, {log.client.geographicalContext.country}
+                                            </div>
+                                          )}
                                         </div>
-                                        {log.client?.geographicalContext && (
-                                          <div><span className="font-medium">Location:</span> 
-                                            {log.client.geographicalContext.city}, {log.client.geographicalContext.state}, {log.client.geographicalContext.country}
-                                          </div>
-                                        )}
-                                      </div>
+                                      )}
                                     </div>
 
                                     {/* Event Section */}
                                     <div>
                                       <div className="flex items-center gap-2 mb-2">
-                                        <ChevronRight className="w-4 h-4 text-foreground" />
+                                        <Button
+                                          variant="ghost"
+                                          size="sm"
+                                          className="p-0 h-auto"
+                                          onClick={() => toggleSection(log.id, 'event')}
+                                        >
+                                          {isSectionExpanded(log.id, 'event') ? (
+                                            <ChevronDown className="w-4 h-4 text-foreground" />
+                                          ) : (
+                                            <ChevronRight className="w-4 h-4 text-foreground" />
+                                          )}
+                                        </Button>
                                         <span className="font-semibold text-foreground">Event</span>
                                       </div>
-                                      <div className="bg-white dark:bg-gray-900 p-3 rounded border border-border space-y-2 text-sm text-foreground">
-                                        <div><span className="font-medium">Event Type:</span> {log.eventType}</div>
-                                        <div><span className="font-medium">Display Message:</span> {log.displayMessage || 'N/A'}</div>
-                                        <div><span className="font-medium">Outcome:</span> 
-                                          <span className={`ml-1 ${getOutcomeColor(log.outcome)}`}>{log.outcome}</span>
+                                      {isSectionExpanded(log.id, 'event') && (
+                                        <div className="bg-white dark:bg-gray-900 p-3 rounded border border-border space-y-2 text-sm text-foreground">
+                                          <div><span className="font-medium">Event Type:</span> {log.eventType}</div>
+                                          <div><span className="font-medium">Display Message:</span> {log.displayMessage || 'N/A'}</div>
+                                          <div><span className="font-medium">Outcome:</span> 
+                                            <span className={`ml-1 ${getOutcomeColor(log.outcome)}`}>{log.outcome}</span>
+                                          </div>
+                                          <div><span className="font-medium">Event ID:</span> {log.id}</div>
                                         </div>
-                                        <div><span className="font-medium">Event ID:</span> {log.id}</div>
-                                      </div>
+                                      )}
                                     </div>
 
                                     {/* Target Section */}
                                     <div>
                                       <div className="flex items-center gap-2 mb-2">
-                                        <ChevronRight className="w-4 h-4 text-foreground" />
+                                        <Button
+                                          variant="ghost"
+                                          size="sm"
+                                          className="p-0 h-auto"
+                                          onClick={() => toggleSection(log.id, 'target')}
+                                        >
+                                          {isSectionExpanded(log.id, 'target') ? (
+                                            <ChevronDown className="w-4 h-4 text-foreground" />
+                                          ) : (
+                                            <ChevronRight className="w-4 h-4 text-foreground" />
+                                          )}
+                                        </Button>
                                         <span className="font-semibold text-foreground">Target</span>
                                       </div>
-                                      <div className="bg-white dark:bg-gray-900 p-3 rounded border border-border space-y-2 text-sm text-foreground">
-                                        {log.target && log.target.length > 0 ? (
-                                          log.target.map((target: any, idx: number) => (
-                                            <div key={idx} className={idx > 0 ? 'pt-2 border-t border-border' : ''}>
-                                              <div><span className="font-medium">ID:</span> {target.id || 'N/A'}</div>
-                                              <div><span className="font-medium">Type:</span> {target.type || 'N/A'}</div>
-                                              <div><span className="font-medium">Display Name:</span> {target.displayName || 'N/A'}</div>
-                                            </div>
-                                          ))
-                                        ) : (
-                                          <div>No target information available</div>
-                                        )}
-                                      </div>
+                                      {isSectionExpanded(log.id, 'target') && (
+                                        <div className="bg-white dark:bg-gray-900 p-3 rounded border border-border space-y-2 text-sm text-foreground">
+                                          {log.target && log.target.length > 0 ? (
+                                            log.target.map((target: any, idx: number) => (
+                                              <div key={idx} className={idx > 0 ? 'pt-2 border-t border-border' : ''}>
+                                                <div><span className="font-medium">ID:</span> {target.id || 'N/A'}</div>
+                                                <div><span className="font-medium">Type:</span> {target.type || 'N/A'}</div>
+                                                <div><span className="font-medium">Display Name:</span> {target.displayName || 'N/A'}</div>
+                                              </div>
+                                            ))
+                                          ) : (
+                                            <div>No target information available</div>
+                                          )}
+                                        </div>
+                                      )}
                                     </div>
                                   </div>
                                 </div>
