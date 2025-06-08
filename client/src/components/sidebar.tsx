@@ -12,8 +12,8 @@ export default function Sidebar() {
 
   return (
     <aside className="w-32 bg-background shadow-md border-r border-border flex-shrink-0 flex flex-col">
-      <div className="p-3 border-b border-border bg-purple-600 dark:bg-purple-700">
-        <div className="text-center">
+      <div className="p-3 border-b border-border bg-purple-600 dark:bg-purple-700 flex flex-col">
+        <div className="text-center flex-1">
           <div className="relative inline-block mb-1">
             <div className="relative w-12 h-12 mx-auto rounded bg-purple-600 flex items-center justify-center">
               <div className="relative w-10 h-10">
@@ -35,8 +35,8 @@ export default function Sidebar() {
               </div>
             </div>
           </div>
-          <div className="text-[10px] text-white/80 leading-tight">Powered by ClockWerk</div>
         </div>
+        <div className="text-[10px] text-white/80 leading-tight text-center mt-auto">Powered by ClockWerk</div>
       </div>
       
       <nav className="p-4 flex-1">
