@@ -268,10 +268,7 @@ export default function Users() {
               <RotateCcw className={`w-4 h-4 mr-2 ${oktaSyncMutation.isPending ? 'animate-spin' : ''}`} />
               Sync OKTA
             </Button>
-            <Button onClick={() => setShowCreateModal(true)} className="bg-blue-600 hover:bg-blue-700 text-white">
-              <UserPlus className="w-4 h-4 mr-2" />
-              Add User
-            </Button>
+
             <div className="relative" ref={dropdownRef}>
               <Button
                 variant="ghost"
@@ -365,7 +362,7 @@ export default function Users() {
       {/* Search and Filters */}
       <div className="bg-background border-b border-border px-6 py-4">
         <form onSubmit={handleSearch} className="flex items-center space-x-4">
-          <div className="flex-1 relative">
+          <div className="w-96 relative">
             <Search className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
             <Input
               type="text"
@@ -376,7 +373,10 @@ export default function Users() {
             />
           </div>
           
-
+          <Button onClick={() => setShowCreateModal(true)} className="bg-blue-600 hover:bg-blue-700 text-white">
+            <UserPlus className="w-4 h-4 mr-2" />
+            Add User
+          </Button>
           
           <ColumnManager
             columns={columns}
