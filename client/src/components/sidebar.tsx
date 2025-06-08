@@ -12,7 +12,7 @@ export default function Sidebar() {
 
   return (
     <aside className="w-32 bg-background shadow-md border-r border-border flex-shrink-0 flex flex-col">
-      <div className="p-3 border-b border-border bg-purple-600 dark:bg-purple-700 flex flex-col">
+      <div className="p-3 border-b border-border bg-purple-600 dark:bg-purple-700 flex flex-col rounded-tl-lg">
         <div className="text-center flex-1">
           <div className="relative inline-block mb-1">
             <div className="relative w-20 h-20 mx-auto rounded bg-purple-600 flex items-center justify-center">
