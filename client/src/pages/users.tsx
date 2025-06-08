@@ -38,23 +38,7 @@ export default function Users() {
   const [sortBy, setSortBy] = useState("firstName");
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [employeeTypeFilter, setEmployeeTypeFilter] = useState<string>("");
-  const [showUserDropdown, setShowUserDropdown] = useState(false);
   const { toast } = useToast();
-  const { user: currentUser } = useAuth();
-  const dropdownRef = useRef<HTMLDivElement>(null);
-
-  // Close dropdown when clicking outside
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setShowUserDropdown(false);
-      }
-    }
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, []);
 
   // Column and filter management
   const [columns, setColumns] = useState<ColumnConfig[]>(() => 
