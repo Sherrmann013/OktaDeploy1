@@ -1366,7 +1366,7 @@ export default function UserDetail() {
                       <p className="text-gray-500 text-center py-8">No recent activity found</p>
                     ) : (
                       <div className="space-y-0 border rounded-lg">
-                        <div className="grid grid-cols-12 gap-4 p-3 bg-gray-50 border-b text-sm font-medium text-gray-700">
+                        <div className="grid grid-cols-12 gap-4 p-3 bg-gray-50 dark:bg-gray-800 border-b text-sm font-medium text-gray-700 dark:text-gray-300">
                           <div className="col-span-2">Time</div>
                           <div className="col-span-3">Actor</div>
                           <div className="col-span-4">Event Info</div>
@@ -1374,8 +1374,8 @@ export default function UserDetail() {
                           <div className="col-span-1"></div>
                         </div>
                         {userLogs.map((log, index) => (
-                          <div key={log.id} className={`${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
-                            <div className="grid grid-cols-12 gap-4 p-3 border-b border-gray-200 hover:bg-blue-50 transition-colors">
+                          <div key={log.id} className={`${index % 2 === 0 ? 'bg-white dark:bg-gray-900' : 'bg-gray-50 dark:bg-gray-800'}`}>
+                            <div className="grid grid-cols-12 gap-4 p-3 border-b border-gray-200 dark:border-gray-700 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors">
                               <div className="col-span-2 text-sm">
                                 <div className="flex items-center gap-2">
                                   <span className="text-lg">{getEventIcon(log.eventType)}</span>
@@ -1426,19 +1426,19 @@ export default function UserDetail() {
                             </div>
                             
                             {expandedLogs.has(log.id) && (
-                              <div className="bg-gray-100 border-b border-gray-200">
+                              <div className="bg-gray-100 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
                                 <div className="p-4 space-y-4">
                                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     {/* Actor Section */}
                                     <div>
                                       <div className="flex items-center gap-2 mb-2">
-                                        <ChevronRight className="w-4 h-4" />
-                                        <span className="font-semibold">Actor</span>
+                                        <ChevronRight className="w-4 h-4 text-foreground" />
+                                        <span className="font-semibold text-foreground">Actor</span>
                                         <Button variant="outline" size="sm" className="ml-auto h-6 text-xs">
                                           Expand All
                                         </Button>
                                       </div>
-                                      <div className="bg-white p-3 rounded border space-y-2 text-sm">
+                                      <div className="bg-white dark:bg-gray-900 p-3 rounded border border-border space-y-2 text-sm text-foreground">
                                         <div><span className="font-medium">ID:</span> {log.actor?.id || 'N/A'}</div>
                                         <div><span className="font-medium">Display Name:</span> {log.actor?.displayName || 'N/A'}</div>
                                         <div><span className="font-medium">Type:</span> {log.actor?.type || 'N/A'}</div>
@@ -1448,13 +1448,13 @@ export default function UserDetail() {
                                     {/* Client Section */}
                                     <div>
                                       <div className="flex items-center gap-2 mb-2">
-                                        <ChevronRight className="w-4 h-4" />
-                                        <span className="font-semibold">Client</span>
+                                        <ChevronRight className="w-4 h-4 text-foreground" />
+                                        <span className="font-semibold text-foreground">Client</span>
                                       </div>
-                                      <div className="bg-white p-3 rounded border space-y-2 text-sm">
+                                      <div className="bg-white dark:bg-gray-900 p-3 rounded border border-border space-y-2 text-sm text-foreground">
                                         <div><span className="font-medium">IP Address:</span> {log.client?.ipAddress || 'N/A'}</div>
                                         <div><span className="font-medium">User Agent:</span> 
-                                          <div className="mt-1 text-xs text-gray-600 break-all">
+                                          <div className="mt-1 text-xs text-muted-foreground break-all">
                                             {log.client?.userAgent || 'N/A'}
                                           </div>
                                         </div>

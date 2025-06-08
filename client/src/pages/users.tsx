@@ -220,8 +220,6 @@ export default function Users() {
 
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
-      
-
       {/* Stats Cards */}
       <div className="bg-background px-6 py-4">
         <div className="grid grid-cols-5 gap-3">
