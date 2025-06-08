@@ -594,7 +594,7 @@ export default function UserDetail() {
             <div className="flex-shrink-0 px-6 pt-4">
               <TabsList className="grid w-full grid-cols-5">
                 <TabsTrigger value="profile">Profile</TabsTrigger>
-                <TabsTrigger value="security">Security</TabsTrigger>
+                <TabsTrigger value="monitoring">Monitoring</TabsTrigger>
                 <TabsTrigger value="applications">Applications ({userApps.length})</TabsTrigger>
                 <TabsTrigger value="devices">Devices ({userDevices.length})</TabsTrigger>
                 <TabsTrigger value="activity">Recent Activity</TabsTrigger>
@@ -897,25 +897,104 @@ export default function UserDetail() {
                       </TabsContent>
 
                       <TabsContent value="microsoft" className="space-y-6 mt-4">
-                        <Card>
-                          <CardHeader>
-                            <CardTitle>Microsoft Account Information</CardTitle>
-                          </CardHeader>
-                          <CardContent className="py-8">
-                            <div className="text-center text-muted-foreground">
-                              <Monitor className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-                              <p className="text-lg font-medium mb-2">Microsoft Integration</p>
-                              <p className="text-sm">Microsoft account information will be displayed here when integration is configured.</p>
-                            </div>
-                          </CardContent>
-                        </Card>
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                          {/* Microsoft Account Info */}
+                          <Card>
+                            <CardHeader>
+                              <CardTitle className="flex items-center gap-2">
+                                <Monitor className="w-5 h-5 text-blue-600" />
+                                Microsoft Account
+                              </CardTitle>
+                            </CardHeader>
+                            <CardContent className="space-y-4">
+                              <div>
+                                <label className="text-sm font-medium text-muted-foreground">Azure AD User ID</label>
+                                <p className="text-foreground">Loading...</p>
+                              </div>
+                              <div>
+                                <label className="text-sm font-medium text-muted-foreground">Office 365 License</label>
+                                <p className="text-foreground">Loading...</p>
+                              </div>
+                              <div>
+                                <label className="text-sm font-medium text-muted-foreground">Teams Status</label>
+                                <p className="text-foreground">Loading...</p>
+                              </div>
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                className="w-full"
+                                onClick={() => {
+                                  // API call to Microsoft Graph
+                                  console.log('Fetching Microsoft data...');
+                                }}
+                              >
+                                <RefreshCw className="w-4 h-4 mr-2" />
+                                Refresh Data
+                              </Button>
+                            </CardContent>
+                          </Card>
+
+                          {/* API Commands */}
+                          <Card>
+                            <CardHeader>
+                              <CardTitle>Microsoft Graph API</CardTitle>
+                            </CardHeader>
+                            <CardContent className="space-y-4">
+                              <div className="space-y-2">
+                                <label className="text-sm font-medium text-muted-foreground">Quick Actions</label>
+                                <div className="grid grid-cols-1 gap-2">
+                                  <Button 
+                                    variant="outline" 
+                                    size="sm"
+                                    onClick={() => {
+                                      // Reset MFA
+                                      console.log('Resetting MFA for user...');
+                                    }}
+                                  >
+                                    Reset MFA
+                                  </Button>
+                                  <Button 
+                                    variant="outline" 
+                                    size="sm"
+                                    onClick={() => {
+                                      // Revoke sessions
+                                      console.log('Revoking all sessions...');
+                                    }}
+                                  >
+                                    Revoke Sessions
+                                  </Button>
+                                  <Button 
+                                    variant="outline" 
+                                    size="sm"
+                                    onClick={() => {
+                                      // Get sign-in logs
+                                      console.log('Fetching sign-in logs...');
+                                    }}
+                                  >
+                                    Get Sign-in Logs
+                                  </Button>
+                                </div>
+                              </div>
+                              <div className="space-y-2">
+                                <label className="text-sm font-medium text-muted-foreground">Custom Query</label>
+                                <Input 
+                                  placeholder="Enter Graph API endpoint..."
+                                  className="text-sm"
+                                />
+                                <Button variant="default" size="sm" className="w-full">
+                                  Execute Query
+                                </Button>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        </div>
                       </TabsContent>
                     </Tabs>
                   </div>
                 )}
               </TabsContent>
 
-              <TabsContent value="security" className="space-y-6 mt-0">
+              <TabsContent value="monitoring" className="space-y-6 mt-0">
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   {/* KnowBe4 */}
                   <Card>
@@ -928,26 +1007,49 @@ export default function UserDetail() {
                     <CardContent className="space-y-4">
                       <div>
                         <label className="text-sm font-medium text-muted-foreground">Training Status</label>
-                        <p className="text-foreground">Up to Date</p>
+                        <p className="text-foreground">Loading...</p>
                       </div>
                       <div>
                         <label className="text-sm font-medium text-muted-foreground">Last Training</label>
-                        <p className="text-foreground">Dec 15, 2024</p>
+                        <p className="text-foreground">Loading...</p>
                       </div>
                       <div>
                         <label className="text-sm font-medium text-muted-foreground">Risk Score</label>
-                        <div className="flex items-center gap-2">
-                          <Badge className="bg-green-600 text-white">Low Risk</Badge>
-                        </div>
+                        <p className="text-foreground">Loading...</p>
                       </div>
                       <div>
                         <label className="text-sm font-medium text-muted-foreground">Phishing Tests</label>
-                        <p className="text-foreground">3/3 Passed</p>
+                        <p className="text-foreground">Loading...</p>
+                      </div>
+                      <div className="flex gap-2 pt-2">
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="flex-1"
+                          onClick={() => {
+                            // API call to KnowBe4
+                            console.log('Fetching KnowBe4 data...');
+                          }}
+                        >
+                          <RefreshCw className="w-4 h-4 mr-1" />
+                          Refresh
+                        </Button>
+                        <Button 
+                          variant="default" 
+                          size="sm" 
+                          className="flex-1"
+                          onClick={() => {
+                            // Trigger training
+                            console.log('Triggering KnowBe4 training...');
+                          }}
+                        >
+                          Assign Training
+                        </Button>
                       </div>
                     </CardContent>
                   </Card>
 
-                  {/* Sentinel 1 */}
+                  {/* SentinelOne */}
                   <Card>
                     <CardHeader>
                       <CardTitle className="flex items-center gap-2">
@@ -958,87 +1060,171 @@ export default function UserDetail() {
                     <CardContent className="space-y-4">
                       <div>
                         <label className="text-sm font-medium text-muted-foreground">Agent Status</label>
-                        <div className="flex items-center gap-2">
-                          <Badge className="bg-green-600 text-white">Active</Badge>
-                        </div>
+                        <p className="text-foreground">Loading...</p>
                       </div>
                       <div>
                         <label className="text-sm font-medium text-muted-foreground">Last Check-in</label>
-                        <p className="text-foreground">2 minutes ago</p>
+                        <p className="text-foreground">Loading...</p>
                       </div>
                       <div>
                         <label className="text-sm font-medium text-muted-foreground">Threats Detected</label>
-                        <p className="text-foreground">0 (Last 30 days)</p>
+                        <p className="text-foreground">Loading...</p>
                       </div>
                       <div>
                         <label className="text-sm font-medium text-muted-foreground">Policy Compliance</label>
-                        <div className="flex items-center gap-2">
-                          <Badge className="bg-green-600 text-white">Compliant</Badge>
-                        </div>
+                        <p className="text-foreground">Loading...</p>
+                      </div>
+                      <div className="flex gap-2 pt-2">
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="flex-1"
+                          onClick={() => {
+                            // API call to SentinelOne
+                            console.log('Fetching SentinelOne data...');
+                          }}
+                        >
+                          <RefreshCw className="w-4 h-4 mr-1" />
+                          Refresh
+                        </Button>
+                        <Button 
+                          variant="default" 
+                          size="sm" 
+                          className="flex-1"
+                          onClick={() => {
+                            // Initiate scan
+                            console.log('Initiating SentinelOne scan...');
+                          }}
+                        >
+                          Full Scan
+                        </Button>
                       </div>
                     </CardContent>
                   </Card>
 
-                  {/* Addigy */}
+                  {/* Device Management - Addigy & Intune */}
                   <Card>
                     <CardHeader>
                       <CardTitle className="flex items-center gap-2">
                         <Monitor className="w-5 h-5 text-orange-600" />
-                        Addigy
+                        Device Management
                       </CardTitle>
                     </CardHeader>
-                    <CardContent className="space-y-4">
-                      <div>
-                        <label className="text-sm font-medium text-muted-foreground">Device Management</label>
-                        <div className="flex items-center gap-2">
-                          <Badge className="bg-green-600 text-white">Managed</Badge>
+                    <CardContent className="space-y-6">
+                      <div className="grid grid-cols-2 gap-4">
+                        {/* Addigy Column */}
+                        <div className="space-y-3">
+                          <h4 className="font-medium text-sm text-orange-600 border-b pb-1">Addigy</h4>
+                          <div>
+                            <label className="text-xs font-medium text-muted-foreground">Status</label>
+                            <div className="flex items-center gap-2">
+                              <Badge className="bg-green-600 text-white text-xs">Managed</Badge>
+                            </div>
+                          </div>
+                          <div>
+                            <label className="text-xs font-medium text-muted-foreground">Last Sync</label>
+                            <p className="text-foreground text-sm">5 min ago</p>
+                          </div>
+                          <div>
+                            <label className="text-xs font-medium text-muted-foreground">Updates</label>
+                            <p className="text-foreground text-sm">Up to Date</p>
+                          </div>
+                        </div>
+                        
+                        {/* Intune Column */}
+                        <div className="space-y-3">
+                          <h4 className="font-medium text-sm text-blue-500 border-b pb-1">Intune</h4>
+                          <div>
+                            <label className="text-xs font-medium text-muted-foreground">Enrollment</label>
+                            <div className="flex items-center gap-2">
+                              <Badge className="bg-green-600 text-white text-xs">Enrolled</Badge>
+                            </div>
+                          </div>
+                          <div>
+                            <label className="text-xs font-medium text-muted-foreground">Check-in</label>
+                            <p className="text-foreground text-sm">1 hour ago</p>
+                          </div>
+                          <div>
+                            <label className="text-xs font-medium text-muted-foreground">Policies</label>
+                            <p className="text-foreground text-sm">5/5 Applied</p>
+                          </div>
                         </div>
                       </div>
-                      <div>
-                        <label className="text-sm font-medium text-muted-foreground">Last Sync</label>
-                        <p className="text-foreground">5 minutes ago</p>
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium text-muted-foreground">Software Updates</label>
-                        <p className="text-foreground">Up to Date</p>
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium text-muted-foreground">Compliance Score</label>
-                        <div className="flex items-center gap-2">
-                          <Badge className="bg-green-600 text-white">98%</Badge>
-                        </div>
+                      
+                      <div className="flex gap-2 pt-2">
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="flex-1"
+                          onClick={() => {
+                            // API call to Addigy
+                            console.log('Fetching Addigy data...');
+                          }}
+                        >
+                          <RefreshCw className="w-3 h-3 mr-1" />
+                          Sync Addigy
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="flex-1"
+                          onClick={() => {
+                            // API call to Intune
+                            console.log('Fetching Intune data...');
+                          }}
+                        >
+                          <RefreshCw className="w-3 h-3 mr-1" />
+                          Sync Intune
+                        </Button>
                       </div>
                     </CardContent>
                   </Card>
 
-                  {/* Intune */}
+                  {/* Jira */}
                   <Card>
                     <CardHeader>
                       <CardTitle className="flex items-center gap-2">
-                        <Smartphone className="w-5 h-5 text-blue-500" />
-                        Microsoft Intune
+                        <Search className="w-5 h-5 text-blue-700" />
+                        Jira Service Management
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
                       <div>
-                        <label className="text-sm font-medium text-muted-foreground">Enrollment Status</label>
-                        <div className="flex items-center gap-2">
-                          <Badge className="bg-green-600 text-white">Enrolled</Badge>
-                        </div>
+                        <label className="text-sm font-medium text-muted-foreground">Open Tickets</label>
+                        <p className="text-foreground">Loading...</p>
                       </div>
                       <div>
-                        <label className="text-sm font-medium text-muted-foreground">Last Check-in</label>
-                        <p className="text-foreground">1 hour ago</p>
+                        <label className="text-sm font-medium text-muted-foreground">Recent Activity</label>
+                        <p className="text-foreground">Loading...</p>
                       </div>
                       <div>
-                        <label className="text-sm font-medium text-muted-foreground">Policies Applied</label>
-                        <p className="text-foreground">5/5 Successful</p>
+                        <label className="text-sm font-medium text-muted-foreground">Priority Issues</label>
+                        <p className="text-foreground">Loading...</p>
                       </div>
-                      <div>
-                        <label className="text-sm font-medium text-muted-foreground">Device Compliance</label>
-                        <div className="flex items-center gap-2">
-                          <Badge className="bg-green-600 text-white">Compliant</Badge>
-                        </div>
+                      <div className="flex gap-2 pt-2">
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="flex-1"
+                          onClick={() => {
+                            // API call to Jira
+                            console.log('Fetching Jira tickets...');
+                          }}
+                        >
+                          <RefreshCw className="w-4 h-4 mr-1" />
+                          Refresh
+                        </Button>
+                        <Button 
+                          variant="default" 
+                          size="sm" 
+                          className="flex-1"
+                          onClick={() => {
+                            // Create new ticket
+                            console.log('Creating new Jira ticket...');
+                          }}
+                        >
+                          Create Ticket
+                        </Button>
                       </div>
                     </CardContent>
                   </Card>
