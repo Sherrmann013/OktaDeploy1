@@ -485,9 +485,9 @@ export default function UserDetail() {
     <main className="flex-1 overflow-hidden">
       <div className="h-full flex flex-col">
         {/* Header */}
-        <div className="flex-shrink-0 bg-background border-b border-border px-2 py-3">
+        <div className="flex-shrink-0 bg-background border-b border-border px-4 py-3">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-4">
               <Button
                 variant="ghost"
                 size="sm"
