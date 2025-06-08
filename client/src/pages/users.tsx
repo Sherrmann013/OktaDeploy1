@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
@@ -41,6 +41,20 @@ export default function Users() {
   const [showUserDropdown, setShowUserDropdown] = useState(false);
   const { toast } = useToast();
   const { user: currentUser } = useAuth();
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setShowUserDropdown(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   // Column and filter management
   const [columns, setColumns] = useState<ColumnConfig[]>(() => 
@@ -258,7 +272,7 @@ export default function Users() {
               <UserPlus className="w-4 h-4 mr-2" />
               Add User
             </Button>
-            <div className="relative">
+            <div className="relative" ref={dropdownRef}>
               <Button
                 variant="ghost"
                 className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center p-0 hover:bg-blue-700"
@@ -358,7 +372,7 @@ export default function Users() {
               placeholder="Search users by name, email, or login..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10"
+              className="pl-10 border-blue-500 ring-1 ring-blue-500 focus:border-blue-600 focus:ring-blue-600"
             />
           </div>
           
