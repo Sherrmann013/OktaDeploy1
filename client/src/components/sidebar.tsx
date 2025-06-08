@@ -21,7 +21,7 @@ export default function Sidebar() {
                 alt="MAZE Logo" 
                 className="w-10 h-10"
                 style={{
-                  filter: 'invert(60%) sepia(95%) saturate(1500%) hue-rotate(15deg) brightness(105%) contrast(105%)'
+                  filter: 'invert(1) sepia(1) saturate(5) hue-rotate(15deg) brightness(1.2)'
                 }}
               />
             </div>
