@@ -594,7 +594,7 @@ export default function UserDetail() {
             <div className="flex-shrink-0 px-6 pt-4">
               <TabsList className="grid w-full grid-cols-5">
                 <TabsTrigger value="profile">Profile</TabsTrigger>
-                <TabsTrigger value="groups">Groups ({userGroups.length})</TabsTrigger>
+                <TabsTrigger value="security">Security</TabsTrigger>
                 <TabsTrigger value="applications">Applications ({userApps.length})</TabsTrigger>
                 <TabsTrigger value="devices">Devices ({userDevices.length})</TabsTrigger>
                 <TabsTrigger value="activity">Recent Activity</TabsTrigger>
@@ -915,29 +915,134 @@ export default function UserDetail() {
                 )}
               </TabsContent>
 
-              <TabsContent value="groups" className="space-y-4 mt-0">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>User Groups</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    {userGroups.length === 0 ? (
-                      <p className="text-gray-500 text-center py-8">No groups assigned</p>
-                    ) : (
-                      <div className="space-y-2">
-                        {userGroups.map((group) => (
-                          <div key={group.id} className="flex items-center justify-between p-2 border rounded-lg">
-                            <div>
-                              <h4 className="font-medium">{group.profile.name}</h4>
-                              <p className="text-sm text-gray-500">{group.profile.description || 'No description'}</p>
-                            </div>
-                            <Badge variant="secondary">{group.type}</Badge>
-                          </div>
-                        ))}
+              <TabsContent value="security" className="space-y-6 mt-0">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  {/* KnowBe4 */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Shield className="w-5 h-5 text-blue-600" />
+                        KnowBe4
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div>
+                        <label className="text-sm font-medium text-muted-foreground">Training Status</label>
+                        <p className="text-foreground">Up to Date</p>
                       </div>
-                    )}
-                  </CardContent>
-                </Card>
+                      <div>
+                        <label className="text-sm font-medium text-muted-foreground">Last Training</label>
+                        <p className="text-foreground">Dec 15, 2024</p>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-muted-foreground">Risk Score</label>
+                        <div className="flex items-center gap-2">
+                          <Badge className="bg-green-600 text-white">Low Risk</Badge>
+                        </div>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-muted-foreground">Phishing Tests</label>
+                        <p className="text-foreground">3/3 Passed</p>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Sentinel 1 */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Eye className="w-5 h-5 text-purple-600" />
+                        SentinelOne
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div>
+                        <label className="text-sm font-medium text-muted-foreground">Agent Status</label>
+                        <div className="flex items-center gap-2">
+                          <Badge className="bg-green-600 text-white">Active</Badge>
+                        </div>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-muted-foreground">Last Check-in</label>
+                        <p className="text-foreground">2 minutes ago</p>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-muted-foreground">Threats Detected</label>
+                        <p className="text-foreground">0 (Last 30 days)</p>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-muted-foreground">Policy Compliance</label>
+                        <div className="flex items-center gap-2">
+                          <Badge className="bg-green-600 text-white">Compliant</Badge>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Addigy */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Monitor className="w-5 h-5 text-orange-600" />
+                        Addigy
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div>
+                        <label className="text-sm font-medium text-muted-foreground">Device Management</label>
+                        <div className="flex items-center gap-2">
+                          <Badge className="bg-green-600 text-white">Managed</Badge>
+                        </div>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-muted-foreground">Last Sync</label>
+                        <p className="text-foreground">5 minutes ago</p>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-muted-foreground">Software Updates</label>
+                        <p className="text-foreground">Up to Date</p>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-muted-foreground">Compliance Score</label>
+                        <div className="flex items-center gap-2">
+                          <Badge className="bg-green-600 text-white">98%</Badge>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Intune */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Smartphone className="w-5 h-5 text-blue-500" />
+                        Microsoft Intune
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div>
+                        <label className="text-sm font-medium text-muted-foreground">Enrollment Status</label>
+                        <div className="flex items-center gap-2">
+                          <Badge className="bg-green-600 text-white">Enrolled</Badge>
+                        </div>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-muted-foreground">Last Check-in</label>
+                        <p className="text-foreground">1 hour ago</p>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-muted-foreground">Policies Applied</label>
+                        <p className="text-foreground">5/5 Successful</p>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-muted-foreground">Device Compliance</label>
+                        <div className="flex items-center gap-2">
+                          <Badge className="bg-green-600 text-white">Compliant</Badge>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
               </TabsContent>
 
               <TabsContent value="applications" className="space-y-4 mt-0">
