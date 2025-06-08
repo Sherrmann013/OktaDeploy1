@@ -21,6 +21,9 @@ export default function Sidebar() {
                   src="/maze-logo.png" 
                   alt="MAZE Logo" 
                   className="w-10 h-10 absolute inset-0"
+                  style={{
+                    filter: 'invert(1)'
+                  }}
                 />
                 <div 
                   className="w-10 h-10 absolute inset-0"
