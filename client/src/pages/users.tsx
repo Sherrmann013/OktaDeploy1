@@ -259,15 +259,7 @@ export default function Users() {
           </div>
           <div className="flex items-center space-x-3">
             <ThemeToggle />
-            <Button
-              variant="outline"
-              onClick={() => oktaSyncMutation.mutate()}
-              disabled={oktaSyncMutation.isPending}
-              className="border-orange-300 text-orange-700 hover:bg-orange-50"
-            >
-              <RotateCcw className={`w-4 h-4 mr-2 ${oktaSyncMutation.isPending ? 'animate-spin' : ''}`} />
-              Sync OKTA
-            </Button>
+
 
             <div className="relative" ref={dropdownRef}>
               <Button
@@ -281,9 +273,23 @@ export default function Users() {
               </Button>
               {showUserDropdown && (
                 <div className="absolute right-0 top-10 w-64 bg-background border border-border rounded-lg shadow-lg z-50">
-                  <div className="p-3">
+                  <div className="p-3 border-b border-border">
                     <p className="font-medium text-foreground">{currentUser?.firstName} {currentUser?.lastName}</p>
                     <p className="text-sm text-muted-foreground">{currentUser?.email}</p>
+                  </div>
+                  <div className="p-3">
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        oktaSyncMutation.mutate();
+                        setShowUserDropdown(false);
+                      }}
+                      disabled={oktaSyncMutation.isPending}
+                      className="w-full border-orange-300 text-orange-700 hover:bg-orange-50"
+                    >
+                      <RotateCcw className={`w-4 h-4 mr-2 ${oktaSyncMutation.isPending ? 'animate-spin' : ''}`} />
+                      Sync OKTA
+                    </Button>
                   </div>
                 </div>
               )}
