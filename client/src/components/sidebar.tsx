@@ -15,40 +15,51 @@ export default function Sidebar() {
       <div className="p-3 border-b border-border bg-purple-600 dark:bg-purple-700">
         <div className="text-center">
           <div className="relative inline-block mb-1">
-            <svg width="64" height="32" viewBox="0 0 64 32" className="mx-auto">
-              {/* Background */}
-              <rect width="64" height="32" fill="#7c3aed" rx="3"/>
+            <svg width="44" height="44" viewBox="0 0 44 44" className="mx-auto">
+              {/* Purple background */}
+              <rect width="44" height="44" fill="#7c3aed" rx="4"/>
               
-              {/* MAZE logo - recreating the block letter style */}
-              <g fill="#f97316" stroke="#14b8a6" strokeWidth="0.8">
-                {/* M */}
-                <rect x="4" y="8" width="3" height="12"/>
-                <rect x="4" y="8" width="8" height="3"/>
-                <rect x="9" y="8" width="3" height="12"/>
-                <rect x="6" y="12" width="3" height="3"/>
+              {/* MAZE logo - accurate recreation of the 2x2 grid design */}
+              <g fill="#f97316">
+                {/* M - top left quadrant */}
+                <rect x="4" y="4" width="16" height="16" rx="1"/>
+                <g fill="#7c3aed">
+                  <rect x="6" y="8" width="2" height="8"/>
+                  <rect x="10" y="8" width="2" height="8"/>
+                  <rect x="14" y="8" width="2" height="8"/>
+                  <rect x="8" y="10" width="2" height="3"/>
+                  <rect x="12" y="10" width="2" height="3"/>
+                </g>
                 
-                {/* A */}
-                <rect x="14" y="11" width="8" height="3"/>
-                <rect x="14" y="8" width="3" height="12"/>
-                <rect x="19" y="8" width="3" height="12"/>
-                <rect x="14" y="8" width="8" height="3"/>
-                <rect x="14" y="14" width="8" height="3"/>
+                {/* A - top right quadrant */}
+                <rect x="24" y="4" width="16" height="16" rx="1"/>
+                <g fill="#7c3aed">
+                  <rect x="26" y="10" width="2" height="6"/>
+                  <rect x="36" y="10" width="2" height="6"/>
+                  <rect x="28" y="8" width="8" height="2"/>
+                  <rect x="30" y="12" width="4" height="2"/>
+                </g>
                 
-                {/* Z */}
-                <rect x="25" y="8" width="8" height="3"/>
-                <rect x="25" y="17" width="8" height="3"/>
-                <rect x="28" y="11" width="3" height="3"/>
-                <rect x="30" y="14" width="3" height="3"/>
+                {/* Z - bottom left quadrant */}
+                <rect x="4" y="24" width="16" height="16" rx="1"/>
+                <g fill="#7c3aed">
+                  <rect x="6" y="28" width="12" height="2"/>
+                  <rect x="6" y="36" width="12" height="2"/>
+                  <polygon points="14,30 16,30 8,34 6,34"/>
+                </g>
                 
-                {/* E */}
-                <rect x="36" y="8" width="3" height="12"/>
-                <rect x="36" y="8" width="8" height="3"/>
-                <rect x="36" y="13" width="6" height="3"/>
-                <rect x="36" y="17" width="8" height="3"/>
+                {/* E - bottom right quadrant */}
+                <rect x="24" y="24" width="16" height="16" rx="1"/>
+                <g fill="#7c3aed">
+                  <rect x="26" y="28" width="2" height="10"/>
+                  <rect x="28" y="28" width="8" height="2"/>
+                  <rect x="28" y="32" width="6" height="2"/>
+                  <rect x="28" y="36" width="8" height="2"/>
+                </g>
               </g>
             </svg>
           </div>
-          <div className="text-xs text-white/80">Powered by ClockWerk</div>
+          <div className="text-[10px] text-white/80 leading-tight">Powered by ClockWerk</div>
         </div>
       </div>
       
