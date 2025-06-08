@@ -131,7 +131,7 @@ export default function Users() {
         sortBy: sortBy,
         sortOrder: sortOrder,
         ...(searchQuery && { search: searchQuery }),
-        ...(employeeTypeFilter && { employeeType: employeeTypeFilter })
+        ...(employeeTypeFilter && employeeTypeFilter !== "all" && { employeeType: employeeTypeFilter })
       });
       
       const response = await fetch(`/api/users?${params}`, {
@@ -272,42 +272,6 @@ export default function Users() {
         </div>
       </header>
 
-      {/* Search and Filters */}
-      <div className="bg-background border-b border-border px-6 py-4">
-        <form onSubmit={handleSearch} className="flex items-center space-x-4">
-          <div className="flex-1 relative">
-            <Search className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
-            <Input
-              type="text"
-              placeholder="Search users by name, email, or login..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10"
-            />
-          </div>
-          
-
-
-          <Button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white">
-            <Search className="w-4 h-4 mr-2" />
-            Search
-          </Button>
-          
-          <ColumnManager
-            columns={columns}
-            onColumnsChange={setColumns}
-            filters={filters}
-            onFiltersChange={setFilters}
-          />
-          
-          {(searchQuery || employeeTypeFilter || filters.length > 0) && (
-            <Button type="button" variant="outline" onClick={clearFilters}>
-              Clear Filters
-            </Button>
-          )}
-        </form>
-      </div>
-
       {/* Stats Cards */}
       <div className="bg-background px-6 py-4">
         <div className="grid grid-cols-5 gap-3">
@@ -373,6 +337,53 @@ export default function Users() {
             </CardContent>
           </Card>
         </div>
+      </div>
+
+      {/* Search and Filters */}
+      <div className="bg-background border-b border-border px-6 py-4">
+        <form onSubmit={handleSearch} className="flex items-center space-x-4">
+          <div className="flex-1 relative">
+            <Search className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
+            <Input
+              type="text"
+              placeholder="Search users by name, email, or login..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+          
+          <Select value={employeeTypeFilter} onValueChange={setEmployeeTypeFilter}>
+            <SelectTrigger className="w-48">
+              <SelectValue placeholder="Filter by Employee Type" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Employee Types</SelectItem>
+              <SelectItem value="EMPLOYEE">Employees</SelectItem>
+              <SelectItem value="CONTRACTOR">Contractors</SelectItem>
+              <SelectItem value="PART_TIME">Part Time</SelectItem>
+              <SelectItem value="INTERN">Interns</SelectItem>
+            </SelectContent>
+          </Select>
+
+          <Button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white">
+            <Search className="w-4 h-4 mr-2" />
+            Search
+          </Button>
+          
+          <ColumnManager
+            columns={columns}
+            onColumnsChange={setColumns}
+            filters={filters}
+            onFiltersChange={setFilters}
+          />
+          
+          {(searchQuery || employeeTypeFilter || filters.length > 0) && (
+            <Button type="button" variant="outline" onClick={clearFilters}>
+              Clear Filters
+            </Button>
+          )}
+        </form>
       </div>
 
       {/* Users Table */}

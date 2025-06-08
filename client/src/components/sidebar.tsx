@@ -13,9 +13,10 @@ export default function Sidebar() {
   return (
     <aside className="w-32 bg-background shadow-md border-r border-border flex-shrink-0 flex flex-col">
       <div className="p-4 border-b border-border">
-        <div>
-          <h1 className="text-lg font-semibold text-foreground">OKTA Admin</h1>
-          <p className="text-xs text-muted-foreground">mazetx.okta.com</p>
+        <div className="text-center">
+          <div className="text-xl font-bold text-blue-600 mb-1">MAZE</div>
+          <div className="text-xs text-muted-foreground mb-2">Therapeutics</div>
+          <div className="text-xs text-muted-foreground">Powered by ClockWerk</div>
         </div>
       </div>
       
