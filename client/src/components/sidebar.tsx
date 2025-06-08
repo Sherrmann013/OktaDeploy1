@@ -1,7 +1,13 @@
 import { Link, useLocation } from "wouter";
-import { Shield, Users, UsersRound, Grid3x3, Settings } from "lucide-react";
+import { Shield, Users, UsersRound, Grid3x3, Settings, RotateCcw } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { useAuth } from "@/hooks/use-auth";
+import { Button } from "@/components/ui/button";
+import { useState, useEffect, useRef } from "react";
+import { useMutation } from "@tanstack/react-query";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 
 const navigation = [
   { name: "Users", href: "/users", icon: Users, current: true },
@@ -9,6 +15,46 @@ const navigation = [
 
 export default function Sidebar() {
   const [location] = useLocation();
+  const { user: currentUser } = useAuth();
+  const [showUserDropdown, setShowUserDropdown] = useState(false);
+  const { toast } = useToast();
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setShowUserDropdown(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  // OKTA sync mutation
+  const oktaSyncMutation = useMutation({
+    mutationFn: async () => {
+      const response = await apiRequest("POST", "/api/sync-okta");
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/users"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/employee-type-counts"] });
+      toast({
+        title: "Success",
+        description: "OKTA users synchronized successfully",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: `Failed to sync OKTA users: ${error.message}`,
+        variant: "destructive",
+      });
+    },
+  });
 
   return (
     <aside className="w-32 bg-background shadow-md border-r border-border flex-shrink-0 flex flex-col">
@@ -63,8 +109,44 @@ export default function Sidebar() {
         </ul>
       </nav>
       
-      {/* Theme Toggle at Bottom */}
-      <div className="p-4 border-t border-border">
+      {/* User Profile and Controls at Bottom */}
+      <div className="p-4 border-t border-border space-y-3">
+        {/* User Dropdown */}
+        <div className="relative" ref={dropdownRef}>
+          <Button
+            variant="ghost"
+            className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center p-0 hover:bg-blue-700 mx-auto"
+            onClick={() => setShowUserDropdown(!showUserDropdown)}
+          >
+            <span className="text-white text-sm font-medium">
+              {currentUser?.firstName?.[0]}{currentUser?.lastName?.[0]}
+            </span>
+          </Button>
+          {showUserDropdown && (
+            <div className="absolute bottom-10 right-0 w-64 bg-background border border-border rounded-lg shadow-lg z-50">
+              <div className="p-3 border-b border-border">
+                <p className="font-medium text-foreground">{currentUser?.firstName} {currentUser?.lastName}</p>
+                <p className="text-sm text-muted-foreground">{currentUser?.email}</p>
+              </div>
+              <div className="p-3">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    oktaSyncMutation.mutate();
+                    setShowUserDropdown(false);
+                  }}
+                  disabled={oktaSyncMutation.isPending}
+                  className="w-full border-orange-300 text-orange-700 hover:bg-orange-50"
+                >
+                  <RotateCcw className={`w-4 h-4 mr-2 ${oktaSyncMutation.isPending ? 'animate-spin' : ''}`} />
+                  Sync OKTA
+                </Button>
+              </div>
+            </div>
+          )}
+        </div>
+        
+        {/* Theme Toggle */}
         <div className="flex justify-center">
           <ThemeToggle />
         </div>

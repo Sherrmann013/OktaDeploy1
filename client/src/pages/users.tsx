@@ -237,66 +237,25 @@ export default function Users() {
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
       {/* Header */}
-      <header className="bg-background border-b border-border px-6 py-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <nav className="flex text-sm text-muted-foreground mb-1">
-              <span>Users</span>
-              <span className="mx-2">/</span>
-              <span className="text-foreground font-medium">All Users</span>
-            </nav>
-            <h2 className="text-2xl font-semibold text-foreground">User Management</h2>
-            {dataSource && (
-              <p className="text-sm text-muted-foreground">
-                Data source: {dataSource === 'okta' ? 'OKTA API' : 'Local Storage'}
-                {dataSource === 'local_storage' && (
-                  <span className="text-yellow-600 dark:text-yellow-400 ml-2">
-                    (OKTA connection unavailable - using fallback data)
-                  </span>
-                )}
-              </p>
+      {/* Page Header */}
+      <div className="bg-background border-b border-border px-6 py-4">
+        <nav className="flex text-sm text-muted-foreground mb-1">
+          <span>Users</span>
+          <span className="mx-2">/</span>
+          <span className="text-foreground font-medium">All Users</span>
+        </nav>
+        <h2 className="text-2xl font-semibold text-foreground">User Management</h2>
+        {dataSource && (
+          <p className="text-sm text-muted-foreground">
+            Data source: {dataSource === 'okta' ? 'OKTA API' : 'Local Storage'}
+            {dataSource === 'local_storage' && (
+              <span className="text-yellow-600 dark:text-yellow-400 ml-2">
+                (OKTA connection unavailable - using fallback data)
+              </span>
             )}
-          </div>
-          <div className="flex items-center space-x-3">
-            <ThemeToggle />
-
-
-            <div className="relative" ref={dropdownRef}>
-              <Button
-                variant="ghost"
-                className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center p-0 hover:bg-blue-700"
-                onClick={() => setShowUserDropdown(!showUserDropdown)}
-              >
-                <span className="text-white text-sm font-medium">
-                  {currentUser?.firstName?.[0]}{currentUser?.lastName?.[0]}
-                </span>
-              </Button>
-              {showUserDropdown && (
-                <div className="absolute right-0 top-10 w-64 bg-background border border-border rounded-lg shadow-lg z-50">
-                  <div className="p-3 border-b border-border">
-                    <p className="font-medium text-foreground">{currentUser?.firstName} {currentUser?.lastName}</p>
-                    <p className="text-sm text-muted-foreground">{currentUser?.email}</p>
-                  </div>
-                  <div className="p-3">
-                    <Button
-                      variant="outline"
-                      onClick={() => {
-                        oktaSyncMutation.mutate();
-                        setShowUserDropdown(false);
-                      }}
-                      disabled={oktaSyncMutation.isPending}
-                      className="w-full border-orange-300 text-orange-700 hover:bg-orange-50"
-                    >
-                      <RotateCcw className={`w-4 h-4 mr-2 ${oktaSyncMutation.isPending ? 'animate-spin' : ''}`} />
-                      Sync OKTA
-                    </Button>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      </header>
+          </p>
+        )}
+      </div>
 
       {/* Stats Cards */}
       <div className="bg-background px-6 py-4">
