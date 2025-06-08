@@ -15,49 +15,16 @@ export default function Sidebar() {
       <div className="p-3 border-b border-border bg-purple-600 dark:bg-purple-700">
         <div className="text-center">
           <div className="relative inline-block mb-1">
-            <svg width="44" height="44" viewBox="0 0 44 44" className="mx-auto">
-              {/* Purple background */}
-              <rect width="44" height="44" fill="#7c3aed" rx="4"/>
-              
-              {/* MAZE logo - accurate recreation of the 2x2 grid design */}
-              <g fill="#f97316">
-                {/* M - top left quadrant */}
-                <rect x="4" y="4" width="16" height="16" rx="1"/>
-                <g fill="#7c3aed">
-                  <rect x="6" y="8" width="2" height="8"/>
-                  <rect x="10" y="8" width="2" height="8"/>
-                  <rect x="14" y="8" width="2" height="8"/>
-                  <rect x="8" y="10" width="2" height="3"/>
-                  <rect x="12" y="10" width="2" height="3"/>
-                </g>
-                
-                {/* A - top right quadrant */}
-                <rect x="24" y="4" width="16" height="16" rx="1"/>
-                <g fill="#7c3aed">
-                  <rect x="26" y="10" width="2" height="6"/>
-                  <rect x="36" y="10" width="2" height="6"/>
-                  <rect x="28" y="8" width="8" height="2"/>
-                  <rect x="30" y="12" width="4" height="2"/>
-                </g>
-                
-                {/* Z - bottom left quadrant */}
-                <rect x="4" y="24" width="16" height="16" rx="1"/>
-                <g fill="#7c3aed">
-                  <rect x="6" y="28" width="12" height="2"/>
-                  <rect x="6" y="36" width="12" height="2"/>
-                  <polygon points="14,30 16,30 8,34 6,34"/>
-                </g>
-                
-                {/* E - bottom right quadrant */}
-                <rect x="24" y="24" width="16" height="16" rx="1"/>
-                <g fill="#7c3aed">
-                  <rect x="26" y="28" width="2" height="10"/>
-                  <rect x="28" y="28" width="8" height="2"/>
-                  <rect x="28" y="32" width="6" height="2"/>
-                  <rect x="28" y="36" width="8" height="2"/>
-                </g>
-              </g>
-            </svg>
+            <div className="w-12 h-12 mx-auto rounded bg-purple-600 flex items-center justify-center">
+              <img 
+                src="/attached_assets/Capture_1749418092702.PNG" 
+                alt="MAZE Logo" 
+                className="w-10 h-10"
+                style={{
+                  filter: 'brightness(0) saturate(100%) invert(54%) sepia(77%) saturate(1234%) hue-rotate(10deg) brightness(102%) contrast(101%)'
+                }}
+              />
+            </div>
           </div>
           <div className="text-[10px] text-white/80 leading-tight">Powered by ClockWerk</div>
         </div>
