@@ -16,14 +16,20 @@ export default function Sidebar() {
         <div className="text-center">
           <div className="relative inline-block mb-1">
             <div className="relative w-12 h-12 mx-auto rounded bg-purple-600 flex items-center justify-center">
-              <img 
-                src="/maze-logo.png" 
-                alt="MAZE Logo" 
-                className="w-10 h-10"
-                style={{
-                  filter: 'brightness(0) saturate(100%) invert(54%) sepia(77%) saturate(1234%) hue-rotate(10deg) brightness(102%) contrast(101%)'
-                }}
-              />
+              <div className="relative w-10 h-10">
+                <img 
+                  src="/maze-logo.png" 
+                  alt="MAZE Logo" 
+                  className="w-10 h-10 absolute inset-0"
+                />
+                <div 
+                  className="w-10 h-10 absolute inset-0"
+                  style={{
+                    backgroundColor: '#f97316',
+                    mixBlendMode: 'multiply'
+                  }}
+                />
+              </div>
             </div>
           </div>
           <div className="text-[10px] text-white/80 leading-tight">Powered by ClockWerk</div>
