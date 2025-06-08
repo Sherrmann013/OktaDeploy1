@@ -15,18 +15,18 @@ export default function Sidebar() {
       <div className="p-3 border-b border-border bg-purple-600 dark:bg-purple-700 flex flex-col">
         <div className="text-center flex-1">
           <div className="relative inline-block mb-1">
-            <div className="relative w-16 h-16 mx-auto rounded bg-purple-600 flex items-center justify-center">
-              <div className="relative w-14 h-14">
+            <div className="relative w-20 h-20 mx-auto rounded bg-purple-600 flex items-center justify-center">
+              <div className="relative w-18 h-18">
                 <img 
                   src="/maze-logo.png" 
                   alt="MAZE Logo" 
-                  className="w-14 h-14 absolute inset-0 object-contain"
+                  className="w-18 h-18 absolute inset-0 object-contain"
                   style={{
                     filter: 'invert(1)'
                   }}
                 />
                 <div 
-                  className="w-14 h-14 absolute inset-0"
+                  className="w-18 h-18 absolute inset-0"
                   style={{
                     backgroundColor: '#f97316',
                     mixBlendMode: 'multiply'
