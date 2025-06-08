@@ -11,8 +11,8 @@ export default function Sidebar() {
   const [location] = useLocation();
 
   return (
-    <aside className="w-44 bg-background shadow-md border-r border-border flex-shrink-0 flex flex-col">
-      <div className="p-6 border-b border-border">
+    <aside className="w-32 bg-background shadow-md border-r border-border flex-shrink-0 flex flex-col">
+      <div className="p-4 border-b border-border">
         <div>
           <h1 className="text-lg font-semibold text-foreground">OKTA Admin</h1>
           <p className="text-xs text-muted-foreground">mazetx.okta.com</p>

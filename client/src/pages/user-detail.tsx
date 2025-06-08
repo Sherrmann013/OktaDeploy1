@@ -485,7 +485,7 @@ export default function UserDetail() {
     <main className="flex-1 overflow-hidden">
       <div className="h-full flex flex-col">
         {/* Header */}
-        <div className="flex-shrink-0 bg-background border-b border-border px-6 py-4">
+        <div className="flex-shrink-0 bg-background border-b border-border px-3 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <Button
@@ -511,6 +511,26 @@ export default function UserDetail() {
                 
                 {/* Individual action buttons next to user name */}
                 <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handlePasswordAction("reset")}
+                    className="flex items-center gap-2 text-blue-600 border-blue-300 hover:bg-blue-50"
+                  >
+                    <Key className="w-4 h-4" />
+                    Reset Password
+                  </Button>
+                  
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handlePasswordAction("expire")}
+                    className="flex items-center gap-2 text-purple-600 border-purple-300 hover:bg-purple-50"
+                  >
+                    <KeyRound className="w-4 h-4" />
+                    Expire Password
+                  </Button>
+                  
                   {user.status === "ACTIVE" ? (
                     <Button
                       variant="outline"
@@ -532,26 +552,6 @@ export default function UserDetail() {
                       Activate
                     </Button>
                   )}
-                  
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handlePasswordAction("reset")}
-                    className="flex items-center gap-2 text-blue-600 border-blue-300 hover:bg-blue-50"
-                  >
-                    <Key className="w-4 h-4" />
-                    Reset Password
-                  </Button>
-                  
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handlePasswordAction("expire")}
-                    className="flex items-center gap-2 text-purple-600 border-purple-300 hover:bg-purple-50"
-                  >
-                    <KeyRound className="w-4 h-4" />
-                    Expire Password
-                  </Button>
                   
                   <Button
                     variant="outline"
