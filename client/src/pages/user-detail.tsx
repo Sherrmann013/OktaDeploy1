@@ -417,7 +417,7 @@ export default function UserDetail() {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "ACTIVE":
-        return <Badge className="bg-green-100 text-green-800">Active</Badge>;
+        return <Badge className="bg-green-600 text-white">Active</Badge>;
       case "SUSPENDED":
         return <Badge className="bg-yellow-100 text-yellow-800">Suspended</Badge>;
       case "DEPROVISIONED":
@@ -497,7 +497,7 @@ export default function UserDetail() {
                 <ArrowLeft className="w-4 h-4" />
                 Back to Users
               </Button>
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-6">
                 <div>
                   <h1 className="text-2xl font-bold text-foreground">
                     {user.firstName || 'Unknown'} {user.lastName || 'User'}
@@ -509,75 +509,81 @@ export default function UserDetail() {
                   </div>
                 </div>
                 
-                {/* Actions moved next to user name */}
+                {/* Individual action buttons next to user name */}
                 <div className="flex items-center gap-2">
-                  {!isEditing && (
+                  {user.status === "ACTIVE" ? (
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => setIsEditing(true)}
-                      className="flex items-center gap-2"
+                      onClick={() => handleStatusChange("SUSPENDED")}
+                      className="flex items-center gap-2 text-orange-600 border-orange-300 hover:bg-orange-50"
                     >
-                      <Edit className="w-4 h-4" />
-                      Edit Profile
+                      <UserX className="w-4 h-4" />
+                      Suspend
+                    </Button>
+                  ) : (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleStatusChange("ACTIVE")}
+                      className="flex items-center gap-2 text-green-600 border-green-300 hover:bg-green-50"
+                    >
+                      <UserCheck className="w-4 h-4" />
+                      Activate
                     </Button>
                   )}
-
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="outline" size="sm">
-                        Actions
-                        <ChevronDown className="w-4 h-4 ml-1" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      {user.status === "ACTIVE" ? (
-                        <DropdownMenuItem
-                          onClick={() => handleStatusChange("SUSPENDED")}
-                          className="text-orange-600"
-                        >
-                          <UserX className="w-4 h-4 mr-2" />
-                          Suspend User
-                        </DropdownMenuItem>
-                      ) : (
-                        <DropdownMenuItem
-                          onClick={() => handleStatusChange("ACTIVE")}
-                          className="text-green-600"
-                        >
-                          <UserCheck className="w-4 h-4 mr-2" />
-                          Activate User
-                        </DropdownMenuItem>
-                      )}
-                      <DropdownMenuItem
-                        onClick={() => setShowAssignAppModal(true)}
-                      >
-                        <Plus className="w-4 h-4 mr-2" />
-                        Assign Application
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        onClick={() => handlePasswordAction("reset")}
-                        className="text-blue-600"
-                      >
-                        <Key className="w-4 h-4 mr-2" />
-                        Reset Password
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem
-                        onClick={() => setConfirmAction({
-                          title: "Delete User",
-                          message: "Are you sure you want to delete this user? This action cannot be undone.",
-                          action: () => handleDeleteUser(),
-                          type: "delete"
-                        })}
-                        className="text-red-600"
-                      >
-                        <Trash2 className="w-4 h-4 mr-2" />
-                        Delete User
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                  
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handlePasswordAction("reset")}
+                    className="flex items-center gap-2 text-blue-600 border-blue-300 hover:bg-blue-50"
+                  >
+                    <Key className="w-4 h-4" />
+                    Reset Password
+                  </Button>
+                  
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handlePasswordAction("expire")}
+                    className="flex items-center gap-2 text-purple-600 border-purple-300 hover:bg-purple-50"
+                  >
+                    <KeyRound className="w-4 h-4" />
+                    Expire Password
+                  </Button>
+                  
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setConfirmAction({
+                      title: "Delete User",
+                      message: "Are you sure you want to delete this user? This action cannot be undone.",
+                      action: () => handleDeleteUser(),
+                      type: "delete"
+                    })}
+                    className="flex items-center gap-2 text-red-600 border-red-300 hover:bg-red-50"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                    Delete
+                  </Button>
                 </div>
               </div>
+            </div>
+            
+            {/* Edit Profile button in the right corner */}
+            <div className="flex items-center">
+              {!isEditing && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setIsEditing(true)}
+                  className="flex items-center gap-2"
+                >
+                  <Edit className="w-4 h-4" />
+                  Edit Profile
+                </Button>
+              )}
             </div>
           </div>
         </div>
@@ -1235,7 +1241,7 @@ export default function UserDetail() {
       <AssignAppModal
         open={showAssignAppModal}
         onClose={() => setShowAssignAppModal(false)}
-        userId={userId.toString()}
+        userId={userId?.toString() || ""}
         userApps={userApps}
       />
     </main>
