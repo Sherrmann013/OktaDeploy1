@@ -485,24 +485,24 @@ export default function UserDetail() {
     <main className="flex-1 overflow-hidden">
       <div className="h-full flex flex-col">
         {/* Header */}
-        <div className="flex-shrink-0 bg-background border-b border-border px-2 py-4">
-          <div className="flex items-start justify-between">
-            <div className="flex items-start gap-3">
+        <div className="flex-shrink-0 bg-background border-b border-border px-2 py-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => setLocation("/")}
-                className="flex items-center gap-2 mt-1"
+                className="flex items-center gap-2"
               >
                 <ArrowLeft className="w-4 h-4" />
                 Back to Users
               </Button>
-              <div className="flex items-start gap-4">
+              <div className="flex items-center gap-4">
                 <div>
-                  <h1 className="text-2xl font-bold text-foreground leading-tight">
+                  <h1 className="text-xl font-bold text-foreground leading-tight">
                     {user.firstName || 'Unknown'} {user.lastName || 'User'}
                   </h1>
-                  <div className="flex items-center gap-2 mt-1">
+                  <div className="flex items-center gap-2">
                     {getStatusBadge(user.status || 'UNKNOWN')}
                     <span className="text-sm text-muted-foreground">•</span>
                     <span className="text-sm text-muted-foreground">{user.email || 'No email'}</span>
@@ -510,7 +510,7 @@ export default function UserDetail() {
                 </div>
                 
                 {/* Individual action buttons next to user name */}
-                <div className="flex items-start gap-2 mt-1">
+                <div className="flex items-center gap-2">
                   <Button
                     variant="outline"
                     size="sm"

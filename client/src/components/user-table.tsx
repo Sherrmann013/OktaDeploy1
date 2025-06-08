@@ -335,14 +335,14 @@ export default function UserTable({
         </div>
 
         {/* Pagination */}
-        <div className="bg-white px-6 py-3 border-t border-gray-200 flex items-center justify-between">
+        <div className="bg-background px-6 py-3 border-t border-border flex items-center justify-between">
           <div className="flex items-center space-x-4">
-            <div className="flex items-center text-sm text-gray-500">
+            <div className="flex items-center text-sm text-muted-foreground">
               Showing <span className="font-medium mx-1">{startIndex}</span> to{" "}
               <span className="font-medium mx-1">{endIndex}</span> of{" "}
               <span className="font-medium mx-1">{total}</span> users
             </div>
-            <div className="flex items-center space-x-2 text-sm text-gray-500">
+            <div className="flex items-center space-x-2 text-sm text-muted-foreground">
               <span>Show:</span>
               <Select value={usersPerPage.toString()} onValueChange={(value) => onPerPageChange(parseInt(value))}>
                 <SelectTrigger className="w-20 h-8">

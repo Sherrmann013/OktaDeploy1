@@ -12,11 +12,14 @@ export default function Sidebar() {
 
   return (
     <aside className="w-32 bg-background shadow-md border-r border-border flex-shrink-0 flex flex-col">
-      <div className="p-4 border-b border-border">
+      <div className="p-3 border-b border-border bg-purple-600 dark:bg-purple-700">
         <div className="text-center">
-          <div className="text-xl font-bold text-blue-600 mb-1">MAZE</div>
-          <div className="text-xs text-muted-foreground mb-2">Therapeutics</div>
-          <div className="text-xs text-muted-foreground">Powered by ClockWerk</div>
+          <div className="relative inline-block">
+            <div className="text-2xl font-black text-orange-500 mb-1 relative z-10 tracking-tight border-2 border-teal-400 bg-purple-600 px-2 py-1 rounded">
+              ma<br />ze
+            </div>
+          </div>
+          <div className="text-xs text-white/80 mt-2">Powered by ClockWerk</div>
         </div>
       </div>
       
