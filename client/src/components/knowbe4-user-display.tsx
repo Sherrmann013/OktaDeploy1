@@ -67,6 +67,12 @@ export default function KnowBe4UserDisplay({ userEmail }: KnowBe4UserDisplayProp
     enabled: !!connectionTest?.success,
   });
 
+  // Debug logging for exact data structure
+  console.log('=== KNOWBE4 DEBUG DATA ===');
+  console.log('KnowBe4 User Data:', JSON.stringify(knowbe4User, null, 2));
+  console.log('Training Campaigns:', JSON.stringify(campaigns, null, 2));
+  console.log('=== END DEBUG DATA ===');
+
 
 
   if (connectionLoading) {
