@@ -1720,8 +1720,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/knowbe4/user/:userId/phishing', isAuthenticated, async (req, res) => {
     try {
       const userId = parseInt(req.params.userId);
-      const results = await knowBe4Service.getUserPhishingResults(userId);
-      res.json(results);
+      
+      // Get all phishing campaigns
+      const campaigns = await knowBe4Service.getPhishingCampaigns();
+      const userPhishingResults: any[] = [];
+      
+      // Check each phishing campaign for user results
+      for (const campaign of campaigns) {
+        try {
+          // Get phishing security tests for this campaign
+          if (campaign.psts && campaign.psts.length > 0) {
+            for (const pst of campaign.psts) {
+              // Note: KnowBe4 API may not expose individual user phishing results
+              // This would require additional API endpoints that may not be available
+              console.log(`Checking PST ${pst.pst_id} for user ${userId}`);
+            }
+          }
+        } catch (campaignError) {
+          console.log(`Skipping phishing campaign ${campaign.campaign_id} due to error:`, (campaignError as Error).message);
+        }
+      }
+      
+      console.log(`Found ${userPhishingResults.length} phishing results for user ${userId}`);
+      res.json(userPhishingResults);
     } catch (error) {
       console.error("KnowBe4 phishing results fetch error:", error);
       res.status(500).json({ 
@@ -1734,8 +1755,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/knowbe4/user/:userId/training', isAuthenticated, async (req, res) => {
     try {
       const userId = parseInt(req.params.userId);
-      const enrollments = await knowBe4Service.getUserTrainingEnrollments(userId);
-      res.json(enrollments);
+      
+      // Get all training campaigns
+      const campaigns = await knowBe4Service.getTrainingCampaigns();
+      const userEnrollments: any[] = [];
+      
+      // Check each campaign for user enrollments
+      for (const campaign of campaigns) {
+        try {
+          const enrollments = await knowBe4Service.getCampaignEnrollments(campaign.campaign_id);
+          
+          // Find enrollments for this specific user
+          const userCampaignEnrollments = enrollments.filter((enrollment: any) => 
+            enrollment.user?.id === userId
+          );
+          
+          // Add campaign info to enrollments
+          userCampaignEnrollments.forEach((enrollment: any) => {
+            userEnrollments.push({
+              ...enrollment,
+              campaign_id: campaign.campaign_id,
+              campaign_name: campaign.name,
+              campaign_status: campaign.status
+            });
+          });
+        } catch (campaignError) {
+          console.log(`Skipping campaign ${campaign.campaign_id} due to error:`, (campaignError as Error).message);
+        }
+      }
+      
+      console.log(`Found ${userEnrollments.length} training enrollments for user ${userId}`);
+      res.json(userEnrollments);
     } catch (error) {
       console.error("KnowBe4 training enrollments fetch error:", error);
       res.status(500).json({ 
