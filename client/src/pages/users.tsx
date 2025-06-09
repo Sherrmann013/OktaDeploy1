@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import UserTable from "@/components/user-table";
 import CreateUserModal from "@/components/create-user-modal";
-import ColumnManager, { ColumnConfig, FilterConfig, AVAILABLE_COLUMNS } from "@/components/column-manager";
+import ColumnManager, { ColumnConfig, AVAILABLE_COLUMNS } from "@/components/column-manager";
 import { User } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
@@ -40,14 +40,14 @@ export default function Users() {
   const [employeeTypeFilter, setEmployeeTypeFilter] = useState<string>("");
   const { toast } = useToast();
 
-  // Column and filter management
+  // Column management
   const [columns, setColumns] = useState<ColumnConfig[]>(() => 
-    AVAILABLE_COLUMNS.map(col => ({
+    AVAILABLE_COLUMNS.map((col, index) => ({
       id: col.id,
-      visible: ['firstName', 'lastName', 'email', 'title', 'department', 'employeeType', 'status'].includes(col.id)
+      visible: ['name', 'title', 'department', 'employeeType', 'status'].includes(col.id),
+      order: index
     }))
   );
-  const [filters, setFilters] = useState<FilterConfig[]>([]);
 
   // OKTA Sync Mutation
   const oktaSyncMutation = useMutation({
@@ -179,7 +179,6 @@ export default function Users() {
   const clearFilters = () => {
     setEmployeeTypeFilter("");
     setSearchQuery("");
-    setFilters([]);
     setCurrentPage(1);
   };
 

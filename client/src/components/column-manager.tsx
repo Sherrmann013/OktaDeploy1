@@ -11,9 +11,7 @@ import { Badge } from "@/components/ui/badge";
 
 // Available columns based on user profile fields
 export const AVAILABLE_COLUMNS = [
-  { id: 'firstName', label: 'First Name', type: 'text' },
-  { id: 'lastName', label: 'Last Name', type: 'text' },
-  { id: 'email', label: 'Email', type: 'text' },
+  { id: 'name', label: 'Name', type: 'text' },
   { id: 'login', label: 'Login', type: 'text' },
   { id: 'title', label: 'Title', type: 'text' },
   { id: 'department', label: 'Department', type: 'text' },
@@ -31,26 +29,16 @@ export interface ColumnConfig {
   id: string;
   visible: boolean;
   width?: number;
-}
-
-export interface FilterConfig {
-  id: string;
-  field: string;
-  operator: 'equals' | 'contains' | 'startsWith' | 'endsWith' | 'before' | 'after';
-  value: string;
+  order: number;
 }
 
 interface ColumnManagerProps {
   columns: ColumnConfig[];
   onColumnsChange: (columns: ColumnConfig[]) => void;
-  filters: FilterConfig[];
-  onFiltersChange: (filters: FilterConfig[]) => void;
 }
 
-export default function ColumnManager({ columns, onColumnsChange, filters, onFiltersChange }: ColumnManagerProps) {
-  const [newFilterField, setNewFilterField] = useState('');
-  const [newFilterOperator, setNewFilterOperator] = useState<FilterConfig['operator']>('contains');
-  const [newFilterValue, setNewFilterValue] = useState('');
+export default function ColumnManager({ columns, onColumnsChange }: ColumnManagerProps) {
+  const [draggedItem, setDraggedItem] = useState<string | null>(null);
 
   const toggleColumn = (columnId: string) => {
     const updatedColumns = columns.map(col => 
@@ -59,47 +47,36 @@ export default function ColumnManager({ columns, onColumnsChange, filters, onFil
     onColumnsChange(updatedColumns);
   };
 
-  const addFilter = () => {
-    if (!newFilterField || !newFilterValue) return;
-    
-    const newFilter: FilterConfig = {
-      id: Date.now().toString(),
-      field: newFilterField,
-      operator: newFilterOperator,
-      value: newFilterValue
-    };
-    
-    onFiltersChange([...filters, newFilter]);
-    setNewFilterField('');
-    setNewFilterValue('');
+  const handleDragStart = (columnId: string) => {
+    setDraggedItem(columnId);
   };
 
-  const removeFilter = (filterId: string) => {
-    onFiltersChange(filters.filter(f => f.id !== filterId));
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
   };
 
-  const getOperatorOptions = (fieldType: string) => {
-    switch (fieldType) {
-      case 'date':
-        return [
-          { value: 'before', label: 'Before' },
-          { value: 'after', label: 'After' }
-        ];
-      case 'select':
-        return [
-          { value: 'equals', label: 'Equals' }
-        ];
-      default:
-        return [
-          { value: 'contains', label: 'Contains' },
-          { value: 'equals', label: 'Equals' },
-          { value: 'startsWith', label: 'Starts with' },
-          { value: 'endsWith', label: 'Ends with' }
-        ];
+  const handleDrop = (targetColumnId: string) => {
+    if (!draggedItem || draggedItem === targetColumnId) {
+      setDraggedItem(null);
+      return;
     }
-  };
 
-  const selectedField = AVAILABLE_COLUMNS.find(col => col.id === newFilterField);
+    const draggedIndex = columns.findIndex(col => col.id === draggedItem);
+    const targetIndex = columns.findIndex(col => col.id === targetColumnId);
+    
+    const updatedColumns = [...columns];
+    const [draggedColumn] = updatedColumns.splice(draggedIndex, 1);
+    updatedColumns.splice(targetIndex, 0, draggedColumn);
+    
+    // Update order values
+    const reorderedColumns = updatedColumns.map((col, index) => ({
+      ...col,
+      order: index
+    }));
+    
+    onColumnsChange(reorderedColumns);
+    setDraggedItem(null);
+  };
 
   return (
     <Sheet>
@@ -111,9 +88,9 @@ export default function ColumnManager({ columns, onColumnsChange, filters, onFil
       </SheetTrigger>
       <SheetContent className="w-[400px] sm:w-[540px]">
         <SheetHeader>
-          <SheetTitle>Manage Columns & Filters</SheetTitle>
+          <SheetTitle>Manage Columns</SheetTitle>
           <SheetDescription>
-            Customize which columns are visible and add filters to refine your view
+            Customize which columns are visible and drag to reorder them
           </SheetDescription>
         </SheetHeader>
         
@@ -124,127 +101,39 @@ export default function ColumnManager({ columns, onColumnsChange, filters, onFil
               <CardTitle className="text-sm">Visible Columns</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
-              {AVAILABLE_COLUMNS.map(column => {
-                const columnConfig = columns.find(c => c.id === column.id);
-                const isVisible = columnConfig?.visible ?? false;
-                
-                return (
-                  <div key={column.id} className="flex items-center space-x-2">
-                    <Checkbox
-                      id={column.id}
-                      checked={isVisible}
-                      onCheckedChange={() => toggleColumn(column.id)}
-                    />
-                    <Label htmlFor={column.id} className="text-sm">
-                      {column.label}
-                    </Label>
-                  </div>
-                );
-              })}
-            </CardContent>
-          </Card>
-
-          {/* Filter Management */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-sm flex items-center gap-2">
-                <Filter className="w-4 h-4" />
-                Active Filters
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {/* Active Filters */}
-              {filters.length > 0 && (
-                <div className="space-y-2">
-                  {filters.map(filter => {
-                    const field = AVAILABLE_COLUMNS.find(col => col.id === filter.field);
-                    return (
-                      <Badge key={filter.id} variant="secondary" className="flex items-center gap-2 justify-between">
-                        <span className="text-xs">
-                          {field?.label} {filter.operator} "{filter.value}"
-                        </span>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => removeFilter(filter.id)}
-                          className="h-4 w-4 p-0 hover:bg-destructive hover:text-destructive-foreground"
-                        >
-                          <X className="w-3 h-3" />
-                        </Button>
-                      </Badge>
-                    );
-                  })}
-                </div>
-              )}
-
-              {/* Add New Filter */}
-              <div className="space-y-3 pt-3 border-t">
-                <div className="space-y-2">
-                  <Label htmlFor="filter-field" className="text-xs">Field</Label>
-                  <Select value={newFilterField} onValueChange={setNewFilterField}>
-                    <SelectTrigger id="filter-field">
-                      <SelectValue placeholder="Select field" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {AVAILABLE_COLUMNS.map(column => (
-                        <SelectItem key={column.id} value={column.id}>
-                          {column.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {newFilterField && (
-                  <>
-                    <div className="space-y-2">
-                      <Label htmlFor="filter-operator" className="text-xs">Condition</Label>
-                      <Select value={newFilterOperator} onValueChange={(value: FilterConfig['operator']) => setNewFilterOperator(value)}>
-                        <SelectTrigger id="filter-operator">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {getOperatorOptions(selectedField?.type || 'text').map(option => (
-                            <SelectItem key={option.value} value={option.value}>
-                              {option.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="filter-value" className="text-xs">Value</Label>
-                      {selectedField?.type === 'select' ? (
-                        <Select value={newFilterValue} onValueChange={setNewFilterValue}>
-                          <SelectTrigger id="filter-value">
-                            <SelectValue placeholder="Select value" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {selectedField.options?.map(option => (
-                              <SelectItem key={option} value={option}>
-                                {option}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      ) : (
-                        <Input
-                          id="filter-value"
-                          type={selectedField?.type === 'date' ? 'date' : 'text'}
-                          value={newFilterValue}
-                          onChange={(e) => setNewFilterValue(e.target.value)}
-                          placeholder="Enter filter value"
+              {columns
+                .sort((a, b) => a.order - b.order)
+                .map(columnConfig => {
+                  const column = AVAILABLE_COLUMNS.find(c => c.id === columnConfig.id);
+                  if (!column) return null;
+                  
+                  return (
+                    <div 
+                      key={columnConfig.id} 
+                      className={`flex items-center space-x-2 p-2 rounded border cursor-grab ${
+                        draggedItem === columnConfig.id ? 'bg-blue-50 border-blue-300' : 'hover:bg-gray-50'
+                      }`}
+                      draggable
+                      onDragStart={() => handleDragStart(columnConfig.id)}
+                      onDragOver={handleDragOver}
+                      onDrop={() => handleDrop(columnConfig.id)}
+                    >
+                      <div className="flex items-center space-x-2 flex-1">
+                        <Checkbox
+                          id={columnConfig.id}
+                          checked={columnConfig.visible}
+                          onCheckedChange={() => toggleColumn(columnConfig.id)}
                         />
-                      )}
+                        <Label htmlFor={columnConfig.id} className="text-sm cursor-pointer">
+                          {column.label}
+                        </Label>
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        ⋮⋮
+                      </div>
                     </div>
-
-                    <Button onClick={addFilter} size="sm" className="w-full">
-                      Add Filter
-                    </Button>
-                  </>
-                )}
-              </div>
+                  );
+                })}
             </CardContent>
           </Card>
         </div>
