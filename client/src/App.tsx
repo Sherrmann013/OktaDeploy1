@@ -62,10 +62,8 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <TooltipProvider>
-          <SSOLayout>
-            <Toaster />
-            <Router />
-          </SSOLayout>
+          <Toaster />
+          <Router />
         </TooltipProvider>
       </AuthProvider>
     </QueryClientProvider>
