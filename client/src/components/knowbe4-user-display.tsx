@@ -83,16 +83,15 @@ export default function KnowBe4UserDisplay({ userEmail }: KnowBe4UserDisplayProp
     enabled: !!userEmail && !!connectionTest?.success,
   });
 
-  // Fetch user-specific campaign enrollments
-  const { data: campaignEnrollments } = useQuery({
-    queryKey: ['/api/knowbe4/user', knowbe4User?.id, 'campaign-enrollments'],
-    enabled: !!knowbe4User?.id && !!connectionTest?.success,
-  });
+  // Extract training campaign data from the existing KnowBe4 user data
+  const campaignEnrollments = knowbe4User?.current_training_campaign_statuses || [];
 
   // Debug logging for exact data structure
   console.log('=== KNOWBE4 DEBUG DATA ===');
-  console.log('KnowBe4 User Data:', JSON.stringify(knowbe4User, null, 2));
-  console.log('Campaign Enrollments:', JSON.stringify(campaignEnrollments, null, 2));
+  console.log('KnowBe4 User Data:', knowbe4User);
+  console.log('Training Campaign Statuses:', knowbe4User?.current_training_campaign_statuses);
+  console.log('Phishing Campaign Stats:', knowbe4User?.phishing_campaign_stats);
+  console.log('Campaign Enrollments:', campaignEnrollments);
   console.log('=== END DEBUG DATA ===');
 
 
@@ -326,9 +325,9 @@ export default function KnowBe4UserDisplay({ userEmail }: KnowBe4UserDisplayProp
         </div>
 
         {/* Detailed Training Enrollment Information */}
-        {trainingStats.length > 0 && (
-          <div className="mt-6">
-            <h4 className="text-sm font-medium text-gray-700 mb-3">Campaign Enrollments</h4>
+        <div className="mt-6">
+          <h4 className="text-sm font-medium text-gray-700 mb-3">Training Campaign Status</h4>
+          {trainingStats.length > 0 ? (
             <div className="space-y-2">
               {trainingStats.map((enrollment, index) => (
                 <div key={index} className="flex justify-between items-center py-2 px-3 bg-gray-50 rounded-lg">
@@ -336,21 +335,34 @@ export default function KnowBe4UserDisplay({ userEmail }: KnowBe4UserDisplayProp
                     <div className="text-sm font-medium text-gray-900">{enrollment.campaign_name}</div>
                     <div className="text-xs text-gray-500">
                       Status: {enrollment.status} • Enrolled: {enrollment.enrollment_date ? new Date(enrollment.enrollment_date).toLocaleDateString() : 'N/A'}
+                      {enrollment.completion_date && ` • Completed: ${new Date(enrollment.completion_date).toLocaleDateString()}`}
                     </div>
                   </div>
                   <div className="text-right">
                     <div className="text-sm font-medium">
-                      {enrollment.completed_items || 0}/{enrollment.content_items || 1} completed
+                      {enrollment.status === 'Completed' ? 'Completed' : 'In Progress'}
                     </div>
                     <div className="text-xs text-gray-500">
-                      {enrollment.time_spent ? `${Math.round(enrollment.time_spent / 60)}min` : 'No time logged'}
+                      {enrollment.time_spent ? `${Math.round(enrollment.time_spent / 60)}min spent` : 'No time logged'}
                     </div>
                   </div>
                 </div>
               ))}
             </div>
-          </div>
-        )}
+          ) : (
+            <div className="py-4 px-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+              <div className="flex items-center gap-2">
+                <AlertTriangle className="w-4 h-4 text-yellow-600" />
+                <div className="text-sm text-yellow-800">
+                  <div className="font-medium">No Active Training Campaigns</div>
+                  <div className="text-xs text-yellow-700 mt-1">
+                    This user is not currently enrolled in any KnowBe4 training campaigns.
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
 
       </CardContent>
     </Card>
