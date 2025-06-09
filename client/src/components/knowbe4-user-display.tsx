@@ -275,7 +275,8 @@ export default function KnowBe4UserDisplay({ userEmail }: KnowBe4UserDisplayProp
   console.log('Using campaign enrollments as training stats:', finalTrainingData);
   
   const completed = finalTrainingData.filter((enrollment: any) => 
-    enrollment.status === 'Completed' || enrollment.status === 'completed'
+    enrollment.status === 'Completed' || enrollment.status === 'completed' || 
+    enrollment.status === 'Passed' || enrollment.status === 'passed'
   ).length;
   
   const inProgress = finalTrainingData.filter((enrollment: any) => 
@@ -313,42 +314,42 @@ export default function KnowBe4UserDisplay({ userEmail }: KnowBe4UserDisplayProp
 
 
         {/* Last Sign In */}
-        <div className="space-y-2">
-          <span className="text-sm font-medium">Last Sign In</span>
-          <div className="text-sm text-gray-600 dark:text-gray-300">
+        <div className="text-sm">
+          <span className="font-medium">Last Sign In: </span>
+          <span className="text-gray-600 dark:text-gray-300">
             {formatDate(knowbe4User.last_sign_in)}
-          </div>
+          </span>
         </div>
 
         {/* 2x2 Grid Layout matching screenshot */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           
           {/* Phishing Results - Left Tile */}
-          <Card className="bg-white border border-gray-200">
+          <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
             <CardContent className="p-4">
               <div className="flex items-center gap-2 mb-4">
-                <Shield className="w-4 h-4 text-gray-500" />
-                <span className="text-sm font-medium text-gray-700">Phishing Results</span>
+                <Shield className="w-4 h-4 text-gray-500 dark:text-gray-400" />
+                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Phishing Results</span>
               </div>
               
               <div className="flex justify-between items-start">
                 <div className="flex-1">
-                  <div className="text-4xl font-bold text-blue-600 mb-1">{knowbe4User.phish_prone_percentage}%</div>
-                  <div className="text-xs text-gray-500">Phish-prone Percentage</div>
+                  <div className="text-4xl font-bold text-blue-600 dark:text-blue-400 mb-1">{knowbe4User.phish_prone_percentage}%</div>
+                  <div className="text-xs text-gray-500 dark:text-gray-400">Phish-prone Percentage</div>
                 </div>
                 
                 <div className="text-right space-y-1 text-xs">
                   <div className="flex justify-between">
-                    <span className="text-gray-600">Emails Delivered</span>
-                    <span className="font-medium">{totalPhishingCampaigns}</span>
+                    <span className="text-gray-600 dark:text-gray-400">Emails Delivered</span>
+                    <span className="font-medium text-gray-900 dark:text-gray-100">{totalPhishingCampaigns}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-600">Failures</span>
-                    <span className="font-medium">{emailsClicked}</span>
+                    <span className="text-gray-600 dark:text-gray-400">Failures</span>
+                    <span className="font-medium text-gray-900 dark:text-gray-100">{emailsClicked}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-600">Emails Reported</span>
-                    <span className="font-medium">{emailsReported}</span>
+                    <span className="text-gray-600 dark:text-gray-400">Emails Reported</span>
+                    <span className="font-medium text-gray-900 dark:text-gray-100">{emailsReported}</span>
                   </div>
                 </div>
               </div>
@@ -356,18 +357,18 @@ export default function KnowBe4UserDisplay({ userEmail }: KnowBe4UserDisplayProp
           </Card>
 
           {/* Security Training - Right Tile */}
-          <Card className="bg-white border border-gray-200">
+          <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
             <CardContent className="p-4">
               <div className="flex items-center gap-2 mb-4">
-                <GraduationCap className="w-4 h-4 text-gray-500" />
-                <span className="text-sm font-medium text-gray-700">Security Training</span>
+                <GraduationCap className="w-4 h-4 text-gray-500 dark:text-gray-400" />
+                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Security Training</span>
               </div>
               
               {finalTrainingData.length > 0 ? (
                 <div className="flex justify-between items-start">
                   <div className="flex-1">
-                    <div className="text-4xl font-bold text-green-600 mb-1">{completionPercentage}%</div>
-                    <div className="text-xs text-gray-500">Completion Rate</div>
+                    <div className="text-4xl font-bold text-green-600 dark:text-green-400 mb-1">{completionPercentage}%</div>
+                    <div className="text-xs text-gray-500 dark:text-gray-400">Completion Rate</div>
                   </div>
                   
                   <div className="text-right space-y-1 text-xs">
