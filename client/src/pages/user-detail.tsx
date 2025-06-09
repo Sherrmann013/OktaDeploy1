@@ -1715,8 +1715,12 @@ export default function UserDetail() {
                                             log.target.map((target: any, idx: number) => (
                                               <div key={idx} className={idx > 0 ? 'pt-2 border-t border-border' : ''}>
                                                 <div><span className="font-medium">ID:</span> {target.id || 'N/A'}</div>
-                                                <div><span className="font-medium">Type:</span> {target.type || 'N/A'}</div>
-                                                <div><span className="font-medium">Display Name:</span> {target.displayName || 'N/A'}</div>
+                                                <div><span className="font-medium">Type:</span> 
+                                                  <span className="ml-1 text-green-600 dark:text-green-400">{target.type || 'N/A'}</span>
+                                                </div>
+                                                <div><span className="font-medium">Display Name:</span> 
+                                                  <span className="ml-1 text-blue-600 dark:text-blue-400">{target.displayName || 'N/A'}</span>
+                                                </div>
                                               </div>
                                             ))
                                           ) : (
