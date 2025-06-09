@@ -1687,17 +1687,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const campaigns = await knowBe4Service.getTrainingCampaigns();
       
-      // Get participant data for each campaign (which contains enrollment information)
+      // Get detailed campaign information which may include enrollment data
       const campaignsWithEnrollments = await Promise.all(
         campaigns.map(async (campaign) => {
           try {
+            // First try to get campaign details which might include enrollment info
+            const campaignDetails = await knowBe4Service.getCampaignById(campaign.campaign_id);
+            
+            // If campaign details include enrollment data, use it
+            if (campaignDetails?.enrollments?.length > 0) {
+              return {
+                ...campaign,
+                ...campaignDetails,
+                enrollments: campaignDetails.enrollments
+              };
+            }
+            
+            // Otherwise try to get participants separately
             const participants = await knowBe4Service.getCampaignParticipants(campaign.campaign_id);
             return {
               ...campaign,
-              enrollments: participants // Use participants as enrollment data
+              enrollments: participants
             };
           } catch (error) {
-            console.error(`Error fetching participants for campaign ${campaign.campaign_id}:`, error);
+            console.error(`Error fetching data for campaign ${campaign.campaign_id}:`, error);
             return {
               ...campaign,
               enrollments: []

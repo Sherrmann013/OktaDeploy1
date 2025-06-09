@@ -347,8 +347,22 @@ class KnowBe4Service {
 
   async getCampaignParticipants(campaignId: number): Promise<any[]> {
     try {
-      const endpoint = `/training/campaigns/${campaignId}/recipients`;
-      return await this.makeRequest(endpoint);
+      // Try multiple possible endpoints for campaign enrollment data
+      let endpoint = `/training/campaigns/${campaignId}/enrollments`;
+      try {
+        return await this.makeRequest(endpoint);
+      } catch (firstError) {
+        // If enrollments endpoint fails, try recipients
+        endpoint = `/training/campaigns/${campaignId}/recipients`;
+        try {
+          return await this.makeRequest(endpoint);
+        } catch (secondError) {
+          // If both fail, try getting campaign details which might include enrollment data
+          endpoint = `/training/campaigns/${campaignId}`;
+          const campaignDetails = await this.makeRequest(endpoint);
+          return campaignDetails.enrollments || campaignDetails.recipients || [];
+        }
+      }
     } catch (error) {
       console.error(`Error fetching campaign ${campaignId} participants:`, error);
       return [];

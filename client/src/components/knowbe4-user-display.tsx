@@ -97,6 +97,7 @@ export default function KnowBe4UserDisplay({ userEmail }: KnowBe4UserDisplayProp
     (allCampaigns as any[]).forEach(campaign => {
       // Check if user is enrolled in this campaign
       const userEnrollment = campaign.enrollments?.find((enrollment: any) => 
+        enrollment.user?.email?.toLowerCase() === userEmail.toLowerCase() ||
         enrollment.email?.toLowerCase() === userEmail.toLowerCase() ||
         enrollment.user_email?.toLowerCase() === userEmail.toLowerCase() ||
         enrollment.recipient_email?.toLowerCase() === userEmail.toLowerCase()
