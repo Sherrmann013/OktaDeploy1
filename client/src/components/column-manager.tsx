@@ -15,7 +15,7 @@ export const AVAILABLE_COLUMNS = [
   { id: 'title', label: 'Title', type: 'text', hasFilter: false },
   { id: 'department', label: 'Department', type: 'text', hasFilter: false },
   { id: 'employeeType', label: 'Employee Type', type: 'select', hasFilter: true, options: ['EMPLOYEE', 'CONTRACTOR', 'INTERN', 'PART_TIME', 'CONSULTANT'] },
-  { id: 'manager', label: 'Manager', type: 'text', hasFilter: false },
+  { id: 'manager', label: 'Manager', type: 'autocomplete', hasFilter: true },
   { id: 'mobilePhone', label: 'Mobile Phone', type: 'text', hasFilter: true },
   { id: 'status', label: 'Status', type: 'select', hasFilter: false, options: ['ACTIVE', 'SUSPENDED', 'DEPROVISIONED'] },
   { id: 'disabled', label: 'Disabled On', type: 'date', hasFilter: false },

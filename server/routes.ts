@@ -135,6 +135,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get manager suggestions for autocomplete
+  app.get("/api/managers", isAuthenticated, async (req, res) => {
+    try {
+      const query = z.string().optional().parse(req.query.q);
+      
+      try {
+        // Get unique managers from OKTA
+        const oktaUsers = await oktaService.getUsers(200);
+        const managers = new Set<string>();
+        
+        oktaUsers.forEach(user => {
+          if (user.profile.manager) {
+            managers.add(user.profile.manager);
+          }
+        });
+        
+        let managerList = Array.from(managers).sort();
+        
+        // Filter by query if provided
+        if (query) {
+          const searchTerm = query.toLowerCase();
+          managerList = managerList.filter(manager => 
+            manager.toLowerCase().includes(searchTerm)
+          );
+        }
+        
+        // Limit to top 10 suggestions
+        res.json(managerList.slice(0, 10));
+      } catch (oktaError) {
+        console.log("OKTA API unavailable for manager suggestions, using empty list");
+        res.json([]);
+      }
+    } catch (error) {
+      console.error("Error fetching manager suggestions:", error);
+      res.status(500).json({ error: "Failed to fetch manager suggestions" });
+    }
+  });
+
   // Get all users with fallback from OKTA to local storage
   app.get("/api/users", isAuthenticated, async (req, res) => {
     try {
@@ -144,6 +182,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const employeeTypeFilter = z.string().optional().parse(req.query.employeeType);
       const employeeTypesFilter = z.string().optional().parse(req.query.employeeTypes);
       const mobilePhoneFilter = z.string().optional().parse(req.query.mobilePhone);
+      const managerFilter = z.string().optional().parse(req.query.manager);
       const page = z.coerce.number().default(1).parse(req.query.page);
       const limit = z.coerce.number().default(10).parse(req.query.limit);
       const sortBy = z.string().default("firstName").parse(req.query.sortBy);
@@ -220,6 +259,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
           );
           console.log(`Mobile phone filter applied: ${mobilePhoneFilter}, found ${filteredUsers.length} matching users`);
         }
+
+        // Apply manager filter
+        if (managerFilter) {
+          const managerSearchTerm = managerFilter.toLowerCase();
+          filteredUsers = filteredUsers.filter(user => 
+            user.profile.manager?.toLowerCase().includes(managerSearchTerm)
+          );
+          console.log(`Manager filter applied: ${managerFilter}, found ${filteredUsers.length} matching users`);
+        }
         
         // Handle employeeType sorting differently since it requires database lookup
         if (sortBy === 'employeeType') {
@@ -269,6 +317,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
               aValue = a.profile.department || '';
               bValue = b.profile.department || '';
               break;
+            case 'manager':
+              aValue = a.profile.manager || '';
+              bValue = b.profile.manager || '';
+              break;
             case 'status':
               aValue = a.status || '';
               bValue = b.status || '';
@@ -282,6 +334,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
               bValue = b.profile.firstName || '';
           }
           
+            // Handle empty values - put them after Z in ascending order, before A in descending order
+            if (!aValue && !bValue) return 0;
+            if (!aValue) return sortOrder === 'desc' ? -1 : 1;
+            if (!bValue) return sortOrder === 'desc' ? 1 : -1;
+            
             if (sortOrder === 'desc') {
               return bValue.localeCompare(aValue);
             } else {

@@ -51,8 +51,9 @@ interface UserTableProps {
   filters?: {
     employeeType: string[];
     mobilePhone: string;
+    manager: string;
   };
-  onFiltersChange?: (filters: { employeeType: string[]; mobilePhone: string }) => void;
+  onFiltersChange?: (filters: { employeeType: string[]; mobilePhone: string; manager: string }) => void;
 }
 
 export default function UserTable({
@@ -83,16 +84,23 @@ export default function UserTable({
   // Use external filter state or fallback to local state
   const mobilePhoneFilter = filters?.mobilePhone || "";
   const employeeTypeFilter = filters?.employeeType || [];
+  const managerFilter = filters?.manager || "";
   
   const setMobilePhoneFilter = (value: string) => {
     if (onFiltersChange) {
-      onFiltersChange({ employeeType: employeeTypeFilter, mobilePhone: value });
+      onFiltersChange({ employeeType: employeeTypeFilter, mobilePhone: value, manager: managerFilter });
     }
   };
   
   const setEmployeeTypeFilter = (value: string[]) => {
     if (onFiltersChange) {
-      onFiltersChange({ employeeType: value, mobilePhone: mobilePhoneFilter });
+      onFiltersChange({ employeeType: value, mobilePhone: mobilePhoneFilter, manager: managerFilter });
+    }
+  };
+
+  const setManagerFilter = (value: string) => {
+    if (onFiltersChange) {
+      onFiltersChange({ employeeType: employeeTypeFilter, mobilePhone: mobilePhoneFilter, manager: value });
     }
   };
 
