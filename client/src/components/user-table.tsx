@@ -15,9 +15,7 @@ import type { User } from "@shared/schema";
 
 // Column definitions for dynamic table rendering
 const COLUMN_DEFINITIONS = {
-  firstName: { label: 'First Name', sortKey: 'firstName' },
-  lastName: { label: 'Last Name', sortKey: 'lastName' },
-  email: { label: 'Email', sortKey: 'email' },
+  name: { label: 'Name', sortKey: 'firstName' },
   login: { label: 'Login', sortKey: 'login' },
   title: { label: 'Title', sortKey: 'title' },
   department: { label: 'Department', sortKey: 'department' },
@@ -61,7 +59,7 @@ export default function UserTable({
   sortBy,
   sortOrder,
   onSort,
-  visibleColumns = ['firstName', 'lastName', 'email', 'status', 'lastLogin'],
+  visibleColumns = ['name', 'status', 'lastLogin'],
 }: UserTableProps) {
   const { toast } = useToast();
   const [confirmAction, setConfirmAction] = useState<{
@@ -174,7 +172,7 @@ export default function UserTable({
 
   const renderCellContent = (user: User, columnId: string) => {
     switch (columnId) {
-      case 'firstName':
+      case 'name':
         return (
           <div className="flex items-center">
             <div className="flex-shrink-0 h-10 w-10">
@@ -188,14 +186,10 @@ export default function UserTable({
               <div className="text-sm font-medium text-foreground">
                 {user.firstName} {user.lastName}
               </div>
-              <div className="text-sm text-muted-foreground">{user.login}</div>
+              <div className="text-sm text-muted-foreground">{user.email}</div>
             </div>
           </div>
         );
-      case 'lastName':
-        return <div className="text-sm text-foreground">{user.lastName}</div>;
-      case 'email':
-        return <div className="text-sm text-foreground">{user.email}</div>;
       case 'login':
         return <div className="text-sm text-foreground">{user.login}</div>;
       case 'title':

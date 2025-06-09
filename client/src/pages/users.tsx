@@ -308,7 +308,7 @@ export default function Users() {
           </div>
           
           <div className="flex items-center space-x-4">
-            {(searchQuery || employeeTypeFilter || filters.length > 0) && (
+            {(searchQuery || employeeTypeFilter) && (
               <Button type="button" variant="outline" onClick={clearFilters}>
                 Clear Filters
               </Button>
@@ -317,8 +317,6 @@ export default function Users() {
             <ColumnManager
               columns={columns}
               onColumnsChange={setColumns}
-              filters={filters}
-              onFiltersChange={setFilters}
             />
           </div>
         </form>
