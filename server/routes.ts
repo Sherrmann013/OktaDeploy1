@@ -1756,69 +1756,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = parseInt(req.params.userId);
       
-      // Get all training campaigns
-      const campaigns = await knowBe4Service.getTrainingCampaigns();
-      const userEnrollments: any[] = [];
+      // Use the correct KnowBe4 API endpoint for user training enrollments
+      const enrollments = await knowBe4Service.getUserTrainingEnrollmentsByUserId(userId);
       
-      // Check each campaign for user enrollments
-      for (const campaign of campaigns) {
-        try {
-          const enrollments = await knowBe4Service.getCampaignEnrollments(campaign.campaign_id);
-          
-          // Find enrollments for this specific user
-          console.log(`Campaign ${campaign.campaign_id}: Checking ${enrollments.length} enrollments for user ID ${userId}`);
-          if (enrollments.length > 0 && campaign.campaign_id === 1894139) {
-            console.log(`=== ENROLLMENT DATA STRUCTURE FOR CAMPAIGN 1894139 ===`);
-            console.log(`Sample enrollment:`, JSON.stringify(enrollments[0], null, 2));
-            console.log(`Looking for user ID ${userId} in enrollments...`);
-            enrollments.slice(0, 5).forEach((enrollment, index) => {
-              console.log(`Enrollment ${index}: user.id = ${enrollment?.user?.id}, user.email = ${enrollment?.user?.email}`);
-            });
-            console.log(`=== END ENROLLMENT DATA ===`);
-          }
-          
-          const userCampaignEnrollments = enrollments.filter((enrollment: any) => 
-            enrollment.user?.id === userId
-          );
-          
-          // Search all enrollments for any user with agiwa email
-          const emailMatches = enrollments.filter((enrollment: any) => 
-            enrollment.user?.email?.toLowerCase().includes('agiwa')
-          );
-          
-          if (emailMatches.length > 0) {
-            console.log(`*** FOUND USER WITH AGIWA EMAIL in campaign ${campaign.campaign_id} ***`);
-            console.log('Enrollment data:', JSON.stringify(emailMatches[0], null, 2));
-          }
-          
-          // Check for user ID 121822386 specifically
-          const idMatches = enrollments.filter((enrollment: any) => 
-            enrollment.user?.id === 121822386
-          );
-          
-          if (idMatches.length > 0) {
-            console.log(`*** FOUND USER ID 121822386 in campaign ${campaign.campaign_id} ***`);
-            console.log('ID match enrollment:', JSON.stringify(idMatches[0], null, 2));
-          }
-          
-          console.log(`Found ${userCampaignEnrollments.length} enrollments for user ${userId} in campaign ${campaign.campaign_id}`);
-          
-          // Add campaign info to enrollments
-          userCampaignEnrollments.forEach((enrollment: any) => {
-            userEnrollments.push({
-              ...enrollment,
-              campaign_id: campaign.campaign_id,
-              campaign_name: campaign.name,
-              campaign_status: campaign.status
-            });
-          });
-        } catch (campaignError) {
-          console.log(`Skipping campaign ${campaign.campaign_id} due to error:`, (campaignError as Error).message);
-        }
-      }
-      
-      console.log(`Found ${userEnrollments.length} training enrollments for user ${userId}`);
-      res.json(userEnrollments);
+      console.log(`Found ${enrollments.length} training enrollments for user ${userId}`);
+      res.json(enrollments);
     } catch (error) {
       console.error("KnowBe4 training enrollments fetch error:", error);
       res.status(500).json({ 
