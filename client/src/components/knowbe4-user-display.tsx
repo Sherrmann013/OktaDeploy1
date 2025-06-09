@@ -89,24 +89,11 @@ export default function KnowBe4UserDisplay({ userEmail }: KnowBe4UserDisplayProp
     enabled: !!connectionTest?.success,
   });
 
-  // Search for Employee campaigns specifically  
-  const { data: employeeCampaigns } = useQuery({
-    queryKey: ['employee-campaigns', 'Employee'],
+  // Search for Baseline campaigns specifically (active campaigns only)
+  const { data: baselineCampaigns } = useQuery({
+    queryKey: ['baseline-campaigns', 'Baseline'],
     queryFn: async () => {
-      const response = await fetch('/api/knowbe4/campaigns/search?q=Employee');
-      if (!response.ok) {
-        throw new Error('Failed to search campaigns');
-      }
-      return response.json();
-    },
-    enabled: !!connectionTest?.success,
-  });
-
-  // Also search for Maze campaigns
-  const { data: mazeCampaigns } = useQuery({
-    queryKey: ['maze-campaigns', 'Maze'],
-    queryFn: async () => {
-      const response = await fetch('/api/knowbe4/campaigns/search?q=Maze');
+      const response = await fetch('/api/knowbe4/campaigns/search?q=Baseline');
       if (!response.ok) {
         throw new Error('Failed to search campaigns');
       }
@@ -366,7 +353,7 @@ export default function KnowBe4UserDisplay({ userEmail }: KnowBe4UserDisplayProp
               </div>
               
               {(() => {
-                // Look for the actual Maze training campaign from user enrollments
+                // Look for any Maze training campaign from user enrollments (the actual data)
                 const mazeTrainingCampaign = trainingStats?.find(enrollment => 
                   enrollment.campaign_name?.toLowerCase().includes('maze')
                 );
@@ -389,13 +376,13 @@ export default function KnowBe4UserDisplay({ userEmail }: KnowBe4UserDisplayProp
                         <div className="flex justify-between text-xs mb-2">
                           <span className="text-gray-600">Completed:</span>
                           <span className="font-medium">
-                            {new Date(mazeTrainingCampaign.completion_date).toLocaleDateString()}
+                            {formatDate(mazeTrainingCampaign.completion_date)}
                           </span>
                         </div>
                         <div className="flex justify-between text-xs">
                           <span className="text-gray-600">Enrolled:</span>
                           <span className="font-medium">
-                            {new Date(mazeTrainingCampaign.enrollment_date).toLocaleDateString()}
+                            {formatDate(mazeTrainingCampaign.enrollment_date)}
                           </span>
                         </div>
                       </div>
@@ -406,33 +393,45 @@ export default function KnowBe4UserDisplay({ userEmail }: KnowBe4UserDisplayProp
                   );
                 }
                 
-                // Show message indicating campaign search in progress
+                // If no user training data available yet, show completion summary
+                if (trainingStats && trainingStats.length > 0) {
+                  const completedCount = trainingStats.filter(t => t.status === 'Completed').length;
+                  const totalCount = trainingStats.length;
+                  const completionRate = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
+                  
+                  return (
+                    <div className="space-y-3">
+                      <div className="border-b pb-3">
+                        <div className="text-sm font-medium text-gray-900 mb-3">
+                          Training Campaign Summary
+                        </div>
+                        <div className="flex justify-between text-xs mb-2">
+                          <span className="text-gray-600">Completion Rate:</span>
+                          <span className="font-medium text-green-600">{completionRate}%</span>
+                        </div>
+                        <div className="flex justify-between text-xs mb-2">
+                          <span className="text-gray-600">Completed:</span>
+                          <span className="font-medium">{completedCount} campaigns</span>
+                        </div>
+                        <div className="flex justify-between text-xs">
+                          <span className="text-gray-600">Total Assigned:</span>
+                          <span className="font-medium">{totalCount} campaigns</span>
+                        </div>
+                      </div>
+                      <div className="text-xs text-gray-500">
+                        Based on user training enrollments
+                      </div>
+                    </div>
+                  );
+                }
+                
+                // Loading state
                 return (
-                  <div className="space-y-3">
-                    <div className="border-b pb-3">
-                      <div className="text-sm font-medium text-gray-900 mb-3">
-                        Maze Baseline - Employee
-                      </div>
-                      <div className="flex justify-between text-xs mb-2">
-                        <span className="text-gray-600">Progress:</span>
-                        <span className="font-medium text-blue-600">90% Completed</span>
-                      </div>
-                      <div className="flex justify-between text-xs mb-2">
-                        <span className="text-gray-600">Duration:</span>
-                        <span className="font-medium">25 minutes</span>
-                      </div>
-                      <div className="flex justify-between text-xs mb-2">
-                        <span className="text-gray-600">Group:</span>
-                        <span className="font-medium">MTX-ET-EMPLOYEE</span>
-                      </div>
-                      <div className="flex justify-between text-xs">
-                        <span className="text-gray-600">Content:</span>
-                        <span className="font-medium">Security Awareness Foundations</span>
-                      </div>
-                    </div>
-                    <div className="text-xs text-gray-500">
-                      Campaign visible in KnowBe4 dashboard
-                    </div>
+                  <div className="text-center text-gray-500">
+                    <p className="text-sm">Loading training data...</p>
+                    <p className="text-xs mt-2">
+                      Retrieving user campaign enrollments from KnowBe4
+                    </p>
                   </div>
                 );
               })()}

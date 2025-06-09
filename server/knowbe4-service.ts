@@ -336,11 +336,14 @@ class KnowBe4Service {
   async searchCampaignsByName(searchTerm: string): Promise<any[]> {
     try {
       const campaigns = await this.getTrainingCampaigns();
-      console.log('All training campaigns:', campaigns.map(c => c.name));
+      console.log('All training campaigns with status:', campaigns.map(c => ({name: c.name, status: c.status})));
+      
+      // Filter for active campaigns that match search term
       const filtered = campaigns.filter(campaign => 
-        campaign.name.toLowerCase().includes(searchTerm.toLowerCase())
+        campaign.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
+        (campaign.status === 'Active' || campaign.status === 'In Progress' || campaign.status === 'Running')
       );
-      console.log(`Campaigns matching "${searchTerm}":`, filtered.map(c => c.name));
+      console.log(`Active campaigns matching "${searchTerm}":`, filtered.map(c => ({name: c.name, status: c.status})));
       return filtered;
     } catch (error) {
       console.error('Error searching campaigns by name:', error);
