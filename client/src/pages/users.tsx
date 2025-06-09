@@ -265,8 +265,18 @@ export default function Users() {
         sortOrder: sortOrder,
       });
 
+      console.log('Export: Making API request to:', `/api/users?${queryParams}`);
       const response = await apiRequest('GET', `/api/users?${queryParams}`);
-      const { users: allUsers } = await response.json();
+      console.log('Export: API response status:', response.status);
+      
+      if (!response.ok) {
+        throw new Error(`API request failed with status ${response.status}`);
+      }
+      
+      const responseData = await response.json();
+      console.log('Export: Response data keys:', Object.keys(responseData));
+      console.log('Export: Users count:', responseData.users?.length || 0);
+      const { users: allUsers } = responseData;
 
       // Get column mapping for human-readable headers
       const columnMap = AVAILABLE_COLUMNS.reduce((acc, col) => {
@@ -355,9 +365,11 @@ export default function Users() {
       });
     } catch (error) {
       console.error('Export error:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      console.error('Export error details:', errorMessage);
       toast({
         title: "Export failed",
-        description: "There was an error exporting the data. Please try again.",
+        description: `Error: ${errorMessage}. Please try again.`,
         variant: "destructive",
       });
     }
