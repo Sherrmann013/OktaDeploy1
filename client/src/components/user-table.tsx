@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Edit, Pause, Trash2, Play, ChevronLeft, ChevronRight, ArrowUpDown, FilterIcon, Calendar, Check, ChevronsUpDown } from "lucide-react";
+import { Edit, Pause, Trash2, Play, ChevronLeft, ChevronRight, ArrowUpDown, FilterIcon, Calendar, Check, ChevronsUpDown, GripVertical } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { Input } from "@/components/ui/input";
@@ -18,6 +18,25 @@ import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import ConfirmationModal from "./confirmation-modal";
 import type { User } from "@shared/schema";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  horizontalListSortingStrategy,
+  useSortable,
+} from '@dnd-kit/sortable';
+import {
+  CSS,
+} from '@dnd-kit/utilities';
 
 // Column definitions for dynamic table rendering
 const COLUMN_DEFINITIONS = {
@@ -58,6 +77,7 @@ interface UserTableProps {
   onSort?: (column: string) => void;
   visibleColumns?: string[];
   columnConfig?: ColumnConfig[];
+  onColumnReorder?: (columns: ColumnConfig[]) => void;
   filters?: {
     employeeType: string[];
     mobilePhone: string;
@@ -66,6 +86,50 @@ interface UserTableProps {
     lastLogin: string;
   };
   onFiltersChange?: (filters: { employeeType: string[]; mobilePhone: string; manager: string; status: string[]; lastLogin: string }) => void;
+}
+
+// Sortable table header component
+function SortableTableHeader({ columnId, children, onColumnReorder, columnConfig }: {
+  columnId: string;
+  children: React.ReactNode;
+  onColumnReorder?: (columns: ColumnConfig[]) => void;
+  columnConfig?: ColumnConfig[];
+}) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: columnId });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
+
+  return (
+    <TableHead 
+      ref={setNodeRef} 
+      style={style}
+      className={`relative ${isDragging ? 'opacity-50 z-50' : ''}`}
+    >
+      <div className="flex items-center gap-2">
+        {onColumnReorder && (
+          <div
+            {...attributes}
+            {...listeners}
+            className="cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+            style={{ touchAction: 'none' }}
+          >
+            <GripVertical className="h-3 w-3" />
+          </div>
+        )}
+        {children}
+      </div>
+    </TableHead>
+  );
 }
 
 export default function UserTable({
@@ -83,6 +147,7 @@ export default function UserTable({
   onSort,
   visibleColumns = ['name', 'status', 'lastLogin'],
   columnConfig,
+  onColumnReorder,
   filters,
   onFiltersChange,
 }: UserTableProps) {

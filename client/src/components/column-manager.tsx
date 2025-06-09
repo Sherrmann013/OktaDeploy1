@@ -78,30 +78,28 @@ function SortableColumnItem({ column, onToggle }: { column: ColumnConfig; onTogg
     <div
       ref={setNodeRef}
       style={style}
-      className="flex items-center justify-between p-3 border rounded-lg bg-card transition-all hover:shadow-md"
+      className="flex items-center justify-between p-2 border rounded-md bg-card transition-all hover:shadow-sm"
     >
-      <div className="flex items-center space-x-3">
+      <div className="flex items-center space-x-2">
         <div
           {...attributes}
           {...listeners}
-          className="cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground p-1 hover:bg-muted/50 rounded transition-colors touch-none"
+          className="cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground p-0.5 hover:bg-muted/50 rounded transition-colors touch-none"
           style={{ touchAction: 'none' }}
         >
-          <GripVertical className="h-4 w-4" />
+          <GripVertical className="h-3 w-3" />
         </div>
         <Checkbox
           checked={column.visible}
           onCheckedChange={() => onToggle(column.id)}
+          className="h-3 w-3"
         />
-        <Label className="text-sm font-medium">
+        <Label className="text-xs font-medium flex-1">
           {availableColumn?.label || column.id}
         </Label>
-      </div>
-      <div className="flex items-center space-x-2">
         {availableColumn?.hasFilter && (
-          <Badge variant="secondary" className="text-xs">
-            <Filter className="h-3 w-3 mr-1" />
-            Filter
+          <Badge variant="secondary" className="text-xs px-1 py-0">
+            <Filter className="h-2 w-2" />
           </Badge>
         )}
       </div>
@@ -155,7 +153,7 @@ export default function ColumnManager({ columns, onColumnsChange }: ColumnManage
           Columns
         </Button>
       </SheetTrigger>
-      <SheetContent className="w-[320px] sm:w-[380px]">
+      <SheetContent className="w-[450px] sm:w-[500px]">
         <SheetHeader>
           <SheetTitle>Manage Columns</SheetTitle>
           <SheetDescription>
@@ -169,7 +167,7 @@ export default function ColumnManager({ columns, onColumnsChange }: ColumnManage
             <CardHeader>
               <CardTitle className="text-sm">Visible Columns</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-3 max-h-[400px] overflow-y-auto">
+            <CardContent className="space-y-2 max-h-[500px] overflow-y-auto scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent">
               <DndContext
                 sensors={sensors}
                 collisionDetection={closestCenter}
@@ -179,7 +177,7 @@ export default function ColumnManager({ columns, onColumnsChange }: ColumnManage
                   items={sortedColumns.map(col => col.id)}
                   strategy={verticalListSortingStrategy}
                 >
-                  <div className="space-y-2">
+                  <div className="space-y-1">
                     {sortedColumns.map(columnConfig => (
                       <SortableColumnItem
                         key={columnConfig.id}

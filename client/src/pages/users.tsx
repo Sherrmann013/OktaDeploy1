@@ -370,6 +370,7 @@ export default function Users() {
           onSort={handleSort}
           visibleColumns={columns.filter(col => col.visible).map(col => col.id)}
           columnConfig={columns}
+          onColumnReorder={setColumns}
           filters={filters}
           onFiltersChange={setFilters}
         />
