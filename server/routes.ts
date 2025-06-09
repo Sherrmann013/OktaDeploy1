@@ -1660,15 +1660,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/knowbe4/user/:userId/training', isAuthenticated, async (req, res) => {
+  app.get('/api/knowbe4/user/:userEmail/training-enrollments', isAuthenticated, async (req, res) => {
     try {
-      const userId = parseInt(req.params.userId);
-      const enrollments = await knowBe4Service.getUserTrainingEnrollments(userId);
-      res.json(enrollments);
+      const userEmail = req.params.userEmail;
+      
+      // Get all training enrollments from KnowBe4
+      const allEnrollments = await knowBe4Service.getTrainingEnrollments();
+      
+      // Filter enrollments for this specific user
+      const userEnrollments = allEnrollments.filter(enrollment => 
+        enrollment.user_email?.toLowerCase() === userEmail.toLowerCase() ||
+        enrollment.email?.toLowerCase() === userEmail.toLowerCase()
+      );
+      
+      res.json(userEnrollments);
     } catch (error) {
-      console.error("KnowBe4 training fetch error:", error);
+      console.error("KnowBe4 training enrollment fetch error:", error);
       res.status(500).json({ 
-        message: "Failed to fetch user training data",
+        message: "Failed to fetch user training enrollments",
         error: error instanceof Error ? error.message : "Unknown error"
       });
     }

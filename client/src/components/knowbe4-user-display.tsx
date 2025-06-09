@@ -83,15 +83,18 @@ export default function KnowBe4UserDisplay({ userEmail }: KnowBe4UserDisplayProp
     enabled: !!userEmail && !!connectionTest?.success,
   });
 
-  // Extract training campaign data from the existing KnowBe4 user data
-  const campaignEnrollments = knowbe4User?.current_training_campaign_statuses || [];
+  // Fetch actual training enrollment data from KnowBe4 API
+  const { data: campaignEnrollments } = useQuery({
+    queryKey: [`/api/knowbe4/user/${userEmail}/training-enrollments`],
+    enabled: !!userEmail && !!connectionTest?.success,
+  });
 
   // Debug logging for exact data structure
   console.log('=== KNOWBE4 DEBUG DATA ===');
   console.log('KnowBe4 User Data:', knowbe4User);
-  console.log('Training Campaign Statuses:', knowbe4User?.current_training_campaign_statuses);
-  console.log('Phishing Campaign Stats:', knowbe4User?.phishing_campaign_stats);
-  console.log('Campaign Enrollments:', campaignEnrollments);
+  console.log('Training Enrollments from API:', campaignEnrollments);
+  console.log('Enrollment Array Length:', campaignEnrollments?.length);
+  console.log('First Enrollment:', campaignEnrollments?.[0]);
   console.log('=== END DEBUG DATA ===');
 
 
