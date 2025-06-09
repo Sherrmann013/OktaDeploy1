@@ -43,7 +43,6 @@ function Router() {
   return (
     <SSOLayout>
       <Switch>
-        <Route path="/" component={Users} />
         <Route path="/dashboard" component={Dashboard} />
         <Route path="/users" component={Users} />
         <Route path="/users/:id" component={UserDetail} />
@@ -51,6 +50,7 @@ function Router() {
         <Route path="/applications" component={Applications} />
         <Route path="/security" component={Security} />
         <Route path="/settings" component={Settings} />
+        <Route path="/" component={Users} />
         <Route component={NotFound} />
       </Switch>
     </SSOLayout>
