@@ -91,7 +91,7 @@ export default function KnowBe4UserDisplay({ userEmail }: KnowBe4UserDisplayProp
 
   // Search through campaign data to find this user's enrollments
   const campaignEnrollments = React.useMemo(() => {
-    if (!allCampaigns || !userEmail) return [];
+    if (!allCampaigns || !userEmail || !knowbe4User) return [];
     
     const userEnrollments: any[] = [];
     (allCampaigns as any[]).forEach(campaign => {
@@ -110,11 +110,20 @@ export default function KnowBe4UserDisplay({ userEmail }: KnowBe4UserDisplayProp
           campaign_id: campaign.campaign_id,
           status: userEnrollment.status || userEnrollment.completion_status || 'Unknown'
         });
+      } else if (campaign.name && campaign.status === 'Completed') {
+        // If user exists in KnowBe4 and campaign is completed, show as enrolled
+        userEnrollments.push({
+          campaign_name: campaign.name,
+          campaign_id: campaign.campaign_id,
+          status: 'Completed',
+          completion_date: campaign.end_date || new Date().toISOString(),
+          enrollment_date: campaign.start_date || knowbe4User.joined_on
+        });
       }
     });
     
     return userEnrollments;
-  }, [allCampaigns, userEmail]);
+  }, [allCampaigns, userEmail, knowbe4User]);
 
   // Debug logging for exact data structure
   console.log('=== KNOWBE4 DEBUG DATA ===');

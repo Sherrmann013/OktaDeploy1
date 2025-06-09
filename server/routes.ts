@@ -1687,37 +1687,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const campaigns = await knowBe4Service.getTrainingCampaigns();
       
-      // Get detailed campaign information which may include enrollment data
-      const campaignsWithEnrollments = await Promise.all(
-        campaigns.map(async (campaign) => {
-          try {
-            // First try to get campaign details which might include enrollment info
-            const campaignDetails = await knowBe4Service.getCampaignById(campaign.campaign_id);
-            
-            // If campaign details include enrollment data, use it
-            if (campaignDetails?.enrollments?.length > 0) {
-              return {
-                ...campaign,
-                ...campaignDetails,
-                enrollments: campaignDetails.enrollments
-              };
-            }
-            
-            // Otherwise try to get participants separately
-            const participants = await knowBe4Service.getCampaignParticipants(campaign.campaign_id);
-            return {
-              ...campaign,
-              enrollments: participants
-            };
-          } catch (error) {
-            console.error(`Error fetching data for campaign ${campaign.campaign_id}:`, error);
-            return {
-              ...campaign,
-              enrollments: []
-            };
-          }
-        })
-      );
+      // Get all training enrollments from the global endpoint
+      const allEnrollments = await knowBe4Service.getTrainingEnrollments();
+      
+      // Group enrollments by campaign ID
+      const enrollmentsByCampaign: { [key: number]: any[] } = {};
+      allEnrollments.forEach(enrollment => {
+        const campaignId = enrollment.campaign_id;
+        if (!enrollmentsByCampaign[campaignId]) {
+          enrollmentsByCampaign[campaignId] = [];
+        }
+        enrollmentsByCampaign[campaignId].push(enrollment);
+      });
+      
+      // Attach enrollments to each campaign
+      const campaignsWithEnrollments = campaigns.map(campaign => ({
+        ...campaign,
+        enrollments: enrollmentsByCampaign[campaign.campaign_id] || []
+      }));
       
       res.json(campaignsWithEnrollments);
     } catch (error) {
