@@ -5,6 +5,7 @@ import { insertUserSchema, updateUserSchema } from "@shared/schema";
 import { z } from "zod";
 import { oktaService } from "./okta-service";
 import { syncSpecificUser } from "./okta-sync";
+import { knowBe4Service } from "./knowbe4-service";
 
 // Helper function to determine employee type from user groups
 function determineEmployeeTypeFromGroups(userGroups: any[], employeeTypeApps: Set<string>): string | null {
@@ -1605,6 +1606,135 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error("Reset status error:", error);
       res.status(500).json({ 
         message: "Failed to reset user status",
+        error: error instanceof Error ? error.message : "Unknown error"
+      });
+    }
+  });
+
+  // KnowBe4 API endpoints
+  app.get('/api/knowbe4/test-connection', isAuthenticated, requireAdmin, async (req, res) => {
+    try {
+      const result = await knowBe4Service.testConnection();
+      res.json(result);
+    } catch (error) {
+      console.error("KnowBe4 connection test error:", error);
+      res.status(500).json({ 
+        success: false,
+        message: "Failed to test KnowBe4 connection",
+        error: error instanceof Error ? error.message : "Unknown error"
+      });
+    }
+  });
+
+  app.get('/api/knowbe4/users', isAuthenticated, requireAdmin, async (req, res) => {
+    try {
+      const page = parseInt(req.query.page as string) || 1;
+      const per_page = parseInt(req.query.per_page as string) || 500;
+      const users = await knowBe4Service.getUsers(page, per_page);
+      res.json(users);
+    } catch (error) {
+      console.error("KnowBe4 users fetch error:", error);
+      res.status(500).json({ 
+        message: "Failed to fetch KnowBe4 users",
+        error: error instanceof Error ? error.message : "Unknown error"
+      });
+    }
+  });
+
+  app.get('/api/knowbe4/user/:email', isAuthenticated, async (req, res) => {
+    try {
+      const email = req.params.email;
+      const user = await knowBe4Service.getUserByEmail(email);
+      
+      if (!user) {
+        return res.status(404).json({ message: "User not found in KnowBe4" });
+      }
+      
+      res.json(user);
+    } catch (error) {
+      console.error("KnowBe4 user fetch error:", error);
+      res.status(500).json({ 
+        message: "Failed to fetch KnowBe4 user",
+        error: error instanceof Error ? error.message : "Unknown error"
+      });
+    }
+  });
+
+  app.get('/api/knowbe4/user/:userId/training', isAuthenticated, async (req, res) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      const enrollments = await knowBe4Service.getUserTrainingEnrollments(userId);
+      res.json(enrollments);
+    } catch (error) {
+      console.error("KnowBe4 training fetch error:", error);
+      res.status(500).json({ 
+        message: "Failed to fetch user training data",
+        error: error instanceof Error ? error.message : "Unknown error"
+      });
+    }
+  });
+
+  app.get('/api/knowbe4/user/:userId/phishing', isAuthenticated, async (req, res) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      const results = await knowBe4Service.getUserPhishingResults(userId);
+      res.json(results);
+    } catch (error) {
+      console.error("KnowBe4 phishing results fetch error:", error);
+      res.status(500).json({ 
+        message: "Failed to fetch user phishing results",
+        error: error instanceof Error ? error.message : "Unknown error"
+      });
+    }
+  });
+
+  app.get('/api/knowbe4/training-campaigns', isAuthenticated, requireAdmin, async (req, res) => {
+    try {
+      const campaigns = await knowBe4Service.getTrainingCampaigns();
+      res.json(campaigns);
+    } catch (error) {
+      console.error("KnowBe4 training campaigns fetch error:", error);
+      res.status(500).json({ 
+        message: "Failed to fetch training campaigns",
+        error: error instanceof Error ? error.message : "Unknown error"
+      });
+    }
+  });
+
+  app.get('/api/knowbe4/phishing-campaigns', isAuthenticated, requireAdmin, async (req, res) => {
+    try {
+      const campaigns = await knowBe4Service.getPhishingCampaigns();
+      res.json(campaigns);
+    } catch (error) {
+      console.error("KnowBe4 phishing campaigns fetch error:", error);
+      res.status(500).json({ 
+        message: "Failed to fetch phishing campaigns",
+        error: error instanceof Error ? error.message : "Unknown error"
+      });
+    }
+  });
+
+  app.get('/api/knowbe4/account-stats', isAuthenticated, requireAdmin, async (req, res) => {
+    try {
+      const stats = await knowBe4Service.getAccountStats();
+      res.json(stats);
+    } catch (error) {
+      console.error("KnowBe4 account stats fetch error:", error);
+      res.status(500).json({ 
+        message: "Failed to fetch account statistics",
+        error: error instanceof Error ? error.message : "Unknown error"
+      });
+    }
+  });
+
+  app.get('/api/knowbe4/groups', isAuthenticated, requireAdmin, async (req, res) => {
+    try {
+      const groups = await knowBe4Service.getGroups();
+      res.json(groups);
+    } catch (error) {
+      console.error("KnowBe4 groups fetch error:", error);
+      res.status(500).json({ 
+        message: "Failed to fetch KnowBe4 groups",
         error: error instanceof Error ? error.message : "Unknown error"
       });
     }
