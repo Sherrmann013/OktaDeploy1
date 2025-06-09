@@ -263,6 +263,16 @@ class KnowBe4Service {
     }
   }
 
+  async getUserTrainingEnrollmentsByUserId(userId: number): Promise<any[]> {
+    try {
+      const endpoint = `/training/enrollments?user_id=${userId}`;
+      return await this.makeRequest(endpoint);
+    } catch (error) {
+      console.error('Error fetching user training enrollments by user ID:', error);
+      return [];
+    }
+  }
+
   async getUserPhishingResults(userId: number): Promise<any[]> {
     try {
       const endpoint = `/users/${userId}/phishing/security_tests`;

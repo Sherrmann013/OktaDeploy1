@@ -31,11 +31,11 @@ function determineEmployeeTypeFromGroups(userGroups: any[], employeeTypeApps: Se
   // This would require additional logic to check user's app assignments
   return null;
 }
-import { setupAuth, isAuthenticated, requireAdmin } from "./direct-okta-auth";
+import { setupLocalAuth, isAuthenticated, requireAdmin } from "./local-auth";
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Setup OKTA SSO authentication
-  await setupAuth(app);
+  // Setup local authentication
+  await setupLocalAuth(app);
 
   // OKTA Initiate Login URI endpoint - required for proper SSO flow
   app.get("/api/sso-login", (req, res) => {
