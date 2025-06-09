@@ -248,8 +248,30 @@ export default function Users() {
     }
   };
 
-  const handleExport = (selectedColumns: string[], exportType: 'current' | 'custom') => {
+  const handleExport = async (selectedColumns: string[], exportType: 'current' | 'custom') => {
     try {
+      // Show loading toast
+      toast({
+        title: "Preparing export...",
+        description: "Fetching all user data for export",
+      });
+
+      // Fetch all users with current filters
+      const queryParams = new URLSearchParams({
+        limit: '10000', // Large number to get all users
+        search: searchQuery,
+        employeeType: employeeTypeFilter,
+        sortBy: sortBy,
+        sortOrder: sortOrder,
+      });
+
+      const response = await fetch(`/api/users?${queryParams}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch users for export');
+      }
+
+      const { users: allUsers } = await response.json();
+
       // Get column mapping for human-readable headers
       const columnMap = AVAILABLE_COLUMNS.reduce((acc, col) => {
         acc[col.id] = col.label;
@@ -260,7 +282,7 @@ export default function Users() {
       const headers = selectedColumns.map(col => columnMap[col] || col);
       
       // Format user data for selected columns
-      const csvData = users.map(user => {
+      const csvData = allUsers.map((user: User) => {
         return selectedColumns.map(column => {
           let value = '';
           switch (column) {
@@ -295,13 +317,11 @@ export default function Users() {
               value = user.lastLogin ? new Date(user.lastLogin).toLocaleDateString() : '';
               break;
             case 'created':
+            case 'activated':
               value = user.created ? new Date(user.created).toLocaleDateString() : '';
               break;
             case 'lastUpdated':
               value = user.lastUpdated ? new Date(user.lastUpdated).toLocaleDateString() : '';
-              break;
-            case 'activated':
-              value = user.activated ? new Date(user.activated).toLocaleDateString() : '';
               break;
             case 'passwordChanged':
               value = user.passwordChanged ? new Date(user.passwordChanged).toLocaleDateString() : '';
@@ -335,7 +355,7 @@ export default function Users() {
 
       toast({
         title: "Export successful",
-        description: `Exported ${users.length} users with ${selectedColumns.length} columns`,
+        description: `Exported ${allUsers.length} users with ${selectedColumns.length} columns`,
       });
     } catch (error) {
       console.error('Export error:', error);
