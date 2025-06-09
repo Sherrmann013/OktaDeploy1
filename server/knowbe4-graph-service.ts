@@ -36,20 +36,30 @@ class KnowBe4GraphService {
 
   private async makeGraphQLRequest<T = any>(query: GraphQLQuery): Promise<GraphQLResponse<T>> {
     try {
+      console.log('Making GraphQL request to:', this.config.baseUrl);
+      console.log('Using API key (first 10 chars):', this.config.apiKey.substring(0, 10) + '...');
+      
       const response = await fetch(this.config.baseUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${this.config.apiKey}`,
+          'Accept': 'application/json',
         },
         body: JSON.stringify(query),
       });
 
+      console.log('Response status:', response.status);
+      console.log('Response headers:', Object.fromEntries(response.headers.entries()));
+
       if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        const errorText = await response.text();
+        console.log('Error response body:', errorText);
+        throw new Error(`HTTP ${response.status}: ${response.statusText} - ${errorText}`);
       }
 
       const result = await response.json();
+      console.log('GraphQL response:', result);
       return result;
     } catch (error) {
       console.error('GraphQL request failed:', error);
