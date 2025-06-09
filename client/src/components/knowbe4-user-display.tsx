@@ -115,6 +115,11 @@ export default function KnowBe4UserDisplay({ userEmail }: KnowBe4UserDisplayProp
 
   // Use the working training stats from the direct user endpoint
   const campaignEnrollments = React.useMemo(() => {
+    // First try to use the userTrainingStats from the direct API call
+    if (userTrainingStats && Array.isArray(userTrainingStats) && userTrainingStats.length > 0) {
+      return userTrainingStats;
+    }
+    
     // Return empty array if no data available
     if (!allCampaigns || !userEmail || !knowbe4User) return [];
     
@@ -139,7 +144,7 @@ export default function KnowBe4UserDisplay({ userEmail }: KnowBe4UserDisplayProp
     });
     
     return userEnrollments;
-  }, [allCampaigns, userEmail, knowbe4User]);
+  }, [userTrainingStats, allCampaigns, userEmail, knowbe4User]);
 
   // Debug logging for exact data structure
   console.log('=== KNOWBE4 DEBUG DATA ===');
@@ -148,9 +153,9 @@ export default function KnowBe4UserDisplay({ userEmail }: KnowBe4UserDisplayProp
   console.log('User Email:', userEmail);
   
   // Log detailed enrollment structure for first campaign
-  if (allCampaigns && allCampaigns.length > 0) {
-    console.log('First Campaign Enrollments Structure:', allCampaigns[0].enrollments);
-    console.log('First Campaign Enrollment Sample:', allCampaigns[0].enrollments?.[0]);
+  if (allCampaigns && Array.isArray(allCampaigns) && allCampaigns.length > 0) {
+    console.log('First Campaign Enrollments Structure:', allCampaigns[0]?.enrollments);
+    console.log('First Campaign Enrollment Sample:', allCampaigns[0]?.enrollments?.[0]);
   }
   
   console.log('Found User Enrollments:', campaignEnrollments);
@@ -263,24 +268,24 @@ export default function KnowBe4UserDisplay({ userEmail }: KnowBe4UserDisplayProp
   const totalPhishingCampaigns = phishingStats.length;
 
   // Use the user-specific campaign enrollment data to show accurate completion status
-  const userTrainingData = campaignEnrollments || [];
-  console.log('Using campaign enrollments as training stats:', userTrainingData);
+  const finalTrainingData = campaignEnrollments || [];
+  console.log('Using campaign enrollments as training stats:', finalTrainingData);
   
-  const completed = userTrainingData.filter(enrollment => 
+  const completed = finalTrainingData.filter((enrollment: any) => 
     enrollment.status === 'Completed' || enrollment.status === 'completed'
   ).length;
   
-  const inProgress = userTrainingData.filter(enrollment => 
+  const inProgress = finalTrainingData.filter((enrollment: any) => 
     enrollment.status === 'In Progress' || enrollment.status === 'in_progress' || 
     enrollment.status === 'Active' || enrollment.status === 'active'
   ).length;
   
-  const notStarted = userTrainingData.filter(enrollment => 
+  const notStarted = finalTrainingData.filter((enrollment: any) => 
     enrollment.status === 'Not Started' || enrollment.status === 'not_started' ||
     !enrollment.completion_date
   ).length;
   
-  const total = userTrainingData.length;
+  const total = finalTrainingData.length;
   const completionPercentage = total > 0 ? Math.round((completed / total) * 100) : 0;
   
   console.log('User-specific training completion calculation:');
