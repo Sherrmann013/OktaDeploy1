@@ -190,79 +190,23 @@ export default function KnowBe4UserDisplay({ userEmail }: KnowBe4UserDisplayProp
     );
   }
 
-  const riskLevel = getRiskLevel(knowbe4User.current_risk_score);
-  const phishProneLevel = getPhishProneLevel(knowbe4User.phish_prone_percentage);
-
-  // Get user-specific campaign data from all campaigns
-  const [campaignData, setCampaignData] = useState<any>(null);
-  
-  useEffect(() => {
-    async function fetchUserCampaignData() {
-      try {
-        // Get all campaigns first
-        const campaignsResponse = await fetch('/api/knowbe4/campaigns');
-        const allCampaigns = await campaignsResponse.json();
-        
-        // Calculate user's status across all campaigns
-        const userCampaignStatus = {
-          totalCampaigns: allCampaigns.length,
-          userEnrolled: 0,
-          completed: 0,
-          inProgress: 0,
-          notStarted: 0
-        };
-        
-        // Find campaigns this user is enrolled in
-        for (const campaign of allCampaigns) {
-          // Check if user is in campaign groups or enrolled
-          const userGroups = knowbe4User?.groups || [];
-          const campaignGroups = campaign.groups?.map((g: any) => g.group_id) || [];
-          
-          if (userGroups.some((ugId: number) => campaignGroups.includes(ugId))) {
-            userCampaignStatus.userEnrolled++;
-            
-            // Check completion status from user's training data
-            const userTrainingStatus = knowbe4User?.current_training_campaign_statuses?.find(
-              (t: any) => t.campaign_id === campaign.campaign_id
-            );
-            
-            if (userTrainingStatus) {
-              if (userTrainingStatus.status === 'Completed') {
-                userCampaignStatus.completed++;
-              } else if (userTrainingStatus.status === 'In Progress' || userTrainingStatus.status === 'Enrolled') {
-                userCampaignStatus.inProgress++;
-              } else {
-                userCampaignStatus.notStarted++;
-              }
-            } else {
-              userCampaignStatus.notStarted++;
-            }
-          }
-        }
-        
-        setCampaignData(userCampaignStatus);
-      } catch (error) {
-        console.error('Error fetching campaign data:', error);
-      }
-    }
-    
-    if (knowbe4User) {
-      fetchUserCampaignData();
-    }
-  }, [knowbe4User]);
-
-  // Calculate statistics from campaign data
-  const completed = campaignData?.completed || 0;
-  const inProgress = campaignData?.inProgress || 0;
-  const notStarted = campaignData?.notStarted || 0;
-  const total = campaignData?.userEnrolled || 0;
-  const completionPercentage = total > 0 ? Math.round((completed / total) * 100) : 0;
+  // Calculate basic data for non-null user
+  const riskLevel = knowbe4User ? getRiskLevel(knowbe4User.current_risk_score) : null;
+  const phishProneLevel = knowbe4User ? getPhishProneLevel(knowbe4User.phish_prone_percentage) : null;
 
   // Calculate phishing statistics from actual data
-  const phishingStats = knowbe4User.phishing_campaign_stats || [];
+  const phishingStats = knowbe4User?.phishing_campaign_stats || [];
   const emailsClicked = phishingStats.filter(p => p.last_clicked_date && p.last_clicked_date !== null).length;
   const emailsReported = phishingStats.filter(p => p.last_reported_date && p.last_reported_date !== null).length;
   const totalPhishingCampaigns = phishingStats.length;
+
+  // Use simple calculation from existing user data
+  const trainingStats = knowbe4User?.current_training_campaign_statuses || [];
+  const completed = trainingStats.filter(t => t.status === 'Completed').length;
+  const inProgress = trainingStats.filter(t => t.status === 'In Progress' || t.status === 'Enrolled').length;
+  const notStarted = trainingStats.filter(t => t.status === 'Not Started' || (!t.completion_date && t.status !== 'Completed')).length;
+  const total = trainingStats.length;
+  const completionPercentage = total > 0 ? Math.round((completed / total) * 100) : 0;
 
   return (
     <Card>
