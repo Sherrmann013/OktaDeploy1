@@ -61,6 +61,12 @@ export default function KnowBe4UserDisplay({ userEmail }: KnowBe4UserDisplayProp
     enabled: !!userEmail && !!connectionTest?.success,
   });
 
+  // Fetch training campaigns for the user
+  const { data: trainingData } = useQuery({
+    queryKey: [`/api/knowbe4/user/${knowbe4User?.id}/training`],
+    enabled: !!knowbe4User?.id,
+  });
+
   if (connectionLoading) {
     return (
       <Card>
@@ -169,133 +175,59 @@ export default function KnowBe4UserDisplay({ userEmail }: KnowBe4UserDisplayProp
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
-        {/* Overview Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="bg-gradient-to-r from-blue-50 to-blue-100 p-4 rounded-lg border">
-            <div className="flex items-center gap-2 mb-2">
-              <Target className="h-4 w-4 text-blue-600" />
-              <span className="font-medium text-blue-800">Risk Score</span>
+        {/* Compact Overview Cards */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <div className="bg-blue-50 p-3 rounded-lg border">
+            <div className="flex items-center gap-1 mb-1">
+              <Target className="h-3 w-3 text-blue-600" />
+              <span className="text-xs font-medium text-blue-800">Risk Score</span>
             </div>
-            <div className="text-2xl font-bold text-blue-900">
+            <div className="text-lg font-bold text-blue-900">
               {knowbe4User.current_risk_score}
             </div>
-            <Badge variant="secondary" className={`mt-1 ${riskLevel.textColor}`}>
-              {riskLevel.level} Risk
+            <Badge variant="secondary" className={`text-xs ${riskLevel.textColor}`}>
+              {riskLevel.level}
             </Badge>
           </div>
 
-          <div className="bg-gradient-to-r from-orange-50 to-orange-100 p-4 rounded-lg border">
-            <div className="flex items-center gap-2 mb-2">
-              <AlertTriangle className="h-4 w-4 text-orange-600" />
-              <span className="font-medium text-orange-800">Phish Prone</span>
+          <div className="bg-orange-50 p-3 rounded-lg border">
+            <div className="flex items-center gap-1 mb-1">
+              <AlertTriangle className="h-3 w-3 text-orange-600" />
+              <span className="text-xs font-medium text-orange-800">Phish Prone</span>
             </div>
-            <div className="text-2xl font-bold text-orange-900">
+            <div className="text-lg font-bold text-orange-900">
               {knowbe4User.phish_prone_percentage}%
             </div>
-            <Badge variant={phishProneLevel.color as any} className="mt-1">
+            <Badge variant={phishProneLevel.color as any} className="text-xs">
               {phishProneLevel.level}
             </Badge>
           </div>
 
-          <div className="bg-gradient-to-r from-green-50 to-green-100 p-4 rounded-lg border">
-            <div className="flex items-center gap-2 mb-2">
-              <CheckCircle className="h-4 w-4 text-green-600" />
-              <span className="font-medium text-green-800">Status</span>
+          <div className="bg-gray-50 p-3 rounded-lg border">
+            <div className="flex items-center gap-1 mb-1">
+              <Clock className="h-3 w-3 text-gray-600" />
+              <span className="text-xs font-medium text-gray-800">Last Sign In</span>
             </div>
-            <div className="text-2xl font-bold text-green-900 capitalize">
-              {knowbe4User.status}
+            <div className="text-sm font-semibold text-gray-900">
+              {formatDate(knowbe4User.last_sign_in)}
             </div>
-            <Badge variant="default" className="mt-1 bg-green-100 text-green-800">
-              {knowbe4User.provisioning_managed ? "Managed" : "Manual"}
-            </Badge>
+          </div>
+
+          <div className="bg-green-50 p-3 rounded-lg border">
+            <div className="flex items-center gap-1 mb-1">
+              <BookOpen className="h-3 w-3 text-green-600" />
+              <span className="text-xs font-medium text-green-800">Campaigns</span>
+            </div>
+            <div className="text-sm font-semibold text-green-900">
+              {knowbe4User.groups && knowbe4User.groups.length > 0 ? 
+                `${knowbe4User.groups.length} Groups` : 
+                "No Groups"
+              }
+            </div>
           </div>
         </div>
 
-        {/* User Details */}
-        <div className="space-y-4">
-          <h4 className="font-semibold flex items-center gap-2">
-            <Users className="h-4 w-4" />
-            User Information
-          </h4>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-            <div>
-              <span className="font-medium">Name:</span>
-              <p>{knowbe4User.first_name} {knowbe4User.last_name}</p>
-            </div>
-            <div>
-              <span className="font-medium">Email:</span>
-              <p>{knowbe4User.email}</p>
-            </div>
-            {knowbe4User.job_title && (
-              <div>
-                <span className="font-medium">Job Title:</span>
-                <p>{knowbe4User.job_title}</p>
-              </div>
-            )}
-            {knowbe4User.department && (
-              <div>
-                <span className="font-medium">Department:</span>
-                <p>{knowbe4User.department}</p>
-              </div>
-            )}
-            {knowbe4User.manager_name && (
-              <div>
-                <span className="font-medium">Manager:</span>
-                <p>{knowbe4User.manager_name}</p>
-                {knowbe4User.manager_email && (
-                  <p className="text-gray-600">({knowbe4User.manager_email})</p>
-                )}
-              </div>
-            )}
-            {knowbe4User.phone_number && (
-              <div>
-                <span className="font-medium">Phone:</span>
-                <p>{knowbe4User.phone_number}</p>
-              </div>
-            )}
-            <div>
-              <span className="font-medium">Joined KnowBe4:</span>
-              <p>{formatDate(knowbe4User.joined_on)}</p>
-            </div>
-            <div>
-              <span className="font-medium">Last Sign In:</span>
-              <p>{formatDate(knowbe4User.last_sign_in)}</p>
-            </div>
-            {knowbe4User.organization && (
-              <div>
-                <span className="font-medium">Organization:</span>
-                <p>{knowbe4User.organization}</p>
-              </div>
-            )}
-            {knowbe4User.groups && knowbe4User.groups.length > 0 && (
-              <div>
-                <span className="font-medium">Groups:</span>
-                <p>{knowbe4User.groups.length} security groups</p>
-              </div>
-            )}
-          </div>
-        </div>
 
-        {/* Risk Assessment */}
-        <div className="space-y-4">
-          <h4 className="font-semibold">Risk Assessment</h4>
-          <div className="space-y-3">
-            <div>
-              <div className="flex justify-between items-center mb-1">
-                <span className="text-sm font-medium">Current Risk Score</span>
-                <span className="text-sm text-gray-600">{knowbe4User.current_risk_score}/100</span>
-              </div>
-              <Progress value={knowbe4User.current_risk_score} className="h-2" />
-            </div>
-            <div>
-              <div className="flex justify-between items-center mb-1">
-                <span className="text-sm font-medium">Phish Prone Percentage</span>
-                <span className="text-sm text-gray-600">{knowbe4User.phish_prone_percentage}%</span>
-              </div>
-              <Progress value={knowbe4User.phish_prone_percentage} className="h-2" />
-            </div>
-          </div>
-        </div>
 
         {/* Account Info */}
         {connectionTest?.details && (
