@@ -190,9 +190,16 @@ export default function UserDetail() {
     enabled: !!user?.email && activeTab === "monitoring",
   });
 
-  const { data: campaignsData } = useQuery({
-    queryKey: ["/api/knowbe4/campaigns"],
-    enabled: activeTab === "monitoring",
+  // Get user-specific training enrollments using KnowBe4 user ID
+  const { data: userTrainingData } = useQuery({
+    queryKey: [`/api/knowbe4/user/${knowBe4Data?.id}/training`],
+    enabled: !!knowBe4Data?.id && activeTab === "monitoring",
+  });
+
+  // Get user-specific phishing results using KnowBe4 user ID
+  const { data: userPhishingData } = useQuery({
+    queryKey: [`/api/knowbe4/user/${knowBe4Data?.id}/phishing`],
+    enabled: !!knowBe4Data?.id && activeTab === "monitoring",
   });
 
   const [expandedLogs, setExpandedLogs] = useState<Set<string>>(new Set());
@@ -1304,32 +1311,42 @@ export default function UserDetail() {
                     </CardContent>
                   </Card>
 
-                  {/* KnowBe4 Raw API Response */}
+                  {/* KnowBe4 User-Specific Data */}
                   <Card>
                     <CardHeader>
                       <CardTitle className="flex items-center gap-2">
                         <BookOpen className="w-5 h-5 text-green-600" />
-                        KnowBe4 Raw API Data
+                        User Training Data
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
                       <div>
-                        <label className="text-sm font-medium text-muted-foreground">Training Campaigns JSON</label>
+                        <label className="text-sm font-medium text-muted-foreground">Training Enrollments JSON</label>
                         <div className="bg-gray-50 dark:bg-gray-900 p-3 rounded text-xs font-mono overflow-auto max-h-40 mt-1">
-                          {campaignsData ? (
-                            <pre className="whitespace-pre-wrap">{JSON.stringify(campaignsData, null, 2)}</pre>
+                          {userTrainingData ? (
+                            <pre className="whitespace-pre-wrap">{JSON.stringify(userTrainingData, null, 2)}</pre>
                           ) : (
-                            <p className="text-gray-500">Loading campaigns...</p>
+                            <p className="text-gray-500">Loading user training data...</p>
+                          )}
+                        </div>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-muted-foreground">Phishing Results JSON</label>
+                        <div className="bg-gray-50 dark:bg-gray-900 p-3 rounded text-xs font-mono overflow-auto max-h-40 mt-1">
+                          {userPhishingData ? (
+                            <pre className="whitespace-pre-wrap">{JSON.stringify(userPhishingData, null, 2)}</pre>
+                          ) : (
+                            <p className="text-gray-500">Loading phishing results...</p>
                           )}
                         </div>
                       </div>
                       <div>
                         <label className="text-sm font-medium text-muted-foreground">User Profile JSON</label>
-                        <div className="bg-gray-50 dark:bg-gray-900 p-3 rounded text-xs font-mono overflow-auto max-h-40 mt-1">
+                        <div className="bg-gray-50 dark:bg-gray-900 p-3 rounded text-xs font-mono overflow-auto max-h-32 mt-1">
                           {knowBe4Data ? (
                             <pre className="whitespace-pre-wrap">{JSON.stringify(knowBe4Data, null, 2)}</pre>
                           ) : (
-                            <p className="text-gray-500">Loading user data...</p>
+                            <p className="text-gray-500">Loading user profile...</p>
                           )}
                         </div>
                       </div>
@@ -1339,14 +1356,15 @@ export default function UserDetail() {
                           size="sm" 
                           className="flex-1"
                           onClick={() => {
-                            console.log('=== RAW KNOWBE4 API REFRESH ===');
-                            console.log('Campaigns:', campaignsData);
-                            console.log('User Data:', knowBe4Data);
-                            console.log('=== END RAW DATA ===');
+                            console.log('=== USER-SPECIFIC KNOWBE4 DATA ===');
+                            console.log('Training Enrollments:', userTrainingData);
+                            console.log('Phishing Results:', userPhishingData);
+                            console.log('User Profile:', knowBe4Data);
+                            console.log('=== END USER DATA ===');
                           }}
                         >
                           <RefreshCw className="w-4 h-4 mr-1" />
-                          Log Raw Data
+                          Log User Data
                         </Button>
                       </div>
                     </CardContent>
