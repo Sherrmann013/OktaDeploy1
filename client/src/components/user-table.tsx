@@ -55,8 +55,9 @@ interface UserTableProps {
     mobilePhone: string;
     manager: string;
     status: string[];
+    lastLogin: string;
   };
-  onFiltersChange?: (filters: { employeeType: string[]; mobilePhone: string; manager: string; status: string[] }) => void;
+  onFiltersChange?: (filters: { employeeType: string[]; mobilePhone: string; manager: string; status: string[]; lastLogin: string }) => void;
 }
 
 export default function UserTable({
@@ -89,28 +90,35 @@ export default function UserTable({
   const employeeTypeFilter = filters?.employeeType || [];
   const managerFilter = filters?.manager || "";
   const statusFilter = filters?.status || [];
+  const lastLoginFilter = filters?.lastLogin || "";
   
   const setMobilePhoneFilter = (value: string) => {
     if (onFiltersChange) {
-      onFiltersChange({ employeeType: employeeTypeFilter, mobilePhone: value, manager: managerFilter, status: statusFilter });
+      onFiltersChange({ employeeType: employeeTypeFilter, mobilePhone: value, manager: managerFilter, status: statusFilter, lastLogin: lastLoginFilter });
     }
   };
   
   const setEmployeeTypeFilter = (value: string[]) => {
     if (onFiltersChange) {
-      onFiltersChange({ employeeType: value, mobilePhone: mobilePhoneFilter, manager: managerFilter, status: statusFilter });
+      onFiltersChange({ employeeType: value, mobilePhone: mobilePhoneFilter, manager: managerFilter, status: statusFilter, lastLogin: lastLoginFilter });
     }
   };
 
   const setManagerFilter = (value: string) => {
     if (onFiltersChange) {
-      onFiltersChange({ employeeType: employeeTypeFilter, mobilePhone: mobilePhoneFilter, manager: value, status: statusFilter });
+      onFiltersChange({ employeeType: employeeTypeFilter, mobilePhone: mobilePhoneFilter, manager: value, status: statusFilter, lastLogin: lastLoginFilter });
     }
   };
 
   const setStatusFilter = (value: string[]) => {
     if (onFiltersChange) {
-      onFiltersChange({ employeeType: employeeTypeFilter, mobilePhone: mobilePhoneFilter, manager: managerFilter, status: value });
+      onFiltersChange({ employeeType: employeeTypeFilter, mobilePhone: mobilePhoneFilter, manager: managerFilter, status: value, lastLogin: lastLoginFilter });
+    }
+  };
+
+  const setLastLoginFilter = (value: string) => {
+    if (onFiltersChange) {
+      onFiltersChange({ employeeType: employeeTypeFilter, mobilePhone: mobilePhoneFilter, manager: managerFilter, status: statusFilter, lastLogin: value });
     }
   };
 
@@ -321,6 +329,59 @@ export default function UserTable({
                 variant="outline" 
                 size="sm" 
                 onClick={() => setStatusFilter([])}
+                className="text-xs"
+              >
+                Clear
+              </Button>
+            </div>
+          </div>
+        </PopoverContent>
+      </Popover>
+    );
+  };
+
+  const renderLastLoginFilter = () => {
+    const lastLoginOptions = [
+      { value: "1", label: "Last 1 day" },
+      { value: "3", label: "Last 3 days" },
+      { value: "7", label: "Last 7 days" },
+      { value: "14", label: "Last 14 days" },
+      { value: "30", label: "Last 30 days" },
+      { value: "31", label: "Longer than 30 days" },
+      { value: "never", label: "Never logged in" }
+    ];
+    
+    return (
+      <Popover>
+        <PopoverTrigger asChild>
+          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+            <FilterIcon className="h-4 w-4" />
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-56" align="start">
+          <div className="space-y-3">
+            <Label className="text-sm font-medium">Last Login</Label>
+            <div className="space-y-2">
+              {lastLoginOptions.map((option) => (
+                <div key={option.value} className="flex items-center space-x-2">
+                  <input
+                    type="radio"
+                    id={option.value}
+                    name="lastLogin"
+                    value={option.value}
+                    checked={lastLoginFilter === option.value}
+                    onChange={(e) => setLastLoginFilter(e.target.value)}
+                    className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500"
+                  />
+                  <Label htmlFor={option.value} className="text-sm font-normal">{option.label}</Label>
+                </div>
+              ))}
+            </div>
+            <div className="flex gap-2">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => setLastLoginFilter("")}
                 className="text-xs"
               >
                 Clear

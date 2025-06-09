@@ -156,9 +156,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Filter by query if provided
         if (query && query.trim().length > 0) {
           const searchTerm = query.trim().toLowerCase();
+          console.log(`Manager search query: "${searchTerm}", total managers: ${managerList.length}`);
           managerList = managerList.filter(manager => 
             manager.toLowerCase().includes(searchTerm)
           );
+          console.log(`Filtered managers: ${managerList.length}`);
         }
         
         // Limit to top 10 suggestions
@@ -372,10 +374,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
             if (!aValue) return sortOrder === 'desc' ? -1 : 1;
             if (!bValue) return sortOrder === 'desc' ? 1 : -1;
             
+            // Use proper locale comparison for text sorting
             if (sortOrder === 'desc') {
-              return bValue.localeCompare(aValue);
+              return bValue.localeCompare(aValue, undefined, { 
+                numeric: true, 
+                sensitivity: 'base',
+                caseFirst: 'upper'
+              });
             } else {
-              return aValue.localeCompare(bValue);
+              return aValue.localeCompare(bValue, undefined, { 
+                numeric: true, 
+                sensitivity: 'base',
+                caseFirst: 'upper'
+              });
             }
           });
         }

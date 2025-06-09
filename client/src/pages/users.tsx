@@ -42,7 +42,8 @@ export default function Users() {
     employeeType: [] as string[],
     mobilePhone: "",
     manager: "",
-    status: [] as string[]
+    status: [] as string[],
+    lastLogin: ""
   });
   const { toast } = useToast();
 
@@ -140,7 +141,8 @@ export default function Users() {
         ...(filters.employeeType.length > 0 && { employeeTypes: filters.employeeType.join(',') }),
         ...(filters.mobilePhone && { mobilePhone: filters.mobilePhone }),
         ...(filters.manager && { manager: filters.manager }),
-        ...(filters.status.length > 0 && { statuses: filters.status.join(',') })
+        ...(filters.status.length > 0 && { statuses: filters.status.join(',') }),
+        ...(filters.lastLogin && { lastLoginDays: filters.lastLogin })
       });
       
       const response = await fetch(`/api/users?${params}`, {
