@@ -2,7 +2,7 @@ import { Link, useLocation } from "wouter";
 import { Shield, Users, UsersRound, Grid3x3, Settings, RotateCcw } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { useAuth } from "@/hooks/use-auth";
+import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect, useRef } from "react";
 import { useMutation } from "@tanstack/react-query";
