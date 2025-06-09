@@ -215,14 +215,17 @@ export default function KnowBe4UserDisplay({ userEmail }: KnowBe4UserDisplayProp
           <div className="text-sm text-gray-600">
             {campaigns && Array.isArray(campaigns) && campaigns.length > 0 ? (
               <div className="space-y-1">
-                {campaigns.slice(0, 3).map((campaign: any, index: number) => (
+                {campaigns.slice(0, 2).map((campaign: any, index: number) => (
                   <div key={index} className="text-xs bg-green-50 px-2 py-1 rounded border">
-                    {campaign.name}
+                    <div className="font-medium">{campaign.name}</div>
+                    <div className="text-gray-500">
+                      {campaign.modules ? `0/${campaign.modules.length} completed` : '0/1 completed'}
+                    </div>
                   </div>
                 ))}
-                {campaigns.length > 3 && (
+                {campaigns.length > 2 && (
                   <div className="text-xs text-gray-500">
-                    +{campaigns.length - 3} more campaigns
+                    +{campaigns.length - 2} more campaigns
                   </div>
                 )}
               </div>
