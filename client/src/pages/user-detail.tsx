@@ -554,18 +554,18 @@ export default function UserDetail() {
 
   if (isLoading) {
     return (
-      <main className="flex-1 flex items-center justify-center">
+      <div className="flex-1 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto mb-4"></div>
           <p className="text-gray-600">Loading user details...</p>
         </div>
-      </main>
+      </div>
     );
   }
 
   if (error) {
     return (
-      <main className="flex-1 flex items-center justify-center">
+      <div className="flex-1 flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-gray-900 mb-2">Error Loading User</h1>
           <p className="text-gray-600 mb-6">Failed to load user data: {error.message}</p>
@@ -574,13 +574,13 @@ export default function UserDetail() {
             Back to Users
           </Button>
         </div>
-      </main>
+      </div>
     );
   }
 
   if (!user) {
     return (
-      <main className="flex-1 flex items-center justify-center">
+      <div className="flex-1 flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-gray-900 mb-2">User Not Found</h1>
           <p className="text-gray-600 mb-6">The user you're looking for doesn't exist or has been removed.</p>
@@ -589,7 +589,7 @@ export default function UserDetail() {
             Back to Users
           </Button>
         </div>
-      </main>
+      </div>
     );
   }
 
@@ -607,7 +607,7 @@ export default function UserDetail() {
   });
 
   return (
-    <main className="flex-1 overflow-hidden">
+    <div className="flex-1 overflow-hidden">
       <div className="h-full flex flex-col">
         {/* Header */}
         <div className="flex-shrink-0 bg-background border-b border-border px-4 py-3">
@@ -1810,6 +1810,6 @@ export default function UserDetail() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </main>
+    </div>
   );
 }
