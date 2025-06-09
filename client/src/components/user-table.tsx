@@ -13,6 +13,24 @@ import { useToast } from "@/hooks/use-toast";
 import ConfirmationModal from "./confirmation-modal";
 import type { User } from "@shared/schema";
 
+// Column definitions for dynamic table rendering
+const COLUMN_DEFINITIONS = {
+  firstName: { label: 'First Name', sortKey: 'firstName' },
+  lastName: { label: 'Last Name', sortKey: 'lastName' },
+  email: { label: 'Email', sortKey: 'email' },
+  login: { label: 'Login', sortKey: 'login' },
+  title: { label: 'Title', sortKey: 'title' },
+  department: { label: 'Department', sortKey: 'department' },
+  employeeType: { label: 'Employee Type', sortKey: 'employeeType' },
+  manager: { label: 'Manager', sortKey: 'manager' },
+  mobilePhone: { label: 'Mobile Phone', sortKey: 'mobilePhone' },
+  status: { label: 'Status', sortKey: 'status' },
+  activated: { label: 'Account Created', sortKey: 'activated' },
+  lastLogin: { label: 'Last Login', sortKey: 'lastLogin' },
+  lastUpdated: { label: 'Last Updated', sortKey: 'lastUpdated' },
+  passwordChanged: { label: 'Password Changed', sortKey: 'passwordChanged' },
+};
+
 interface UserTableProps {
   users: User[];
   total: number;
@@ -43,6 +61,7 @@ export default function UserTable({
   sortBy,
   sortOrder,
   onSort,
+  visibleColumns = ['firstName', 'lastName', 'email', 'status', 'lastLogin'],
 }: UserTableProps) {
   const { toast } = useToast();
   const [confirmAction, setConfirmAction] = useState<{
@@ -153,6 +172,73 @@ export default function UserTable({
     }
   };
 
+  const renderCellContent = (user: User, columnId: string) => {
+    switch (columnId) {
+      case 'firstName':
+        return (
+          <div className="flex items-center">
+            <div className="flex-shrink-0 h-10 w-10">
+              <div className="h-10 w-10 rounded-full bg-blue-600 flex items-center justify-center">
+                <span className="text-sm font-medium text-white">
+                  {getUserInitials(user.firstName, user.lastName)}
+                </span>
+              </div>
+            </div>
+            <div className="ml-4">
+              <div className="text-sm font-medium text-foreground">
+                {user.firstName} {user.lastName}
+              </div>
+              <div className="text-sm text-muted-foreground">{user.login}</div>
+            </div>
+          </div>
+        );
+      case 'lastName':
+        return <div className="text-sm text-foreground">{user.lastName}</div>;
+      case 'email':
+        return <div className="text-sm text-foreground">{user.email}</div>;
+      case 'login':
+        return <div className="text-sm text-foreground">{user.login}</div>;
+      case 'title':
+        return <div className="text-sm text-foreground">{user.title || '-'}</div>;
+      case 'department':
+        return <div className="text-sm text-foreground">{user.department || '-'}</div>;
+      case 'employeeType':
+        return <Badge variant="outline">{user.employeeType}</Badge>;
+      case 'manager':
+        return <div className="text-sm text-foreground">{user.manager || '-'}</div>;
+      case 'mobilePhone':
+        return <div className="text-sm text-foreground">{user.mobilePhone || '-'}</div>;
+      case 'status':
+        return getStatusBadge(user.status);
+      case 'activated':
+        return (
+          <div className="text-sm text-muted-foreground">
+            {user.created ? format(new Date(user.created), 'MMM dd, yyyy') : '-'}
+          </div>
+        );
+      case 'lastLogin':
+        return (
+          <div className="text-sm text-muted-foreground">
+            {formatLastLogin(user.lastLogin as Date | string | null)}
+          </div>
+        );
+      case 'lastUpdated':
+        return (
+          <div className="text-sm text-muted-foreground">
+            {user.lastUpdated ? format(new Date(user.lastUpdated), 'MMM dd, yyyy') : '-'}
+          </div>
+        );
+      case 'passwordChanged':
+        return (
+          <div className="text-sm text-muted-foreground">
+            {user.passwordChanged ? format(new Date(user.passwordChanged), 'MMM dd, yyyy') : '-'}
+          </div>
+        );
+      default:
+        return <div className="text-sm text-foreground">-</div>;
+    }
+  };
+
   const startIndex = (currentPage - 1) * usersPerPage + 1;
   const endIndex = Math.min(currentPage * usersPerPage, total);
 
@@ -179,67 +265,28 @@ export default function UserTable({
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="px-6 py-4">
-                  <div className="flex items-center space-x-2">
-                    <Button 
-                      variant="ghost" 
-                      className="h-auto p-0 font-medium text-xs text-muted-foreground uppercase tracking-wider hover:text-foreground"
-                      onClick={() => handleSort('firstName')}
-                    >
-                      User
-                      {getSortIcon('firstName')}
-                    </Button>
-                    <Button variant="ghost" size="icon" className="h-6 w-6">
-                      <FilterIcon className="h-3 w-3" />
-                    </Button>
-                  </div>
-                </TableHead>
-                <TableHead className="px-6 py-4">
-                  <div className="flex items-center space-x-2">
-                    <Button 
-                      variant="ghost" 
-                      className="h-auto p-0 font-medium text-xs text-muted-foreground uppercase tracking-wider hover:text-foreground"
-                      onClick={() => handleSort('email')}
-                    >
-                      Email
-                      {getSortIcon('email')}
-                    </Button>
-                    <Button variant="ghost" size="icon" className="h-6 w-6">
-                      <FilterIcon className="h-3 w-3" />
-                    </Button>
-                  </div>
-                </TableHead>
-                <TableHead className="px-6 py-4">
-                  <div className="flex items-center space-x-2">
-                    <Button 
-                      variant="ghost" 
-                      className="h-auto p-0 font-medium text-xs text-muted-foreground uppercase tracking-wider hover:text-foreground"
-                      onClick={() => handleSort('status')}
-                    >
-                      Status
-                      {getSortIcon('status')}
-                    </Button>
-                    <Button variant="ghost" size="icon" className="h-6 w-6">
-                      <FilterIcon className="h-3 w-3" />
-                    </Button>
-                  </div>
-                </TableHead>
-                <TableHead className="px-6 py-4">
-                  <div className="flex items-center space-x-2">
-                    <Button 
-                      variant="ghost" 
-                      className="h-auto p-0 font-medium text-xs text-muted-foreground uppercase tracking-wider hover:text-foreground"
-                      onClick={() => handleSort('lastLogin')}
-                    >
-                      Last Login
-                      {getSortIcon('lastLogin')}
-                    </Button>
-                    <Button variant="ghost" size="icon" className="h-6 w-6">
-                      <FilterIcon className="h-3 w-3" />
-                    </Button>
-                  </div>
-                </TableHead>
-
+                {visibleColumns.map((columnId) => {
+                  const column = COLUMN_DEFINITIONS[columnId as keyof typeof COLUMN_DEFINITIONS];
+                  if (!column) return null;
+                  
+                  return (
+                    <TableHead key={columnId} className="px-6 py-4">
+                      <div className="flex items-center space-x-2">
+                        <Button 
+                          variant="ghost" 
+                          className="h-auto p-0 font-medium text-xs text-muted-foreground uppercase tracking-wider hover:text-foreground"
+                          onClick={() => handleSort(column.sortKey)}
+                        >
+                          {column.label}
+                          {getSortIcon(column.sortKey)}
+                        </Button>
+                        <Button variant="ghost" size="icon" className="h-6 w-6">
+                          <FilterIcon className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    </TableHead>
+                  );
+                })}
               </TableRow>
             </TableHeader>
             <TableBody>

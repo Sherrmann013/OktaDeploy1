@@ -106,7 +106,7 @@ export default function ColumnManager({ columns, onColumnsChange, filters, onFil
       <SheetTrigger asChild>
         <Button variant="outline" className="gap-2">
           <Settings className="w-4 h-4" />
-          Columns & Filters
+          Columns
         </Button>
       </SheetTrigger>
       <SheetContent className="w-[400px] sm:w-[540px]">

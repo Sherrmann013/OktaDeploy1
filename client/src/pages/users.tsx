@@ -287,37 +287,41 @@ export default function Users() {
         </div>
       </div>
 
-      {/* Search and Filters */}
+      {/* Search and Controls */}
       <div className="bg-background border-b border-border px-6 py-4">
-        <form onSubmit={handleSearch} className="flex items-center space-x-4">
-          <div className="w-96 relative">
-            <Search className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
-            <Input
-              type="text"
-              placeholder="Search users by name, email, or login..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 border-blue-500 ring-1 ring-blue-500 focus:border-blue-600 focus:ring-blue-600"
-            />
+        <form onSubmit={handleSearch} className="flex items-center justify-between">
+          <div className="flex items-center space-x-4">
+            <div className="w-96 relative">
+              <Search className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
+              <Input
+                type="text"
+                placeholder="Search users by name, email, or login..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10 border-blue-500 ring-1 ring-blue-500 focus:border-blue-600 focus:ring-blue-600"
+              />
+            </div>
+            
+            <Button onClick={() => setShowCreateModal(true)} className="bg-blue-600 hover:bg-blue-700 text-white">
+              <UserPlus className="w-4 h-4 mr-2" />
+              Add User
+            </Button>
           </div>
           
-          <Button onClick={() => setShowCreateModal(true)} className="bg-blue-600 hover:bg-blue-700 text-white">
-            <UserPlus className="w-4 h-4 mr-2" />
-            Add User
-          </Button>
-          
-          <ColumnManager
-            columns={columns}
-            onColumnsChange={setColumns}
-            filters={filters}
-            onFiltersChange={setFilters}
-          />
-          
-          {(searchQuery || employeeTypeFilter || filters.length > 0) && (
-            <Button type="button" variant="outline" onClick={clearFilters}>
-              Clear Filters
-            </Button>
-          )}
+          <div className="flex items-center space-x-4">
+            {(searchQuery || employeeTypeFilter || filters.length > 0) && (
+              <Button type="button" variant="outline" onClick={clearFilters}>
+                Clear Filters
+              </Button>
+            )}
+            
+            <ColumnManager
+              columns={columns}
+              onColumnsChange={setColumns}
+              filters={filters}
+              onFiltersChange={setFilters}
+            />
+          </div>
         </form>
       </div>
 
