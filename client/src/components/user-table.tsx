@@ -607,7 +607,6 @@ export default function UserTable({
               <div className="text-sm font-medium text-foreground">
                 {user.firstName} {user.lastName}
               </div>
-              <div className="text-sm text-muted-foreground">{user.email}</div>
             </div>
           </div>
         );
