@@ -22,14 +22,34 @@ class KnowBe4GraphService {
 
   constructor() {
     const apiKey = process.env.KNOWBE4_GRAPH_API_KEY;
-    const baseUrl = process.env.KNOWBE4_GRAPH_API_URL || 'https://us.api.knowbe4.com/graphql';
+    const graphApiUrl = process.env.KNOWBE4_GRAPH_API_URL;
+    
+    // If KNOWBE4_GRAPH_API_URL is a JWT token, use it as the API key and construct the URL
+    let baseUrl = 'https://us.api.knowbe4.com/graphql';
+    let finalApiKey = apiKey;
+    
+    if (graphApiUrl && graphApiUrl.startsWith('eyJ')) {
+      // This looks like a JWT token, use it as the API key
+      finalApiKey = graphApiUrl;
+      try {
+        // Decode JWT to extract site information
+        const payload = JSON.parse(atob(graphApiUrl.split('.')[1]));
+        if (payload.site) {
+          baseUrl = `https://${payload.site}/graphql`;
+        }
+      } catch (e) {
+        console.warn('Could not decode JWT token for site extraction, using default URL');
+      }
+    } else if (graphApiUrl) {
+      baseUrl = graphApiUrl;
+    }
 
-    if (!apiKey) {
+    if (!finalApiKey) {
       throw new Error('KNOWBE4_GRAPH_API_KEY environment variable is required');
     }
 
     this.config = {
-      apiKey,
+      apiKey: finalApiKey,
       baseUrl,
     };
   }
