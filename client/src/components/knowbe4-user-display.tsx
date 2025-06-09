@@ -83,16 +83,16 @@ export default function KnowBe4UserDisplay({ userEmail }: KnowBe4UserDisplayProp
     enabled: !!userEmail && !!connectionTest?.success,
   });
 
-  // Fetch all training campaigns
-  const { data: campaigns } = useQuery({
-    queryKey: ['/api/knowbe4/campaigns'],
-    enabled: !!connectionTest?.success,
+  // Fetch user-specific campaign enrollments
+  const { data: campaignEnrollments } = useQuery({
+    queryKey: ['/api/knowbe4/user', knowbe4User?.id, 'campaign-enrollments'],
+    enabled: !!knowbe4User?.id && !!connectionTest?.success,
   });
 
   // Debug logging for exact data structure
   console.log('=== KNOWBE4 DEBUG DATA ===');
   console.log('KnowBe4 User Data:', JSON.stringify(knowbe4User, null, 2));
-  console.log('Training Campaigns:', JSON.stringify(campaigns, null, 2));
+  console.log('Campaign Enrollments:', JSON.stringify(campaignEnrollments, null, 2));
   console.log('=== END DEBUG DATA ===');
 
 
@@ -200,33 +200,32 @@ export default function KnowBe4UserDisplay({ userEmail }: KnowBe4UserDisplayProp
   const emailsReported = phishingStats.filter(p => p.last_reported_date && p.last_reported_date !== null).length;
   const totalPhishingCampaigns = phishingStats.length;
 
-  // Use the campaigns data which contains the actual training information
-  // The debug shows "Passphrase Test" campaign with "Completed" status
-  const trainingStats = campaigns || [];
-  console.log('Using campaigns as training stats:', trainingStats);
+  // Use the user-specific campaign enrollment data to show accurate completion status
+  const trainingStats = campaignEnrollments || [];
+  console.log('Using campaign enrollments as training stats:', trainingStats);
   
-  const completed = trainingStats.filter(campaign => 
-    campaign.status === 'Completed' || campaign.status === 'completed'
+  const completed = trainingStats.filter(enrollment => 
+    enrollment.status === 'Completed' || enrollment.status === 'completed'
   ).length;
   
-  const inProgress = trainingStats.filter(campaign => 
-    campaign.status === 'In Progress' || campaign.status === 'in_progress' || 
-    campaign.status === 'Active' || campaign.status === 'active'
+  const inProgress = trainingStats.filter(enrollment => 
+    enrollment.status === 'In Progress' || enrollment.status === 'in_progress' || 
+    enrollment.status === 'Active' || enrollment.status === 'active'
   ).length;
   
-  const notStarted = trainingStats.filter(campaign => 
-    campaign.status === 'Not Started' || campaign.status === 'not_started' ||
-    campaign.status === 'Draft' || campaign.status === 'draft'
+  const notStarted = trainingStats.filter(enrollment => 
+    enrollment.status === 'Not Started' || enrollment.status === 'not_started' ||
+    !enrollment.completion_date
   ).length;
   
   const total = trainingStats.length;
   const completionPercentage = total > 0 ? Math.round((completed / total) * 100) : 0;
   
-  console.log('Training completion calculation:');
-  console.log('Completed campaigns:', completed);
-  console.log('In Progress campaigns:', inProgress); 
-  console.log('Not Started campaigns:', notStarted);
-  console.log('Total campaigns:', total);
+  console.log('User-specific training completion calculation:');
+  console.log('Completed enrollments:', completed);
+  console.log('In Progress enrollments:', inProgress); 
+  console.log('Not Started enrollments:', notStarted);
+  console.log('Total enrollments:', total);
   console.log('Completion percentage:', completionPercentage);
 
   return (
@@ -326,8 +325,32 @@ export default function KnowBe4UserDisplay({ userEmail }: KnowBe4UserDisplayProp
 
         </div>
 
-
-
+        {/* Detailed Training Enrollment Information */}
+        {trainingStats.length > 0 && (
+          <div className="mt-6">
+            <h4 className="text-sm font-medium text-gray-700 mb-3">Campaign Enrollments</h4>
+            <div className="space-y-2">
+              {trainingStats.map((enrollment, index) => (
+                <div key={index} className="flex justify-between items-center py-2 px-3 bg-gray-50 rounded-lg">
+                  <div className="flex-1">
+                    <div className="text-sm font-medium text-gray-900">{enrollment.campaign_name}</div>
+                    <div className="text-xs text-gray-500">
+                      Status: {enrollment.status} • Enrolled: {enrollment.enrollment_date ? new Date(enrollment.enrollment_date).toLocaleDateString() : 'N/A'}
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-sm font-medium">
+                      {enrollment.completed_items || 0}/{enrollment.content_items || 1} completed
+                    </div>
+                    <div className="text-xs text-gray-500">
+                      {enrollment.time_spent ? `${Math.round(enrollment.time_spent / 60)}min` : 'No time logged'}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
       </CardContent>
     </Card>

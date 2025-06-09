@@ -354,6 +354,45 @@ class KnowBe4Service {
       return [];
     }
   }
+
+  async getUserCampaignEnrollments(userId: number): Promise<any[]> {
+    try {
+      // Get all training campaigns
+      const campaigns = await this.getTrainingCampaigns();
+      const userEnrollments = [];
+
+      // For each campaign, check if user is enrolled and get their status
+      for (const campaign of campaigns) {
+        try {
+          const recipients = await this.getCampaignParticipants(campaign.campaign_id);
+          const userEnrollment = recipients.find(recipient => 
+            recipient.id === userId || recipient.user_id === userId
+          );
+
+          if (userEnrollment) {
+            userEnrollments.push({
+              campaign_id: campaign.campaign_id,
+              campaign_name: campaign.name,
+              status: userEnrollment.status || 'Not Started',
+              enrollment_date: userEnrollment.enrollment_date,
+              completion_date: userEnrollment.completion_date,
+              time_spent: userEnrollment.time_spent || 0,
+              score: userEnrollment.score || null,
+              content_items: campaign.content?.length || 0,
+              completed_items: userEnrollment.completed_items || 0
+            });
+          }
+        } catch (error) {
+          console.error(`Error checking enrollment for campaign ${campaign.campaign_id}:`, error);
+        }
+      }
+
+      return userEnrollments;
+    } catch (error) {
+      console.error('Error fetching user campaign enrollments:', error);
+      return [];
+    }
+  }
 }
 
 export const knowBe4Service = new KnowBe4Service();
