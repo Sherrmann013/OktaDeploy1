@@ -184,6 +184,17 @@ export default function UserDetail() {
     enabled: !!userId && activeTab === "activity",
   });
 
+  // KnowBe4 data queries
+  const { data: knowBe4Data } = useQuery({
+    queryKey: [`/api/knowbe4/user/${user?.email}`],
+    enabled: !!user?.email && activeTab === "monitoring",
+  });
+
+  const { data: campaignsData } = useQuery({
+    queryKey: ["/api/knowbe4/campaigns"],
+    enabled: activeTab === "monitoring",
+  });
+
   const [expandedLogs, setExpandedLogs] = useState<Set<string>>(new Set());
 
   const toggleLogExpansion = (logId: string) => {
