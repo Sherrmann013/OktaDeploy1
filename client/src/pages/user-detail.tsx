@@ -1293,46 +1293,7 @@ export default function UserDetail() {
                     </CardContent>
                   </Card>
 
-                  {/* Compliance Monitoring */}
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        <CheckCircle className="w-5 h-5 text-green-600" />
-                        Compliance
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      <div>
-                        <label className="text-sm font-medium text-muted-foreground">SOC2 Status</label>
-                        <p className="text-foreground">Compliant</p>
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium text-muted-foreground">Last Audit</label>
-                        <p className="text-foreground">2024-11-15</p>
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium text-muted-foreground">Training Complete</label>
-                        <p className="text-foreground">Loading...</p>
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium text-muted-foreground">Policy Acknowledgment</label>
-                        <p className="text-foreground">Current</p>
-                      </div>
-                      <div className="flex gap-2 pt-2">
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
-                          className="flex-1"
-                          onClick={() => {
-                            console.log('Refreshing compliance data...');
-                          }}
-                        >
-                          <RefreshCw className="w-4 h-4 mr-1" />
-                          Refresh
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
+
                   </div>
                 </div>
               </TabsContent>
