@@ -296,33 +296,11 @@ export default function UserTable({
                   className="table-row-light cursor-pointer"
                   onClick={() => onUserClick(user.id)}
                 >
-                  <TableCell className="px-6 py-4">
-                    <div className="flex items-center">
-                      <div className="flex-shrink-0 h-10 w-10">
-                        <div className="h-10 w-10 rounded-full bg-blue-600 flex items-center justify-center">
-                          <span className="text-sm font-medium text-white">
-                            {getUserInitials(user.firstName, user.lastName)}
-                          </span>
-                        </div>
-                      </div>
-                      <div className="ml-4">
-                        <div className="text-sm font-medium text-foreground">
-                          {user.firstName} {user.lastName}
-                        </div>
-                        <div className="text-sm text-muted-foreground">{user.login}</div>
-                      </div>
-                    </div>
-                  </TableCell>
-                  <TableCell className="px-6 py-4">
-                    <div className="text-sm text-foreground">{user.email}</div>
-                  </TableCell>
-                  <TableCell className="px-6 py-4">
-                    {getStatusBadge(user.status)}
-                  </TableCell>
-                  <TableCell className="px-6 py-4 text-sm text-muted-foreground">
-                    {formatLastLogin(user.lastLogin as Date | string | null)}
-                  </TableCell>
-
+                  {visibleColumns.map((columnId) => (
+                    <TableCell key={columnId} className="px-6 py-4">
+                      {renderCellContent(user, columnId)}
+                    </TableCell>
+                  ))}
                 </TableRow>
               ))}
             </TableBody>
