@@ -92,9 +92,9 @@ function SortableColumnItem({ column, onToggle }: { column: ColumnConfig; onTogg
         <Checkbox
           checked={column.visible}
           onCheckedChange={() => onToggle(column.id)}
-          className="h-3 w-3"
+          className="h-4 w-4"
         />
-        <Label className="text-xs font-medium flex-1">
+        <Label className="text-sm font-medium flex-1">
           {availableColumn?.label || column.id}
         </Label>
         {availableColumn?.hasFilter && (

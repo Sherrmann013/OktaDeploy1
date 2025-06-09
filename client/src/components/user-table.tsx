@@ -693,12 +693,12 @@ export default function UserTable({
     <>
       <Card>
         <div className="overflow-x-auto">
-          <Table>
-            <DndContext
-              sensors={sensors}
-              collisionDetection={closestCenter}
-              onDragEnd={handleDragEnd}
-            >
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}
+          >
+            <Table>
               <TableHeader>
                 <TableRow className="group">
                   <SortableContext 
@@ -737,7 +737,6 @@ export default function UserTable({
                   </SortableContext>
                 </TableRow>
               </TableHeader>
-            </DndContext>
             <TableBody>
               {users.map((user) => (
                 <TableRow 
@@ -753,7 +752,8 @@ export default function UserTable({
                 </TableRow>
               ))}
             </TableBody>
-          </Table>
+            </Table>
+          </DndContext>
         </div>
 
         {/* Pagination */}
