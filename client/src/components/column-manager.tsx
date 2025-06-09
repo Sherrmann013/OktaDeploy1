@@ -11,18 +11,18 @@ import { Badge } from "@/components/ui/badge";
 
 // Available columns based on user profile fields
 export const AVAILABLE_COLUMNS = [
-  { id: 'name', label: 'Name', type: 'text' },
-  { id: 'login', label: 'Login', type: 'text' },
-  { id: 'title', label: 'Title', type: 'text' },
-  { id: 'department', label: 'Department', type: 'text' },
-  { id: 'employeeType', label: 'Employee Type', type: 'select', options: ['EMPLOYEE', 'CONTRACTOR', 'INTERN', 'PART_TIME', 'CONSULTANT'] },
-  { id: 'manager', label: 'Manager', type: 'text' },
-  { id: 'mobilePhone', label: 'Mobile Phone', type: 'text' },
-  { id: 'status', label: 'Status', type: 'select', options: ['ACTIVE', 'SUSPENDED', 'DEPROVISIONED'] },
-  { id: 'activated', label: 'Account Created', type: 'date' },
-  { id: 'lastLogin', label: 'Last Login', type: 'date' },
-  { id: 'lastUpdated', label: 'Last Updated', type: 'date' },
-  { id: 'passwordChanged', label: 'Password Changed', type: 'date' },
+  { id: 'name', label: 'Name', type: 'text', hasFilter: false },
+  { id: 'title', label: 'Title', type: 'text', hasFilter: false },
+  { id: 'department', label: 'Department', type: 'text', hasFilter: false },
+  { id: 'employeeType', label: 'Employee Type', type: 'select', hasFilter: true, options: ['EMPLOYEE', 'CONTRACTOR', 'INTERN', 'PART_TIME', 'CONSULTANT'] },
+  { id: 'manager', label: 'Manager', type: 'text', hasFilter: false },
+  { id: 'mobilePhone', label: 'Mobile Phone', type: 'text', hasFilter: true },
+  { id: 'status', label: 'Status', type: 'select', hasFilter: false, options: ['ACTIVE', 'SUSPENDED', 'DEPROVISIONED'] },
+  { id: 'disabled', label: 'Disabled', type: 'select', hasFilter: false, options: ['true', 'false'] },
+  { id: 'activated', label: 'Account Created', type: 'date', hasFilter: true },
+  { id: 'lastLogin', label: 'Last Login', type: 'date', hasFilter: true },
+  { id: 'lastUpdated', label: 'Last Updated', type: 'date', hasFilter: true },
+  { id: 'passwordChanged', label: 'Password Changed', type: 'date', hasFilter: true },
 ] as const;
 
 export interface ColumnConfig {

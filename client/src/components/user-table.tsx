@@ -15,18 +15,18 @@ import type { User } from "@shared/schema";
 
 // Column definitions for dynamic table rendering
 const COLUMN_DEFINITIONS = {
-  name: { label: 'Name', sortKey: 'firstName' },
-  login: { label: 'Login', sortKey: 'login' },
-  title: { label: 'Title', sortKey: 'title' },
-  department: { label: 'Department', sortKey: 'department' },
-  employeeType: { label: 'Employee Type', sortKey: 'employeeType' },
-  manager: { label: 'Manager', sortKey: 'manager' },
-  mobilePhone: { label: 'Mobile Phone', sortKey: 'mobilePhone' },
-  status: { label: 'Status', sortKey: 'status' },
-  activated: { label: 'Account Created', sortKey: 'activated' },
-  lastLogin: { label: 'Last Login', sortKey: 'lastLogin' },
-  lastUpdated: { label: 'Last Updated', sortKey: 'lastUpdated' },
-  passwordChanged: { label: 'Password Changed', sortKey: 'passwordChanged' },
+  name: { label: 'Name', sortKey: 'firstName', hasFilter: false },
+  title: { label: 'Title', sortKey: 'title', hasFilter: false },
+  department: { label: 'Department', sortKey: 'department', hasFilter: false },
+  employeeType: { label: 'Employee Type', sortKey: 'employeeType', hasFilter: true },
+  manager: { label: 'Manager', sortKey: 'manager', hasFilter: false },
+  mobilePhone: { label: 'Mobile Phone', sortKey: 'mobilePhone', hasFilter: true },
+  status: { label: 'Status', sortKey: 'status', hasFilter: false },
+  disabled: { label: 'Disabled', sortKey: 'status', hasFilter: false },
+  activated: { label: 'Account Created', sortKey: 'activated', hasFilter: true },
+  lastLogin: { label: 'Last Login', sortKey: 'lastLogin', hasFilter: true },
+  lastUpdated: { label: 'Last Updated', sortKey: 'lastUpdated', hasFilter: true },
+  passwordChanged: { label: 'Password Changed', sortKey: 'passwordChanged', hasFilter: true },
 };
 
 interface UserTableProps {
@@ -204,6 +204,13 @@ export default function UserTable({
         return <div className="text-sm text-foreground">{user.mobilePhone || '-'}</div>;
       case 'status':
         return getStatusBadge(user.status);
+      case 'disabled':
+        const isDisabled = user.status === 'SUSPENDED' || user.status === 'DEPROVISIONED';
+        return (
+          <Badge variant={isDisabled ? "destructive" : "secondary"}>
+            {isDisabled ? 'Yes' : 'No'}
+          </Badge>
+        );
       case 'activated':
         return (
           <div className="text-sm text-muted-foreground">
@@ -264,8 +271,8 @@ export default function UserTable({
                   if (!column) return null;
                   
                   return (
-                    <TableHead key={columnId} className="px-6 py-4">
-                      <div className="flex items-center space-x-2">
+                    <TableHead key={columnId} className="px-6 py-4 text-center">
+                      <div className="flex items-center justify-center space-x-2">
                         <Button 
                           variant="ghost" 
                           className="h-auto p-0 font-medium text-xs text-muted-foreground uppercase tracking-wider hover:text-foreground"
@@ -274,9 +281,11 @@ export default function UserTable({
                           {column.label}
                           {getSortIcon(column.sortKey)}
                         </Button>
-                        <Button variant="ghost" size="icon" className="h-6 w-6">
-                          <FilterIcon className="h-3 w-3" />
-                        </Button>
+                        {column.hasFilter && (
+                          <Button variant="ghost" size="icon" className="h-6 w-6">
+                            <FilterIcon className="h-3 w-3" />
+                          </Button>
+                        )}
                       </div>
                     </TableHead>
                   );
@@ -291,7 +300,7 @@ export default function UserTable({
                   onClick={() => onUserClick(user.id)}
                 >
                   {visibleColumns.map((columnId) => (
-                    <TableCell key={columnId} className="px-6 py-4">
+                    <TableCell key={columnId} className="px-6 py-4 text-center">
                       {renderCellContent(user, columnId)}
                     </TableCell>
                   ))}
