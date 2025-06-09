@@ -48,6 +48,11 @@ interface UserTableProps {
   sortOrder?: 'asc' | 'desc';
   onSort?: (column: string) => void;
   visibleColumns?: string[];
+  filters?: {
+    employeeType: string[];
+    mobilePhone: string;
+  };
+  onFiltersChange?: (filters: { employeeType: string[]; mobilePhone: string }) => void;
 }
 
 export default function UserTable({
@@ -64,6 +69,8 @@ export default function UserTable({
   sortOrder,
   onSort,
   visibleColumns = ['name', 'status', 'lastLogin'],
+  filters,
+  onFiltersChange,
 }: UserTableProps) {
   const { toast } = useToast();
   const [confirmAction, setConfirmAction] = useState<{
@@ -73,10 +80,21 @@ export default function UserTable({
     action: () => void;
   } | null>(null);
   
-  // Filter states
-  const [mobilePhoneFilter, setMobilePhoneFilter] = useState("");
-  const [employeeTypeFilter, setEmployeeTypeFilter] = useState<string[]>([]);
-  const [dateFilters, setDateFilters] = useState<{[key: string]: {start?: string, end?: string}}>({});
+  // Use external filter state or fallback to local state
+  const mobilePhoneFilter = filters?.mobilePhone || "";
+  const employeeTypeFilter = filters?.employeeType || [];
+  
+  const setMobilePhoneFilter = (value: string) => {
+    if (onFiltersChange) {
+      onFiltersChange({ employeeType: employeeTypeFilter, mobilePhone: value });
+    }
+  };
+  
+  const setEmployeeTypeFilter = (value: string[]) => {
+    if (onFiltersChange) {
+      onFiltersChange({ employeeType: value, mobilePhone: mobilePhoneFilter });
+    }
+  };
 
   const updateStatusMutation = useMutation({
     mutationFn: async ({ userId, status }: { userId: number; status: string }) => {

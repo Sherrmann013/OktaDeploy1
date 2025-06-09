@@ -38,6 +38,10 @@ export default function Users() {
   const [sortBy, setSortBy] = useState("firstName");
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [employeeTypeFilter, setEmployeeTypeFilter] = useState<string>("");
+  const [filters, setFilters] = useState({
+    employeeType: [] as string[],
+    mobilePhone: ""
+  });
   const { toast } = useToast();
 
   // Column management
@@ -122,7 +126,7 @@ export default function Users() {
   });
 
   const { data: usersData, isLoading, refetch } = useQuery({
-    queryKey: ["/api/users", currentPage, usersPerPage, searchQuery, sortBy, sortOrder, employeeTypeFilter],
+    queryKey: ["/api/users", currentPage, usersPerPage, searchQuery, sortBy, sortOrder, employeeTypeFilter, filters],
     queryFn: async () => {
       const params = new URLSearchParams({
         page: currentPage.toString(),
@@ -130,7 +134,9 @@ export default function Users() {
         sortBy: sortBy,
         sortOrder: sortOrder,
         ...(searchQuery && { search: searchQuery }),
-        ...(employeeTypeFilter && employeeTypeFilter !== "all" && { employeeType: employeeTypeFilter })
+        ...(employeeTypeFilter && employeeTypeFilter !== "all" && { employeeType: employeeTypeFilter }),
+        ...(filters.employeeType.length > 0 && { employeeTypes: filters.employeeType.join(',') }),
+        ...(filters.mobilePhone && { mobilePhone: filters.mobilePhone })
       });
       
       const response = await fetch(`/api/users?${params}`, {
@@ -339,6 +345,8 @@ export default function Users() {
           sortOrder={sortOrder}
           onSort={handleSort}
           visibleColumns={columns.filter(col => col.visible).map(col => col.id)}
+          filters={filters}
+          onFiltersChange={setFilters}
         />
       </div>
 
