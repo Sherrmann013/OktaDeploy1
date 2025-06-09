@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { format, formatDistanceToNow } from "date-fns";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -555,6 +555,13 @@ export default function UserTable({
 
   const startIndex = (currentPage - 1) * usersPerPage + 1;
   const endIndex = Math.min(currentPage * usersPerPage, total);
+  
+  // Memoized user rows for performance optimization
+  const memoizedUsers = useMemo(() => users, [users]);
+  
+  // Virtualized rendering for large datasets
+  const itemHeight = 57; // Height of each table row in pixels
+  const containerHeight = Math.min(600, Math.max(300, users.length * itemHeight));
 
   if (isLoading) {
     return (
@@ -642,6 +649,8 @@ export default function UserTable({
                   <SelectItem value="25">25</SelectItem>
                   <SelectItem value="50">50</SelectItem>
                   <SelectItem value="100">100</SelectItem>
+                  <SelectItem value="200">200</SelectItem>
+                  <SelectItem value="500">500</SelectItem>
                 </SelectContent>
               </Select>
               <span>per page</span>

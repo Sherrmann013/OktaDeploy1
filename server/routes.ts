@@ -190,14 +190,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const employeeTypesFilter = z.string().optional().parse(req.query.employeeTypes);
       const mobilePhoneFilter = z.string().optional().parse(req.query.mobilePhone);
       const managerFilter = z.string().optional().parse(req.query.manager);
-      const page = z.coerce.number().default(1).parse(req.query.page);
-      const limit = z.coerce.number().default(10).parse(req.query.limit);
+      const page = z.coerce.number().min(1).default(1).parse(req.query.page);
+      const limit = z.coerce.number().min(1).max(500).default(10).parse(req.query.limit);
+      const statsOnly = z.boolean().default(false).parse(req.query.statsOnly === 'true');
       const sortBy = z.string().default("firstName").parse(req.query.sortBy);
       const sortOrder = z.enum(["asc", "desc"]).default("asc").parse(req.query.sortOrder);
 
       try {
+        // For stats-only requests, return minimal data quickly
+        if (statsOnly) {
+          const sampleUsers = await oktaService.getUsers(50); // Smaller sample for stats
+          res.json({
+            users: [],
+            total: sampleUsers.length,
+            currentPage: 1,
+            totalPages: 1,
+            usersPerPage: limit,
+            source: 'okta_stats'
+          });
+          return;
+        }
+
         // Try to fetch users from OKTA first
-        const oktaUsers = await oktaService.getUsers(200);
+        const oktaUsers = await oktaService.getUsers(Math.min(500, limit * 5));
         
         let filteredUsers = oktaUsers;
         
