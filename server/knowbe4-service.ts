@@ -336,9 +336,12 @@ class KnowBe4Service {
   async searchCampaignsByName(searchTerm: string): Promise<any[]> {
     try {
       const campaigns = await this.getTrainingCampaigns();
-      return campaigns.filter(campaign => 
+      console.log('All training campaigns:', campaigns.map(c => c.name));
+      const filtered = campaigns.filter(campaign => 
         campaign.name.toLowerCase().includes(searchTerm.toLowerCase())
       );
+      console.log(`Campaigns matching "${searchTerm}":`, filtered.map(c => c.name));
+      return filtered;
     } catch (error) {
       console.error('Error searching campaigns by name:', error);
       return [];
