@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider, useAuth } from "@/hooks/use-auth";
 import SSOLayout from "@/components/sso-layout";
 import Landing from "@/pages/landing";
+import Login from "@/pages/login";
 import Home from "@/pages/home";
 import Dashboard from "@/pages/dashboard";
 import Users from "@/pages/users";
@@ -33,7 +34,10 @@ function Router() {
   return (
     <Switch>
       {!user ? (
-        <Route path="/" component={Landing} />
+        <>
+          <Route path="/login" component={Login} />
+          <Route path="/" component={Login} />
+        </>
       ) : (
         <>
           <Route path="/" component={Users} />
