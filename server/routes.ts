@@ -6,6 +6,7 @@ import { z } from "zod";
 import { oktaService } from "./okta-service";
 import { syncSpecificUser } from "./okta-sync";
 import { knowBe4Service } from "./knowbe4-service";
+import { knowBe4GraphService } from "./knowbe4-graph-service";
 
 // Helper function to determine employee type from user groups
 function determineEmployeeTypeFromGroups(userGroups: any[], employeeTypeApps: Set<string>): string | null {
@@ -1849,6 +1850,102 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Error fetching campaign participants:', error);
       res.status(500).json({ error: 'Failed to fetch campaign participants' });
+    }
+  });
+
+  // ===== KNOWBE4 GRAPH API ROUTES =====
+  
+  // Test Graph API connection
+  app.get('/api/knowbe4/graph/test-connection', isAuthenticated, requireAdmin, async (req, res) => {
+    try {
+      const connectionTest = await knowBe4GraphService.testConnection();
+      res.json(connectionTest);
+    } catch (error) {
+      console.error("KnowBe4 Graph API connection test error:", error);
+      res.status(500).json({ 
+        success: false,
+        message: "Failed to test Graph API connection",
+        error: error instanceof Error ? error.message : "Unknown error"
+      });
+    }
+  });
+
+  // Get user data via Graph API
+  app.get('/api/knowbe4/graph/user/:email', isAuthenticated, async (req, res) => {
+    try {
+      const email = req.params.email;
+      const user = await knowBe4GraphService.getUserByEmail(email);
+      if (!user) {
+        return res.status(404).json({ error: 'User not found in KnowBe4 Graph API' });
+      }
+      res.json(user);
+    } catch (error) {
+      console.error("KnowBe4 Graph API user fetch error:", error);
+      res.status(500).json({ 
+        message: "Failed to fetch user from Graph API",
+        error: error instanceof Error ? error.message : "Unknown error"
+      });
+    }
+  });
+
+  // Get training campaigns via Graph API
+  app.get('/api/knowbe4/graph/training-campaigns', isAuthenticated, requireAdmin, async (req, res) => {
+    try {
+      const campaigns = await knowBe4GraphService.getTrainingCampaigns();
+      res.json(campaigns);
+    } catch (error) {
+      console.error("KnowBe4 Graph API training campaigns fetch error:", error);
+      res.status(500).json({ 
+        message: "Failed to fetch training campaigns from Graph API",
+        error: error instanceof Error ? error.message : "Unknown error"
+      });
+    }
+  });
+
+  // Get phishing campaigns via Graph API
+  app.get('/api/knowbe4/graph/phishing-campaigns', isAuthenticated, requireAdmin, async (req, res) => {
+    try {
+      const campaigns = await knowBe4GraphService.getPhishingCampaigns();
+      res.json(campaigns);
+    } catch (error) {
+      console.error("KnowBe4 Graph API phishing campaigns fetch error:", error);
+      res.status(500).json({ 
+        message: "Failed to fetch phishing campaigns from Graph API",
+        error: error instanceof Error ? error.message : "Unknown error"
+      });
+    }
+  });
+
+  // Search campaigns via Graph API
+  app.get('/api/knowbe4/graph/campaigns/search', isAuthenticated, async (req, res) => {
+    try {
+      const searchTerm = req.query.q as string;
+      const campaignType = req.query.type as 'training' | 'phishing' | undefined;
+      
+      if (!searchTerm) {
+        return res.status(400).json({ error: 'Search term is required' });
+      }
+      
+      const campaigns = await knowBe4GraphService.searchCampaignsByName(searchTerm, campaignType);
+      res.json(campaigns);
+    } catch (error) {
+      console.error('Error searching campaigns via Graph API:', error);
+      res.status(500).json({ error: 'Failed to search campaigns' });
+    }
+  });
+
+  // Get user training enrollments via Graph API
+  app.get('/api/knowbe4/graph/user/:userId/training', isAuthenticated, async (req, res) => {
+    try {
+      const userId = req.params.userId;
+      const enrollments = await knowBe4GraphService.getUserTrainingEnrollments(userId);
+      res.json(enrollments);
+    } catch (error) {
+      console.error("KnowBe4 Graph API user training enrollments fetch error:", error);
+      res.status(500).json({ 
+        message: "Failed to fetch user training enrollments from Graph API",
+        error: error instanceof Error ? error.message : "Unknown error"
+      });
     }
   });
 
