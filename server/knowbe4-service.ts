@@ -323,6 +323,19 @@ class KnowBe4Service {
     }
   }
 
+  async getCampaignEnrollments(campaignId: number): Promise<any[]> {
+    try {
+      const endpoint = `/training/campaigns/${campaignId}/enrollments`;
+      console.log(`Fetching enrollments for campaign ${campaignId}`);
+      const enrollments = await this.makeRequest(endpoint);
+      console.log(`Campaign ${campaignId} returned ${enrollments?.length || 0} enrollments`);
+      return enrollments || [];
+    } catch (error) {
+      console.error(`Error fetching campaign ${campaignId} enrollments:`, error);
+      return [];
+    }
+  }
+
   async searchCampaignsByName(searchTerm: string): Promise<any[]> {
     try {
       const campaigns = await this.getTrainingCampaigns();
