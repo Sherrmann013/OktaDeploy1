@@ -1321,22 +1321,50 @@ export default function UserDetail() {
                     </CardHeader>
                     <CardContent className="space-y-4">
                       <div>
-                        <label className="text-sm font-medium text-muted-foreground">Training Campaign Statuses</label>
+                        <label className="text-sm font-medium text-muted-foreground">Available KnowBe4 Fields</label>
                         <div className="bg-gray-50 dark:bg-gray-900 p-3 rounded text-xs font-mono overflow-auto max-h-40 mt-1">
-                          {knowBe4Data?.current_training_campaign_statuses ? (
-                            <pre className="whitespace-pre-wrap">{JSON.stringify(knowBe4Data.current_training_campaign_statuses, null, 2)}</pre>
+                          {knowBe4Data ? (
+                            <pre className="whitespace-pre-wrap">{JSON.stringify(Object.keys(knowBe4Data).sort(), null, 2)}</pre>
                           ) : (
-                            <p className="text-gray-500">No training campaign data available</p>
+                            <p className="text-gray-500">Loading field list...</p>
                           )}
                         </div>
                       </div>
                       <div>
-                        <label className="text-sm font-medium text-muted-foreground">Phishing Campaign Statistics</label>
+                        <label className="text-sm font-medium text-muted-foreground">Training Related Fields</label>
                         <div className="bg-gray-50 dark:bg-gray-900 p-3 rounded text-xs font-mono overflow-auto max-h-40 mt-1">
-                          {knowBe4Data?.phishing_campaign_stats ? (
-                            <pre className="whitespace-pre-wrap">{JSON.stringify(knowBe4Data.phishing_campaign_stats, null, 2)}</pre>
+                          {knowBe4Data ? (
+                            <pre className="whitespace-pre-wrap">{JSON.stringify(
+                              Object.keys(knowBe4Data)
+                                .filter(key => key.toLowerCase().includes('training') || key.toLowerCase().includes('campaign'))
+                                .reduce((obj, key) => {
+                                  obj[key] = (knowBe4Data as any)[key];
+                                  return obj;
+                                }, {} as any),
+                              null, 
+                              2
+                            )}</pre>
                           ) : (
-                            <p className="text-gray-500">No phishing campaign data available</p>
+                            <p className="text-gray-500">Loading training fields...</p>
+                          )}
+                        </div>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-muted-foreground">Phishing Related Fields</label>
+                        <div className="bg-gray-50 dark:bg-gray-900 p-3 rounded text-xs font-mono overflow-auto max-h-40 mt-1">
+                          {knowBe4Data ? (
+                            <pre className="whitespace-pre-wrap">{JSON.stringify(
+                              Object.keys(knowBe4Data)
+                                .filter(key => key.toLowerCase().includes('phish') || key.toLowerCase().includes('prone'))
+                                .reduce((obj, key) => {
+                                  obj[key] = (knowBe4Data as any)[key];
+                                  return obj;
+                                }, {} as any),
+                              null, 
+                              2
+                            )}</pre>
+                          ) : (
+                            <p className="text-gray-500">Loading phishing fields...</p>
                           )}
                         </div>
                       </div>
