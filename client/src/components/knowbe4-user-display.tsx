@@ -344,141 +344,24 @@ export default function KnowBe4UserDisplay({ userEmail }: KnowBe4UserDisplayProp
             </CardContent>
           </Card>
 
-          {/* User Training Data - Right Tile */}
+          {/* Security Training - Right Tile */}
           <Card className="bg-white border border-gray-200">
             <CardContent className="p-4">
               <div className="flex items-center gap-2 mb-4">
                 <GraduationCap className="w-4 h-4 text-gray-500" />
-                <span className="text-sm font-medium text-gray-700">User Training Data</span>
+                <span className="text-sm font-medium text-gray-700">Security Training</span>
               </div>
               
-              {(() => {
-                // Look for any Maze training campaign from user enrollments (the actual data)
-                const mazeTrainingCampaign = trainingStats?.find(enrollment => 
-                  enrollment.campaign_name?.toLowerCase().includes('maze')
-                );
-                
-                if (mazeTrainingCampaign) {
-                  return (
-                    <div className="space-y-3">
-                      <div className="border-b pb-3">
-                        <div className="text-sm font-medium text-gray-900 mb-3">
-                          {mazeTrainingCampaign.campaign_name}
-                        </div>
-                        <div className="flex justify-between text-xs mb-2">
-                          <span className="text-gray-600">Status:</span>
-                          <span className="font-medium text-green-600">{mazeTrainingCampaign.status}</span>
-                        </div>
-                        <div className="flex justify-between text-xs mb-2">
-                          <span className="text-gray-600">Campaign ID:</span>
-                          <span className="font-medium">{mazeTrainingCampaign.campaign_id}</span>
-                        </div>
-                        <div className="flex justify-between text-xs mb-2">
-                          <span className="text-gray-600">Completed:</span>
-                          <span className="font-medium">
-                            {formatDate(mazeTrainingCampaign.completion_date)}
-                          </span>
-                        </div>
-                        <div className="flex justify-between text-xs">
-                          <span className="text-gray-600">Enrolled:</span>
-                          <span className="font-medium">
-                            {formatDate(mazeTrainingCampaign.enrollment_date)}
-                          </span>
-                        </div>
-                      </div>
-                      <div className="text-xs text-gray-500">
-                        User enrollment data from KnowBe4
-                      </div>
-                    </div>
-                  );
-                }
-                
-                // If no user training data available yet, show completion summary
-                if (trainingStats && trainingStats.length > 0) {
-                  const completedCount = trainingStats.filter(t => t.status === 'Completed').length;
-                  const totalCount = trainingStats.length;
-                  const completionRate = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
-                  
-                  return (
-                    <div className="space-y-3">
-                      <div className="border-b pb-3">
-                        <div className="text-sm font-medium text-gray-900 mb-3">
-                          Training Campaign Summary
-                        </div>
-                        <div className="flex justify-between text-xs mb-2">
-                          <span className="text-gray-600">Completion Rate:</span>
-                          <span className="font-medium text-green-600">{completionRate}%</span>
-                        </div>
-                        <div className="flex justify-between text-xs mb-2">
-                          <span className="text-gray-600">Completed:</span>
-                          <span className="font-medium">{completedCount} campaigns</span>
-                        </div>
-                        <div className="flex justify-between text-xs">
-                          <span className="text-gray-600">Total Assigned:</span>
-                          <span className="font-medium">{totalCount} campaigns</span>
-                        </div>
-                      </div>
-                      <div className="text-xs text-gray-500">
-                        Based on user training enrollments
-                      </div>
-                    </div>
-                  );
-                }
-                
-                // Loading state
-                return (
-                  <div className="text-center text-gray-500">
-                    <p className="text-sm">Loading training data...</p>
-                    <p className="text-xs mt-2">
-                      Retrieving user campaign enrollments from KnowBe4
-                    </p>
-                  </div>
-                );
-              })()}
+              <div className="text-center text-gray-500">
+                <p className="text-sm">Training data requires enhanced API access</p>
+                <p className="text-xs mt-1">Contact KnowBe4 admin for detailed training metrics</p>
+              </div>
             </CardContent>
           </Card>
 
         </div>
 
-        {/* Detailed Training Enrollment Information */}
-        <div className="mt-6">
-          <h4 className="text-sm font-medium text-gray-700 mb-3">Training Campaign Status</h4>
-          {trainingStats.length > 0 ? (
-            <div className="space-y-2">
-              {trainingStats.map((enrollment, index) => (
-                <div key={index} className="flex justify-between items-center py-2 px-3 bg-gray-50 rounded-lg">
-                  <div className="flex-1">
-                    <div className="text-sm font-medium text-gray-900">{enrollment.campaign_name}</div>
-                    <div className="text-xs text-gray-500">
-                      Status: {enrollment.status} • Enrolled: {enrollment.enrollment_date ? new Date(enrollment.enrollment_date).toLocaleDateString() : 'N/A'}
-                      {enrollment.completion_date && ` • Completed: ${new Date(enrollment.completion_date).toLocaleDateString()}`}
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <div className="text-sm font-medium">
-                      {enrollment.status === 'Completed' ? 'Completed' : 'In Progress'}
-                    </div>
-                    <div className="text-xs text-gray-500">
-                      {enrollment.time_spent ? `${Math.round(enrollment.time_spent / 60)}min spent` : 'No time logged'}
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="py-4 px-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-              <div className="flex items-center gap-2">
-                <AlertTriangle className="w-4 h-4 text-yellow-600" />
-                <div className="text-sm text-yellow-800">
-                  <div className="font-medium">No Active Training Campaigns</div>
-                  <div className="text-xs text-yellow-700 mt-1">
-                    This user is not currently enrolled in any KnowBe4 training campaigns.
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
+
 
       </CardContent>
     </Card>
