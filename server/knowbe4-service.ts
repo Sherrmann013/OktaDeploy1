@@ -146,7 +146,7 @@ class KnowBe4Service {
   constructor() {
     this.config = {
       apiKey: process.env.KNOWBE4_API_KEY || '',
-      baseUrl: 'https://us.api.knowbe4.com/v1'
+      baseUrl: process.env.KNOWBE4_BASE_URL || 'https://us.api.knowbe4.com/v1'
     };
 
     if (!this.config.apiKey) {
