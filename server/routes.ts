@@ -153,13 +153,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         let managerList = Array.from(managers).sort();
         
-        // Filter by query if provided
+        // Filter by query if provided - search from beginning of names
         if (query && query.trim().length > 0) {
           const searchTerm = query.trim().toLowerCase();
           console.log(`Manager search query: "${searchTerm}", total managers: ${managerList.length}`);
-          managerList = managerList.filter(manager => 
-            manager.toLowerCase().includes(searchTerm)
-          );
+          managerList = managerList.filter(manager => {
+            const fullName = manager.toLowerCase();
+            const nameParts = fullName.split(' ');
+            // Match if query starts any part of the name (first name, last name)
+            return nameParts.some(part => part.startsWith(searchTerm)) || fullName.startsWith(searchTerm);
+          });
           console.log(`Filtered managers: ${managerList.length}`);
         }
         
@@ -289,15 +292,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
             const thirtyDaysAgo = new Date(now.getTime() - (30 * 24 * 60 * 60 * 1000));
             filteredUsers = filteredUsers.filter(user => {
               if (!user.lastLogin) return true; // Include never logged in users
-              return new Date(user.lastLogin) < thirtyDaysAgo;
+              const lastLoginDate = new Date(user.lastLogin);
+              return lastLoginDate < thirtyDaysAgo;
             });
           } else {
             // Users who logged in within the specified number of days
             const days = parseInt(lastLoginDays);
+            if (isNaN(days)) return; // Skip if invalid number
+            
             const cutoffDate = new Date(now.getTime() - (days * 24 * 60 * 60 * 1000));
             filteredUsers = filteredUsers.filter(user => {
               if (!user.lastLogin) return false; // Exclude never logged in users
-              return new Date(user.lastLogin) >= cutoffDate;
+              const lastLoginDate = new Date(user.lastLogin);
+              // Ensure we have a valid date
+              if (isNaN(lastLoginDate.getTime())) return false;
+              return lastLoginDate >= cutoffDate;
             });
           }
           console.log(`Last login filter applied: ${lastLoginDays}, found ${filteredUsers.length} matching users`);
