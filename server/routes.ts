@@ -360,8 +360,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
             }
           });
         } else {
-          // Apply standard sorting for other fields
+          // Apply standard sorting for other fields with priority for LOCKED_OUT users
           filteredUsers.sort((a, b) => {
+            // Priority sorting: LOCKED_OUT users always appear first
+            const aIsLockedOut = a.status === 'LOCKED_OUT';
+            const bIsLockedOut = b.status === 'LOCKED_OUT';
+            
+            if (aIsLockedOut && !bIsLockedOut) return -1;
+            if (!aIsLockedOut && bIsLockedOut) return 1;
+            
             let aValue, bValue;
             
             switch (sortBy) {

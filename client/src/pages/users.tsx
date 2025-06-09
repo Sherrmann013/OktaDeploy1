@@ -51,7 +51,7 @@ export default function Users() {
   const [columns, setColumns] = useState<ColumnConfig[]>(() => 
     AVAILABLE_COLUMNS.map((col, index) => ({
       id: col.id,
-      visible: ['name', 'title', 'department', 'employeeType', 'status', 'lastLogin'].includes(col.id),
+      visible: ['name', 'title', 'department', 'manager', 'status', 'lastLogin'].includes(col.id),
       order: index
     }))
   );

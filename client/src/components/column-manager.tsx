@@ -167,7 +167,7 @@ export default function ColumnManager({ columns, onColumnsChange }: ColumnManage
             <CardHeader>
               <CardTitle className="text-sm">Visible Columns</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-2 max-h-[500px] overflow-y-auto scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent">
+            <CardContent className="space-y-2 max-h-[500px] overflow-y-auto scrollbar-thin scrollbar-thumb-muted-foreground/20 scrollbar-track-transparent">
               <DndContext
                 sensors={sensors}
                 collisionDetection={closestCenter}

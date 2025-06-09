@@ -113,9 +113,9 @@ function SortableTableHeader({ columnId, children, onColumnReorder, columnConfig
     <TableHead 
       ref={setNodeRef} 
       style={style}
-      className={`relative ${isDragging ? 'opacity-50 z-50' : ''}`}
+      className={`relative px-6 py-4 text-center ${isDragging ? 'opacity-50 z-50' : ''}`}
     >
-      <div className="flex items-center gap-2">
+      <div className="flex items-center justify-center gap-2 w-full">
         {onColumnReorder && (
           <div
             {...attributes}
@@ -716,7 +716,7 @@ export default function UserTable({
                           onColumnReorder={onColumnReorder}
                           columnConfig={columnConfig}
                         >
-                          <div className="flex items-center justify-center space-x-2">
+                          <div className="flex items-center justify-center space-x-2 w-full">
                             <Button 
                               variant="ghost" 
                               className="h-auto p-0 font-medium text-xs text-muted-foreground uppercase tracking-wider hover:text-foreground"
