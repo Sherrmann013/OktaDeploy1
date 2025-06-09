@@ -16,6 +16,7 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import ConfirmationModal from "@/components/confirmation-modal";
 import AssignAppModal from "@/components/assign-app-modal";
+import KnowBe4Section from "@/components/knowbe4-section";
 import { useState, useEffect, useMemo } from "react";
 import type { User } from "@shared/schema";
 import { useForm } from "react-hook-form";
@@ -1106,59 +1107,11 @@ export default function UserDetail() {
               </TabsContent>
 
               <TabsContent value="monitoring" className="space-y-6 mt-0">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  {/* KnowBe4 */}
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        <Shield className="w-5 h-5 text-blue-600" />
-                        KnowBe4
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      <div>
-                        <label className="text-sm font-medium text-muted-foreground">Training Status</label>
-                        <p className="text-foreground">Loading...</p>
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium text-muted-foreground">Last Training</label>
-                        <p className="text-foreground">Loading...</p>
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium text-muted-foreground">Risk Score</label>
-                        <p className="text-foreground">Loading...</p>
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium text-muted-foreground">Phishing Tests</label>
-                        <p className="text-foreground">Loading...</p>
-                      </div>
-                      <div className="flex gap-2 pt-2">
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
-                          className="flex-1"
-                          onClick={() => {
-                            // API call to KnowBe4
-                            console.log('Fetching KnowBe4 data...');
-                          }}
-                        >
-                          <RefreshCw className="w-4 h-4 mr-1" />
-                          Refresh
-                        </Button>
-                        <Button 
-                          variant="default" 
-                          size="sm" 
-                          className="flex-1"
-                          onClick={() => {
-                            // Trigger training
-                            console.log('Triggering KnowBe4 training...');
-                          }}
-                        >
-                          Assign Training
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
+                <div className="space-y-6">
+                  {/* KnowBe4 Security Training Section */}
+                  <KnowBe4Section userEmail={user.email || ''} />
+                  
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
                   {/* SentinelOne */}
                   <Card>
@@ -1339,6 +1292,7 @@ export default function UserDetail() {
                       </div>
                     </CardContent>
                   </Card>
+                  </div>
                 </div>
               </TabsContent>
 
@@ -1744,8 +1698,6 @@ export default function UserDetail() {
           </Tabs>
         </div>
       </div>
-
-
 
       <AssignAppModal
         open={showAssignAppModal}
