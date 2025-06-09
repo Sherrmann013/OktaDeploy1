@@ -1710,7 +1710,8 @@ export default function UserDetail() {
                   </CardContent>
                 </Card>
               </TabsContent>
-            </Tabs>
+            </div>
+          </Tabs>
         </div>
       </div>
 
