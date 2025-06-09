@@ -10,6 +10,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import UserTable from "@/components/user-table";
 import CreateUserModal from "@/components/create-user-modal";
 import ColumnManager, { ColumnConfig, AVAILABLE_COLUMNS } from "@/components/column-manager";
+import ExportModal from "@/components/export-modal";
 import { User } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
@@ -247,6 +248,105 @@ export default function Users() {
     }
   };
 
+  const handleExport = (selectedColumns: string[], exportType: 'current' | 'custom') => {
+    try {
+      // Get column mapping for human-readable headers
+      const columnMap = AVAILABLE_COLUMNS.reduce((acc, col) => {
+        acc[col.id] = col.label;
+        return acc;
+      }, {} as Record<string, string>);
+
+      // Create CSV headers
+      const headers = selectedColumns.map(col => columnMap[col] || col);
+      
+      // Format user data for selected columns
+      const csvData = users.map(user => {
+        return selectedColumns.map(column => {
+          let value = '';
+          switch (column) {
+            case 'name':
+              value = `${user.firstName || ''} ${user.lastName || ''}`.trim();
+              break;
+            case 'email':
+              value = user.email || '';
+              break;
+            case 'login':
+              value = user.login || '';
+              break;
+            case 'title':
+              value = user.title || '';
+              break;
+            case 'department':
+              value = user.department || '';
+              break;
+            case 'manager':
+              value = user.manager || '';
+              break;
+            case 'mobilePhone':
+              value = user.mobilePhone || '';
+              break;
+            case 'status':
+              value = user.status || '';
+              break;
+            case 'employeeType':
+              value = user.employeeType || '';
+              break;
+            case 'lastLogin':
+              value = user.lastLogin ? new Date(user.lastLogin).toLocaleDateString() : '';
+              break;
+            case 'created':
+              value = user.created ? new Date(user.created).toLocaleDateString() : '';
+              break;
+            case 'lastUpdated':
+              value = user.lastUpdated ? new Date(user.lastUpdated).toLocaleDateString() : '';
+              break;
+            case 'activated':
+              value = user.activated ? new Date(user.activated).toLocaleDateString() : '';
+              break;
+            case 'passwordChanged':
+              value = user.passwordChanged ? new Date(user.passwordChanged).toLocaleDateString() : '';
+              break;
+            default:
+              value = '';
+          }
+          // Escape quotes and wrap in quotes if contains comma, quote, or newline
+          if (value.includes(',') || value.includes('"') || value.includes('\n')) {
+            value = `"${value.replace(/"/g, '""')}"`;
+          }
+          return value;
+        });
+      });
+
+      // Combine headers and data
+      const csvContent = [headers, ...csvData]
+        .map(row => row.join(','))
+        .join('\n');
+
+      // Create and download file
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      link.setAttribute('href', url);
+      link.setAttribute('download', `users_export_${new Date().toISOString().split('T')[0]}.csv`);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      toast({
+        title: "Export successful",
+        description: `Exported ${users.length} users with ${selectedColumns.length} columns`,
+      });
+    } catch (error) {
+      console.error('Export error:', error);
+      toast({
+        title: "Export failed",
+        description: "There was an error exporting the data. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
       {/* Stats Cards */}
@@ -343,6 +443,12 @@ export default function Users() {
                 Clear Filters
               </Button>
             )}
+            
+            <ExportModal
+              users={users}
+              currentColumns={columns}
+              onExport={handleExport}
+            />
             
             <ColumnManager
               columns={columns}
