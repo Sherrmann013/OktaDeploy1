@@ -1293,6 +1293,49 @@ export default function UserDetail() {
                     </CardContent>
                   </Card>
 
+                  {/* KnowBe4 Training Details */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <BookOpen className="w-5 h-5 text-green-600" />
+                        Training Campaigns
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div>
+                        <label className="text-sm font-medium text-muted-foreground">Active Campaign</label>
+                        <p className="text-sm text-foreground font-medium">Passphrase Test</p>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-muted-foreground">Status</label>
+                        <p className="text-sm text-green-600 font-medium">Completed</p>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-muted-foreground">Training Modules</label>
+                        <div className="text-xs text-gray-600 space-y-1">
+                          <div>• Creating Strong Passwords</div>
+                          <div>• Join the Craze of the Passphrase</div>
+                        </div>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-muted-foreground">Risk Score</label>
+                        <p className="text-sm text-orange-600 font-medium">44.1</p>
+                      </div>
+                      <div className="flex gap-2 pt-2">
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="flex-1"
+                          onClick={() => {
+                            console.log('Refreshing KnowBe4 training data...');
+                          }}
+                        >
+                          <RefreshCw className="w-4 h-4 mr-1" />
+                          Refresh
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
 
                   </div>
                 </div>
