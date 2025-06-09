@@ -2,7 +2,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { useRoute, useLocation } from "wouter";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -379,6 +379,201 @@ export default function UserDetail() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
 
+  // Combined KnowBe4 monitoring card component
+  const KnowBe4CombinedCard = ({ user }: { user: any }) => {
+    const { data: connectionTest } = useQuery<{success: boolean; message: string; details: any}>({
+      queryKey: ['/api/knowbe4/test-connection'],
+      staleTime: 5 * 60 * 1000,
+    });
+
+    const { data: knowbe4User } = useQuery({
+      queryKey: [`/api/knowbe4/user/${user.email}`],
+      enabled: !!user.email && !!connectionTest?.success,
+    });
+
+    const { data: userTrainingStats = [] } = useQuery({
+      queryKey: [`/api/knowbe4/user/${knowbe4User?.id}/training`],
+      enabled: !!knowbe4User?.id,
+    });
+
+    if (!connectionTest?.success) {
+      return (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Shield className="h-5 w-5" />
+              KnowBe4 Security Training
+            </CardTitle>
+            <CardDescription>
+              Security awareness and phishing simulation data from KnowBe4
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="text-center text-gray-500">
+              <p className="text-sm">KnowBe4 API not available</p>
+              <p className="text-xs mt-1">{connectionTest?.message || "Unable to connect"}</p>
+            </div>
+          </CardContent>
+        </Card>
+      );
+    }
+
+    if (!knowbe4User) {
+      return (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Shield className="h-5 w-5" />
+              KnowBe4 Security Training
+            </CardTitle>
+            <CardDescription>
+              Security awareness and phishing simulation data from KnowBe4
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="text-center text-gray-500">
+              <p className="text-sm">User not found in KnowBe4 system</p>
+            </div>
+          </CardContent>
+        </Card>
+      );
+    }
+
+    // Calculate phishing data
+    const phishingStats = knowbe4User?.phishing_campaign_stats || [];
+    const emailsClicked = phishingStats.filter((p: any) => p.last_clicked_date && p.last_clicked_date !== null).length;
+    const emailsReported = phishingStats.filter((p: any) => p.last_reported_date && p.last_reported_date !== null).length;
+    const totalPhishingCampaigns = phishingStats.length;
+
+    // Calculate training data
+    const finalTrainingData = userTrainingStats || [];
+    const completed = finalTrainingData.filter((enrollment: any) => 
+      enrollment.status === 'Completed' || enrollment.status === 'completed' || 
+      enrollment.status === 'Passed' || enrollment.status === 'passed'
+    ).length;
+    
+    const inProgress = finalTrainingData.filter((enrollment: any) => 
+      enrollment.status === 'In Progress' || enrollment.status === 'in_progress' || 
+      enrollment.status === 'Active' || enrollment.status === 'active'
+    ).length;
+    
+    const notStarted = finalTrainingData.filter((enrollment: any) => 
+      enrollment.status === 'Not Started' || enrollment.status === 'not_started' ||
+      !enrollment.completion_date
+    ).length;
+    
+    const total = finalTrainingData.length;
+    const completionPercentage = total > 0 ? Math.round((completed / total) * 100) : 0;
+
+    // Format date helper
+    const formatDate = (dateString: string | null) => {
+      if (!dateString) return "Never";
+      return new Date(dateString).toLocaleDateString();
+    };
+
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Shield className="h-5 w-5" />
+            KnowBe4 Security Training
+          </CardTitle>
+          <CardDescription>
+            Security awareness and phishing simulation data from KnowBe4
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {/* Last Sign In */}
+          <div className="text-sm">
+            <span className="font-medium">Last Sign In: </span>
+            <span className="text-gray-600 dark:text-gray-300">
+              {formatDate(knowbe4User.last_sign_in)}
+            </span>
+          </div>
+
+          {/* 2x2 Grid Layout */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            
+            {/* Phishing Results */}
+            <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+              <CardContent className="p-4">
+                <div className="flex items-center gap-2 mb-4">
+                  <Shield className="w-4 h-4 text-gray-500 dark:text-gray-400" />
+                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Phishing Results</span>
+                </div>
+                
+                <div className="flex justify-between items-start">
+                  <div className="flex-1">
+                    <div className="text-4xl font-bold text-blue-600 dark:text-blue-400 mb-1">{knowbe4User.phish_prone_percentage}%</div>
+                    <div className="text-xs text-gray-500 dark:text-gray-400">Phish-prone Percentage</div>
+                  </div>
+                  
+                  <div className="text-right space-y-1 text-xs">
+                    <div className="flex justify-between">
+                      <span className="text-gray-600 dark:text-gray-400">Emails Delivered</span>
+                      <span className="font-medium text-gray-900 dark:text-gray-100">{totalPhishingCampaigns}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600 dark:text-gray-400">Failures</span>
+                      <span className="font-medium text-gray-900 dark:text-gray-100">{emailsClicked}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600 dark:text-gray-400">Emails Reported</span>
+                      <span className="font-medium text-gray-900 dark:text-gray-100">{emailsReported}</span>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Security Training */}
+            <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+              <CardContent className="p-4">
+                <div className="flex items-center gap-2 mb-4">
+                  <BookOpen className="w-4 h-4 text-gray-500 dark:text-gray-400" />
+                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Security Training</span>
+                </div>
+                
+                {finalTrainingData.length > 0 ? (
+                  <div className="flex justify-between items-start">
+                    <div className="flex-1">
+                      <div className="text-4xl font-bold text-green-600 dark:text-green-400 mb-1">{completionPercentage}%</div>
+                      <div className="text-xs text-gray-500 dark:text-gray-400">Completion Rate</div>
+                    </div>
+                    
+                    <div className="text-right space-y-1 text-xs">
+                      <div className="flex justify-between">
+                        <span className="text-gray-600 dark:text-gray-400">Total Enrollments</span>
+                        <span className="font-medium text-gray-900 dark:text-gray-100">{total}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600 dark:text-gray-400">Completed</span>
+                        <span className="font-medium text-green-600 dark:text-green-400">{completed}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600 dark:text-gray-400">In Progress</span>
+                        <span className="font-medium text-yellow-600 dark:text-yellow-400">{inProgress}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600 dark:text-gray-400">Not Started</span>
+                        <span className="font-medium text-gray-600 dark:text-gray-400">{notStarted}</span>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-center text-gray-500">
+                    <p className="text-sm">No training data available</p>
+                    <p className="text-xs mt-1">User not enrolled in any training campaigns</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  };
+
   // Internal KnowBe4 monitoring card components  
   const PhishingResultsCard = ({ user }: { user: any }) => {
     const { data: connectionTest } = useQuery<{success: boolean; message: string; details: any}>({
@@ -449,7 +644,7 @@ export default function UserDetail() {
     );
   };
 
-  const SecurityTrainingCard = ({ user }: { user: any }) => {
+  const KnowBe4CombinedCard = ({ user }: { user: any }) => {
     const { data: connectionTest } = useQuery<{success: boolean; message: string; details: any}>({
       queryKey: ['/api/knowbe4/test-connection'],
       staleTime: 5 * 60 * 1000,
@@ -465,26 +660,57 @@ export default function UserDetail() {
       enabled: !!knowbe4User?.id,
     });
 
-    if (!connectionTest?.success || !knowbe4User) {
+    if (!connectionTest?.success) {
       return (
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <BookOpen className="w-5 h-5 text-green-600" />
-              Security Training
+              <Shield className="h-5 w-5" />
+              KnowBe4 Security Training
             </CardTitle>
+            <CardDescription>
+              Security awareness and phishing simulation data from KnowBe4
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="text-center text-gray-500">
-              <p className="text-sm">No training data available</p>
+              <p className="text-sm">KnowBe4 API not available</p>
+              <p className="text-xs mt-1">{connectionTest?.message || "Unable to connect"}</p>
             </div>
           </CardContent>
         </Card>
       );
     }
 
+    if (!knowbe4User) {
+      return (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Shield className="h-5 w-5" />
+              KnowBe4 Security Training
+            </CardTitle>
+            <CardDescription>
+              Security awareness and phishing simulation data from KnowBe4
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="text-center text-gray-500">
+              <p className="text-sm">User not found in KnowBe4 system</p>
+            </div>
+          </CardContent>
+        </Card>
+      );
+    }
+
+    // Calculate phishing data
+    const phishingStats = knowbe4User?.phishing_campaign_stats || [];
+    const emailsClicked = phishingStats.filter((p: any) => p.last_clicked_date && p.last_clicked_date !== null).length;
+    const emailsReported = phishingStats.filter((p: any) => p.last_reported_date && p.last_reported_date !== null).length;
+    const totalPhishingCampaigns = phishingStats.length;
+
+    // Calculate training data
     const finalTrainingData = userTrainingStats || [];
-    
     const completed = finalTrainingData.filter((enrollment: any) => 
       enrollment.status === 'Completed' || enrollment.status === 'completed' || 
       enrollment.status === 'Passed' || enrollment.status === 'passed'
@@ -503,47 +729,110 @@ export default function UserDetail() {
     const total = finalTrainingData.length;
     const completionPercentage = total > 0 ? Math.round((completed / total) * 100) : 0;
 
+    // Format date helper
+    const formatDate = (dateString: string | null) => {
+      if (!dateString) return "Never";
+      return new Date(dateString).toLocaleDateString();
+    };
+
     return (
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <BookOpen className="w-5 h-5 text-green-600" />
-            Security Training
+            <Shield className="h-5 w-5" />
+            KnowBe4 Security Training
           </CardTitle>
+          <CardDescription>
+            Security awareness and phishing simulation data from KnowBe4
+          </CardDescription>
         </CardHeader>
-        <CardContent>
-          {finalTrainingData.length > 0 ? (
-            <div className="flex justify-between items-start">
-              <div className="flex-1">
-                <div className="text-4xl font-bold text-green-600 dark:text-green-400 mb-1">{completionPercentage}%</div>
-                <div className="text-xs text-gray-500 dark:text-gray-400">Completion Rate</div>
-              </div>
-              
-              <div className="text-right space-y-1 text-xs">
-                <div className="flex justify-between">
-                  <span className="text-gray-600 dark:text-gray-400">Total Enrollments</span>
-                  <span className="font-medium text-gray-900 dark:text-gray-100">{total}</span>
+        <CardContent className="space-y-4">
+          {/* Last Sign In */}
+          <div className="text-sm">
+            <span className="font-medium">Last Sign In: </span>
+            <span className="text-gray-600 dark:text-gray-300">
+              {formatDate(knowbe4User.last_sign_in)}
+            </span>
+          </div>
+
+          {/* 2x2 Grid Layout */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            
+            {/* Phishing Results */}
+            <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+              <CardContent className="p-4">
+                <div className="flex items-center gap-2 mb-4">
+                  <Shield className="w-4 h-4 text-gray-500 dark:text-gray-400" />
+                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Phishing Results</span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600 dark:text-gray-400">Completed</span>
-                  <span className="font-medium text-green-600 dark:text-green-400">{completed}</span>
+                
+                <div className="flex justify-between items-start">
+                  <div className="flex-1">
+                    <div className="text-4xl font-bold text-blue-600 dark:text-blue-400 mb-1">{knowbe4User.phish_prone_percentage}%</div>
+                    <div className="text-xs text-gray-500 dark:text-gray-400">Phish-prone Percentage</div>
+                  </div>
+                  
+                  <div className="text-right space-y-1 text-xs">
+                    <div className="flex justify-between">
+                      <span className="text-gray-600 dark:text-gray-400">Emails Delivered</span>
+                      <span className="font-medium text-gray-900 dark:text-gray-100">{totalPhishingCampaigns}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600 dark:text-gray-400">Failures</span>
+                      <span className="font-medium text-gray-900 dark:text-gray-100">{emailsClicked}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600 dark:text-gray-400">Emails Reported</span>
+                      <span className="font-medium text-gray-900 dark:text-gray-100">{emailsReported}</span>
+                    </div>
+                  </div>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600 dark:text-gray-400">In Progress</span>
-                  <span className="font-medium text-yellow-600 dark:text-yellow-400">{inProgress}</span>
+              </CardContent>
+            </Card>
+
+            {/* Security Training */}
+            <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+              <CardContent className="p-4">
+                <div className="flex items-center gap-2 mb-4">
+                  <BookOpen className="w-4 h-4 text-gray-500 dark:text-gray-400" />
+                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Security Training</span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600 dark:text-gray-400">Not Started</span>
-                  <span className="font-medium text-gray-600 dark:text-gray-400">{notStarted}</span>
-                </div>
-              </div>
-            </div>
-          ) : (
-            <div className="text-center text-gray-500">
-              <p className="text-sm">No training data available</p>
-              <p className="text-xs mt-1">User not enrolled in any training campaigns</p>
-            </div>
-          )}
+                
+                {finalTrainingData.length > 0 ? (
+                  <div className="flex justify-between items-start">
+                    <div className="flex-1">
+                      <div className="text-4xl font-bold text-green-600 dark:text-green-400 mb-1">{completionPercentage}%</div>
+                      <div className="text-xs text-gray-500 dark:text-gray-400">Completion Rate</div>
+                    </div>
+                    
+                    <div className="text-right space-y-1 text-xs">
+                      <div className="flex justify-between">
+                        <span className="text-gray-600 dark:text-gray-400">Total Enrollments</span>
+                        <span className="font-medium text-gray-900 dark:text-gray-100">{total}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600 dark:text-gray-400">Completed</span>
+                        <span className="font-medium text-green-600 dark:text-green-400">{completed}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600 dark:text-gray-400">In Progress</span>
+                        <span className="font-medium text-yellow-600 dark:text-yellow-400">{inProgress}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600 dark:text-gray-400">Not Started</span>
+                        <span className="font-medium text-gray-600 dark:text-gray-400">{notStarted}</span>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-center text-gray-500">
+                    <p className="text-sm">No training data available</p>
+                    <p className="text-xs mt-1">User not enrolled in any training campaigns</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
         </CardContent>
       </Card>
     );
@@ -1634,13 +1923,10 @@ export default function UserDetail() {
               </TabsContent>
 
               <TabsContent value="monitoring" className="space-y-6 mt-0">
+                {/* Combined KnowBe4 Security Training Card */}
+                <KnowBe4CombinedCard user={user} />
+                
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-
-                  {/* KnowBe4 Phishing Results */}
-                  <PhishingResultsCard user={user} />
-
-                  {/* KnowBe4 Security Training */}
-                  <SecurityTrainingCard user={user} />
 
                   {/* SentinelOne */}
                   <Card>
