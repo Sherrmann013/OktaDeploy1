@@ -166,7 +166,7 @@ class KnowBe4Service {
       const response = await fetch(url, {
         method,
         headers: {
-          'Authorization': `Token ${this.config.apiKey}`,
+          'Authorization': `Bearer ${this.config.apiKey}`,
           'Accept': 'application/json',
           'Content-Type': 'application/json',
           'User-Agent': 'Replit-KnowBe4-Integration/1.0'

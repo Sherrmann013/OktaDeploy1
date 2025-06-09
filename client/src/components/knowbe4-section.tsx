@@ -75,15 +75,14 @@ export default function KnowBe4Section({ userEmail }: KnowBe4SectionProps) {
   const [testConnection, setTestConnection] = useState<any>(null);
 
   // Test KnowBe4 connection
-  const { data: connectionTest } = useQuery({
+  const { data: connectionTest, isLoading: connectionLoading, refetch: testKnowBe4 } = useQuery({
     queryKey: ['/api/knowbe4/test-connection'],
-    enabled: false, // We'll trigger this manually
   });
 
-  // Fetch KnowBe4 user data
+  // Fetch KnowBe4 user data only if connection is successful
   const { data: knowbe4User, isLoading: userLoading, error: userError } = useQuery<KnowBe4User>({
     queryKey: ['/api/knowbe4/user', userEmail],
-    enabled: !!userEmail,
+    enabled: !!userEmail && !!connectionTest?.success,
   });
 
   // Fetch training data
@@ -97,6 +96,68 @@ export default function KnowBe4Section({ userEmail }: KnowBe4SectionProps) {
     queryKey: ['/api/knowbe4/user', knowbe4User?.id, 'phishing'],
     enabled: !!knowbe4User?.id,
   });
+
+  // Show connection status and configuration guidance
+  if (connectionLoading) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Shield className="h-5 w-5" />
+            KnowBe4 Security Training
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="animate-pulse space-y-4">
+            <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+            <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (!connectionTest?.success) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Shield className="h-5 w-5" />
+            KnowBe4 Security Training
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <Alert>
+            <AlertTriangle className="h-4 w-4" />
+            <AlertDescription>
+              <div className="space-y-2">
+                <p className="font-medium">KnowBe4 API Configuration Required</p>
+                <p className="text-sm text-gray-600">
+                  {connectionTest?.message || "Unable to connect to KnowBe4 API"}
+                </p>
+                <div className="text-xs text-gray-500 mt-2">
+                  <p>To enable KnowBe4 integration:</p>
+                  <ol className="list-decimal list-inside mt-1 space-y-1">
+                    <li>Ensure Reporting API is enabled in KnowBe4 console</li>
+                    <li>Verify KCM token has "Read Only" permissions</li>
+                    <li>Wait 5-10 minutes after enabling for token activation</li>
+                  </ol>
+                </div>
+              </div>
+            </AlertDescription>
+          </Alert>
+          <Button 
+            onClick={() => testKnowBe4()} 
+            variant="outline" 
+            size="sm"
+            disabled={connectionLoading}
+          >
+            Test Connection
+          </Button>
+        </CardContent>
+      </Card>
+    );
+  }
 
   if (userLoading) {
     return (
@@ -130,7 +191,7 @@ export default function KnowBe4Section({ userEmail }: KnowBe4SectionProps) {
           <Alert>
             <AlertTriangle className="h-4 w-4" />
             <AlertDescription>
-              User not found in KnowBe4 or unable to connect to KnowBe4 API.
+              User not found in KnowBe4 system. This user may not be enrolled in security training.
             </AlertDescription>
           </Alert>
         </CardContent>
