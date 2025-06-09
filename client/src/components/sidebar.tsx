@@ -110,44 +110,44 @@ export default function Sidebar() {
       </nav>
       
       {/* User Profile and Controls at Bottom */}
-      <div className="p-4 border-t border-border space-y-3">
-        {/* User Dropdown */}
-        <div className="relative" ref={dropdownRef}>
-          <Button
-            variant="ghost"
-            className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center p-0 hover:bg-blue-700 mx-auto"
-            onClick={() => setShowUserDropdown(!showUserDropdown)}
-          >
-            <span className="text-white text-sm font-medium">
-              {currentUser?.firstName?.[0]}{currentUser?.lastName?.[0]}
-            </span>
-          </Button>
-          {showUserDropdown && (
-            <div className="absolute bottom-10 right-0 w-64 bg-background border border-border rounded-lg shadow-lg z-50">
-              <div className="p-3 border-b border-border">
-                <p className="font-medium text-foreground">{currentUser?.firstName} {currentUser?.lastName}</p>
-                <p className="text-sm text-muted-foreground">{currentUser?.email}</p>
+      <div className="p-4 border-t border-border">
+        <div className="flex items-center justify-center gap-3">
+          {/* User Dropdown */}
+          <div className="relative" ref={dropdownRef}>
+            <Button
+              variant="ghost"
+              className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center p-0 hover:bg-blue-700"
+              onClick={() => setShowUserDropdown(!showUserDropdown)}
+            >
+              <span className="text-white text-sm font-medium">
+                {currentUser?.firstName?.[0]}{currentUser?.lastName?.[0]}
+              </span>
+            </Button>
+            {showUserDropdown && (
+              <div className="absolute bottom-10 left-0 w-64 bg-background border border-border rounded-lg shadow-lg z-50">
+                <div className="p-3 border-b border-border">
+                  <p className="font-medium text-foreground">{currentUser?.firstName} {currentUser?.lastName}</p>
+                  <p className="text-sm text-muted-foreground">{currentUser?.email}</p>
+                </div>
+                <div className="p-3">
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      oktaSyncMutation.mutate();
+                      setShowUserDropdown(false);
+                    }}
+                    disabled={oktaSyncMutation.isPending}
+                    className="w-full border-orange-300 text-orange-700 hover:bg-orange-50"
+                  >
+                    <RotateCcw className={`w-4 h-4 mr-2 ${oktaSyncMutation.isPending ? 'animate-spin' : ''}`} />
+                    Sync OKTA
+                  </Button>
+                </div>
               </div>
-              <div className="p-3">
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    oktaSyncMutation.mutate();
-                    setShowUserDropdown(false);
-                  }}
-                  disabled={oktaSyncMutation.isPending}
-                  className="w-full border-orange-300 text-orange-700 hover:bg-orange-50"
-                >
-                  <RotateCcw className={`w-4 h-4 mr-2 ${oktaSyncMutation.isPending ? 'animate-spin' : ''}`} />
-                  Sync OKTA
-                </Button>
-              </div>
-            </div>
-          )}
-        </div>
-        
-        {/* Theme Toggle */}
-        <div className="flex justify-center">
+            )}
+          </div>
+          
+          {/* Theme Toggle */}
           <ThemeToggle />
         </div>
       </div>
