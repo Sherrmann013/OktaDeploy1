@@ -37,12 +37,7 @@ export default function UserDetail() {
   const [, params] = useRoute("/users/:id");
   const [, setLocation] = useLocation();
   const { toast } = useToast();
-  const [confirmAction, setConfirmAction] = useState<{
-    type: string;
-    title: string;
-    message: string;
-    action: () => void;
-  } | null>(null);
+
   
   const [isEditing, setIsEditing] = useState(false);
   const [managerSearch, setManagerSearch] = useState("");
@@ -378,33 +373,14 @@ export default function UserDetail() {
   });
 
   const handleStatusChange = (status: string) => {
-    const actionText = status === "ACTIVE" ? "activate" : status === "SUSPENDED" ? "deactivate" : "deactivate";
-    setConfirmAction({
-      type: status,
-      title: `${actionText.charAt(0).toUpperCase() + actionText.slice(1)} User`,
-      message: `Are you sure you want to ${actionText} this user?`,
-      action: () => updateStatusMutation.mutate({ status }),
-    });
+    updateStatusMutation.mutate({ status });
   };
 
   const handleDeleteUser = () => {
-    setConfirmAction({
-      type: "delete",
-      title: "Delete User",
-      message: "Are you sure you want to delete this user? This action cannot be undone.",
-      action: () => deleteUserMutation.mutate(),
-    });
+    deleteUserMutation.mutate();
   };
 
-  const handlePasswordAction = (action: "reset" | "expire") => {
-    const actionText = action === "reset" ? "reset password" : "expire password";
-    setConfirmAction({
-      type: action,
-      title: `${actionText.charAt(0).toUpperCase() + actionText.slice(1)}`,
-      message: `Are you sure you want to ${actionText} for this user?`,
-      action: () => passwordResetMutation.mutate(action),
-    });
-  };
+;
 
   const handleEditSubmit = (data: z.infer<typeof editUserSchema>) => {
     updateUserMutation.mutate(data);
@@ -558,8 +534,8 @@ export default function UserDetail() {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => handlePasswordAction("reset")}
-                    className="flex items-center gap-2 text-blue-600 border-blue-300 hover:bg-blue-50"
+                    onClick={() => passwordResetMutation.mutate("reset")}
+                    className="flex items-center gap-2 text-blue-600 dark:text-blue-400 border-blue-300 dark:border-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900"
                   >
                     <Key className="w-4 h-4" />
                     Reset Password
@@ -568,8 +544,8 @@ export default function UserDetail() {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => handlePasswordAction("expire")}
-                    className="flex items-center gap-2 text-purple-600 border-purple-300 hover:bg-purple-50"
+                    onClick={() => passwordResetMutation.mutate("expire")}
+                    className="flex items-center gap-2 text-purple-600 dark:text-purple-400 border-purple-300 dark:border-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900"
                   >
                     <KeyRound className="w-4 h-4" />
                     Expire Password
@@ -580,7 +556,7 @@ export default function UserDetail() {
                       variant="outline"
                       size="sm"
                       onClick={() => handleStatusChange("SUSPENDED")}
-                      className="flex items-center gap-2 text-orange-600 border-orange-300 hover:bg-orange-50"
+                      className="flex items-center gap-2 text-orange-600 dark:text-orange-400 border-orange-300 dark:border-orange-600 hover:bg-orange-50 dark:hover:bg-orange-900"
                     >
                       <UserX className="w-4 h-4" />
                       Suspend
@@ -590,7 +566,7 @@ export default function UserDetail() {
                       variant="outline"
                       size="sm"
                       onClick={() => handleStatusChange("ACTIVE")}
-                      className="flex items-center gap-2 text-green-600 border-green-300 hover:bg-green-50"
+                      className="flex items-center gap-2 text-green-600 dark:text-green-400 border-green-300 dark:border-green-600 hover:bg-green-50 dark:hover:bg-green-900"
                     >
                       <UserCheck className="w-4 h-4" />
                       Activate
@@ -1619,16 +1595,7 @@ export default function UserDetail() {
         </div>
       </div>
 
-      {confirmAction && (
-        <ConfirmationModal
-          open={true}
-          onClose={() => setConfirmAction(null)}
-          onConfirm={confirmAction.action}
-          title={confirmAction.title}
-          message={confirmAction.message}
-          variant={confirmAction.type === "delete" ? "destructive" : "default"}
-        />
-      )}
+
 
       <AssignAppModal
         open={showAssignAppModal}
