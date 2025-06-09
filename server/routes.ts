@@ -1781,15 +1781,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
             enrollment.user?.id === userId
           );
           
-          // Also try filtering by email for debugging
-          const userEmail = 'agiwa@mazetx.com'; // For debugging specific user
+          // Search all enrollments for any user with agiwa email
           const emailMatches = enrollments.filter((enrollment: any) => 
-            enrollment.user?.email?.toLowerCase() === userEmail.toLowerCase()
+            enrollment.user?.email?.toLowerCase().includes('agiwa')
           );
           
-          if (campaign.campaign_id === 1894139 && emailMatches.length > 0) {
-            console.log(`Found ${emailMatches.length} enrollments for ${userEmail} by email match in campaign ${campaign.campaign_id}`);
-            console.log('Email match enrollment:', JSON.stringify(emailMatches[0], null, 2));
+          if (emailMatches.length > 0) {
+            console.log(`*** FOUND USER WITH AGIWA EMAIL in campaign ${campaign.campaign_id} ***`);
+            console.log('Enrollment data:', JSON.stringify(emailMatches[0], null, 2));
+          }
+          
+          // Check for user ID 121822386 specifically
+          const idMatches = enrollments.filter((enrollment: any) => 
+            enrollment.user?.id === 121822386
+          );
+          
+          if (idMatches.length > 0) {
+            console.log(`*** FOUND USER ID 121822386 in campaign ${campaign.campaign_id} ***`);
+            console.log('ID match enrollment:', JSON.stringify(idMatches[0], null, 2));
           }
           
           console.log(`Found ${userCampaignEnrollments.length} enrollments for user ${userId} in campaign ${campaign.campaign_id}`);
