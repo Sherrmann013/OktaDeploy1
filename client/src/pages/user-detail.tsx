@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -43,6 +44,9 @@ export default function UserDetail() {
   const [managerSearch, setManagerSearch] = useState("");
   const [profileSubTab, setProfileSubTab] = useState("okta");
   const [expandedSections, setExpandedSections] = useState<{[logId: string]: {[section: string]: boolean}}>({});
+  const [showPasswordModal, setShowPasswordModal] = useState<"reset" | "expire" | null>(null);
+  const [newPassword, setNewPassword] = useState("");
+  const [generatedPassword, setGeneratedPassword] = useState("");
   
   const userId = params?.id ? parseInt(params.id) : null;
   
@@ -431,6 +435,38 @@ export default function UserDetail() {
     return sections?.actor && sections?.client && sections?.event && sections?.target;
   };
 
+  const generatePassword = () => {
+    const length = 12;
+    const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*";
+    let password = "";
+    for (let i = 0; i < length; i++) {
+      password += charset.charAt(Math.floor(Math.random() * charset.length));
+    }
+    setGeneratedPassword(password);
+    setNewPassword(password);
+  };
+
+  const handlePasswordReset = () => {
+    if (!newPassword) {
+      toast({
+        title: "Error",
+        description: "Please enter a password or generate one",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    passwordResetMutation.mutate("reset");
+    setShowPasswordModal(null);
+    setNewPassword("");
+    setGeneratedPassword("");
+  };
+
+  const handlePasswordExpire = () => {
+    passwordResetMutation.mutate("expire");
+    setShowPasswordModal(null);
+  };
+
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "ACTIVE":
@@ -531,7 +567,7 @@ export default function UserDetail() {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => passwordResetMutation.mutate("reset")}
+                    onClick={() => setShowPasswordModal("reset")}
                     className="flex items-center gap-2 text-blue-600 dark:text-blue-400 border-blue-300 dark:border-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900"
                   >
                     <Key className="w-4 h-4" />
@@ -541,7 +577,7 @@ export default function UserDetail() {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => passwordResetMutation.mutate("expire")}
+                    onClick={() => setShowPasswordModal("expire")}
                     className="flex items-center gap-2 text-purple-600 dark:text-purple-400 border-purple-300 dark:border-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900"
                   >
                     <KeyRound className="w-4 h-4" />
@@ -1595,6 +1631,90 @@ export default function UserDetail() {
         userId={userId?.toString() || ""}
         userApps={userApps}
       />
+
+      {/* Password Reset Modal */}
+      <Dialog open={showPasswordModal === "reset"} onOpenChange={() => setShowPasswordModal(null)}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Reset Password</DialogTitle>
+            <DialogDescription>
+              Set a new password for {user?.firstName} {user?.lastName}. The user will be notified and can use this password to log in immediately.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">New Password</label>
+              <div className="flex gap-2">
+                <Input
+                  type="text"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  placeholder="Enter new password"
+                  className="flex-1"
+                />
+                <Button 
+                  variant="outline" 
+                  onClick={generatePassword}
+                  className="px-3"
+                >
+                  Generate
+                </Button>
+              </div>
+              {generatedPassword && (
+                <div className="text-xs text-muted-foreground">
+                  Generated: {generatedPassword}
+                </div>
+              )}
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowPasswordModal(null)}>
+              Cancel
+            </Button>
+            <Button onClick={handlePasswordReset} disabled={!newPassword}>
+              Reset Password
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Password Expire Modal */}
+      <Dialog open={showPasswordModal === "expire"} onOpenChange={() => setShowPasswordModal(null)}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Expire Password</DialogTitle>
+            <DialogDescription>
+              This action will expire {user?.firstName} {user?.lastName}'s current password. Here's what will happen:
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3 text-sm">
+            <div className="flex items-start gap-2">
+              <div className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-2 flex-shrink-0"></div>
+              <span>User will be forced to change their password on next login</span>
+            </div>
+            <div className="flex items-start gap-2">
+              <div className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-2 flex-shrink-0"></div>
+              <span>Current password will become invalid immediately</span>
+            </div>
+            <div className="flex items-start gap-2">
+              <div className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-2 flex-shrink-0"></div>
+              <span>User will receive an email notification</span>
+            </div>
+            <div className="flex items-start gap-2">
+              <div className="w-1.5 h-1.5 rounded-full bg-orange-500 mt-2 flex-shrink-0"></div>
+              <span className="text-orange-600 dark:text-orange-400">User cannot access any applications until password is changed</span>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowPasswordModal(null)}>
+              Cancel
+            </Button>
+            <Button onClick={handlePasswordExpire} variant="destructive">
+              Expire Password
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </main>
   );
 }
