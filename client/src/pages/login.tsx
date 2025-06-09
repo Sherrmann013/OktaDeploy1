@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
@@ -10,8 +10,8 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 
 export default function Login() {
   const [, setLocation] = useLocation();
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
+  const [username, setUsername] = useState("CW-Admin");
+  const [password, setPassword] = useState("YellowDr@g0nFly");
   const { toast } = useToast();
 
   const loginMutation = useMutation({
@@ -35,6 +35,17 @@ export default function Login() {
       });
     },
   });
+
+  // Auto-login for development convenience
+  useEffect(() => {
+    if (username && password && !loginMutation.isPending) {
+      const timer = setTimeout(() => {
+        loginMutation.mutate({ username, password });
+      }, 500);
+      
+      return () => clearTimeout(timer);
+    }
+  }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
