@@ -369,6 +369,7 @@ export default function Users() {
           sortOrder={sortOrder}
           onSort={handleSort}
           visibleColumns={columns.filter(col => col.visible).map(col => col.id)}
+          columnConfig={columns}
           filters={filters}
           onFiltersChange={setFilters}
         />

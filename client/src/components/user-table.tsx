@@ -256,6 +256,17 @@ export default function UserTable({
     }
   };
 
+  // Determine column order from columnConfig or fallback to visibleColumns
+  const orderedColumns = useMemo(() => {
+    if (columnConfig) {
+      return columnConfig
+        .filter(col => col.visible)
+        .sort((a, b) => a.order - b.order)
+        .map(col => col.id);
+    }
+    return visibleColumns;
+  }, [columnConfig, visibleColumns]);
+
   const renderEmployeeTypeFilter = () => {
     const employeeTypes = ['EMPLOYEE', 'CONTRACTOR', 'INTERN', 'PART_TIME', 'CONSULTANT'];
     
@@ -596,7 +607,7 @@ export default function UserTable({
           <Table>
             <TableHeader>
               <TableRow>
-                {visibleColumns.map((columnId) => {
+                {orderedColumns.map((columnId) => {
                   const column = COLUMN_DEFINITIONS[columnId as keyof typeof COLUMN_DEFINITIONS];
                   if (!column) return null;
                   
@@ -629,7 +640,7 @@ export default function UserTable({
                   className="table-row-light cursor-pointer"
                   onClick={() => onUserClick(user.id)}
                 >
-                  {visibleColumns.map((columnId) => (
+                  {orderedColumns.map((columnId) => (
                     <TableCell key={columnId} className="px-6 py-4 text-center">
                       {renderCellContent(user, columnId)}
                     </TableCell>
