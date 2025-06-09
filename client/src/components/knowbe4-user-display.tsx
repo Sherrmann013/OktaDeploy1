@@ -29,6 +29,27 @@ interface KnowBe4User {
   organization?: string;
   groups?: number[];
   provisioning_managed?: boolean;
+  current_training_campaign_statuses?: Array<{
+    campaign_id: number;
+    campaign_name: string;
+    enrollment_date: string;
+    completion_date: string;
+    status: string;
+    time_spent: number;
+    policy_acknowledged: boolean;
+  }>;
+  phishing_campaign_stats?: Array<{
+    campaign_id: number;
+    campaign_name: string;
+    last_phish_prone_date: string;
+    last_clicked_date: string;
+    last_replied_date: string;
+    last_attachment_opened_date: string;
+    last_macro_enabled_date: string;
+    last_data_entered_date: string;
+    last_reported_date: string;
+    last_bounced_date: string;
+  }>;
 }
 
 function formatDate(dateString: string | null) {
@@ -171,6 +192,20 @@ export default function KnowBe4UserDisplay({ userEmail }: KnowBe4UserDisplayProp
   const riskLevel = getRiskLevel(knowbe4User.current_risk_score);
   const phishProneLevel = getPhishProneLevel(knowbe4User.phish_prone_percentage);
 
+  // Calculate training completion statistics from actual data
+  const trainingStats = knowbe4User.current_training_campaign_statuses || [];
+  const completed = trainingStats.filter(t => t.status === 'Completed').length;
+  const inProgress = trainingStats.filter(t => t.status === 'In Progress' || t.status === 'Enrolled').length;
+  const notStarted = trainingStats.filter(t => t.status === 'Not Started' || (!t.completion_date && t.status !== 'Completed')).length;
+  const total = trainingStats.length;
+  const completionPercentage = total > 0 ? Math.round((completed / total) * 100) : 0;
+
+  // Calculate phishing statistics from actual data
+  const phishingStats = knowbe4User.phishing_campaign_stats || [];
+  const emailsClicked = phishingStats.filter(p => p.last_clicked_date && p.last_clicked_date !== null).length;
+  const emailsReported = phishingStats.filter(p => p.last_reported_date && p.last_reported_date !== null).length;
+  const totalPhishingCampaigns = phishingStats.length;
+
   return (
     <Card>
       <CardHeader>
@@ -202,21 +237,21 @@ export default function KnowBe4UserDisplay({ userEmail }: KnowBe4UserDisplayProp
           
           <div className="bg-gray-50 rounded-lg p-3">
             <div className="text-center mb-3">
-              <div className="text-3xl font-bold text-blue-600">0%</div>
+              <div className="text-3xl font-bold text-blue-600">{knowbe4User.phish_prone_percentage}%</div>
               <div className="text-xs text-gray-600">Phish-prone Percentage</div>
             </div>
             <div className="grid grid-cols-3 gap-3 text-xs">
               <div className="text-center">
-                <div className="font-medium text-gray-700">Emails Delivered</div>
-                <div className="text-gray-600">0</div>
+                <div className="font-medium text-gray-700">Campaigns</div>
+                <div className="text-gray-600">{totalPhishingCampaigns}</div>
               </div>
               <div className="text-center">
-                <div className="font-medium text-gray-700">Failures</div>
-                <div className="text-gray-600">0</div>
+                <div className="font-medium text-gray-700">Clicked</div>
+                <div className="text-red-600">{emailsClicked}</div>
               </div>
               <div className="text-center">
-                <div className="font-medium text-gray-700">Emails Reported</div>
-                <div className="text-gray-600">0</div>
+                <div className="font-medium text-gray-700">Reported</div>
+                <div className="text-green-600">{emailsReported}</div>
               </div>
             </div>
           </div>
@@ -232,21 +267,21 @@ export default function KnowBe4UserDisplay({ userEmail }: KnowBe4UserDisplayProp
           {/* Completion Summary */}
           <div className="bg-blue-50 rounded-lg p-3">
             <div className="text-center mb-2">
-              <div className="text-2xl font-bold text-blue-600">0%</div>
+              <div className="text-2xl font-bold text-blue-600">{completionPercentage}%</div>
               <div className="text-xs text-gray-600">Total Assignment Completions</div>
             </div>
             <div className="grid grid-cols-3 gap-2 text-xs">
               <div>
                 <div className="font-medium">Completed</div>
-                <div className="text-green-600">0</div>
+                <div className="text-green-600">{completed}</div>
               </div>
               <div>
                 <div className="font-medium">In Progress</div>
-                <div className="text-yellow-600">0</div>
+                <div className="text-yellow-600">{inProgress}</div>
               </div>
               <div>
                 <div className="font-medium">Not Started</div>
-                <div className="text-gray-600">13</div>
+                <div className="text-gray-600">{notStarted}</div>
               </div>
             </div>
           </div>
