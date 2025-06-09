@@ -166,7 +166,7 @@ class KnowBe4Service {
       const response = await fetch(url, {
         method,
         headers: {
-          'Authorization': `Bearer ${this.config.apiKey}`,
+          'Authorization': `Token ${this.config.apiKey}`,
           'Accept': 'application/json',
           'Content-Type': 'application/json',
           'User-Agent': 'Replit-KnowBe4-Integration/1.0'
@@ -187,19 +187,23 @@ class KnowBe4Service {
 
   async testConnection(): Promise<{ success: boolean; message: string; details?: any }> {
     try {
-      console.log('Testing KnowBe4 API with token:', this.config.apiKey ? 'Token provided' : 'No token');
+      console.log('Testing KnowBe4 API with token length:', this.config.apiKey ? this.config.apiKey.length : 0);
+      console.log('Token starts with:', this.config.apiKey ? this.config.apiKey.substring(0, 10) : 'N/A');
       console.log('API URL:', `${this.config.baseUrl}/account`);
       
-      const response = await this.makeRequest('/account');
+      // Try different endpoints to test API access
+      let response;
+      try {
+        response = await this.makeRequest('/account');
+      } catch (accountError) {
+        console.log('Account endpoint failed, trying users endpoint...');
+        response = await this.makeRequest('/users?page=1&per_page=1');
+      }
+      
       return {
         success: true,
         message: 'KnowBe4 API connection successful',
-        details: {
-          account_name: response.name,
-          subscription_level: response.subscription_level,
-          number_of_seats: response.number_of_seats,
-          current_risk_score: response.current_risk_score
-        }
+        details: response
       };
     } catch (error: any) {
       console.log('KnowBe4 API error details:', error);
