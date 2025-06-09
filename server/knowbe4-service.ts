@@ -323,16 +323,6 @@ class KnowBe4Service {
     }
   }
 
-  async getCampaignEnrollments(campaignId: number): Promise<any[]> {
-    try {
-      const endpoint = `/training/campaigns/${campaignId}/enrollments`;
-      return await this.makeRequest(endpoint);
-    } catch (error) {
-      console.error(`Error fetching campaign ${campaignId} enrollments:`, error);
-      return [];
-    }
-  }
-
   async searchCampaignsByName(searchTerm: string): Promise<any[]> {
     try {
       const campaigns = await this.getTrainingCampaigns();
@@ -371,16 +361,6 @@ class KnowBe4Service {
       }
     } catch (error) {
       console.error(`Error fetching campaign ${campaignId} participants:`, error);
-      return [];
-    }
-  }
-
-  async getCampaignEnrollments(campaignId: number): Promise<any[]> {
-    try {
-      const endpoint = `/training/campaigns/${campaignId}/enrollments`;
-      return await this.makeRequest(endpoint);
-    } catch (error) {
-      console.error(`Error fetching campaign ${campaignId} enrollments:`, error);
       return [];
     }
   }
