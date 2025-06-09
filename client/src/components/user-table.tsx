@@ -126,13 +126,13 @@ export default function UserTable({
   const [managerSearchQuery, setManagerSearchQuery] = useState("");
   const [managerOpen, setManagerOpen] = useState(false);
 
-  // Fetch manager suggestions for autocomplete
+  // Fetch manager suggestions for autocomplete with debouncing
   const { data: managerSuggestions = [] } = useQuery({
     queryKey: ["/api/managers", managerSearchQuery],
     queryFn: async () => {
       const params = new URLSearchParams();
-      if (managerSearchQuery) {
-        params.append("q", managerSearchQuery);
+      if (managerSearchQuery.trim()) {
+        params.append("q", managerSearchQuery.trim());
       }
       const response = await fetch(`/api/managers?${params}`, {
         credentials: 'include'
@@ -142,7 +142,8 @@ export default function UserTable({
       }
       return response.json();
     },
-    enabled: managerOpen || managerSearchQuery.length > 0,
+    enabled: managerOpen,
+    staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
   const updateStatusMutation = useMutation({
@@ -433,7 +434,7 @@ export default function UserTable({
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-56 p-0" align="start">
-          <Command>
+          <Command key={managerSearchQuery} shouldFilter={false}>
             <CommandInput 
               placeholder="Search manager..." 
               value={managerSearchQuery}
