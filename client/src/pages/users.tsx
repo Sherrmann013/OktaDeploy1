@@ -467,6 +467,7 @@ export default function Users() {
             <ExportModal
               users={users}
               currentColumns={columns}
+              totalUsers={total}
               onExport={handleExport}
             />
             

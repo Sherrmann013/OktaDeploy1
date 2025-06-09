@@ -18,10 +18,11 @@ import { User } from "@shared/schema";
 interface ExportModalProps {
   users: User[];
   currentColumns: ColumnConfig[];
+  totalUsers: number;
   onExport: (columns: string[], exportType: 'current' | 'custom') => void;
 }
 
-export default function ExportModal({ users, currentColumns, onExport }: ExportModalProps) {
+export default function ExportModal({ users, currentColumns, totalUsers, onExport }: ExportModalProps) {
   const [open, setOpen] = useState(false);
   const [exportType, setExportType] = useState<'current' | 'custom'>('current');
   const [selectedColumns, setSelectedColumns] = useState<string[]>(() => 
@@ -119,7 +120,7 @@ export default function ExportModal({ users, currentColumns, onExport }: ExportM
 
           {/* Export Summary */}
           <div className="text-sm text-muted-foreground">
-            {users.length} users will be exported with{' '}
+            {totalUsers} users will be exported with{' '}
             {exportType === 'current' 
               ? currentColumns.filter(col => col.visible).length
               : selectedColumns.length
