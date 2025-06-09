@@ -83,12 +83,26 @@ export async function setupLocalAuth(app: Express) {
       
       const adminUser = {
         id: 1,
-        username: ADMIN_USERNAME,
-        email: "admin@mazetx.com",
+        oktaId: null,
         firstName: "CW",
         lastName: "Admin",
-        title: "System Administrator",
+        email: "admin@mazetx.com",
+        login: ADMIN_USERNAME,
+        mobilePhone: null,
         department: "IT",
+        title: "System Administrator",
+        employeeType: "ADMIN",
+        profileImageUrl: null,
+        managerId: null,
+        manager: null,
+        status: "ACTIVE",
+        groups: [],
+        applications: [],
+        created: new Date(),
+        lastUpdated: new Date(),
+        lastLogin: new Date(),
+        passwordChanged: null,
+        username: ADMIN_USERNAME,
         role: "admin"
       };
       
