@@ -64,6 +64,7 @@ function SortableColumnItem({ column, onToggle }: { column: ColumnConfig; onTogg
     setNodeRef,
     transform,
     transition,
+    isDragging,
   } = useSortable({ id: column.id });
 
   const style = {
@@ -77,13 +78,16 @@ function SortableColumnItem({ column, onToggle }: { column: ColumnConfig; onTogg
     <div
       ref={setNodeRef}
       style={style}
-      className="flex items-center justify-between p-3 border rounded-lg bg-card"
+      className={`flex items-center justify-between p-3 border rounded-lg bg-card transition-all ${
+        isDragging ? 'opacity-50 shadow-lg scale-105 z-50' : 'hover:shadow-md'
+      }`}
     >
       <div className="flex items-center space-x-3">
         <div
           {...attributes}
           {...listeners}
-          className="cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground"
+          className="cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground p-1 hover:bg-muted/50 rounded transition-colors touch-none"
+          style={{ touchAction: 'none' }}
         >
           <GripVertical className="h-4 w-4" />
         </div>
@@ -109,7 +113,11 @@ function SortableColumnItem({ column, onToggle }: { column: ColumnConfig; onTogg
 
 export default function ColumnManager({ columns, onColumnsChange }: ColumnManagerProps) {
   const sensors = useSensors(
-    useSensor(PointerSensor),
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 3,
+      },
+    }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
     })
@@ -149,7 +157,7 @@ export default function ColumnManager({ columns, onColumnsChange }: ColumnManage
           Columns
         </Button>
       </SheetTrigger>
-      <SheetContent className="w-[400px] sm:w-[540px]">
+      <SheetContent className="w-[320px] sm:w-[380px]">
         <SheetHeader>
           <SheetTitle>Manage Columns</SheetTitle>
           <SheetDescription>
@@ -163,7 +171,7 @@ export default function ColumnManager({ columns, onColumnsChange }: ColumnManage
             <CardHeader>
               <CardTitle className="text-sm">Visible Columns</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-3">
+            <CardContent className="space-y-3 max-h-[400px] overflow-y-auto">
               <DndContext
                 sensors={sensors}
                 collisionDetection={closestCenter}
@@ -173,13 +181,15 @@ export default function ColumnManager({ columns, onColumnsChange }: ColumnManage
                   items={sortedColumns.map(col => col.id)}
                   strategy={verticalListSortingStrategy}
                 >
-                  {sortedColumns.map(columnConfig => (
-                    <SortableColumnItem
-                      key={columnConfig.id}
-                      column={columnConfig}
-                      onToggle={toggleColumn}
-                    />
-                  ))}
+                  <div className="space-y-2">
+                    {sortedColumns.map(columnConfig => (
+                      <SortableColumnItem
+                        key={columnConfig.id}
+                        column={columnConfig}
+                        onToggle={toggleColumn}
+                      />
+                    ))}
+                  </div>
                 </SortableContext>
               </DndContext>
             </CardContent>
