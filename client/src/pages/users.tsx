@@ -360,7 +360,7 @@ export default function Users() {
           currentPage={currentPage}
           totalPages={totalPages}
           usersPerPage={usersPerPage}
-          isLoading={isLoading}
+          isLoading={isLoading || isFetching}
           onUserClick={handleUserClick}
           onPageChange={setCurrentPage}
           onPerPageChange={handlePerPageChange}

@@ -192,6 +192,11 @@ class OktaService {
   }
 
   async getUsers(limit: number = 200): Promise<any[]> {
+    // Optimize for large datasets - implement progressive loading
+    if (limit > 100) {
+      return this.getUsersBatch(limit);
+    }
+
     // Check cache first for user lists
     const cacheKey = `users_${limit}`;
     const cached = this.userCache.get(cacheKey);
@@ -237,6 +242,39 @@ class OktaService {
       return allUsers;
     } catch (error) {
       throw new Error(`OKTA API error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  // Batch loading method for large datasets
+  private async getUsersBatch(limit: number): Promise<any[]> {
+    const cacheKey = `users_batch_${limit}`;
+    const cached = this.userCache.get(cacheKey);
+    if (cached && (Date.now() - cached.timestamp) < this.USER_CACHE_TTL) {
+      return cached.data;
+    }
+
+    try {
+      await this.throttleRequest();
+      const batchSize = Math.min(200, limit);
+      const url = `/users?limit=${batchSize}`;
+      const response = await this.makeRequest(url);
+      
+      if (response.ok) {
+        const users = await response.json();
+        
+        // Cache the result
+        this.userCache.set(cacheKey, {
+          data: users,
+          timestamp: Date.now()
+        });
+        
+        return users;
+      } else {
+        const errorText = await response.text();
+        throw new Error(`Failed to get users batch: ${response.status} ${response.statusText} - ${errorText}`);
+      }
+    } catch (error) {
+      throw new Error(`OKTA API batch error: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 
