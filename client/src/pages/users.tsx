@@ -40,7 +40,8 @@ export default function Users() {
   const [employeeTypeFilter, setEmployeeTypeFilter] = useState<string>("");
   const [filters, setFilters] = useState({
     employeeType: [] as string[],
-    mobilePhone: ""
+    mobilePhone: "",
+    manager: ""
   });
   const { toast } = useToast();
 
@@ -136,7 +137,8 @@ export default function Users() {
         ...(searchQuery && { search: searchQuery }),
         ...(employeeTypeFilter && employeeTypeFilter !== "all" && { employeeType: employeeTypeFilter }),
         ...(filters.employeeType.length > 0 && { employeeTypes: filters.employeeType.join(',') }),
-        ...(filters.mobilePhone && { mobilePhone: filters.mobilePhone })
+        ...(filters.mobilePhone && { mobilePhone: filters.mobilePhone }),
+        ...(filters.manager && { manager: filters.manager })
       });
       
       const response = await fetch(`/api/users?${params}`, {

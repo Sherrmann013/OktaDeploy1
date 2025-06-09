@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useMutation } from "@tanstack/react-query";
+import { useState, useEffect } from "react";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { format, formatDistanceToNow } from "date-fns";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
@@ -7,13 +7,15 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Edit, Pause, Trash2, Play, ChevronLeft, ChevronRight, ArrowUpDown, FilterIcon, Calendar } from "lucide-react";
+import { Edit, Pause, Trash2, Play, ChevronLeft, ChevronRight, ArrowUpDown, FilterIcon, Calendar, Check, ChevronsUpDown } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { cn } from "@/lib/utils";
 import ConfirmationModal from "./confirmation-modal";
 import type { User } from "@shared/schema";
 
@@ -23,7 +25,7 @@ const COLUMN_DEFINITIONS = {
   title: { label: 'Title', sortKey: 'title', hasFilter: false },
   department: { label: 'Department', sortKey: 'department', hasFilter: false },
   employeeType: { label: 'Employee Type', sortKey: 'employeeType', hasFilter: true },
-  manager: { label: 'Manager', sortKey: 'manager', hasFilter: false },
+  manager: { label: 'Manager', sortKey: 'manager', hasFilter: true },
   mobilePhone: { label: 'Mobile Phone', sortKey: 'mobilePhone', hasFilter: true },
   status: { label: 'Status', sortKey: 'status', hasFilter: false },
   disabled: { label: 'Disabled On', sortKey: 'lastUpdated', hasFilter: false },
@@ -103,6 +105,29 @@ export default function UserTable({
       onFiltersChange({ employeeType: employeeTypeFilter, mobilePhone: mobilePhoneFilter, manager: value });
     }
   };
+
+  // Manager autocomplete state and functionality
+  const [managerSearchQuery, setManagerSearchQuery] = useState("");
+  const [managerOpen, setManagerOpen] = useState(false);
+
+  // Fetch manager suggestions for autocomplete
+  const { data: managerSuggestions = [] } = useQuery({
+    queryKey: ["/api/managers", managerSearchQuery],
+    queryFn: async () => {
+      const params = new URLSearchParams();
+      if (managerSearchQuery) {
+        params.append("q", managerSearchQuery);
+      }
+      const response = await fetch(`/api/managers?${params}`, {
+        credentials: 'include'
+      });
+      if (!response.ok) {
+        throw new Error(`Failed to fetch manager suggestions: ${response.statusText}`);
+      }
+      return response.json();
+    },
+    enabled: managerOpen || managerSearchQuery.length > 0,
+  });
 
   const updateStatusMutation = useMutation({
     mutationFn: async ({ userId, status }: { userId: number; status: string }) => {
