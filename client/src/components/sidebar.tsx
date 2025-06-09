@@ -82,7 +82,7 @@ export default function Sidebar() {
             </div>
           </div>
         </div>
-        <div className="text-[10px] text-white/80 leading-none text-left mt-auto whitespace-nowrap px-1">Powered by ClockWerk.it</div>
+        <div className="text-[10px] text-white/80 leading-none text-left mt-auto whitespace-nowrap pl-1">Powered by ClockWerk.it</div>
       </div>
       
       <nav className="p-4 flex-1">
