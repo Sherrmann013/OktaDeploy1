@@ -1321,27 +1321,27 @@ export default function UserDetail() {
                     </CardHeader>
                     <CardContent className="space-y-4">
                       <div>
-                        <label className="text-sm font-medium text-muted-foreground">Training Enrollments JSON</label>
+                        <label className="text-sm font-medium text-muted-foreground">Training Campaign Statuses</label>
                         <div className="bg-gray-50 dark:bg-gray-900 p-3 rounded text-xs font-mono overflow-auto max-h-40 mt-1">
-                          {userTrainingData ? (
-                            <pre className="whitespace-pre-wrap">{JSON.stringify(userTrainingData, null, 2)}</pre>
+                          {knowBe4Data?.current_training_campaign_statuses ? (
+                            <pre className="whitespace-pre-wrap">{JSON.stringify(knowBe4Data.current_training_campaign_statuses, null, 2)}</pre>
                           ) : (
-                            <p className="text-gray-500">Loading user training data...</p>
+                            <p className="text-gray-500">No training campaign data available</p>
                           )}
                         </div>
                       </div>
                       <div>
-                        <label className="text-sm font-medium text-muted-foreground">Phishing Results JSON</label>
+                        <label className="text-sm font-medium text-muted-foreground">Phishing Campaign Statistics</label>
                         <div className="bg-gray-50 dark:bg-gray-900 p-3 rounded text-xs font-mono overflow-auto max-h-40 mt-1">
-                          {userPhishingData ? (
-                            <pre className="whitespace-pre-wrap">{JSON.stringify(userPhishingData, null, 2)}</pre>
+                          {knowBe4Data?.phishing_campaign_stats ? (
+                            <pre className="whitespace-pre-wrap">{JSON.stringify(knowBe4Data.phishing_campaign_stats, null, 2)}</pre>
                           ) : (
-                            <p className="text-gray-500">Loading phishing results...</p>
+                            <p className="text-gray-500">No phishing campaign data available</p>
                           )}
                         </div>
                       </div>
                       <div>
-                        <label className="text-sm font-medium text-muted-foreground">User Profile JSON</label>
+                        <label className="text-sm font-medium text-muted-foreground">Complete User Profile</label>
                         <div className="bg-gray-50 dark:bg-gray-900 p-3 rounded text-xs font-mono overflow-auto max-h-32 mt-1">
                           {knowBe4Data ? (
                             <pre className="whitespace-pre-wrap">{JSON.stringify(knowBe4Data, null, 2)}</pre>
@@ -1356,15 +1356,15 @@ export default function UserDetail() {
                           size="sm" 
                           className="flex-1"
                           onClick={() => {
-                            console.log('=== USER-SPECIFIC KNOWBE4 DATA ===');
-                            console.log('Training Enrollments:', userTrainingData);
-                            console.log('Phishing Results:', userPhishingData);
-                            console.log('User Profile:', knowBe4Data);
-                            console.log('=== END USER DATA ===');
+                            console.log('=== USER-SPECIFIC KNOWBE4 TRAINING DATA ===');
+                            console.log('Training Campaign Statuses:', knowBe4Data?.current_training_campaign_statuses);
+                            console.log('Phishing Campaign Stats:', knowBe4Data?.phishing_campaign_stats);
+                            console.log('Complete Profile:', knowBe4Data);
+                            console.log('=== END USER TRAINING DATA ===');
                           }}
                         >
                           <RefreshCw className="w-4 h-4 mr-1" />
-                          Log User Data
+                          Log Training Data
                         </Button>
                       </div>
                     </CardContent>
