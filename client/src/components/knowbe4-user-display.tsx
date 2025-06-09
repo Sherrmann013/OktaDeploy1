@@ -61,10 +61,10 @@ export default function KnowBe4UserDisplay({ userEmail }: KnowBe4UserDisplayProp
     enabled: !!userEmail && !!connectionTest?.success,
   });
 
-  // Fetch training campaigns for the user
-  const { data: trainingData } = useQuery({
-    queryKey: [`/api/knowbe4/user/${knowbe4User?.id}/training`],
-    enabled: !!knowbe4User?.id,
+  // Fetch all training campaigns
+  const { data: campaigns } = useQuery({
+    queryKey: ['/api/knowbe4/campaigns'],
+    enabled: !!connectionTest?.success,
   });
 
   if (connectionLoading) {
@@ -174,56 +174,61 @@ export default function KnowBe4UserDisplay({ userEmail }: KnowBe4UserDisplayProp
           Security awareness and phishing simulation data from KnowBe4
         </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-6">
-        {/* Compact Overview Cards */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          <div className="bg-blue-50 p-3 rounded-lg border">
-            <div className="flex items-center gap-1 mb-1">
-              <Target className="h-3 w-3 text-blue-600" />
-              <span className="text-xs font-medium text-blue-800">Risk Score</span>
-            </div>
-            <div className="text-lg font-bold text-blue-900">
-              {knowbe4User.current_risk_score}
-            </div>
+      <CardContent className="space-y-4">
+        {/* Risk Score */}
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-medium">Risk Score</span>
             <Badge variant="secondary" className={`text-xs ${riskLevel.textColor}`}>
               {riskLevel.level}
             </Badge>
           </div>
+          <div className="text-2xl font-bold text-blue-600">
+            {knowbe4User.current_risk_score}
+          </div>
+        </div>
 
-          <div className="bg-orange-50 p-3 rounded-lg border">
-            <div className="flex items-center gap-1 mb-1">
-              <AlertTriangle className="h-3 w-3 text-orange-600" />
-              <span className="text-xs font-medium text-orange-800">Phish Prone</span>
-            </div>
-            <div className="text-lg font-bold text-orange-900">
-              {knowbe4User.phish_prone_percentage}%
-            </div>
+        {/* Phish Prone */}
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-medium">Phish Prone</span>
             <Badge variant={phishProneLevel.color as any} className="text-xs">
               {phishProneLevel.level}
             </Badge>
           </div>
-
-          <div className="bg-gray-50 p-3 rounded-lg border">
-            <div className="flex items-center gap-1 mb-1">
-              <Clock className="h-3 w-3 text-gray-600" />
-              <span className="text-xs font-medium text-gray-800">Last Sign In</span>
-            </div>
-            <div className="text-sm font-semibold text-gray-900">
-              {formatDate(knowbe4User.last_sign_in)}
-            </div>
+          <div className="text-2xl font-bold text-orange-600">
+            {knowbe4User.phish_prone_percentage}%
           </div>
+        </div>
 
-          <div className="bg-green-50 p-3 rounded-lg border">
-            <div className="flex items-center gap-1 mb-1">
-              <BookOpen className="h-3 w-3 text-green-600" />
-              <span className="text-xs font-medium text-green-800">Campaigns</span>
-            </div>
-            <div className="text-sm font-semibold text-green-900">
-              {knowbe4User.groups && knowbe4User.groups.length > 0 ? 
-                `${knowbe4User.groups.length} Groups` : 
-                "No Groups"
-              }
-            </div>
+        {/* Last Sign In */}
+        <div className="space-y-2">
+          <span className="text-sm font-medium">Last Sign In</span>
+          <div className="text-sm text-gray-600">
+            {formatDate(knowbe4User.last_sign_in)}
+          </div>
+        </div>
+
+        {/* Current Campaigns */}
+        <div className="space-y-2">
+          <span className="text-sm font-medium">Training Campaigns</span>
+          <div className="text-sm text-gray-600">
+            {campaigns && Array.isArray(campaigns) && campaigns.length > 0 ? (
+              <div className="space-y-1">
+                {campaigns.slice(0, 3).map((campaign: any, index: number) => (
+                  <div key={index} className="text-xs bg-green-50 px-2 py-1 rounded border">
+                    {campaign.name}
+                  </div>
+                ))}
+                {campaigns.length > 3 && (
+                  <div className="text-xs text-gray-500">
+                    +{campaigns.length - 3} more campaigns
+                  </div>
+                )}
+              </div>
+            ) : (
+              "No Active Campaigns"
+            )}
           </div>
         </div>
 
