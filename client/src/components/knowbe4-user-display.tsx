@@ -321,84 +321,74 @@ export default function KnowBe4UserDisplay({ userEmail }: KnowBe4UserDisplayProp
           </span>
         </div>
 
-        {/* 2x2 Grid Layout matching screenshot */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Combined Phishing and Training Data in single card layout */}
+        <div className="grid grid-cols-2 gap-4">
           
-          {/* Phishing Results - Left Tile */}
-          <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-2 mb-4">
-                <Shield className="w-4 h-4 text-gray-500 dark:text-gray-400" />
-                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Phishing Results</span>
+          {/* Phishing Results - Left Side */}
+          <div>
+            <div className="flex items-center gap-2 mb-3">
+              <Shield className="w-4 h-4 text-blue-500" />
+              <span className="text-sm font-medium">Phishing Results</span>
+            </div>
+            
+            <div className="text-3xl font-bold text-blue-600 dark:text-blue-400 mb-1">{knowbe4User.phish_prone_percentage}%</div>
+            <div className="text-xs text-gray-500 dark:text-gray-400 mb-3">Phish-prone Percentage</div>
+            
+            <div className="space-y-1 text-xs">
+              <div className="flex justify-between">
+                <span className="text-gray-600 dark:text-gray-400">Emails Delivered</span>
+                <span className="font-medium">{totalPhishingCampaigns}</span>
               </div>
-              
-              <div className="flex justify-between items-start">
-                <div className="flex-1">
-                  <div className="text-4xl font-bold text-blue-600 dark:text-blue-400 mb-1">{knowbe4User.phish_prone_percentage}%</div>
-                  <div className="text-xs text-gray-500 dark:text-gray-400">Phish-prone Percentage</div>
-                </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600 dark:text-gray-400">Failures</span>
+                <span className="font-medium">{emailsClicked}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600 dark:text-gray-400">Emails Reported</span>
+                <span className="font-medium">{emailsReported}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Security Training - Right Side */}
+          <div>
+            <div className="flex items-center gap-2 mb-3">
+              <GraduationCap className="w-4 h-4 text-green-500" />
+              <span className="text-sm font-medium">Security Training</span>
+            </div>
+            
+            {finalTrainingData.length > 0 ? (
+              <>
+                <div className="text-3xl font-bold text-green-600 dark:text-green-400 mb-1">{completionPercentage}%</div>
+                <div className="text-xs text-gray-500 dark:text-gray-400 mb-3">Completion Rate</div>
                 
-                <div className="text-right space-y-1 text-xs">
+                <div className="space-y-1 text-xs">
                   <div className="flex justify-between">
-                    <span className="text-gray-600 dark:text-gray-400">Emails Delivered</span>
-                    <span className="font-medium text-gray-900 dark:text-gray-100">{totalPhishingCampaigns}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600 dark:text-gray-400">Failures</span>
-                    <span className="font-medium text-gray-900 dark:text-gray-100">{emailsClicked}</span>
+                    <span className="text-gray-600 dark:text-gray-400">Total Enrollments</span>
+                    <span className="font-medium">{total}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-600 dark:text-gray-400">Emails Reported</span>
-                    <span className="font-medium text-gray-900 dark:text-gray-100">{emailsReported}</span>
+                    <span className="text-gray-600 dark:text-gray-400">Completed</span>
+                    <span className="font-medium text-green-600">{completed}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600 dark:text-gray-400">In Progress</span>
+                    <span className="font-medium text-yellow-600">{inProgress}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600 dark:text-gray-400">Not Started</span>
+                    <span className="font-medium text-gray-600">{notStarted}</span>
                   </div>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Security Training - Right Tile */}
-          <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-2 mb-4">
-                <GraduationCap className="w-4 h-4 text-gray-500 dark:text-gray-400" />
-                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Security Training</span>
-              </div>
-              
-              {finalTrainingData.length > 0 ? (
-                <div className="flex justify-between items-start">
-                  <div className="flex-1">
-                    <div className="text-4xl font-bold text-green-600 dark:text-green-400 mb-1">{completionPercentage}%</div>
-                    <div className="text-xs text-gray-500 dark:text-gray-400">Completion Rate</div>
-                  </div>
-                  
-                  <div className="text-right space-y-1 text-xs">
-                    <div className="flex justify-between">
-                      <span className="text-gray-600 dark:text-gray-400">Total Enrollments</span>
-                      <span className="font-medium text-gray-900 dark:text-gray-100">{total}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600 dark:text-gray-400">Completed</span>
-                      <span className="font-medium text-green-600 dark:text-green-400">{completed}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600 dark:text-gray-400">In Progress</span>
-                      <span className="font-medium text-yellow-600 dark:text-yellow-400">{inProgress}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600 dark:text-gray-400">Not Started</span>
-                      <span className="font-medium text-gray-600 dark:text-gray-400">{notStarted}</span>
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <div className="text-center text-gray-500">
-                  <p className="text-sm">No training data available</p>
-                  <p className="text-xs mt-1">User not enrolled in any training campaigns</p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
+              </>
+            ) : (
+              <>
+                <div className="text-3xl font-bold text-gray-400 mb-1">0%</div>
+                <div className="text-xs text-gray-500 dark:text-gray-400 mb-3">No training data</div>
+                <div className="text-xs text-gray-500">User not enrolled in any training campaigns</div>
+              </>
+            )}
+          </div>
         </div>
 
         {/* Collapsible Training Enrollments */}

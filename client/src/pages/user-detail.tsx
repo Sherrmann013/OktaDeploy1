@@ -1127,10 +1127,32 @@ export default function UserDetail() {
               <TabsContent value="monitoring" className="space-y-6 mt-0">
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
-                  {/* KnowBe4 Security Training - Full Component */}
-                  <div className="lg:col-span-2">
-                    <KnowBe4UserDisplay userEmail={user.email || ''} />
-                  </div>
+                  {/* KnowBe4 Security Training */}
+                  <KnowBe4UserDisplay userEmail={user.email || ''} />
+
+                  {/* Placeholder for second monitoring tile */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Shield className="w-5 h-5 text-blue-600" />
+                        Security Overview
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div>
+                        <label className="text-sm font-medium text-muted-foreground">Overall Risk Score</label>
+                        <p className="text-foreground">Loading...</p>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-muted-foreground">Compliance Status</label>
+                        <p className="text-foreground">Loading...</p>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-muted-foreground">Last Assessment</label>
+                        <p className="text-foreground">Loading...</p>
+                      </div>
+                    </CardContent>
+                  </Card>
 
                   {/* SentinelOne */}
                   <Card>
