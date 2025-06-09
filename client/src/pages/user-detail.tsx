@@ -1384,15 +1384,24 @@ export default function UserDetail() {
                           size="sm" 
                           className="flex-1"
                           onClick={() => {
-                            console.log('=== USER-SPECIFIC KNOWBE4 TRAINING DATA ===');
-                            console.log('Training Campaign Statuses:', knowBe4Data?.current_training_campaign_statuses);
-                            console.log('Phishing Campaign Stats:', knowBe4Data?.phishing_campaign_stats);
-                            console.log('Complete Profile:', knowBe4Data);
-                            console.log('=== END USER TRAINING DATA ===');
+                            console.log('=== COMPLETE KNOWBE4 USER PROFILE ===');
+                            console.log('Full untruncated profile:', JSON.stringify(knowBe4Data, null, 2));
+                            console.log('=== SPECIFIC TRAINING FIELDS ===');
+                            if (knowBe4Data) {
+                              Object.keys(knowBe4Data).forEach(key => {
+                                if (key.toLowerCase().includes('training') || 
+                                    key.toLowerCase().includes('campaign') ||
+                                    key.toLowerCase().includes('completion') ||
+                                    key.toLowerCase().includes('assignment')) {
+                                  console.log(`${key}:`, (knowBe4Data as any)[key]);
+                                }
+                              });
+                            }
+                            console.log('=== END TRAINING DATA ===');
                           }}
                         >
                           <RefreshCw className="w-4 h-4 mr-1" />
-                          Log Training Data
+                          Log Complete Data
                         </Button>
                       </div>
                     </CardContent>
