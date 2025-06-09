@@ -221,11 +221,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
           console.log(`Mobile phone filter applied: ${mobilePhoneFilter}, found ${filteredUsers.length} matching users`);
         }
         
-        // Apply sorting
-        filteredUsers.sort((a, b) => {
-          let aValue, bValue;
+        // Handle employeeType sorting differently since it requires database lookup
+        if (sortBy === 'employeeType') {
+          // Get all database users to access employeeType data
+          const allDbUsers = await storage.getAllUsers({ limit: 1000 });
+          const employeeTypeMap = new Map();
+          allDbUsers.users.forEach(dbUser => {
+            if (dbUser.oktaId) {
+              employeeTypeMap.set(dbUser.oktaId, dbUser.employeeType || '');
+            }
+          });
           
-          switch (sortBy) {
+          // Sort by employeeType using database data
+          filteredUsers.sort((a, b) => {
+            const aEmployeeType = employeeTypeMap.get(a.id) || '';
+            const bEmployeeType = employeeTypeMap.get(b.id) || '';
+            
+            if (sortOrder === 'desc') {
+              return bEmployeeType.localeCompare(aEmployeeType);
+            } else {
+              return aEmployeeType.localeCompare(bEmployeeType);
+            }
+          });
+        } else {
+          // Apply standard sorting for other fields
+          filteredUsers.sort((a, b) => {
+            let aValue, bValue;
+            
+            switch (sortBy) {
             case 'firstName':
               aValue = a.profile.firstName || '';
               bValue = b.profile.firstName || '';
@@ -237,6 +260,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
             case 'email':
               aValue = a.profile.email || '';
               bValue = b.profile.email || '';
+              break;
+            case 'title':
+              aValue = a.profile.title || '';
+              bValue = b.profile.title || '';
+              break;
+            case 'department':
+              aValue = a.profile.department || '';
+              bValue = b.profile.department || '';
               break;
             case 'status':
               aValue = a.status || '';
@@ -251,12 +282,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
               bValue = b.profile.firstName || '';
           }
           
-          if (sortOrder === 'desc') {
-            return bValue.localeCompare(aValue);
-          } else {
-            return aValue.localeCompare(bValue);
-          }
-        });
+            if (sortOrder === 'desc') {
+              return bValue.localeCompare(aValue);
+            } else {
+              return aValue.localeCompare(bValue);
+            }
+          });
+        }
         
         // Pagination
         const offset = (page - 1) * limit;
