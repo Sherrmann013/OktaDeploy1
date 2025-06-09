@@ -5,11 +5,18 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { ArrowLeft, Monitor, Shield, Eye, RefreshCw, Edit, BookOpen } from "lucide-react";
+import { ArrowLeft, ChevronDown, ChevronRight, ChevronUp, Smartphone, Monitor, Shield, Eye, RefreshCw, KeyRound, Edit, Play, Pause, Trash2, Search, UserX, Save, X, Download, Copy, UserCheck, Plus, Key, CheckCircle, BookOpen } from "lucide-react";
+import { DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import ConfirmationModal from "@/components/confirmation-modal";
+import AssignAppModal from "@/components/assign-app-modal";
+import KnowBe4UserDisplay from "@/components/knowbe4-user-display";
 import { useState, useEffect, useMemo } from "react";
 import type { User } from "@shared/schema";
 import { useForm } from "react-hook-form";
@@ -181,6 +188,11 @@ export default function UserDetail() {
   
   const [isEditing, setIsEditing] = useState(false);
   const [managerSearch, setManagerSearch] = useState("");
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [actionType, setActionType] = useState<'suspend' | 'delete' | 'activate' | 'deactivate' | 'resetPassword' | 'expirePassword' | null>(null);
+  const [showAssignAppModal, setShowAssignAppModal] = useState(false);
+  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
+  const [expandedApps, setExpandedApps] = useState<Set<string>>(new Set());
 
   const form = useForm({
     resolver: zodResolver(editUserSchema),
@@ -340,6 +352,149 @@ export default function UserDetail() {
           <TabsTrigger value="activity">Recent Activity</TabsTrigger>
           <TabsTrigger value="microsoft">Microsoft</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="monitoring" className="space-y-6 mt-0">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            
+            {/* KnowBe4 Phishing Results */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Shield className="w-5 h-5 text-blue-600" />
+                  KnowBe4 Phishing
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <KnowBe4PhishingCard userEmail={user?.email} />
+              </CardContent>
+            </Card>
+
+            {/* KnowBe4 Security Training */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <BookOpen className="w-5 h-5 text-green-600" />
+                  KnowBe4 Training
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <KnowBe4TrainingCard userEmail={user?.email} />
+              </CardContent>
+            </Card>
+
+            {/* SentinelOne */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Eye className="w-5 h-5 text-purple-600" />
+                  SentinelOne
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">Agent Status</label>
+                  <p className="text-foreground">Loading...</p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">Last Check-in</label>
+                  <p className="text-foreground">Loading...</p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">Threats Detected</label>
+                  <p className="text-foreground">Loading...</p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">Policy Compliance</label>
+                  <p className="text-foreground">Loading...</p>
+                </div>
+                <div className="flex gap-2 pt-2">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="flex-1"
+                    onClick={() => {
+                      console.log('Fetching SentinelOne data...');
+                    }}
+                  >
+                    <RefreshCw className="w-4 h-4 mr-1" />
+                    Refresh
+                  </Button>
+                  <Button 
+                    variant="default" 
+                    size="sm" 
+                    className="flex-1"
+                    onClick={() => {
+                      console.log('Initiating SentinelOne scan...');
+                    }}
+                  >
+                    Full Scan
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Device Management - Addigy & Intune */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Monitor className="w-5 h-5 text-orange-600" />
+                  Device Management
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="grid grid-cols-2 gap-4">
+                  {/* Addigy Column */}
+                  <div className="space-y-3">
+                    <h4 className="font-medium text-sm text-orange-600 border-b pb-1">Addigy</h4>
+                    <div>
+                      <label className="text-xs font-medium text-muted-foreground">Status</label>
+                      <div className="flex items-center gap-2">
+                        <Badge className="bg-green-600 text-white text-xs">Managed</Badge>
+                      </div>
+                    </div>
+                    <div>
+                      <label className="text-xs font-medium text-muted-foreground">Enrollment</label>
+                      <div className="flex items-center gap-2">
+                        <Badge className="bg-green-600 text-white text-xs">Enrolled</Badge>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Intune Column */}
+                  <div className="space-y-3">
+                    <h4 className="font-medium text-sm text-blue-600 border-b pb-1">Intune</h4>
+                    <div>
+                      <label className="text-xs font-medium text-muted-foreground">Status</label>
+                      <div className="flex items-center gap-2">
+                        <Badge className="bg-green-600 text-white text-xs">Enrolled</Badge>
+                      </div>
+                    </div>
+                    <div>
+                      <label className="text-xs font-medium text-muted-foreground">Enrollment</label>
+                      <div className="flex items-center gap-2">
+                        <Badge className="bg-green-600 text-white text-xs">Enrolled</Badge>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="flex gap-2 pt-2">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="flex-1"
+                    onClick={() => {
+                      console.log('Refreshing device data...');
+                    }}
+                  >
+                    <RefreshCw className="w-4 h-4 mr-1" />
+                    Refresh
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
 
         <TabsContent value="profile" className="space-y-6 mt-0">
           {isEditing ? (
@@ -586,149 +741,6 @@ export default function UserDetail() {
               </Card>
             </div>
           )}
-        </TabsContent>
-
-        <TabsContent value="monitoring" className="space-y-6 mt-0">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            
-            {/* KnowBe4 Phishing Results */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Shield className="w-5 h-5 text-blue-600" />
-                  KnowBe4 Phishing
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <KnowBe4PhishingCard userEmail={user?.email} />
-              </CardContent>
-            </Card>
-
-            {/* KnowBe4 Security Training */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <BookOpen className="w-5 h-5 text-green-600" />
-                  KnowBe4 Training
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <KnowBe4TrainingCard userEmail={user?.email} />
-              </CardContent>
-            </Card>
-
-            {/* SentinelOne */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Eye className="w-5 h-5 text-purple-600" />
-                  SentinelOne
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <label className="text-sm font-medium text-muted-foreground">Agent Status</label>
-                  <p className="text-foreground">Loading...</p>
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-muted-foreground">Last Check-in</label>
-                  <p className="text-foreground">Loading...</p>
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-muted-foreground">Threats Detected</label>
-                  <p className="text-foreground">Loading...</p>
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-muted-foreground">Policy Compliance</label>
-                  <p className="text-foreground">Loading...</p>
-                </div>
-                <div className="flex gap-2 pt-2">
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    className="flex-1"
-                    onClick={() => {
-                      console.log('Fetching SentinelOne data...');
-                    }}
-                  >
-                    <RefreshCw className="w-4 h-4 mr-1" />
-                    Refresh
-                  </Button>
-                  <Button 
-                    variant="default" 
-                    size="sm" 
-                    className="flex-1"
-                    onClick={() => {
-                      console.log('Initiating SentinelOne scan...');
-                    }}
-                  >
-                    Full Scan
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Device Management - Addigy & Intune */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Monitor className="w-5 h-5 text-orange-600" />
-                  Device Management
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="grid grid-cols-2 gap-4">
-                  {/* Addigy Column */}
-                  <div className="space-y-3">
-                    <h4 className="font-medium text-sm text-orange-600 border-b pb-1">Addigy</h4>
-                    <div>
-                      <label className="text-xs font-medium text-muted-foreground">Status</label>
-                      <div className="flex items-center gap-2">
-                        <Badge className="bg-green-600 text-white text-xs">Managed</Badge>
-                      </div>
-                    </div>
-                    <div>
-                      <label className="text-xs font-medium text-muted-foreground">Enrollment</label>
-                      <div className="flex items-center gap-2">
-                        <Badge className="bg-green-600 text-white text-xs">Enrolled</Badge>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  {/* Intune Column */}
-                  <div className="space-y-3">
-                    <h4 className="font-medium text-sm text-blue-600 border-b pb-1">Intune</h4>
-                    <div>
-                      <label className="text-xs font-medium text-muted-foreground">Status</label>
-                      <div className="flex items-center gap-2">
-                        <Badge className="bg-green-600 text-white text-xs">Enrolled</Badge>
-                      </div>
-                    </div>
-                    <div>
-                      <label className="text-xs font-medium text-muted-foreground">Enrollment</label>
-                      <div className="flex items-center gap-2">
-                        <Badge className="bg-green-600 text-white text-xs">Enrolled</Badge>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="flex gap-2 pt-2">
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    className="flex-1"
-                    onClick={() => {
-                      console.log('Refreshing device data...');
-                    }}
-                  >
-                    <RefreshCw className="w-4 h-4 mr-1" />
-                    Refresh
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
         </TabsContent>
 
         <TabsContent value="applications" className="space-y-4 mt-0">
