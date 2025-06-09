@@ -609,9 +609,9 @@ export default function UserDetail() {
                     {user.firstName || 'Unknown'} {user.lastName || 'User'}
                   </h1>
                   <div className="flex items-center gap-2">
-                    {getStatusBadge(user.status || 'UNKNOWN')}
-                    <span className="text-sm text-muted-foreground">•</span>
                     <span className="text-sm text-muted-foreground">{user.email || 'No email'}</span>
+                    <span className="text-sm text-muted-foreground">•</span>
+                    {getStatusBadge(user.status || 'UNKNOWN')}
                   </div>
                 </div>
                 
@@ -646,6 +646,16 @@ export default function UserDetail() {
                     >
                       <UserX className="w-4 h-4" />
                       Suspend
+                    </Button>
+                  ) : user.status === "LOCKED_OUT" ? (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleStatusChange("ACTIVE")}
+                      className="flex items-center gap-2 text-blue-600 dark:text-blue-400 border-blue-300 dark:border-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900"
+                    >
+                      <UserCheck className="w-4 h-4" />
+                      Unlock User
                     </Button>
                   ) : (
                     <Button
