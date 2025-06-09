@@ -331,41 +331,109 @@ export default function KnowBe4UserDisplay({ userEmail }: KnowBe4UserDisplayProp
             </CardContent>
           </Card>
 
-          {/* Training Assignments - Right Tile */}
+          {/* User Training Data - Right Tile */}
           <Card className="bg-white border border-gray-200">
             <CardContent className="p-4">
               <div className="flex items-center gap-2 mb-4">
                 <GraduationCap className="w-4 h-4 text-gray-500" />
-                <span className="text-sm font-medium text-gray-700">Training Assignments</span>
+                <span className="text-sm font-medium text-gray-700">User Training Data</span>
               </div>
               
-              <div className="flex justify-between items-start">
-                <div className="flex-1">
-                  <div className="text-4xl font-bold text-blue-600 mb-1">{completionPercentage}%</div>
-                  <div className="text-xs text-gray-500">Total Assignment Completions</div>
-                </div>
+              {(() => {
+                // Filter for Maze Baseline - Employee campaign specifically
+                const mazeBaselineCampaign = trainingStats?.find(enrollment => 
+                  enrollment.campaign_name?.toLowerCase().includes('maze baseline') &&
+                  enrollment.campaign_name?.toLowerCase().includes('employee')
+                );
                 
-                <div className="text-right space-y-1 text-xs">
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Completed</span>
-                    <span className="font-medium">{completed}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">In Progress</span>
-                    <span className="font-medium">{inProgress}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Not Started</span>
-                    <span className="font-medium">{notStarted}</span>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="mt-4 flex justify-end">
-                <button className="bg-gray-500 hover:bg-gray-600 text-white text-xs px-3 py-1 rounded">
-                  View Training Details
-                </button>
-              </div>
+                if (mazeBaselineCampaign) {
+                  return (
+                    <div className="space-y-3">
+                      <div className="border-b pb-3">
+                        <div className="text-sm font-medium text-gray-900 mb-2">
+                          Maze Baseline - Employee
+                        </div>
+                        <div className="flex justify-between text-xs">
+                          <span className="text-gray-600">Status:</span>
+                          <span className={`font-medium ${
+                            mazeBaselineCampaign.status === 'Completed' || mazeBaselineCampaign.status === 'Complete' 
+                              ? 'text-green-600' 
+                              : mazeBaselineCampaign.status === 'In Progress'
+                              ? 'text-yellow-600'
+                              : 'text-gray-600'
+                          }`}>
+                            {mazeBaselineCampaign.status}
+                          </span>
+                        </div>
+                        {mazeBaselineCampaign.enrollment_date && (
+                          <div className="flex justify-between text-xs">
+                            <span className="text-gray-600">Enrolled:</span>
+                            <span className="font-medium">
+                              {new Date(mazeBaselineCampaign.enrollment_date).toLocaleDateString()}
+                            </span>
+                          </div>
+                        )}
+                        {mazeBaselineCampaign.completion_date && (
+                          <div className="flex justify-between text-xs">
+                            <span className="text-gray-600">Completed:</span>
+                            <span className="font-medium">
+                              {new Date(mazeBaselineCampaign.completion_date).toLocaleDateString()}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                      <div className="text-xs text-gray-500">
+                        Campaign ID: {mazeBaselineCampaign.campaign_id}
+                      </div>
+                    </div>
+                  );
+                } else {
+                  // Show alternative Maze campaigns if Maze Baseline not found
+                  const allMazeCampaigns = trainingStats?.filter(enrollment =>
+                    enrollment.campaign_name?.toLowerCase().includes('maze')
+                  ) || [];
+                  
+                  if (allMazeCampaigns.length > 0) {
+                    return (
+                      <div className="space-y-2">
+                        <div className="text-sm font-medium text-gray-900">
+                          Maze Training Campaigns ({allMazeCampaigns.length})
+                        </div>
+                        {allMazeCampaigns.slice(0, 2).map((enrollment, index) => (
+                          <div key={index} className="border-b pb-2 last:border-b-0">
+                            <div className="flex justify-between text-xs">
+                              <span className="text-gray-600 truncate pr-2">
+                                {enrollment.campaign_name}
+                              </span>
+                              <span className={`font-medium ${
+                                enrollment.status === 'Completed' || enrollment.status === 'Complete' 
+                                  ? 'text-green-600' 
+                                  : 'text-yellow-600'
+                              }`}>
+                                {enrollment.status}
+                              </span>
+                            </div>
+                            {enrollment.completion_date && (
+                              <div className="text-xs text-gray-500 mt-1">
+                                Completed: {new Date(enrollment.completion_date).toLocaleDateString()}
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    );
+                  } else {
+                    return (
+                      <div className="text-center text-gray-500">
+                        <p className="text-sm">No Maze Baseline - Employee campaign found</p>
+                        <p className="text-xs mt-2">
+                          User has {trainingStats?.length || 0} total training enrollments
+                        </p>
+                      </div>
+                    );
+                  }
+                }
+              })()}
             </CardContent>
           </Card>
 
