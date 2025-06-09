@@ -88,7 +88,7 @@ export default function UserDetail() {
                title.includes(searchTerm) ||
                department.includes(searchTerm);
       })
-      .sort((a, b) => {
+      .sort((a: User, b: User) => {
         // Sort by relevance - exact name matches first
         const aFullName = `${a.firstName} ${a.lastName}`.toLowerCase();
         const bFullName = `${b.firstName} ${b.lastName}`.toLowerCase();
@@ -245,7 +245,6 @@ export default function UserDetail() {
         description: "User status updated successfully",
       });
       queryClient.invalidateQueries({ queryKey: ["/api/users", userId] });
-      setConfirmAction(null);
     },
     onError: (error) => {
       toast({
@@ -379,8 +378,6 @@ export default function UserDetail() {
   const handleDeleteUser = () => {
     deleteUserMutation.mutate();
   };
-
-;
 
   const handleEditSubmit = (data: z.infer<typeof editUserSchema>) => {
     updateUserMutation.mutate(data);
@@ -576,13 +573,8 @@ export default function UserDetail() {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => setConfirmAction({
-                      title: "Delete User",
-                      message: "Are you sure you want to delete this user? This action cannot be undone.",
-                      action: () => handleDeleteUser(),
-                      type: "delete"
-                    })}
-                    className="flex items-center gap-2 text-red-600 border-red-300 hover:bg-red-50"
+                    onClick={handleDeleteUser}
+                    className="flex items-center gap-2 text-red-600 dark:text-red-400 border-red-300 dark:border-red-600 hover:bg-red-50 dark:hover:bg-red-900"
                   >
                     <Trash2 className="w-4 h-4" />
                     Delete
