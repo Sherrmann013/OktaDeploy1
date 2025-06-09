@@ -182,6 +182,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const statusFilter = z.string().optional().parse(req.query.status);
       const statusFilters = z.string().optional().parse(req.query.statuses);
       const departmentFilter = z.string().optional().parse(req.query.department);
+      const lastLoginDays = z.string().optional().parse(req.query.lastLoginDays);
       const employeeTypeFilter = z.string().optional().parse(req.query.employeeType);
       const employeeTypesFilter = z.string().optional().parse(req.query.employeeTypes);
       const mobilePhoneFilter = z.string().optional().parse(req.query.mobilePhone);
@@ -275,6 +276,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
             user.profile.manager?.toLowerCase().includes(managerSearchTerm)
           );
           console.log(`Manager filter applied: ${managerFilter}, found ${filteredUsers.length} matching users`);
+        }
+
+        // Apply last login time range filter
+        if (lastLoginDays) {
+          const now = new Date();
+          if (lastLoginDays === "never") {
+            // Users who have never logged in
+            filteredUsers = filteredUsers.filter(user => !user.lastLogin);
+          } else if (lastLoginDays === "31") {
+            // Users who logged in longer than 30 days ago
+            const thirtyDaysAgo = new Date(now.getTime() - (30 * 24 * 60 * 60 * 1000));
+            filteredUsers = filteredUsers.filter(user => {
+              if (!user.lastLogin) return true; // Include never logged in users
+              return new Date(user.lastLogin) < thirtyDaysAgo;
+            });
+          } else {
+            // Users who logged in within the specified number of days
+            const days = parseInt(lastLoginDays);
+            const cutoffDate = new Date(now.getTime() - (days * 24 * 60 * 60 * 1000));
+            filteredUsers = filteredUsers.filter(user => {
+              if (!user.lastLogin) return false; // Exclude never logged in users
+              return new Date(user.lastLogin) >= cutoffDate;
+            });
+          }
+          console.log(`Last login filter applied: ${lastLoginDays}, found ${filteredUsers.length} matching users`);
         }
         
         // Handle employeeType sorting differently since it requires database lookup
