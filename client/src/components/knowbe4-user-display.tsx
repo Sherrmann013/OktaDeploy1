@@ -244,18 +244,26 @@ export default function KnowBe4UserDisplay({ userEmail }: KnowBe4UserDisplayProp
           {campaigns && Array.isArray(campaigns) && campaigns.length > 0 && (
             <div className="space-y-2">
               <div className="text-xs font-medium text-gray-700">Active Campaigns</div>
-              {campaigns.slice(0, 2).map((campaign: any, index: number) => (
-                <div key={index} className="text-xs bg-gray-50 rounded p-2">
-                  <div className="font-medium mb-1">{campaign.name}</div>
-                  <div className="flex justify-between text-gray-500">
-                    <span>Modules: {campaign.content ? campaign.content.length : campaign.modules?.length || 1}</span>
-                    <span className="text-orange-600">Not Started</span>
+              {campaigns.slice(0, 3).map((campaign: any, index: number) => {
+                const moduleCount = campaign.content ? campaign.content.length : (campaign.modules?.length || 1);
+                return (
+                  <div key={campaign.campaign_id || index} className="text-xs bg-gray-50 rounded p-2">
+                    <div className="font-medium mb-1 text-blue-700">{campaign.name}</div>
+                    <div className="flex justify-between text-gray-500">
+                      <span>{moduleCount} module{moduleCount !== 1 ? 's' : ''}</span>
+                      <span className="text-orange-600 font-medium">Not Started</span>
+                    </div>
+                    <div className="mt-1">
+                      <div className="w-full bg-gray-200 rounded-full h-1">
+                        <div className="bg-orange-400 h-1 rounded-full" style={{ width: '0%' }}></div>
+                      </div>
+                    </div>
                   </div>
-                </div>
-              ))}
-              {campaigns.length > 2 && (
+                );
+              })}
+              {campaigns.length > 3 && (
                 <div className="text-xs text-gray-500 text-center">
-                  +{campaigns.length - 2} more campaigns
+                  +{campaigns.length - 3} more assignments
                 </div>
               )}
             </div>

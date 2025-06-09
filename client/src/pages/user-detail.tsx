@@ -10,7 +10,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from "@/components/ui/input";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { ArrowLeft, ChevronDown, ChevronRight, ChevronUp, Smartphone, Monitor, Shield, Eye, RefreshCw, KeyRound, Edit, Play, Pause, Trash2, Search, UserX, Save, X, Download, Copy, UserCheck, Plus, Key } from "lucide-react";
+import { ArrowLeft, ChevronDown, ChevronRight, ChevronUp, Smartphone, Monitor, Shield, Eye, RefreshCw, KeyRound, Edit, Play, Pause, Trash2, Search, UserX, Save, X, Download, Copy, UserCheck, Plus, Key, CheckCircle } from "lucide-react";
 import { DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -1108,7 +1108,7 @@ export default function UserDetail() {
 
               <TabsContent value="monitoring" className="space-y-6 mt-0">
                 <div className="space-y-6">
-                  <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
                   {/* KnowBe4 Security Training */}
                   <KnowBe4UserDisplay userEmail={user.email || ''} />
