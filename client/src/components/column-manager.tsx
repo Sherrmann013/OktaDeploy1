@@ -31,6 +31,7 @@ import { CSS } from '@dnd-kit/utilities';
 // Available columns based on user profile fields
 export const AVAILABLE_COLUMNS = [
   { id: 'name', label: 'Name', type: 'text', hasFilter: false },
+  { id: 'login', label: 'Login', type: 'text', hasFilter: false },
   { id: 'title', label: 'Title', type: 'text', hasFilter: false },
   { id: 'department', label: 'Department', type: 'text', hasFilter: false },
   { id: 'employeeType', label: 'Employee Type', type: 'select', hasFilter: true, options: ['EMPLOYEE', 'CONTRACTOR', 'INTERN', 'PART_TIME', 'CONSULTANT'] },

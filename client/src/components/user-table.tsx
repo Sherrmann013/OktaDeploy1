@@ -41,6 +41,7 @@ import {
 // Column definitions for dynamic table rendering
 const COLUMN_DEFINITIONS = {
   name: { label: 'Name', sortKey: 'firstName', hasFilter: false },
+  login: { label: 'Login', sortKey: 'firstName', hasFilter: false },
   title: { label: 'Title', sortKey: 'title', hasFilter: false },
   department: { label: 'Department', sortKey: 'department', hasFilter: false },
   employeeType: { label: 'Employee Type', sortKey: 'employeeType', hasFilter: true },
