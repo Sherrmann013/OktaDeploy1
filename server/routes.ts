@@ -1686,7 +1686,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/knowbe4/campaigns', isAuthenticated, async (req, res) => {
     try {
       const campaigns = await knowBe4Service.getTrainingCampaigns();
-      res.json(campaigns);
+      
+      // Get enrollment data for each campaign
+      const campaignsWithEnrollments = await Promise.all(
+        campaigns.map(async (campaign) => {
+          try {
+            const enrollments = await knowBe4Service.getCampaignEnrollments(campaign.campaign_id);
+            return {
+              ...campaign,
+              enrollments
+            };
+          } catch (error) {
+            console.error(`Error fetching enrollments for campaign ${campaign.campaign_id}:`, error);
+            return {
+              ...campaign,
+              enrollments: []
+            };
+          }
+        })
+      );
+      
+      res.json(campaignsWithEnrollments);
     } catch (error) {
       console.error("KnowBe4 campaigns fetch error:", error);
       res.status(500).json({ 

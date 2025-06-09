@@ -83,18 +83,43 @@ export default function KnowBe4UserDisplay({ userEmail }: KnowBe4UserDisplayProp
     enabled: !!userEmail && !!connectionTest?.success,
   });
 
-  // Fetch actual training enrollment data from KnowBe4 API
-  const { data: campaignEnrollments } = useQuery({
-    queryKey: [`/api/knowbe4/user/${userEmail}/training-enrollments`],
-    enabled: !!userEmail && !!connectionTest?.success,
+  // Get all KnowBe4 campaigns and find user enrollments within them
+  const { data: allCampaigns } = useQuery({
+    queryKey: ['/api/knowbe4/campaigns'],
+    enabled: !!connectionTest?.success,
   });
+
+  // Search through campaign data to find this user's enrollments
+  const campaignEnrollments = React.useMemo(() => {
+    if (!allCampaigns || !userEmail) return [];
+    
+    const userEnrollments = [];
+    allCampaigns.forEach(campaign => {
+      // Check if user is enrolled in this campaign
+      const userEnrollment = campaign.enrollments?.find(enrollment => 
+        enrollment.user_email?.toLowerCase() === userEmail.toLowerCase() ||
+        enrollment.email?.toLowerCase() === userEmail.toLowerCase()
+      );
+      
+      if (userEnrollment) {
+        userEnrollments.push({
+          ...userEnrollment,
+          campaign_name: campaign.name,
+          campaign_id: campaign.campaign_id
+        });
+      }
+    });
+    
+    return userEnrollments;
+  }, [allCampaigns, userEmail]);
 
   // Debug logging for exact data structure
   console.log('=== KNOWBE4 DEBUG DATA ===');
   console.log('KnowBe4 User Data:', knowbe4User);
-  console.log('Training Enrollments from API:', campaignEnrollments);
-  console.log('Enrollment Array Length:', campaignEnrollments?.length);
-  console.log('First Enrollment:', campaignEnrollments?.[0]);
+  console.log('All Campaigns:', allCampaigns);
+  console.log('User Email:', userEmail);
+  console.log('Found User Enrollments:', campaignEnrollments);
+  console.log('Enrollment Count:', campaignEnrollments?.length);
   console.log('=== END DEBUG DATA ===');
 
 

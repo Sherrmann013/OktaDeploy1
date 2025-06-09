@@ -355,6 +355,16 @@ class KnowBe4Service {
     }
   }
 
+  async getCampaignEnrollments(campaignId: number): Promise<any[]> {
+    try {
+      const endpoint = `/training/campaigns/${campaignId}/enrollments`;
+      return await this.makeRequest(endpoint);
+    } catch (error) {
+      console.error(`Error fetching campaign ${campaignId} enrollments:`, error);
+      return [];
+    }
+  }
+
   async getUserCampaignEnrollments(userId: number): Promise<any[]> {
     try {
       // Get all training campaigns
