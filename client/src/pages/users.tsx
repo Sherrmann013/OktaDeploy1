@@ -265,11 +265,7 @@ export default function Users() {
         sortOrder: sortOrder,
       });
 
-      const response = await fetch(`/api/users?${queryParams}`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch users for export');
-      }
-
+      const response = await apiRequest('GET', `/api/users?${queryParams}`);
       const { users: allUsers } = await response.json();
 
       // Get column mapping for human-readable headers
