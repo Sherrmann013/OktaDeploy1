@@ -317,10 +317,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
             const days = parseInt(lastLoginDays);
             if (isNaN(days)) return; // Skip if invalid number
             
-            // Set cutoff to start of day for more precise filtering
-            const cutoffDate = new Date(now);
-            cutoffDate.setDate(cutoffDate.getDate() - days);
-            cutoffDate.setHours(0, 0, 0, 0); // Start of day
+            // Set cutoff to exact milliseconds for precise filtering
+            const cutoffDate = new Date(now.getTime() - (days * 24 * 60 * 60 * 1000));
             
             filteredUsers = filteredUsers.filter(user => {
               if (!user.lastLogin) return false; // Exclude never logged in users
@@ -328,10 +326,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
               // Ensure we have a valid date
               if (isNaN(lastLoginDate.getTime())) return false;
               
-              // For debugging
-              const daysDiff = Math.floor((now.getTime() - lastLoginDate.getTime()) / (24 * 60 * 60 * 1000));
+              // For debugging: calculate exact days difference
+              const timeDiff = now.getTime() - lastLoginDate.getTime();
+              const daysDiff = timeDiff / (24 * 60 * 60 * 1000);
               
-              return lastLoginDate >= cutoffDate;
+              // Only include users who logged in within the specified days (strict boundary)
+              return daysDiff <= days;
             });
           }
           console.log(`Last login filter applied: ${lastLoginDays}, found ${filteredUsers.length} matching users`);

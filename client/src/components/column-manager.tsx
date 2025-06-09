@@ -78,9 +78,7 @@ function SortableColumnItem({ column, onToggle }: { column: ColumnConfig; onTogg
     <div
       ref={setNodeRef}
       style={style}
-      className={`flex items-center justify-between p-3 border rounded-lg bg-card transition-all ${
-        isDragging ? 'opacity-50 shadow-lg scale-105 z-50' : 'hover:shadow-md'
-      }`}
+      className="flex items-center justify-between p-3 border rounded-lg bg-card transition-all hover:shadow-md"
     >
       <div className="flex items-center space-x-3">
         <div
