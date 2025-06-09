@@ -92,11 +92,16 @@ class KnowBe4GraphService {
       const query: GraphQLQuery = {
         query: `
           query {
-            account {
-              id
-              name
-              subscriptionLevel
-              numberOfSeats
+            __schema {
+              queryType {
+                fields {
+                  name
+                  description
+                  type {
+                    name
+                  }
+                }
+              }
             }
           }
         `
