@@ -93,19 +93,21 @@ export default function KnowBe4UserDisplay({ userEmail }: KnowBe4UserDisplayProp
   const campaignEnrollments = React.useMemo(() => {
     if (!allCampaigns || !userEmail) return [];
     
-    const userEnrollments = [];
-    allCampaigns.forEach(campaign => {
+    const userEnrollments: any[] = [];
+    (allCampaigns as any[]).forEach(campaign => {
       // Check if user is enrolled in this campaign
-      const userEnrollment = campaign.enrollments?.find(enrollment => 
+      const userEnrollment = campaign.enrollments?.find((enrollment: any) => 
+        enrollment.email?.toLowerCase() === userEmail.toLowerCase() ||
         enrollment.user_email?.toLowerCase() === userEmail.toLowerCase() ||
-        enrollment.email?.toLowerCase() === userEmail.toLowerCase()
+        enrollment.recipient_email?.toLowerCase() === userEmail.toLowerCase()
       );
       
       if (userEnrollment) {
         userEnrollments.push({
           ...userEnrollment,
           campaign_name: campaign.name,
-          campaign_id: campaign.campaign_id
+          campaign_id: campaign.campaign_id,
+          status: userEnrollment.status || userEnrollment.completion_status || 'Unknown'
         });
       }
     });
@@ -118,6 +120,13 @@ export default function KnowBe4UserDisplay({ userEmail }: KnowBe4UserDisplayProp
   console.log('KnowBe4 User Data:', knowbe4User);
   console.log('All Campaigns:', allCampaigns);
   console.log('User Email:', userEmail);
+  
+  // Log detailed enrollment structure for first campaign
+  if (allCampaigns && allCampaigns.length > 0) {
+    console.log('First Campaign Enrollments Structure:', allCampaigns[0].enrollments);
+    console.log('First Campaign Enrollment Sample:', allCampaigns[0].enrollments?.[0]);
+  }
+  
   console.log('Found User Enrollments:', campaignEnrollments);
   console.log('Enrollment Count:', campaignEnrollments?.length);
   console.log('=== END DEBUG DATA ===');
