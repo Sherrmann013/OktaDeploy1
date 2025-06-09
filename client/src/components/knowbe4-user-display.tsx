@@ -200,52 +200,34 @@ export default function KnowBe4UserDisplay({ userEmail }: KnowBe4UserDisplayProp
   const emailsReported = phishingStats.filter(p => p.last_reported_date && p.last_reported_date !== null).length;
   const totalPhishingCampaigns = phishingStats.length;
 
-  // Extract training data from the actual KnowBe4 API response structure
-  // The debug shows training data exists but current_training_campaign_statuses is empty
-  // Let's check if there are other fields with training data
-  const allCampaignData = JSON.stringify(knowbe4User, null, 2);
-  console.log('Full KnowBe4 User Object Keys:', Object.keys(knowbe4User || {}));
+  // Use the campaigns data which contains the actual training information
+  // The debug shows "Passphrase Test" campaign with "Completed" status
+  const trainingStats = campaigns || [];
+  console.log('Using campaigns as training stats:', trainingStats);
   
-  // Look for training-related fields in the actual data
-  const trainingCampaignStatuses = knowbe4User?.current_training_campaign_statuses || [];
-  const trainingEnrollments = knowbe4User?.training_enrollments || [];
-  const campaignData = knowbe4User?.campaigns || [];
-  
-  console.log('Training Campaign Statuses:', trainingCampaignStatuses);
-  console.log('Training Enrollments:', trainingEnrollments);
-  console.log('Campaign Data:', campaignData);
-  
-  // Use whichever field has actual data
-  let trainingStats = trainingCampaignStatuses;
-  if (trainingStats.length === 0 && trainingEnrollments.length > 0) {
-    trainingStats = trainingEnrollments;
-  }
-  if (trainingStats.length === 0 && campaignData.length > 0) {
-    trainingStats = campaignData;
-  }
-  
-  const completed = trainingStats.filter(t => 
-    t.status === 'Completed' || t.status === 'completed' || 
-    (t.completion_date && t.completion_date !== null)
+  const completed = trainingStats.filter(campaign => 
+    campaign.status === 'Completed' || campaign.status === 'completed'
   ).length;
   
-  const inProgress = trainingStats.filter(t => 
-    t.status === 'In Progress' || t.status === 'in_progress' || 
-    t.status === 'Enrolled' || t.status === 'enrolled' ||
-    t.status === 'Active' || t.status === 'active'
+  const inProgress = trainingStats.filter(campaign => 
+    campaign.status === 'In Progress' || campaign.status === 'in_progress' || 
+    campaign.status === 'Active' || campaign.status === 'active'
   ).length;
   
-  const notStarted = trainingStats.filter(t => 
-    t.status === 'Not Started' || t.status === 'not_started' ||
-    (!t.completion_date && !['Completed', 'completed', 'In Progress', 'in_progress', 'Enrolled', 'enrolled'].includes(t.status))
+  const notStarted = trainingStats.filter(campaign => 
+    campaign.status === 'Not Started' || campaign.status === 'not_started' ||
+    campaign.status === 'Draft' || campaign.status === 'draft'
   ).length;
   
   const total = trainingStats.length;
   const completionPercentage = total > 0 ? Math.round((completed / total) * 100) : 0;
   
-  console.log('Final Training Stats:', trainingStats);
-  console.log('Completed:', completed, 'InProgress:', inProgress, 'NotStarted:', notStarted);
-  console.log('Total:', total, 'Completion %:', completionPercentage);
+  console.log('Training completion calculation:');
+  console.log('Completed campaigns:', completed);
+  console.log('In Progress campaigns:', inProgress); 
+  console.log('Not Started campaigns:', notStarted);
+  console.log('Total campaigns:', total);
+  console.log('Completion percentage:', completionPercentage);
 
   return (
     <Card>
