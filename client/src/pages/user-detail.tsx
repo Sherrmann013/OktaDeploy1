@@ -16,7 +16,7 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import ConfirmationModal from "@/components/confirmation-modal";
 import AssignAppModal from "@/components/assign-app-modal";
-import KnowBe4Section from "@/components/knowbe4-section";
+import KnowBe4UserDisplay from "@/components/knowbe4-user-display";
 import { useState, useEffect, useMemo } from "react";
 import type { User } from "@shared/schema";
 import { useForm } from "react-hook-form";
