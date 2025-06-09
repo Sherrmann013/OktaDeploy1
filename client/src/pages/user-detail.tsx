@@ -1476,7 +1476,10 @@ export default function UserDetail() {
                         </div>
                         {userLogs.map((log, index) => (
                           <div key={log.id} className={`${index % 2 === 0 ? 'bg-white dark:bg-gray-900' : 'bg-gray-50 dark:bg-gray-800'}`}>
-                            <div className="grid grid-cols-12 gap-4 p-3 border-b border-gray-200 dark:border-gray-700 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors">
+                            <div 
+                              className="grid grid-cols-12 gap-4 p-3 border-b border-gray-200 dark:border-gray-700 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors cursor-pointer"
+                              onClick={() => toggleLogExpansion(log.id)}
+                            >
                               <div className="col-span-2 text-sm">
                                 <div className="flex items-center gap-2">
                                   <span className="text-lg">{getEventIcon(log.eventType)}</span>
@@ -1507,7 +1510,10 @@ export default function UserDetail() {
                                 <Button
                                   variant="ghost"
                                   size="sm"
-                                  onClick={() => toggleLogExpansion(log.id)}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    toggleLogExpansion(log.id);
+                                  }}
                                   className="h-8 w-8 p-0"
                                 >
                                   {expandedLogs.has(log.id) ? (
@@ -1519,6 +1525,7 @@ export default function UserDetail() {
                                 <Button
                                   variant="ghost"
                                   size="sm"
+                                  onClick={(e) => e.stopPropagation()}
                                   className="h-8 w-8 p-0 ml-1"
                                 >
                                   <Copy className="w-4 h-4" />
