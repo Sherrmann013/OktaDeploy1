@@ -61,18 +61,18 @@ export default function Sidebar() {
       <div className="p-3 border-b border-border bg-purple-600 dark:bg-purple-700 flex flex-col rounded-br-lg">
         <div className="text-center flex-1">
           <div className="relative inline-block mb-1">
-            <div className="relative w-20 h-20 mx-auto rounded bg-purple-600 flex items-center justify-center">
-              <div className="relative w-16 h-16">
+            <div className="relative w-24 h-24 mx-auto rounded bg-purple-600 flex items-center justify-center">
+              <div className="relative w-20 h-20">
                 <img 
                   src="/maze-logo.png" 
                   alt="MAZE Logo" 
-                  className="w-16 h-16 absolute inset-0 object-contain"
+                  className="w-20 h-20 absolute inset-0 object-contain"
                   style={{
                     filter: 'invert(1)'
                   }}
                 />
                 <div 
-                  className="w-16 h-16 absolute inset-0"
+                  className="w-20 h-20 absolute inset-0"
                   style={{
                     backgroundColor: '#f97316',
                     mixBlendMode: 'multiply'
@@ -82,7 +82,7 @@ export default function Sidebar() {
             </div>
           </div>
         </div>
-        <div className="text-[10px] text-white/80 leading-none text-center mt-auto whitespace-nowrap">Powered by ClockWerk.it</div>
+        <div className="text-[10px] text-white/80 leading-none text-left mt-auto whitespace-nowrap px-1">Powered by ClockWerk.it</div>
       </div>
       
       <nav className="p-4 flex-1">
