@@ -213,10 +213,25 @@ export default function KnowBe4UserDisplay({ userEmail }: KnowBe4UserDisplayProp
         <div className="space-y-2">
           <span className="text-sm font-medium">Training Campaigns</span>
           <div className="text-sm text-gray-600">
-            {campaigns && Array.isArray(campaigns) && campaigns.length > 0 ? 
-              `${campaigns.length} Active Campaigns` : 
+            {campaigns && Array.isArray(campaigns) && campaigns.length > 0 ? (
+              <div className="space-y-1">
+                {campaigns.slice(0, 2).map((campaign: any, index: number) => (
+                  <div key={index} className="text-xs">
+                    <div className="font-medium">{campaign.name}</div>
+                    <div className="text-gray-500">
+                      0/{campaign.modules ? campaign.modules.length : 1} completed
+                    </div>
+                  </div>
+                ))}
+                {campaigns.length > 2 && (
+                  <div className="text-xs text-gray-500">
+                    +{campaigns.length - 2} more campaigns
+                  </div>
+                )}
+              </div>
+            ) : (
               "No Active Campaigns"
-            }
+            )}
           </div>
         </div>
 
