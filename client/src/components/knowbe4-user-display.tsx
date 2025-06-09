@@ -67,6 +67,8 @@ export default function KnowBe4UserDisplay({ userEmail }: KnowBe4UserDisplayProp
     enabled: !!connectionTest?.success,
   });
 
+
+
   if (connectionLoading) {
     return (
       <Card>
