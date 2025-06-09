@@ -312,6 +312,48 @@ class KnowBe4Service {
       return [];
     }
   }
+
+  async getCampaignById(campaignId: number): Promise<any> {
+    try {
+      const endpoint = `/training/campaigns/${campaignId}`;
+      return await this.makeRequest(endpoint);
+    } catch (error) {
+      console.error(`Error fetching campaign ${campaignId}:`, error);
+      return null;
+    }
+  }
+
+  async getCampaignEnrollments(campaignId: number): Promise<any[]> {
+    try {
+      const endpoint = `/training/campaigns/${campaignId}/enrollments`;
+      return await this.makeRequest(endpoint);
+    } catch (error) {
+      console.error(`Error fetching campaign ${campaignId} enrollments:`, error);
+      return [];
+    }
+  }
+
+  async searchCampaignsByName(searchTerm: string): Promise<any[]> {
+    try {
+      const campaigns = await this.getTrainingCampaigns();
+      return campaigns.filter(campaign => 
+        campaign.name.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    } catch (error) {
+      console.error('Error searching campaigns by name:', error);
+      return [];
+    }
+  }
+
+  async getCampaignParticipants(campaignId: number): Promise<any[]> {
+    try {
+      const endpoint = `/training/campaigns/${campaignId}/recipients`;
+      return await this.makeRequest(endpoint);
+    } catch (error) {
+      console.error(`Error fetching campaign ${campaignId} participants:`, error);
+      return [];
+    }
+  }
 }
 
 export const knowBe4Service = new KnowBe4Service();

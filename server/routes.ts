@@ -1767,6 +1767,60 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Search campaigns by name
+  app.get('/api/knowbe4/campaigns/search', isAuthenticated, async (req, res) => {
+    try {
+      const searchTerm = req.query.q as string;
+      if (!searchTerm) {
+        return res.status(400).json({ error: 'Search term is required' });
+      }
+      const campaigns = await knowBe4Service.searchCampaignsByName(searchTerm);
+      res.json(campaigns);
+    } catch (error) {
+      console.error('Error searching campaigns:', error);
+      res.status(500).json({ error: 'Failed to search campaigns' });
+    }
+  });
+
+  // Get specific campaign details
+  app.get('/api/knowbe4/campaigns/:campaignId', isAuthenticated, async (req, res) => {
+    try {
+      const campaignId = parseInt(req.params.campaignId);
+      const campaign = await knowBe4Service.getCampaignById(campaignId);
+      if (!campaign) {
+        return res.status(404).json({ error: 'Campaign not found' });
+      }
+      res.json(campaign);
+    } catch (error) {
+      console.error('Error fetching campaign:', error);
+      res.status(500).json({ error: 'Failed to fetch campaign' });
+    }
+  });
+
+  // Get campaign enrollments/participants
+  app.get('/api/knowbe4/campaigns/:campaignId/participants', isAuthenticated, async (req, res) => {
+    try {
+      const campaignId = parseInt(req.params.campaignId);
+      const participants = await knowBe4Service.getCampaignParticipants(campaignId);
+      res.json(participants);
+    } catch (error) {
+      console.error('Error fetching campaign participants:', error);
+      res.status(500).json({ error: 'Failed to fetch campaign participants' });
+    }
+  });
+
+  // Get campaign enrollments
+  app.get('/api/knowbe4/campaigns/:campaignId/enrollments', isAuthenticated, async (req, res) => {
+    try {
+      const campaignId = parseInt(req.params.campaignId);
+      const enrollments = await knowBe4Service.getCampaignEnrollments(campaignId);
+      res.json(enrollments);
+    } catch (error) {
+      console.error('Error fetching campaign enrollments:', error);
+      res.status(500).json({ error: 'Failed to fetch campaign enrollments' });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
