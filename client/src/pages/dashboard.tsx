@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
-import Sidebar from "@/components/sidebar";
+
 import UserTable from "@/components/user-table";
 import CreateUserModal from "@/components/create-user-modal";
 import { Button } from "@/components/ui/button";
@@ -49,13 +49,10 @@ export default function Dashboard() {
   const totalPages = Math.ceil((data?.total || 0) / usersPerPage);
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
-      <Sidebar />
-      
-      <main className="flex-1 flex flex-col overflow-hidden">
-        {/* Header */}
-        <header className="bg-white border-b border-gray-200 px-6 py-4">
-          <div className="flex items-center justify-between">
+    <>
+      {/* Header */}
+      <header className="bg-white border-b border-gray-200 px-6 py-4">
+        <div className="flex items-center justify-between">
             <div>
               <nav className="flex text-sm text-gray-500 mb-1">
                 <span>Directory</span>
@@ -144,7 +141,6 @@ export default function Dashboard() {
             onPerPageChange={setUsersPerPage}
           />
         </div>
-      </main>
 
       <CreateUserModal
         open={isCreateModalOpen}
@@ -154,6 +150,6 @@ export default function Dashboard() {
           refetch();
         }}
       />
-    </div>
+    </>
   );
 }
