@@ -2,10 +2,11 @@ import React, { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Progress } from "@/components/ui/progress";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Shield, Target, BookOpen, AlertTriangle, CheckCircle, XCircle, Clock, Users, GraduationCap } from "lucide-react";
+import { Shield, Target, BookOpen, AlertTriangle, CheckCircle, XCircle, Clock, Users, GraduationCap, ChevronDown, ChevronRight } from "lucide-react";
 
 interface KnowBe4UserDisplayProps {
   userEmail: string;
@@ -71,6 +72,8 @@ function getPhishProneLevel(percentage: number) {
 }
 
 export default function KnowBe4UserDisplay({ userEmail }: KnowBe4UserDisplayProps) {
+  const [enrollmentsExpanded, setEnrollmentsExpanded] = useState(false);
+  
   // Test connection first
   const { data: connectionTest, isLoading: connectionLoading } = useQuery<{success: boolean; message: string; details: any}>({
     queryKey: ['/api/knowbe4/test-connection'],
@@ -397,88 +400,59 @@ export default function KnowBe4UserDisplay({ userEmail }: KnowBe4UserDisplayProp
 
         </div>
 
-        {/* Detailed Training Enrollments */}
+        {/* Collapsible Training Enrollments */}
         {finalTrainingData.length > 0 && (
           <div className="mt-6">
-            <Tabs defaultValue="training" className="w-full">
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="training">Training Details</TabsTrigger>
-                <TabsTrigger value="phishing">Phishing History</TabsTrigger>
-              </TabsList>
-              
-              <TabsContent value="training" className="space-y-4">
-                <div className="space-y-3">
-                  <h4 className="font-medium text-sm text-gray-700">Training Enrollments ({finalTrainingData.length})</h4>
-                  <div className="space-y-2 max-h-96 overflow-y-auto">
-                    {finalTrainingData.map((enrollment: any, index: number) => (
-                      <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                        <div className="flex-1">
-                          <div className="font-medium text-sm text-gray-900">
-                            {enrollment.module_name || enrollment.name}
-                          </div>
-                          <div className="text-xs text-gray-600">
-                            {enrollment.campaign_name}
-                          </div>
-                          <div className="text-xs text-gray-500 mt-1">
-                            Enrolled: {formatDate(enrollment.enrollment_date)}
-                            {enrollment.completion_date && (
-                              <span> • Completed: {formatDate(enrollment.completion_date)}</span>
-                            )}
-                          </div>
-                        </div>
-                        <div className="ml-4">
-                          <Badge 
-                            variant={
-                              enrollment.status === 'Completed' ? 'default' : 
-                              enrollment.status === 'In Progress' ? 'secondary' : 
-                              'outline'
-                            }
-                            className={
-                              enrollment.status === 'Completed' ? 'bg-green-100 text-green-800' :
-                              enrollment.status === 'In Progress' ? 'bg-yellow-100 text-yellow-800' :
-                              'bg-gray-100 text-gray-800'
-                            }
-                          >
-                            {enrollment.status || 'Not Started'}
-                          </Badge>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </TabsContent>
-              
-              <TabsContent value="phishing" className="space-y-4">
-                <div className="space-y-3">
-                  <h4 className="font-medium text-sm text-gray-700">Phishing Campaign History</h4>
-                  {phishingResults.length > 0 ? (
-                    <div className="space-y-2 max-h-96 overflow-y-auto">
-                      {phishingResults.map((result: any, index: number) => (
-                        <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                          <div className="flex-1">
-                            <div className="font-medium text-sm text-gray-900">
-                              {result.campaign_name}
-                            </div>
-                            <div className="text-xs text-gray-500 mt-1">
-                              {result.last_phish_prone_date && `Last Activity: ${formatDate(result.last_phish_prone_date)}`}
-                            </div>
-                          </div>
-                          <div className="ml-4">
-                            <Badge variant="outline" className="text-xs">
-                              {result.status || 'Completed'}
-                            </Badge>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
+            <Collapsible open={enrollmentsExpanded} onOpenChange={setEnrollmentsExpanded}>
+              <CollapsibleTrigger asChild>
+                <Button variant="ghost" className="flex items-center justify-between w-full p-3 text-left hover:bg-gray-100 rounded-lg">
+                  <span className="font-medium text-sm text-gray-700">
+                    Training Enrollments ({finalTrainingData.length})
+                  </span>
+                  {enrollmentsExpanded ? (
+                    <ChevronDown className="h-4 w-4" />
                   ) : (
-                    <div className="text-center text-gray-500 py-8">
-                      <p className="text-sm">No phishing campaign history available</p>
-                    </div>
+                    <ChevronRight className="h-4 w-4" />
                   )}
-                </div>
-              </TabsContent>
-            </Tabs>
+                </Button>
+              </CollapsibleTrigger>
+              <CollapsibleContent className="space-y-2 mt-2 max-h-96 overflow-y-auto">
+                {finalTrainingData.map((enrollment: any, index: number) => (
+                  <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div className="flex-1">
+                      <div className="font-medium text-sm text-gray-900">
+                        {enrollment.module_name || enrollment.name}
+                      </div>
+                      <div className="text-xs text-gray-600">
+                        {enrollment.campaign_name}
+                      </div>
+                      <div className="text-xs text-gray-500 mt-1">
+                        Enrolled: {formatDate(enrollment.enrollment_date)}
+                        {enrollment.completion_date && (
+                          <span> • Completed: {formatDate(enrollment.completion_date)}</span>
+                        )}
+                      </div>
+                    </div>
+                    <div className="ml-4">
+                      <Badge 
+                        variant={
+                          enrollment.status === 'Completed' ? 'default' : 
+                          enrollment.status === 'In Progress' ? 'secondary' : 
+                          'outline'
+                        }
+                        className={
+                          enrollment.status === 'Completed' ? 'bg-green-100 text-green-800' :
+                          enrollment.status === 'In Progress' ? 'bg-yellow-100 text-yellow-800' :
+                          'bg-gray-100 text-gray-800'
+                        }
+                      >
+                        {enrollment.status || 'Not Started'}
+                      </Badge>
+                    </div>
+                  </div>
+                ))}
+              </CollapsibleContent>
+            </Collapsible>
           </div>
         )}
 
