@@ -308,6 +308,61 @@ export default function UserTable({
     );
   };
 
+  const renderManagerFilter = () => {
+    return (
+      <Popover open={managerOpen} onOpenChange={setManagerOpen}>
+        <PopoverTrigger asChild>
+          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+            <FilterIcon className="h-4 w-4" />
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-56 p-0" align="start">
+          <Command>
+            <CommandInput 
+              placeholder="Search manager..." 
+              value={managerSearchQuery}
+              onValueChange={setManagerSearchQuery}
+            />
+            <CommandList>
+              <CommandEmpty>No managers found.</CommandEmpty>
+              <CommandGroup>
+                {managerFilter && (
+                  <CommandItem
+                    onSelect={() => {
+                      setManagerFilter("");
+                      setManagerSearchQuery("");
+                      setManagerOpen(false);
+                    }}
+                  >
+                    <span className="text-muted-foreground">Clear filter</span>
+                  </CommandItem>
+                )}
+                {managerSuggestions.map((manager: string) => (
+                  <CommandItem
+                    key={manager}
+                    onSelect={() => {
+                      setManagerFilter(manager);
+                      setManagerSearchQuery("");
+                      setManagerOpen(false);
+                    }}
+                  >
+                    <Check
+                      className={cn(
+                        "mr-2 h-4 w-4",
+                        managerFilter === manager ? "opacity-100" : "opacity-0"
+                      )}
+                    />
+                    {manager}
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            </CommandList>
+          </Command>
+        </PopoverContent>
+      </Popover>
+    );
+  };
+
   const renderCellContent = (user: User, columnId: string) => {
     switch (columnId) {
       case 'name':
@@ -424,6 +479,7 @@ export default function UserTable({
                         </Button>
                         {column.hasFilter && columnId === 'employeeType' && renderEmployeeTypeFilter()}
                         {column.hasFilter && columnId === 'mobilePhone' && renderMobilePhoneFilter()}
+                        {column.hasFilter && columnId === 'manager' && renderManagerFilter()}
                       </div>
                     </TableHead>
                   );
