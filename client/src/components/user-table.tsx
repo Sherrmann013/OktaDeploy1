@@ -434,11 +434,12 @@ export default function UserTable({
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-56 p-0" align="start">
-          <Command key={managerSearchQuery} shouldFilter={false}>
+          <Command shouldFilter={false}>
             <CommandInput 
               placeholder="Search manager..." 
               value={managerSearchQuery}
               onValueChange={setManagerSearchQuery}
+              autoFocus
             />
             <CommandList>
               <CommandEmpty>No managers found.</CommandEmpty>
