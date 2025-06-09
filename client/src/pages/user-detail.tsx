@@ -1309,10 +1309,6 @@ export default function UserDetail() {
                       </div>
                     </CardContent>
                   </Card>
-
-
-
-                  </div>
                 </div>
               </TabsContent>
 
@@ -1714,8 +1710,7 @@ export default function UserDetail() {
                   </CardContent>
                 </Card>
               </TabsContent>
-            </div>
-          </Tabs>
+            </Tabs>
         </div>
       </div>
 
