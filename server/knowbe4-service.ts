@@ -168,7 +168,8 @@ class KnowBe4Service {
         headers: {
           'Authorization': `Bearer ${this.config.apiKey}`,
           'Accept': 'application/json',
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'User-Agent': 'Replit-KnowBe4-Integration/1.0'
         }
       });
 
@@ -186,6 +187,9 @@ class KnowBe4Service {
 
   async testConnection(): Promise<{ success: boolean; message: string; details?: any }> {
     try {
+      console.log('Testing KnowBe4 API with token:', this.config.apiKey ? 'Token provided' : 'No token');
+      console.log('API URL:', `${this.config.baseUrl}/account`);
+      
       const response = await this.makeRequest('/account');
       return {
         success: true,
@@ -198,6 +202,7 @@ class KnowBe4Service {
         }
       };
     } catch (error: any) {
+      console.log('KnowBe4 API error details:', error);
       return {
         success: false,
         message: `KnowBe4 API connection failed: ${error.message}`,
