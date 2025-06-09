@@ -41,7 +41,8 @@ export default function Users() {
   const [filters, setFilters] = useState({
     employeeType: [] as string[],
     mobilePhone: "",
-    manager: ""
+    manager: "",
+    status: [] as string[]
   });
   const { toast } = useToast();
 

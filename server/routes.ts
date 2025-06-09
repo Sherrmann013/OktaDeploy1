@@ -154,8 +154,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         let managerList = Array.from(managers).sort();
         
         // Filter by query if provided
-        if (query) {
-          const searchTerm = query.toLowerCase();
+        if (query && query.trim().length > 0) {
+          const searchTerm = query.trim().toLowerCase();
           managerList = managerList.filter(manager => 
             manager.toLowerCase().includes(searchTerm)
           );
@@ -326,9 +326,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
               bValue = b.status || '';
               break;
             case 'lastLogin':
-              aValue = a.lastLogin || '';
-              bValue = b.lastLogin || '';
-              break;
+              // Handle date sorting with null values at the end
+              if (!a.lastLogin && !b.lastLogin) return 0;
+              if (!a.lastLogin) return 1; // null values go to end
+              if (!b.lastLogin) return -1;
+              aValue = new Date(a.lastLogin).getTime();
+              bValue = new Date(b.lastLogin).getTime();
+              // Skip the empty value handling below for dates
+              if (sortOrder === 'desc') {
+                return bValue - aValue;
+              } else {
+                return aValue - bValue;
+              }
+            case 'activated':
+            case 'created':
+            case 'lastUpdated':
+            case 'passwordChanged':
+              // Handle date sorting with null values at the end
+              const aDate = a.activated || a.created || a.lastUpdated || a.passwordChanged;
+              const bDate = b.activated || b.created || b.lastUpdated || b.passwordChanged;
+              if (!aDate && !bDate) return 0;
+              if (!aDate) return 1; // null values go to end
+              if (!bDate) return -1;
+              aValue = new Date(aDate).getTime();
+              bValue = new Date(bDate).getTime();
+              // Skip the empty value handling below for dates
+              if (sortOrder === 'desc') {
+                return bValue - aValue;
+              } else {
+                return aValue - bValue;
+              }
             default:
               aValue = a.profile.firstName || '';
               bValue = b.profile.firstName || '';

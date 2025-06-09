@@ -27,7 +27,7 @@ const COLUMN_DEFINITIONS = {
   employeeType: { label: 'Employee Type', sortKey: 'employeeType', hasFilter: true },
   manager: { label: 'Manager', sortKey: 'manager', hasFilter: true },
   mobilePhone: { label: 'Mobile Phone', sortKey: 'mobilePhone', hasFilter: true },
-  status: { label: 'Status', sortKey: 'status', hasFilter: false },
+  status: { label: 'Status', sortKey: 'status', hasFilter: true },
   disabled: { label: 'Disabled On', sortKey: 'lastUpdated', hasFilter: false },
   activated: { label: 'Account Created', sortKey: 'activated', hasFilter: true },
   lastLogin: { label: 'Last Login', sortKey: 'lastLogin', hasFilter: true },
@@ -54,8 +54,9 @@ interface UserTableProps {
     employeeType: string[];
     mobilePhone: string;
     manager: string;
+    status: string[];
   };
-  onFiltersChange?: (filters: { employeeType: string[]; mobilePhone: string; manager: string }) => void;
+  onFiltersChange?: (filters: { employeeType: string[]; mobilePhone: string; manager: string; status: string[] }) => void;
 }
 
 export default function UserTable({
@@ -87,22 +88,29 @@ export default function UserTable({
   const mobilePhoneFilter = filters?.mobilePhone || "";
   const employeeTypeFilter = filters?.employeeType || [];
   const managerFilter = filters?.manager || "";
+  const statusFilter = filters?.status || [];
   
   const setMobilePhoneFilter = (value: string) => {
     if (onFiltersChange) {
-      onFiltersChange({ employeeType: employeeTypeFilter, mobilePhone: value, manager: managerFilter });
+      onFiltersChange({ employeeType: employeeTypeFilter, mobilePhone: value, manager: managerFilter, status: statusFilter });
     }
   };
   
   const setEmployeeTypeFilter = (value: string[]) => {
     if (onFiltersChange) {
-      onFiltersChange({ employeeType: value, mobilePhone: mobilePhoneFilter, manager: managerFilter });
+      onFiltersChange({ employeeType: value, mobilePhone: mobilePhoneFilter, manager: managerFilter, status: statusFilter });
     }
   };
 
   const setManagerFilter = (value: string) => {
     if (onFiltersChange) {
-      onFiltersChange({ employeeType: employeeTypeFilter, mobilePhone: mobilePhoneFilter, manager: value });
+      onFiltersChange({ employeeType: employeeTypeFilter, mobilePhone: mobilePhoneFilter, manager: value, status: statusFilter });
+    }
+  };
+
+  const setStatusFilter = (value: string[]) => {
+    if (onFiltersChange) {
+      onFiltersChange({ employeeType: employeeTypeFilter, mobilePhone: mobilePhoneFilter, manager: managerFilter, status: value });
     }
   };
 
@@ -266,6 +274,53 @@ export default function UserTable({
                 variant="outline" 
                 size="sm" 
                 onClick={() => setEmployeeTypeFilter([])}
+                className="text-xs"
+              >
+                Clear
+              </Button>
+            </div>
+          </div>
+        </PopoverContent>
+      </Popover>
+    );
+  };
+
+  const renderStatusFilter = () => {
+    const statusOptions = ['ACTIVE', 'SUSPENDED', 'DEPROVISIONED', 'PROVISIONED', 'STAGED', 'RECOVERY', 'LOCKED_OUT', 'PASSWORD_EXPIRED'];
+    
+    return (
+      <Popover>
+        <PopoverTrigger asChild>
+          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+            <FilterIcon className="h-4 w-4" />
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-56" align="start">
+          <div className="space-y-3">
+            <Label className="text-sm font-medium">Status</Label>
+            <div className="space-y-2 max-h-48 overflow-y-auto">
+              {statusOptions.map((status) => (
+                <div key={status} className="flex items-center space-x-2">
+                  <Checkbox
+                    id={status}
+                    checked={statusFilter.includes(status)}
+                    onCheckedChange={(checked) => {
+                      if (checked) {
+                        setStatusFilter([...statusFilter, status]);
+                      } else {
+                        setStatusFilter(statusFilter.filter(s => s !== status));
+                      }
+                    }}
+                  />
+                  <Label htmlFor={status} className="text-sm font-normal">{status}</Label>
+                </div>
+              ))}
+            </div>
+            <div className="flex gap-2">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => setStatusFilter([])}
                 className="text-xs"
               >
                 Clear
