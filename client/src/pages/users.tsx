@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
@@ -111,32 +111,45 @@ export default function Users() {
     },
   });
 
-  // Get all users for fallback stats if OKTA counts fail
+  // Get all users for fallback stats if OKTA counts fail - optimized with smaller limit and caching
   const { data: allUsersData } = useQuery({
-    queryKey: ["/api/users/all"],
+    queryKey: ["/api/users/stats"],
     queryFn: async () => {
-      const response = await fetch(`/api/users?limit=1000`, {
+      const response = await fetch(`/api/users?limit=500&statsOnly=true`, {
         credentials: 'include'
       });
       
       if (!response.ok) {
-        throw new Error('Failed to fetch all users');
+        throw new Error('Failed to fetch user stats');
       }
       
       return response.json();
     },
-    enabled: !employeeTypeCounts, // Only fetch if OKTA counts aren't available
+    enabled: !employeeTypeCounts,
+    staleTime: 10 * 60 * 1000, // 10 minutes cache
+    gcTime: 30 * 60 * 1000, // 30 minutes garbage collection
   });
 
-  const { data: usersData, isLoading, refetch } = useQuery({
-    queryKey: ["/api/users", currentPage, usersPerPage, searchQuery, sortBy, sortOrder, employeeTypeFilter, filters],
+  // Debounced search query for better performance
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState(searchQuery);
+  
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchQuery(searchQuery);
+    }, 300); // 300ms debounce
+    
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  const { data: usersData, isLoading, refetch, isFetching } = useQuery({
+    queryKey: ["/api/users", currentPage, usersPerPage, debouncedSearchQuery, sortBy, sortOrder, employeeTypeFilter, filters],
     queryFn: async () => {
       const params = new URLSearchParams({
         page: currentPage.toString(),
         limit: usersPerPage.toString(),
         sortBy: sortBy,
         sortOrder: sortOrder,
-        ...(searchQuery && { search: searchQuery }),
+        ...(debouncedSearchQuery && { search: debouncedSearchQuery }),
         ...(employeeTypeFilter && employeeTypeFilter !== "all" && { employeeType: employeeTypeFilter }),
         ...(filters.employeeType.length > 0 && { employeeTypes: filters.employeeType.join(',') }),
         ...(filters.mobilePhone && { mobilePhone: filters.mobilePhone }),
@@ -155,6 +168,11 @@ export default function Users() {
       
       return response.json();
     },
+    staleTime: 2 * 60 * 1000, // 2 minutes
+    gcTime: 10 * 60 * 1000, // 10 minutes
+    placeholderData: (previousData) => previousData, // Keep previous data while fetching new data
+    refetchOnWindowFocus: false, // Prevent unnecessary refetches
+    retry: 2, // Reduce retry attempts for faster failure feedback
   });
 
   const users = usersData?.users || [];
