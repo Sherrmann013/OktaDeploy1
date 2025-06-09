@@ -222,6 +222,16 @@ export default function UserDetail() {
     }
   };
 
+  const formatTimestampWithPST = (timestamp: string | Date | null) => {
+    if (!timestamp) return null;
+    try {
+      const date = new Date(timestamp);
+      return format(date, "MMM d, yyyy 'at' h:mm a") + " PST";
+    } catch {
+      return 'Invalid date';
+    }
+  };
+
   // Set form values when user data loads
   useEffect(() => {
     if (user && !isEditing) {
@@ -961,25 +971,25 @@ export default function UserDetail() {
                               <div>
                                 <label className="text-sm font-medium text-muted-foreground">Account Created</label>
                                 <p className="text-foreground">
-                                  {user.created ? format(new Date(user.created), "MMM d, yyyy 'at' h:mm a") : 'Not available'}
+                                  {formatTimestampWithPST(user.created) || 'Not available'}
                                 </p>
                               </div>
                               <div>
                                 <label className="text-sm font-medium text-muted-foreground">Last Update</label>
                                 <p className="text-foreground">
-                                  {user.lastUpdated ? format(new Date(user.lastUpdated), "MMM d, yyyy 'at' h:mm a") : 'Not available'}
+                                  {formatTimestampWithPST(user.lastUpdated) || 'Not available'}
                                 </p>
                               </div>
                               <div>
                                 <label className="text-sm font-medium text-muted-foreground">Last Password Change</label>
                                 <p className="text-foreground">
-                                  {user.passwordChanged ? format(new Date(user.passwordChanged), "MMM d, yyyy 'at' h:mm a") : 'Never changed'}
+                                  {formatTimestampWithPST(user.passwordChanged) || 'Never changed'}
                                 </p>
                               </div>
                               <div>
                                 <label className="text-sm font-medium text-muted-foreground">Last Login</label>
                                 <p className="text-foreground">
-                                  {user.lastLogin ? format(new Date(user.lastLogin), "MMM d, yyyy 'at' h:mm a") : 'Never logged in'}
+                                  {formatTimestampWithPST(user.lastLogin) || 'Never logged in'}
                                 </p>
                               </div>
                             </CardContent>
