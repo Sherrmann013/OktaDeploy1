@@ -209,41 +209,20 @@ export default function KnowBe4UserDisplay({ userEmail }: KnowBe4UserDisplayProp
           </div>
         </div>
 
-        {/* Current Campaigns */}
+        {/* Training Campaigns */}
         <div className="space-y-2">
           <span className="text-sm font-medium">Training Campaigns</span>
           <div className="text-sm text-gray-600">
-            {campaigns && Array.isArray(campaigns) && campaigns.length > 0 ? (
-              <div className="space-y-1">
-                {campaigns.slice(0, 2).map((campaign: any, index: number) => (
-                  <div key={index} className="text-xs bg-green-50 px-2 py-1 rounded border">
-                    <div className="font-medium">{campaign.name}</div>
-                    <div className="text-gray-500">
-                      {campaign.modules ? `0/${campaign.modules.length} completed` : '0/1 completed'}
-                    </div>
-                  </div>
-                ))}
-                {campaigns.length > 2 && (
-                  <div className="text-xs text-gray-500">
-                    +{campaigns.length - 2} more campaigns
-                  </div>
-                )}
-              </div>
-            ) : (
+            {campaigns && Array.isArray(campaigns) && campaigns.length > 0 ? 
+              `${campaigns.length} Active Campaigns` : 
               "No Active Campaigns"
-            )}
+            }
           </div>
         </div>
 
 
 
-        {/* Account Info */}
-        {connectionTest?.details && (
-          <div className="text-xs text-gray-500 pt-4 border-t">
-            <p>Connected to {connectionTest.details.account_name} ({connectionTest.details.subscription_level})</p>
-            <p>{connectionTest.details.number_of_seats} seats • Risk Score: {connectionTest.details.current_risk_score}</p>
-          </div>
-        )}
+
       </CardContent>
     </Card>
   );
