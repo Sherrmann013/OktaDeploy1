@@ -31,27 +31,29 @@ function Router() {
     );
   }
 
+  if (!user) {
+    return (
+      <Switch>
+        <Route path="/login" component={Login} />
+        <Route component={Login} />
+      </Switch>
+    );
+  }
+
   return (
-    <Switch>
-      {!user ? (
-        <>
-          <Route path="/login" component={Login} />
-          <Route path="/" component={Login} />
-        </>
-      ) : (
-        <>
-          <Route path="/" component={Users} />
-          <Route path="/dashboard" component={Dashboard} />
-          <Route path="/users" component={Users} />
-          <Route path="/users/:id" component={UserDetail} />
-          <Route path="/groups" component={Groups} />
-          <Route path="/applications" component={Applications} />
-          <Route path="/security" component={Security} />
-          <Route path="/settings" component={Settings} />
-        </>
-      )}
-      <Route component={NotFound} />
-    </Switch>
+    <SSOLayout>
+      <Switch>
+        <Route path="/" component={Users} />
+        <Route path="/dashboard" component={Dashboard} />
+        <Route path="/users" component={Users} />
+        <Route path="/users/:id" component={UserDetail} />
+        <Route path="/groups" component={Groups} />
+        <Route path="/applications" component={Applications} />
+        <Route path="/security" component={Security} />
+        <Route path="/settings" component={Settings} />
+        <Route component={NotFound} />
+      </Switch>
+    </SSOLayout>
   );
 }
 

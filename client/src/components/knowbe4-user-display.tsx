@@ -360,16 +360,127 @@ export default function KnowBe4UserDisplay({ userEmail }: KnowBe4UserDisplayProp
                 <span className="text-sm font-medium text-gray-700">Security Training</span>
               </div>
               
-              <div className="text-center text-gray-500">
-                <p className="text-sm">Training data requires enhanced API access</p>
-                <p className="text-xs mt-1">Contact KnowBe4 admin for detailed training metrics</p>
-              </div>
+              {finalTrainingData.length > 0 ? (
+                <div className="flex justify-between items-start">
+                  <div className="flex-1">
+                    <div className="text-4xl font-bold text-green-600 mb-1">{completionPercentage}%</div>
+                    <div className="text-xs text-gray-500">Completion Rate</div>
+                  </div>
+                  
+                  <div className="text-right space-y-1 text-xs">
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Total Enrollments</span>
+                      <span className="font-medium">{total}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Completed</span>
+                      <span className="font-medium text-green-600">{completed}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">In Progress</span>
+                      <span className="font-medium text-yellow-600">{inProgress}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Not Started</span>
+                      <span className="font-medium text-gray-600">{notStarted}</span>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="text-center text-gray-500">
+                  <p className="text-sm">No training data available</p>
+                  <p className="text-xs mt-1">User not enrolled in any training campaigns</p>
+                </div>
+              )}
             </CardContent>
           </Card>
 
         </div>
 
-
+        {/* Detailed Training Enrollments */}
+        {finalTrainingData.length > 0 && (
+          <div className="mt-6">
+            <Tabs defaultValue="training" className="w-full">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="training">Training Details</TabsTrigger>
+                <TabsTrigger value="phishing">Phishing History</TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="training" className="space-y-4">
+                <div className="space-y-3">
+                  <h4 className="font-medium text-sm text-gray-700">Training Enrollments ({finalTrainingData.length})</h4>
+                  <div className="space-y-2 max-h-96 overflow-y-auto">
+                    {finalTrainingData.map((enrollment: any, index: number) => (
+                      <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <div className="flex-1">
+                          <div className="font-medium text-sm text-gray-900">
+                            {enrollment.module_name || enrollment.name}
+                          </div>
+                          <div className="text-xs text-gray-600">
+                            {enrollment.campaign_name}
+                          </div>
+                          <div className="text-xs text-gray-500 mt-1">
+                            Enrolled: {formatDate(enrollment.enrollment_date)}
+                            {enrollment.completion_date && (
+                              <span> • Completed: {formatDate(enrollment.completion_date)}</span>
+                            )}
+                          </div>
+                        </div>
+                        <div className="ml-4">
+                          <Badge 
+                            variant={
+                              enrollment.status === 'Completed' ? 'default' : 
+                              enrollment.status === 'In Progress' ? 'secondary' : 
+                              'outline'
+                            }
+                            className={
+                              enrollment.status === 'Completed' ? 'bg-green-100 text-green-800' :
+                              enrollment.status === 'In Progress' ? 'bg-yellow-100 text-yellow-800' :
+                              'bg-gray-100 text-gray-800'
+                            }
+                          >
+                            {enrollment.status || 'Not Started'}
+                          </Badge>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </TabsContent>
+              
+              <TabsContent value="phishing" className="space-y-4">
+                <div className="space-y-3">
+                  <h4 className="font-medium text-sm text-gray-700">Phishing Campaign History</h4>
+                  {phishingResults.length > 0 ? (
+                    <div className="space-y-2 max-h-96 overflow-y-auto">
+                      {phishingResults.map((result: any, index: number) => (
+                        <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                          <div className="flex-1">
+                            <div className="font-medium text-sm text-gray-900">
+                              {result.campaign_name}
+                            </div>
+                            <div className="text-xs text-gray-500 mt-1">
+                              {result.last_phish_prone_date && `Last Activity: ${formatDate(result.last_phish_prone_date)}`}
+                            </div>
+                          </div>
+                          <div className="ml-4">
+                            <Badge variant="outline" className="text-xs">
+                              {result.status || 'Completed'}
+                            </Badge>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center text-gray-500 py-8">
+                      <p className="text-sm">No phishing campaign history available</p>
+                    </div>
+                  )}
+                </div>
+              </TabsContent>
+            </Tabs>
+          </div>
+        )}
 
       </CardContent>
     </Card>
