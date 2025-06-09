@@ -4,10 +4,11 @@ import { setupVite, serveStatic, log } from "./vite";
 import dotenv from "dotenv";
 
 // Load environment variables
-if (process.env.NODE_ENV === "production") {
-  dotenv.config({ path: ".env.production" });
-} else {
-  dotenv.config();
+dotenv.config();
+
+// Set required environment variables for production if not already set
+if (!process.env.KNOWBE4_BASE_URL) {
+  process.env.KNOWBE4_BASE_URL = "https://us.api.knowbe4.com/v1";
 }
 
 const app = express();
