@@ -57,7 +57,7 @@ export default function KnowBe4UserDisplay({ userEmail }: KnowBe4UserDisplayProp
 
   // Fetch KnowBe4 user data
   const { data: knowbe4User, isLoading: userLoading, error: userError } = useQuery<KnowBe4User>({
-    queryKey: ['/api/knowbe4/user', userEmail],
+    queryKey: [`/api/knowbe4/user/${userEmail}`],
     enabled: !!userEmail && !!connectionTest?.success,
   });
 
