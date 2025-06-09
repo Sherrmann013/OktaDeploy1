@@ -39,7 +39,7 @@ export function getSession() {
     resave: false,
     saveUninitialized: false,
     cookie: {
-      httpOnly: true,
+      httpOnly: false, // Allow client-side access for debugging
       secure: false, // Allow HTTP for development
       maxAge: sessionTtl,
       sameSite: 'lax'
