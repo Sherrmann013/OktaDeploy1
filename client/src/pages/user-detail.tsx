@@ -1109,7 +1109,7 @@ export default function UserDetail() {
               <TabsContent value="monitoring" className="space-y-6 mt-0">
                 <div className="space-y-6">
                   {/* KnowBe4 Security Training Section */}
-                  <KnowBe4Section userEmail={user.email || ''} />
+                  <KnowBe4UserDisplay userEmail={user.email || ''} />
                   
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
