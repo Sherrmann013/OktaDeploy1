@@ -1488,7 +1488,13 @@ export default function UserDetail() {
                           <div key={log.id} className={`${index % 2 === 0 ? 'bg-white dark:bg-gray-900' : 'bg-gray-50 dark:bg-gray-800'}`}>
                             <div 
                               className="grid grid-cols-12 gap-4 p-3 border-b border-gray-200 dark:border-gray-700 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors cursor-pointer"
-                              onClick={() => toggleLogExpansion(log.id)}
+                              onClick={() => {
+                                toggleLogExpansion(log.id);
+                                // Expand all sections by default when opening
+                                if (!expandedLogs.has(log.id)) {
+                                  expandAllSections(log.id);
+                                }
+                              }}
                             >
                               <div className="col-span-2 text-sm">
                                 <div className="flex items-center gap-2">
@@ -1610,6 +1616,48 @@ export default function UserDetail() {
                                             <div><span className="font-medium">Location:</span> 
                                               {log.client.geographicalContext.city}, {log.client.geographicalContext.state}, {log.client.geographicalContext.country}
                                             </div>
+                                          )}
+                                          {/* Device Information */}
+                                          {log.client?.device && (
+                                            <>
+                                              <div className="pt-2 border-t border-border">
+                                                <span className="font-medium text-blue-600 dark:text-blue-400">Device Information</span>
+                                              </div>
+                                              <div><span className="font-medium">Device ID:</span> {log.client.device.id || 'N/A'}</div>
+                                              <div><span className="font-medium">UDID:</span> {log.client.device.udid || 'N/A'}</div>
+                                              <div><span className="font-medium">Device Name:</span> {log.client.device.name || 'N/A'}</div>
+                                              <div><span className="font-medium">OS Platform:</span> {log.client.device.os_platform || 'N/A'}</div>
+                                              <div><span className="font-medium">OS Version:</span> {log.client.device.os_version || 'N/A'}</div>
+                                              <div><span className="font-medium">Managed:</span> 
+                                                <span className={`ml-1 ${log.client.device.managed ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                                                  {log.client.device.managed ? 'Yes' : 'No'}
+                                                </span>
+                                              </div>
+                                              <div><span className="font-medium">Verified:</span> 
+                                                <span className={`ml-1 ${log.client.device.registered ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                                                  {log.client.device.registered ? 'Yes' : 'No'}
+                                                </span>
+                                              </div>
+                                              <div><span className="font-medium">Screen Lock Type:</span> {log.client.device.screen_lock_type || 'N/A'}</div>
+                                              <div><span className="font-medium">Disk Encryption Type:</span> {log.client.device.disk_encryption_type || 'N/A'}</div>
+                                            </>
+                                          )}
+                                          {/* Request Information */}
+                                          {log.request && (
+                                            <>
+                                              <div className="pt-2 border-t border-border">
+                                                <span className="font-medium text-purple-600 dark:text-purple-400">Request Information</span>
+                                              </div>
+                                              <div><span className="font-medium">IP Chain:</span> 
+                                                <div className="mt-1 text-xs text-muted-foreground">
+                                                  {log.request.ipChain?.map((ip: any, idx: number) => (
+                                                    <div key={idx} className="ml-2">
+                                                      • {ip.ip} ({ip.source || 'Unknown'}) - {ip.geographicalContext?.city || 'Unknown location'}
+                                                    </div>
+                                                  )) || 'N/A'}
+                                                </div>
+                                              </div>
+                                            </>
                                           )}
                                         </div>
                                       )}
