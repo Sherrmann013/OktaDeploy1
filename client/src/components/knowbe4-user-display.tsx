@@ -315,7 +315,7 @@ export default function KnowBe4UserDisplay({ userEmail }: KnowBe4UserDisplayProp
         {/* Last Sign In */}
         <div className="space-y-2">
           <span className="text-sm font-medium">Last Sign In</span>
-          <div className="text-sm text-gray-600">
+          <div className="text-sm text-gray-600 dark:text-gray-300">
             {formatDate(knowbe4User.last_sign_in)}
           </div>
         </div>
@@ -372,20 +372,20 @@ export default function KnowBe4UserDisplay({ userEmail }: KnowBe4UserDisplayProp
                   
                   <div className="text-right space-y-1 text-xs">
                     <div className="flex justify-between">
-                      <span className="text-gray-600">Total Enrollments</span>
-                      <span className="font-medium">{total}</span>
+                      <span className="text-gray-600 dark:text-gray-400">Total Enrollments</span>
+                      <span className="font-medium text-gray-900 dark:text-gray-100">{total}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-600">Completed</span>
-                      <span className="font-medium text-green-600">{completed}</span>
+                      <span className="text-gray-600 dark:text-gray-400">Completed</span>
+                      <span className="font-medium text-green-600 dark:text-green-400">{completed}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-600">In Progress</span>
-                      <span className="font-medium text-yellow-600">{inProgress}</span>
+                      <span className="text-gray-600 dark:text-gray-400">In Progress</span>
+                      <span className="font-medium text-yellow-600 dark:text-yellow-400">{inProgress}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-600">Not Started</span>
-                      <span className="font-medium text-gray-600">{notStarted}</span>
+                      <span className="text-gray-600 dark:text-gray-400">Not Started</span>
+                      <span className="font-medium text-gray-600 dark:text-gray-400">{notStarted}</span>
                     </div>
                   </div>
                 </div>
