@@ -177,31 +177,7 @@ export default function KnowBe4UserDisplay({ userEmail }: KnowBe4UserDisplayProp
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        {/* Risk Score */}
-        <div className="space-y-2">
-          <div className="flex items-center justify-between">
-            <span className="text-sm font-medium">Risk Score</span>
-            <Badge variant="secondary" className={`text-xs ${riskLevel.textColor}`}>
-              {riskLevel.level}
-            </Badge>
-          </div>
-          <div className="text-2xl font-bold text-blue-600">
-            {knowbe4User.current_risk_score}
-          </div>
-        </div>
 
-        {/* Phish Prone */}
-        <div className="space-y-2">
-          <div className="flex items-center justify-between">
-            <span className="text-sm font-medium">Phish Prone</span>
-            <Badge variant={phishProneLevel.color as any} className="text-xs">
-              {phishProneLevel.level}
-            </Badge>
-          </div>
-          <div className="text-2xl font-bold text-orange-600">
-            {knowbe4User.phish_prone_percentage}%
-          </div>
-        </div>
 
         {/* Last Sign In */}
         <div className="space-y-2">
