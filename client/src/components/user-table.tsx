@@ -158,6 +158,30 @@ export default function UserTable({
     message: string;
     action: () => void;
   } | null>(null);
+
+  // Drag and drop sensors
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (over && active.id !== over.id && onColumnReorder && columnConfig) {
+      const oldIndex = columnConfig.findIndex(col => col.id === active.id);
+      const newIndex = columnConfig.findIndex(col => col.id === over.id);
+      
+      const newColumns = arrayMove(columnConfig, oldIndex, newIndex).map((col, index) => ({
+        ...col,
+        order: index
+      }));
+      
+      onColumnReorder(newColumns);
+    }
+  };
   
   // Use external filter state or fallback to local state
   const mobilePhoneFilter = filters?.mobilePhone || "";
@@ -670,34 +694,50 @@ export default function UserTable({
       <Card>
         <div className="overflow-x-auto">
           <Table>
-            <TableHeader>
-              <TableRow>
-                {orderedColumns.map((columnId) => {
-                  const column = COLUMN_DEFINITIONS[columnId as keyof typeof COLUMN_DEFINITIONS];
-                  if (!column) return null;
-                  
-                  return (
-                    <TableHead key={columnId} className="px-6 py-4 text-center">
-                      <div className="flex items-center justify-center space-x-2">
-                        <Button 
-                          variant="ghost" 
-                          className="h-auto p-0 font-medium text-xs text-muted-foreground uppercase tracking-wider hover:text-foreground"
-                          onClick={() => handleSort(column.sortKey)}
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragEnd={handleDragEnd}
+            >
+              <TableHeader>
+                <TableRow className="group">
+                  <SortableContext 
+                    items={orderedColumns} 
+                    strategy={horizontalListSortingStrategy}
+                  >
+                    {orderedColumns.map((columnId) => {
+                      const column = COLUMN_DEFINITIONS[columnId as keyof typeof COLUMN_DEFINITIONS];
+                      if (!column) return null;
+                      
+                      return (
+                        <SortableTableHeader
+                          key={columnId}
+                          columnId={columnId}
+                          onColumnReorder={onColumnReorder}
+                          columnConfig={columnConfig}
                         >
-                          {column.label}
-                          {getSortIcon(column.sortKey)}
-                        </Button>
-                        {column.hasFilter && columnId === 'employeeType' && renderEmployeeTypeFilter()}
-                        {column.hasFilter && columnId === 'mobilePhone' && renderMobilePhoneFilter()}
-                        {column.hasFilter && columnId === 'manager' && renderManagerFilter()}
-                        {column.hasFilter && columnId === 'status' && renderStatusFilter()}
-                        {column.hasFilter && columnId === 'lastLogin' && renderLastLoginFilter()}
-                      </div>
-                    </TableHead>
-                  );
-                })}
-              </TableRow>
-            </TableHeader>
+                          <div className="flex items-center justify-center space-x-2">
+                            <Button 
+                              variant="ghost" 
+                              className="h-auto p-0 font-medium text-xs text-muted-foreground uppercase tracking-wider hover:text-foreground"
+                              onClick={() => handleSort(column.sortKey)}
+                            >
+                              {column.label}
+                              {getSortIcon(column.sortKey)}
+                            </Button>
+                            {column.hasFilter && columnId === 'employeeType' && renderEmployeeTypeFilter()}
+                            {column.hasFilter && columnId === 'mobilePhone' && renderMobilePhoneFilter()}
+                            {column.hasFilter && columnId === 'manager' && renderManagerFilter()}
+                            {column.hasFilter && columnId === 'status' && renderStatusFilter()}
+                            {column.hasFilter && columnId === 'lastLogin' && renderLastLoginFilter()}
+                          </div>
+                        </SortableTableHeader>
+                      );
+                    })}
+                  </SortableContext>
+                </TableRow>
+              </TableHeader>
+            </DndContext>
             <TableBody>
               {users.map((user) => (
                 <TableRow 
