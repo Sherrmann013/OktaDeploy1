@@ -35,6 +35,13 @@ const COLUMN_DEFINITIONS = {
   passwordChanged: { label: 'Password Changed', sortKey: 'passwordChanged', hasFilter: true },
 };
 
+interface ColumnConfig {
+  id: string;
+  visible: boolean;
+  width?: number;
+  order: number;
+}
+
 interface UserTableProps {
   users: User[];
   total: number;
@@ -50,6 +57,7 @@ interface UserTableProps {
   sortOrder?: 'asc' | 'desc';
   onSort?: (column: string) => void;
   visibleColumns?: string[];
+  columnConfig?: ColumnConfig[];
   filters?: {
     employeeType: string[];
     mobilePhone: string;
@@ -74,6 +82,7 @@ export default function UserTable({
   sortOrder,
   onSort,
   visibleColumns = ['name', 'status', 'lastLogin'],
+  columnConfig,
   filters,
   onFiltersChange,
 }: UserTableProps) {

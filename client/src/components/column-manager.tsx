@@ -138,36 +138,8 @@ export default function ColumnManager({ columns, onColumnsChange }: ColumnManage
     onColumnsChange(updatedColumns);
   };
 
-  const handleDragStart = (columnId: string) => {
-    setDraggedItem(columnId);
-  };
-
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-  };
-
-  const handleDrop = (targetColumnId: string) => {
-    if (!draggedItem || draggedItem === targetColumnId) {
-      setDraggedItem(null);
-      return;
-    }
-
-    const draggedIndex = columns.findIndex(col => col.id === draggedItem);
-    const targetIndex = columns.findIndex(col => col.id === targetColumnId);
-    
-    const updatedColumns = [...columns];
-    const [draggedColumn] = updatedColumns.splice(draggedIndex, 1);
-    updatedColumns.splice(targetIndex, 0, draggedColumn);
-    
-    // Update order values
-    const reorderedColumns = updatedColumns.map((col, index) => ({
-      ...col,
-      order: index
-    }));
-    
-    onColumnsChange(reorderedColumns);
-    setDraggedItem(null);
-  };
+  // Sort columns by order for display
+  const sortedColumns = [...columns].sort((a, b) => a.order - b.order);
 
   return (
     <Sheet>
@@ -192,39 +164,24 @@ export default function ColumnManager({ columns, onColumnsChange }: ColumnManage
               <CardTitle className="text-sm">Visible Columns</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
-              {columns
-                .sort((a, b) => a.order - b.order)
-                .map(columnConfig => {
-                  const column = AVAILABLE_COLUMNS.find(c => c.id === columnConfig.id);
-                  if (!column) return null;
-                  
-                  return (
-                    <div 
-                      key={columnConfig.id} 
-                      className={`flex items-center space-x-2 p-2 rounded border cursor-grab ${
-                        draggedItem === columnConfig.id ? 'bg-blue-50 border-blue-300' : 'hover:bg-gray-50'
-                      }`}
-                      draggable
-                      onDragStart={() => handleDragStart(columnConfig.id)}
-                      onDragOver={handleDragOver}
-                      onDrop={() => handleDrop(columnConfig.id)}
-                    >
-                      <div className="flex items-center space-x-2 flex-1">
-                        <Checkbox
-                          id={columnConfig.id}
-                          checked={columnConfig.visible}
-                          onCheckedChange={() => toggleColumn(columnConfig.id)}
-                        />
-                        <Label htmlFor={columnConfig.id} className="text-sm cursor-pointer">
-                          {column.label}
-                        </Label>
-                      </div>
-                      <div className="text-xs text-muted-foreground">
-                        ⋮⋮
-                      </div>
-                    </div>
-                  );
-                })}
+              <DndContext
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                onDragEnd={handleDragEnd}
+              >
+                <SortableContext 
+                  items={sortedColumns.map(col => col.id)}
+                  strategy={verticalListSortingStrategy}
+                >
+                  {sortedColumns.map(columnConfig => (
+                    <SortableColumnItem
+                      key={columnConfig.id}
+                      column={columnConfig}
+                      onToggle={toggleColumn}
+                    />
+                  ))}
+                </SortableContext>
+              </DndContext>
             </CardContent>
           </Card>
         </div>
