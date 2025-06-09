@@ -1781,6 +1781,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
             enrollment.user?.id === userId
           );
           
+          // Also try filtering by email for debugging
+          const userEmail = 'agiwa@mazetx.com'; // For debugging specific user
+          const emailMatches = enrollments.filter((enrollment: any) => 
+            enrollment.user?.email?.toLowerCase() === userEmail.toLowerCase()
+          );
+          
+          if (campaign.campaign_id === 1894139 && emailMatches.length > 0) {
+            console.log(`Found ${emailMatches.length} enrollments for ${userEmail} by email match in campaign ${campaign.campaign_id}`);
+            console.log('Email match enrollment:', JSON.stringify(emailMatches[0], null, 2));
+          }
+          
           console.log(`Found ${userCampaignEnrollments.length} enrollments for user ${userId} in campaign ${campaign.campaign_id}`);
           
           // Add campaign info to enrollments
