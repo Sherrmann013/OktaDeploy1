@@ -436,14 +436,57 @@ export default function UserDetail() {
   };
 
   const generatePassword = () => {
-    const length = 12;
-    const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*";
-    let password = "";
-    for (let i = 0; i < length; i++) {
-      password += charset.charAt(Math.floor(Math.random() * charset.length));
+    const words = [
+      'blue', 'red', 'green', 'cat', 'dog', 'sun', 'moon', 'star', 'tree', 'bird',
+      'fish', 'car', 'book', 'key', 'box', 'cup', 'pen', 'hat', 'bag', 'run',
+      'jump', 'fast', 'slow', 'big', 'small', 'hot', 'cold', 'new', 'old', 'good',
+      'bad', 'easy', 'hard', 'soft', 'loud', 'quiet', 'dark', 'light', 'win', 'lose',
+      'open', 'close', 'start', 'stop', 'home', 'work', 'play', 'rest', 'love', 'hope'
+    ];
+    
+    const symbols = ['!', '@', '#', '$', '%', '^', '&', '*'];
+    const numbers = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+    
+    // Generate 2-3 unique words
+    const wordCount = Math.random() < 0.5 ? 2 : 3;
+    const selectedWords = [];
+    const usedIndices = new Set();
+    
+    for (let i = 0; i < wordCount; i++) {
+      let randomIndex;
+      do {
+        randomIndex = Math.floor(Math.random() * words.length);
+      } while (usedIndices.has(randomIndex));
+      
+      usedIndices.add(randomIndex);
+      selectedWords.push(words[randomIndex]);
     }
-    setGeneratedPassword(password);
-    setNewPassword(password);
+    
+    // Capitalize first letter of each word
+    const capitalizedWords = selectedWords.map(word => 
+      word.charAt(0).toUpperCase() + word.slice(1)
+    );
+    
+    // Add one symbol
+    const randomSymbol = symbols[Math.floor(Math.random() * symbols.length)];
+    
+    // Add two numbers
+    const randomNumbers = [
+      numbers[Math.floor(Math.random() * numbers.length)],
+      numbers[Math.floor(Math.random() * numbers.length)]
+    ];
+    
+    // Combine all parts
+    const password = capitalizedWords.join('') + randomSymbol + randomNumbers.join('');
+    
+    // Ensure password is between 8-12 characters
+    if (password.length >= 8 && password.length <= 12) {
+      setGeneratedPassword(password);
+      setNewPassword(password);
+    } else {
+      // If not in range, regenerate
+      generatePassword();
+    }
   };
 
   const handlePasswordReset = () => {
