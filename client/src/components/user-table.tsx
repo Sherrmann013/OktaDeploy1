@@ -535,6 +535,7 @@ export default function UserTable({
                         {column.hasFilter && columnId === 'employeeType' && renderEmployeeTypeFilter()}
                         {column.hasFilter && columnId === 'mobilePhone' && renderMobilePhoneFilter()}
                         {column.hasFilter && columnId === 'manager' && renderManagerFilter()}
+                        {column.hasFilter && columnId === 'status' && renderStatusFilter()}
                       </div>
                     </TableHead>
                   );

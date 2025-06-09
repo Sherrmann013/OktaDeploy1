@@ -178,6 +178,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const searchQuery = z.string().optional().parse(req.query.search);
       const statusFilter = z.string().optional().parse(req.query.status);
+      const statusFilters = z.string().optional().parse(req.query.statuses);
       const departmentFilter = z.string().optional().parse(req.query.department);
       const employeeTypeFilter = z.string().optional().parse(req.query.employeeType);
       const employeeTypesFilter = z.string().optional().parse(req.query.employeeTypes);
@@ -205,9 +206,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
           );
         }
         
-        // Apply status filter
+        // Apply status filter (single or multiple)
         if (statusFilter) {
           filteredUsers = filteredUsers.filter(user => user.status === statusFilter);
+        } else if (statusFilters) {
+          const statusArray = statusFilters.split(',').map(s => s.trim());
+          if (statusArray.length > 0) {
+            filteredUsers = filteredUsers.filter(user => statusArray.includes(user.status));
+          }
         }
         
         // Apply department filter

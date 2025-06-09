@@ -139,7 +139,8 @@ export default function Users() {
         ...(employeeTypeFilter && employeeTypeFilter !== "all" && { employeeType: employeeTypeFilter }),
         ...(filters.employeeType.length > 0 && { employeeTypes: filters.employeeType.join(',') }),
         ...(filters.mobilePhone && { mobilePhone: filters.mobilePhone }),
-        ...(filters.manager && { manager: filters.manager })
+        ...(filters.manager && { manager: filters.manager }),
+        ...(filters.status.length > 0 && { statuses: filters.status.join(',') })
       });
       
       const response = await fetch(`/api/users?${params}`, {
