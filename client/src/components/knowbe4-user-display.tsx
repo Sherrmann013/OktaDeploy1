@@ -187,6 +187,35 @@ export default function KnowBe4UserDisplay({ userEmail }: KnowBe4UserDisplayProp
           </div>
         </div>
 
+        {/* Phishing Results */}
+        <div className="space-y-3">
+          <div className="flex items-center gap-2">
+            <Shield className="w-4 h-4 text-gray-600" />
+            <span className="text-sm font-medium">Phishing Results</span>
+          </div>
+          
+          <div className="bg-gray-50 rounded-lg p-3">
+            <div className="text-center mb-3">
+              <div className="text-3xl font-bold text-blue-600">0%</div>
+              <div className="text-xs text-gray-600">Phish-prone Percentage</div>
+            </div>
+            <div className="grid grid-cols-3 gap-3 text-xs">
+              <div className="text-center">
+                <div className="font-medium text-gray-700">Emails Delivered</div>
+                <div className="text-gray-600">0</div>
+              </div>
+              <div className="text-center">
+                <div className="font-medium text-gray-700">Failures</div>
+                <div className="text-gray-600">0</div>
+              </div>
+              <div className="text-center">
+                <div className="font-medium text-gray-700">Emails Reported</div>
+                <div className="text-gray-600">0</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Training Assignments */}
         <div className="space-y-3">
           <div className="flex items-center gap-2">
