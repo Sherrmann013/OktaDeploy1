@@ -253,30 +253,43 @@ export default function Users() {
       // Show loading toast
       toast({
         title: "Preparing export...",
-        description: "Fetching all user data for export",
+        description: "Fetching all user data for export (this may take a moment)",
       });
 
-      // Fetch all users with current filters
-      const queryParams = new URLSearchParams({
-        limit: '10000', // Large number to get all users
-        search: searchQuery,
-        employeeType: employeeTypeFilter,
-        sortBy: sortBy,
-        sortOrder: sortOrder,
-      });
+      // Fetch all users with current filters using pagination
+      let allUsers: User[] = [];
+      let currentPage = 1;
+      const limit = 500; // Maximum allowed by server
+      let hasMorePages = true;
 
-      console.log('Export: Making API request to:', `/api/users?${queryParams}`);
-      const response = await apiRequest('GET', `/api/users?${queryParams}`);
-      console.log('Export: API response status:', response.status);
-      
-      if (!response.ok) {
-        throw new Error(`API request failed with status ${response.status}`);
+      while (hasMorePages) {
+        const queryParams = new URLSearchParams({
+          limit: limit.toString(),
+          page: currentPage.toString(),
+          search: searchQuery,
+          employeeType: employeeTypeFilter,
+          sortBy: sortBy,
+          sortOrder: sortOrder,
+        });
+
+        console.log(`Export: Fetching page ${currentPage} - /api/users?${queryParams}`);
+        const response = await apiRequest('GET', `/api/users?${queryParams}`);
+        
+        if (!response.ok) {
+          throw new Error(`API request failed with status ${response.status}`);
+        }
+        
+        const responseData = await response.json();
+        const { users: pageUsers, totalPages } = responseData;
+        
+        allUsers = [...allUsers, ...pageUsers];
+        console.log(`Export: Page ${currentPage} - fetched ${pageUsers.length} users, total so far: ${allUsers.length}`);
+        
+        hasMorePages = currentPage < totalPages;
+        currentPage++;
       }
-      
-      const responseData = await response.json();
-      console.log('Export: Response data keys:', Object.keys(responseData));
-      console.log('Export: Users count:', responseData.users?.length || 0);
-      const { users: allUsers } = responseData;
+
+      console.log(`Export: Completed fetching all ${allUsers.length} users`);
 
       // Get column mapping for human-readable headers
       const columnMap = AVAILABLE_COLUMNS.reduce((acc, col) => {
