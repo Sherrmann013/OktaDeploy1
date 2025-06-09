@@ -1766,9 +1766,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const enrollments = await knowBe4Service.getCampaignEnrollments(campaign.campaign_id);
           
           // Find enrollments for this specific user
+          console.log(`Campaign ${campaign.campaign_id}: Checking ${enrollments.length} enrollments for user ID ${userId}`);
+          if (enrollments.length > 0 && campaign.campaign_id === 1894139) {
+            console.log(`=== ENROLLMENT DATA STRUCTURE FOR CAMPAIGN 1894139 ===`);
+            console.log(`Sample enrollment:`, JSON.stringify(enrollments[0], null, 2));
+            console.log(`Looking for user ID ${userId} in enrollments...`);
+            enrollments.slice(0, 5).forEach((enrollment, index) => {
+              console.log(`Enrollment ${index}: user.id = ${enrollment?.user?.id}, user.email = ${enrollment?.user?.email}`);
+            });
+            console.log(`=== END ENROLLMENT DATA ===`);
+          }
+          
           const userCampaignEnrollments = enrollments.filter((enrollment: any) => 
             enrollment.user?.id === userId
           );
+          
+          console.log(`Found ${userCampaignEnrollments.length} enrollments for user ${userId} in campaign ${campaign.campaign_id}`);
           
           // Add campaign info to enrollments
           userCampaignEnrollments.forEach((enrollment: any) => {
