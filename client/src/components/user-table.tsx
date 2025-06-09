@@ -7,7 +7,11 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Edit, Pause, Trash2, Play, ChevronLeft, ChevronRight, ArrowUpDown, FilterIcon } from "lucide-react";
+import { Edit, Pause, Trash2, Play, ChevronLeft, ChevronRight, ArrowUpDown, FilterIcon, Calendar } from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import ConfirmationModal from "./confirmation-modal";
@@ -22,7 +26,7 @@ const COLUMN_DEFINITIONS = {
   manager: { label: 'Manager', sortKey: 'manager', hasFilter: false },
   mobilePhone: { label: 'Mobile Phone', sortKey: 'mobilePhone', hasFilter: true },
   status: { label: 'Status', sortKey: 'status', hasFilter: false },
-  disabled: { label: 'Disabled', sortKey: 'status', hasFilter: false },
+  disabled: { label: 'Disabled On', sortKey: 'lastUpdated', hasFilter: false },
   activated: { label: 'Account Created', sortKey: 'activated', hasFilter: true },
   lastLogin: { label: 'Last Login', sortKey: 'lastLogin', hasFilter: true },
   lastUpdated: { label: 'Last Updated', sortKey: 'lastUpdated', hasFilter: true },
@@ -68,6 +72,11 @@ export default function UserTable({
     message: string;
     action: () => void;
   } | null>(null);
+  
+  // Filter states
+  const [mobilePhoneFilter, setMobilePhoneFilter] = useState("");
+  const [employeeTypeFilter, setEmployeeTypeFilter] = useState<string[]>([]);
+  const [dateFilters, setDateFilters] = useState<{[key: string]: {start?: string, end?: string}}>({});
 
   const updateStatusMutation = useMutation({
     mutationFn: async ({ userId, status }: { userId: number; status: string }) => {
@@ -170,6 +179,84 @@ export default function UserTable({
     }
   };
 
+  const renderEmployeeTypeFilter = () => {
+    const employeeTypes = ['EMPLOYEE', 'CONTRACTOR', 'INTERN', 'PART_TIME', 'CONSULTANT'];
+    
+    return (
+      <Popover>
+        <PopoverTrigger asChild>
+          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+            <FilterIcon className="h-4 w-4" />
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-56" align="start">
+          <div className="space-y-3">
+            <Label className="text-sm font-medium">Employee Type</Label>
+            <div className="space-y-2">
+              {employeeTypes.map((type) => (
+                <div key={type} className="flex items-center space-x-2">
+                  <Checkbox
+                    id={type}
+                    checked={employeeTypeFilter.includes(type)}
+                    onCheckedChange={(checked) => {
+                      if (checked) {
+                        setEmployeeTypeFilter([...employeeTypeFilter, type]);
+                      } else {
+                        setEmployeeTypeFilter(employeeTypeFilter.filter(t => t !== type));
+                      }
+                    }}
+                  />
+                  <Label htmlFor={type} className="text-sm font-normal">{type}</Label>
+                </div>
+              ))}
+            </div>
+            <div className="flex gap-2">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => setEmployeeTypeFilter([])}
+                className="text-xs"
+              >
+                Clear
+              </Button>
+            </div>
+          </div>
+        </PopoverContent>
+      </Popover>
+    );
+  };
+
+  const renderMobilePhoneFilter = () => {
+    return (
+      <Popover>
+        <PopoverTrigger asChild>
+          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+            <FilterIcon className="h-4 w-4" />
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-56" align="start">
+          <div className="space-y-3">
+            <Label className="text-sm font-medium">Mobile Phone</Label>
+            <Input
+              placeholder="Search phone number..."
+              value={mobilePhoneFilter}
+              onChange={(e) => setMobilePhoneFilter(e.target.value)}
+              className="text-sm"
+            />
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => setMobilePhoneFilter("")}
+              className="text-xs"
+            >
+              Clear
+            </Button>
+          </div>
+        </PopoverContent>
+      </Popover>
+    );
+  };
+
   const renderCellContent = (user: User, columnId: string) => {
     switch (columnId) {
       case 'name':
@@ -206,11 +293,14 @@ export default function UserTable({
         return getStatusBadge(user.status);
       case 'disabled':
         const isDisabled = user.status === 'SUSPENDED' || user.status === 'DEPROVISIONED';
-        return (
-          <Badge variant={isDisabled ? "destructive" : "secondary"}>
-            {isDisabled ? 'Yes' : 'No'}
-          </Badge>
-        );
+        if (isDisabled && user.lastUpdated) {
+          return (
+            <div className="text-sm text-red-600 dark:text-red-400">
+              {format(new Date(user.lastUpdated), 'MMM dd, yyyy')}
+            </div>
+          );
+        }
+        return <div className="text-sm text-muted-foreground">-</div>;
       case 'activated':
         return (
           <div className="text-sm text-muted-foreground">
@@ -281,11 +371,8 @@ export default function UserTable({
                           {column.label}
                           {getSortIcon(column.sortKey)}
                         </Button>
-                        {column.hasFilter && (
-                          <Button variant="ghost" size="icon" className="h-6 w-6">
-                            <FilterIcon className="h-3 w-3" />
-                          </Button>
-                        )}
+                        {column.hasFilter && columnId === 'employeeType' && renderEmployeeTypeFilter()}
+                        {column.hasFilter && columnId === 'mobilePhone' && renderMobilePhoneFilter()}
                       </div>
                     </TableHead>
                   );

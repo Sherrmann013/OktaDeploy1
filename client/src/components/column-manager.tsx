@@ -18,7 +18,7 @@ export const AVAILABLE_COLUMNS = [
   { id: 'manager', label: 'Manager', type: 'text', hasFilter: false },
   { id: 'mobilePhone', label: 'Mobile Phone', type: 'text', hasFilter: true },
   { id: 'status', label: 'Status', type: 'select', hasFilter: false, options: ['ACTIVE', 'SUSPENDED', 'DEPROVISIONED'] },
-  { id: 'disabled', label: 'Disabled', type: 'select', hasFilter: false, options: ['true', 'false'] },
+  { id: 'disabled', label: 'Disabled On', type: 'date', hasFilter: false },
   { id: 'activated', label: 'Account Created', type: 'date', hasFilter: true },
   { id: 'lastLogin', label: 'Last Login', type: 'date', hasFilter: true },
   { id: 'lastUpdated', label: 'Last Updated', type: 'date', hasFilter: true },
