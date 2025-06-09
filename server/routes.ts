@@ -142,6 +142,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const statusFilter = z.string().optional().parse(req.query.status);
       const departmentFilter = z.string().optional().parse(req.query.department);
       const employeeTypeFilter = z.string().optional().parse(req.query.employeeType);
+      const employeeTypesFilter = z.string().optional().parse(req.query.employeeTypes);
+      const mobilePhoneFilter = z.string().optional().parse(req.query.mobilePhone);
       const page = z.coerce.number().default(1).parse(req.query.page);
       const limit = z.coerce.number().default(10).parse(req.query.limit);
       const sortBy = z.string().default("firstName").parse(req.query.sortBy);
@@ -189,6 +191,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
           filteredUsers = filteredUsers.filter(oktaUser => oktaIdsWithType.has(oktaUser.id));
           
           console.log(`Employee type filter applied: ${employeeTypeFilter}, found ${filteredUsers.length} matching users`);
+        }
+
+        // Apply employee types array filter (from new filter interface)
+        if (employeeTypesFilter) {
+          const selectedTypes = employeeTypesFilter.split(',');
+          if (selectedTypes.length > 0) {
+            const dbUsersWithTypes = await storage.getAllUsers({ 
+              limit: 1000 
+            });
+            const oktaIdsWithTypes = new Set(
+              dbUsersWithTypes.users
+                .filter(user => user.employeeType && selectedTypes.includes(user.employeeType))
+                .map(user => user.oktaId)
+                .filter(Boolean)
+            );
+            
+            filteredUsers = filteredUsers.filter(oktaUser => oktaIdsWithTypes.has(oktaUser.id));
+            console.log(`Employee types filter applied: ${selectedTypes.join(', ')}, found ${filteredUsers.length} matching users`);
+          }
+        }
+
+        // Apply mobile phone filter
+        if (mobilePhoneFilter) {
+          const phoneSearchTerm = mobilePhoneFilter.toLowerCase();
+          filteredUsers = filteredUsers.filter(user => 
+            user.profile.mobilePhone?.toLowerCase().includes(phoneSearchTerm)
+          );
+          console.log(`Mobile phone filter applied: ${mobilePhoneFilter}, found ${filteredUsers.length} matching users`);
         }
         
         // Apply sorting
