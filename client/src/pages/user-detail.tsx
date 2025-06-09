@@ -1293,33 +1293,34 @@ export default function UserDetail() {
                     </CardContent>
                   </Card>
 
-                  {/* KnowBe4 Training Details */}
+                  {/* KnowBe4 Raw API Response */}
                   <Card>
                     <CardHeader>
                       <CardTitle className="flex items-center gap-2">
                         <BookOpen className="w-5 h-5 text-green-600" />
-                        Training Campaigns
+                        KnowBe4 Raw API Data
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
                       <div>
-                        <label className="text-sm font-medium text-muted-foreground">Active Campaign</label>
-                        <p className="text-sm text-foreground font-medium">Passphrase Test</p>
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium text-muted-foreground">Status</label>
-                        <p className="text-sm text-green-600 font-medium">Completed</p>
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium text-muted-foreground">Training Modules</label>
-                        <div className="text-xs text-gray-600 space-y-1">
-                          <div>• Creating Strong Passwords</div>
-                          <div>• Join the Craze of the Passphrase</div>
+                        <label className="text-sm font-medium text-muted-foreground">Training Campaigns JSON</label>
+                        <div className="bg-gray-50 dark:bg-gray-900 p-3 rounded text-xs font-mono overflow-auto max-h-40 mt-1">
+                          {campaignsData ? (
+                            <pre className="whitespace-pre-wrap">{JSON.stringify(campaignsData, null, 2)}</pre>
+                          ) : (
+                            <p className="text-gray-500">Loading campaigns...</p>
+                          )}
                         </div>
                       </div>
                       <div>
-                        <label className="text-sm font-medium text-muted-foreground">Risk Score</label>
-                        <p className="text-sm text-orange-600 font-medium">44.1</p>
+                        <label className="text-sm font-medium text-muted-foreground">User Profile JSON</label>
+                        <div className="bg-gray-50 dark:bg-gray-900 p-3 rounded text-xs font-mono overflow-auto max-h-40 mt-1">
+                          {knowBe4Data ? (
+                            <pre className="whitespace-pre-wrap">{JSON.stringify(knowBe4Data, null, 2)}</pre>
+                          ) : (
+                            <p className="text-gray-500">Loading user data...</p>
+                          )}
+                        </div>
                       </div>
                       <div className="flex gap-2 pt-2">
                         <Button 
@@ -1327,11 +1328,14 @@ export default function UserDetail() {
                           size="sm" 
                           className="flex-1"
                           onClick={() => {
-                            console.log('Refreshing KnowBe4 training data...');
+                            console.log('=== RAW KNOWBE4 API REFRESH ===');
+                            console.log('Campaigns:', campaignsData);
+                            console.log('User Data:', knowBe4Data);
+                            console.log('=== END RAW DATA ===');
                           }}
                         >
                           <RefreshCw className="w-4 h-4 mr-1" />
-                          Refresh
+                          Log Raw Data
                         </Button>
                       </div>
                     </CardContent>
