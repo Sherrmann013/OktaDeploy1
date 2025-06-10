@@ -175,6 +175,7 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
     createUserMutation.mutate({
       ...data,
       groups: [...autoGroups, ...selectedGroups],
+      applications: selectedApps,
     });
   };
 
@@ -295,11 +296,15 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
                     <FormControl>
                       <div className="relative">
                         <Input 
-                          {...field} 
+                          value={managerSearch}
                           onChange={(e) => {
-                            field.onChange(e);
-                            setManagerSearch(e.target.value);
-                            setShowManagerDropdown(e.target.value.length > 0);
+                            const value = e.target.value;
+                            setManagerSearch(value);
+                            setShowManagerDropdown(value.length > 0);
+                            // Clear the field value when typing
+                            if (value !== field.value) {
+                              field.onChange("");
+                            }
                           }}
                           placeholder="Type to search for manager..."
                         />
@@ -312,8 +317,10 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
                                 onClick={() => {
                                   const fullName = `${manager.firstName} ${manager.lastName}`;
                                   field.onChange(fullName);
-                                  setManagerSearch("");
+                                  setManagerSearch(fullName);
                                   setShowManagerDropdown(false);
+                                  // Set the manager ID for form submission
+                                  form.setValue('managerId', manager.id);
                                 }}
                               >
                                 <div className="font-medium text-gray-900 dark:text-white">{manager.firstName} {manager.lastName}</div>
