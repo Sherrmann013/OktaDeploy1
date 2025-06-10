@@ -139,6 +139,53 @@ async function simpleBuild() {
       .dark .table-row-light:hover {
         background-color: hsl(215 20% 20%);
       }
+
+      /* Status badges with proper dark mode */
+      .status-active {
+        background-color: rgb(220 252 231);
+        color: rgb(22 101 52);
+      }
+
+      .status-suspended {
+        background-color: rgb(254 249 195);
+        color: rgb(133 77 14);
+      }
+
+      .status-deprovisioned {
+        background-color: rgb(254 226 226);
+        color: rgb(153 27 27);
+      }
+
+      .dark .status-active {
+        background-color: hsl(123 46% 35%);
+        color: hsl(0 0% 98%);
+      }
+
+      .dark .status-suspended {
+        background-color: hsl(35 91% 48%);
+        color: hsl(0 0% 98%);
+      }
+
+      .dark .status-deprovisioned {
+        background-color: hsl(0 75% 55%);
+        color: hsl(0 0% 98%);
+      }
+
+      /* Enhanced button styling for tabs */
+      .bg-muted\/50 {
+        background-color: hsla(var(--muted), 0.5);
+      }
+
+      /* Custom table header styling */
+      .table-header {
+        background-color: hsl(var(--muted));
+        border-bottom: 1px solid hsl(var(--border));
+      }
+
+      .dark .table-header {
+        background-color: hsl(215 20% 16%);
+        border-bottom: 1px solid hsl(215 15% 25%);
+      }
     </style>
   </head>
   <body>
