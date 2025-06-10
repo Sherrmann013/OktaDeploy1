@@ -186,6 +186,39 @@ async function simpleBuild() {
         background-color: hsl(215 20% 16%);
         border-bottom: 1px solid hsl(215 15% 25%);
       }
+
+      /* Fix TabsList to show distinct buttons */
+      [role="tablist"] {
+        background-color: transparent !important;
+        gap: 0.5rem;
+      }
+
+      [role="tab"] {
+        background-color: hsl(var(--muted)) !important;
+        border: 1px solid hsl(var(--border)) !important;
+        border-radius: 0.375rem !important;
+        margin: 0 !important;
+      }
+
+      [role="tab"][data-state="active"] {
+        background-color: hsl(var(--card)) !important;
+        color: hsl(var(--card-foreground)) !important;
+        border-color: hsl(var(--primary)) !important;
+      }
+
+      /* Main content areas need darker backgrounds */
+      .space-y-6 {
+        background-color: hsl(var(--muted)/0.3);
+        padding: 1rem;
+        border-radius: 0.5rem;
+      }
+
+      /* Table and search area backgrounds */
+      .table-container {
+        background-color: hsl(var(--muted)/0.5);
+        border-radius: 0.5rem;
+        padding: 1rem;
+      }
     </style>
   </head>
   <body>
