@@ -174,27 +174,10 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
     }
   };
 
-  const handleManagerSelect = (user: User) => {
-    setSelectedManager(user);
-    const fullName = `${user.firstName} ${user.lastName}`;
-    setManagerSearch(fullName);
-    form.setValue('manager', fullName);
-    setShowManagerDropdown(false);
-  };
-
-  const handleManagerSearchChange = (value: string) => {
-    setManagerSearch(value);
-    setShowManagerDropdown(value.length > 0);
-    if (value === "") {
-      setSelectedManager(null);
-    }
-  };
-
   const handleClose = () => {
     form.reset();
     setSelectedGroups([]);
     setManagerSearch("");
-    setSelectedManager(null);
     setShowManagerDropdown(false);
     onClose();
   };
