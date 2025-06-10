@@ -7,6 +7,7 @@ import { oktaService } from "./okta-service";
 import { syncSpecificUser } from "./okta-sync";
 import { knowBe4Service } from "./knowbe4-service";
 import { knowBe4GraphService } from "./knowbe4-graph-service";
+import { syncUserGroupsAndEmployeeType, syncAllUsersGroupsAndEmployeeTypes } from "./sync-user-groups";
 
 // Helper function to determine employee type from user groups
 function determineEmployeeTypeFromGroups(userGroups: any[], employeeTypeApps: Set<string>): string | null {
@@ -1154,15 +1155,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
 
-  // Full OKTA sync - fetch all users with pagination
+  // Full OKTA sync - fetch all users with pagination and group information
   app.get("/api/okta/sync-all", requireAdmin, async (req, res) => {
     try {
-      console.log("Starting full OKTA sync with pagination...");
+      console.log("Starting full OKTA sync with pagination and group sync...");
       const allUsers = await oktaService.getUsers(200); // This will now paginate through all users
       console.log(`Found ${allUsers.length} users in OKTA`);
       
       let syncedCount = 0;
       let updatedCount = 0;
+      let groupsSyncedCount = 0;
       
       for (const oktaUser of allUsers) {
         try {
@@ -2256,6 +2258,55 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Error searching campaigns via Graph API:', error);
       res.status(500).json({ error: 'Failed to search campaigns' });
+    }
+  });
+
+  // Sync user groups and employee types
+  app.post('/api/sync-user-groups/:userId', isAuthenticated, requireAdmin, async (req, res) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      const user = await storage.getUser(userId);
+      
+      if (!user || !user.oktaId) {
+        return res.status(404).json({ message: 'User not found or no OKTA ID' });
+      }
+      
+      await syncUserGroupsAndEmployeeType(userId, user.oktaId);
+      
+      // Get updated user data
+      const updatedUser = await storage.getUser(userId);
+      
+      res.json({
+        success: true,
+        message: `Groups and employee type synced for ${user.email}`,
+        user: updatedUser
+      });
+    } catch (error) {
+      console.error('Error syncing user groups:', error);
+      res.status(500).json({ 
+        message: 'Failed to sync user groups',
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
+  // Sync all users' groups and employee types
+  app.post('/api/sync-all-user-groups', isAuthenticated, requireAdmin, async (req, res) => {
+    try {
+      const result = await syncAllUsersGroupsAndEmployeeTypes();
+      
+      res.json({
+        success: true,
+        message: `Groups sync completed. Updated: ${result.updated}, Errors: ${result.errors}`,
+        updated: result.updated,
+        errors: result.errors
+      });
+    } catch (error) {
+      console.error('Error syncing all user groups:', error);
+      res.status(500).json({ 
+        message: 'Failed to sync all user groups',
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
     }
   });
 
