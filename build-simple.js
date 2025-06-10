@@ -271,6 +271,13 @@ async function simpleBuild() {
         box-shadow: none !important;
       }
 
+      /* Remove border from theme toggle button specifically */
+      .dark button[data-testid="theme-toggle"],
+      .dark button:has(.lucide-sun),
+      .dark button:has(.lucide-moon) {
+        border: none !important;
+      }
+
       .dark button:focus,
       .dark select:focus,
       .dark input:focus,
