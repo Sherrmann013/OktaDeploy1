@@ -545,49 +545,61 @@ export default function UserTable({
             <FilterIcon className="h-4 w-4" />
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-56 p-0 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-lg z-50" align="start">
-          <Command shouldFilter={false}>
-            <CommandInput 
-              placeholder="Search manager..." 
-              value={managerSearchQuery}
-              onValueChange={setManagerSearchQuery}
-              autoFocus
-            />
-            <CommandList>
-              <CommandEmpty>No managers found.</CommandEmpty>
-              <CommandGroup>
-                {managerFilter && (
-                  <CommandItem
-                    onSelect={() => {
-                      setManagerFilter("");
-                      setManagerSearchQuery("");
-                      setManagerOpen(false);
-                    }}
-                  >
-                    <span className="text-muted-foreground">Clear filter</span>
-                  </CommandItem>
-                )}
-                {managerSuggestions.map((manager: string) => (
-                  <CommandItem
-                    key={manager}
-                    onSelect={() => {
-                      setManagerFilter(manager);
-                      setManagerSearchQuery("");
-                      setManagerOpen(false);
-                    }}
-                  >
-                    <Check
-                      className={cn(
-                        "mr-2 h-4 w-4",
-                        managerFilter === manager ? "opacity-100" : "opacity-0"
-                      )}
-                    />
-                    {manager}
-                  </CommandItem>
-                ))}
-              </CommandGroup>
-            </CommandList>
-          </Command>
+        <PopoverContent className="w-64 p-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-lg z-50" align="start">
+          <div className="space-y-2">
+            <div className="relative">
+              <Input
+                placeholder="Type to search manager..."
+                value={managerSearchQuery}
+                onChange={(e) => setManagerSearchQuery(e.target.value)}
+                className="text-sm"
+                autoFocus
+              />
+              {managerSearchQuery && managerSuggestions.length > 0 && (
+                <div className="absolute z-10 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md shadow-lg max-h-48 overflow-auto">
+                  {managerSuggestions.map((manager: string) => (
+                    <div
+                      key={manager}
+                      className="px-3 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 text-sm"
+                      onClick={() => {
+                        setManagerFilter(manager);
+                        setManagerSearchQuery(manager);
+                        setManagerOpen(false);
+                      }}
+                    >
+                      {manager}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+            <div className="flex gap-2">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => {
+                  setManagerFilter(managerSearchQuery);
+                  setManagerOpen(false);
+                }}
+                className="text-xs flex-1"
+                disabled={!managerSearchQuery}
+              >
+                Apply
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => {
+                  setManagerFilter("");
+                  setManagerSearchQuery("");
+                  setManagerOpen(false);
+                }}
+                className="text-xs"
+              >
+                Clear
+              </Button>
+            </div>
+          </div>
         </PopoverContent>
       </Popover>
     );
