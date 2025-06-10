@@ -48,14 +48,17 @@ export default function Users() {
   });
   const { toast } = useToast();
 
-  // Column management
-  const [columns, setColumns] = useState<ColumnConfig[]>(() => 
-    AVAILABLE_COLUMNS.map((col, index) => ({
+  // Column management - force reset to ensure Employee Type shows by default
+  const [columns, setColumns] = useState<ColumnConfig[]>(() => {
+    // Clear any cached column settings
+    localStorage.removeItem('user-table-columns');
+    
+    return AVAILABLE_COLUMNS.map((col, index) => ({
       id: col.id,
       visible: ['name', 'login', 'title', 'department', 'manager', 'employeeType', 'status'].includes(col.id),
       order: index
-    }))
-  );
+    }));
+  });
 
   // OKTA Sync Mutation
   const oktaSyncMutation = useMutation({

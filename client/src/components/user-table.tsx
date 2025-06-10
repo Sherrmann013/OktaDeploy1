@@ -619,49 +619,22 @@ export default function UserTable({
       case 'department':
         return <div className="text-sm text-foreground">{user.department || '-'}</div>;
       case 'employeeType':
-        const getEmployeeTypeStyle = (employeeType: string) => {
+        const getEmployeeTypeBadge = (employeeType: string) => {
           switch (employeeType?.toUpperCase()) {
-            case 'EMPLOYEE': 
-              return { 
-                backgroundColor: '#dbeafe', 
-                color: '#1e40af',
-                border: '1px solid #3b82f6'
-              };
-            case 'CONTRACTOR': 
-              return { 
-                backgroundColor: '#dcfce7', 
-                color: '#166534',
-                border: '1px solid #22c55e'
-              };
-            case 'PART_TIME': 
-              return { 
-                backgroundColor: '#f3e8ff', 
-                color: '#7c3aed',
-                border: '1px solid #8b5cf6'
-              };
-            case 'INTERN': 
-              return { 
-                backgroundColor: '#fed7aa', 
-                color: '#ea580c',
-                border: '1px solid #f97316'
-              };
-            default: 
-              return { 
-                backgroundColor: '#f3f4f6', 
-                color: '#374151',
-                border: '1px solid #9ca3af'
-              };
+            case 'EMPLOYEE':
+              return <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-100">Employee</Badge>;
+            case 'CONTRACTOR':
+              return <Badge className="bg-green-100 text-green-800 hover:bg-green-100">Contractor</Badge>;
+            case 'PART_TIME':
+              return <Badge className="bg-purple-100 text-purple-800 hover:bg-purple-100">Part Time</Badge>;
+            case 'INTERN':
+              return <Badge className="bg-orange-100 text-orange-800 hover:bg-orange-100">Intern</Badge>;
+            default:
+              return <Badge className="bg-gray-100 text-gray-800 hover:bg-gray-100">Not specified</Badge>;
           }
         };
         
-        return (
-          <span 
-            className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
-            style={getEmployeeTypeStyle(user.employeeType || '')}
-          >
-            {user.employeeType || 'Not specified'}
-          </span>
-        );
+        return getEmployeeTypeBadge(user.employeeType || '');
       case 'manager':
         return <div className="text-sm text-foreground">{user.manager || '-'}</div>;
       case 'mobilePhone':
