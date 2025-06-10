@@ -937,19 +937,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       console.log(`Deleting user: ${user.firstName} ${user.lastName} (${user.email})`);
 
-      // Deactivate user in OKTA first if they have an OKTA ID
+      // Permanently delete user from OKTA first if they have an OKTA ID
       if (user.oktaId) {
         try {
-          console.log(`Deactivating user in OKTA: ${user.oktaId}`);
-          await oktaService.deactivateUser(user.oktaId);
-          console.log(`Successfully deactivated user in OKTA: ${user.oktaId}`);
+          console.log(`Permanently deleting user from OKTA: ${user.oktaId}`);
+          await oktaService.deleteUser(user.oktaId);
+          console.log(`Successfully deleted user from OKTA: ${user.oktaId}`);
         } catch (oktaError) {
-          console.error(`Failed to deactivate user in OKTA: ${user.oktaId}`, oktaError);
-          // Don't fail the entire operation if OKTA deactivation fails
+          console.error(`Failed to delete user from OKTA: ${user.oktaId}`, oktaError);
+          // Don't fail the entire operation if OKTA deletion fails
           // Continue with local deletion for data consistency
         }
       } else {
-        console.log('User has no OKTA ID, skipping OKTA deactivation');
+        console.log('User has no OKTA ID, skipping OKTA deletion');
       }
       
       // Delete from local storage

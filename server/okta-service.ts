@@ -819,6 +819,30 @@ class OktaService {
     }
   }
 
+  async deleteUser(userId: string): Promise<any> {
+    try {
+      // First deactivate the user
+      console.log(`Deactivating user ${userId} before deletion`);
+      await this.deactivateUser(userId);
+      
+      // Then permanently delete the user
+      console.log(`Permanently deleting user ${userId} from OKTA`);
+      const response = await this.makeRequest(`/users/${userId}`, {
+        method: 'DELETE'
+      });
+      
+      if (response.ok || response.status === 204) {
+        console.log(`Successfully deleted user ${userId} from OKTA`);
+        return { success: true };
+      } else {
+        const errorText = await response.text();
+        throw new Error(`Failed to delete user: ${response.status} ${response.statusText} - ${errorText}`);
+      }
+    } catch (error) {
+      throw new Error(`OKTA API error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
   async resetUserPassword(userId: string): Promise<any> {
     try {
       const response = await this.makeRequest(`/users/${userId}/lifecycle/reset_password?sendEmail=true`, {
