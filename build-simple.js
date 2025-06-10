@@ -220,12 +220,12 @@ async function simpleBuild() {
         background-color: hsl(var(--muted)/0.4) !important;
       }
       
-      /* Individual table rows - darker backgrounds */
+      /* Individual table rows - darker backgrounds with blue outline */
       .dark [data-state] tr,
       .dark tbody tr,
       .dark .table-row-light {
         background-color: hsl(215 20% 16%) !important;
-        border: none !important;
+        border: 1px solid hsl(207 90% 54%) !important;
       }
       
       /* Search and filter row - darker background */
