@@ -240,7 +240,6 @@ async function simpleBuild() {
       .table-header-row,
       th {
         background-color: hsl(215 25% 12%) !important;
-        border-bottom: 2px solid hsl(215 15% 25%) !important;
         color: hsl(0 0% 98%) !important;
       }
       
