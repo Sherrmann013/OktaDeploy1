@@ -245,19 +245,16 @@ async function simpleBuild() {
         color: hsl(0 0% 98%) !important;
       }
       
-      /* Table container overall */
+      /* Table container overall - remove border */
       .flex-1.overflow-auto.bg-background {
         background-color: hsl(var(--muted)/0.3) !important;
         padding: 1rem !important;
         border-radius: 0.5rem !important;
+        border: none !important;
       }
       
-      /* UserTable card wrapper with blue outline */
-      .dark .relative.w-full.overflow-auto,
-      .dark .UserTable [role="table"],
-      .dark [data-table-container],
-      .dark table {
-        background-color: hsl(215 22% 18%) !important;
+      /* UserTable card wrapper with blue outline - target only the table wrapper inside Card */
+      .dark .UserTable .relative.w-full.overflow-auto {
         border: 1px solid hsl(207 90% 54%) !important;
         border-radius: 0.5rem !important;
       }
