@@ -193,16 +193,16 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
     const symbols = ['!', '@', '#', '$', '%', '^', '&', '*'];
     const numbers = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
     
-    // Generate 2-3 unique words to fit 12 characters total
+    // Generate exactly 2 words to fit 12 characters total
     let attempts = 0;
     let generatedPassword = '';
     
-    while (attempts < 10) {
-      const wordCount = Math.random() < 0.5 ? 2 : 3;
+    while (attempts < 20) {
+      // Select 2 unique words
       const selectedWords = [];
       const usedIndices = new Set();
       
-      for (let i = 0; i < wordCount; i++) {
+      for (let i = 0; i < 2; i++) {
         let randomIndex;
         do {
           randomIndex = Math.floor(Math.random() * words.length);
@@ -220,7 +220,7 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
       // Add one symbol
       const randomSymbol = symbols[Math.floor(Math.random() * symbols.length)];
       
-      // Add two numbers
+      // Add exactly two numbers
       const randomNumbers = [
         numbers[Math.floor(Math.random() * numbers.length)],
         numbers[Math.floor(Math.random() * numbers.length)]
@@ -238,29 +238,42 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
       attempts++;
     }
     
-    // Fallback if no exact 12-character combination found
+    // Fallback: force exactly 12 characters with 2 words + symbol + 2 numbers
     if (!generatedPassword) {
-      // Use shorter words and adjust
-      const shortWords = words.filter(w => w.length <= 4);
-      const word1 = shortWords[Math.floor(Math.random() * shortWords.length)];
-      const word2 = shortWords[Math.floor(Math.random() * shortWords.length)];
-      const cap1 = word1.charAt(0).toUpperCase() + word1.slice(1);
-      const cap2 = word2.charAt(0).toUpperCase() + word2.slice(1);
+      // Use words that together make exactly 9 characters (12 - 1 symbol - 2 numbers)
+      const targetWordLength = 9;
+      const word1 = words[Math.floor(Math.random() * words.length)];
+      const word2 = words[Math.floor(Math.random() * words.length)];
+      
+      let cap1 = word1.charAt(0).toUpperCase() + word1.slice(1);
+      let cap2 = word2.charAt(0).toUpperCase() + word2.slice(1);
+      
+      // Adjust word lengths to reach exactly 9 characters total
+      const currentWordLength = cap1.length + cap2.length;
+      if (currentWordLength > targetWordLength) {
+        // Trim words to fit
+        const excess = currentWordLength - targetWordLength;
+        if (cap2.length > excess) {
+          cap2 = cap2.substring(0, cap2.length - excess);
+        } else {
+          cap2 = cap2.substring(0, 1); // Keep at least first letter
+          const remaining = excess - (cap2.length - 1);
+          cap1 = cap1.substring(0, Math.max(1, cap1.length - remaining));
+        }
+      } else if (currentWordLength < targetWordLength) {
+        // Pad with additional letters from word pool
+        const needed = targetWordLength - currentWordLength;
+        const extraLetters = 'abcdefghijklmnopqrstuvwxyz';
+        for (let i = 0; i < needed; i++) {
+          cap2 += extraLetters[Math.floor(Math.random() * extraLetters.length)];
+        }
+      }
+      
       const symbol = symbols[Math.floor(Math.random() * symbols.length)];
       const num1 = numbers[Math.floor(Math.random() * numbers.length)];
       const num2 = numbers[Math.floor(Math.random() * numbers.length)];
       
       generatedPassword = cap1 + cap2 + symbol + num1 + num2;
-      
-      // Adjust to exactly 12 characters if needed
-      if (generatedPassword.length < 12) {
-        const needed = 12 - generatedPassword.length;
-        for (let i = 0; i < needed; i++) {
-          generatedPassword += numbers[Math.floor(Math.random() * numbers.length)];
-        }
-      } else if (generatedPassword.length > 12) {
-        generatedPassword = generatedPassword.substring(0, 12);
-      }
     }
     
     setPassword(generatedPassword);
