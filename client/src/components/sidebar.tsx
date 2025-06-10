@@ -58,8 +58,8 @@ export default function Sidebar() {
   });
 
   return (
-    <aside className="w-32 bg-background shadow-md border-r border-border flex-shrink-0 flex flex-col">
-      <div className="p-3 border-b border-border bg-purple-600 dark:bg-purple-700 flex flex-col rounded-br-lg">
+    <aside className="w-32 bg-white dark:bg-gray-800 shadow-md border-r border-gray-200 dark:border-gray-700 flex-shrink-0 flex flex-col">
+      <div className="p-3 border-b border-gray-200 dark:border-gray-700 bg-purple-600 dark:bg-purple-700 flex flex-col rounded-br-lg">
         <div className="text-center flex-1">
           <div className="relative inline-block mb-1">
             <div className="relative w-24 h-24 mx-auto rounded bg-purple-600 flex items-center justify-center">
@@ -97,8 +97,8 @@ export default function Sidebar() {
                   className={cn(
                     "flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors",
                     isActive
-                      ? "bg-primary/10 text-primary"
-                      : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                      ? "bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300"
+                      : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100"
                   )}
                 >
                   <item.icon className="w-5 h-5" />
@@ -111,7 +111,7 @@ export default function Sidebar() {
       </nav>
       
       {/* User Profile and Controls at Bottom */}
-      <div className="p-4 border-t border-border">
+      <div className="p-4 border-t border-gray-200 dark:border-gray-700">
         <div className="flex items-center justify-center gap-3">
           {/* User Dropdown */}
           <div className="relative" ref={dropdownRef}>
@@ -125,10 +125,10 @@ export default function Sidebar() {
               </span>
             </Button>
             {showUserDropdown && (
-              <div className="absolute bottom-10 left-0 w-64 bg-background border border-border rounded-lg shadow-lg z-50">
-                <div className="p-3 border-b border-border">
-                  <p className="font-medium text-foreground">{currentUser?.firstName} {currentUser?.lastName}</p>
-                  <p className="text-sm text-muted-foreground">{currentUser?.email}</p>
+              <div className="absolute bottom-10 left-0 w-64 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50">
+                <div className="p-3 border-b border-gray-200 dark:border-gray-700">
+                  <p className="font-medium text-gray-900 dark:text-gray-100">{currentUser?.firstName} {currentUser?.lastName}</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">{currentUser?.email}</p>
                 </div>
                 <div className="p-3">
                   <Button
