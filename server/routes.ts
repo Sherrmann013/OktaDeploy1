@@ -1024,11 +1024,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
             syncedCount++;
           } else {
             // Debug logging for specific users
-            if (oktaUser.profile.email === 'agiwa@mazetx.com' || oktaUser.profile.email === 'ejimenez@mazetx.com') {
+            if (oktaUser.profile.email === 'ejimenez@mazetx.com') {
               console.log(`=== SYNC DEBUG FOR ${oktaUser.profile.email} ===`);
+              console.log(`OKTA created: ${oktaUser.created}`);
               console.log(`OKTA lastLogin: ${oktaUser.lastLogin}`);
+              console.log(`Local created before update: ${existingUser.created}`);
               console.log(`Local lastLogin before update: ${existingUser.lastLogin}`);
-              console.log(`Will update to: ${oktaUser.lastLogin ? new Date(oktaUser.lastLogin) : null}`);
+              console.log(`Will update created to: ${new Date(oktaUser.created)}`);
+              console.log(`Will update lastLogin to: ${oktaUser.lastLogin ? new Date(oktaUser.lastLogin) : null}`);
             }
             
             await storage.updateUser(existingUser.id, {
