@@ -258,20 +258,37 @@ async function simpleBuild() {
         border: 1px solid hsl(215 15% 25%) !important;
       }
 
-      /* Remove outline from dark mode toggle button */
-      .dark button[aria-label*="theme"],
-      .dark button[aria-label*="Toggle"],
+      /* Remove white outlines from all interactive elements in dark mode */
+      .dark button,
+      .dark select,
+      .dark input,
+      .dark [role="combobox"],
+      .dark [role="button"],
+      .dark [data-state],
       .dark .theme-toggle {
         outline: none !important;
-        border: none !important;
         box-shadow: none !important;
       }
 
-      .dark button[aria-label*="theme"]:focus,
-      .dark button[aria-label*="Toggle"]:focus,
+      .dark button:focus,
+      .dark select:focus,
+      .dark input:focus,
+      .dark [role="combobox"]:focus,
+      .dark [role="button"]:focus,
+      .dark [data-state]:focus,
       .dark .theme-toggle:focus {
         outline: none !important;
-        border: none !important;
+        box-shadow: none !important;
+        border-color: hsl(var(--primary)) !important;
+      }
+
+      .dark button:focus-visible,
+      .dark select:focus-visible,
+      .dark input:focus-visible,
+      .dark [role="combobox"]:focus-visible,
+      .dark [role="button"]:focus-visible {
+        outline: 2px solid hsl(var(--primary)) !important;
+        outline-offset: 2px !important;
         box-shadow: none !important;
       }
     </style>
