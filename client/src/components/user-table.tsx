@@ -622,15 +622,15 @@ export default function UserTable({
         const getEmployeeTypeBadge = (employeeType: string) => {
           switch (employeeType?.toUpperCase()) {
             case 'EMPLOYEE':
-              return <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-100">Employee</Badge>;
+              return <Badge className="bg-blue-200 text-blue-900 hover:bg-blue-200 border border-blue-300">Employee</Badge>;
             case 'CONTRACTOR':
-              return <Badge className="bg-green-100 text-green-800 hover:bg-green-100">Contractor</Badge>;
+              return <Badge className="bg-green-200 text-green-900 hover:bg-green-200 border border-green-300">Contractor</Badge>;
             case 'PART_TIME':
-              return <Badge className="bg-purple-100 text-purple-800 hover:bg-purple-100">Part Time</Badge>;
+              return <Badge className="bg-purple-200 text-purple-900 hover:bg-purple-200 border border-purple-300">Part Time</Badge>;
             case 'INTERN':
-              return <Badge className="bg-orange-100 text-orange-800 hover:bg-orange-100">Intern</Badge>;
+              return <Badge className="bg-orange-200 text-orange-900 hover:bg-orange-200 border border-orange-300">Intern</Badge>;
             default:
-              return <Badge className="bg-gray-100 text-gray-800 hover:bg-gray-100">Not specified</Badge>;
+              return <Badge className="bg-gray-200 text-gray-900 hover:bg-gray-200 border border-gray-300">Not specified</Badge>;
           }
         };
         
