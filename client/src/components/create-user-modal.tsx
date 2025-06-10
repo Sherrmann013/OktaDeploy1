@@ -193,25 +193,75 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
     const symbols = ['!', '@', '#', '$', '%', '^', '&', '*'];
     const numbers = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
     
-    // Start with one base word (4-5 characters)
-    const baseWord = words[Math.floor(Math.random() * words.length)];
-    const capitalizedBase = baseWord.charAt(0).toUpperCase() + baseWord.slice(1);
+    // Generate 2-3 unique words to fit 12 characters total
+    let attempts = 0;
+    let generatedPassword = '';
     
-    // Add one symbol
-    const randomSymbol = symbols[Math.floor(Math.random() * symbols.length)];
-    
-    // Calculate remaining characters needed to reach 12 total
-    const currentLength = capitalizedBase.length + 1; // base word + symbol
-    const remainingChars = 12 - currentLength;
-    
-    // Fill remaining space with numbers
-    const randomNumbers = [];
-    for (let i = 0; i < remainingChars; i++) {
-      randomNumbers.push(numbers[Math.floor(Math.random() * numbers.length)]);
+    while (attempts < 10) {
+      const wordCount = Math.random() < 0.5 ? 2 : 3;
+      const selectedWords = [];
+      const usedIndices = new Set();
+      
+      for (let i = 0; i < wordCount; i++) {
+        let randomIndex;
+        do {
+          randomIndex = Math.floor(Math.random() * words.length);
+        } while (usedIndices.has(randomIndex));
+        
+        usedIndices.add(randomIndex);
+        selectedWords.push(words[randomIndex]);
+      }
+      
+      // Capitalize first letter of each word
+      const capitalizedWords = selectedWords.map(word => 
+        word.charAt(0).toUpperCase() + word.slice(1)
+      );
+      
+      // Add one symbol
+      const randomSymbol = symbols[Math.floor(Math.random() * symbols.length)];
+      
+      // Add two numbers
+      const randomNumbers = [
+        numbers[Math.floor(Math.random() * numbers.length)],
+        numbers[Math.floor(Math.random() * numbers.length)]
+      ];
+      
+      // Combine all parts
+      const testPassword = capitalizedWords.join('') + randomSymbol + randomNumbers.join('');
+      
+      // Check if exactly 12 characters
+      if (testPassword.length === 12) {
+        generatedPassword = testPassword;
+        break;
+      }
+      
+      attempts++;
     }
     
-    // Combine all parts to exactly 12 characters
-    const generatedPassword = capitalizedBase + randomSymbol + randomNumbers.join('');
+    // Fallback if no exact 12-character combination found
+    if (!generatedPassword) {
+      // Use shorter words and adjust
+      const shortWords = words.filter(w => w.length <= 4);
+      const word1 = shortWords[Math.floor(Math.random() * shortWords.length)];
+      const word2 = shortWords[Math.floor(Math.random() * shortWords.length)];
+      const cap1 = word1.charAt(0).toUpperCase() + word1.slice(1);
+      const cap2 = word2.charAt(0).toUpperCase() + word2.slice(1);
+      const symbol = symbols[Math.floor(Math.random() * symbols.length)];
+      const num1 = numbers[Math.floor(Math.random() * numbers.length)];
+      const num2 = numbers[Math.floor(Math.random() * numbers.length)];
+      
+      generatedPassword = cap1 + cap2 + symbol + num1 + num2;
+      
+      // Adjust to exactly 12 characters if needed
+      if (generatedPassword.length < 12) {
+        const needed = 12 - generatedPassword.length;
+        for (let i = 0; i < needed; i++) {
+          generatedPassword += numbers[Math.floor(Math.random() * numbers.length)];
+        }
+      } else if (generatedPassword.length > 12) {
+        generatedPassword = generatedPassword.substring(0, 12);
+      }
+    }
     
     setPassword(generatedPassword);
   };
