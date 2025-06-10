@@ -19,7 +19,7 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
         variant: "destructive",
       });
       setTimeout(() => {
-        window.location.href = "/users";
+        window.location.href = "/api/login";
       }, 500);
       return;
     }
