@@ -822,7 +822,7 @@ export default function UserTable({
                 <SelectTrigger className="w-20 h-8">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-background dark:bg-background border border-border dark:border-border z-50">
                   <SelectItem value="10">10</SelectItem>
                   <SelectItem value="25">25</SelectItem>
                   <SelectItem value="50">50</SelectItem>
