@@ -48,6 +48,12 @@ export default function UserDetail() {
   const [showPasswordModal, setShowPasswordModal] = useState<"reset" | "expire" | null>(null);
   const [newPassword, setNewPassword] = useState("");
   const [generatedPassword, setGeneratedPassword] = useState("");
+  const [confirmAction, setConfirmAction] = useState<{
+    type: string;
+    title: string;
+    message: string;
+    action: () => void;
+  } | null>(null);
   
   const userId = params?.id ? parseInt(params.id) : null;
   
@@ -405,11 +411,22 @@ export default function UserDetail() {
   });
 
   const handleStatusChange = (status: string) => {
-    updateStatusMutation.mutate({ status });
+    const actionText = status === "ACTIVE" ? "activate" : "suspend";
+    setConfirmAction({
+      type: status,
+      title: `${actionText.charAt(0).toUpperCase() + actionText.slice(1)} User`,
+      message: `Are you sure you want to ${actionText} this user?`,
+      action: () => updateStatusMutation.mutate({ status }),
+    });
   };
 
   const handleDeleteUser = () => {
-    deleteUserMutation.mutate();
+    setConfirmAction({
+      type: "delete",
+      title: "Delete User",
+      message: "Are you sure you want to delete this user? This action cannot be undone.",
+      action: () => deleteUserMutation.mutate(),
+    });
   };
 
   const handleEditSubmit = (data: z.infer<typeof editUserSchema>) => {
@@ -1807,6 +1824,23 @@ export default function UserDetail() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Confirmation Modal */}
+      {confirmAction && (
+        <ConfirmationModal
+          isOpen={!!confirmAction}
+          onClose={() => setConfirmAction(null)}
+          onConfirm={() => {
+            confirmAction.action();
+            setConfirmAction(null);
+          }}
+          title={confirmAction.title}
+          message={confirmAction.message}
+          confirmText={confirmAction.type === "delete" ? "Delete" : "Confirm"}
+          cancelText="Cancel"
+          variant={confirmAction.type === "delete" ? "destructive" : "default"}
+        />
+      )}
     </div>
   );
 }
