@@ -375,49 +375,30 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
               />
               <FormField
                 control={form.control}
-                name="manager"
+                name="password"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Manager</FormLabel>
+                    <FormLabel>Password *</FormLabel>
                     <FormControl>
                       <div className="relative">
                         <Input 
-                          value={managerSearch}
+                          type="text" 
+                          placeholder="Enter password" 
+                          value={password}
                           onChange={(e) => {
-                            const value = e.target.value;
-                            setManagerSearch(value);
-                            setShowManagerDropdown(value.length > 0);
-                            // Clear the field value when typing
-                            if (value !== field.value) {
-                              field.onChange("");
-                            }
+                            setPassword(e.target.value);
+                            field.onChange(e.target.value);
                           }}
-                          placeholder="Type to search for manager..."
                         />
-                        {managerSearch && filteredManagers.length > 0 && showManagerDropdown && (
-                          <div className="absolute z-10 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md shadow-lg max-h-60 overflow-auto">
-                            {filteredManagers.map((manager: User) => (
-                              <div
-                                key={manager.id}
-                                className="px-3 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700"
-                                onClick={() => {
-                                  const fullName = `${manager.firstName} ${manager.lastName}`;
-                                  field.onChange(fullName);
-                                  setManagerSearch(fullName);
-                                  setShowManagerDropdown(false);
-                                  // Set the manager ID for form submission
-                                  form.setValue('managerId', manager.id);
-                                }}
-                              >
-                                <div className="font-medium text-gray-900 dark:text-white">{manager.firstName} {manager.lastName}</div>
-                                <div className="text-sm text-gray-500 dark:text-gray-400">{manager.email}</div>
-                                {manager.title && (
-                                  <div className="text-sm text-gray-400 dark:text-gray-500">{manager.title}</div>
-                                )}
-                              </div>
-                            ))}
-                          </div>
-                        )}
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="ghost"
+                          className="absolute right-2 top-1/2 transform -translate-y-1/2 h-6 w-6 p-0 hover:bg-gray-100 dark:hover:bg-gray-700"
+                          onClick={generatePassword}
+                        >
+                          <RefreshCw className="h-4 w-4" />
+                        </Button>
                       </div>
                     </FormControl>
                     <FormMessage />
@@ -523,6 +504,60 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
               />
               <FormField
                 control={form.control}
+                name="manager"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Manager</FormLabel>
+                    <FormControl>
+                      <div className="relative">
+                        <Input 
+                          value={managerSearch}
+                          onChange={(e) => {
+                            const value = e.target.value;
+                            setManagerSearch(value);
+                            setShowManagerDropdown(value.length > 0);
+                            // Clear the field value when typing
+                            if (value !== field.value) {
+                              field.onChange("");
+                            }
+                          }}
+                          placeholder="Type to search for manager..."
+                        />
+                        {managerSearch && filteredManagers.length > 0 && showManagerDropdown && (
+                          <div className="absolute z-10 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md shadow-lg max-h-60 overflow-auto">
+                            {filteredManagers.map((manager: User) => (
+                              <div
+                                key={manager.id}
+                                className="px-3 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700"
+                                onClick={() => {
+                                  const fullName = `${manager.firstName} ${manager.lastName}`;
+                                  field.onChange(fullName);
+                                  setManagerSearch(fullName);
+                                  setShowManagerDropdown(false);
+                                  // Set the manager ID for form submission
+                                  form.setValue('managerId', manager.id);
+                                }}
+                              >
+                                <div className="font-medium text-gray-900 dark:text-white">{manager.firstName} {manager.lastName}</div>
+                                <div className="text-sm text-gray-500 dark:text-gray-400">{manager.email}</div>
+                                {manager.title && (
+                                  <div className="text-sm text-gray-400 dark:text-gray-500">{manager.title}</div>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
                 name="employeeType"
                 render={({ field }) => (
                   <FormItem>
@@ -566,8 +601,6 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
                 )}
               />
             </div>
-
-
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
