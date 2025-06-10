@@ -420,7 +420,7 @@ export default function Users() {
             <CardContent className="p-3">
               <div className="flex flex-col items-center text-center">
                 <UsersIcon className={`w-6 h-6 mb-1 ${
-                  employeeTypeFilter === 'EMPLOYEE' ? 'text-blue-700' : 'text-blue-600'
+                  employeeTypeFilter === 'EMPLOYEE' ? 'text-green-700' : 'text-green-600'
                 }`} />
                 <p className="text-xs font-medium text-muted-foreground">Employees</p>
                 <p className="text-xl font-bold text-gray-900 dark:text-gray-100">
@@ -434,7 +434,7 @@ export default function Users() {
             <CardContent className="p-3">
               <div className="flex flex-col items-center text-center">
                 <Building className={`w-6 h-6 mb-1 ${
-                  employeeTypeFilter === 'CONTRACTOR' ? 'text-green-700' : 'text-green-600'
+                  employeeTypeFilter === 'CONTRACTOR' ? 'text-blue-700' : 'text-blue-600'
                 }`} />
                 <p className="text-xs font-medium text-muted-foreground">Contractors</p>
                 <p className="text-xl font-bold text-gray-900 dark:text-gray-100">
