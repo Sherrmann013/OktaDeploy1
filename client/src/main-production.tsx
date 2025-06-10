@@ -29,7 +29,8 @@ function initApp() {
       console.log('✅ React app rendered successfully');
     } catch (error) {
       console.error('❌ Error rendering React app:', error);
-      rootElement.innerHTML = `<div style="color: red; padding: 20px;">Error: ${error.message}</div>`;
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      rootElement.innerHTML = `<div style="color: red; padding: 20px;">Error: ${errorMessage}</div>`;
     }
   } else {
     console.error('❌ Root element not found');
