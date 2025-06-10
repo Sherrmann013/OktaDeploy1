@@ -937,56 +937,58 @@ export default function UserDetail() {
                       
                       <TabsContent value="okta" className="space-y-6 mt-4">
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                          {/* Personal Information */}
+                          {/* Combined Personal & Work Information */}
                           <Card>
                             <CardHeader>
-                              <CardTitle>Personal Information</CardTitle>
+                              <CardTitle>Personal & Work Information</CardTitle>
                             </CardHeader>
                             <CardContent className="space-y-4">
-                              <div>
-                                <label className="text-sm font-medium text-muted-foreground">First Name</label>
-                                <p className="text-foreground">{user.firstName}</p>
+                              {/* First Name --- Last Name */}
+                              <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                  <label className="text-sm font-medium text-muted-foreground">First Name</label>
+                                  <p className="text-foreground">{user.firstName}</p>
+                                </div>
+                                <div>
+                                  <label className="text-sm font-medium text-muted-foreground">Last Name</label>
+                                  <p className="text-foreground">{user.lastName}</p>
+                                </div>
                               </div>
-                              <div>
-                                <label className="text-sm font-medium text-muted-foreground">Last Name</label>
-                                <p className="text-foreground">{user.lastName}</p>
+                              
+                              {/* Email --- Manager */}
+                              <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                  <label className="text-sm font-medium text-muted-foreground">Email</label>
+                                  <p className="text-foreground">{user.email}</p>
+                                </div>
+                                <div>
+                                  <label className="text-sm font-medium text-muted-foreground">Manager</label>
+                                  <p className="text-foreground">{user.manager || 'Not specified'}</p>
+                                </div>
                               </div>
-                              <div>
-                                <label className="text-sm font-medium text-muted-foreground">Email</label>
-                                <p className="text-foreground">{user.email}</p>
+                              
+                              {/* Title --- Department */}
+                              <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                  <label className="text-sm font-medium text-muted-foreground">Title</label>
+                                  <p className="text-foreground">{user.title || 'Not specified'}</p>
+                                </div>
+                                <div>
+                                  <label className="text-sm font-medium text-muted-foreground">Department</label>
+                                  <p className="text-foreground">{user.department || 'Not specified'}</p>
+                                </div>
                               </div>
-                              <div>
-                                <label className="text-sm font-medium text-muted-foreground">Login</label>
-                                <p className="text-foreground">{user.login}</p>
-                              </div>
-                              <div>
-                                <label className="text-sm font-medium text-muted-foreground">Mobile Phone</label>
-                                <p className="text-foreground">{user.mobilePhone || 'Not specified'}</p>
-                              </div>
-                            </CardContent>
-                          </Card>
-
-                          {/* Work Information */}
-                          <Card>
-                            <CardHeader>
-                              <CardTitle>Work Information</CardTitle>
-                            </CardHeader>
-                            <CardContent className="space-y-4">
-                              <div>
-                                <label className="text-sm font-medium text-muted-foreground">Title</label>
-                                <p className="text-foreground">{user.title || 'Not specified'}</p>
-                              </div>
-                              <div>
-                                <label className="text-sm font-medium text-muted-foreground">Department</label>
-                                <p className="text-foreground">{user.department || 'Not specified'}</p>
-                              </div>
-                              <div>
-                                <label className="text-sm font-medium text-muted-foreground">Manager</label>
-                                <p className="text-foreground">{user.manager || 'Not specified'}</p>
-                              </div>
-                              <div>
-                                <label className="text-sm font-medium text-muted-foreground">Employee Type</label>
-                                <p className="text-foreground">{user.employeeType || 'Not specified'}</p>
+                              
+                              {/* Mobile Phone --- Employee Type */}
+                              <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                  <label className="text-sm font-medium text-muted-foreground">Mobile Phone</label>
+                                  <p className="text-foreground">{user.mobilePhone || 'Not specified'}</p>
+                                </div>
+                                <div>
+                                  <label className="text-sm font-medium text-muted-foreground">Employee Type</label>
+                                  <p className="text-foreground">{user.employeeType || 'Not specified'}</p>
+                                </div>
                               </div>
                             </CardContent>
                           </Card>
