@@ -201,7 +201,7 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
       <DialogContent className="max-w-2xl max-h-screen overflow-y-auto">
         <DialogHeader>
           <div className="flex items-center justify-between">
-            <DialogTitle className="text-lg font-semibold text-gray-900">
+            <DialogTitle className="text-lg font-semibold text-gray-900 dark:text-white">
               Create New User
             </DialogTitle>
             <Button
@@ -267,7 +267,7 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
                           }}
                           className="rounded-r-none"
                         />
-                        <div className="flex items-center px-3 bg-gray-50 border border-l-0 border-gray-300 rounded-r-md text-sm text-gray-500">
+                        <div className="flex items-center px-3 bg-gray-50 dark:bg-gray-700 border border-l-0 border-gray-300 dark:border-gray-600 rounded-r-md text-sm text-gray-500 dark:text-gray-300">
                           @mazetx.com
                         </div>
                       </div>
@@ -286,7 +286,7 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
                       <Input 
                         placeholder="Login will auto-populate" 
                         {...field}
-                        className="bg-gray-50"
+                        className="bg-gray-50 dark:bg-gray-700"
                         readOnly
                       />
                     </FormControl>
@@ -396,11 +396,11 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
                         placeholder="Type to search for manager..."
                       />
                       {managerSearch && filteredManagers.length > 0 && (
-                        <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto">
+                        <div className="absolute z-10 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md shadow-lg max-h-60 overflow-auto">
                           {filteredManagers.map((manager: User) => (
                             <div
                               key={manager.id}
-                              className="px-3 py-2 cursor-pointer hover:bg-gray-100"
+                              className="px-3 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700"
                               onClick={() => {
                                 const fullName = `${manager.firstName} ${manager.lastName}`;
                                 field.onChange(fullName);
@@ -409,10 +409,10 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
                                 setShowManagerDropdown(false);
                               }}
                             >
-                              <div className="font-medium">{manager.firstName} {manager.lastName}</div>
-                              <div className="text-sm text-gray-500">{manager.email}</div>
+                              <div className="font-medium text-gray-900 dark:text-white">{manager.firstName} {manager.lastName}</div>
+                              <div className="text-sm text-gray-500 dark:text-gray-400">{manager.email}</div>
                               {manager.title && (
-                                <div className="text-sm text-gray-400">{manager.title}</div>
+                                <div className="text-sm text-gray-400 dark:text-gray-500">{manager.title}</div>
                               )}
                             </div>
                           ))}
@@ -426,7 +426,7 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
             />
 
             <div>
-              <Label className="text-sm font-medium text-gray-700 mb-2 block">Groups</Label>
+              <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 block">Groups</Label>
               <div className="space-y-2">
                 {availableGroups.map((group) => (
                   <div key={group} className="flex items-center space-x-2">
@@ -435,7 +435,7 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
                       checked={selectedGroups.includes(group)}
                       onCheckedChange={(checked) => handleGroupToggle(group, checked as boolean)}
                     />
-                    <Label htmlFor={`group-${group}`} className="text-sm text-gray-700">
+                    <Label htmlFor={`group-${group}`} className="text-sm text-gray-700 dark:text-gray-300">
                       {group}
                     </Label>
                   </div>
