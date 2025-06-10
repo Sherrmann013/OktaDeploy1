@@ -453,7 +453,7 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
                     <FormControl>
                       <div className="relative">
                         <Input 
-                          type="password" 
+                          type="text" 
                           placeholder="Enter password" 
                           value={password}
                           onChange={(e) => {
