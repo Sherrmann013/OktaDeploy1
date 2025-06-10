@@ -128,14 +128,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Auth routes are handled by setupAuth
 
-  // Get employee type group counts from OKTA
+  // Get employee type counts from local storage (fast, no OKTA calls)
   app.get("/api/employee-type-counts", isAuthenticated, async (req, res) => {
     try {
-      const counts = await oktaService.getEmployeeTypeGroupCounts();
+      const users = await storage.getAllUsers();
+      
+      const counts = {
+        EMPLOYEE: 0,
+        CONTRACTOR: 0,
+        INTERN: 0,
+        PART_TIME: 0
+      };
+      
+      for (const user of users) {
+        if (user.employeeType && counts.hasOwnProperty(user.employeeType)) {
+          counts[user.employeeType]++;
+        }
+      }
+      
       res.json(counts);
     } catch (error) {
-      console.error("Error fetching employee type counts:", error);
-      res.status(500).json({ error: "Failed to fetch employee type counts" });
+      console.error("Error getting employee type counts:", error);
+      res.status(500).json({ 
+        error: "Failed to get employee type counts",
+        message: error instanceof Error ? error.message : "Unknown error"
+      });
     }
   });
 
