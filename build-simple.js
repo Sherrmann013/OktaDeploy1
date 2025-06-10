@@ -213,11 +213,47 @@ async function simpleBuild() {
         border-radius: 0.5rem;
       }
 
-      /* Table and search area backgrounds */
-      .table-container {
-        background-color: hsl(var(--muted)/0.5);
-        border-radius: 0.5rem;
-        padding: 1rem;
+      /* Main Users page specific styling */
+      
+      /* Stats cards section - darker background */
+      .bg-background.px-6.py-4 {
+        background-color: hsl(var(--muted)/0.4) !important;
+      }
+      
+      /* Individual employee cards - darker backgrounds */
+      .dark [class*="CardContent"] {
+        background-color: hsl(215 20% 16%) !important;
+        border: 1px solid hsl(215 15% 25%) !important;
+      }
+      
+      /* Search and filter row - darker background */
+      .flex.flex-col.gap-4.mb-6,
+      .flex.justify-between.items-center.gap-4 {
+        background-color: hsl(var(--muted)/0.5) !important;
+        padding: 1rem !important;
+        border-radius: 0.5rem !important;
+        border: 1px solid hsl(var(--border)) !important;
+      }
+      
+      /* Table header row - darker background */
+      thead tr,
+      .table-header-row {
+        background-color: hsl(215 20% 16%) !important;
+        border-bottom: 2px solid hsl(215 15% 25%) !important;
+      }
+      
+      /* Table container overall */
+      .flex-1.overflow-auto.bg-background {
+        background-color: hsl(var(--muted)/0.3) !important;
+        padding: 1rem !important;
+        border-radius: 0.5rem !important;
+      }
+      
+      /* UserTable card wrapper */
+      .dark .UserTable [role="table"],
+      .dark [data-table-container] {
+        background-color: hsl(215 22% 18%) !important;
+        border: 1px solid hsl(215 15% 25%) !important;
       }
     </style>
   </head>
