@@ -62,7 +62,7 @@ export async function setupSimpleAuth(app: Express) {
           client_id: process.env.CLIENT_ID!,
           client_secret: process.env.CLIENT_SECRET!,
           code: code as string,
-          redirect_uri: 'https://mazetx.replit.app/api/okta-callback'
+          redirect_uri: `${req.protocol}://${req.get('host')}/api/okta-callback`
         })
       });
       

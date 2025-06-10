@@ -64,8 +64,8 @@ export async function setupAuth(app: Express) {
   app.use(passport.initialize());
   app.use(passport.session());
 
-  // Use the production domain for callback URL
-  const domain = 'mazetx.replit.app';
+  // Use the current domain for callback URL
+  const domain = process.env.REPLIT_DOMAINS || 'localhost:5000';
   
   console.log('Using domain for callback:', domain);
   console.log('OKTA Auth URLs:', {
@@ -143,7 +143,7 @@ export async function setupAuth(app: Express) {
             `client_id=${process.env.CLIENT_ID}&` +
             `response_type=code&` +
             `scope=openid email profile&` +
-            `redirect_uri=${encodeURIComponent('https://mazetx.replit.app/api/okta-callback')}&` +
+            `redirect_uri=${encodeURIComponent(`${req.protocol}://${req.get('host')}/api/okta-callback`)}&` +
             `state=oauth_state`;
           console.log('Redirecting to:', authUrl);
           return res.redirect(authUrl);
@@ -191,7 +191,7 @@ export async function setupAuth(app: Express) {
           client_id: process.env.CLIENT_ID!,
           client_secret: process.env.CLIENT_SECRET!,
           code: code as string,
-          redirect_uri: 'https://mazetx.replit.app/api/okta-callback'
+          redirect_uri: `${req.protocol}://${req.get('host')}/api/okta-callback`
         })
       });
       
