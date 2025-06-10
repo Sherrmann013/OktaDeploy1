@@ -25,6 +25,7 @@ interface CreateUserModalProps {
 export default function CreateUserModal({ open, onClose, onSuccess }: CreateUserModalProps) {
   const { toast } = useToast();
   const [selectedGroups, setSelectedGroups] = useState<string[]>([]);
+  const [selectedApps, setSelectedApps] = useState<string[]>([]);
   const [managerSearch, setManagerSearch] = useState("");
   const [showManagerDropdown, setShowManagerDropdown] = useState(false);
 
@@ -185,22 +186,34 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
     }
   };
 
+  const handleAppToggle = (appName: string, checked: boolean) => {
+    if (checked) {
+      setSelectedApps([...selectedApps, appName]);
+    } else {
+      setSelectedApps(selectedApps.filter(a => a !== appName));
+    }
+  };
+
   const handleClose = () => {
     form.reset();
     setSelectedGroups([]);
+    setSelectedApps([]);
     setManagerSearch("");
     setShowManagerDropdown(false);
     onClose();
   };
 
   const availableGroups = [
-    "All Employees",
-    "Engineering Team",
-    "Marketing Team",
-    "Sales Team",
-    "HR Team",
-    "Finance Team",
-    "Managers",
+    "R&D@mazetx.com",
+    "Labusers@mazetx.com", 
+    "finfacit@mazetx.com",
+    "HR@mazetx.com"
+  ];
+
+  const availableApps = [
+    "Microsoft",
+    "Slack",
+    "Zoom"
   ];
 
   return (
@@ -402,21 +415,41 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
 
 
 
-            <div>
-              <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 block">Groups</Label>
-              <div className="space-y-2">
-                {availableGroups.map((group) => (
-                  <div key={group} className="flex items-center space-x-2">
-                    <Checkbox
-                      id={`group-${group}`}
-                      checked={selectedGroups.includes(group)}
-                      onCheckedChange={(checked) => handleGroupToggle(group, checked as boolean)}
-                    />
-                    <Label htmlFor={`group-${group}`} className="text-sm text-gray-700 dark:text-gray-300">
-                      {group}
-                    </Label>
-                  </div>
-                ))}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 block">Groups</Label>
+                <div className="space-y-2">
+                  {availableGroups.map((group) => (
+                    <div key={group} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={`group-${group}`}
+                        checked={selectedGroups.includes(group)}
+                        onCheckedChange={(checked) => handleGroupToggle(group, checked as boolean)}
+                      />
+                      <Label htmlFor={`group-${group}`} className="text-sm text-gray-700 dark:text-gray-300">
+                        {group}
+                      </Label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              
+              <div>
+                <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 block">Apps</Label>
+                <div className="space-y-2">
+                  {availableApps.map((app) => (
+                    <div key={app} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={`app-${app}`}
+                        checked={selectedApps.includes(app)}
+                        onCheckedChange={(checked) => handleAppToggle(app, checked as boolean)}
+                      />
+                      <Label htmlFor={`app-${app}`} className="text-sm text-gray-700 dark:text-gray-300">
+                        {app}
+                      </Label>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
 

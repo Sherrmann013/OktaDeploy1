@@ -214,7 +214,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const mobilePhoneFilter = z.string().optional().parse(req.query.mobilePhone);
       const managerFilter = z.string().optional().parse(req.query.manager);
       const page = z.coerce.number().min(1).default(1).parse(req.query.page);
-      const limit = z.coerce.number().min(1).max(500).default(10).parse(req.query.limit);
+      const limit = z.coerce.number().min(1).max(1000).default(10).parse(req.query.limit);
       const statsOnly = z.boolean().default(false).parse(req.query.statsOnly === 'true');
       const sortBy = z.string().default("firstName").parse(req.query.sortBy);
       const sortOrder = z.enum(["asc", "desc"]).default("asc").parse(req.query.sortOrder);
