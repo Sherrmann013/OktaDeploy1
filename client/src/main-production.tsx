@@ -1,4 +1,5 @@
 // Production entry point that works with global React
+import React from "react";
 import { createRoot } from "react-dom/client";
 import App from "./App";
 import { ThemeProvider } from "@/hooks/use-theme";
@@ -29,8 +30,16 @@ function initApp() {
       console.log('✅ React app rendered successfully');
     } catch (error) {
       console.error('❌ Error rendering React app:', error);
+      console.error('❌ Error name:', error?.constructor?.name);
+      console.error('❌ Error message:', error?.message);
+      console.error('❌ Error stack:', error?.stack);
       const errorMessage = error instanceof Error ? error.message : String(error);
-      rootElement.innerHTML = `<div style="color: red; padding: 20px;">Error: ${errorMessage}</div>`;
+      rootElement.innerHTML = `<div style="color: red; padding: 20px; font-family: monospace;">
+        <h3>React Rendering Error:</h3>
+        <p><strong>Message:</strong> ${errorMessage}</p>
+        <p><strong>Type:</strong> ${error?.constructor?.name || 'Unknown'}</p>
+        <pre style="background: #f0f0f0; padding: 10px; overflow: auto;">${error?.stack || 'No stack trace'}</pre>
+      </div>`;
     }
   } else {
     console.error('❌ Root element not found');

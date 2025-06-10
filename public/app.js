@@ -7787,6 +7787,7 @@
   });
 
   // client/src/main-production.tsx
+  var import_react27 = __toESM(require_react(), 1);
   var import_client = __toESM(require_client(), 1);
 
   // node_modules/regexparam/dist/index.mjs
@@ -41676,6 +41677,7 @@ Defaulting to \`null\`.`;
 
   // client/src/main-production.tsx
   function initApp() {
+    var _a121, _b93;
     console.log("\u{1F680} initApp() called");
     console.log("\u{1F4CB} Document ready state:", document.readyState);
     const rootElement = document.getElementById("root");
@@ -41688,13 +41690,21 @@ Defaulting to \`null\`.`;
         const root = (0, import_client.createRoot)(rootElement);
         console.log("\u{1F3A8} Rendering app...");
         root.render(
-          /* @__PURE__ */ React.createElement(ThemeProvider, { defaultTheme: "dark", storageKey: "ui-theme" }, /* @__PURE__ */ React.createElement(App_default, null))
+          /* @__PURE__ */ import_react27.default.createElement(ThemeProvider, { defaultTheme: "dark", storageKey: "ui-theme" }, /* @__PURE__ */ import_react27.default.createElement(App_default, null))
         );
         console.log("\u2705 React app rendered successfully");
       } catch (error) {
         console.error("\u274C Error rendering React app:", error);
+        console.error("\u274C Error name:", (_a121 = error == null ? void 0 : error.constructor) == null ? void 0 : _a121.name);
+        console.error("\u274C Error message:", error == null ? void 0 : error.message);
+        console.error("\u274C Error stack:", error == null ? void 0 : error.stack);
         const errorMessage = error instanceof Error ? error.message : String(error);
-        rootElement.innerHTML = `<div style="color: red; padding: 20px;">Error: ${errorMessage}</div>`;
+        rootElement.innerHTML = `<div style="color: red; padding: 20px; font-family: monospace;">
+        <h3>React Rendering Error:</h3>
+        <p><strong>Message:</strong> ${errorMessage}</p>
+        <p><strong>Type:</strong> ${((_b93 = error == null ? void 0 : error.constructor) == null ? void 0 : _b93.name) || "Unknown"}</p>
+        <pre style="background: #f0f0f0; padding: 10px; overflow: auto;">${(error == null ? void 0 : error.stack) || "No stack trace"}</pre>
+      </div>`;
       }
     } else {
       console.error("\u274C Root element not found");
