@@ -619,10 +619,45 @@ export default function UserTable({
       case 'department':
         return <div className="text-sm text-foreground">{user.department || '-'}</div>;
       case 'employeeType':
-        const employeeTypeColorClass = getEmployeeTypeColor ? getEmployeeTypeColor(user.employeeType || '') : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300';
+        const getEmployeeTypeStyle = (employeeType: string) => {
+          switch (employeeType?.toUpperCase()) {
+            case 'EMPLOYEE': 
+              return { 
+                backgroundColor: '#dbeafe', 
+                color: '#1e40af',
+                border: '1px solid #3b82f6'
+              };
+            case 'CONTRACTOR': 
+              return { 
+                backgroundColor: '#dcfce7', 
+                color: '#166534',
+                border: '1px solid #22c55e'
+              };
+            case 'PART_TIME': 
+              return { 
+                backgroundColor: '#f3e8ff', 
+                color: '#7c3aed',
+                border: '1px solid #8b5cf6'
+              };
+            case 'INTERN': 
+              return { 
+                backgroundColor: '#fed7aa', 
+                color: '#ea580c',
+                border: '1px solid #f97316'
+              };
+            default: 
+              return { 
+                backgroundColor: '#f3f4f6', 
+                color: '#374151',
+                border: '1px solid #9ca3af'
+              };
+          }
+        };
+        
         return (
           <span 
-            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${employeeTypeColorClass}`}
+            className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+            style={getEmployeeTypeStyle(user.employeeType || '')}
           >
             {user.employeeType || 'Not specified'}
           </span>
