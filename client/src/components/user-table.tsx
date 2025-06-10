@@ -625,7 +625,7 @@ export default function UserTable({
               return (
                 <Badge 
                   className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
-                  style={{ backgroundColor: '#3b82f6', color: '#ffffff', border: '1px solid #1e40af' }}
+                  style={{ backgroundColor: '#10b981', color: '#ffffff', border: '1px solid #047857' }}
                 >
                   Employee
                 </Badge>
@@ -634,7 +634,7 @@ export default function UserTable({
               return (
                 <Badge 
                   className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
-                  style={{ backgroundColor: '#10b981', color: '#ffffff', border: '1px solid #047857' }}
+                  style={{ backgroundColor: '#3b82f6', color: '#ffffff', border: '1px solid #1e40af' }}
                 >
                   Contractor
                 </Badge>
