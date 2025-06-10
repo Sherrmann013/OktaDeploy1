@@ -622,15 +622,50 @@ export default function UserTable({
         const getEmployeeTypeBadge = (employeeType: string) => {
           switch (employeeType?.toUpperCase()) {
             case 'EMPLOYEE':
-              return <Badge className="bg-blue-200 text-blue-900 hover:bg-blue-200 border border-blue-300">Employee</Badge>;
+              return (
+                <Badge 
+                  className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                  style={{ backgroundColor: '#3b82f6', color: '#ffffff', border: '1px solid #1e40af' }}
+                >
+                  Employee
+                </Badge>
+              );
             case 'CONTRACTOR':
-              return <Badge className="bg-green-200 text-green-900 hover:bg-green-200 border border-green-300">Contractor</Badge>;
+              return (
+                <Badge 
+                  className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                  style={{ backgroundColor: '#10b981', color: '#ffffff', border: '1px solid #047857' }}
+                >
+                  Contractor
+                </Badge>
+              );
             case 'PART_TIME':
-              return <Badge className="bg-purple-200 text-purple-900 hover:bg-purple-200 border border-purple-300">Part Time</Badge>;
+              return (
+                <Badge 
+                  className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                  style={{ backgroundColor: '#8b5cf6', color: '#ffffff', border: '1px solid #6d28d9' }}
+                >
+                  Part Time
+                </Badge>
+              );
             case 'INTERN':
-              return <Badge className="bg-orange-200 text-orange-900 hover:bg-orange-200 border border-orange-300">Intern</Badge>;
+              return (
+                <Badge 
+                  className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                  style={{ backgroundColor: '#f97316', color: '#ffffff', border: '1px solid #ea580c' }}
+                >
+                  Intern
+                </Badge>
+              );
             default:
-              return <Badge className="bg-gray-200 text-gray-900 hover:bg-gray-200 border border-gray-300">Not specified</Badge>;
+              return (
+                <Badge 
+                  className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                  style={{ backgroundColor: '#6b7280', color: '#ffffff', border: '1px solid #4b5563' }}
+                >
+                  Not specified
+                </Badge>
+              );
           }
         };
         
