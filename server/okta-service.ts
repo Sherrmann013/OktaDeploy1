@@ -238,28 +238,45 @@ class OktaService {
     }
   }
 
-  // Batch loading method for large datasets
+  // Batch loading method for large datasets with proper pagination
   private async getUsersBatch(limit: number): Promise<any[]> {
     // Skip cache for sync operations to ensure fresh data
-    console.log("Fetching fresh batch user data from OKTA (bypassing cache)");
+    console.log("Fetching fresh batch user data from OKTA with full pagination (bypassing cache)");
 
     try {
-      await this.throttleRequest();
+      let allUsers: any[] = [];
+      let after = '';
       const batchSize = Math.min(200, limit);
-      const url = `/users?limit=${batchSize}`;
-      const response = await this.makeRequest(url);
       
-      if (response.ok) {
-        const users = await response.json();
+      do {
+        await this.throttleRequest();
+        const url = `/users?limit=${batchSize}${after ? `&after=${after}` : ''}`;
+        const response = await this.makeRequest(url);
         
-        // Don't cache during sync operations to ensure fresh data
-        console.log(`Retrieved ${users.length} users from OKTA batch with fresh data`);
-        
-        return users;
-      } else {
-        const errorText = await response.text();
-        throw new Error(`Failed to get users batch: ${response.status} ${response.statusText} - ${errorText}`);
-      }
+        if (response.ok) {
+          const users = await response.json();
+          allUsers = allUsers.concat(users);
+          
+          console.log(`Retrieved ${users.length} users from OKTA batch (total so far: ${allUsers.length})`);
+          
+          // Check for pagination - OKTA includes Link header for pagination
+          const linkHeader = response.headers.get('link');
+          after = '';
+          
+          if (linkHeader) {
+            const nextMatch = linkHeader.match(/<[^>]+[?&]after=([^&>]+)[^>]*>;\s*rel="next"/);
+            if (nextMatch) {
+              after = nextMatch[1];
+            }
+          }
+        } else {
+          const errorText = await response.text();
+          throw new Error(`Failed to get users batch: ${response.status} ${response.statusText} - ${errorText}`);
+        }
+      } while (after && allUsers.length < limit);
+      
+      console.log(`Completed batch fetch: ${allUsers.length} total users from OKTA with fresh data`);
+      return allUsers;
     } catch (error) {
       throw new Error(`OKTA API batch error: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
