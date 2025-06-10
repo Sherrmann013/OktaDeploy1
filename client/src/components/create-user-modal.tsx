@@ -38,7 +38,7 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
 
   // Filter managers based on search input
   const filteredManagers = useMemo(() => {
-    if (!managerSearch || managerSearch.length < 2) return [];
+    if (!managerSearch || managerSearch.length < 1) return [];
     
     const searchTerm = managerSearch.toLowerCase().trim();
     
@@ -47,14 +47,47 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
         const firstName = user.firstName?.toLowerCase() || '';
         const lastName = user.lastName?.toLowerCase() || '';
         const email = user.email?.toLowerCase() || '';
+        const title = user.title?.toLowerCase() || '';
+        const department = user.department?.toLowerCase() || '';
         const fullName = `${firstName} ${lastName}`;
+        const fullNameReverse = `${lastName} ${firstName}`;
         
-        return firstName.includes(searchTerm) ||
-               lastName.includes(searchTerm) ||
+        // Search in multiple fields with different match types
+        return firstName.startsWith(searchTerm) ||
+               lastName.startsWith(searchTerm) ||
                fullName.includes(searchTerm) ||
-               email.includes(searchTerm);
+               fullNameReverse.includes(searchTerm) ||
+               email.includes(searchTerm) ||
+               title.includes(searchTerm) ||
+               department.includes(searchTerm) ||
+               firstName.includes(searchTerm) ||
+               lastName.includes(searchTerm);
       })
-      .slice(0, 10);
+      .sort((a, b) => {
+        // Sort by relevance - exact matches first
+        const aFirstName = a.firstName?.toLowerCase() || '';
+        const aLastName = a.lastName?.toLowerCase() || '';
+        const bFirstName = b.firstName?.toLowerCase() || '';
+        const bLastName = b.lastName?.toLowerCase() || '';
+        const aFullName = `${aFirstName} ${aLastName}`;
+        const bFullName = `${bFirstName} ${bLastName}`;
+        
+        // Exact first name match gets highest priority
+        if (aFirstName.startsWith(searchTerm) && !bFirstName.startsWith(searchTerm)) return -1;
+        if (bFirstName.startsWith(searchTerm) && !aFirstName.startsWith(searchTerm)) return 1;
+        
+        // Exact last name match gets second priority
+        if (aLastName.startsWith(searchTerm) && !bLastName.startsWith(searchTerm)) return -1;
+        if (bLastName.startsWith(searchTerm) && !aLastName.startsWith(searchTerm)) return 1;
+        
+        // Full name match gets third priority
+        if (aFullName.startsWith(searchTerm) && !bFullName.startsWith(searchTerm)) return -1;
+        if (bFullName.startsWith(searchTerm) && !aFullName.startsWith(searchTerm)) return 1;
+        
+        // Sort alphabetically as fallback
+        return aFullName.localeCompare(bFullName);
+      })
+      .slice(0, 15);
   }, [availableManagers, managerSearch]);
 
 
@@ -270,21 +303,20 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
               />
             </div>
 
-            <FormField
-              control={form.control}
-              name="title"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Job Title</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Enter job title" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="title"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Job Title</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Enter job title" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
               <FormField
                 control={form.control}
                 name="department"
