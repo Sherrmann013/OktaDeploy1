@@ -253,10 +253,13 @@ async function simpleBuild() {
       }
       
       /* UserTable card wrapper with blue outline */
+      .dark .relative.w-full.overflow-auto,
       .dark .UserTable [role="table"],
-      .dark [data-table-container] {
+      .dark [data-table-container],
+      .dark table {
         background-color: hsl(215 22% 18%) !important;
         border: 1px solid hsl(207 90% 54%) !important;
+        border-radius: 0.5rem !important;
       }
 
       /* Remove white outlines from all interactive elements in dark mode */
