@@ -486,8 +486,8 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
                         setSelectedZoomOption(value);
                         // Remove any existing Zoom options from selectedApps
                         const filteredApps = selectedApps.filter(app => !app.startsWith("Zoom"));
-                        // Add the new Zoom option if one is selected
-                        if (value) {
+                        // Add the new Zoom option if one is selected and it's not "none"
+                        if (value && value !== "none") {
                           setSelectedApps([...filteredApps, value]);
                         } else {
                           setSelectedApps(filteredApps);
@@ -498,7 +498,7 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
                         <SelectValue placeholder="Select Zoom option" />
                       </SelectTrigger>
                       <SelectContent className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600">
-                        <SelectItem value="">None</SelectItem>
+                        <SelectItem value="none">None</SelectItem>
                         {zoomOptions.map((option) => (
                           <SelectItem key={option} value={option}>
                             {option}
