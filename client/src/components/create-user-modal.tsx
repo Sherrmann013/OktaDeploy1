@@ -455,7 +455,6 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600">
-                        <SelectItem value="none">Select Department</SelectItem>
                         <SelectItem value="Engineering">Engineering</SelectItem>
                         <SelectItem value="Marketing">Marketing</SelectItem>
                         <SelectItem value="Sales">Sales</SelectItem>
