@@ -9,6 +9,8 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { insertUserSchema, type InsertUser, type User } from "@shared/schema";
@@ -23,66 +25,22 @@ interface CreateUserModalProps {
 export default function CreateUserModal({ open, onClose, onSuccess }: CreateUserModalProps) {
   const { toast } = useToast();
   const [selectedGroups, setSelectedGroups] = useState<string[]>([]);
-  const [managerSearch, setManagerSearch] = useState("");
-  const [selectedManager, setSelectedManager] = useState<User | null>(null);
-  const [showManagerDropdown, setShowManagerDropdown] = useState(false);
+  const [managerOpen, setManagerOpen] = useState(false);
+  const [managerSearchQuery, setManagerSearchQuery] = useState("");
+  const [managerFilter, setManagerFilter] = useState("");
 
-  // Fetch existing users for manager dropdown
-  const { data: usersData } = useQuery({
-    queryKey: ["/api/users"],
-    enabled: open,
+  // Fetch manager suggestions from API
+  const { data: managerSuggestions = [] } = useQuery({
+    queryKey: ["/api/managers", managerSearchQuery],
+    queryFn: async () => {
+      if (!managerSearchQuery || managerSearchQuery.length < 2) return [];
+      const response = await fetch(`/api/managers?q=${encodeURIComponent(managerSearchQuery)}`);
+      if (!response.ok) return [];
+      return response.json();
+    },
+    enabled: open && managerSearchQuery.length >= 2,
   });
 
-  const availableManagers = usersData?.users || [];
-  
-  // Filter managers based on search input - matching edit user configuration
-  const filteredManagers = useMemo(() => {
-    if (!managerSearch || managerSearch.length < 2) return [];
-    
-    const searchTerm = managerSearch.toLowerCase().trim();
-    
-    return availableManagers
-      .filter(user => {
-        const firstName = user.firstName?.toLowerCase() || '';
-        const lastName = user.lastName?.toLowerCase() || '';
-        const email = user.email?.toLowerCase() || '';
-        const title = user.title?.toLowerCase() || '';
-        const department = user.department?.toLowerCase() || '';
-        const fullName = `${firstName} ${lastName}`;
-        
-        return firstName.includes(searchTerm) ||
-               lastName.includes(searchTerm) ||
-               fullName.includes(searchTerm) ||
-               email.includes(searchTerm) ||
-               title.includes(searchTerm) ||
-               department.includes(searchTerm);
-      })
-      .sort((a, b) => {
-        // Sort by relevance - exact name matches first
-        const aFullName = `${a.firstName} ${a.lastName}`.toLowerCase();
-        const bFullName = `${b.firstName} ${b.lastName}`.toLowerCase();
-        const aFirstName = a.firstName?.toLowerCase() || '';
-        const bFirstName = b.firstName?.toLowerCase() || '';
-        const aLastName = a.lastName?.toLowerCase() || '';
-        const bLastName = b.lastName?.toLowerCase() || '';
-        
-        // Exact first name match gets highest priority
-        if (aFirstName.startsWith(searchTerm) && !bFirstName.startsWith(searchTerm)) return -1;
-        if (bFirstName.startsWith(searchTerm) && !aFirstName.startsWith(searchTerm)) return 1;
-        
-        // Exact last name match gets second priority
-        if (aLastName.startsWith(searchTerm) && !bLastName.startsWith(searchTerm)) return -1;
-        if (bLastName.startsWith(searchTerm) && !aLastName.startsWith(searchTerm)) return 1;
-        
-        // Full name match gets third priority
-        if (aFullName.startsWith(searchTerm) && !bFullName.startsWith(searchTerm)) return -1;
-        if (bFullName.startsWith(searchTerm) && !aFullName.startsWith(searchTerm)) return 1;
-        
-        // Sort alphabetically as fallback
-        return aFullName.localeCompare(bFullName);
-      })
-      .slice(0, 25); // Match edit user configuration (25 suggestions)
-  }, [availableManagers, managerSearch]);
 
   const form = useForm<InsertUser>({
     resolver: zodResolver(insertUserSchema),
@@ -318,11 +276,11 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
                     <FormLabel>Department</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value || ""}>
                       <FormControl>
-                        <SelectTrigger>
+                        <SelectTrigger className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600">
                           <SelectValue placeholder="Select Department" />
                         </SelectTrigger>
                       </FormControl>
-                      <SelectContent>
+                      <SelectContent className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600">
                         <SelectItem value="none">Select Department</SelectItem>
                         <SelectItem value="Engineering">Engineering</SelectItem>
                         <SelectItem value="Marketing">Marketing</SelectItem>
@@ -359,11 +317,11 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
                   <FormLabel>Employee Type</FormLabel>
                   <Select onValueChange={field.onChange} value={field.value || ""}>
                     <FormControl>
-                      <SelectTrigger>
+                      <SelectTrigger className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600">
                         <SelectValue placeholder="Select Employee Type" />
                       </SelectTrigger>
                     </FormControl>
-                    <SelectContent>
+                    <SelectContent className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600">
                       <SelectItem value="Employee">Employee</SelectItem>
                       <SelectItem value="Contractor">Contractor</SelectItem>
                       <SelectItem value="Intern">Intern</SelectItem>
@@ -382,42 +340,59 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
                 <FormItem>
                   <FormLabel>Manager</FormLabel>
                   <FormControl>
-                    <div className="relative">
+                    <div className="flex items-center gap-2">
                       <Input 
                         {...field} 
-                        onChange={(e) => {
-                          field.onChange(e);
-                          setManagerSearch(e.target.value);
-                          setShowManagerDropdown(e.target.value.length > 0);
-                          if (e.target.value === "") {
-                            setSelectedManager(null);
-                          }
-                        }}
-                        placeholder="Type to search for manager..."
+                        placeholder="Type manager name or click search..."
+                        className="flex-1"
                       />
-                      {managerSearch && filteredManagers.length > 0 && (
-                        <div className="absolute z-10 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md shadow-lg max-h-60 overflow-auto">
-                          {filteredManagers.map((manager: User) => (
-                            <div
-                              key={manager.id}
-                              className="px-3 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700"
-                              onClick={() => {
-                                const fullName = `${manager.firstName} ${manager.lastName}`;
-                                field.onChange(fullName);
-                                setSelectedManager(manager);
-                                setManagerSearch("");
-                                setShowManagerDropdown(false);
-                              }}
-                            >
-                              <div className="font-medium text-gray-900 dark:text-white">{manager.firstName} {manager.lastName}</div>
-                              <div className="text-sm text-gray-500 dark:text-gray-400">{manager.email}</div>
-                              {manager.title && (
-                                <div className="text-sm text-gray-400 dark:text-gray-500">{manager.title}</div>
-                              )}
-                            </div>
-                          ))}
-                        </div>
-                      )}
+                      <Popover open={managerOpen} onOpenChange={setManagerOpen}>
+                        <PopoverTrigger asChild>
+                          <Button variant="outline" size="sm" className="px-3">
+                            Search
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-56 p-0 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-lg z-50" align="start">
+                          <Command shouldFilter={false}>
+                            <CommandInput 
+                              placeholder="Search manager..." 
+                              value={managerSearchQuery}
+                              onValueChange={setManagerSearchQuery}
+                              autoFocus
+                            />
+                            <CommandList>
+                              <CommandEmpty>No managers found.</CommandEmpty>
+                              <CommandGroup>
+                                {managerFilter && (
+                                  <CommandItem
+                                    onSelect={() => {
+                                      setManagerFilter("");
+                                      field.onChange("");
+                                      setManagerSearchQuery("");
+                                      setManagerOpen(false);
+                                    }}
+                                  >
+                                    <span className="text-muted-foreground">Clear manager</span>
+                                  </CommandItem>
+                                )}
+                                {managerSuggestions.map((manager: string) => (
+                                  <CommandItem
+                                    key={manager}
+                                    onSelect={() => {
+                                      setManagerFilter(manager);
+                                      field.onChange(manager);
+                                      setManagerSearchQuery("");
+                                      setManagerOpen(false);
+                                    }}
+                                  >
+                                    {manager}
+                                  </CommandItem>
+                                ))}
+                              </CommandGroup>
+                            </CommandList>
+                          </Command>
+                        </PopoverContent>
+                      </Popover>
                     </div>
                   </FormControl>
                   <FormMessage />
