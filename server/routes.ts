@@ -9,6 +9,7 @@ import { knowBe4Service } from "./knowbe4-service";
 import { knowBe4GraphService } from "./knowbe4-graph-service";
 import { syncUserGroupsAndEmployeeType, syncAllUsersGroupsAndEmployeeTypes } from "./sync-user-groups";
 import { bulkSyncUserGroupsAndEmployeeTypes } from "./bulk-groups-sync";
+import { EmployeeTypeSync } from "./employee-type-sync";
 
 // Helper function to determine employee type from user groups
 function determineEmployeeTypeFromGroups(userGroups: any[], employeeTypeApps: Set<string>): string | null {
@@ -131,7 +132,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get employee type counts from local storage (fast, no OKTA calls)
   app.get("/api/employee-type-counts", isAuthenticated, async (req, res) => {
     try {
-      const users = await storage.getAllUsers();
+      const result = await storage.getAllUsers();
+      const users = result.users;
       
       const counts = {
         EMPLOYEE: 0,
@@ -2001,6 +2003,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ 
         message: "Failed to fetch user training enrollments",
         error: error instanceof Error ? error.message : "Unknown error"
+      });
+    }
+  });
+
+  // Sync employee types from OKTA groups to local storage
+  app.post("/api/sync-employee-types", requireAdmin, async (req, res) => {
+    try {
+      const result = await EmployeeTypeSync.syncEmployeeTypesFromGroups();
+      res.json(result);
+    } catch (error) {
+      console.error("Employee type sync failed:", error);
+      res.status(500).json({
+        success: false,
+        updated: 0,
+        message: `Employee type sync failed: ${error instanceof Error ? error.message : 'Unknown error'}`
       });
     }
   });

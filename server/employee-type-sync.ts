@@ -1,4 +1,4 @@
-import { IStorage } from './storage';
+import { storage } from './storage';
 import { oktaService } from './okta-service';
 
 interface EmployeeTypeMapping {
@@ -13,13 +13,8 @@ const GROUP_TO_EMPLOYEE_TYPE: EmployeeTypeMapping = {
 };
 
 export class EmployeeTypeSync {
-  constructor(
-    private storage: IStorage,
-    private oktaService: typeof oktaService
-  ) {}
-
   // Sync employee types from OKTA groups and store locally
-  async syncEmployeeTypesFromGroups(): Promise<{
+  static async syncEmployeeTypesFromGroups(): Promise<{
     success: boolean;
     updated: number;
     message: string;
@@ -28,7 +23,8 @@ export class EmployeeTypeSync {
       console.log('Starting employee type sync from OKTA groups...');
       
       // Get all users from database
-      const allLocalUsers = await this.storage.getAllUsers();
+      const result = await storage.getAllUsers();
+      const allLocalUsers = result.users;
       console.log(`Found ${allLocalUsers.length} local users to sync`);
       
       let updatedCount = 0;
@@ -38,7 +34,7 @@ export class EmployeeTypeSync {
         
         try {
           // Get user's groups from OKTA
-          const userGroups = await this.oktaService.getUserGroups(user.oktaId);
+          const userGroups = await oktaService.getUserGroups(user.oktaId);
           
           // Find employee type group
           let employeeType: string | null = null;
@@ -51,7 +47,7 @@ export class EmployeeTypeSync {
           
           // Update if different from current
           if (employeeType !== user.employeeType) {
-            await this.storage.updateUser(user.id, { employeeType });
+            await storage.updateUser(user.id, { employeeType });
             updatedCount++;
             console.log(`Updated ${user.email}: ${user.employeeType} → ${employeeType}`);
           }
@@ -77,15 +73,10 @@ export class EmployeeTypeSync {
     }
   }
 
-  // Get employee type from local storage (no OKTA calls)
-  async getEmployeeTypeLocal(userId: number): Promise<string | null> {
-    const user = await this.storage.getUserById(userId);
-    return user?.employeeType || null;
-  }
-
   // Get employee type counts from local storage (no OKTA calls)
-  async getEmployeeTypeCountsLocal(): Promise<Record<string, number>> {
-    const users = await this.storage.getAllUsers();
+  static async getEmployeeTypeCountsLocal(): Promise<Record<string, number>> {
+    const result = await storage.getAllUsers();
+    const users = result.users;
     const counts: Record<string, number> = {
       EMPLOYEE: 0,
       CONTRACTOR: 0,
@@ -103,9 +94,9 @@ export class EmployeeTypeSync {
   }
 
   // Assign employee type when creating new user
-  async assignEmployeeTypeForNewUser(oktaId: string): Promise<string | null> {
+  static async assignEmployeeTypeForNewUser(oktaId: string): Promise<string | null> {
     try {
-      const userGroups = await this.oktaService.getUserGroups(oktaId);
+      const userGroups = await oktaService.getUserGroups(oktaId);
       
       for (const group of userGroups) {
         if (GROUP_TO_EMPLOYEE_TYPE[group.profile.name]) {
