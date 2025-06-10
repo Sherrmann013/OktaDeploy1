@@ -225,7 +225,7 @@ async function simpleBuild() {
       .dark tbody tr,
       .dark .table-row-light {
         background-color: hsl(215 20% 16%) !important;
-        border: 1px solid yellow !important;
+        border: none !important;
       }
       
       /* Search and filter row - darker background */
