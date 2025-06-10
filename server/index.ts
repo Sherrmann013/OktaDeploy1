@@ -2,6 +2,8 @@ import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import dotenv from "dotenv";
+import fs from "fs";
+import path from "path";
 
 // Load environment variables
 dotenv.config();
@@ -65,13 +67,28 @@ app.use((req, res, next) => {
     throw err;
   });
 
-  // importantly only setup vite in development and after
-  // setting up all the other routes so the catch-all route
-  // doesn't interfere with the other routes
-  if (app.get("env") === "development") {
+  // Check if production build exists and serve statically if so
+  const publicDir = path.resolve(process.cwd(), "public");
+  const hasProductionBuild = fs.existsSync(path.join(publicDir, "index.html"));
+  
+  if (hasProductionBuild) {
+    log("Production build detected, serving static files from " + publicDir);
+    
+    // Serve static files directly from public directory
+    app.use(express.static(publicDir));
+    
+    // Handle SPA routing - serve index.html for all non-API routes
+    app.use("*", (req, res) => {
+      if (!req.path.startsWith("/api")) {
+        res.sendFile(path.join(publicDir, "index.html"));
+      }
+    });
+  } else if (app.get("env") === "development") {
+    log("Development mode, setting up Vite");
     await setupVite(app, server);
   } else {
-    serveStatic(app);
+    log("No production build found, falling back to Vite");
+    await setupVite(app, server);
   }
 
   // ALWAYS serve the app on port 5000
