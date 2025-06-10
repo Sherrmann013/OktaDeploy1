@@ -1678,6 +1678,93 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Debug endpoint to check OKTA data vs local data
+  app.get('/api/debug/user/:email', isAuthenticated, requireAdmin, async (req, res) => {
+    try {
+      const email = req.params.email;
+      
+      // Get data from OKTA
+      const oktaUser = await oktaService.getUserByEmail(email);
+      if (!oktaUser) {
+        return res.status(404).json({ message: "User not found in OKTA" });
+      }
+      
+      // Get data from local database
+      const localUser = await storage.getUserByEmail(email);
+      
+      res.json({
+        okta: {
+          id: oktaUser.id,
+          email: oktaUser.profile.email,
+          lastLogin: oktaUser.lastLogin,
+          lastUpdated: oktaUser.lastUpdated,
+          status: oktaUser.status
+        },
+        local: localUser ? {
+          id: localUser.id,
+          email: localUser.email,
+          lastLogin: localUser.lastLogin,
+          lastUpdated: localUser.lastUpdated,
+          status: localUser.status
+        } : null,
+        synced: oktaUser.lastLogin === localUser?.lastLogin?.toISOString()
+      });
+    } catch (error) {
+      console.error("Debug user error:", error);
+      res.status(500).json({ message: "Failed to debug user data" });
+    }
+  });
+
+  // Force sync specific user from OKTA
+  app.post('/api/force-sync-user/:email', isAuthenticated, requireAdmin, async (req, res) => {
+    try {
+      const email = req.params.email;
+      
+      // Get fresh data from OKTA
+      const oktaUser = await oktaService.getUserByEmail(email);
+      if (!oktaUser) {
+        return res.status(404).json({ message: "User not found in OKTA" });
+      }
+      
+      // Get local user
+      const localUser = await storage.getUserByEmail(email);
+      if (!localUser) {
+        return res.status(404).json({ message: "User not found locally" });
+      }
+      
+      // Force update with fresh OKTA data
+      const updates = {
+        firstName: oktaUser.profile.firstName,
+        lastName: oktaUser.profile.lastName,
+        email: oktaUser.profile.email,
+        title: oktaUser.profile.title || null,
+        department: oktaUser.profile.department || null,
+        mobilePhone: oktaUser.profile.mobilePhone || null,
+        manager: oktaUser.profile.manager || null,
+        status: oktaUser.status,
+        lastUpdated: new Date(oktaUser.lastUpdated),
+        lastLogin: oktaUser.lastLogin ? new Date(oktaUser.lastLogin) : null
+      };
+      
+      console.log(`Force syncing ${email}: OKTA lastLogin = ${oktaUser.lastLogin}, local was = ${localUser.lastLogin}`);
+      
+      const updatedUser = await storage.updateUser(localUser.id, updates);
+      
+      res.json({
+        success: true,
+        message: "User force synced successfully",
+        user: updatedUser,
+        changes: {
+          lastLoginBefore: localUser.lastLogin,
+          lastLoginAfter: oktaUser.lastLogin
+        }
+      });
+    } catch (error) {
+      console.error("Force sync user error:", error);
+      res.status(500).json({ message: "Failed to force sync user" });
+    }
+  });
+
   // KnowBe4 API endpoints
   app.get('/api/knowbe4/test-connection', isAuthenticated, requireAdmin, async (req, res) => {
     try {
