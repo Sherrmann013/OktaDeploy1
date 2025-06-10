@@ -640,8 +640,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       };
 
-      // Create user in OKTA
-      const oktaResponse = await fetch(`${process.env.OKTA_DOMAIN}/api/v1/users?activate=${userData.sendActivationEmail}`, {
+      // Create user in OKTA - always activate immediately
+      const oktaResponse = await fetch(`${process.env.OKTA_DOMAIN}/api/v1/users?activate=true`, {
         method: 'POST',
         headers: {
           'Accept': 'application/json',
