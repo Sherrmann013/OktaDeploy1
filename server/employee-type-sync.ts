@@ -9,7 +9,8 @@ const GROUP_TO_EMPLOYEE_TYPE: EmployeeTypeMapping = {
   'MTX-ET-EMPLOYEE': 'EMPLOYEE',
   'MTX-ET-CONTRACTOR': 'CONTRACTOR', 
   'MTX-ET-INTERN': 'INTERN',
-  'MTX-ET-PART_TIME': 'PART_TIME'
+  'MTX-ET-PART_TIME': 'PART_TIME',
+  'MTXCW-ET-EMPLOYEE': 'EMPLOYEE'
 };
 
 export class EmployeeTypeSync {
