@@ -87,6 +87,7 @@ interface UserTableProps {
     lastLogin: string;
   };
   onFiltersChange?: (filters: { employeeType: string[]; mobilePhone: string; manager: string; status: string[]; lastLogin: string }) => void;
+  getEmployeeTypeColor?: (employeeType: string) => string;
 }
 
 // Sortable table header component
@@ -151,6 +152,7 @@ export default function UserTable({
   onColumnReorder,
   filters,
   onFiltersChange,
+  getEmployeeTypeColor,
 }: UserTableProps) {
   const { toast } = useToast();
   const [confirmAction, setConfirmAction] = useState<{
@@ -617,7 +619,13 @@ export default function UserTable({
       case 'department':
         return <div className="text-sm text-foreground">{user.department || '-'}</div>;
       case 'employeeType':
-        return <Badge variant="outline">{user.employeeType}</Badge>;
+        return (
+          <Badge 
+            className={getEmployeeTypeColor ? getEmployeeTypeColor(user.employeeType || '') : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'}
+          >
+            {user.employeeType || 'Not specified'}
+          </Badge>
+        );
       case 'manager':
         return <div className="text-sm text-foreground">{user.manager || '-'}</div>;
       case 'mobilePhone':
