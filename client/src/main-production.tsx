@@ -6,20 +6,46 @@ import "./index.css";
 
 // Initialize the app when DOM is ready
 function initApp() {
+  console.log('🚀 initApp() called');
+  console.log('📋 Document ready state:', document.readyState);
+  
   const rootElement = document.getElementById("root");
+  console.log('🎯 Root element found:', !!rootElement);
+  
   if (rootElement) {
-    // Clear loading text
+    console.log('🧹 Clearing root element...');
     rootElement.innerHTML = "";
     
-    // Create React root and render app
-    const root = createRoot(rootElement);
-    root.render(
-      <ThemeProvider defaultTheme="dark" storageKey="ui-theme">
-        <App />
-      </ThemeProvider>
-    );
+    try {
+      console.log('⚛️ Creating React root...');
+      const root = createRoot(rootElement);
+      
+      console.log('🎨 Rendering app...');
+      root.render(
+        <ThemeProvider defaultTheme="dark" storageKey="ui-theme">
+          <App />
+        </ThemeProvider>
+      );
+      console.log('✅ React app rendered successfully');
+    } catch (error) {
+      console.error('❌ Error rendering React app:', error);
+      rootElement.innerHTML = `<div style="color: red; padding: 20px;">Error: ${error.message}</div>`;
+    }
+  } else {
+    console.error('❌ Root element not found');
   }
 }
 
-// Start the app immediately
-initApp();
+// Add debugging for script loading
+console.log('🔧 Script loaded, document state:', document.readyState);
+
+if (document.readyState === 'loading') {
+  console.log('⏳ Waiting for DOM to load...');
+  document.addEventListener('DOMContentLoaded', () => {
+    console.log('📄 DOM loaded, calling initApp');
+    initApp();
+  });
+} else {
+  console.log('📄 DOM already loaded, calling initApp immediately');
+  initApp();
+}
