@@ -257,6 +257,23 @@ async function simpleBuild() {
         background-color: hsl(215 22% 18%) !important;
         border: 1px solid hsl(215 15% 25%) !important;
       }
+
+      /* Remove outline from dark mode toggle button */
+      .dark button[aria-label*="theme"],
+      .dark button[aria-label*="Toggle"],
+      .dark .theme-toggle {
+        outline: none !important;
+        border: none !important;
+        box-shadow: none !important;
+      }
+
+      .dark button[aria-label*="theme"]:focus,
+      .dark button[aria-label*="Toggle"]:focus,
+      .dark .theme-toggle:focus {
+        outline: none !important;
+        border: none !important;
+        box-shadow: none !important;
+      }
     </style>
   </head>
   <body>

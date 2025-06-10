@@ -991,6 +991,72 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // OKTA sync endpoint that frontend expects
+  app.post("/api/sync-okta", isAuthenticated, requireAdmin, async (req, res) => {
+    try {
+      console.log("Starting OKTA sync...");
+      const allUsers = await oktaService.getUsers(500);
+      console.log(`Found ${allUsers.length} users in OKTA`);
+      
+      let syncedCount = 0;
+      let updatedCount = 0;
+      
+      for (const oktaUser of allUsers) {
+        try {
+          const existingUser = await storage.getUserByOktaId(oktaUser.id);
+          
+          if (!existingUser) {
+            await storage.createUser({
+              oktaId: oktaUser.id,
+              firstName: oktaUser.profile.firstName || '',
+              lastName: oktaUser.profile.lastName || '',
+              email: oktaUser.profile.email || '',
+              login: oktaUser.profile.login || '',
+              mobilePhone: oktaUser.profile.mobilePhone || null,
+              department: oktaUser.profile.department || null,
+              title: oktaUser.profile.title || null,
+              employeeType: null,
+              profileImageUrl: null,
+              status: oktaUser.status,
+              groups: [],
+              applications: []
+            });
+            syncedCount++;
+          } else {
+            await storage.updateUser(existingUser.id, {
+              firstName: oktaUser.profile.firstName || '',
+              lastName: oktaUser.profile.lastName || '',
+              email: oktaUser.profile.email || '',
+              login: oktaUser.profile.login || '',
+              mobilePhone: oktaUser.profile.mobilePhone || null,
+              department: oktaUser.profile.department || null,
+              title: oktaUser.profile.title || null,
+              status: oktaUser.status
+            });
+            updatedCount++;
+          }
+        } catch (userError) {
+          console.error(`Error syncing user ${oktaUser.profile.email}:`, userError);
+        }
+      }
+      
+      res.json({
+        success: true,
+        message: "OKTA sync completed successfully",
+        totalUsers: allUsers.length,
+        newUsers: syncedCount,
+        updatedUsers: updatedCount
+      });
+    } catch (error) {
+      console.error("OKTA sync error:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to sync OKTA users",
+        error: error instanceof Error ? error.message : "Unknown error"
+      });
+    }
+  });
+
   // Full OKTA sync - fetch all users with pagination
   app.get("/api/okta/sync-all", requireAdmin, async (req, res) => {
     try {
