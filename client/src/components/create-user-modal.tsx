@@ -210,7 +210,10 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
     "R&D@mazetx.com",
     "Labusers@mazetx.com", 
     "finfacit@mazetx.com",
-    "HR@mazetx.com"
+    "HR@mazetx.com",
+    "MTXCW-ET-EMPLOYEE",
+    "MTXCW-ET-CONTRACTOR",
+    "MTXCW-SG-ZOOM-PRO"
   ];
 
   const availableApps = [
@@ -369,15 +372,22 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
                     <Select 
                       onValueChange={(value) => {
                         field.onChange(value);
-                        // Auto-check HR group when HR department is selected
+                        // Auto-check groups based on department selection
+                        let newGroups = [...selectedGroups];
+                        
+                        // Remove department-specific groups first
+                        newGroups = newGroups.filter(group => 
+                          group !== "HR@mazetx.com" && group !== "finfacit@mazetx.com"
+                        );
+                        
+                        // Add appropriate group based on selection
                         if (value === "HR") {
-                          if (!selectedGroups.includes("HR@mazetx.com")) {
-                            setSelectedGroups(prev => [...prev, "HR@mazetx.com"]);
-                          }
-                        } else {
-                          // Uncheck HR group when department changes from HR
-                          setSelectedGroups(prev => prev.filter(group => group !== "HR@mazetx.com"));
+                          newGroups.push("HR@mazetx.com");
+                        } else if (value === "Finance") {
+                          newGroups.push("finfacit@mazetx.com");
                         }
+                        
+                        setSelectedGroups(newGroups);
                       }} 
                       value={field.value || ""}
                     >
@@ -421,7 +431,28 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Employee Type</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value || ""}>
+                    <Select 
+                      onValueChange={(value) => {
+                        field.onChange(value);
+                        // Auto-check groups based on employee type selection
+                        let newGroups = [...selectedGroups];
+                        
+                        // Remove employee type-specific groups first
+                        newGroups = newGroups.filter(group => 
+                          group !== "MTXCW-ET-EMPLOYEE" && group !== "MTXCW-ET-CONTRACTOR"
+                        );
+                        
+                        // Add appropriate group based on selection
+                        if (value === "Employee") {
+                          newGroups.push("MTXCW-ET-EMPLOYEE");
+                        } else if (value === "Contractor") {
+                          newGroups.push("MTXCW-ET-CONTRACTOR");
+                        }
+                        
+                        setSelectedGroups(newGroups);
+                      }}
+                      value={field.value || ""}
+                    >
                       <FormControl>
                         <SelectTrigger className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600">
                           <SelectValue placeholder="Select Employee Type" />
@@ -492,6 +523,16 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
                         } else {
                           setSelectedApps(filteredApps);
                         }
+                        
+                        // Auto-check MTXCW-SG-ZOOM-PRO group for Zoom Pro
+                        let newGroups = [...selectedGroups];
+                        newGroups = newGroups.filter(group => group !== "MTXCW-SG-ZOOM-PRO");
+                        
+                        if (value === "Zoom Pro") {
+                          newGroups.push("MTXCW-SG-ZOOM-PRO");
+                        }
+                        
+                        setSelectedGroups(newGroups);
                       }}
                     >
                       <SelectTrigger className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600">
