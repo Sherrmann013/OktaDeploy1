@@ -45,7 +45,77 @@ async function simpleBuild() {
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Vite + React + TS</title>
-    <link rel="stylesheet" href="/assets/index.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {}
+        }
+      }
+    </script>
+    <style>
+      :root {
+        --background: 0 0% 100%;
+        --foreground: 20 14.3% 4.1%;
+        --muted: 60 4.8% 95.9%;
+        --muted-foreground: 25 5.3% 44.7%;
+        --card: 0 0% 100%;
+        --card-foreground: 20 14.3% 4.1%;
+        --border: 20 5.9% 90%;
+        --primary: 207 90% 54%;
+        --primary-foreground: 211 100% 99%;
+        --secondary: 60 4.8% 95.9%;
+        --secondary-foreground: 24 9.8% 10%;
+        --accent: 60 4.8% 95.9%;
+        --accent-foreground: 24 9.8% 10%;
+        --destructive: 0 84.2% 60.2%;
+        --destructive-foreground: 60 9.1% 97.8%;
+        --ring: 20 14.3% 4.1%;
+        --radius: 0.5rem;
+      }
+
+      .dark {
+        --background: 215 25% 16%;
+        --foreground: 0 0% 98%;
+        --muted: 215 20% 20%;
+        --muted-foreground: 0 0% 85%;
+        --card: 215 22% 18%;
+        --card-foreground: 0 0% 98%;
+        --border: 215 15% 25%;
+        --primary: 207 90% 58%;
+        --primary-foreground: 0 0% 100%;
+        --secondary: 215 15% 25%;
+        --secondary-foreground: 0 0% 98%;
+        --accent: 215 15% 25%;
+        --accent-foreground: 0 0% 98%;
+        --destructive: 0 75% 55%;
+        --destructive-foreground: 0 0% 98%;
+        --ring: 207 90% 58%;
+      }
+
+      body {
+        background-color: hsl(var(--background));
+        color: hsl(var(--foreground));
+        font-family: system-ui, -apple-system, sans-serif;
+      }
+
+      .table-row-light {
+        background-color: #f8f9fa;
+      }
+
+      .table-row-light:hover {
+        background-color: #f1f3f4;
+      }
+
+      .dark .table-row-light {
+        background-color: hsl(215 22% 18%);
+      }
+
+      .dark .table-row-light:hover {
+        background-color: hsl(215 20% 20%);
+      }
+    </style>
   </head>
   <body>
     <div id="root"></div>
