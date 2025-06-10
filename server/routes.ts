@@ -727,12 +727,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         // Check selected apps for Zoom
         if (userData.selectedApps && userData.selectedApps.includes('Zoom')) {
-          const zoomProGroup = groups.find(g => g.profile.name === 'MTXCW-SG-ZOOM-PRO');
-          if (zoomProGroup) {
-            await oktaService.addUserToGroup(oktaUser.id, zoomProGroup.id);
-            console.log('Added user to Zoom Pro group: MTXCW-SG-ZOOM-PRO');
+          console.log('Looking for Zoom groups in available groups:', groups.map(g => g.profile.name).filter(name => name.includes('ZOOM')));
+          
+          // Try to find any Zoom-related group
+          const zoomGroup = groups.find(g => g.profile.name.includes('ZOOM'));
+          if (zoomGroup) {
+            console.log(`Found Zoom group: ${zoomGroup.profile.name}`);
+            await oktaService.addUserToGroup(oktaUser.id, zoomGroup.id);
+            console.log(`Added user to Zoom group: ${zoomGroup.profile.name}`);
           } else {
-            console.log('Group not found: MTXCW-SG-ZOOM-PRO');
+            console.log('No Zoom groups found in OKTA. Available groups:', groups.map(g => g.profile.name).slice(0, 10));
           }
         }
         
