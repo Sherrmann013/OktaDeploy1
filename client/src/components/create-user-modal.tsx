@@ -277,6 +277,7 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
     }
     
     setPassword(generatedPassword);
+    form.setValue('password', generatedPassword);
   };
 
   const handleClose = () => {
