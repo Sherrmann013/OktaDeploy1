@@ -51,7 +51,9 @@ export const insertUserSchema = createInsertSchema(users).omit({
   sendActivationEmail: z.boolean().optional(),
 });
 
-export const updateUserSchema = insertUserSchema.partial().omit({
+export const updateUserSchema = createInsertSchema(users).partial().omit({
+  id: true,
+  oktaId: true,
   sendActivationEmail: true,
 });
 

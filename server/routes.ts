@@ -1045,7 +1045,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             syncedCount++;
           } else {
             // Debug logging for specific users
-            if (oktaUser.profile.email === 'ejimenez@mazetx.com') {
+            if (oktaUser.profile.email === 'abarrow@mazetx.com' || oktaUser.profile.email === 'ejimenez@mazetx.com') {
               console.log(`=== SYNC DEBUG FOR ${oktaUser.profile.email} ===`);
               console.log(`OKTA created: ${oktaUser.created}`);
               console.log(`OKTA lastLogin: ${oktaUser.lastLogin}`);
