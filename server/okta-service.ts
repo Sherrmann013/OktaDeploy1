@@ -684,7 +684,17 @@ class OktaService {
       
       if (response.ok) {
         console.log(`Successfully added user to group via PUT`);
-        return await response.json();
+        // Some OKTA PUT responses return empty body, handle gracefully
+        const responseText = await response.text();
+        if (responseText.trim()) {
+          try {
+            return JSON.parse(responseText);
+          } catch (e) {
+            console.log('PUT response was successful but not JSON, returning success indicator');
+            return { success: true };
+          }
+        }
+        return { success: true };
       }
       
       // Log detailed error for troubleshooting
