@@ -246,7 +246,7 @@ export async function setupAuth(app: Express) {
         }
         console.log('=== LOGIN SUCCESSFUL ===');
         console.log('User logged in:', sessionUser.email);
-        res.redirect('/');
+        res.redirect('/users');
       });
       
     } catch (error) {

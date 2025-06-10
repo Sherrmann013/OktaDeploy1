@@ -141,7 +141,7 @@ export async function setupAuth(app: Express) {
   app.get("/api/okta-callback", (req, res, next) => {
     console.log('Processing OKTA callback');
     passport.authenticate('okta', {
-      successRedirect: "/",
+      successRedirect: "/users",
       failureRedirect: "/?error=auth_failed"
     })(req, res, next);
   });

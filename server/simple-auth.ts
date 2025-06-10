@@ -129,7 +129,7 @@ export async function setupSimpleAuth(app: Express) {
       
       console.log('=== LOGIN SUCCESSFUL ===');
       console.log('User logged in:', sessionUser.email);
-      res.redirect('/');
+      res.redirect('/users');
       
     } catch (error) {
       console.error('Callback processing error:', error);

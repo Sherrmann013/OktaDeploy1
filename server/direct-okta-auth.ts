@@ -182,8 +182,8 @@ export async function setupAuth(app: Express) {
       (req.session as any).userId = user.id;
       (req.session as any).user = user;
       
-      // Redirect to dashboard
-      res.redirect('/');
+      // Redirect to users page
+      res.redirect('/users');
       
     } catch (error) {
       console.error('OKTA callback error:', error);
