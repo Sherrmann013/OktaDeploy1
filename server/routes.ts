@@ -2394,6 +2394,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Create OKTA group
+  app.post('/api/okta/groups', isAuthenticated, requireAdmin, async (req, res) => {
+    try {
+      const { groupName, description } = req.body;
+      
+      if (!groupName) {
+        return res.status(400).json({ message: 'Group name is required' });
+      }
+      
+      const createdGroup = await oktaService.createGroup(groupName, description);
+      res.json(createdGroup);
+    } catch (error) {
+      console.error('Error creating OKTA group:', error);
+      res.status(500).json({ 
+        message: 'Failed to create OKTA group',
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

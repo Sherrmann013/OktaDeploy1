@@ -861,6 +861,37 @@ class OktaService {
       throw new Error(`Failed to update user profile: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
+
+  async createGroup(groupName: string, description?: string): Promise<any> {
+    try {
+      console.log(`Creating OKTA group: ${groupName}`);
+      
+      const groupData = {
+        profile: {
+          name: groupName,
+          description: description || `Auto-created group: ${groupName}`
+        }
+      };
+      
+      const response = await this.makeRequest('/groups', {
+        method: 'POST',
+        body: JSON.stringify(groupData),
+        useEnhancedToken: true
+      });
+      
+      if (response.ok) {
+        const createdGroup = await response.json();
+        console.log(`Successfully created OKTA group: ${groupName} (ID: ${createdGroup.id})`);
+        return createdGroup;
+      } else {
+        const errorText = await response.text();
+        throw new Error(`Failed to create group: ${response.status} ${response.statusText} - ${errorText}`);
+      }
+    } catch (error) {
+      console.error(`Failed to create OKTA group ${groupName}:`, error);
+      throw new Error(`Failed to create group: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
 }
 
 export const oktaService = new OktaService();
