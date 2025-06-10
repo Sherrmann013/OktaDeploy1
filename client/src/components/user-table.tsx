@@ -369,7 +369,7 @@ export default function UserTable({
             <FilterIcon className="h-4 w-4" />
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-56" align="start">
+        <PopoverContent className="w-56 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-lg z-50" align="start">
           <div className="space-y-3">
             <Label className="text-sm font-medium">Employee Type</Label>
             <div className="space-y-2">
@@ -416,7 +416,7 @@ export default function UserTable({
             <FilterIcon className="h-4 w-4" />
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-56" align="start">
+        <PopoverContent className="w-56 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-lg z-50" align="start">
           <div className="space-y-3">
             <Label className="text-sm font-medium">Status</Label>
             <div className="space-y-2 max-h-48 overflow-y-auto">
@@ -471,7 +471,7 @@ export default function UserTable({
             <FilterIcon className="h-4 w-4" />
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-56" align="start">
+        <PopoverContent className="w-56 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-lg z-50" align="start">
           <div className="space-y-3">
             <Label className="text-sm font-medium">Last Login</Label>
             <div className="space-y-2">
@@ -545,7 +545,7 @@ export default function UserTable({
             <FilterIcon className="h-4 w-4" />
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-56 p-0" align="start">
+        <PopoverContent className="w-56 p-0 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-lg z-50" align="start">
           <Command shouldFilter={false}>
             <CommandInput 
               placeholder="Search manager..." 
