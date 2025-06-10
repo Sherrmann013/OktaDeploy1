@@ -12,11 +12,11 @@ async function simpleBuild() {
   await mkdir('dist', { recursive: true });
   await mkdir('dist/public', { recursive: true });
 
-  // Build client bundle to match server expectations
+  // Build client bundle to original structure
   await build({
     entryPoints: ['client/src/main.tsx'],
     bundle: true,
-    outfile: 'public/app.js',
+    outfile: 'dist/public/app.js',
     format: 'iife',
     target: 'es2017',
     minify: true,
@@ -53,7 +53,7 @@ async function simpleBuild() {
   </body>
 </html>`;
 
-  await writeFile('public/index.html', html);
+  await writeFile('dist/public/index.html', html);
   
   // Build server
   await build({

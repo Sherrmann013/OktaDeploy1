@@ -68,19 +68,21 @@ app.use((req, res, next) => {
   });
 
   // Check if production build exists and serve statically if so
-  const publicDir = path.resolve(process.cwd(), "public");
-  const hasProductionBuild = fs.existsSync(path.join(publicDir, "index.html"));
+  const publicDir = path.resolve(process.cwd(), "dist/public");
+  const fallbackPublicDir = path.resolve(process.cwd(), "public");
+  const hasProductionBuild = fs.existsSync(path.join(publicDir, "index.html")) || fs.existsSync(path.join(fallbackPublicDir, "index.html"));
+  const actualPublicDir = fs.existsSync(path.join(publicDir, "index.html")) ? publicDir : fallbackPublicDir;
   
   if (hasProductionBuild) {
-    log("Production build detected, serving static files from " + publicDir);
+    log("Production build detected, serving static files from " + actualPublicDir);
     
-    // Serve static files directly from public directory
-    app.use(express.static(publicDir));
+    // Serve static files directly from build directory
+    app.use(express.static(actualPublicDir));
     
     // Handle SPA routing - serve index.html for all non-API routes
     app.use("*", (req, res) => {
       if (!req.path.startsWith("/api")) {
-        res.sendFile(path.join(publicDir, "index.html"));
+        res.sendFile(path.join(actualPublicDir, "index.html"));
       }
     });
   } else if (app.get("env") === "development") {
