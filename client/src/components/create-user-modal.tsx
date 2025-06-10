@@ -50,21 +50,18 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
         const title = user.title?.toLowerCase() || '';
         const department = user.department?.toLowerCase() || '';
         const fullName = `${firstName} ${lastName}`;
-        const fullNameReverse = `${lastName} ${firstName}`;
         
-        // Search in multiple fields with different match types
+        // Search in multiple fields - prioritize first name matching
         return firstName.startsWith(searchTerm) ||
+               firstName.includes(searchTerm) ||
                lastName.startsWith(searchTerm) ||
                fullName.includes(searchTerm) ||
-               fullNameReverse.includes(searchTerm) ||
                email.includes(searchTerm) ||
                title.includes(searchTerm) ||
-               department.includes(searchTerm) ||
-               firstName.includes(searchTerm) ||
-               lastName.includes(searchTerm);
+               department.includes(searchTerm);
       })
       .sort((a, b) => {
-        // Sort by relevance - exact matches first
+        // Sort by relevance - first name exact matches get highest priority
         const aFirstName = a.firstName?.toLowerCase() || '';
         const aLastName = a.lastName?.toLowerCase() || '';
         const bFirstName = b.firstName?.toLowerCase() || '';
@@ -72,15 +69,25 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
         const aFullName = `${aFirstName} ${aLastName}`;
         const bFullName = `${bFirstName} ${bLastName}`;
         
-        // Exact first name match gets highest priority
-        if (aFirstName.startsWith(searchTerm) && !bFirstName.startsWith(searchTerm)) return -1;
-        if (bFirstName.startsWith(searchTerm) && !aFirstName.startsWith(searchTerm)) return 1;
+        // First name exact start match gets highest priority
+        const aFirstStartsWithSearch = aFirstName.startsWith(searchTerm);
+        const bFirstStartsWithSearch = bFirstName.startsWith(searchTerm);
         
-        // Exact last name match gets second priority
+        if (aFirstStartsWithSearch && !bFirstStartsWithSearch) return -1;
+        if (bFirstStartsWithSearch && !aFirstStartsWithSearch) return 1;
+        
+        // If both or neither start with search term, check first name contains
+        const aFirstContainsSearch = aFirstName.includes(searchTerm);
+        const bFirstContainsSearch = bFirstName.includes(searchTerm);
+        
+        if (aFirstContainsSearch && !bFirstContainsSearch) return -1;
+        if (bFirstContainsSearch && !aFirstContainsSearch) return 1;
+        
+        // Last name start match gets next priority
         if (aLastName.startsWith(searchTerm) && !bLastName.startsWith(searchTerm)) return -1;
         if (bLastName.startsWith(searchTerm) && !aLastName.startsWith(searchTerm)) return 1;
         
-        // Full name match gets third priority
+        // Full name match gets lower priority
         if (aFullName.startsWith(searchTerm) && !bFullName.startsWith(searchTerm)) return -1;
         if (bFullName.startsWith(searchTerm) && !aFullName.startsWith(searchTerm)) return 1;
         
@@ -155,7 +162,6 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
 
     createUserMutation.mutate({
       ...data,
-      managerId: selectedManager?.id || undefined,
       groups: [...autoGroups, ...selectedGroups],
     });
   };
@@ -285,17 +291,44 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
               />
               <FormField
                 control={form.control}
-                name="login"
+                name="manager"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Login *</FormLabel>
+                    <FormLabel>Manager</FormLabel>
                     <FormControl>
-                      <Input 
-                        placeholder="Login will auto-populate" 
-                        {...field}
-                        className="bg-gray-50 dark:bg-gray-700"
-                        readOnly
-                      />
+                      <div className="relative">
+                        <Input 
+                          {...field} 
+                          onChange={(e) => {
+                            field.onChange(e);
+                            setManagerSearch(e.target.value);
+                            setShowManagerDropdown(e.target.value.length > 0);
+                          }}
+                          placeholder="Type to search for manager..."
+                        />
+                        {managerSearch && filteredManagers.length > 0 && showManagerDropdown && (
+                          <div className="absolute z-10 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md shadow-lg max-h-60 overflow-auto">
+                            {filteredManagers.map((manager: User) => (
+                              <div
+                                key={manager.id}
+                                className="px-3 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700"
+                                onClick={() => {
+                                  const fullName = `${manager.firstName} ${manager.lastName}`;
+                                  field.onChange(fullName);
+                                  setManagerSearch("");
+                                  setShowManagerDropdown(false);
+                                }}
+                              >
+                                <div className="font-medium text-gray-900 dark:text-white">{manager.firstName} {manager.lastName}</div>
+                                <div className="text-sm text-gray-500 dark:text-gray-400">{manager.email}</div>
+                                {manager.title && (
+                                  <div className="text-sm text-gray-400 dark:text-gray-500">{manager.title}</div>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -383,51 +416,7 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
               />
             </div>
 
-            <FormField
-              control={form.control}
-              name="manager"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Manager</FormLabel>
-                  <FormControl>
-                    <div className="relative">
-                      <Input 
-                        {...field} 
-                        onChange={(e) => {
-                          field.onChange(e);
-                          setManagerSearch(e.target.value);
-                          setShowManagerDropdown(e.target.value.length > 0);
-                        }}
-                        placeholder="Type to search for manager..."
-                      />
-                      {managerSearch && filteredManagers.length > 0 && showManagerDropdown && (
-                        <div className="absolute z-10 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md shadow-lg max-h-60 overflow-auto">
-                          {filteredManagers.map((manager: User) => (
-                            <div
-                              key={manager.id}
-                              className="px-3 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700"
-                              onClick={() => {
-                                const fullName = `${manager.firstName} ${manager.lastName}`;
-                                field.onChange(fullName);
-                                setManagerSearch("");
-                                setShowManagerDropdown(false);
-                              }}
-                            >
-                              <div className="font-medium text-gray-900 dark:text-white">{manager.firstName} {manager.lastName}</div>
-                              <div className="text-sm text-gray-500 dark:text-gray-400">{manager.email}</div>
-                              {manager.title && (
-                                <div className="text-sm text-gray-400 dark:text-gray-500">{manager.title}</div>
-                              )}
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+
 
             <div>
               <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 block">Groups</Label>
