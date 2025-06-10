@@ -308,18 +308,71 @@ async function simpleBuild() {
       .dark [role="dialog"] input,
       .dark [role="dialog"] [role="checkbox"],
       .dark .column-item,
-      .dark .column-item * {
+      .dark .column-item *,
+      .dark input[type="search"],
+      .dark .search-input {
         outline: none !important;
         box-shadow: none !important;
-        border-color: hsl(var(--border)) !important;
+        border: 1px solid hsl(var(--border)) !important;
+        border-width: 1px !important;
       }
 
       .dark [role="dialog"] button:focus,
       .dark [role="dialog"] input:focus,
-      .dark [role="dialog"] [role="checkbox"]:focus {
+      .dark [role="dialog"] [role="checkbox"]:focus,
+      .dark input[type="search"]:focus,
+      .dark .search-input:focus {
         outline: none !important;
         box-shadow: none !important;
-        border-color: hsl(var(--primary)) !important;
+        border: 1px solid hsl(var(--primary)) !important;
+        border-width: 1px !important;
+      }
+
+      /* Override any default focus/active states */
+      .dark *:focus,
+      .dark *:active,
+      .dark *:focus-visible {
+        outline: none !important;
+        box-shadow: none !important;
+      }
+
+      /* Nuclear approach - override everything with extreme specificity */
+      html.dark *,
+      html.dark *:focus,
+      html.dark *:active,
+      html.dark *:hover,
+      html.dark button,
+      html.dark input,
+      html.dark select,
+      html.dark textarea,
+      html.dark [role="button"],
+      html.dark [role="combobox"],
+      html.dark [tabindex],
+      html.dark .lucide,
+      html.dark svg {
+        outline: 0 !important;
+        outline-width: 0 !important;
+        outline-style: none !important;
+        outline-color: transparent !important;
+        box-shadow: none !important;
+        border-width: 1px !important;
+      }
+
+      /* Specific targeting for search input */
+      html.dark input[placeholder*="Search"],
+      html.dark input[placeholder*="search"],
+      html.dark .relative input {
+        outline: 0 !important;
+        box-shadow: none !important;
+        border: 1px solid hsl(215 15% 25%) !important;
+      }
+
+      html.dark input[placeholder*="Search"]:focus,
+      html.dark input[placeholder*="search"]:focus,
+      html.dark .relative input:focus {
+        outline: 0 !important;
+        box-shadow: none !important;
+        border: 1px solid hsl(var(--primary)) !important;
       }
     </style>
   </head>
