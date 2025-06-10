@@ -725,8 +725,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
         }
         
-        // Check selected apps for Zoom Pro
-        if (userData.selectedApps && userData.selectedApps.includes('Zoom Pro')) {
+        // Check selected apps for Zoom
+        if (userData.selectedApps && userData.selectedApps.includes('Zoom')) {
           const zoomProGroup = groups.find(g => g.profile.name === 'MTXCW-SG-ZOOM-PRO');
           if (zoomProGroup) {
             await oktaService.addUserToGroup(oktaUser.id, zoomProGroup.id);
