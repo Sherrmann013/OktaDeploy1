@@ -157,6 +157,7 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
   const onSubmit = (data: InsertUser) => {
     createUserMutation.mutate({
       ...data,
+      password,
       selectedApps,
       selectedGroups,
       groups: selectedGroups,
