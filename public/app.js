@@ -7787,7 +7787,6 @@
   });
 
   // client/src/main-production.tsx
-  var import_react27 = __toESM(require_react(), 1);
   var import_client = __toESM(require_client(), 1);
 
   // node_modules/regexparam/dist/index.mjs
@@ -7818,15 +7817,15 @@
   __name(parse, "parse");
 
   // node_modules/wouter/esm/react-deps.js
-  var React2 = __toESM(require_react(), 1);
+  var React = __toESM(require_react(), 1);
   var import_react = __toESM(require_react(), 1);
   var import_shim = __toESM(require_shim(), 1);
-  var useBuiltinInsertionEffect = React2["useInsertionEffect"];
+  var useBuiltinInsertionEffect = React["useInsertionEffect"];
   var canUseDOM = !!(typeof window !== "undefined" && typeof window.document !== "undefined" && typeof window.document.createElement !== "undefined");
-  var useIsomorphicLayoutEffect = canUseDOM ? React2.useLayoutEffect : React2.useEffect;
+  var useIsomorphicLayoutEffect = canUseDOM ? React.useLayoutEffect : React.useEffect;
   var useInsertionEffect2 = useBuiltinInsertionEffect || useIsomorphicLayoutEffect;
   var useEvent = /* @__PURE__ */ __name((fn) => {
-    const ref = React2.useRef([fn, (...args) => ref[0](...args)]).current;
+    const ref = React.useRef([fn, (...args) => ref[0](...args)]).current;
     useInsertionEffect2(() => {
       ref[0] = fn;
     });
@@ -10455,13 +10454,13 @@
   }, "#notify"), __name(_a11, "MutationObserver"), _a11);
 
   // node_modules/@tanstack/react-query/build/modern/QueryClientProvider.js
-  var React3 = __toESM(require_react(), 1);
+  var React2 = __toESM(require_react(), 1);
   var import_jsx_runtime = __toESM(require_jsx_runtime(), 1);
-  var QueryClientContext = React3.createContext(
+  var QueryClientContext = React2.createContext(
     void 0
   );
   var useQueryClient = /* @__PURE__ */ __name((queryClient2) => {
-    const client = React3.useContext(QueryClientContext);
+    const client = React2.useContext(QueryClientContext);
     if (queryClient2) {
       return queryClient2;
     }
@@ -10474,7 +10473,7 @@
     client,
     children
   }) => {
-    React3.useEffect(() => {
+    React2.useEffect(() => {
       client.mount();
       return () => {
         client.unmount();
@@ -10484,13 +10483,13 @@
   }, "QueryClientProvider");
 
   // node_modules/@tanstack/react-query/build/modern/isRestoring.js
-  var React4 = __toESM(require_react(), 1);
-  var IsRestoringContext = React4.createContext(false);
-  var useIsRestoring = /* @__PURE__ */ __name(() => React4.useContext(IsRestoringContext), "useIsRestoring");
+  var React3 = __toESM(require_react(), 1);
+  var IsRestoringContext = React3.createContext(false);
+  var useIsRestoring = /* @__PURE__ */ __name(() => React3.useContext(IsRestoringContext), "useIsRestoring");
   var IsRestoringProvider = IsRestoringContext.Provider;
 
   // node_modules/@tanstack/react-query/build/modern/QueryErrorResetBoundary.js
-  var React5 = __toESM(require_react(), 1);
+  var React4 = __toESM(require_react(), 1);
   var import_jsx_runtime2 = __toESM(require_jsx_runtime(), 1);
   function createValue() {
     let isReset = false;
@@ -10507,11 +10506,11 @@
     };
   }
   __name(createValue, "createValue");
-  var QueryErrorResetBoundaryContext = React5.createContext(createValue());
-  var useQueryErrorResetBoundary = /* @__PURE__ */ __name(() => React5.useContext(QueryErrorResetBoundaryContext), "useQueryErrorResetBoundary");
+  var QueryErrorResetBoundaryContext = React4.createContext(createValue());
+  var useQueryErrorResetBoundary = /* @__PURE__ */ __name(() => React4.useContext(QueryErrorResetBoundaryContext), "useQueryErrorResetBoundary");
 
   // node_modules/@tanstack/react-query/build/modern/errorBoundaryUtils.js
-  var React6 = __toESM(require_react(), 1);
+  var React5 = __toESM(require_react(), 1);
 
   // node_modules/@tanstack/react-query/build/modern/utils.js
   function shouldThrowError(throwError, params) {
@@ -10534,7 +10533,7 @@
     }
   }, "ensurePreventErrorBoundaryRetry");
   var useClearResetErrorBoundary = /* @__PURE__ */ __name((errorResetBoundary) => {
-    React6.useEffect(() => {
+    React5.useEffect(() => {
       errorResetBoundary.clearReset();
     }, [errorResetBoundary]);
   }, "useClearResetErrorBoundary");
@@ -10565,7 +10564,7 @@
   }), "fetchOptimistic");
 
   // node_modules/@tanstack/react-query/build/modern/useBaseQuery.js
-  var React7 = __toESM(require_react(), 1);
+  var React6 = __toESM(require_react(), 1);
   function useBaseQuery(options, Observer, queryClient2) {
     var _a121, _b93, _c5, _d4, _e4;
     if (false) {
@@ -10588,15 +10587,15 @@
     ensurePreventErrorBoundaryRetry(defaultedOptions, errorResetBoundary);
     useClearResetErrorBoundary(errorResetBoundary);
     const isNewCacheEntry = !client.getQueryCache().get(defaultedOptions.queryHash);
-    const [observer] = React7.useState(
+    const [observer] = React6.useState(
       () => new Observer(
         client,
         defaultedOptions
       )
     );
     const result = observer.getOptimisticResult(defaultedOptions);
-    React7.useSyncExternalStore(
-      React7.useCallback(
+    React6.useSyncExternalStore(
+      React6.useCallback(
         (onStoreChange) => {
           const unsubscribe = isRestoring ? noop2 : observer.subscribe(notifyManager.batchCalls(onStoreChange));
           observer.updateResult();
@@ -10607,7 +10606,7 @@
       () => observer.getCurrentResult(),
       () => observer.getCurrentResult()
     );
-    React7.useEffect(() => {
+    React6.useEffect(() => {
       observer.setOptions(defaultedOptions, { listeners: false });
     }, [defaultedOptions, observer]);
     if (shouldSuspend(defaultedOptions, result)) {
@@ -10650,27 +10649,27 @@
   __name(useQuery, "useQuery");
 
   // node_modules/@tanstack/react-query/build/modern/useMutation.js
-  var React8 = __toESM(require_react(), 1);
+  var React7 = __toESM(require_react(), 1);
   function useMutation(options, queryClient2) {
     const client = useQueryClient(queryClient2);
-    const [observer] = React8.useState(
+    const [observer] = React7.useState(
       () => new MutationObserver2(
         client,
         options
       )
     );
-    React8.useEffect(() => {
+    React7.useEffect(() => {
       observer.setOptions(options);
     }, [observer, options]);
-    const result = React8.useSyncExternalStore(
-      React8.useCallback(
+    const result = React7.useSyncExternalStore(
+      React7.useCallback(
         (onStoreChange) => observer.subscribe(notifyManager.batchCalls(onStoreChange)),
         [observer]
       ),
       () => observer.getCurrentResult(),
       () => observer.getCurrentResult()
     );
-    const mutate = React8.useCallback(
+    const mutate = React7.useCallback(
       (variables, mutateOptions) => {
         observer.mutate(variables, mutateOptions).catch(noop2);
       },
@@ -10728,7 +10727,7 @@
   });
 
   // client/src/hooks/use-toast.ts
-  var React9 = __toESM(require_react(), 1);
+  var React8 = __toESM(require_react(), 1);
   var TOAST_LIMIT = 1;
   var TOAST_REMOVE_DELAY = 1e6;
   var count = 0;
@@ -10826,8 +10825,8 @@
   }
   __name(toast, "toast");
   function useToast() {
-    const [state, setState] = React9.useState(memoryState);
-    React9.useEffect(() => {
+    const [state, setState] = React8.useState(memoryState);
+    React8.useEffect(() => {
       listeners.push(setState);
       return () => {
         const index3 = listeners.indexOf(setState);
@@ -10844,10 +10843,10 @@
   __name(useToast, "useToast");
 
   // client/src/components/ui/toast.tsx
-  var React25 = __toESM(require_react(), 1);
+  var React24 = __toESM(require_react(), 1);
 
   // node_modules/@radix-ui/react-toast/dist/index.mjs
-  var React24 = __toESM(require_react(), 1);
+  var React23 = __toESM(require_react(), 1);
   var ReactDOM3 = __toESM(require_react_dom(), 1);
 
   // node_modules/@radix-ui/primitive/dist/index.mjs
@@ -10862,7 +10861,7 @@
   __name(composeEventHandlers, "composeEventHandlers");
 
   // node_modules/@radix-ui/react-compose-refs/dist/index.mjs
-  var React10 = __toESM(require_react(), 1);
+  var React9 = __toESM(require_react(), 1);
   function setRef(ref, value) {
     if (typeof ref === "function") {
       return ref(value);
@@ -10897,7 +10896,7 @@
   }
   __name(composeRefs, "composeRefs");
   function useComposedRefs(...refs) {
-    return React10.useCallback(composeRefs(...refs), refs);
+    return React9.useCallback(composeRefs(...refs), refs);
   }
   __name(useComposedRefs, "useComposedRefs");
 
@@ -10905,18 +10904,18 @@
   var import_react2 = __toESM(require_react(), 1);
 
   // node_modules/@radix-ui/react-context/dist/index.mjs
-  var React11 = __toESM(require_react(), 1);
+  var React10 = __toESM(require_react(), 1);
   var import_jsx_runtime3 = __toESM(require_jsx_runtime(), 1);
   function createContext22(rootComponentName, defaultContext) {
-    const Context2 = React11.createContext(defaultContext);
+    const Context2 = React10.createContext(defaultContext);
     const Provider3 = /* @__PURE__ */ __name((props) => {
       const _a121 = props, { children } = _a121, context = __objRest(_a121, ["children"]);
-      const value = React11.useMemo(() => context, Object.values(context));
+      const value = React10.useMemo(() => context, Object.values(context));
       return /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(Context2.Provider, { value, children });
     }, "Provider");
     Provider3.displayName = rootComponentName + "Provider";
     function useContext22(consumerName) {
-      const context = React11.useContext(Context2);
+      const context = React10.useContext(Context2);
       if (context) return context;
       if (defaultContext !== void 0) return defaultContext;
       throw new Error(`\`${consumerName}\` must be used within \`${rootComponentName}\``);
@@ -10928,21 +10927,21 @@
   function createContextScope(scopeName, createContextScopeDeps = []) {
     let defaultContexts = [];
     function createContext32(rootComponentName, defaultContext) {
-      const BaseContext = React11.createContext(defaultContext);
+      const BaseContext = React10.createContext(defaultContext);
       const index3 = defaultContexts.length;
       defaultContexts = [...defaultContexts, defaultContext];
       const Provider3 = /* @__PURE__ */ __name((props) => {
         var _b93;
         const _a121 = props, { scope, children } = _a121, context = __objRest(_a121, ["scope", "children"]);
         const Context2 = ((_b93 = scope == null ? void 0 : scope[scopeName]) == null ? void 0 : _b93[index3]) || BaseContext;
-        const value = React11.useMemo(() => context, Object.values(context));
+        const value = React10.useMemo(() => context, Object.values(context));
         return /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(Context2.Provider, { value, children });
       }, "Provider");
       Provider3.displayName = rootComponentName + "Provider";
       function useContext22(consumerName, scope) {
         var _a121;
         const Context2 = ((_a121 = scope == null ? void 0 : scope[scopeName]) == null ? void 0 : _a121[index3]) || BaseContext;
-        const context = React11.useContext(Context2);
+        const context = React10.useContext(Context2);
         if (context) return context;
         if (defaultContext !== void 0) return defaultContext;
         throw new Error(`\`${consumerName}\` must be used within \`${rootComponentName}\``);
@@ -10953,11 +10952,11 @@
     __name(createContext32, "createContext3");
     const createScope = /* @__PURE__ */ __name(() => {
       const scopeContexts = defaultContexts.map((defaultContext) => {
-        return React11.createContext(defaultContext);
+        return React10.createContext(defaultContext);
       });
       return /* @__PURE__ */ __name(function useScope(scope) {
         const contexts = (scope == null ? void 0 : scope[scopeName]) || scopeContexts;
-        return React11.useMemo(
+        return React10.useMemo(
           () => ({ [`__scope${scopeName}`]: __spreadProps(__spreadValues({}, scope), { [scopeName]: contexts }) }),
           [scope, contexts]
         );
@@ -10981,7 +10980,7 @@
           const currentScope = scopeProps[`__scope${scopeName}`];
           return __spreadValues(__spreadValues({}, nextScopes2), currentScope);
         }, {});
-        return React11.useMemo(() => ({ [`__scope${baseScope.scopeName}`]: nextScopes }), [nextScopes]);
+        return React10.useMemo(() => ({ [`__scope${baseScope.scopeName}`]: nextScopes }), [nextScopes]);
       }, "useComposedScopes");
     }, "createScope");
     createScope.scopeName = baseScope.scopeName;
@@ -10990,26 +10989,26 @@
   __name(composeContextScopes, "composeContextScopes");
 
   // node_modules/@radix-ui/react-slot/dist/index.mjs
-  var React12 = __toESM(require_react(), 1);
+  var React11 = __toESM(require_react(), 1);
   var import_jsx_runtime4 = __toESM(require_jsx_runtime(), 1);
   // @__NO_SIDE_EFFECTS__
   function createSlot(ownerName) {
     const SlotClone = /* @__PURE__ */ createSlotClone(ownerName);
-    const Slot22 = React12.forwardRef((props, forwardedRef) => {
+    const Slot22 = React11.forwardRef((props, forwardedRef) => {
       const _a121 = props, { children } = _a121, slotProps = __objRest(_a121, ["children"]);
-      const childrenArray = React12.Children.toArray(children);
+      const childrenArray = React11.Children.toArray(children);
       const slottable = childrenArray.find(isSlottable);
       if (slottable) {
         const newElement = slottable.props.children;
         const newChildren = childrenArray.map((child) => {
           if (child === slottable) {
-            if (React12.Children.count(newElement) > 1) return React12.Children.only(null);
-            return React12.isValidElement(newElement) ? newElement.props.children : null;
+            if (React11.Children.count(newElement) > 1) return React11.Children.only(null);
+            return React11.isValidElement(newElement) ? newElement.props.children : null;
           } else {
             return child;
           }
         });
-        return /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(SlotClone, __spreadProps(__spreadValues({}, slotProps), { ref: forwardedRef, children: React12.isValidElement(newElement) ? React12.cloneElement(newElement, void 0, newChildren) : null }));
+        return /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(SlotClone, __spreadProps(__spreadValues({}, slotProps), { ref: forwardedRef, children: React11.isValidElement(newElement) ? React11.cloneElement(newElement, void 0, newChildren) : null }));
       }
       return /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(SlotClone, __spreadProps(__spreadValues({}, slotProps), { ref: forwardedRef, children }));
     });
@@ -11020,17 +11019,17 @@
   var Slot = /* @__PURE__ */ createSlot("Slot");
   // @__NO_SIDE_EFFECTS__
   function createSlotClone(ownerName) {
-    const SlotClone = React12.forwardRef((props, forwardedRef) => {
+    const SlotClone = React11.forwardRef((props, forwardedRef) => {
       const _a121 = props, { children } = _a121, slotProps = __objRest(_a121, ["children"]);
-      if (React12.isValidElement(children)) {
+      if (React11.isValidElement(children)) {
         const childrenRef = getElementRef(children);
         const props2 = mergeProps(slotProps, children.props);
-        if (children.type !== React12.Fragment) {
+        if (children.type !== React11.Fragment) {
           props2.ref = forwardedRef ? composeRefs(forwardedRef, childrenRef) : childrenRef;
         }
-        return React12.cloneElement(children, props2);
+        return React11.cloneElement(children, props2);
       }
-      return React12.Children.count(children) > 1 ? React12.Children.only(null) : null;
+      return React11.Children.count(children) > 1 ? React11.Children.only(null) : null;
     });
     SlotClone.displayName = `${ownerName}.SlotClone`;
     return SlotClone;
@@ -11048,7 +11047,7 @@
   }
   __name(createSlottable, "createSlottable");
   function isSlottable(child) {
-    return React12.isValidElement(child) && typeof child.type === "function" && "__radixId" in child.type && child.type.__radixId === SLOTTABLE_IDENTIFIER;
+    return React11.isValidElement(child) && typeof child.type === "function" && "__radixId" in child.type && child.type.__radixId === SLOTTABLE_IDENTIFIER;
   }
   __name(isSlottable, "isSlottable");
   function mergeProps(slotProps, childProps) {
@@ -11159,10 +11158,10 @@
   __name(createCollection, "createCollection");
 
   // node_modules/@radix-ui/react-dismissable-layer/dist/index.mjs
-  var React17 = __toESM(require_react(), 1);
+  var React16 = __toESM(require_react(), 1);
 
   // node_modules/@radix-ui/react-primitive/dist/index.mjs
-  var React14 = __toESM(require_react(), 1);
+  var React13 = __toESM(require_react(), 1);
   var ReactDOM = __toESM(require_react_dom(), 1);
   var import_jsx_runtime6 = __toESM(require_jsx_runtime(), 1);
   var NODES = [
@@ -11185,7 +11184,7 @@
   ];
   var Primitive = NODES.reduce((primitive, node) => {
     const Slot5 = createSlot(`Primitive.${node}`);
-    const Node2 = React14.forwardRef((props, forwardedRef) => {
+    const Node2 = React13.forwardRef((props, forwardedRef) => {
       const _a121 = props, { asChild } = _a121, primitiveProps = __objRest(_a121, ["asChild"]);
       const Comp = asChild ? Slot5 : node;
       if (typeof window !== "undefined") {
@@ -11202,13 +11201,13 @@
   __name(dispatchDiscreteCustomEvent, "dispatchDiscreteCustomEvent");
 
   // node_modules/@radix-ui/react-use-callback-ref/dist/index.mjs
-  var React15 = __toESM(require_react(), 1);
+  var React14 = __toESM(require_react(), 1);
   function useCallbackRef(callback) {
-    const callbackRef = React15.useRef(callback);
-    React15.useEffect(() => {
+    const callbackRef = React14.useRef(callback);
+    React14.useEffect(() => {
       callbackRef.current = callback;
     });
-    return React15.useMemo(() => (...args) => {
+    return React14.useMemo(() => (...args) => {
       var _a121;
       return (_a121 = callbackRef.current) == null ? void 0 : _a121.call(callbackRef, ...args);
     }, []);
@@ -11216,10 +11215,10 @@
   __name(useCallbackRef, "useCallbackRef");
 
   // node_modules/@radix-ui/react-use-escape-keydown/dist/index.mjs
-  var React16 = __toESM(require_react(), 1);
+  var React15 = __toESM(require_react(), 1);
   function useEscapeKeydown(onEscapeKeyDownProp, ownerDocument = globalThis == null ? void 0 : globalThis.document) {
     const onEscapeKeyDown = useCallbackRef(onEscapeKeyDownProp);
-    React16.useEffect(() => {
+    React15.useEffect(() => {
       const handleKeyDown = /* @__PURE__ */ __name((event) => {
         if (event.key === "Escape") {
           onEscapeKeyDown(event);
@@ -11238,12 +11237,12 @@
   var POINTER_DOWN_OUTSIDE = "dismissableLayer.pointerDownOutside";
   var FOCUS_OUTSIDE = "dismissableLayer.focusOutside";
   var originalBodyPointerEvents;
-  var DismissableLayerContext = React17.createContext({
+  var DismissableLayerContext = React16.createContext({
     layers: /* @__PURE__ */ new Set(),
     layersWithOutsidePointerEventsDisabled: /* @__PURE__ */ new Set(),
     branches: /* @__PURE__ */ new Set()
   });
-  var DismissableLayer = React17.forwardRef(
+  var DismissableLayer = React16.forwardRef(
     (props, forwardedRef) => {
       var _b93;
       const _a121 = props, {
@@ -11261,10 +11260,10 @@
         "onInteractOutside",
         "onDismiss"
       ]);
-      const context = React17.useContext(DismissableLayerContext);
-      const [node, setNode] = React17.useState(null);
+      const context = React16.useContext(DismissableLayerContext);
+      const [node, setNode] = React16.useState(null);
       const ownerDocument = (_b93 = node == null ? void 0 : node.ownerDocument) != null ? _b93 : globalThis == null ? void 0 : globalThis.document;
-      const [, force] = React17.useState({});
+      const [, force] = React16.useState({});
       const composedRefs = useComposedRefs(forwardedRef, (node2) => setNode(node2));
       const layers = Array.from(context.layers);
       const [highestLayerWithOutsidePointerEventsDisabled] = [...context.layersWithOutsidePointerEventsDisabled].slice(-1);
@@ -11297,7 +11296,7 @@
           onDismiss();
         }
       }, ownerDocument);
-      React17.useEffect(() => {
+      React16.useEffect(() => {
         if (!node) return;
         if (disableOutsidePointerEvents) {
           if (context.layersWithOutsidePointerEventsDisabled.size === 0) {
@@ -11314,7 +11313,7 @@
           }
         };
       }, [node, ownerDocument, disableOutsidePointerEvents, context]);
-      React17.useEffect(() => {
+      React16.useEffect(() => {
         return () => {
           if (!node) return;
           context.layers.delete(node);
@@ -11322,7 +11321,7 @@
           dispatchUpdate();
         };
       }, [node, context]);
-      React17.useEffect(() => {
+      React16.useEffect(() => {
         const handleUpdate = /* @__PURE__ */ __name(() => force({}), "handleUpdate");
         document.addEventListener(CONTEXT_UPDATE, handleUpdate);
         return () => document.removeEventListener(CONTEXT_UPDATE, handleUpdate);
@@ -11346,11 +11345,11 @@
   );
   DismissableLayer.displayName = DISMISSABLE_LAYER_NAME;
   var BRANCH_NAME = "DismissableLayerBranch";
-  var DismissableLayerBranch = React17.forwardRef((props, forwardedRef) => {
-    const context = React17.useContext(DismissableLayerContext);
-    const ref = React17.useRef(null);
+  var DismissableLayerBranch = React16.forwardRef((props, forwardedRef) => {
+    const context = React16.useContext(DismissableLayerContext);
+    const ref = React16.useRef(null);
     const composedRefs = useComposedRefs(forwardedRef, ref);
-    React17.useEffect(() => {
+    React16.useEffect(() => {
       const node = ref.current;
       if (node) {
         context.branches.add(node);
@@ -11364,10 +11363,10 @@
   DismissableLayerBranch.displayName = BRANCH_NAME;
   function usePointerDownOutside(onPointerDownOutside, ownerDocument = globalThis == null ? void 0 : globalThis.document) {
     const handlePointerDownOutside = useCallbackRef(onPointerDownOutside);
-    const isPointerInsideReactTreeRef = React17.useRef(false);
-    const handleClickRef = React17.useRef(() => {
+    const isPointerInsideReactTreeRef = React16.useRef(false);
+    const handleClickRef = React16.useRef(() => {
     });
-    React17.useEffect(() => {
+    React16.useEffect(() => {
       const handlePointerDown = /* @__PURE__ */ __name((event) => {
         if (event.target && !isPointerInsideReactTreeRef.current) {
           let handleAndDispatchPointerDownOutsideEvent2 = /* @__PURE__ */ __name(function() {
@@ -11409,8 +11408,8 @@
   __name(usePointerDownOutside, "usePointerDownOutside");
   function useFocusOutside(onFocusOutside, ownerDocument = globalThis == null ? void 0 : globalThis.document) {
     const handleFocusOutside = useCallbackRef(onFocusOutside);
-    const isFocusInsideReactTreeRef = React17.useRef(false);
-    React17.useEffect(() => {
+    const isFocusInsideReactTreeRef = React16.useRef(false);
+    React16.useEffect(() => {
       const handleFocus = /* @__PURE__ */ __name((event) => {
         if (event.target && !isFocusInsideReactTreeRef.current) {
           const eventDetail = { originalEvent: event };
@@ -11448,21 +11447,21 @@
   var Branch = DismissableLayerBranch;
 
   // node_modules/@radix-ui/react-portal/dist/index.mjs
-  var React19 = __toESM(require_react(), 1);
+  var React18 = __toESM(require_react(), 1);
   var import_react_dom = __toESM(require_react_dom(), 1);
 
   // node_modules/@radix-ui/react-use-layout-effect/dist/index.mjs
-  var React18 = __toESM(require_react(), 1);
-  var useLayoutEffect22 = (globalThis == null ? void 0 : globalThis.document) ? React18.useLayoutEffect : () => {
+  var React17 = __toESM(require_react(), 1);
+  var useLayoutEffect22 = (globalThis == null ? void 0 : globalThis.document) ? React17.useLayoutEffect : () => {
   };
 
   // node_modules/@radix-ui/react-portal/dist/index.mjs
   var import_jsx_runtime8 = __toESM(require_jsx_runtime(), 1);
   var PORTAL_NAME = "Portal";
-  var Portal = React19.forwardRef((props, forwardedRef) => {
+  var Portal = React18.forwardRef((props, forwardedRef) => {
     var _b93;
     const _a121 = props, { container: containerProp } = _a121, portalProps = __objRest(_a121, ["container"]);
-    const [mounted, setMounted] = React19.useState(false);
+    const [mounted, setMounted] = React18.useState(false);
     useLayoutEffect22(() => setMounted(true), []);
     const container = containerProp || mounted && ((_b93 = globalThis == null ? void 0 : globalThis.document) == null ? void 0 : _b93.body);
     return container ? import_react_dom.default.createPortal(/* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Primitive.div, __spreadProps(__spreadValues({}, portalProps), { ref: forwardedRef })), container) : null;
@@ -11471,9 +11470,9 @@
 
   // node_modules/@radix-ui/react-presence/dist/index.mjs
   var React22 = __toESM(require_react(), 1);
-  var React20 = __toESM(require_react(), 1);
+  var React19 = __toESM(require_react(), 1);
   function useStateMachine(initialState2, machine) {
-    return React20.useReducer((state, event) => {
+    return React19.useReducer((state, event) => {
       const nextState = machine[state][event];
       return nextState != null ? nextState : state;
     }, initialState2);
@@ -11602,7 +11601,7 @@
   __name(getElementRef2, "getElementRef");
 
   // node_modules/@radix-ui/react-use-controllable-state/dist/index.mjs
-  var React21 = __toESM(require_react(), 1);
+  var React20 = __toESM(require_react(), 1);
   function useControllableState({
     prop,
     defaultProp,
@@ -11613,7 +11612,7 @@
     const isControlled = prop !== void 0;
     const value = isControlled ? prop : uncontrolledProp;
     const handleChange = useCallbackRef(onChange);
-    const setValue = React21.useCallback(
+    const setValue = React20.useCallback(
       (nextValue) => {
         if (isControlled) {
           const setter = nextValue;
@@ -11632,11 +11631,11 @@
     defaultProp,
     onChange
   }) {
-    const uncontrolledState = React21.useState(defaultProp);
+    const uncontrolledState = React20.useState(defaultProp);
     const [value] = uncontrolledState;
-    const prevValueRef = React21.useRef(value);
+    const prevValueRef = React20.useRef(value);
     const handleChange = useCallbackRef(onChange);
-    React21.useEffect(() => {
+    React20.useEffect(() => {
       if (prevValueRef.current !== value) {
         handleChange(value);
         prevValueRef.current = value;
@@ -11647,10 +11646,10 @@
   __name(useUncontrolledState, "useUncontrolledState");
 
   // node_modules/@radix-ui/react-visually-hidden/dist/index.mjs
-  var React23 = __toESM(require_react(), 1);
+  var React21 = __toESM(require_react(), 1);
   var import_jsx_runtime9 = __toESM(require_jsx_runtime(), 1);
   var NAME = "VisuallyHidden";
-  var VisuallyHidden = React23.forwardRef(
+  var VisuallyHidden = React21.forwardRef(
     (props, forwardedRef) => {
       return /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(
         Primitive.span,
@@ -11691,10 +11690,10 @@
       swipeThreshold = 50,
       children
     } = props;
-    const [viewport, setViewport] = React24.useState(null);
-    const [toastCount, setToastCount] = React24.useState(0);
-    const isFocusedToastEscapeKeyDownRef = React24.useRef(false);
-    const isClosePausedRef = React24.useRef(false);
+    const [viewport, setViewport] = React23.useState(null);
+    const [toastCount, setToastCount] = React23.useState(0);
+    const isFocusedToastEscapeKeyDownRef = React23.useRef(false);
+    const isClosePausedRef = React23.useRef(false);
     if (!label.trim()) {
       console.error(
         `Invalid prop \`label\` supplied to \`${PROVIDER_NAME}\`. Expected non-empty \`string\`.`
@@ -11711,8 +11710,8 @@
         toastCount,
         viewport,
         onViewportChange: setViewport,
-        onToastAdd: React24.useCallback(() => setToastCount((prevCount) => prevCount + 1), []),
-        onToastRemove: React24.useCallback(() => setToastCount((prevCount) => prevCount - 1), []),
+        onToastAdd: React23.useCallback(() => setToastCount((prevCount) => prevCount + 1), []),
+        onToastRemove: React23.useCallback(() => setToastCount((prevCount) => prevCount - 1), []),
         isFocusedToastEscapeKeyDownRef,
         isClosePausedRef,
         children
@@ -11724,7 +11723,7 @@
   var VIEWPORT_DEFAULT_HOTKEY = ["F8"];
   var VIEWPORT_PAUSE = "toast.viewportPause";
   var VIEWPORT_RESUME = "toast.viewportResume";
-  var ToastViewport = React24.forwardRef(
+  var ToastViewport = React23.forwardRef(
     (props, forwardedRef) => {
       const _a121 = props, {
         __scopeToast,
@@ -11737,14 +11736,14 @@
       ]);
       const context = useToastProviderContext(VIEWPORT_NAME, __scopeToast);
       const getItems = useCollection(__scopeToast);
-      const wrapperRef = React24.useRef(null);
-      const headFocusProxyRef = React24.useRef(null);
-      const tailFocusProxyRef = React24.useRef(null);
-      const ref = React24.useRef(null);
+      const wrapperRef = React23.useRef(null);
+      const headFocusProxyRef = React23.useRef(null);
+      const tailFocusProxyRef = React23.useRef(null);
+      const ref = React23.useRef(null);
       const composedRefs = useComposedRefs(forwardedRef, ref, context.onViewportChange);
       const hotkeyLabel = hotkey.join("+").replace(/Key/g, "").replace(/Digit/g, "");
       const hasToasts = context.toastCount > 0;
-      React24.useEffect(() => {
+      React23.useEffect(() => {
         const handleKeyDown = /* @__PURE__ */ __name((event) => {
           var _a122;
           const isHotkeyPressed = hotkey.length !== 0 && hotkey.every((key) => event[key] || event.code === key);
@@ -11753,7 +11752,7 @@
         document.addEventListener("keydown", handleKeyDown);
         return () => document.removeEventListener("keydown", handleKeyDown);
       }, [hotkey]);
-      React24.useEffect(() => {
+      React23.useEffect(() => {
         const wrapper = wrapperRef.current;
         const viewport = ref.current;
         if (hasToasts && wrapper && viewport) {
@@ -11795,7 +11794,7 @@
           };
         }
       }, [hasToasts, context.isClosePausedRef]);
-      const getSortedTabbableCandidates = React24.useCallback(
+      const getSortedTabbableCandidates = React23.useCallback(
         ({ tabbingDirection }) => {
           const toastItems = getItems();
           const tabbableCandidates = toastItems.map((toastItem) => {
@@ -11807,7 +11806,7 @@
         },
         [getItems]
       );
-      React24.useEffect(() => {
+      React23.useEffect(() => {
         const viewport = ref.current;
         if (viewport) {
           const handleKeyDown = /* @__PURE__ */ __name((event) => {
@@ -11877,7 +11876,7 @@
   );
   ToastViewport.displayName = VIEWPORT_NAME;
   var FOCUS_PROXY_NAME = "ToastFocusProxy";
-  var FocusProxy = React24.forwardRef(
+  var FocusProxy = React23.forwardRef(
     (props, forwardedRef) => {
       const _a121 = props, { __scopeToast, onFocusFromOutsideViewport } = _a121, proxyProps = __objRest(_a121, ["__scopeToast", "onFocusFromOutsideViewport"]);
       const context = useToastProviderContext(FOCUS_PROXY_NAME, __scopeToast);
@@ -11905,7 +11904,7 @@
   var TOAST_SWIPE_MOVE = "toast.swipeMove";
   var TOAST_SWIPE_CANCEL = "toast.swipeCancel";
   var TOAST_SWIPE_END = "toast.swipeEnd";
-  var Toast = React24.forwardRef(
+  var Toast = React23.forwardRef(
     (props, forwardedRef) => {
       const _a121 = props, { forceMount, open: openProp, defaultOpen, onOpenChange } = _a121, toastProps = __objRest(_a121, ["forceMount", "open", "defaultOpen", "onOpenChange"]);
       const [open = true, setOpen] = useControllableState({
@@ -11956,7 +11955,7 @@
     onClose() {
     }
   });
-  var ToastImpl = React24.forwardRef(
+  var ToastImpl = React23.forwardRef(
     (props, forwardedRef) => {
       const _a121 = props, {
         __scopeToast,
@@ -11986,14 +11985,14 @@
         "onSwipeEnd"
       ]);
       const context = useToastProviderContext(TOAST_NAME, __scopeToast);
-      const [node, setNode] = React24.useState(null);
+      const [node, setNode] = React23.useState(null);
       const composedRefs = useComposedRefs(forwardedRef, (node2) => setNode(node2));
-      const pointerStartRef = React24.useRef(null);
-      const swipeDeltaRef = React24.useRef(null);
+      const pointerStartRef = React23.useRef(null);
+      const swipeDeltaRef = React23.useRef(null);
       const duration = durationProp || context.duration;
-      const closeTimerStartTimeRef = React24.useRef(0);
-      const closeTimerRemainingTimeRef = React24.useRef(duration);
-      const closeTimerRef = React24.useRef(0);
+      const closeTimerStartTimeRef = React23.useRef(0);
+      const closeTimerRemainingTimeRef = React23.useRef(duration);
+      const closeTimerRef = React23.useRef(0);
       const { onToastAdd, onToastRemove } = context;
       const handleClose = useCallbackRef(() => {
         var _a122;
@@ -12001,7 +12000,7 @@
         if (isFocusInToast) (_a122 = context.viewport) == null ? void 0 : _a122.focus();
         onClose();
       });
-      const startTimer = React24.useCallback(
+      const startTimer = React23.useCallback(
         (duration2) => {
           if (!duration2 || duration2 === Infinity) return;
           window.clearTimeout(closeTimerRef.current);
@@ -12010,7 +12009,7 @@
         },
         [handleClose]
       );
-      React24.useEffect(() => {
+      React23.useEffect(() => {
         const viewport = context.viewport;
         if (viewport) {
           const handleResume = /* @__PURE__ */ __name(() => {
@@ -12031,14 +12030,14 @@
           };
         }
       }, [context.viewport, duration, onPause, onResume, startTimer]);
-      React24.useEffect(() => {
+      React23.useEffect(() => {
         if (open && !context.isClosePausedRef.current) startTimer(duration);
       }, [open, duration, context.isClosePausedRef, startTimer]);
-      React24.useEffect(() => {
+      React23.useEffect(() => {
         onToastAdd();
         return () => onToastRemove();
       }, [onToastAdd, onToastRemove]);
-      const announceTextContent = React24.useMemo(() => {
+      const announceTextContent = React23.useMemo(() => {
         return node ? getAnnounceTextContent(node) : null;
       }, [node]);
       if (!context.viewport) return null;
@@ -12155,10 +12154,10 @@
   var ToastAnnounce = /* @__PURE__ */ __name((props) => {
     const _a121 = props, { __scopeToast, children } = _a121, announceProps = __objRest(_a121, ["__scopeToast", "children"]);
     const context = useToastProviderContext(TOAST_NAME, __scopeToast);
-    const [renderAnnounceText, setRenderAnnounceText] = React24.useState(false);
-    const [isAnnounced, setIsAnnounced] = React24.useState(false);
+    const [renderAnnounceText, setRenderAnnounceText] = React23.useState(false);
+    const [isAnnounced, setIsAnnounced] = React23.useState(false);
     useNextFrame(() => setRenderAnnounceText(true));
-    React24.useEffect(() => {
+    React23.useEffect(() => {
       const timer = window.setTimeout(() => setIsAnnounced(true), 1e3);
       return () => window.clearTimeout(timer);
     }, []);
@@ -12169,7 +12168,7 @@
     ] }) })) });
   }, "ToastAnnounce");
   var TITLE_NAME = "ToastTitle";
-  var ToastTitle = React24.forwardRef(
+  var ToastTitle = React23.forwardRef(
     (props, forwardedRef) => {
       const _a121 = props, { __scopeToast } = _a121, titleProps = __objRest(_a121, ["__scopeToast"]);
       return /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(Primitive.div, __spreadProps(__spreadValues({}, titleProps), { ref: forwardedRef }));
@@ -12177,7 +12176,7 @@
   );
   ToastTitle.displayName = TITLE_NAME;
   var DESCRIPTION_NAME = "ToastDescription";
-  var ToastDescription = React24.forwardRef(
+  var ToastDescription = React23.forwardRef(
     (props, forwardedRef) => {
       const _a121 = props, { __scopeToast } = _a121, descriptionProps = __objRest(_a121, ["__scopeToast"]);
       return /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(Primitive.div, __spreadProps(__spreadValues({}, descriptionProps), { ref: forwardedRef }));
@@ -12185,7 +12184,7 @@
   );
   ToastDescription.displayName = DESCRIPTION_NAME;
   var ACTION_NAME = "ToastAction";
-  var ToastAction = React24.forwardRef(
+  var ToastAction = React23.forwardRef(
     (props, forwardedRef) => {
       const _a121 = props, { altText } = _a121, actionProps = __objRest(_a121, ["altText"]);
       if (!altText.trim()) {
@@ -12199,7 +12198,7 @@
   );
   ToastAction.displayName = ACTION_NAME;
   var CLOSE_NAME = "ToastClose";
-  var ToastClose = React24.forwardRef(
+  var ToastClose = React23.forwardRef(
     (props, forwardedRef) => {
       const _a121 = props, { __scopeToast } = _a121, closeProps = __objRest(_a121, ["__scopeToast"]);
       const interactiveContext = useToastInteractiveContext(CLOSE_NAME, __scopeToast);
@@ -12215,7 +12214,7 @@
     }
   );
   ToastClose.displayName = CLOSE_NAME;
-  var ToastAnnounceExclude = React24.forwardRef((props, forwardedRef) => {
+  var ToastAnnounceExclude = React23.forwardRef((props, forwardedRef) => {
     const _a121 = props, { __scopeToast, altText } = _a121, announceExcludeProps = __objRest(_a121, ["__scopeToast", "altText"]);
     return /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(
       Primitive.div,
@@ -15268,10 +15267,11 @@
   __name(cn, "cn");
 
   // client/src/components/ui/toast.tsx
+  var import_jsx_runtime11 = __toESM(require_jsx_runtime(), 1);
   var ToastProvider2 = Provider;
-  var ToastViewport2 = React25.forwardRef((_a121, ref) => {
+  var ToastViewport2 = React24.forwardRef((_a121, ref) => {
     var _b93 = _a121, { className } = _b93, props = __objRest(_b93, ["className"]);
-    return /* @__PURE__ */ React25.createElement(
+    return /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(
       Viewport,
       __spreadValues({
         ref,
@@ -15297,9 +15297,9 @@
       }
     }
   );
-  var Toast2 = React25.forwardRef((_a121, ref) => {
+  var Toast2 = React24.forwardRef((_a121, ref) => {
     var _b93 = _a121, { className, variant } = _b93, props = __objRest(_b93, ["className", "variant"]);
-    return /* @__PURE__ */ React25.createElement(
+    return /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(
       Root22,
       __spreadValues({
         ref,
@@ -15308,9 +15308,9 @@
     );
   });
   Toast2.displayName = Root22.displayName;
-  var ToastAction2 = React25.forwardRef((_a121, ref) => {
+  var ToastAction2 = React24.forwardRef((_a121, ref) => {
     var _b93 = _a121, { className } = _b93, props = __objRest(_b93, ["className"]);
-    return /* @__PURE__ */ React25.createElement(
+    return /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(
       Action,
       __spreadValues({
         ref,
@@ -15322,25 +15322,26 @@
     );
   });
   ToastAction2.displayName = Action.displayName;
-  var ToastClose2 = React25.forwardRef((_a121, ref) => {
+  var ToastClose2 = React24.forwardRef((_a121, ref) => {
     var _b93 = _a121, { className } = _b93, props = __objRest(_b93, ["className"]);
-    return /* @__PURE__ */ React25.createElement(
+    return /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(
       Close,
-      __spreadValues({
+      __spreadProps(__spreadValues({
         ref,
         className: cn(
           "absolute right-2 top-2 rounded-md p-1 text-foreground/50 opacity-0 transition-opacity hover:text-foreground focus:opacity-100 focus:outline-none focus:ring-2 group-hover:opacity-100 group-[.destructive]:text-red-300 group-[.destructive]:hover:text-red-50 group-[.destructive]:focus:ring-red-400 group-[.destructive]:focus:ring-offset-red-600",
           className
         ),
         "toast-close": ""
-      }, props),
-      /* @__PURE__ */ React25.createElement(X, { className: "h-4 w-4" })
+      }, props), {
+        children: /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(X, { className: "h-4 w-4" })
+      })
     );
   });
   ToastClose2.displayName = Close.displayName;
-  var ToastTitle2 = React25.forwardRef((_a121, ref) => {
+  var ToastTitle2 = React24.forwardRef((_a121, ref) => {
     var _b93 = _a121, { className } = _b93, props = __objRest(_b93, ["className"]);
-    return /* @__PURE__ */ React25.createElement(
+    return /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(
       Title,
       __spreadValues({
         ref,
@@ -15349,9 +15350,9 @@
     );
   });
   ToastTitle2.displayName = Title.displayName;
-  var ToastDescription2 = React25.forwardRef((_a121, ref) => {
+  var ToastDescription2 = React24.forwardRef((_a121, ref) => {
     var _b93 = _a121, { className } = _b93, props = __objRest(_b93, ["className"]);
-    return /* @__PURE__ */ React25.createElement(
+    return /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(
       Description,
       __spreadValues({
         ref,
@@ -15362,27 +15363,38 @@
   ToastDescription2.displayName = Description.displayName;
 
   // client/src/components/ui/toaster.tsx
+  var import_jsx_runtime12 = __toESM(require_jsx_runtime(), 1);
   function Toaster() {
     const { toasts } = useToast();
-    return /* @__PURE__ */ React.createElement(ToastProvider2, null, toasts.map(function(_a121) {
-      var _b93 = _a121, { id, title, description, action } = _b93, props = __objRest(_b93, ["id", "title", "description", "action"]);
-      return /* @__PURE__ */ React.createElement(Toast2, __spreadValues({ key: id }, props), /* @__PURE__ */ React.createElement("div", { className: "grid gap-1" }, title && /* @__PURE__ */ React.createElement(ToastTitle2, null, title), description && /* @__PURE__ */ React.createElement(ToastDescription2, null, description)), action, /* @__PURE__ */ React.createElement(ToastClose2, null));
-    }), /* @__PURE__ */ React.createElement(ToastViewport2, null));
+    return /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)(ToastProvider2, { children: [
+      toasts.map(function(_a121) {
+        var _b93 = _a121, { id, title, description, action } = _b93, props = __objRest(_b93, ["id", "title", "description", "action"]);
+        return /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)(Toast2, __spreadProps(__spreadValues({}, props), { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)("div", { className: "grid gap-1", children: [
+            title && /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(ToastTitle2, { children: title }),
+            description && /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(ToastDescription2, { children: description })
+          ] }),
+          action,
+          /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(ToastClose2, {})
+        ] }), id);
+      }),
+      /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(ToastViewport2, {})
+    ] });
   }
   __name(Toaster, "Toaster");
 
   // client/src/components/ui/tooltip.tsx
-  var React32 = __toESM(require_react(), 1);
-
-  // node_modules/@radix-ui/react-tooltip/dist/index.mjs
   var React31 = __toESM(require_react(), 1);
 
+  // node_modules/@radix-ui/react-tooltip/dist/index.mjs
+  var React30 = __toESM(require_react(), 1);
+
   // node_modules/@radix-ui/react-id/dist/index.mjs
-  var React26 = __toESM(require_react(), 1);
-  var useReactId = React26[" useId ".trim().toString()] || (() => void 0);
+  var React25 = __toESM(require_react(), 1);
+  var useReactId = React25[" useId ".trim().toString()] || (() => void 0);
   var count2 = 0;
   function useId(deterministicId) {
-    const [id, setId] = React26.useState(useReactId());
+    const [id, setId] = React25.useState(useReactId());
     useLayoutEffect22(() => {
       if (!deterministicId) setId((reactId) => reactId != null ? reactId : String(count2++));
     }, [deterministicId]);
@@ -15391,7 +15403,7 @@
   __name(useId, "useId");
 
   // node_modules/@radix-ui/react-popper/dist/index.mjs
-  var React30 = __toESM(require_react(), 1);
+  var React29 = __toESM(require_react(), 1);
 
   // node_modules/@floating-ui/utils/dist/floating-ui.utils.mjs
   var sides = ["top", "right", "bottom", "left"];
@@ -17038,7 +17050,7 @@
   }, "computePosition");
 
   // node_modules/@floating-ui/react-dom/dist/floating-ui.react-dom.mjs
-  var React27 = __toESM(require_react(), 1);
+  var React26 = __toESM(require_react(), 1);
   var import_react5 = __toESM(require_react(), 1);
   var ReactDOM4 = __toESM(require_react_dom(), 1);
   var index = typeof document !== "undefined" ? import_react5.useLayoutEffect : import_react5.useEffect;
@@ -17104,7 +17116,7 @@
   }
   __name(roundByDPR, "roundByDPR");
   function useLatestRef(value) {
-    const ref = React27.useRef(value);
+    const ref = React26.useRef(value);
     index(() => {
       ref.current = value;
     });
@@ -17128,7 +17140,7 @@
       whileElementsMounted,
       open
     } = options;
-    const [data, setData] = React27.useState({
+    const [data, setData] = React26.useState({
       x: 0,
       y: 0,
       strategy,
@@ -17136,19 +17148,19 @@
       middlewareData: {},
       isPositioned: false
     });
-    const [latestMiddleware, setLatestMiddleware] = React27.useState(middleware);
+    const [latestMiddleware, setLatestMiddleware] = React26.useState(middleware);
     if (!deepEqual(latestMiddleware, middleware)) {
       setLatestMiddleware(middleware);
     }
-    const [_reference, _setReference] = React27.useState(null);
-    const [_floating, _setFloating] = React27.useState(null);
-    const setReference = React27.useCallback((node) => {
+    const [_reference, _setReference] = React26.useState(null);
+    const [_floating, _setFloating] = React26.useState(null);
+    const setReference = React26.useCallback((node) => {
       if (node !== referenceRef.current) {
         referenceRef.current = node;
         _setReference(node);
       }
     }, []);
-    const setFloating = React27.useCallback((node) => {
+    const setFloating = React26.useCallback((node) => {
       if (node !== floatingRef.current) {
         floatingRef.current = node;
         _setFloating(node);
@@ -17156,14 +17168,14 @@
     }, []);
     const referenceEl = externalReference || _reference;
     const floatingEl = externalFloating || _floating;
-    const referenceRef = React27.useRef(null);
-    const floatingRef = React27.useRef(null);
-    const dataRef = React27.useRef(data);
+    const referenceRef = React26.useRef(null);
+    const floatingRef = React26.useRef(null);
+    const dataRef = React26.useRef(data);
     const hasWhileElementsMounted = whileElementsMounted != null;
     const whileElementsMountedRef = useLatestRef(whileElementsMounted);
     const platformRef = useLatestRef(platform2);
     const openRef = useLatestRef(open);
-    const update = React27.useCallback(() => {
+    const update = React26.useCallback(() => {
       if (!referenceRef.current || !floatingRef.current) {
         return;
       }
@@ -17199,7 +17211,7 @@
         }));
       }
     }, [open]);
-    const isMountedRef = React27.useRef(false);
+    const isMountedRef = React26.useRef(false);
     index(() => {
       isMountedRef.current = true;
       return () => {
@@ -17216,17 +17228,17 @@
         update();
       }
     }, [referenceEl, floatingEl, update, whileElementsMountedRef, hasWhileElementsMounted]);
-    const refs = React27.useMemo(() => ({
+    const refs = React26.useMemo(() => ({
       reference: referenceRef,
       floating: floatingRef,
       setReference,
       setFloating
     }), [setReference, setFloating]);
-    const elements = React27.useMemo(() => ({
+    const elements = React26.useMemo(() => ({
       reference: referenceEl,
       floating: floatingEl
     }), [referenceEl, floatingEl]);
-    const floatingStyles = React27.useMemo(() => {
+    const floatingStyles = React26.useMemo(() => {
       const initialStyles = {
         position: strategy,
         left: 0,
@@ -17250,7 +17262,7 @@
         top: y
       };
     }, [strategy, transform, elements.floating, data.x, data.y]);
-    return React27.useMemo(() => __spreadProps(__spreadValues({}, data), {
+    return React26.useMemo(() => __spreadProps(__spreadValues({}, data), {
       update,
       refs,
       elements,
@@ -17313,12 +17325,12 @@
   }), "arrow");
 
   // node_modules/@radix-ui/react-arrow/dist/index.mjs
-  var React28 = __toESM(require_react(), 1);
-  var import_jsx_runtime11 = __toESM(require_jsx_runtime(), 1);
+  var React27 = __toESM(require_react(), 1);
+  var import_jsx_runtime13 = __toESM(require_jsx_runtime(), 1);
   var NAME2 = "Arrow";
-  var Arrow = React28.forwardRef((props, forwardedRef) => {
+  var Arrow = React27.forwardRef((props, forwardedRef) => {
     const _a121 = props, { children, width = 10, height = 5 } = _a121, arrowProps = __objRest(_a121, ["children", "width", "height"]);
-    return /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(
+    return /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(
       Primitive.svg,
       __spreadProps(__spreadValues({}, arrowProps), {
         ref: forwardedRef,
@@ -17326,7 +17338,7 @@
         height,
         viewBox: "0 0 30 10",
         preserveAspectRatio: "none",
-        children: props.asChild ? children : /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("polygon", { points: "0,0 30,0 15,10" })
+        children: props.asChild ? children : /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("polygon", { points: "0,0 30,0 15,10" })
       })
     );
   });
@@ -17334,9 +17346,9 @@
   var Root3 = Arrow;
 
   // node_modules/@radix-ui/react-use-size/dist/index.mjs
-  var React29 = __toESM(require_react(), 1);
+  var React28 = __toESM(require_react(), 1);
   function useSize(element) {
-    const [size4, setSize] = React29.useState(void 0);
+    const [size4, setSize] = React28.useState(void 0);
     useLayoutEffect22(() => {
       if (element) {
         setSize({ width: element.offsetWidth, height: element.offsetHeight });
@@ -17372,33 +17384,33 @@
   __name(useSize, "useSize");
 
   // node_modules/@radix-ui/react-popper/dist/index.mjs
-  var import_jsx_runtime12 = __toESM(require_jsx_runtime(), 1);
+  var import_jsx_runtime14 = __toESM(require_jsx_runtime(), 1);
   var POPPER_NAME = "Popper";
   var [createPopperContext, createPopperScope] = createContextScope(POPPER_NAME);
   var [PopperProvider, usePopperContext] = createPopperContext(POPPER_NAME);
   var Popper = /* @__PURE__ */ __name((props) => {
     const { __scopePopper, children } = props;
-    const [anchor, setAnchor] = React30.useState(null);
-    return /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(PopperProvider, { scope: __scopePopper, anchor, onAnchorChange: setAnchor, children });
+    const [anchor, setAnchor] = React29.useState(null);
+    return /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(PopperProvider, { scope: __scopePopper, anchor, onAnchorChange: setAnchor, children });
   }, "Popper");
   Popper.displayName = POPPER_NAME;
   var ANCHOR_NAME = "PopperAnchor";
-  var PopperAnchor = React30.forwardRef(
+  var PopperAnchor = React29.forwardRef(
     (props, forwardedRef) => {
       const _a121 = props, { __scopePopper, virtualRef } = _a121, anchorProps = __objRest(_a121, ["__scopePopper", "virtualRef"]);
       const context = usePopperContext(ANCHOR_NAME, __scopePopper);
-      const ref = React30.useRef(null);
+      const ref = React29.useRef(null);
       const composedRefs = useComposedRefs(forwardedRef, ref);
-      React30.useEffect(() => {
+      React29.useEffect(() => {
         context.onAnchorChange((virtualRef == null ? void 0 : virtualRef.current) || ref.current);
       });
-      return virtualRef ? null : /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(Primitive.div, __spreadProps(__spreadValues({}, anchorProps), { ref: composedRefs }));
+      return virtualRef ? null : /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(Primitive.div, __spreadProps(__spreadValues({}, anchorProps), { ref: composedRefs }));
     }
   );
   PopperAnchor.displayName = ANCHOR_NAME;
   var CONTENT_NAME = "PopperContent";
   var [PopperContentProvider, useContentContext] = createPopperContext(CONTENT_NAME);
-  var PopperContent = React30.forwardRef(
+  var PopperContent = React29.forwardRef(
     (props, forwardedRef) => {
       var _b93, _c5, _d4, _e4, _f2, _g2, _h2, _i2;
       const _a121 = props, {
@@ -17431,9 +17443,9 @@
         "onPlaced"
       ]);
       const context = usePopperContext(CONTENT_NAME, __scopePopper);
-      const [content, setContent] = React30.useState(null);
+      const [content, setContent] = React29.useState(null);
       const composedRefs = useComposedRefs(forwardedRef, (node) => setContent(node));
-      const [arrow4, setArrow] = React30.useState(null);
+      const [arrow4, setArrow] = React29.useState(null);
       const arrowSize = useSize(arrow4);
       const arrowWidth = (_b93 = arrowSize == null ? void 0 : arrowSize.width) != null ? _b93 : 0;
       const arrowHeight = (_c5 = arrowSize == null ? void 0 : arrowSize.height) != null ? _c5 : 0;
@@ -17493,11 +17505,11 @@
       const arrowX = (_d4 = middlewareData.arrow) == null ? void 0 : _d4.x;
       const arrowY = (_e4 = middlewareData.arrow) == null ? void 0 : _e4.y;
       const cannotCenterArrow = ((_f2 = middlewareData.arrow) == null ? void 0 : _f2.centerOffset) !== 0;
-      const [contentZIndex, setContentZIndex] = React30.useState();
+      const [contentZIndex, setContentZIndex] = React29.useState();
       useLayoutEffect22(() => {
         if (content) setContentZIndex(window.getComputedStyle(content).zIndex);
       }, [content]);
-      return /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(
+      return /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(
         "div",
         {
           ref: refs.setFloating,
@@ -17516,7 +17528,7 @@
             pointerEvents: "none"
           }),
           dir: props.dir,
-          children: /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(
+          children: /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(
             PopperContentProvider,
             {
               scope: __scopePopper,
@@ -17525,7 +17537,7 @@
               arrowX,
               arrowY,
               shouldHideArrow: cannotCenterArrow,
-              children: /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(
+              children: /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(
                 Primitive.div,
                 __spreadProps(__spreadValues({
                   "data-side": placedSide,
@@ -17553,7 +17565,7 @@
     bottom: "top",
     left: "right"
   };
-  var PopperArrow = React30.forwardRef(/* @__PURE__ */ __name(function PopperArrow2(props, forwardedRef) {
+  var PopperArrow = React29.forwardRef(/* @__PURE__ */ __name(function PopperArrow2(props, forwardedRef) {
     const _a121 = props, { __scopePopper } = _a121, arrowProps = __objRest(_a121, ["__scopePopper"]);
     const contentContext = useContentContext(ARROW_NAME, __scopePopper);
     const baseSide = OPPOSITE_SIDE[contentContext.placedSide];
@@ -17561,7 +17573,7 @@
       // we have to use an extra wrapper because `ResizeObserver` (used by `useSize`)
       // doesn't report size as we'd expect on SVG elements.
       // it reports their bounding box which is effectively the largest path inside the SVG.
-      /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(
+      /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(
         "span",
         {
           ref: contentContext.onArrowChange,
@@ -17584,7 +17596,7 @@
             }[contentContext.placedSide],
             visibility: contentContext.shouldHideArrow ? "hidden" : void 0
           },
-          children: /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(
+          children: /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(
             Root3,
             __spreadProps(__spreadValues({}, arrowProps), {
               ref: forwardedRef,
@@ -17646,7 +17658,7 @@
   var Arrow2 = PopperArrow;
 
   // node_modules/@radix-ui/react-tooltip/dist/index.mjs
-  var import_jsx_runtime13 = __toESM(require_jsx_runtime(), 1);
+  var import_jsx_runtime15 = __toESM(require_jsx_runtime(), 1);
   var [createTooltipContext, createTooltipScope] = createContextScope("Tooltip", [
     createPopperScope
   ]);
@@ -17663,24 +17675,24 @@
       disableHoverableContent = false,
       children
     } = props;
-    const isOpenDelayedRef = React31.useRef(true);
-    const isPointerInTransitRef = React31.useRef(false);
-    const skipDelayTimerRef = React31.useRef(0);
-    React31.useEffect(() => {
+    const isOpenDelayedRef = React30.useRef(true);
+    const isPointerInTransitRef = React30.useRef(false);
+    const skipDelayTimerRef = React30.useRef(0);
+    React30.useEffect(() => {
       const skipDelayTimer = skipDelayTimerRef.current;
       return () => window.clearTimeout(skipDelayTimer);
     }, []);
-    return /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(
+    return /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(
       TooltipProviderContextProvider,
       {
         scope: __scopeTooltip,
         isOpenDelayedRef,
         delayDuration,
-        onOpen: React31.useCallback(() => {
+        onOpen: React30.useCallback(() => {
           window.clearTimeout(skipDelayTimerRef.current);
           isOpenDelayedRef.current = false;
         }, []),
-        onClose: React31.useCallback(() => {
+        onClose: React30.useCallback(() => {
           window.clearTimeout(skipDelayTimerRef.current);
           skipDelayTimerRef.current = window.setTimeout(
             () => isOpenDelayedRef.current = true,
@@ -17688,7 +17700,7 @@
           );
         }, [skipDelayDuration]),
         isPointerInTransitRef,
-        onPointerInTransitChange: React31.useCallback((inTransit) => {
+        onPointerInTransitChange: React30.useCallback((inTransit) => {
           isPointerInTransitRef.current = inTransit;
         }, []),
         disableHoverableContent,
@@ -17711,12 +17723,12 @@
     } = props;
     const providerContext = useTooltipProviderContext(TOOLTIP_NAME, props.__scopeTooltip);
     const popperScope = usePopperScope(__scopeTooltip);
-    const [trigger, setTrigger] = React31.useState(null);
+    const [trigger, setTrigger] = React30.useState(null);
     const contentId = useId();
-    const openTimerRef = React31.useRef(0);
+    const openTimerRef = React30.useRef(0);
     const disableHoverableContent = disableHoverableContentProp != null ? disableHoverableContentProp : providerContext.disableHoverableContent;
     const delayDuration = delayDurationProp != null ? delayDurationProp : providerContext.delayDuration;
-    const wasOpenDelayedRef = React31.useRef(false);
+    const wasOpenDelayedRef = React30.useRef(false);
     const [open = false, setOpen] = useControllableState({
       prop: openProp,
       defaultProp: defaultOpen,
@@ -17730,21 +17742,21 @@
         onOpenChange == null ? void 0 : onOpenChange(open2);
       }, "onChange")
     });
-    const stateAttribute = React31.useMemo(() => {
+    const stateAttribute = React30.useMemo(() => {
       return open ? wasOpenDelayedRef.current ? "delayed-open" : "instant-open" : "closed";
     }, [open]);
-    const handleOpen = React31.useCallback(() => {
+    const handleOpen = React30.useCallback(() => {
       window.clearTimeout(openTimerRef.current);
       openTimerRef.current = 0;
       wasOpenDelayedRef.current = false;
       setOpen(true);
     }, [setOpen]);
-    const handleClose = React31.useCallback(() => {
+    const handleClose = React30.useCallback(() => {
       window.clearTimeout(openTimerRef.current);
       openTimerRef.current = 0;
       setOpen(false);
     }, [setOpen]);
-    const handleDelayedOpen = React31.useCallback(() => {
+    const handleDelayedOpen = React30.useCallback(() => {
       window.clearTimeout(openTimerRef.current);
       openTimerRef.current = window.setTimeout(() => {
         wasOpenDelayedRef.current = true;
@@ -17752,7 +17764,7 @@
         openTimerRef.current = 0;
       }, delayDuration);
     }, [delayDuration, setOpen]);
-    React31.useEffect(() => {
+    React30.useEffect(() => {
       return () => {
         if (openTimerRef.current) {
           window.clearTimeout(openTimerRef.current);
@@ -17760,7 +17772,7 @@
         }
       };
     }, []);
-    return /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(Root23, __spreadProps(__spreadValues({}, popperScope), { children: /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(
+    return /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(Root23, __spreadProps(__spreadValues({}, popperScope), { children: /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(
       TooltipContextProvider,
       {
         scope: __scopeTooltip,
@@ -17769,11 +17781,11 @@
         stateAttribute,
         trigger,
         onTriggerChange: setTrigger,
-        onTriggerEnter: React31.useCallback(() => {
+        onTriggerEnter: React30.useCallback(() => {
           if (providerContext.isOpenDelayedRef.current) handleDelayedOpen();
           else handleOpen();
         }, [providerContext.isOpenDelayedRef, handleDelayedOpen, handleOpen]),
-        onTriggerLeave: React31.useCallback(() => {
+        onTriggerLeave: React30.useCallback(() => {
           if (disableHoverableContent) {
             handleClose();
           } else {
@@ -17790,21 +17802,21 @@
   }, "Tooltip");
   Tooltip.displayName = TOOLTIP_NAME;
   var TRIGGER_NAME = "TooltipTrigger";
-  var TooltipTrigger = React31.forwardRef(
+  var TooltipTrigger = React30.forwardRef(
     (props, forwardedRef) => {
       const _a121 = props, { __scopeTooltip } = _a121, triggerProps = __objRest(_a121, ["__scopeTooltip"]);
       const context = useTooltipContext(TRIGGER_NAME, __scopeTooltip);
       const providerContext = useTooltipProviderContext(TRIGGER_NAME, __scopeTooltip);
       const popperScope = usePopperScope(__scopeTooltip);
-      const ref = React31.useRef(null);
+      const ref = React30.useRef(null);
       const composedRefs = useComposedRefs(forwardedRef, ref, context.onTriggerChange);
-      const isPointerDownRef = React31.useRef(false);
-      const hasPointerMoveOpenedRef = React31.useRef(false);
-      const handlePointerUp = React31.useCallback(() => isPointerDownRef.current = false, []);
-      React31.useEffect(() => {
+      const isPointerDownRef = React30.useRef(false);
+      const hasPointerMoveOpenedRef = React30.useRef(false);
+      const handlePointerUp = React30.useCallback(() => isPointerDownRef.current = false, []);
+      React30.useEffect(() => {
         return () => document.removeEventListener("pointerup", handlePointerUp);
       }, [handlePointerUp]);
-      return /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(Anchor, __spreadProps(__spreadValues({ asChild: true }, popperScope), { children: /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(
+      return /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(Anchor, __spreadProps(__spreadValues({ asChild: true }, popperScope), { children: /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(
         Primitive.button,
         __spreadProps(__spreadValues({
           "aria-describedby": context.open ? context.contentId : void 0,
@@ -17846,32 +17858,32 @@
   var TooltipPortal = /* @__PURE__ */ __name((props) => {
     const { __scopeTooltip, forceMount, children, container } = props;
     const context = useTooltipContext(PORTAL_NAME2, __scopeTooltip);
-    return /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(PortalProvider, { scope: __scopeTooltip, forceMount, children: /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(Presence, { present: forceMount || context.open, children: /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(Portal, { asChild: true, container, children }) }) });
+    return /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(PortalProvider, { scope: __scopeTooltip, forceMount, children: /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(Presence, { present: forceMount || context.open, children: /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(Portal, { asChild: true, container, children }) }) });
   }, "TooltipPortal");
   TooltipPortal.displayName = PORTAL_NAME2;
   var CONTENT_NAME2 = "TooltipContent";
-  var TooltipContent = React31.forwardRef(
+  var TooltipContent = React30.forwardRef(
     (props, forwardedRef) => {
       const portalContext = usePortalContext(CONTENT_NAME2, props.__scopeTooltip);
       const _a121 = props, { forceMount = portalContext.forceMount, side = "top" } = _a121, contentProps = __objRest(_a121, ["forceMount", "side"]);
       const context = useTooltipContext(CONTENT_NAME2, props.__scopeTooltip);
-      return /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(Presence, { present: forceMount || context.open, children: context.disableHoverableContent ? /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(TooltipContentImpl, __spreadProps(__spreadValues({ side }, contentProps), { ref: forwardedRef })) : /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(TooltipContentHoverable, __spreadProps(__spreadValues({ side }, contentProps), { ref: forwardedRef })) });
+      return /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(Presence, { present: forceMount || context.open, children: context.disableHoverableContent ? /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(TooltipContentImpl, __spreadProps(__spreadValues({ side }, contentProps), { ref: forwardedRef })) : /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(TooltipContentHoverable, __spreadProps(__spreadValues({ side }, contentProps), { ref: forwardedRef })) });
     }
   );
-  var TooltipContentHoverable = React31.forwardRef((props, forwardedRef) => {
+  var TooltipContentHoverable = React30.forwardRef((props, forwardedRef) => {
     const context = useTooltipContext(CONTENT_NAME2, props.__scopeTooltip);
     const providerContext = useTooltipProviderContext(CONTENT_NAME2, props.__scopeTooltip);
-    const ref = React31.useRef(null);
+    const ref = React30.useRef(null);
     const composedRefs = useComposedRefs(forwardedRef, ref);
-    const [pointerGraceArea, setPointerGraceArea] = React31.useState(null);
+    const [pointerGraceArea, setPointerGraceArea] = React30.useState(null);
     const { trigger, onClose } = context;
     const content = ref.current;
     const { onPointerInTransitChange } = providerContext;
-    const handleRemoveGraceArea = React31.useCallback(() => {
+    const handleRemoveGraceArea = React30.useCallback(() => {
       setPointerGraceArea(null);
       onPointerInTransitChange(false);
     }, [onPointerInTransitChange]);
-    const handleCreateGraceArea = React31.useCallback(
+    const handleCreateGraceArea = React30.useCallback(
       (event, hoverTarget) => {
         const currentTarget = event.currentTarget;
         const exitPoint = { x: event.clientX, y: event.clientY };
@@ -17884,10 +17896,10 @@
       },
       [onPointerInTransitChange]
     );
-    React31.useEffect(() => {
+    React30.useEffect(() => {
       return () => handleRemoveGraceArea();
     }, [handleRemoveGraceArea]);
-    React31.useEffect(() => {
+    React30.useEffect(() => {
       if (trigger && content) {
         const handleTriggerLeave = /* @__PURE__ */ __name((event) => handleCreateGraceArea(event, content), "handleTriggerLeave");
         const handleContentLeave = /* @__PURE__ */ __name((event) => handleCreateGraceArea(event, trigger), "handleContentLeave");
@@ -17899,7 +17911,7 @@
         };
       }
     }, [trigger, content, handleCreateGraceArea, handleRemoveGraceArea]);
-    React31.useEffect(() => {
+    React30.useEffect(() => {
       if (pointerGraceArea) {
         const handleTrackPointerGrace = /* @__PURE__ */ __name((event) => {
           const target = event.target;
@@ -17917,11 +17929,11 @@
         return () => document.removeEventListener("pointermove", handleTrackPointerGrace);
       }
     }, [trigger, content, pointerGraceArea, onClose, handleRemoveGraceArea]);
-    return /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(TooltipContentImpl, __spreadProps(__spreadValues({}, props), { ref: composedRefs }));
+    return /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(TooltipContentImpl, __spreadProps(__spreadValues({}, props), { ref: composedRefs }));
   });
   var [VisuallyHiddenContentContextProvider, useVisuallyHiddenContentContext] = createTooltipContext(TOOLTIP_NAME, { isInside: false });
   var Slottable = createSlottable("TooltipContent");
-  var TooltipContentImpl = React31.forwardRef(
+  var TooltipContentImpl = React30.forwardRef(
     (props, forwardedRef) => {
       const _a121 = props, {
         __scopeTooltip,
@@ -17939,11 +17951,11 @@
       const context = useTooltipContext(CONTENT_NAME2, __scopeTooltip);
       const popperScope = usePopperScope(__scopeTooltip);
       const { onClose } = context;
-      React31.useEffect(() => {
+      React30.useEffect(() => {
         document.addEventListener(TOOLTIP_OPEN, onClose);
         return () => document.removeEventListener(TOOLTIP_OPEN, onClose);
       }, [onClose]);
-      React31.useEffect(() => {
+      React30.useEffect(() => {
         if (context.trigger) {
           const handleScroll2 = /* @__PURE__ */ __name((event) => {
             const target = event.target;
@@ -17953,7 +17965,7 @@
           return () => window.removeEventListener("scroll", handleScroll2, { capture: true });
         }
       }, [context.trigger, onClose]);
-      return /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(
+      return /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(
         DismissableLayer,
         {
           asChild: true,
@@ -17962,7 +17974,7 @@
           onPointerDownOutside,
           onFocusOutside: /* @__PURE__ */ __name((event) => event.preventDefault(), "onFocusOutside"),
           onDismiss: onClose,
-          children: /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)(
+          children: /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)(
             Content,
             __spreadProps(__spreadValues(__spreadValues({
               "data-state": context.stateAttribute
@@ -17976,8 +17988,8 @@
                 "--radix-tooltip-trigger-height": "var(--radix-popper-anchor-height)"
               }),
               children: [
-                /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(Slottable, { children }),
-                /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(VisuallyHiddenContentContextProvider, { scope: __scopeTooltip, isInside: true, children: /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(Root2, { id: context.contentId, role: "tooltip", children: ariaLabel || children }) })
+                /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(Slottable, { children }),
+                /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(VisuallyHiddenContentContextProvider, { scope: __scopeTooltip, isInside: true, children: /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(Root2, { id: context.contentId, role: "tooltip", children: ariaLabel || children }) })
               ]
             })
           )
@@ -17987,7 +17999,7 @@
   );
   TooltipContent.displayName = CONTENT_NAME2;
   var ARROW_NAME2 = "TooltipArrow";
-  var TooltipArrow = React31.forwardRef(
+  var TooltipArrow = React30.forwardRef(
     (props, forwardedRef) => {
       const _a121 = props, { __scopeTooltip } = _a121, arrowProps = __objRest(_a121, ["__scopeTooltip"]);
       const popperScope = usePopperScope(__scopeTooltip);
@@ -17995,7 +18007,7 @@
         ARROW_NAME2,
         __scopeTooltip
       );
-      return visuallyHiddenContentContext.isInside ? null : /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(Arrow2, __spreadProps(__spreadValues(__spreadValues({}, popperScope), arrowProps), { ref: forwardedRef }));
+      return visuallyHiddenContentContext.isInside ? null : /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(Arrow2, __spreadProps(__spreadValues(__spreadValues({}, popperScope), arrowProps), { ref: forwardedRef }));
     }
   );
   TooltipArrow.displayName = ARROW_NAME2;
@@ -18122,10 +18134,11 @@
   var Content2 = TooltipContent;
 
   // client/src/components/ui/tooltip.tsx
+  var import_jsx_runtime16 = __toESM(require_jsx_runtime(), 1);
   var TooltipProvider2 = Provider2;
-  var TooltipContent2 = React32.forwardRef((_a121, ref) => {
+  var TooltipContent2 = React31.forwardRef((_a121, ref) => {
     var _b93 = _a121, { className, sideOffset = 4 } = _b93, props = __objRest(_b93, ["className", "sideOffset"]);
-    return /* @__PURE__ */ React32.createElement(
+    return /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(
       Content2,
       __spreadValues({
         ref,
@@ -18166,7 +18179,8 @@
   __name(useAuth, "useAuth");
 
   // client/src/components/ui/button.tsx
-  var React33 = __toESM(require_react(), 1);
+  var React32 = __toESM(require_react(), 1);
+  var import_jsx_runtime17 = __toESM(require_jsx_runtime(), 1);
   var buttonVariants = cva(
     "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
     {
@@ -18192,11 +18206,11 @@
       }
     }
   );
-  var Button = React33.forwardRef(
+  var Button = React32.forwardRef(
     (_a121, ref) => {
       var _b93 = _a121, { className, variant, size: size4, asChild = false } = _b93, props = __objRest(_b93, ["className", "variant", "size", "asChild"]);
       const Comp = asChild ? Slot : "button";
-      return /* @__PURE__ */ React33.createElement(
+      return /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(
         Comp,
         __spreadValues({
           className: cn(buttonVariants({ variant, size: size4, className })),
@@ -18209,6 +18223,7 @@
 
   // client/src/hooks/use-theme.tsx
   var import_react6 = __toESM(require_react(), 1);
+  var import_jsx_runtime18 = __toESM(require_jsx_runtime(), 1);
   var initialState = {
     theme: "system",
     setTheme: /* @__PURE__ */ __name(() => null, "setTheme")
@@ -18250,7 +18265,7 @@
         setTheme(theme2);
       }, "setTheme")
     };
-    return /* @__PURE__ */ React.createElement(ThemeProviderContext.Provider, __spreadProps(__spreadValues({}, props), { value }), children);
+    return /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(ThemeProviderContext.Provider, __spreadProps(__spreadValues({}, props), { value, children }));
   }
   __name(ThemeProvider, "ThemeProvider");
   var useTheme = /* @__PURE__ */ __name(() => {
@@ -18261,25 +18276,29 @@
   }, "useTheme");
 
   // client/src/components/theme-toggle.tsx
+  var import_jsx_runtime19 = __toESM(require_jsx_runtime(), 1);
   function ThemeToggle() {
     const { theme, setTheme } = useTheme();
-    return /* @__PURE__ */ React.createElement(
+    return /* @__PURE__ */ (0, import_jsx_runtime19.jsxs)(
       Button,
       {
         variant: "outline",
         size: "icon",
         onClick: () => setTheme(theme === "light" ? "dark" : "light"),
-        className: "w-9 h-9"
-      },
-      /* @__PURE__ */ React.createElement(Sun, { className: "h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" }),
-      /* @__PURE__ */ React.createElement(Moon, { className: "absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" }),
-      /* @__PURE__ */ React.createElement("span", { className: "sr-only" }, "Toggle theme")
+        className: "w-9 h-9",
+        children: [
+          /* @__PURE__ */ (0, import_jsx_runtime19.jsx)(Sun, { className: "h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" }),
+          /* @__PURE__ */ (0, import_jsx_runtime19.jsx)(Moon, { className: "absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" }),
+          /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("span", { className: "sr-only", children: "Toggle theme" })
+        ]
+      }
     );
   }
   __name(ThemeToggle, "ThemeToggle");
 
   // client/src/components/sidebar.tsx
   var import_react7 = __toESM(require_react(), 1);
+  var import_jsx_runtime20 = __toESM(require_jsx_runtime(), 1);
   var navigation = [
     { name: "Users", href: "/users", icon: Users, current: true }
   ];
@@ -18323,76 +18342,113 @@
         });
       }, "onError")
     });
-    return /* @__PURE__ */ React.createElement("aside", { className: "w-32 bg-background shadow-md border-r border-border flex-shrink-0 flex flex-col" }, /* @__PURE__ */ React.createElement("div", { className: "p-3 border-b border-border bg-purple-600 dark:bg-purple-700 flex flex-col rounded-br-lg" }, /* @__PURE__ */ React.createElement("div", { className: "text-center flex-1" }, /* @__PURE__ */ React.createElement("div", { className: "relative inline-block mb-1" }, /* @__PURE__ */ React.createElement("div", { className: "relative w-24 h-24 mx-auto rounded bg-purple-600 flex items-center justify-center" }, /* @__PURE__ */ React.createElement("div", { className: "relative w-20 h-20" }, /* @__PURE__ */ React.createElement(
-      "img",
-      {
-        src: "/maze-logo.png",
-        alt: "MAZE Logo",
-        className: "w-20 h-20 absolute inset-0 object-contain",
-        style: {
-          filter: "invert(1)"
-        }
-      }
-    ), /* @__PURE__ */ React.createElement(
-      "div",
-      {
-        className: "w-20 h-20 absolute inset-0",
-        style: {
-          backgroundColor: "#f97316",
-          mixBlendMode: "multiply"
-        }
-      }
-    ))))), /* @__PURE__ */ React.createElement("div", { className: "text-[10px] text-white/80 leading-none mt-auto whitespace-nowrap -ml-1" }, "Powered by ClockWerk.it")), /* @__PURE__ */ React.createElement("nav", { className: "p-4 flex-1" }, /* @__PURE__ */ React.createElement("ul", { className: "space-y-2" }, navigation.map((item) => {
-      const isActive = location2 === item.href || item.href === "/" && location2.startsWith("/users");
-      return /* @__PURE__ */ React.createElement("li", { key: item.name }, /* @__PURE__ */ React.createElement(
-        Link,
-        {
-          href: item.href,
-          className: cn(
-            "flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors",
-            isActive ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-muted hover:text-foreground"
+    return /* @__PURE__ */ (0, import_jsx_runtime20.jsxs)("aside", { className: "w-32 bg-background shadow-md border-r border-border flex-shrink-0 flex flex-col", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime20.jsxs)("div", { className: "p-3 border-b border-border bg-purple-600 dark:bg-purple-700 flex flex-col rounded-br-lg", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("div", { className: "text-center flex-1", children: /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("div", { className: "relative inline-block mb-1", children: /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("div", { className: "relative w-24 h-24 mx-auto rounded bg-purple-600 flex items-center justify-center", children: /* @__PURE__ */ (0, import_jsx_runtime20.jsxs)("div", { className: "relative w-20 h-20", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime20.jsx)(
+            "img",
+            {
+              src: "/maze-logo.png",
+              alt: "MAZE Logo",
+              className: "w-20 h-20 absolute inset-0 object-contain",
+              style: {
+                filter: "invert(1)"
+              }
+            }
+          ),
+          /* @__PURE__ */ (0, import_jsx_runtime20.jsx)(
+            "div",
+            {
+              className: "w-20 h-20 absolute inset-0",
+              style: {
+                backgroundColor: "#f97316",
+                mixBlendMode: "multiply"
+              }
+            }
           )
-        },
-        /* @__PURE__ */ React.createElement(item.icon, { className: "w-5 h-5" }),
-        /* @__PURE__ */ React.createElement("span", null, item.name)
-      ));
-    }))), /* @__PURE__ */ React.createElement("div", { className: "p-4 border-t border-border" }, /* @__PURE__ */ React.createElement("div", { className: "flex items-center justify-center gap-3" }, /* @__PURE__ */ React.createElement("div", { className: "relative", ref: dropdownRef }, /* @__PURE__ */ React.createElement(
-      Button,
-      {
-        variant: "ghost",
-        className: "w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center p-0 hover:bg-blue-700",
-        onClick: () => setShowUserDropdown(!showUserDropdown)
-      },
-      /* @__PURE__ */ React.createElement("span", { className: "text-white text-sm font-medium" }, (_a121 = currentUser == null ? void 0 : currentUser.firstName) == null ? void 0 : _a121[0], (_b93 = currentUser == null ? void 0 : currentUser.lastName) == null ? void 0 : _b93[0])
-    ), showUserDropdown && /* @__PURE__ */ React.createElement("div", { className: "absolute bottom-10 left-0 w-64 bg-background border border-border rounded-lg shadow-lg z-50" }, /* @__PURE__ */ React.createElement("div", { className: "p-3 border-b border-border" }, /* @__PURE__ */ React.createElement("p", { className: "font-medium text-foreground" }, currentUser == null ? void 0 : currentUser.firstName, " ", currentUser == null ? void 0 : currentUser.lastName), /* @__PURE__ */ React.createElement("p", { className: "text-sm text-muted-foreground" }, currentUser == null ? void 0 : currentUser.email)), /* @__PURE__ */ React.createElement("div", { className: "p-3" }, /* @__PURE__ */ React.createElement(
-      Button,
-      {
-        variant: "outline",
-        onClick: () => {
-          oktaSyncMutation.mutate();
-          setShowUserDropdown(false);
-        },
-        disabled: oktaSyncMutation.isPending,
-        className: "w-full border-orange-300 text-orange-700 hover:bg-orange-50"
-      },
-      /* @__PURE__ */ React.createElement(RotateCcw, { className: `w-4 h-4 mr-2 ${oktaSyncMutation.isPending ? "animate-spin" : ""}` }),
-      "Sync OKTA"
-    )))), /* @__PURE__ */ React.createElement(ThemeToggle, null))));
+        ] }) }) }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("div", { className: "text-[10px] text-white/80 leading-none mt-auto whitespace-nowrap -ml-1", children: "Powered by ClockWerk.it" })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("nav", { className: "p-4 flex-1", children: /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("ul", { className: "space-y-2", children: navigation.map((item) => {
+        const isActive = location2 === item.href || item.href === "/" && location2.startsWith("/users");
+        return /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("li", { children: /* @__PURE__ */ (0, import_jsx_runtime20.jsxs)(
+          Link,
+          {
+            href: item.href,
+            className: cn(
+              "flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors",
+              isActive ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-muted hover:text-foreground"
+            ),
+            children: [
+              /* @__PURE__ */ (0, import_jsx_runtime20.jsx)(item.icon, { className: "w-5 h-5" }),
+              /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("span", { children: item.name })
+            ]
+          }
+        ) }, item.name);
+      }) }) }),
+      /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("div", { className: "p-4 border-t border-border", children: /* @__PURE__ */ (0, import_jsx_runtime20.jsxs)("div", { className: "flex items-center justify-center gap-3", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime20.jsxs)("div", { className: "relative", ref: dropdownRef, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime20.jsx)(
+            Button,
+            {
+              variant: "ghost",
+              className: "w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center p-0 hover:bg-blue-700",
+              onClick: () => setShowUserDropdown(!showUserDropdown),
+              children: /* @__PURE__ */ (0, import_jsx_runtime20.jsxs)("span", { className: "text-white text-sm font-medium", children: [
+                (_a121 = currentUser == null ? void 0 : currentUser.firstName) == null ? void 0 : _a121[0],
+                (_b93 = currentUser == null ? void 0 : currentUser.lastName) == null ? void 0 : _b93[0]
+              ] })
+            }
+          ),
+          showUserDropdown && /* @__PURE__ */ (0, import_jsx_runtime20.jsxs)("div", { className: "absolute bottom-10 left-0 w-64 bg-background border border-border rounded-lg shadow-lg z-50", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime20.jsxs)("div", { className: "p-3 border-b border-border", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime20.jsxs)("p", { className: "font-medium text-foreground", children: [
+                currentUser == null ? void 0 : currentUser.firstName,
+                " ",
+                currentUser == null ? void 0 : currentUser.lastName
+              ] }),
+              /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("p", { className: "text-sm text-muted-foreground", children: currentUser == null ? void 0 : currentUser.email })
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("div", { className: "p-3", children: /* @__PURE__ */ (0, import_jsx_runtime20.jsxs)(
+              Button,
+              {
+                variant: "outline",
+                onClick: () => {
+                  oktaSyncMutation.mutate();
+                  setShowUserDropdown(false);
+                },
+                disabled: oktaSyncMutation.isPending,
+                className: "w-full border-orange-300 text-orange-700 hover:bg-orange-50",
+                children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime20.jsx)(RotateCcw, { className: `w-4 h-4 mr-2 ${oktaSyncMutation.isPending ? "animate-spin" : ""}` }),
+                  "Sync OKTA"
+                ]
+              }
+            ) })
+          ] })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime20.jsx)(ThemeToggle, {})
+      ] }) })
+    ] });
   }
   __name(Sidebar, "Sidebar");
 
   // client/src/components/sso-layout.tsx
+  var import_jsx_runtime21 = __toESM(require_jsx_runtime(), 1);
   function SSOLayout({ children }) {
     var _a121, _b93;
     const { isAuthenticated, user } = useAuth();
     if (!isAuthenticated) {
-      return /* @__PURE__ */ React.createElement(React.Fragment, null, children);
+      return /* @__PURE__ */ (0, import_jsx_runtime21.jsx)(import_jsx_runtime21.Fragment, { children });
     }
     const handleLogout = /* @__PURE__ */ __name(() => {
       window.location.href = "/api/logout";
     }, "handleLogout");
     const userInitials = user ? `${((_a121 = user.firstName) == null ? void 0 : _a121.charAt(0)) || ""}${((_b93 = user.lastName) == null ? void 0 : _b93.charAt(0)) || ""}`.toUpperCase() || "U" : "U";
-    return /* @__PURE__ */ React.createElement("div", { className: "flex h-screen bg-background" }, /* @__PURE__ */ React.createElement(Sidebar, null), /* @__PURE__ */ React.createElement("div", { className: "flex-1 flex flex-col" }, /* @__PURE__ */ React.createElement("main", { className: "flex-1 overflow-auto" }, children)));
+    return /* @__PURE__ */ (0, import_jsx_runtime21.jsxs)("div", { className: "flex h-screen bg-background", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime21.jsx)(Sidebar, {}),
+      /* @__PURE__ */ (0, import_jsx_runtime21.jsx)("div", { className: "flex-1 flex flex-col", children: /* @__PURE__ */ (0, import_jsx_runtime21.jsx)("main", { className: "flex-1 overflow-auto", children }) })
+    ] });
   }
   __name(SSOLayout, "SSOLayout");
 
@@ -18400,11 +18456,12 @@
   var import_react8 = __toESM(require_react(), 1);
 
   // client/src/components/ui/input.tsx
-  var React34 = __toESM(require_react(), 1);
-  var Input = React34.forwardRef(
+  var React33 = __toESM(require_react(), 1);
+  var import_jsx_runtime22 = __toESM(require_jsx_runtime(), 1);
+  var Input = React33.forwardRef(
     (_a121, ref) => {
       var _b93 = _a121, { className, type } = _b93, props = __objRest(_b93, ["className", "type"]);
-      return /* @__PURE__ */ React34.createElement(
+      return /* @__PURE__ */ (0, import_jsx_runtime22.jsx)(
         "input",
         __spreadValues({
           type,
@@ -18420,14 +18477,14 @@
   Input.displayName = "Input";
 
   // client/src/components/ui/label.tsx
-  var React36 = __toESM(require_react(), 1);
+  var React35 = __toESM(require_react(), 1);
 
   // node_modules/@radix-ui/react-label/dist/index.mjs
-  var React35 = __toESM(require_react(), 1);
-  var import_jsx_runtime14 = __toESM(require_jsx_runtime(), 1);
+  var React34 = __toESM(require_react(), 1);
+  var import_jsx_runtime23 = __toESM(require_jsx_runtime(), 1);
   var NAME3 = "Label";
-  var Label = React35.forwardRef((props, forwardedRef) => {
-    return /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(
+  var Label = React34.forwardRef((props, forwardedRef) => {
+    return /* @__PURE__ */ (0, import_jsx_runtime23.jsx)(
       Primitive.label,
       __spreadProps(__spreadValues({}, props), {
         ref: forwardedRef,
@@ -18445,12 +18502,13 @@
   var Root4 = Label;
 
   // client/src/components/ui/label.tsx
+  var import_jsx_runtime24 = __toESM(require_jsx_runtime(), 1);
   var labelVariants = cva(
     "text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
   );
-  var Label2 = React36.forwardRef((_a121, ref) => {
+  var Label2 = React35.forwardRef((_a121, ref) => {
     var _b93 = _a121, { className } = _b93, props = __objRest(_b93, ["className"]);
-    return /* @__PURE__ */ React36.createElement(
+    return /* @__PURE__ */ (0, import_jsx_runtime24.jsx)(
       Root4,
       __spreadValues({
         ref,
@@ -18461,10 +18519,11 @@
   Label2.displayName = Root4.displayName;
 
   // client/src/components/ui/card.tsx
-  var React37 = __toESM(require_react(), 1);
-  var Card = React37.forwardRef((_a121, ref) => {
+  var React36 = __toESM(require_react(), 1);
+  var import_jsx_runtime25 = __toESM(require_jsx_runtime(), 1);
+  var Card = React36.forwardRef((_a121, ref) => {
     var _b93 = _a121, { className } = _b93, props = __objRest(_b93, ["className"]);
-    return /* @__PURE__ */ React37.createElement(
+    return /* @__PURE__ */ (0, import_jsx_runtime25.jsx)(
       "div",
       __spreadValues({
         ref,
@@ -18476,14 +18535,14 @@
     );
   });
   Card.displayName = "Card";
-  var CardHeader = React37.forwardRef((_a121, ref) => {
+  var CardHeader = React36.forwardRef((_a121, ref) => {
     var _b93 = _a121, { className } = _b93, props = __objRest(_b93, ["className"]);
-    return /* @__PURE__ */ React37.createElement("div", __spreadValues({ ref, className: cn("flex flex-col space-y-1.5 p-6", className) }, props));
+    return /* @__PURE__ */ (0, import_jsx_runtime25.jsx)("div", __spreadValues({ ref, className: cn("flex flex-col space-y-1.5 p-6", className) }, props));
   });
   CardHeader.displayName = "CardHeader";
-  var CardTitle = React37.forwardRef((_a121, ref) => {
+  var CardTitle = React36.forwardRef((_a121, ref) => {
     var _b93 = _a121, { className } = _b93, props = __objRest(_b93, ["className"]);
-    return /* @__PURE__ */ React37.createElement(
+    return /* @__PURE__ */ (0, import_jsx_runtime25.jsx)(
       "h3",
       __spreadValues({
         ref,
@@ -18495,9 +18554,9 @@
     );
   });
   CardTitle.displayName = "CardTitle";
-  var CardDescription = React37.forwardRef((_a121, ref) => {
+  var CardDescription = React36.forwardRef((_a121, ref) => {
     var _b93 = _a121, { className } = _b93, props = __objRest(_b93, ["className"]);
-    return /* @__PURE__ */ React37.createElement(
+    return /* @__PURE__ */ (0, import_jsx_runtime25.jsx)(
       "p",
       __spreadValues({
         ref,
@@ -18506,18 +18565,19 @@
     );
   });
   CardDescription.displayName = "CardDescription";
-  var CardContent = React37.forwardRef((_a121, ref) => {
+  var CardContent = React36.forwardRef((_a121, ref) => {
     var _b93 = _a121, { className } = _b93, props = __objRest(_b93, ["className"]);
-    return /* @__PURE__ */ React37.createElement("div", __spreadValues({ ref, className: cn("p-6 pt-0", className) }, props));
+    return /* @__PURE__ */ (0, import_jsx_runtime25.jsx)("div", __spreadValues({ ref, className: cn("p-6 pt-0", className) }, props));
   });
   CardContent.displayName = "CardContent";
-  var CardFooter = React37.forwardRef((_a121, ref) => {
+  var CardFooter = React36.forwardRef((_a121, ref) => {
     var _b93 = _a121, { className } = _b93, props = __objRest(_b93, ["className"]);
-    return /* @__PURE__ */ React37.createElement("div", __spreadValues({ ref, className: cn("flex items-center p-6 pt-0", className) }, props));
+    return /* @__PURE__ */ (0, import_jsx_runtime25.jsx)("div", __spreadValues({ ref, className: cn("flex items-center p-6 pt-0", className) }, props));
   });
   CardFooter.displayName = "CardFooter";
 
   // client/src/pages/login.tsx
+  var import_jsx_runtime26 = __toESM(require_jsx_runtime(), 1);
   function Login() {
     const [, setLocation] = useLocation();
     const [username, setUsername] = (0, import_react8.useState)("CW-Admin");
@@ -18564,35 +18624,51 @@
       }
       loginMutation.mutate({ username, password });
     }, "handleSubmit");
-    return /* @__PURE__ */ React.createElement("div", { className: "min-h-screen flex items-center justify-center bg-gray-50" }, /* @__PURE__ */ React.createElement(Card, { className: "w-full max-w-md" }, /* @__PURE__ */ React.createElement(CardHeader, null, /* @__PURE__ */ React.createElement(CardTitle, null, "Admin Login"), /* @__PURE__ */ React.createElement(CardDescription, null, "Sign in to access the OKTA Admin Dashboard")), /* @__PURE__ */ React.createElement(CardContent, null, /* @__PURE__ */ React.createElement("form", { onSubmit: handleSubmit, className: "space-y-4" }, /* @__PURE__ */ React.createElement("div", { className: "space-y-2" }, /* @__PURE__ */ React.createElement(Label2, { htmlFor: "username" }, "Username"), /* @__PURE__ */ React.createElement(
-      Input,
-      {
-        id: "username",
-        type: "text",
-        value: username,
-        onChange: (e) => setUsername(e.target.value),
-        placeholder: "Enter your username",
-        disabled: loginMutation.isPending
-      }
-    )), /* @__PURE__ */ React.createElement("div", { className: "space-y-2" }, /* @__PURE__ */ React.createElement(Label2, { htmlFor: "password" }, "Password"), /* @__PURE__ */ React.createElement(
-      Input,
-      {
-        id: "password",
-        type: "password",
-        value: password,
-        onChange: (e) => setPassword(e.target.value),
-        placeholder: "Enter your password",
-        disabled: loginMutation.isPending
-      }
-    )), /* @__PURE__ */ React.createElement(
-      Button,
-      {
-        type: "submit",
-        className: "w-full",
-        disabled: loginMutation.isPending
-      },
-      loginMutation.isPending ? "Signing in..." : "Sign In"
-    )))));
+    return /* @__PURE__ */ (0, import_jsx_runtime26.jsx)("div", { className: "min-h-screen flex items-center justify-center bg-gray-50", children: /* @__PURE__ */ (0, import_jsx_runtime26.jsxs)(Card, { className: "w-full max-w-md", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime26.jsxs)(CardHeader, { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime26.jsx)(CardTitle, { children: "Admin Login" }),
+        /* @__PURE__ */ (0, import_jsx_runtime26.jsx)(CardDescription, { children: "Sign in to access the OKTA Admin Dashboard" })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime26.jsx)(CardContent, { children: /* @__PURE__ */ (0, import_jsx_runtime26.jsxs)("form", { onSubmit: handleSubmit, className: "space-y-4", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime26.jsxs)("div", { className: "space-y-2", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime26.jsx)(Label2, { htmlFor: "username", children: "Username" }),
+          /* @__PURE__ */ (0, import_jsx_runtime26.jsx)(
+            Input,
+            {
+              id: "username",
+              type: "text",
+              value: username,
+              onChange: (e) => setUsername(e.target.value),
+              placeholder: "Enter your username",
+              disabled: loginMutation.isPending
+            }
+          )
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime26.jsxs)("div", { className: "space-y-2", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime26.jsx)(Label2, { htmlFor: "password", children: "Password" }),
+          /* @__PURE__ */ (0, import_jsx_runtime26.jsx)(
+            Input,
+            {
+              id: "password",
+              type: "password",
+              value: password,
+              onChange: (e) => setPassword(e.target.value),
+              placeholder: "Enter your password",
+              disabled: loginMutation.isPending
+            }
+          )
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime26.jsx)(
+          Button,
+          {
+            type: "submit",
+            className: "w-full",
+            disabled: loginMutation.isPending,
+            children: loginMutation.isPending ? "Signing in..." : "Sign In"
+          }
+        )
+      ] }) })
+    ] }) });
   }
   __name(Login, "Login");
 
@@ -20405,25 +20481,26 @@
 
   // client/src/components/ui/table.tsx
   var React38 = __toESM(require_react(), 1);
+  var import_jsx_runtime27 = __toESM(require_jsx_runtime(), 1);
   var Table = React38.forwardRef((_a121, ref) => {
     var _b93 = _a121, { className } = _b93, props = __objRest(_b93, ["className"]);
-    return /* @__PURE__ */ React38.createElement("div", { className: "relative w-full overflow-auto" }, /* @__PURE__ */ React38.createElement(
+    return /* @__PURE__ */ (0, import_jsx_runtime27.jsx)("div", { className: "relative w-full overflow-auto", children: /* @__PURE__ */ (0, import_jsx_runtime27.jsx)(
       "table",
       __spreadValues({
         ref,
         className: cn("w-full caption-bottom text-sm", className)
       }, props)
-    ));
+    ) });
   });
   Table.displayName = "Table";
   var TableHeader = React38.forwardRef((_a121, ref) => {
     var _b93 = _a121, { className } = _b93, props = __objRest(_b93, ["className"]);
-    return /* @__PURE__ */ React38.createElement("thead", __spreadValues({ ref, className: cn("[&_tr]:border-b", className) }, props));
+    return /* @__PURE__ */ (0, import_jsx_runtime27.jsx)("thead", __spreadValues({ ref, className: cn("[&_tr]:border-b", className) }, props));
   });
   TableHeader.displayName = "TableHeader";
   var TableBody = React38.forwardRef((_a121, ref) => {
     var _b93 = _a121, { className } = _b93, props = __objRest(_b93, ["className"]);
-    return /* @__PURE__ */ React38.createElement(
+    return /* @__PURE__ */ (0, import_jsx_runtime27.jsx)(
       "tbody",
       __spreadValues({
         ref,
@@ -20434,7 +20511,7 @@
   TableBody.displayName = "TableBody";
   var TableFooter = React38.forwardRef((_a121, ref) => {
     var _b93 = _a121, { className } = _b93, props = __objRest(_b93, ["className"]);
-    return /* @__PURE__ */ React38.createElement(
+    return /* @__PURE__ */ (0, import_jsx_runtime27.jsx)(
       "tfoot",
       __spreadValues({
         ref,
@@ -20448,7 +20525,7 @@
   TableFooter.displayName = "TableFooter";
   var TableRow = React38.forwardRef((_a121, ref) => {
     var _b93 = _a121, { className } = _b93, props = __objRest(_b93, ["className"]);
-    return /* @__PURE__ */ React38.createElement(
+    return /* @__PURE__ */ (0, import_jsx_runtime27.jsx)(
       "tr",
       __spreadValues({
         ref,
@@ -20462,7 +20539,7 @@
   TableRow.displayName = "TableRow";
   var TableHead = React38.forwardRef((_a121, ref) => {
     var _b93 = _a121, { className } = _b93, props = __objRest(_b93, ["className"]);
-    return /* @__PURE__ */ React38.createElement(
+    return /* @__PURE__ */ (0, import_jsx_runtime27.jsx)(
       "th",
       __spreadValues({
         ref,
@@ -20476,7 +20553,7 @@
   TableHead.displayName = "TableHead";
   var TableCell = React38.forwardRef((_a121, ref) => {
     var _b93 = _a121, { className } = _b93, props = __objRest(_b93, ["className"]);
-    return /* @__PURE__ */ React38.createElement(
+    return /* @__PURE__ */ (0, import_jsx_runtime27.jsx)(
       "td",
       __spreadValues({
         ref,
@@ -20487,7 +20564,7 @@
   TableCell.displayName = "TableCell";
   var TableCaption = React38.forwardRef((_a121, ref) => {
     var _b93 = _a121, { className } = _b93, props = __objRest(_b93, ["className"]);
-    return /* @__PURE__ */ React38.createElement(
+    return /* @__PURE__ */ (0, import_jsx_runtime27.jsx)(
       "caption",
       __spreadValues({
         ref,
@@ -20498,7 +20575,7 @@
   TableCaption.displayName = "TableCaption";
 
   // client/src/components/ui/badge.tsx
-  var React39 = __toESM(require_react(), 1);
+  var import_jsx_runtime28 = __toESM(require_jsx_runtime(), 1);
   var badgeVariants = cva(
     "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
     {
@@ -20517,18 +20594,19 @@
   );
   function Badge(_a121) {
     var _b93 = _a121, { className, variant } = _b93, props = __objRest(_b93, ["className", "variant"]);
-    return /* @__PURE__ */ React39.createElement("div", __spreadValues({ className: cn(badgeVariants({ variant }), className) }, props));
+    return /* @__PURE__ */ (0, import_jsx_runtime28.jsx)("div", __spreadValues({ className: cn(badgeVariants({ variant }), className) }, props));
   }
   __name(Badge, "Badge");
 
   // client/src/components/ui/skeleton.tsx
+  var import_jsx_runtime29 = __toESM(require_jsx_runtime(), 1);
   function Skeleton(_a121) {
     var _b93 = _a121, {
       className
     } = _b93, props = __objRest(_b93, [
       "className"
     ]);
-    return /* @__PURE__ */ React.createElement(
+    return /* @__PURE__ */ (0, import_jsx_runtime29.jsx)(
       "div",
       __spreadValues({
         className: cn("animate-pulse rounded-md bg-muted", className)
@@ -20538,10 +20616,10 @@
   __name(Skeleton, "Skeleton");
 
   // client/src/components/ui/select.tsx
-  var React52 = __toESM(require_react(), 1);
+  var React51 = __toESM(require_react(), 1);
 
   // node_modules/@radix-ui/react-select/dist/index.mjs
-  var React51 = __toESM(require_react(), 1);
+  var React50 = __toESM(require_react(), 1);
   var ReactDOM5 = __toESM(require_react_dom(), 1);
 
   // node_modules/@radix-ui/number/dist/index.mjs
@@ -20551,20 +20629,20 @@
   __name(clamp2, "clamp");
 
   // node_modules/@radix-ui/react-direction/dist/index.mjs
-  var React40 = __toESM(require_react(), 1);
-  var import_jsx_runtime15 = __toESM(require_jsx_runtime(), 1);
-  var DirectionContext = React40.createContext(void 0);
+  var React39 = __toESM(require_react(), 1);
+  var import_jsx_runtime30 = __toESM(require_jsx_runtime(), 1);
+  var DirectionContext = React39.createContext(void 0);
   function useDirection(localDir) {
-    const globalDir = React40.useContext(DirectionContext);
+    const globalDir = React39.useContext(DirectionContext);
     return localDir || globalDir || "ltr";
   }
   __name(useDirection, "useDirection");
 
   // node_modules/@radix-ui/react-focus-guards/dist/index.mjs
-  var React41 = __toESM(require_react(), 1);
+  var React40 = __toESM(require_react(), 1);
   var count3 = 0;
   function useFocusGuards() {
-    React41.useEffect(() => {
+    React40.useEffect(() => {
       var _a121, _b93;
       const edgeGuards = document.querySelectorAll("[data-radix-focus-guard]");
       document.body.insertAdjacentElement("afterbegin", (_a121 = edgeGuards[0]) != null ? _a121 : createFocusGuard());
@@ -20592,13 +20670,13 @@
   __name(createFocusGuard, "createFocusGuard");
 
   // node_modules/@radix-ui/react-focus-scope/dist/index.mjs
-  var React42 = __toESM(require_react(), 1);
-  var import_jsx_runtime16 = __toESM(require_jsx_runtime(), 1);
+  var React41 = __toESM(require_react(), 1);
+  var import_jsx_runtime31 = __toESM(require_jsx_runtime(), 1);
   var AUTOFOCUS_ON_MOUNT = "focusScope.autoFocusOnMount";
   var AUTOFOCUS_ON_UNMOUNT = "focusScope.autoFocusOnUnmount";
   var EVENT_OPTIONS = { bubbles: false, cancelable: true };
   var FOCUS_SCOPE_NAME = "FocusScope";
-  var FocusScope = React42.forwardRef((props, forwardedRef) => {
+  var FocusScope = React41.forwardRef((props, forwardedRef) => {
     const _a121 = props, {
       loop = false,
       trapped = false,
@@ -20610,12 +20688,12 @@
       "onMountAutoFocus",
       "onUnmountAutoFocus"
     ]);
-    const [container, setContainer] = React42.useState(null);
+    const [container, setContainer] = React41.useState(null);
     const onMountAutoFocus = useCallbackRef(onMountAutoFocusProp);
     const onUnmountAutoFocus = useCallbackRef(onUnmountAutoFocusProp);
-    const lastFocusedElementRef = React42.useRef(null);
+    const lastFocusedElementRef = React41.useRef(null);
     const composedRefs = useComposedRefs(forwardedRef, (node) => setContainer(node));
-    const focusScope = React42.useRef({
+    const focusScope = React41.useRef({
       paused: false,
       pause() {
         this.paused = true;
@@ -20624,7 +20702,7 @@
         this.paused = false;
       }
     }).current;
-    React42.useEffect(() => {
+    React41.useEffect(() => {
       if (trapped) {
         let handleFocusIn2 = /* @__PURE__ */ __name(function(event) {
           if (focusScope.paused || !container) return;
@@ -20660,7 +20738,7 @@
         };
       }
     }, [trapped, container, focusScope.paused]);
-    React42.useEffect(() => {
+    React41.useEffect(() => {
       if (container) {
         focusScopesStack.add(focusScope);
         const previouslyFocusedElement = document.activeElement;
@@ -20691,7 +20769,7 @@
         };
       }
     }, [container, onMountAutoFocus, onUnmountAutoFocus, focusScope]);
-    const handleKeyDown = React42.useCallback(
+    const handleKeyDown = React41.useCallback(
       (event) => {
         if (!loop && !trapped) return;
         if (focusScope.paused) return;
@@ -20716,7 +20794,7 @@
       },
       [loop, trapped, focusScope.paused]
     );
-    return /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(Primitive.div, __spreadProps(__spreadValues({ tabIndex: -1 }, scopeProps), { ref: composedRefs, onKeyDown: handleKeyDown }));
+    return /* @__PURE__ */ (0, import_jsx_runtime31.jsx)(Primitive.div, __spreadProps(__spreadValues({ tabIndex: -1 }, scopeProps), { ref: composedRefs, onKeyDown: handleKeyDown }));
   });
   FocusScope.displayName = FOCUS_SCOPE_NAME;
   function focusFirst2(candidates, { select = false } = {}) {
@@ -20811,10 +20889,10 @@
   __name(removeLinks, "removeLinks");
 
   // node_modules/@radix-ui/react-use-previous/dist/index.mjs
-  var React43 = __toESM(require_react(), 1);
+  var React42 = __toESM(require_react(), 1);
   function usePrevious(value) {
-    const ref = React43.useRef({ value, previous: value });
-    return React43.useMemo(() => {
+    const ref = React42.useRef({ value, previous: value });
+    return React42.useMemo(() => {
       if (ref.current.value !== value) {
         ref.current.previous = ref.current.value;
         ref.current.value = value;
@@ -20980,10 +21058,10 @@
   __name(__spreadArray, "__spreadArray");
 
   // node_modules/react-remove-scroll/dist/es2015/Combination.js
-  var React50 = __toESM(require_react());
+  var React49 = __toESM(require_react());
 
   // node_modules/react-remove-scroll/dist/es2015/UI.js
-  var React46 = __toESM(require_react());
+  var React45 = __toESM(require_react());
 
   // node_modules/react-remove-scroll-bar/dist/es2015/constants.js
   var zeroRightClassName = "right-scroll-bar-position";
@@ -21032,8 +21110,8 @@
   __name(useCallbackRef2, "useCallbackRef");
 
   // node_modules/use-callback-ref/dist/es2015/useMergeRef.js
-  var React44 = __toESM(require_react());
-  var useIsomorphicLayoutEffect2 = typeof window !== "undefined" ? React44.useLayoutEffect : React44.useEffect;
+  var React43 = __toESM(require_react());
+  var useIsomorphicLayoutEffect2 = typeof window !== "undefined" ? React43.useLayoutEffect : React43.useEffect;
   var currentValues = /* @__PURE__ */ new WeakMap();
   function useMergeRefs(refs, defaultValue2) {
     var callbackRef = useCallbackRef2(defaultValue2 || null, function(newValue) {
@@ -21154,7 +21232,7 @@
   __name(createSidecarMedium, "createSidecarMedium");
 
   // node_modules/use-sidecar/dist/es2015/exports.js
-  var React45 = __toESM(require_react());
+  var React44 = __toESM(require_react());
   var SideCar = /* @__PURE__ */ __name(function(_a121) {
     var sideCar = _a121.sideCar, rest = __rest(_a121, ["sideCar"]);
     if (!sideCar) {
@@ -21164,7 +21242,7 @@
     if (!Target2) {
       throw new Error("Sidecar medium not found");
     }
-    return React45.createElement(Target2, __assign({}, rest));
+    return React44.createElement(Target2, __assign({}, rest));
   }, "SideCar");
   SideCar.isSideCarExport = true;
   function exportSidecar(medium, exported) {
@@ -21180,9 +21258,9 @@
   var nothing = /* @__PURE__ */ __name(function() {
     return;
   }, "nothing");
-  var RemoveScroll = React46.forwardRef(function(props, parentRef) {
-    var ref = React46.useRef(null);
-    var _a121 = React46.useState({
+  var RemoveScroll = React45.forwardRef(function(props, parentRef) {
+    var ref = React45.useRef(null);
+    var _a121 = React45.useState({
       onScrollCapture: nothing,
       onWheelCapture: nothing,
       onTouchMoveCapture: nothing
@@ -21191,11 +21269,11 @@
     var SideCar2 = sideCar;
     var containerRef = useMergeRefs([ref, parentRef]);
     var containerProps = __assign(__assign({}, rest), callbacks);
-    return React46.createElement(
-      React46.Fragment,
+    return React45.createElement(
+      React45.Fragment,
       null,
-      enabled && React46.createElement(SideCar2, { sideCar: effectCar, removeScrollBar, shards, noIsolation, inert, setCallbacks, allowPinchZoom: !!allowPinchZoom, lockRef: ref, gapMode }),
-      forwardProps ? React46.cloneElement(React46.Children.only(children), __assign(__assign({}, containerProps), { ref: containerRef })) : React46.createElement(Container, __assign({}, containerProps, { className, ref: containerRef }), children)
+      enabled && React45.createElement(SideCar2, { sideCar: effectCar, removeScrollBar, shards, noIsolation, inert, setCallbacks, allowPinchZoom: !!allowPinchZoom, lockRef: ref, gapMode }),
+      forwardProps ? React45.cloneElement(React45.Children.only(children), __assign(__assign({}, containerProps), { ref: containerRef })) : React45.createElement(Container, __assign({}, containerProps, { className, ref: containerRef }), children)
     );
   });
   RemoveScroll.defaultProps = {
@@ -21209,13 +21287,13 @@
   };
 
   // node_modules/react-remove-scroll/dist/es2015/SideEffect.js
-  var React49 = __toESM(require_react());
-
-  // node_modules/react-remove-scroll-bar/dist/es2015/component.js
   var React48 = __toESM(require_react());
 
-  // node_modules/react-style-singleton/dist/es2015/hook.js
+  // node_modules/react-remove-scroll-bar/dist/es2015/component.js
   var React47 = __toESM(require_react());
+
+  // node_modules/react-style-singleton/dist/es2015/hook.js
+  var React46 = __toESM(require_react());
 
   // node_modules/get-nonce/dist/es2015/index.js
   var currentNonce;
@@ -21282,7 +21360,7 @@
   var styleHookSingleton = /* @__PURE__ */ __name(function() {
     var sheet = stylesheetSingleton();
     return function(styles, isDynamic) {
-      React47.useEffect(function() {
+      React46.useEffect(function() {
         sheet.add(styles);
         return function() {
           sheet.remove();
@@ -21356,7 +21434,7 @@
     return isFinite(counter) ? counter : 0;
   }, "getCurrentUseCounter");
   var useLockAttribute = /* @__PURE__ */ __name(function() {
-    React48.useEffect(function() {
+    React47.useEffect(function() {
       document.body.setAttribute(lockAttribute, (getCurrentUseCounter() + 1).toString());
       return function() {
         var newCounter = getCurrentUseCounter() - 1;
@@ -21371,10 +21449,10 @@
   var RemoveScrollBar = /* @__PURE__ */ __name(function(_a121) {
     var noRelative = _a121.noRelative, noImportant = _a121.noImportant, _b93 = _a121.gapMode, gapMode = _b93 === void 0 ? "margin" : _b93;
     useLockAttribute();
-    var gap = React48.useMemo(function() {
+    var gap = React47.useMemo(function() {
       return getGapWidth(gapMode);
     }, [gapMode]);
-    return React48.createElement(Style, { styles: getStyles(gap, !noRelative, gapMode, !noImportant ? "!important" : "") });
+    return React47.createElement(Style, { styles: getStyles(gap, !noRelative, gapMode, !noImportant ? "!important" : "") });
   }, "RemoveScrollBar");
 
   // node_modules/react-remove-scroll/dist/es2015/aggresiveCapture.js
@@ -21515,16 +21593,16 @@
   var idCounter = 0;
   var lockStack = [];
   function RemoveScrollSideCar(props) {
-    var shouldPreventQueue = React49.useRef([]);
-    var touchStartRef = React49.useRef([0, 0]);
-    var activeAxis = React49.useRef();
-    var id = React49.useState(idCounter++)[0];
-    var Style2 = React49.useState(styleSingleton)[0];
-    var lastProps = React49.useRef(props);
-    React49.useEffect(function() {
+    var shouldPreventQueue = React48.useRef([]);
+    var touchStartRef = React48.useRef([0, 0]);
+    var activeAxis = React48.useRef();
+    var id = React48.useState(idCounter++)[0];
+    var Style2 = React48.useState(styleSingleton)[0];
+    var lastProps = React48.useRef(props);
+    React48.useEffect(function() {
       lastProps.current = props;
     }, [props]);
-    React49.useEffect(function() {
+    React48.useEffect(function() {
       if (props.inert) {
         document.body.classList.add("block-interactivity-".concat(id));
         var allow_1 = __spreadArray([props.lockRef.current], (props.shards || []).map(extractRef), true).filter(Boolean);
@@ -21540,7 +21618,7 @@
       }
       return;
     }, [props.inert, props.lockRef.current, props.shards]);
-    var shouldCancelEvent = React49.useCallback(function(event, parent) {
+    var shouldCancelEvent = React48.useCallback(function(event, parent) {
       if ("touches" in event && event.touches.length === 2 || event.type === "wheel" && event.ctrlKey) {
         return !lastProps.current.allowPinchZoom;
       }
@@ -21576,7 +21654,7 @@
       var cancelingAxis = activeAxis.current || currentAxis;
       return handleScroll(cancelingAxis, parent, event, cancelingAxis === "h" ? deltaX : deltaY, true);
     }, []);
-    var shouldPrevent = React49.useCallback(function(_event) {
+    var shouldPrevent = React48.useCallback(function(_event) {
       var event = _event;
       if (!lockStack.length || lockStack[lockStack.length - 1] !== Style2) {
         return;
@@ -21603,7 +21681,7 @@
         }
       }
     }, []);
-    var shouldCancel = React49.useCallback(function(name, delta, target, should) {
+    var shouldCancel = React48.useCallback(function(name, delta, target, should) {
       var event = { name, delta, target, should, shadowParent: getOutermostShadowParent(target) };
       shouldPreventQueue.current.push(event);
       setTimeout(function() {
@@ -21612,17 +21690,17 @@
         });
       }, 1);
     }, []);
-    var scrollTouchStart = React49.useCallback(function(event) {
+    var scrollTouchStart = React48.useCallback(function(event) {
       touchStartRef.current = getTouchXY(event);
       activeAxis.current = void 0;
     }, []);
-    var scrollWheel = React49.useCallback(function(event) {
+    var scrollWheel = React48.useCallback(function(event) {
       shouldCancel(event.type, getDeltaXY(event), event.target, shouldCancelEvent(event, props.lockRef.current));
     }, []);
-    var scrollTouchMove = React49.useCallback(function(event) {
+    var scrollTouchMove = React48.useCallback(function(event) {
       shouldCancel(event.type, getTouchXY(event), event.target, shouldCancelEvent(event, props.lockRef.current));
     }, []);
-    React49.useEffect(function() {
+    React48.useEffect(function() {
       lockStack.push(Style2);
       props.setCallbacks({
         onScrollCapture: scrollWheel,
@@ -21642,11 +21720,11 @@
       };
     }, []);
     var removeScrollBar = props.removeScrollBar, inert = props.inert;
-    return React49.createElement(
-      React49.Fragment,
+    return React48.createElement(
+      React48.Fragment,
       null,
-      inert ? React49.createElement(Style2, { styles: generateStyle(id) }) : null,
-      removeScrollBar ? React49.createElement(RemoveScrollBar, { gapMode: props.gapMode }) : null
+      inert ? React48.createElement(Style2, { styles: generateStyle(id) }) : null,
+      removeScrollBar ? React48.createElement(RemoveScrollBar, { gapMode: props.gapMode }) : null
     );
   }
   __name(RemoveScrollSideCar, "RemoveScrollSideCar");
@@ -21667,14 +21745,14 @@
   var sidecar_default = exportSidecar(effectCar, RemoveScrollSideCar);
 
   // node_modules/react-remove-scroll/dist/es2015/Combination.js
-  var ReactRemoveScroll = React50.forwardRef(function(props, ref) {
-    return React50.createElement(RemoveScroll, __assign({}, props, { ref, sideCar: sidecar_default }));
+  var ReactRemoveScroll = React49.forwardRef(function(props, ref) {
+    return React49.createElement(RemoveScroll, __assign({}, props, { ref, sideCar: sidecar_default }));
   });
   ReactRemoveScroll.classNames = RemoveScroll.classNames;
   var Combination_default = ReactRemoveScroll;
 
   // node_modules/@radix-ui/react-select/dist/index.mjs
-  var import_jsx_runtime17 = __toESM(require_jsx_runtime(), 1);
+  var import_jsx_runtime32 = __toESM(require_jsx_runtime(), 1);
   var OPEN_KEYS = [" ", "Enter", "ArrowUp", "ArrowDown"];
   var SELECTION_KEYS = [" ", "Enter"];
   var SELECT_NAME = "Select";
@@ -21704,9 +21782,9 @@
       form
     } = props;
     const popperScope = usePopperScope2(__scopeSelect);
-    const [trigger, setTrigger] = React51.useState(null);
-    const [valueNode, setValueNode] = React51.useState(null);
-    const [valueNodeHasChildren, setValueNodeHasChildren] = React51.useState(false);
+    const [trigger, setTrigger] = React50.useState(null);
+    const [valueNode, setValueNode] = React50.useState(null);
+    const [valueNodeHasChildren, setValueNodeHasChildren] = React50.useState(false);
     const direction = useDirection(dir);
     const [open = false, setOpen] = useControllableState({
       prop: openProp,
@@ -21718,11 +21796,11 @@
       defaultProp: defaultValue2,
       onChange: onValueChange
     });
-    const triggerPointerDownPosRef = React51.useRef(null);
+    const triggerPointerDownPosRef = React50.useRef(null);
     const isFormControl = trigger ? form || !!trigger.closest("form") : true;
-    const [nativeOptionsSet, setNativeOptionsSet] = React51.useState(/* @__PURE__ */ new Set());
+    const [nativeOptionsSet, setNativeOptionsSet] = React50.useState(/* @__PURE__ */ new Set());
     const nativeSelectKey = Array.from(nativeOptionsSet).map((option) => option.props.value).join(";");
-    return /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Root23, __spreadProps(__spreadValues({}, popperScope), { children: /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)(
+    return /* @__PURE__ */ (0, import_jsx_runtime32.jsx)(Root23, __spreadProps(__spreadValues({}, popperScope), { children: /* @__PURE__ */ (0, import_jsx_runtime32.jsxs)(
       SelectProvider,
       {
         required,
@@ -21742,14 +21820,14 @@
         triggerPointerDownPosRef,
         disabled,
         children: [
-          /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Collection2.Provider, { scope: __scopeSelect, children: /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(
+          /* @__PURE__ */ (0, import_jsx_runtime32.jsx)(Collection2.Provider, { scope: __scopeSelect, children: /* @__PURE__ */ (0, import_jsx_runtime32.jsx)(
             SelectNativeOptionsProvider,
             {
               scope: props.__scopeSelect,
-              onNativeOptionAdd: React51.useCallback((option) => {
+              onNativeOptionAdd: React50.useCallback((option) => {
                 setNativeOptionsSet((prev) => new Set(prev).add(option));
               }, []),
-              onNativeOptionRemove: React51.useCallback((option) => {
+              onNativeOptionRemove: React50.useCallback((option) => {
                 setNativeOptionsSet((prev) => {
                   const optionsSet = new Set(prev);
                   optionsSet.delete(option);
@@ -21759,7 +21837,7 @@
               children
             }
           ) }),
-          isFormControl ? /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)(
+          isFormControl ? /* @__PURE__ */ (0, import_jsx_runtime32.jsxs)(
             BubbleSelect,
             {
               "aria-hidden": true,
@@ -21772,7 +21850,7 @@
               disabled,
               form,
               children: [
-                value === void 0 ? /* @__PURE__ */ (0, import_jsx_runtime17.jsx)("option", { value: "" }) : null,
+                value === void 0 ? /* @__PURE__ */ (0, import_jsx_runtime32.jsx)("option", { value: "" }) : null,
                 Array.from(nativeOptionsSet)
               ]
             },
@@ -21784,7 +21862,7 @@
   }, "Select");
   Select.displayName = SELECT_NAME;
   var TRIGGER_NAME2 = "SelectTrigger";
-  var SelectTrigger = React51.forwardRef(
+  var SelectTrigger = React50.forwardRef(
     (props, forwardedRef) => {
       const _a121 = props, { __scopeSelect, disabled = false } = _a121, triggerProps = __objRest(_a121, ["__scopeSelect", "disabled"]);
       const popperScope = usePopperScope2(__scopeSelect);
@@ -21792,7 +21870,7 @@
       const isDisabled = context.disabled || disabled;
       const composedRefs = useComposedRefs(forwardedRef, context.onTriggerChange);
       const getItems = useCollection2(__scopeSelect);
-      const pointerTypeRef = React51.useRef("touch");
+      const pointerTypeRef = React50.useRef("touch");
       const [searchRef, handleTypeaheadSearch, resetTypeahead] = useTypeaheadSearch((search) => {
         const enabledItems = getItems().filter((item) => !item.disabled);
         const currentItem = enabledItems.find((item) => item.value === context.value);
@@ -21813,7 +21891,7 @@
           };
         }
       }, "handleOpen");
-      return /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Anchor, __spreadProps(__spreadValues({ asChild: true }, popperScope), { children: /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(
+      return /* @__PURE__ */ (0, import_jsx_runtime32.jsx)(Anchor, __spreadProps(__spreadValues({ asChild: true }, popperScope), { children: /* @__PURE__ */ (0, import_jsx_runtime32.jsx)(
         Primitive.button,
         __spreadProps(__spreadValues({
           type: "button",
@@ -21862,7 +21940,7 @@
   );
   SelectTrigger.displayName = TRIGGER_NAME2;
   var VALUE_NAME = "SelectValue";
-  var SelectValue = React51.forwardRef(
+  var SelectValue = React50.forwardRef(
     (props, forwardedRef) => {
       const _a121 = props, { __scopeSelect, className, style, children, placeholder = "" } = _a121, valueProps = __objRest(_a121, ["__scopeSelect", "className", "style", "children", "placeholder"]);
       const context = useSelectContext(VALUE_NAME, __scopeSelect);
@@ -21872,46 +21950,46 @@
       useLayoutEffect22(() => {
         onValueNodeHasChildrenChange(hasChildren);
       }, [onValueNodeHasChildrenChange, hasChildren]);
-      return /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(
+      return /* @__PURE__ */ (0, import_jsx_runtime32.jsx)(
         Primitive.span,
         __spreadProps(__spreadValues({}, valueProps), {
           ref: composedRefs,
           style: { pointerEvents: "none" },
-          children: shouldShowPlaceholder(context.value) ? /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(import_jsx_runtime17.Fragment, { children: placeholder }) : children
+          children: shouldShowPlaceholder(context.value) ? /* @__PURE__ */ (0, import_jsx_runtime32.jsx)(import_jsx_runtime32.Fragment, { children: placeholder }) : children
         })
       );
     }
   );
   SelectValue.displayName = VALUE_NAME;
   var ICON_NAME = "SelectIcon";
-  var SelectIcon = React51.forwardRef(
+  var SelectIcon = React50.forwardRef(
     (props, forwardedRef) => {
       const _a121 = props, { __scopeSelect, children } = _a121, iconProps = __objRest(_a121, ["__scopeSelect", "children"]);
-      return /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Primitive.span, __spreadProps(__spreadValues({ "aria-hidden": true }, iconProps), { ref: forwardedRef, children: children || "\u25BC" }));
+      return /* @__PURE__ */ (0, import_jsx_runtime32.jsx)(Primitive.span, __spreadProps(__spreadValues({ "aria-hidden": true }, iconProps), { ref: forwardedRef, children: children || "\u25BC" }));
     }
   );
   SelectIcon.displayName = ICON_NAME;
   var PORTAL_NAME3 = "SelectPortal";
   var SelectPortal = /* @__PURE__ */ __name((props) => {
-    return /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Portal, __spreadValues({ asChild: true }, props));
+    return /* @__PURE__ */ (0, import_jsx_runtime32.jsx)(Portal, __spreadValues({ asChild: true }, props));
   }, "SelectPortal");
   SelectPortal.displayName = PORTAL_NAME3;
   var CONTENT_NAME3 = "SelectContent";
-  var SelectContent = React51.forwardRef(
+  var SelectContent = React50.forwardRef(
     (props, forwardedRef) => {
       const context = useSelectContext(CONTENT_NAME3, props.__scopeSelect);
-      const [fragment, setFragment] = React51.useState();
+      const [fragment, setFragment] = React50.useState();
       useLayoutEffect22(() => {
         setFragment(new DocumentFragment());
       }, []);
       if (!context.open) {
         const frag = fragment;
         return frag ? ReactDOM5.createPortal(
-          /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(SelectContentProvider, { scope: props.__scopeSelect, children: /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Collection2.Slot, { scope: props.__scopeSelect, children: /* @__PURE__ */ (0, import_jsx_runtime17.jsx)("div", { children: props.children }) }) }),
+          /* @__PURE__ */ (0, import_jsx_runtime32.jsx)(SelectContentProvider, { scope: props.__scopeSelect, children: /* @__PURE__ */ (0, import_jsx_runtime32.jsx)(Collection2.Slot, { scope: props.__scopeSelect, children: /* @__PURE__ */ (0, import_jsx_runtime32.jsx)("div", { children: props.children }) }) }),
           frag
         ) : null;
       }
-      return /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(SelectContentImpl, __spreadProps(__spreadValues({}, props), { ref: forwardedRef }));
+      return /* @__PURE__ */ (0, import_jsx_runtime32.jsx)(SelectContentImpl, __spreadProps(__spreadValues({}, props), { ref: forwardedRef }));
     }
   );
   SelectContent.displayName = CONTENT_NAME3;
@@ -21919,7 +21997,7 @@
   var [SelectContentProvider, useSelectContentContext] = createSelectContext(CONTENT_NAME3);
   var CONTENT_IMPL_NAME = "SelectContentImpl";
   var Slot2 = createSlot("SelectContent.RemoveScroll");
-  var SelectContentImpl = React51.forwardRef(
+  var SelectContentImpl = React50.forwardRef(
     (props, forwardedRef) => {
       const _a121 = props, {
         __scopeSelect,
@@ -21957,21 +22035,21 @@
         "avoidCollisions"
       ]);
       const context = useSelectContext(CONTENT_NAME3, __scopeSelect);
-      const [content, setContent] = React51.useState(null);
-      const [viewport, setViewport] = React51.useState(null);
+      const [content, setContent] = React50.useState(null);
+      const [viewport, setViewport] = React50.useState(null);
       const composedRefs = useComposedRefs(forwardedRef, (node) => setContent(node));
-      const [selectedItem, setSelectedItem] = React51.useState(null);
-      const [selectedItemText, setSelectedItemText] = React51.useState(
+      const [selectedItem, setSelectedItem] = React50.useState(null);
+      const [selectedItemText, setSelectedItemText] = React50.useState(
         null
       );
       const getItems = useCollection2(__scopeSelect);
-      const [isPositioned, setIsPositioned] = React51.useState(false);
-      const firstValidItemFoundRef = React51.useRef(false);
-      React51.useEffect(() => {
+      const [isPositioned, setIsPositioned] = React50.useState(false);
+      const firstValidItemFoundRef = React50.useRef(false);
+      React50.useEffect(() => {
         if (content) return hideOthers(content);
       }, [content]);
       useFocusGuards();
-      const focusFirst4 = React51.useCallback(
+      const focusFirst4 = React50.useCallback(
         (candidates) => {
           const [firstItem, ...restItems] = getItems().map((item) => item.ref.current);
           const [lastItem] = restItems.slice(-1);
@@ -21987,17 +22065,17 @@
         },
         [getItems, viewport]
       );
-      const focusSelectedItem = React51.useCallback(
+      const focusSelectedItem = React50.useCallback(
         () => focusFirst4([selectedItem, content]),
         [focusFirst4, selectedItem, content]
       );
-      React51.useEffect(() => {
+      React50.useEffect(() => {
         if (isPositioned) {
           focusSelectedItem();
         }
       }, [isPositioned, focusSelectedItem]);
       const { onOpenChange, triggerPointerDownPosRef } = context;
-      React51.useEffect(() => {
+      React50.useEffect(() => {
         if (content) {
           let pointerMoveDelta = { x: 0, y: 0 };
           const handlePointerMove = /* @__PURE__ */ __name((event) => {
@@ -22028,7 +22106,7 @@
           };
         }
       }, [content, onOpenChange, triggerPointerDownPosRef]);
-      React51.useEffect(() => {
+      React50.useEffect(() => {
         const close = /* @__PURE__ */ __name(() => onOpenChange(false), "close");
         window.addEventListener("blur", close);
         window.addEventListener("resize", close);
@@ -22045,7 +22123,7 @@
           setTimeout(() => nextItem.ref.current.focus());
         }
       });
-      const itemRefCallback = React51.useCallback(
+      const itemRefCallback = React50.useCallback(
         (node, value, disabled) => {
           const isFirstValidItem = !firstValidItemFoundRef.current && !disabled;
           const isSelectedItem = context.value !== void 0 && context.value === value;
@@ -22056,8 +22134,8 @@
         },
         [context.value]
       );
-      const handleItemLeave = React51.useCallback(() => content == null ? void 0 : content.focus(), [content]);
-      const itemTextRefCallback = React51.useCallback(
+      const handleItemLeave = React50.useCallback(() => content == null ? void 0 : content.focus(), [content]);
+      const itemTextRefCallback = React50.useCallback(
         (node, value, disabled) => {
           const isFirstValidItem = !firstValidItemFoundRef.current && !disabled;
           const isSelectedItem = context.value !== void 0 && context.value === value;
@@ -22080,7 +22158,7 @@
         hideWhenDetached,
         avoidCollisions
       } : {};
-      return /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(
+      return /* @__PURE__ */ (0, import_jsx_runtime32.jsx)(
         SelectContentProvider,
         {
           scope: __scopeSelect,
@@ -22096,7 +22174,7 @@
           position,
           isPositioned,
           searchRef,
-          children: /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Combination_default, { as: Slot2, allowPinchZoom: true, children: /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(
+          children: /* @__PURE__ */ (0, import_jsx_runtime32.jsx)(Combination_default, { as: Slot2, allowPinchZoom: true, children: /* @__PURE__ */ (0, import_jsx_runtime32.jsx)(
             FocusScope,
             {
               asChild: true,
@@ -22109,7 +22187,7 @@
                 (_a122 = context.trigger) == null ? void 0 : _a122.focus({ preventScroll: true });
                 event.preventDefault();
               }),
-              children: /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(
+              children: /* @__PURE__ */ (0, import_jsx_runtime32.jsx)(
                 DismissableLayer,
                 {
                   asChild: true,
@@ -22118,7 +22196,7 @@
                   onPointerDownOutside,
                   onFocusOutside: /* @__PURE__ */ __name((event) => event.preventDefault(), "onFocusOutside"),
                   onDismiss: /* @__PURE__ */ __name(() => context.onOpenChange(false), "onDismiss"),
-                  children: /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(
+                  children: /* @__PURE__ */ (0, import_jsx_runtime32.jsx)(
                     SelectPosition,
                     __spreadProps(__spreadValues(__spreadValues({
                       role: "listbox",
@@ -22167,18 +22245,18 @@
   );
   SelectContentImpl.displayName = CONTENT_IMPL_NAME;
   var ITEM_ALIGNED_POSITION_NAME = "SelectItemAlignedPosition";
-  var SelectItemAlignedPosition = React51.forwardRef((props, forwardedRef) => {
+  var SelectItemAlignedPosition = React50.forwardRef((props, forwardedRef) => {
     const _a121 = props, { __scopeSelect, onPlaced } = _a121, popperProps = __objRest(_a121, ["__scopeSelect", "onPlaced"]);
     const context = useSelectContext(CONTENT_NAME3, __scopeSelect);
     const contentContext = useSelectContentContext(CONTENT_NAME3, __scopeSelect);
-    const [contentWrapper, setContentWrapper] = React51.useState(null);
-    const [content, setContent] = React51.useState(null);
+    const [contentWrapper, setContentWrapper] = React50.useState(null);
+    const [content, setContent] = React50.useState(null);
     const composedRefs = useComposedRefs(forwardedRef, (node) => setContent(node));
     const getItems = useCollection2(__scopeSelect);
-    const shouldExpandOnScrollRef = React51.useRef(false);
-    const shouldRepositionRef = React51.useRef(true);
+    const shouldExpandOnScrollRef = React50.useRef(false);
+    const shouldRepositionRef = React50.useRef(true);
     const { viewport, selectedItem, selectedItemText, focusSelectedItem } = contentContext;
-    const position = React51.useCallback(() => {
+    const position = React50.useCallback(() => {
       if (context.trigger && context.valueNode && contentWrapper && content && viewport && selectedItem && selectedItemText) {
         const triggerRect = context.trigger.getBoundingClientRect();
         const contentRect = content.getBoundingClientRect();
@@ -22278,11 +22356,11 @@
       onPlaced
     ]);
     useLayoutEffect22(() => position(), [position]);
-    const [contentZIndex, setContentZIndex] = React51.useState();
+    const [contentZIndex, setContentZIndex] = React50.useState();
     useLayoutEffect22(() => {
       if (content) setContentZIndex(window.getComputedStyle(content).zIndex);
     }, [content]);
-    const handleScrollButtonChange = React51.useCallback(
+    const handleScrollButtonChange = React50.useCallback(
       (node) => {
         if (node && shouldRepositionRef.current === true) {
           position();
@@ -22292,14 +22370,14 @@
       },
       [position, focusSelectedItem]
     );
-    return /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(
+    return /* @__PURE__ */ (0, import_jsx_runtime32.jsx)(
       SelectViewportProvider,
       {
         scope: __scopeSelect,
         contentWrapper,
         shouldExpandOnScrollRef,
         onScrollButtonChange: handleScrollButtonChange,
-        children: /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(
+        children: /* @__PURE__ */ (0, import_jsx_runtime32.jsx)(
           "div",
           {
             ref: setContentWrapper,
@@ -22309,7 +22387,7 @@
               position: "fixed",
               zIndex: contentZIndex
             },
-            children: /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(
+            children: /* @__PURE__ */ (0, import_jsx_runtime32.jsx)(
               Primitive.div,
               __spreadProps(__spreadValues({}, popperProps), {
                 ref: composedRefs,
@@ -22329,7 +22407,7 @@
   });
   SelectItemAlignedPosition.displayName = ITEM_ALIGNED_POSITION_NAME;
   var POPPER_POSITION_NAME = "SelectPopperPosition";
-  var SelectPopperPosition = React51.forwardRef((props, forwardedRef) => {
+  var SelectPopperPosition = React50.forwardRef((props, forwardedRef) => {
     const _a121 = props, {
       __scopeSelect,
       align = "start",
@@ -22340,7 +22418,7 @@
       "collisionPadding"
     ]);
     const popperScope = usePopperScope2(__scopeSelect);
-    return /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(
+    return /* @__PURE__ */ (0, import_jsx_runtime32.jsx)(
       Content,
       __spreadProps(__spreadValues(__spreadValues({}, popperScope), popperProps), {
         ref: forwardedRef,
@@ -22362,15 +22440,15 @@
   SelectPopperPosition.displayName = POPPER_POSITION_NAME;
   var [SelectViewportProvider, useSelectViewportContext] = createSelectContext(CONTENT_NAME3, {});
   var VIEWPORT_NAME2 = "SelectViewport";
-  var SelectViewport = React51.forwardRef(
+  var SelectViewport = React50.forwardRef(
     (props, forwardedRef) => {
       const _a121 = props, { __scopeSelect, nonce } = _a121, viewportProps = __objRest(_a121, ["__scopeSelect", "nonce"]);
       const contentContext = useSelectContentContext(VIEWPORT_NAME2, __scopeSelect);
       const viewportContext = useSelectViewportContext(VIEWPORT_NAME2, __scopeSelect);
       const composedRefs = useComposedRefs(forwardedRef, contentContext.onViewportChange);
-      const prevScrollTopRef = React51.useRef(0);
-      return /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)(import_jsx_runtime17.Fragment, { children: [
-        /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(
+      const prevScrollTopRef = React50.useRef(0);
+      return /* @__PURE__ */ (0, import_jsx_runtime32.jsxs)(import_jsx_runtime32.Fragment, { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime32.jsx)(
           "style",
           {
             dangerouslySetInnerHTML: {
@@ -22379,7 +22457,7 @@
             nonce
           }
         ),
-        /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Collection2.Slot, { scope: __scopeSelect, children: /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(
+        /* @__PURE__ */ (0, import_jsx_runtime32.jsx)(Collection2.Slot, { scope: __scopeSelect, children: /* @__PURE__ */ (0, import_jsx_runtime32.jsx)(
           Primitive.div,
           __spreadProps(__spreadValues({
             "data-radix-select-viewport": "",
@@ -22430,26 +22508,26 @@
   SelectViewport.displayName = VIEWPORT_NAME2;
   var GROUP_NAME = "SelectGroup";
   var [SelectGroupContextProvider, useSelectGroupContext] = createSelectContext(GROUP_NAME);
-  var SelectGroup = React51.forwardRef(
+  var SelectGroup = React50.forwardRef(
     (props, forwardedRef) => {
       const _a121 = props, { __scopeSelect } = _a121, groupProps = __objRest(_a121, ["__scopeSelect"]);
       const groupId = useId();
-      return /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(SelectGroupContextProvider, { scope: __scopeSelect, id: groupId, children: /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Primitive.div, __spreadProps(__spreadValues({ role: "group", "aria-labelledby": groupId }, groupProps), { ref: forwardedRef })) });
+      return /* @__PURE__ */ (0, import_jsx_runtime32.jsx)(SelectGroupContextProvider, { scope: __scopeSelect, id: groupId, children: /* @__PURE__ */ (0, import_jsx_runtime32.jsx)(Primitive.div, __spreadProps(__spreadValues({ role: "group", "aria-labelledby": groupId }, groupProps), { ref: forwardedRef })) });
     }
   );
   SelectGroup.displayName = GROUP_NAME;
   var LABEL_NAME = "SelectLabel";
-  var SelectLabel = React51.forwardRef(
+  var SelectLabel = React50.forwardRef(
     (props, forwardedRef) => {
       const _a121 = props, { __scopeSelect } = _a121, labelProps = __objRest(_a121, ["__scopeSelect"]);
       const groupContext = useSelectGroupContext(LABEL_NAME, __scopeSelect);
-      return /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Primitive.div, __spreadProps(__spreadValues({ id: groupContext.id }, labelProps), { ref: forwardedRef }));
+      return /* @__PURE__ */ (0, import_jsx_runtime32.jsx)(Primitive.div, __spreadProps(__spreadValues({ id: groupContext.id }, labelProps), { ref: forwardedRef }));
     }
   );
   SelectLabel.displayName = LABEL_NAME;
   var ITEM_NAME = "SelectItem";
   var [SelectItemContextProvider, useSelectItemContext] = createSelectContext(ITEM_NAME);
-  var SelectItem = React51.forwardRef(
+  var SelectItem = React50.forwardRef(
     (props, forwardedRef) => {
       const _a121 = props, {
         __scopeSelect,
@@ -22465,8 +22543,8 @@
       const context = useSelectContext(ITEM_NAME, __scopeSelect);
       const contentContext = useSelectContentContext(ITEM_NAME, __scopeSelect);
       const isSelected = context.value === value;
-      const [textValue, setTextValue] = React51.useState(textValueProp != null ? textValueProp : "");
-      const [isFocused, setIsFocused] = React51.useState(false);
+      const [textValue, setTextValue] = React50.useState(textValueProp != null ? textValueProp : "");
+      const [isFocused, setIsFocused] = React50.useState(false);
       const composedRefs = useComposedRefs(
         forwardedRef,
         (node) => {
@@ -22475,7 +22553,7 @@
         }
       );
       const textId = useId();
-      const pointerTypeRef = React51.useRef("touch");
+      const pointerTypeRef = React50.useRef("touch");
       const handleSelect = /* @__PURE__ */ __name(() => {
         if (!disabled) {
           context.onValueChange(value);
@@ -22487,7 +22565,7 @@
           "A <Select.Item /> must have a value prop that is not an empty string. This is because the Select value can be set to an empty string to clear the selection and show the placeholder."
         );
       }
-      return /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(
+      return /* @__PURE__ */ (0, import_jsx_runtime32.jsx)(
         SelectItemContextProvider,
         {
           scope: __scopeSelect,
@@ -22495,20 +22573,20 @@
           disabled,
           textId,
           isSelected,
-          onItemTextChange: React51.useCallback((node) => {
+          onItemTextChange: React50.useCallback((node) => {
             setTextValue((prevTextValue) => {
               var _a122;
               return prevTextValue || ((_a122 = node == null ? void 0 : node.textContent) != null ? _a122 : "").trim();
             });
           }, []),
-          children: /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(
+          children: /* @__PURE__ */ (0, import_jsx_runtime32.jsx)(
             Collection2.ItemSlot,
             {
               scope: __scopeSelect,
               value,
               disabled,
               textValue,
-              children: /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(
+              children: /* @__PURE__ */ (0, import_jsx_runtime32.jsx)(
                 Primitive.div,
                 __spreadProps(__spreadValues({
                   role: "option",
@@ -22564,14 +22642,14 @@
   );
   SelectItem.displayName = ITEM_NAME;
   var ITEM_TEXT_NAME = "SelectItemText";
-  var SelectItemText = React51.forwardRef(
+  var SelectItemText = React50.forwardRef(
     (props, forwardedRef) => {
       const _a121 = props, { __scopeSelect, className, style } = _a121, itemTextProps = __objRest(_a121, ["__scopeSelect", "className", "style"]);
       const context = useSelectContext(ITEM_TEXT_NAME, __scopeSelect);
       const contentContext = useSelectContentContext(ITEM_TEXT_NAME, __scopeSelect);
       const itemContext = useSelectItemContext(ITEM_TEXT_NAME, __scopeSelect);
       const nativeOptionsContext = useSelectNativeOptionsContext(ITEM_TEXT_NAME, __scopeSelect);
-      const [itemTextNode, setItemTextNode] = React51.useState(null);
+      const [itemTextNode, setItemTextNode] = React50.useState(null);
       const composedRefs = useComposedRefs(
         forwardedRef,
         (node) => setItemTextNode(node),
@@ -22582,8 +22660,8 @@
         }
       );
       const textContent = itemTextNode == null ? void 0 : itemTextNode.textContent;
-      const nativeOption = React51.useMemo(
-        () => /* @__PURE__ */ (0, import_jsx_runtime17.jsx)("option", { value: itemContext.value, disabled: itemContext.disabled, children: textContent }, itemContext.value),
+      const nativeOption = React50.useMemo(
+        () => /* @__PURE__ */ (0, import_jsx_runtime32.jsx)("option", { value: itemContext.value, disabled: itemContext.disabled, children: textContent }, itemContext.value),
         [itemContext.disabled, itemContext.value, textContent]
       );
       const { onNativeOptionAdd, onNativeOptionRemove } = nativeOptionsContext;
@@ -22591,27 +22669,27 @@
         onNativeOptionAdd(nativeOption);
         return () => onNativeOptionRemove(nativeOption);
       }, [onNativeOptionAdd, onNativeOptionRemove, nativeOption]);
-      return /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)(import_jsx_runtime17.Fragment, { children: [
-        /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Primitive.span, __spreadProps(__spreadValues({ id: itemContext.textId }, itemTextProps), { ref: composedRefs })),
+      return /* @__PURE__ */ (0, import_jsx_runtime32.jsxs)(import_jsx_runtime32.Fragment, { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime32.jsx)(Primitive.span, __spreadProps(__spreadValues({ id: itemContext.textId }, itemTextProps), { ref: composedRefs })),
         itemContext.isSelected && context.valueNode && !context.valueNodeHasChildren ? ReactDOM5.createPortal(itemTextProps.children, context.valueNode) : null
       ] });
     }
   );
   SelectItemText.displayName = ITEM_TEXT_NAME;
   var ITEM_INDICATOR_NAME = "SelectItemIndicator";
-  var SelectItemIndicator = React51.forwardRef(
+  var SelectItemIndicator = React50.forwardRef(
     (props, forwardedRef) => {
       const _a121 = props, { __scopeSelect } = _a121, itemIndicatorProps = __objRest(_a121, ["__scopeSelect"]);
       const itemContext = useSelectItemContext(ITEM_INDICATOR_NAME, __scopeSelect);
-      return itemContext.isSelected ? /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Primitive.span, __spreadProps(__spreadValues({ "aria-hidden": true }, itemIndicatorProps), { ref: forwardedRef })) : null;
+      return itemContext.isSelected ? /* @__PURE__ */ (0, import_jsx_runtime32.jsx)(Primitive.span, __spreadProps(__spreadValues({ "aria-hidden": true }, itemIndicatorProps), { ref: forwardedRef })) : null;
     }
   );
   SelectItemIndicator.displayName = ITEM_INDICATOR_NAME;
   var SCROLL_UP_BUTTON_NAME = "SelectScrollUpButton";
-  var SelectScrollUpButton = React51.forwardRef((props, forwardedRef) => {
+  var SelectScrollUpButton = React50.forwardRef((props, forwardedRef) => {
     const contentContext = useSelectContentContext(SCROLL_UP_BUTTON_NAME, props.__scopeSelect);
     const viewportContext = useSelectViewportContext(SCROLL_UP_BUTTON_NAME, props.__scopeSelect);
-    const [canScrollUp, setCanScrollUp] = React51.useState(false);
+    const [canScrollUp, setCanScrollUp] = React50.useState(false);
     const composedRefs = useComposedRefs(forwardedRef, viewportContext.onScrollButtonChange);
     useLayoutEffect22(() => {
       if (contentContext.viewport && contentContext.isPositioned) {
@@ -22626,7 +22704,7 @@
         return () => viewport.removeEventListener("scroll", handleScroll22);
       }
     }, [contentContext.viewport, contentContext.isPositioned]);
-    return canScrollUp ? /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(
+    return canScrollUp ? /* @__PURE__ */ (0, import_jsx_runtime32.jsx)(
       SelectScrollButtonImpl,
       __spreadProps(__spreadValues({}, props), {
         ref: composedRefs,
@@ -22641,10 +22719,10 @@
   });
   SelectScrollUpButton.displayName = SCROLL_UP_BUTTON_NAME;
   var SCROLL_DOWN_BUTTON_NAME = "SelectScrollDownButton";
-  var SelectScrollDownButton = React51.forwardRef((props, forwardedRef) => {
+  var SelectScrollDownButton = React50.forwardRef((props, forwardedRef) => {
     const contentContext = useSelectContentContext(SCROLL_DOWN_BUTTON_NAME, props.__scopeSelect);
     const viewportContext = useSelectViewportContext(SCROLL_DOWN_BUTTON_NAME, props.__scopeSelect);
-    const [canScrollDown, setCanScrollDown] = React51.useState(false);
+    const [canScrollDown, setCanScrollDown] = React50.useState(false);
     const composedRefs = useComposedRefs(forwardedRef, viewportContext.onScrollButtonChange);
     useLayoutEffect22(() => {
       if (contentContext.viewport && contentContext.isPositioned) {
@@ -22660,7 +22738,7 @@
         return () => viewport.removeEventListener("scroll", handleScroll22);
       }
     }, [contentContext.viewport, contentContext.isPositioned]);
-    return canScrollDown ? /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(
+    return canScrollDown ? /* @__PURE__ */ (0, import_jsx_runtime32.jsx)(
       SelectScrollButtonImpl,
       __spreadProps(__spreadValues({}, props), {
         ref: composedRefs,
@@ -22674,18 +22752,18 @@
     ) : null;
   });
   SelectScrollDownButton.displayName = SCROLL_DOWN_BUTTON_NAME;
-  var SelectScrollButtonImpl = React51.forwardRef((props, forwardedRef) => {
+  var SelectScrollButtonImpl = React50.forwardRef((props, forwardedRef) => {
     const _a121 = props, { __scopeSelect, onAutoScroll } = _a121, scrollIndicatorProps = __objRest(_a121, ["__scopeSelect", "onAutoScroll"]);
     const contentContext = useSelectContentContext("SelectScrollButton", __scopeSelect);
-    const autoScrollTimerRef = React51.useRef(null);
+    const autoScrollTimerRef = React50.useRef(null);
     const getItems = useCollection2(__scopeSelect);
-    const clearAutoScrollTimer = React51.useCallback(() => {
+    const clearAutoScrollTimer = React50.useCallback(() => {
       if (autoScrollTimerRef.current !== null) {
         window.clearInterval(autoScrollTimerRef.current);
         autoScrollTimerRef.current = null;
       }
     }, []);
-    React51.useEffect(() => {
+    React50.useEffect(() => {
       return () => clearAutoScrollTimer();
     }, [clearAutoScrollTimer]);
     useLayoutEffect22(() => {
@@ -22693,7 +22771,7 @@
       const activeItem = getItems().find((item) => item.ref.current === document.activeElement);
       (_a122 = activeItem == null ? void 0 : activeItem.ref.current) == null ? void 0 : _a122.scrollIntoView({ block: "nearest" });
     }, [getItems]);
-    return /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(
+    return /* @__PURE__ */ (0, import_jsx_runtime32.jsx)(
       Primitive.div,
       __spreadProps(__spreadValues({
         "aria-hidden": true
@@ -22719,21 +22797,21 @@
     );
   });
   var SEPARATOR_NAME = "SelectSeparator";
-  var SelectSeparator = React51.forwardRef(
+  var SelectSeparator = React50.forwardRef(
     (props, forwardedRef) => {
       const _a121 = props, { __scopeSelect } = _a121, separatorProps = __objRest(_a121, ["__scopeSelect"]);
-      return /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Primitive.div, __spreadProps(__spreadValues({ "aria-hidden": true }, separatorProps), { ref: forwardedRef }));
+      return /* @__PURE__ */ (0, import_jsx_runtime32.jsx)(Primitive.div, __spreadProps(__spreadValues({ "aria-hidden": true }, separatorProps), { ref: forwardedRef }));
     }
   );
   SelectSeparator.displayName = SEPARATOR_NAME;
   var ARROW_NAME3 = "SelectArrow";
-  var SelectArrow = React51.forwardRef(
+  var SelectArrow = React50.forwardRef(
     (props, forwardedRef) => {
       const _a121 = props, { __scopeSelect } = _a121, arrowProps = __objRest(_a121, ["__scopeSelect"]);
       const popperScope = usePopperScope2(__scopeSelect);
       const context = useSelectContext(ARROW_NAME3, __scopeSelect);
       const contentContext = useSelectContentContext(ARROW_NAME3, __scopeSelect);
-      return context.open && contentContext.position === "popper" ? /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Arrow2, __spreadProps(__spreadValues(__spreadValues({}, popperScope), arrowProps), { ref: forwardedRef })) : null;
+      return context.open && contentContext.position === "popper" ? /* @__PURE__ */ (0, import_jsx_runtime32.jsx)(Arrow2, __spreadProps(__spreadValues(__spreadValues({}, popperScope), arrowProps), { ref: forwardedRef })) : null;
     }
   );
   SelectArrow.displayName = ARROW_NAME3;
@@ -22741,13 +22819,13 @@
     return value === "" || value === void 0;
   }
   __name(shouldShowPlaceholder, "shouldShowPlaceholder");
-  var BubbleSelect = React51.forwardRef(
+  var BubbleSelect = React50.forwardRef(
     (props, forwardedRef) => {
       const _a121 = props, { value } = _a121, selectProps = __objRest(_a121, ["value"]);
-      const ref = React51.useRef(null);
+      const ref = React50.useRef(null);
       const composedRefs = useComposedRefs(forwardedRef, ref);
       const prevValue = usePrevious(value);
-      React51.useEffect(() => {
+      React50.useEffect(() => {
         const select = ref.current;
         const selectProto = window.HTMLSelectElement.prototype;
         const descriptor = Object.getOwnPropertyDescriptor(
@@ -22761,15 +22839,15 @@
           select.dispatchEvent(event);
         }
       }, [prevValue, value]);
-      return /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(VisuallyHidden, { asChild: true, children: /* @__PURE__ */ (0, import_jsx_runtime17.jsx)("select", __spreadProps(__spreadValues({}, selectProps), { ref: composedRefs, defaultValue: value })) });
+      return /* @__PURE__ */ (0, import_jsx_runtime32.jsx)(VisuallyHidden, { asChild: true, children: /* @__PURE__ */ (0, import_jsx_runtime32.jsx)("select", __spreadProps(__spreadValues({}, selectProps), { ref: composedRefs, defaultValue: value })) });
     }
   );
   BubbleSelect.displayName = "BubbleSelect";
   function useTypeaheadSearch(onSearchChange) {
     const handleSearchChange = useCallbackRef(onSearchChange);
-    const searchRef = React51.useRef("");
-    const timerRef = React51.useRef(0);
-    const handleTypeaheadSearch = React51.useCallback(
+    const searchRef = React50.useRef("");
+    const timerRef = React50.useRef(0);
+    const handleTypeaheadSearch = React50.useCallback(
       (key) => {
         const search = searchRef.current + key;
         handleSearchChange(search);
@@ -22781,11 +22859,11 @@
       },
       [handleSearchChange]
     );
-    const resetTypeahead = React51.useCallback(() => {
+    const resetTypeahead = React50.useCallback(() => {
       searchRef.current = "";
       window.clearTimeout(timerRef.current);
     }, []);
-    React51.useEffect(() => {
+    React50.useEffect(() => {
       return () => window.clearTimeout(timerRef.current);
     }, []);
     return [searchRef, handleTypeaheadSearch, resetTypeahead];
@@ -22824,59 +22902,65 @@
   var Separator = SelectSeparator;
 
   // client/src/components/ui/select.tsx
+  var import_jsx_runtime33 = __toESM(require_jsx_runtime(), 1);
   var Select2 = Root24;
   var SelectValue2 = Value;
-  var SelectTrigger2 = React52.forwardRef((_a121, ref) => {
+  var SelectTrigger2 = React51.forwardRef((_a121, ref) => {
     var _b93 = _a121, { className, children } = _b93, props = __objRest(_b93, ["className", "children"]);
-    return /* @__PURE__ */ React52.createElement(
+    return /* @__PURE__ */ (0, import_jsx_runtime33.jsxs)(
       Trigger2,
-      __spreadValues({
+      __spreadProps(__spreadValues({
         ref,
         className: cn(
           "flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background data-[placeholder]:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1",
           className
         )
-      }, props),
-      children,
-      /* @__PURE__ */ React52.createElement(Icon2, { asChild: true }, /* @__PURE__ */ React52.createElement(ChevronDown, { className: "h-4 w-4 opacity-50" }))
+      }, props), {
+        children: [
+          children,
+          /* @__PURE__ */ (0, import_jsx_runtime33.jsx)(Icon2, { asChild: true, children: /* @__PURE__ */ (0, import_jsx_runtime33.jsx)(ChevronDown, { className: "h-4 w-4 opacity-50" }) })
+        ]
+      })
     );
   });
   SelectTrigger2.displayName = Trigger2.displayName;
-  var SelectScrollUpButton2 = React52.forwardRef((_a121, ref) => {
+  var SelectScrollUpButton2 = React51.forwardRef((_a121, ref) => {
     var _b93 = _a121, { className } = _b93, props = __objRest(_b93, ["className"]);
-    return /* @__PURE__ */ React52.createElement(
+    return /* @__PURE__ */ (0, import_jsx_runtime33.jsx)(
       ScrollUpButton,
-      __spreadValues({
+      __spreadProps(__spreadValues({
         ref,
         className: cn(
           "flex cursor-default items-center justify-center py-1",
           className
         )
-      }, props),
-      /* @__PURE__ */ React52.createElement(ChevronUp, { className: "h-4 w-4" })
+      }, props), {
+        children: /* @__PURE__ */ (0, import_jsx_runtime33.jsx)(ChevronUp, { className: "h-4 w-4" })
+      })
     );
   });
   SelectScrollUpButton2.displayName = ScrollUpButton.displayName;
-  var SelectScrollDownButton2 = React52.forwardRef((_a121, ref) => {
+  var SelectScrollDownButton2 = React51.forwardRef((_a121, ref) => {
     var _b93 = _a121, { className } = _b93, props = __objRest(_b93, ["className"]);
-    return /* @__PURE__ */ React52.createElement(
+    return /* @__PURE__ */ (0, import_jsx_runtime33.jsx)(
       ScrollDownButton,
-      __spreadValues({
+      __spreadProps(__spreadValues({
         ref,
         className: cn(
           "flex cursor-default items-center justify-center py-1",
           className
         )
-      }, props),
-      /* @__PURE__ */ React52.createElement(ChevronDown, { className: "h-4 w-4" })
+      }, props), {
+        children: /* @__PURE__ */ (0, import_jsx_runtime33.jsx)(ChevronDown, { className: "h-4 w-4" })
+      })
     );
   });
   SelectScrollDownButton2.displayName = ScrollDownButton.displayName;
-  var SelectContent2 = React52.forwardRef((_a121, ref) => {
+  var SelectContent2 = React51.forwardRef((_a121, ref) => {
     var _b93 = _a121, { className, children, position = "popper" } = _b93, props = __objRest(_b93, ["className", "children", "position"]);
-    return /* @__PURE__ */ React52.createElement(Portal2, null, /* @__PURE__ */ React52.createElement(
+    return /* @__PURE__ */ (0, import_jsx_runtime33.jsx)(Portal2, { children: /* @__PURE__ */ (0, import_jsx_runtime33.jsxs)(
       Content22,
-      __spreadValues({
+      __spreadProps(__spreadValues({
         ref,
         className: cn(
           "relative z-50 max-h-[--radix-select-content-available-height] min-w-[8rem] overflow-y-auto overflow-x-hidden rounded-md border bg-popover text-popover-foreground shadow-md data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 origin-[--radix-select-content-transform-origin]",
@@ -22884,25 +22968,28 @@
           className
         ),
         position
-      }, props),
-      /* @__PURE__ */ React52.createElement(SelectScrollUpButton2, null),
-      /* @__PURE__ */ React52.createElement(
-        Viewport2,
-        {
-          className: cn(
-            "p-1",
-            position === "popper" && "h-[var(--radix-select-trigger-height)] w-full min-w-[var(--radix-select-trigger-width)]"
-          )
-        },
-        children
-      ),
-      /* @__PURE__ */ React52.createElement(SelectScrollDownButton2, null)
-    ));
+      }, props), {
+        children: [
+          /* @__PURE__ */ (0, import_jsx_runtime33.jsx)(SelectScrollUpButton2, {}),
+          /* @__PURE__ */ (0, import_jsx_runtime33.jsx)(
+            Viewport2,
+            {
+              className: cn(
+                "p-1",
+                position === "popper" && "h-[var(--radix-select-trigger-height)] w-full min-w-[var(--radix-select-trigger-width)]"
+              ),
+              children
+            }
+          ),
+          /* @__PURE__ */ (0, import_jsx_runtime33.jsx)(SelectScrollDownButton2, {})
+        ]
+      })
+    ) });
   });
   SelectContent2.displayName = Content22.displayName;
-  var SelectLabel2 = React52.forwardRef((_a121, ref) => {
+  var SelectLabel2 = React51.forwardRef((_a121, ref) => {
     var _b93 = _a121, { className } = _b93, props = __objRest(_b93, ["className"]);
-    return /* @__PURE__ */ React52.createElement(
+    return /* @__PURE__ */ (0, import_jsx_runtime33.jsx)(
       Label3,
       __spreadValues({
         ref,
@@ -22911,25 +22998,28 @@
     );
   });
   SelectLabel2.displayName = Label3.displayName;
-  var SelectItem2 = React52.forwardRef((_a121, ref) => {
+  var SelectItem2 = React51.forwardRef((_a121, ref) => {
     var _b93 = _a121, { className, children } = _b93, props = __objRest(_b93, ["className", "children"]);
-    return /* @__PURE__ */ React52.createElement(
+    return /* @__PURE__ */ (0, import_jsx_runtime33.jsxs)(
       Item,
-      __spreadValues({
+      __spreadProps(__spreadValues({
         ref,
         className: cn(
           "relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
           className
         )
-      }, props),
-      /* @__PURE__ */ React52.createElement("span", { className: "absolute left-2 flex h-3.5 w-3.5 items-center justify-center" }, /* @__PURE__ */ React52.createElement(ItemIndicator, null, /* @__PURE__ */ React52.createElement(Check, { className: "h-4 w-4" }))),
-      /* @__PURE__ */ React52.createElement(ItemText, null, children)
+      }, props), {
+        children: [
+          /* @__PURE__ */ (0, import_jsx_runtime33.jsx)("span", { className: "absolute left-2 flex h-3.5 w-3.5 items-center justify-center", children: /* @__PURE__ */ (0, import_jsx_runtime33.jsx)(ItemIndicator, { children: /* @__PURE__ */ (0, import_jsx_runtime33.jsx)(Check, { className: "h-4 w-4" }) }) }),
+          /* @__PURE__ */ (0, import_jsx_runtime33.jsx)(ItemText, { children })
+        ]
+      })
     );
   });
   SelectItem2.displayName = Item.displayName;
-  var SelectSeparator2 = React52.forwardRef((_a121, ref) => {
+  var SelectSeparator2 = React51.forwardRef((_a121, ref) => {
     var _b93 = _a121, { className } = _b93, props = __objRest(_b93, ["className"]);
-    return /* @__PURE__ */ React52.createElement(
+    return /* @__PURE__ */ (0, import_jsx_runtime33.jsx)(
       Separator,
       __spreadValues({
         ref,
@@ -22940,11 +23030,11 @@
   SelectSeparator2.displayName = Separator.displayName;
 
   // client/src/components/ui/popover.tsx
-  var React54 = __toESM(require_react(), 1);
+  var React53 = __toESM(require_react(), 1);
 
   // node_modules/@radix-ui/react-popover/dist/index.mjs
-  var React53 = __toESM(require_react(), 1);
-  var import_jsx_runtime18 = __toESM(require_jsx_runtime(), 1);
+  var React52 = __toESM(require_react(), 1);
+  var import_jsx_runtime34 = __toESM(require_jsx_runtime(), 1);
   var POPOVER_NAME = "Popover";
   var [createPopoverContext, createPopoverScope] = createContextScope(POPOVER_NAME, [
     createPopperScope
@@ -22961,14 +23051,14 @@
       modal = false
     } = props;
     const popperScope = usePopperScope3(__scopePopover);
-    const triggerRef = React53.useRef(null);
-    const [hasCustomAnchor, setHasCustomAnchor] = React53.useState(false);
+    const triggerRef = React52.useRef(null);
+    const [hasCustomAnchor, setHasCustomAnchor] = React52.useState(false);
     const [open = false, setOpen] = useControllableState({
       prop: openProp,
       defaultProp: defaultOpen,
       onChange: onOpenChange
     });
-    return /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(Root23, __spreadProps(__spreadValues({}, popperScope), { children: /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(
+    return /* @__PURE__ */ (0, import_jsx_runtime34.jsx)(Root23, __spreadProps(__spreadValues({}, popperScope), { children: /* @__PURE__ */ (0, import_jsx_runtime34.jsx)(
       PopoverProvider,
       {
         scope: __scopePopover,
@@ -22976,10 +23066,10 @@
         triggerRef,
         open,
         onOpenChange: setOpen,
-        onOpenToggle: React53.useCallback(() => setOpen((prevOpen) => !prevOpen), [setOpen]),
+        onOpenToggle: React52.useCallback(() => setOpen((prevOpen) => !prevOpen), [setOpen]),
         hasCustomAnchor,
-        onCustomAnchorAdd: React53.useCallback(() => setHasCustomAnchor(true), []),
-        onCustomAnchorRemove: React53.useCallback(() => setHasCustomAnchor(false), []),
+        onCustomAnchorAdd: React52.useCallback(() => setHasCustomAnchor(true), []),
+        onCustomAnchorRemove: React52.useCallback(() => setHasCustomAnchor(false), []),
         modal,
         children
       }
@@ -22987,28 +23077,28 @@
   }, "Popover");
   Popover.displayName = POPOVER_NAME;
   var ANCHOR_NAME2 = "PopoverAnchor";
-  var PopoverAnchor = React53.forwardRef(
+  var PopoverAnchor = React52.forwardRef(
     (props, forwardedRef) => {
       const _a121 = props, { __scopePopover } = _a121, anchorProps = __objRest(_a121, ["__scopePopover"]);
       const context = usePopoverContext(ANCHOR_NAME2, __scopePopover);
       const popperScope = usePopperScope3(__scopePopover);
       const { onCustomAnchorAdd, onCustomAnchorRemove } = context;
-      React53.useEffect(() => {
+      React52.useEffect(() => {
         onCustomAnchorAdd();
         return () => onCustomAnchorRemove();
       }, [onCustomAnchorAdd, onCustomAnchorRemove]);
-      return /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(Anchor, __spreadProps(__spreadValues(__spreadValues({}, popperScope), anchorProps), { ref: forwardedRef }));
+      return /* @__PURE__ */ (0, import_jsx_runtime34.jsx)(Anchor, __spreadProps(__spreadValues(__spreadValues({}, popperScope), anchorProps), { ref: forwardedRef }));
     }
   );
   PopoverAnchor.displayName = ANCHOR_NAME2;
   var TRIGGER_NAME3 = "PopoverTrigger";
-  var PopoverTrigger = React53.forwardRef(
+  var PopoverTrigger = React52.forwardRef(
     (props, forwardedRef) => {
       const _a121 = props, { __scopePopover } = _a121, triggerProps = __objRest(_a121, ["__scopePopover"]);
       const context = usePopoverContext(TRIGGER_NAME3, __scopePopover);
       const popperScope = usePopperScope3(__scopePopover);
       const composedTriggerRef = useComposedRefs(forwardedRef, context.triggerRef);
-      const trigger = /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(
+      const trigger = /* @__PURE__ */ (0, import_jsx_runtime34.jsx)(
         Primitive.button,
         __spreadProps(__spreadValues({
           type: "button",
@@ -23021,7 +23111,7 @@
           onClick: composeEventHandlers(props.onClick, context.onOpenToggle)
         })
       );
-      return context.hasCustomAnchor ? trigger : /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(Anchor, __spreadProps(__spreadValues({ asChild: true }, popperScope), { children: trigger }));
+      return context.hasCustomAnchor ? trigger : /* @__PURE__ */ (0, import_jsx_runtime34.jsx)(Anchor, __spreadProps(__spreadValues({ asChild: true }, popperScope), { children: trigger }));
     }
   );
   PopoverTrigger.displayName = TRIGGER_NAME3;
@@ -23032,31 +23122,31 @@
   var PopoverPortal = /* @__PURE__ */ __name((props) => {
     const { __scopePopover, forceMount, children, container } = props;
     const context = usePopoverContext(PORTAL_NAME4, __scopePopover);
-    return /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(PortalProvider2, { scope: __scopePopover, forceMount, children: /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(Presence, { present: forceMount || context.open, children: /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(Portal, { asChild: true, container, children }) }) });
+    return /* @__PURE__ */ (0, import_jsx_runtime34.jsx)(PortalProvider2, { scope: __scopePopover, forceMount, children: /* @__PURE__ */ (0, import_jsx_runtime34.jsx)(Presence, { present: forceMount || context.open, children: /* @__PURE__ */ (0, import_jsx_runtime34.jsx)(Portal, { asChild: true, container, children }) }) });
   }, "PopoverPortal");
   PopoverPortal.displayName = PORTAL_NAME4;
   var CONTENT_NAME4 = "PopoverContent";
-  var PopoverContent = React53.forwardRef(
+  var PopoverContent = React52.forwardRef(
     (props, forwardedRef) => {
       const portalContext = usePortalContext2(CONTENT_NAME4, props.__scopePopover);
       const _a121 = props, { forceMount = portalContext.forceMount } = _a121, contentProps = __objRest(_a121, ["forceMount"]);
       const context = usePopoverContext(CONTENT_NAME4, props.__scopePopover);
-      return /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(Presence, { present: forceMount || context.open, children: context.modal ? /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(PopoverContentModal, __spreadProps(__spreadValues({}, contentProps), { ref: forwardedRef })) : /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(PopoverContentNonModal, __spreadProps(__spreadValues({}, contentProps), { ref: forwardedRef })) });
+      return /* @__PURE__ */ (0, import_jsx_runtime34.jsx)(Presence, { present: forceMount || context.open, children: context.modal ? /* @__PURE__ */ (0, import_jsx_runtime34.jsx)(PopoverContentModal, __spreadProps(__spreadValues({}, contentProps), { ref: forwardedRef })) : /* @__PURE__ */ (0, import_jsx_runtime34.jsx)(PopoverContentNonModal, __spreadProps(__spreadValues({}, contentProps), { ref: forwardedRef })) });
     }
   );
   PopoverContent.displayName = CONTENT_NAME4;
   var Slot3 = createSlot("PopoverContent.RemoveScroll");
-  var PopoverContentModal = React53.forwardRef(
+  var PopoverContentModal = React52.forwardRef(
     (props, forwardedRef) => {
       const context = usePopoverContext(CONTENT_NAME4, props.__scopePopover);
-      const contentRef = React53.useRef(null);
+      const contentRef = React52.useRef(null);
       const composedRefs = useComposedRefs(forwardedRef, contentRef);
-      const isRightClickOutsideRef = React53.useRef(false);
-      React53.useEffect(() => {
+      const isRightClickOutsideRef = React52.useRef(false);
+      React52.useEffect(() => {
         const content = contentRef.current;
         if (content) return hideOthers(content);
       }, []);
-      return /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(Combination_default, { as: Slot3, allowPinchZoom: true, children: /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(
+      return /* @__PURE__ */ (0, import_jsx_runtime34.jsx)(Combination_default, { as: Slot3, allowPinchZoom: true, children: /* @__PURE__ */ (0, import_jsx_runtime34.jsx)(
         PopoverContentImpl,
         __spreadProps(__spreadValues({}, props), {
           ref: composedRefs,
@@ -23086,12 +23176,12 @@
       ) });
     }
   );
-  var PopoverContentNonModal = React53.forwardRef(
+  var PopoverContentNonModal = React52.forwardRef(
     (props, forwardedRef) => {
       const context = usePopoverContext(CONTENT_NAME4, props.__scopePopover);
-      const hasInteractedOutsideRef = React53.useRef(false);
-      const hasPointerDownOutsideRef = React53.useRef(false);
-      return /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(
+      const hasInteractedOutsideRef = React52.useRef(false);
+      const hasPointerDownOutsideRef = React52.useRef(false);
+      return /* @__PURE__ */ (0, import_jsx_runtime34.jsx)(
         PopoverContentImpl,
         __spreadProps(__spreadValues({}, props), {
           ref: forwardedRef,
@@ -23127,7 +23217,7 @@
       );
     }
   );
-  var PopoverContentImpl = React53.forwardRef(
+  var PopoverContentImpl = React52.forwardRef(
     (props, forwardedRef) => {
       const _a121 = props, {
         __scopePopover,
@@ -23153,7 +23243,7 @@
       const context = usePopoverContext(CONTENT_NAME4, __scopePopover);
       const popperScope = usePopperScope3(__scopePopover);
       useFocusGuards();
-      return /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(
+      return /* @__PURE__ */ (0, import_jsx_runtime34.jsx)(
         FocusScope,
         {
           asChild: true,
@@ -23161,7 +23251,7 @@
           trapped: trapFocus,
           onMountAutoFocus: onOpenAutoFocus,
           onUnmountAutoFocus: onCloseAutoFocus,
-          children: /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(
+          children: /* @__PURE__ */ (0, import_jsx_runtime34.jsx)(
             DismissableLayer,
             {
               asChild: true,
@@ -23171,7 +23261,7 @@
               onPointerDownOutside,
               onFocusOutside,
               onDismiss: /* @__PURE__ */ __name(() => context.onOpenChange(false), "onDismiss"),
-              children: /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(
+              children: /* @__PURE__ */ (0, import_jsx_runtime34.jsx)(
                 Content,
                 __spreadProps(__spreadValues(__spreadValues({
                   "data-state": getState(context.open),
@@ -23195,11 +23285,11 @@
     }
   );
   var CLOSE_NAME2 = "PopoverClose";
-  var PopoverClose = React53.forwardRef(
+  var PopoverClose = React52.forwardRef(
     (props, forwardedRef) => {
       const _a121 = props, { __scopePopover } = _a121, closeProps = __objRest(_a121, ["__scopePopover"]);
       const context = usePopoverContext(CLOSE_NAME2, __scopePopover);
-      return /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(
+      return /* @__PURE__ */ (0, import_jsx_runtime34.jsx)(
         Primitive.button,
         __spreadProps(__spreadValues({
           type: "button"
@@ -23212,11 +23302,11 @@
   );
   PopoverClose.displayName = CLOSE_NAME2;
   var ARROW_NAME4 = "PopoverArrow";
-  var PopoverArrow = React53.forwardRef(
+  var PopoverArrow = React52.forwardRef(
     (props, forwardedRef) => {
       const _a121 = props, { __scopePopover } = _a121, arrowProps = __objRest(_a121, ["__scopePopover"]);
       const popperScope = usePopperScope3(__scopePopover);
-      return /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(Arrow2, __spreadProps(__spreadValues(__spreadValues({}, popperScope), arrowProps), { ref: forwardedRef }));
+      return /* @__PURE__ */ (0, import_jsx_runtime34.jsx)(Arrow2, __spreadProps(__spreadValues(__spreadValues({}, popperScope), arrowProps), { ref: forwardedRef }));
     }
   );
   PopoverArrow.displayName = ARROW_NAME4;
@@ -23230,11 +23320,12 @@
   var Content23 = PopoverContent;
 
   // client/src/components/ui/popover.tsx
+  var import_jsx_runtime35 = __toESM(require_jsx_runtime(), 1);
   var Popover2 = Root25;
   var PopoverTrigger2 = Trigger3;
-  var PopoverContent2 = React54.forwardRef((_a121, ref) => {
+  var PopoverContent2 = React53.forwardRef((_a121, ref) => {
     var _b93 = _a121, { className, align = "center", sideOffset = 4 } = _b93, props = __objRest(_b93, ["className", "align", "sideOffset"]);
-    return /* @__PURE__ */ React54.createElement(Portal3, null, /* @__PURE__ */ React54.createElement(
+    return /* @__PURE__ */ (0, import_jsx_runtime35.jsx)(Portal3, { children: /* @__PURE__ */ (0, import_jsx_runtime35.jsx)(
       Content23,
       __spreadValues({
         ref,
@@ -23245,12 +23336,12 @@
           className
         )
       }, props)
-    ));
+    ) });
   });
   PopoverContent2.displayName = Content23.displayName;
 
   // client/src/components/ui/command.tsx
-  var React57 = __toESM(require_react(), 1);
+  var React56 = __toESM(require_react(), 1);
 
   // node_modules/cmdk/dist/chunk-NZJY6EH4.mjs
   var U = 1;
@@ -23283,8 +23374,8 @@
   __name(W, "W");
 
   // node_modules/@radix-ui/react-dialog/dist/index.mjs
-  var React55 = __toESM(require_react(), 1);
-  var import_jsx_runtime19 = __toESM(require_jsx_runtime(), 1);
+  var React54 = __toESM(require_react(), 1);
+  var import_jsx_runtime36 = __toESM(require_jsx_runtime(), 1);
   var DIALOG_NAME = "Dialog";
   var [createDialogContext, createDialogScope] = createContextScope(DIALOG_NAME);
   var [DialogProvider, useDialogContext] = createDialogContext(DIALOG_NAME);
@@ -23297,14 +23388,14 @@
       onOpenChange,
       modal = true
     } = props;
-    const triggerRef = React55.useRef(null);
-    const contentRef = React55.useRef(null);
+    const triggerRef = React54.useRef(null);
+    const contentRef = React54.useRef(null);
     const [open = false, setOpen] = useControllableState({
       prop: openProp,
       defaultProp: defaultOpen,
       onChange: onOpenChange
     });
-    return /* @__PURE__ */ (0, import_jsx_runtime19.jsx)(
+    return /* @__PURE__ */ (0, import_jsx_runtime36.jsx)(
       DialogProvider,
       {
         scope: __scopeDialog,
@@ -23315,7 +23406,7 @@
         descriptionId: useId(),
         open,
         onOpenChange: setOpen,
-        onOpenToggle: React55.useCallback(() => setOpen((prevOpen) => !prevOpen), [setOpen]),
+        onOpenToggle: React54.useCallback(() => setOpen((prevOpen) => !prevOpen), [setOpen]),
         modal,
         children
       }
@@ -23323,12 +23414,12 @@
   }, "Dialog");
   Dialog.displayName = DIALOG_NAME;
   var TRIGGER_NAME4 = "DialogTrigger";
-  var DialogTrigger = React55.forwardRef(
+  var DialogTrigger = React54.forwardRef(
     (props, forwardedRef) => {
       const _a121 = props, { __scopeDialog } = _a121, triggerProps = __objRest(_a121, ["__scopeDialog"]);
       const context = useDialogContext(TRIGGER_NAME4, __scopeDialog);
       const composedTriggerRef = useComposedRefs(forwardedRef, context.triggerRef);
-      return /* @__PURE__ */ (0, import_jsx_runtime19.jsx)(
+      return /* @__PURE__ */ (0, import_jsx_runtime36.jsx)(
         Primitive.button,
         __spreadProps(__spreadValues({
           type: "button",
@@ -23351,28 +23442,28 @@
   var DialogPortal = /* @__PURE__ */ __name((props) => {
     const { __scopeDialog, forceMount, children, container } = props;
     const context = useDialogContext(PORTAL_NAME5, __scopeDialog);
-    return /* @__PURE__ */ (0, import_jsx_runtime19.jsx)(PortalProvider3, { scope: __scopeDialog, forceMount, children: React55.Children.map(children, (child) => /* @__PURE__ */ (0, import_jsx_runtime19.jsx)(Presence, { present: forceMount || context.open, children: /* @__PURE__ */ (0, import_jsx_runtime19.jsx)(Portal, { asChild: true, container, children: child }) })) });
+    return /* @__PURE__ */ (0, import_jsx_runtime36.jsx)(PortalProvider3, { scope: __scopeDialog, forceMount, children: React54.Children.map(children, (child) => /* @__PURE__ */ (0, import_jsx_runtime36.jsx)(Presence, { present: forceMount || context.open, children: /* @__PURE__ */ (0, import_jsx_runtime36.jsx)(Portal, { asChild: true, container, children: child }) })) });
   }, "DialogPortal");
   DialogPortal.displayName = PORTAL_NAME5;
   var OVERLAY_NAME = "DialogOverlay";
-  var DialogOverlay = React55.forwardRef(
+  var DialogOverlay = React54.forwardRef(
     (props, forwardedRef) => {
       const portalContext = usePortalContext3(OVERLAY_NAME, props.__scopeDialog);
       const _a121 = props, { forceMount = portalContext.forceMount } = _a121, overlayProps = __objRest(_a121, ["forceMount"]);
       const context = useDialogContext(OVERLAY_NAME, props.__scopeDialog);
-      return context.modal ? /* @__PURE__ */ (0, import_jsx_runtime19.jsx)(Presence, { present: forceMount || context.open, children: /* @__PURE__ */ (0, import_jsx_runtime19.jsx)(DialogOverlayImpl, __spreadProps(__spreadValues({}, overlayProps), { ref: forwardedRef })) }) : null;
+      return context.modal ? /* @__PURE__ */ (0, import_jsx_runtime36.jsx)(Presence, { present: forceMount || context.open, children: /* @__PURE__ */ (0, import_jsx_runtime36.jsx)(DialogOverlayImpl, __spreadProps(__spreadValues({}, overlayProps), { ref: forwardedRef })) }) : null;
     }
   );
   DialogOverlay.displayName = OVERLAY_NAME;
   var Slot4 = createSlot("DialogOverlay.RemoveScroll");
-  var DialogOverlayImpl = React55.forwardRef(
+  var DialogOverlayImpl = React54.forwardRef(
     (props, forwardedRef) => {
       const _a121 = props, { __scopeDialog } = _a121, overlayProps = __objRest(_a121, ["__scopeDialog"]);
       const context = useDialogContext(OVERLAY_NAME, __scopeDialog);
       return (
         // Make sure `Content` is scrollable even when it doesn't live inside `RemoveScroll`
         // ie. when `Overlay` and `Content` are siblings
-        /* @__PURE__ */ (0, import_jsx_runtime19.jsx)(Combination_default, { as: Slot4, allowPinchZoom: true, shards: [context.contentRef], children: /* @__PURE__ */ (0, import_jsx_runtime19.jsx)(
+        /* @__PURE__ */ (0, import_jsx_runtime36.jsx)(Combination_default, { as: Slot4, allowPinchZoom: true, shards: [context.contentRef], children: /* @__PURE__ */ (0, import_jsx_runtime36.jsx)(
           Primitive.div,
           __spreadProps(__spreadValues({
             "data-state": getState2(context.open)
@@ -23385,25 +23476,25 @@
     }
   );
   var CONTENT_NAME5 = "DialogContent";
-  var DialogContent = React55.forwardRef(
+  var DialogContent = React54.forwardRef(
     (props, forwardedRef) => {
       const portalContext = usePortalContext3(CONTENT_NAME5, props.__scopeDialog);
       const _a121 = props, { forceMount = portalContext.forceMount } = _a121, contentProps = __objRest(_a121, ["forceMount"]);
       const context = useDialogContext(CONTENT_NAME5, props.__scopeDialog);
-      return /* @__PURE__ */ (0, import_jsx_runtime19.jsx)(Presence, { present: forceMount || context.open, children: context.modal ? /* @__PURE__ */ (0, import_jsx_runtime19.jsx)(DialogContentModal, __spreadProps(__spreadValues({}, contentProps), { ref: forwardedRef })) : /* @__PURE__ */ (0, import_jsx_runtime19.jsx)(DialogContentNonModal, __spreadProps(__spreadValues({}, contentProps), { ref: forwardedRef })) });
+      return /* @__PURE__ */ (0, import_jsx_runtime36.jsx)(Presence, { present: forceMount || context.open, children: context.modal ? /* @__PURE__ */ (0, import_jsx_runtime36.jsx)(DialogContentModal, __spreadProps(__spreadValues({}, contentProps), { ref: forwardedRef })) : /* @__PURE__ */ (0, import_jsx_runtime36.jsx)(DialogContentNonModal, __spreadProps(__spreadValues({}, contentProps), { ref: forwardedRef })) });
     }
   );
   DialogContent.displayName = CONTENT_NAME5;
-  var DialogContentModal = React55.forwardRef(
+  var DialogContentModal = React54.forwardRef(
     (props, forwardedRef) => {
       const context = useDialogContext(CONTENT_NAME5, props.__scopeDialog);
-      const contentRef = React55.useRef(null);
+      const contentRef = React54.useRef(null);
       const composedRefs = useComposedRefs(forwardedRef, context.contentRef, contentRef);
-      React55.useEffect(() => {
+      React54.useEffect(() => {
         const content = contentRef.current;
         if (content) return hideOthers(content);
       }, []);
-      return /* @__PURE__ */ (0, import_jsx_runtime19.jsx)(
+      return /* @__PURE__ */ (0, import_jsx_runtime36.jsx)(
         DialogContentImpl,
         __spreadProps(__spreadValues({}, props), {
           ref: composedRefs,
@@ -23428,12 +23519,12 @@
       );
     }
   );
-  var DialogContentNonModal = React55.forwardRef(
+  var DialogContentNonModal = React54.forwardRef(
     (props, forwardedRef) => {
       const context = useDialogContext(CONTENT_NAME5, props.__scopeDialog);
-      const hasInteractedOutsideRef = React55.useRef(false);
-      const hasPointerDownOutsideRef = React55.useRef(false);
-      return /* @__PURE__ */ (0, import_jsx_runtime19.jsx)(
+      const hasInteractedOutsideRef = React54.useRef(false);
+      const hasPointerDownOutsideRef = React54.useRef(false);
+      return /* @__PURE__ */ (0, import_jsx_runtime36.jsx)(
         DialogContentImpl,
         __spreadProps(__spreadValues({}, props), {
           ref: forwardedRef,
@@ -23469,15 +23560,15 @@
       );
     }
   );
-  var DialogContentImpl = React55.forwardRef(
+  var DialogContentImpl = React54.forwardRef(
     (props, forwardedRef) => {
       const _a121 = props, { __scopeDialog, trapFocus, onOpenAutoFocus, onCloseAutoFocus } = _a121, contentProps = __objRest(_a121, ["__scopeDialog", "trapFocus", "onOpenAutoFocus", "onCloseAutoFocus"]);
       const context = useDialogContext(CONTENT_NAME5, __scopeDialog);
-      const contentRef = React55.useRef(null);
+      const contentRef = React54.useRef(null);
       const composedRefs = useComposedRefs(forwardedRef, contentRef);
       useFocusGuards();
-      return /* @__PURE__ */ (0, import_jsx_runtime19.jsxs)(import_jsx_runtime19.Fragment, { children: [
-        /* @__PURE__ */ (0, import_jsx_runtime19.jsx)(
+      return /* @__PURE__ */ (0, import_jsx_runtime36.jsxs)(import_jsx_runtime36.Fragment, { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime36.jsx)(
           FocusScope,
           {
             asChild: true,
@@ -23485,7 +23576,7 @@
             trapped: trapFocus,
             onMountAutoFocus: onOpenAutoFocus,
             onUnmountAutoFocus: onCloseAutoFocus,
-            children: /* @__PURE__ */ (0, import_jsx_runtime19.jsx)(
+            children: /* @__PURE__ */ (0, import_jsx_runtime36.jsx)(
               DismissableLayer,
               __spreadProps(__spreadValues({
                 role: "dialog",
@@ -23500,37 +23591,37 @@
             )
           }
         ),
-        /* @__PURE__ */ (0, import_jsx_runtime19.jsxs)(import_jsx_runtime19.Fragment, { children: [
-          /* @__PURE__ */ (0, import_jsx_runtime19.jsx)(TitleWarning, { titleId: context.titleId }),
-          /* @__PURE__ */ (0, import_jsx_runtime19.jsx)(DescriptionWarning, { contentRef, descriptionId: context.descriptionId })
+        /* @__PURE__ */ (0, import_jsx_runtime36.jsxs)(import_jsx_runtime36.Fragment, { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime36.jsx)(TitleWarning, { titleId: context.titleId }),
+          /* @__PURE__ */ (0, import_jsx_runtime36.jsx)(DescriptionWarning, { contentRef, descriptionId: context.descriptionId })
         ] })
       ] });
     }
   );
   var TITLE_NAME2 = "DialogTitle";
-  var DialogTitle = React55.forwardRef(
+  var DialogTitle = React54.forwardRef(
     (props, forwardedRef) => {
       const _a121 = props, { __scopeDialog } = _a121, titleProps = __objRest(_a121, ["__scopeDialog"]);
       const context = useDialogContext(TITLE_NAME2, __scopeDialog);
-      return /* @__PURE__ */ (0, import_jsx_runtime19.jsx)(Primitive.h2, __spreadProps(__spreadValues({ id: context.titleId }, titleProps), { ref: forwardedRef }));
+      return /* @__PURE__ */ (0, import_jsx_runtime36.jsx)(Primitive.h2, __spreadProps(__spreadValues({ id: context.titleId }, titleProps), { ref: forwardedRef }));
     }
   );
   DialogTitle.displayName = TITLE_NAME2;
   var DESCRIPTION_NAME2 = "DialogDescription";
-  var DialogDescription = React55.forwardRef(
+  var DialogDescription = React54.forwardRef(
     (props, forwardedRef) => {
       const _a121 = props, { __scopeDialog } = _a121, descriptionProps = __objRest(_a121, ["__scopeDialog"]);
       const context = useDialogContext(DESCRIPTION_NAME2, __scopeDialog);
-      return /* @__PURE__ */ (0, import_jsx_runtime19.jsx)(Primitive.p, __spreadProps(__spreadValues({ id: context.descriptionId }, descriptionProps), { ref: forwardedRef }));
+      return /* @__PURE__ */ (0, import_jsx_runtime36.jsx)(Primitive.p, __spreadProps(__spreadValues({ id: context.descriptionId }, descriptionProps), { ref: forwardedRef }));
     }
   );
   DialogDescription.displayName = DESCRIPTION_NAME2;
   var CLOSE_NAME3 = "DialogClose";
-  var DialogClose = React55.forwardRef(
+  var DialogClose = React54.forwardRef(
     (props, forwardedRef) => {
       const _a121 = props, { __scopeDialog } = _a121, closeProps = __objRest(_a121, ["__scopeDialog"]);
       const context = useDialogContext(CLOSE_NAME3, __scopeDialog);
-      return /* @__PURE__ */ (0, import_jsx_runtime19.jsx)(
+      return /* @__PURE__ */ (0, import_jsx_runtime36.jsx)(
         Primitive.button,
         __spreadProps(__spreadValues({
           type: "button"
@@ -23559,7 +23650,7 @@
 If you want to hide the \`${titleWarningContext.titleName}\`, you can wrap it with our VisuallyHidden component.
 
 For more information, see https://radix-ui.com/primitives/docs/components/${titleWarningContext.docsSlug}`;
-    React55.useEffect(() => {
+    React54.useEffect(() => {
       if (titleId) {
         const hasTitle = document.getElementById(titleId);
         if (!hasTitle) console.error(MESSAGE);
@@ -23571,7 +23662,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${titl
   var DescriptionWarning = /* @__PURE__ */ __name(({ contentRef, descriptionId }) => {
     const descriptionWarningContext = useWarningContext(DESCRIPTION_WARNING_NAME);
     const MESSAGE = `Warning: Missing \`Description\` or \`aria-describedby={undefined}\` for {${descriptionWarningContext.contentName}}.`;
-    React55.useEffect(() => {
+    React54.useEffect(() => {
       var _a121;
       const describedById = (_a121 = contentRef.current) == null ? void 0 : _a121.getAttribute("aria-describedby");
       if (descriptionId && describedById) {
@@ -23928,13 +24019,14 @@ For more information, see https://radix-ui.com/primitives/docs/components/${titl
   var Te = { position: "absolute", width: "1px", height: "1px", padding: "0", margin: "-1px", overflow: "hidden", clip: "rect(0, 0, 0, 0)", whiteSpace: "nowrap", borderWidth: "0" };
 
   // client/src/components/ui/dialog.tsx
-  var React56 = __toESM(require_react(), 1);
+  var React55 = __toESM(require_react(), 1);
+  var import_jsx_runtime37 = __toESM(require_jsx_runtime(), 1);
   var Dialog2 = Root5;
   var DialogTrigger2 = Trigger4;
   var DialogPortal2 = Portal4;
-  var DialogOverlay2 = React56.forwardRef((_a121, ref) => {
+  var DialogOverlay2 = React55.forwardRef((_a121, ref) => {
     var _b93 = _a121, { className } = _b93, props = __objRest(_b93, ["className"]);
-    return /* @__PURE__ */ React56.createElement(
+    return /* @__PURE__ */ (0, import_jsx_runtime37.jsx)(
       Overlay,
       __spreadValues({
         ref,
@@ -23946,20 +24038,29 @@ For more information, see https://radix-ui.com/primitives/docs/components/${titl
     );
   });
   DialogOverlay2.displayName = Overlay.displayName;
-  var DialogContent2 = React56.forwardRef((_a121, ref) => {
+  var DialogContent2 = React55.forwardRef((_a121, ref) => {
     var _b93 = _a121, { className, children } = _b93, props = __objRest(_b93, ["className", "children"]);
-    return /* @__PURE__ */ React56.createElement(DialogPortal2, null, /* @__PURE__ */ React56.createElement(DialogOverlay2, null), /* @__PURE__ */ React56.createElement(
-      Content3,
-      __spreadValues({
-        ref,
-        className: cn(
-          "fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] sm:rounded-lg",
-          className
-        )
-      }, props),
-      children,
-      /* @__PURE__ */ React56.createElement(Close2, { className: "absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground" }, /* @__PURE__ */ React56.createElement(X, { className: "h-4 w-4" }), /* @__PURE__ */ React56.createElement("span", { className: "sr-only" }, "Close"))
-    ));
+    return /* @__PURE__ */ (0, import_jsx_runtime37.jsxs)(DialogPortal2, { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime37.jsx)(DialogOverlay2, {}),
+      /* @__PURE__ */ (0, import_jsx_runtime37.jsxs)(
+        Content3,
+        __spreadProps(__spreadValues({
+          ref,
+          className: cn(
+            "fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] sm:rounded-lg",
+            className
+          )
+        }, props), {
+          children: [
+            children,
+            /* @__PURE__ */ (0, import_jsx_runtime37.jsxs)(Close2, { className: "absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime37.jsx)(X, { className: "h-4 w-4" }),
+              /* @__PURE__ */ (0, import_jsx_runtime37.jsx)("span", { className: "sr-only", children: "Close" })
+            ] })
+          ]
+        })
+      )
+    ] });
   });
   DialogContent2.displayName = Content3.displayName;
   var DialogHeader = /* @__PURE__ */ __name((_a121) => {
@@ -23968,7 +24069,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${titl
     } = _b93, props = __objRest(_b93, [
       "className"
     ]);
-    return /* @__PURE__ */ React56.createElement(
+    return /* @__PURE__ */ (0, import_jsx_runtime37.jsx)(
       "div",
       __spreadValues({
         className: cn(
@@ -23985,7 +24086,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${titl
     } = _b93, props = __objRest(_b93, [
       "className"
     ]);
-    return /* @__PURE__ */ React56.createElement(
+    return /* @__PURE__ */ (0, import_jsx_runtime37.jsx)(
       "div",
       __spreadValues({
         className: cn(
@@ -23996,9 +24097,9 @@ For more information, see https://radix-ui.com/primitives/docs/components/${titl
     );
   }, "DialogFooter");
   DialogFooter.displayName = "DialogFooter";
-  var DialogTitle2 = React56.forwardRef((_a121, ref) => {
+  var DialogTitle2 = React55.forwardRef((_a121, ref) => {
     var _b93 = _a121, { className } = _b93, props = __objRest(_b93, ["className"]);
-    return /* @__PURE__ */ React56.createElement(
+    return /* @__PURE__ */ (0, import_jsx_runtime37.jsx)(
       Title2,
       __spreadValues({
         ref,
@@ -24010,9 +24111,9 @@ For more information, see https://radix-ui.com/primitives/docs/components/${titl
     );
   });
   DialogTitle2.displayName = Title2.displayName;
-  var DialogDescription2 = React56.forwardRef((_a121, ref) => {
+  var DialogDescription2 = React55.forwardRef((_a121, ref) => {
     var _b93 = _a121, { className } = _b93, props = __objRest(_b93, ["className"]);
-    return /* @__PURE__ */ React56.createElement(
+    return /* @__PURE__ */ (0, import_jsx_runtime37.jsx)(
       Description2,
       __spreadValues({
         ref,
@@ -24023,9 +24124,10 @@ For more information, see https://radix-ui.com/primitives/docs/components/${titl
   DialogDescription2.displayName = Description2.displayName;
 
   // client/src/components/ui/command.tsx
-  var Command = React57.forwardRef((_a121, ref) => {
+  var import_jsx_runtime38 = __toESM(require_jsx_runtime(), 1);
+  var Command = React56.forwardRef((_a121, ref) => {
     var _b93 = _a121, { className } = _b93, props = __objRest(_b93, ["className"]);
-    return /* @__PURE__ */ React57.createElement(
+    return /* @__PURE__ */ (0, import_jsx_runtime38.jsx)(
       _e,
       __spreadValues({
         ref,
@@ -24037,23 +24139,26 @@ For more information, see https://radix-ui.com/primitives/docs/components/${titl
     );
   });
   Command.displayName = _e.displayName;
-  var CommandInput = React57.forwardRef((_a121, ref) => {
+  var CommandInput = React56.forwardRef((_a121, ref) => {
     var _b93 = _a121, { className } = _b93, props = __objRest(_b93, ["className"]);
-    return /* @__PURE__ */ React57.createElement("div", { className: "flex items-center border-b px-3", "cmdk-input-wrapper": "" }, /* @__PURE__ */ React57.createElement(Search, { className: "mr-2 h-4 w-4 shrink-0 opacity-50" }), /* @__PURE__ */ React57.createElement(
-      _e.Input,
-      __spreadValues({
-        ref,
-        className: cn(
-          "flex h-11 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50",
-          className
-        )
-      }, props)
-    ));
+    return /* @__PURE__ */ (0, import_jsx_runtime38.jsxs)("div", { className: "flex items-center border-b px-3", "cmdk-input-wrapper": "", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime38.jsx)(Search, { className: "mr-2 h-4 w-4 shrink-0 opacity-50" }),
+      /* @__PURE__ */ (0, import_jsx_runtime38.jsx)(
+        _e.Input,
+        __spreadValues({
+          ref,
+          className: cn(
+            "flex h-11 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50",
+            className
+          )
+        }, props)
+      )
+    ] });
   });
   CommandInput.displayName = _e.Input.displayName;
-  var CommandList = React57.forwardRef((_a121, ref) => {
+  var CommandList = React56.forwardRef((_a121, ref) => {
     var _b93 = _a121, { className } = _b93, props = __objRest(_b93, ["className"]);
-    return /* @__PURE__ */ React57.createElement(
+    return /* @__PURE__ */ (0, import_jsx_runtime38.jsx)(
       _e.List,
       __spreadValues({
         ref,
@@ -24062,7 +24167,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${titl
     );
   });
   CommandList.displayName = _e.List.displayName;
-  var CommandEmpty = React57.forwardRef((props, ref) => /* @__PURE__ */ React57.createElement(
+  var CommandEmpty = React56.forwardRef((props, ref) => /* @__PURE__ */ (0, import_jsx_runtime38.jsx)(
     _e.Empty,
     __spreadValues({
       ref,
@@ -24070,9 +24175,9 @@ For more information, see https://radix-ui.com/primitives/docs/components/${titl
     }, props)
   ));
   CommandEmpty.displayName = _e.Empty.displayName;
-  var CommandGroup = React57.forwardRef((_a121, ref) => {
+  var CommandGroup = React56.forwardRef((_a121, ref) => {
     var _b93 = _a121, { className } = _b93, props = __objRest(_b93, ["className"]);
-    return /* @__PURE__ */ React57.createElement(
+    return /* @__PURE__ */ (0, import_jsx_runtime38.jsx)(
       _e.Group,
       __spreadValues({
         ref,
@@ -24084,9 +24189,9 @@ For more information, see https://radix-ui.com/primitives/docs/components/${titl
     );
   });
   CommandGroup.displayName = _e.Group.displayName;
-  var CommandSeparator = React57.forwardRef((_a121, ref) => {
+  var CommandSeparator = React56.forwardRef((_a121, ref) => {
     var _b93 = _a121, { className } = _b93, props = __objRest(_b93, ["className"]);
-    return /* @__PURE__ */ React57.createElement(
+    return /* @__PURE__ */ (0, import_jsx_runtime38.jsx)(
       _e.Separator,
       __spreadValues({
         ref,
@@ -24095,9 +24200,9 @@ For more information, see https://radix-ui.com/primitives/docs/components/${titl
     );
   });
   CommandSeparator.displayName = _e.Separator.displayName;
-  var CommandItem = React57.forwardRef((_a121, ref) => {
+  var CommandItem = React56.forwardRef((_a121, ref) => {
     var _b93 = _a121, { className } = _b93, props = __objRest(_b93, ["className"]);
-    return /* @__PURE__ */ React57.createElement(
+    return /* @__PURE__ */ (0, import_jsx_runtime38.jsx)(
       _e.Item,
       __spreadValues({
         ref,
@@ -24115,7 +24220,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${titl
     } = _b93, props = __objRest(_b93, [
       "className"
     ]);
-    return /* @__PURE__ */ React57.createElement(
+    return /* @__PURE__ */ (0, import_jsx_runtime38.jsx)(
       "span",
       __spreadValues({
         className: cn(
@@ -24128,15 +24233,15 @@ For more information, see https://radix-ui.com/primitives/docs/components/${titl
   CommandShortcut.displayName = "CommandShortcut";
 
   // client/src/components/ui/checkbox.tsx
-  var React59 = __toESM(require_react(), 1);
+  var React58 = __toESM(require_react(), 1);
 
   // node_modules/@radix-ui/react-checkbox/dist/index.mjs
-  var React58 = __toESM(require_react(), 1);
-  var import_jsx_runtime20 = __toESM(require_jsx_runtime(), 1);
+  var React57 = __toESM(require_react(), 1);
+  var import_jsx_runtime39 = __toESM(require_jsx_runtime(), 1);
   var CHECKBOX_NAME = "Checkbox";
   var [createCheckboxContext, createCheckboxScope] = createContextScope(CHECKBOX_NAME);
   var [CheckboxProvider, useCheckboxContext] = createCheckboxContext(CHECKBOX_NAME);
-  var Checkbox = React58.forwardRef(
+  var Checkbox = React57.forwardRef(
     (props, forwardedRef) => {
       const _a121 = props, {
         __scopeCheckbox,
@@ -24159,17 +24264,17 @@ For more information, see https://radix-ui.com/primitives/docs/components/${titl
         "onCheckedChange",
         "form"
       ]);
-      const [button, setButton] = React58.useState(null);
+      const [button, setButton] = React57.useState(null);
       const composedRefs = useComposedRefs(forwardedRef, (node) => setButton(node));
-      const hasConsumerStoppedPropagationRef = React58.useRef(false);
+      const hasConsumerStoppedPropagationRef = React57.useRef(false);
       const isFormControl = button ? form || !!button.closest("form") : true;
       const [checked = false, setChecked] = useControllableState({
         prop: checkedProp,
         defaultProp: defaultChecked,
         onChange: onCheckedChange
       });
-      const initialCheckedStateRef = React58.useRef(checked);
-      React58.useEffect(() => {
+      const initialCheckedStateRef = React57.useRef(checked);
+      React57.useEffect(() => {
         const form2 = button == null ? void 0 : button.form;
         if (form2) {
           const reset = /* @__PURE__ */ __name(() => setChecked(initialCheckedStateRef.current), "reset");
@@ -24177,8 +24282,8 @@ For more information, see https://radix-ui.com/primitives/docs/components/${titl
           return () => form2.removeEventListener("reset", reset);
         }
       }, [button, setChecked]);
-      return /* @__PURE__ */ (0, import_jsx_runtime20.jsxs)(CheckboxProvider, { scope: __scopeCheckbox, state: checked, disabled, children: [
-        /* @__PURE__ */ (0, import_jsx_runtime20.jsx)(
+      return /* @__PURE__ */ (0, import_jsx_runtime39.jsxs)(CheckboxProvider, { scope: __scopeCheckbox, state: checked, disabled, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime39.jsx)(
           Primitive.button,
           __spreadProps(__spreadValues({
             type: "button",
@@ -24203,7 +24308,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${titl
             })
           })
         ),
-        isFormControl && /* @__PURE__ */ (0, import_jsx_runtime20.jsx)(
+        isFormControl && /* @__PURE__ */ (0, import_jsx_runtime39.jsx)(
           BubbleInput,
           {
             control: button,
@@ -24223,11 +24328,11 @@ For more information, see https://radix-ui.com/primitives/docs/components/${titl
   );
   Checkbox.displayName = CHECKBOX_NAME;
   var INDICATOR_NAME = "CheckboxIndicator";
-  var CheckboxIndicator = React58.forwardRef(
+  var CheckboxIndicator = React57.forwardRef(
     (props, forwardedRef) => {
       const _a121 = props, { __scopeCheckbox, forceMount } = _a121, indicatorProps = __objRest(_a121, ["__scopeCheckbox", "forceMount"]);
       const context = useCheckboxContext(INDICATOR_NAME, __scopeCheckbox);
-      return /* @__PURE__ */ (0, import_jsx_runtime20.jsx)(Presence, { present: forceMount || isIndeterminate(context.state) || context.state === true, children: /* @__PURE__ */ (0, import_jsx_runtime20.jsx)(
+      return /* @__PURE__ */ (0, import_jsx_runtime39.jsx)(Presence, { present: forceMount || isIndeterminate(context.state) || context.state === true, children: /* @__PURE__ */ (0, import_jsx_runtime39.jsx)(
         Primitive.span,
         __spreadProps(__spreadValues({
           "data-state": getState3(context.state),
@@ -24242,10 +24347,10 @@ For more information, see https://radix-ui.com/primitives/docs/components/${titl
   CheckboxIndicator.displayName = INDICATOR_NAME;
   var BubbleInput = /* @__PURE__ */ __name((props) => {
     const _a121 = props, { control, checked, bubbles = true, defaultChecked } = _a121, inputProps = __objRest(_a121, ["control", "checked", "bubbles", "defaultChecked"]);
-    const ref = React58.useRef(null);
+    const ref = React57.useRef(null);
     const prevChecked = usePrevious(checked);
     const controlSize = useSize(control);
-    React58.useEffect(() => {
+    React57.useEffect(() => {
       const input = ref.current;
       const inputProto = window.HTMLInputElement.prototype;
       const descriptor = Object.getOwnPropertyDescriptor(inputProto, "checked");
@@ -24257,8 +24362,8 @@ For more information, see https://radix-ui.com/primitives/docs/components/${titl
         input.dispatchEvent(event);
       }
     }, [prevChecked, checked, bubbles]);
-    const defaultCheckedRef = React58.useRef(isIndeterminate(checked) ? false : checked);
-    return /* @__PURE__ */ (0, import_jsx_runtime20.jsx)(
+    const defaultCheckedRef = React57.useRef(isIndeterminate(checked) ? false : checked);
+    return /* @__PURE__ */ (0, import_jsx_runtime39.jsx)(
       "input",
       __spreadProps(__spreadValues({
         type: "checkbox",
@@ -24288,29 +24393,32 @@ For more information, see https://radix-ui.com/primitives/docs/components/${titl
   var Indicator = CheckboxIndicator;
 
   // client/src/components/ui/checkbox.tsx
-  var Checkbox2 = React59.forwardRef((_a121, ref) => {
+  var import_jsx_runtime40 = __toESM(require_jsx_runtime(), 1);
+  var Checkbox2 = React58.forwardRef((_a121, ref) => {
     var _b93 = _a121, { className } = _b93, props = __objRest(_b93, ["className"]);
-    return /* @__PURE__ */ React59.createElement(
+    return /* @__PURE__ */ (0, import_jsx_runtime40.jsx)(
       Root6,
-      __spreadValues({
+      __spreadProps(__spreadValues({
         ref,
         className: cn(
           "peer h-4 w-4 shrink-0 rounded-sm border border-primary ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground",
           className
         )
-      }, props),
-      /* @__PURE__ */ React59.createElement(
-        Indicator,
-        {
-          className: cn("flex items-center justify-center text-current")
-        },
-        /* @__PURE__ */ React59.createElement(Check, { className: "h-4 w-4" })
-      )
+      }, props), {
+        children: /* @__PURE__ */ (0, import_jsx_runtime40.jsx)(
+          Indicator,
+          {
+            className: cn("flex items-center justify-center text-current"),
+            children: /* @__PURE__ */ (0, import_jsx_runtime40.jsx)(Check, { className: "h-4 w-4" })
+          }
+        )
+      })
     );
   });
   Checkbox2.displayName = Root6.displayName;
 
   // client/src/components/confirmation-modal.tsx
+  var import_jsx_runtime41 = __toESM(require_jsx_runtime(), 1);
   function ConfirmationModal({
     open,
     onClose,
@@ -24321,16 +24429,28 @@ For more information, see https://radix-ui.com/primitives/docs/components/${titl
     cancelText = "Cancel",
     variant = "default"
   }) {
-    return /* @__PURE__ */ React.createElement(Dialog2, { open, onOpenChange: onClose }, /* @__PURE__ */ React.createElement(DialogContent2, { className: "max-w-md" }, /* @__PURE__ */ React.createElement(DialogHeader, null, /* @__PURE__ */ React.createElement("div", { className: "flex items-center space-x-3 mb-4" }, /* @__PURE__ */ React.createElement("div", { className: "flex-shrink-0" }, /* @__PURE__ */ React.createElement(TriangleAlert, { className: "w-6 h-6 text-amber-500" })), /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement(DialogTitle2, { className: "text-lg font-semibold text-gray-900" }, title), /* @__PURE__ */ React.createElement(DialogDescription2, { className: "text-sm text-gray-500 mt-1" }, message2)))), /* @__PURE__ */ React.createElement("div", { className: "flex justify-end space-x-3" }, /* @__PURE__ */ React.createElement(Button, { type: "button", variant: "outline", onClick: onClose }, cancelText), /* @__PURE__ */ React.createElement(
-      Button,
-      {
-        type: "button",
-        variant,
-        onClick: onConfirm,
-        className: variant === "destructive" ? "bg-red-600 hover:bg-red-700 text-white" : "bg-blue-600 hover:bg-blue-700 text-white"
-      },
-      confirmText
-    ))));
+    return /* @__PURE__ */ (0, import_jsx_runtime41.jsx)(Dialog2, { open, onOpenChange: onClose, children: /* @__PURE__ */ (0, import_jsx_runtime41.jsxs)(DialogContent2, { className: "max-w-md", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime41.jsx)(DialogHeader, { children: /* @__PURE__ */ (0, import_jsx_runtime41.jsxs)("div", { className: "flex items-center space-x-3 mb-4", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime41.jsx)("div", { className: "flex-shrink-0", children: /* @__PURE__ */ (0, import_jsx_runtime41.jsx)(TriangleAlert, { className: "w-6 h-6 text-amber-500" }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime41.jsxs)("div", { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime41.jsx)(DialogTitle2, { className: "text-lg font-semibold text-gray-900", children: title }),
+          /* @__PURE__ */ (0, import_jsx_runtime41.jsx)(DialogDescription2, { className: "text-sm text-gray-500 mt-1", children: message2 })
+        ] })
+      ] }) }),
+      /* @__PURE__ */ (0, import_jsx_runtime41.jsxs)("div", { className: "flex justify-end space-x-3", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime41.jsx)(Button, { type: "button", variant: "outline", onClick: onClose, children: cancelText }),
+        /* @__PURE__ */ (0, import_jsx_runtime41.jsx)(
+          Button,
+          {
+            type: "button",
+            variant,
+            onClick: onConfirm,
+            className: variant === "destructive" ? "bg-red-600 hover:bg-red-700 text-white" : "bg-blue-600 hover:bg-blue-700 text-white",
+            children: confirmText
+          }
+        )
+      ] })
+    ] }) });
   }
   __name(ConfirmationModal, "ConfirmationModal");
 
@@ -28465,6 +28585,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${titl
   __name(isAfter, "isAfter");
 
   // client/src/components/user-table.tsx
+  var import_jsx_runtime42 = __toESM(require_jsx_runtime(), 1);
   var COLUMN_DEFINITIONS = {
     name: { label: "Name", sortKey: "firstName", hasFilter: false },
     login: { label: "Login", sortKey: "firstName", hasFilter: false },
@@ -28493,21 +28614,24 @@ For more information, see https://radix-ui.com/primitives/docs/components/${titl
       transform: CSS2.Transform.toString(transform),
       transition
     };
-    return /* @__PURE__ */ React.createElement(
+    return /* @__PURE__ */ (0, import_jsx_runtime42.jsx)(
       TableHead,
       {
         ref: setNodeRef,
         style,
-        className: `relative px-6 py-4 text-center ${isDragging ? "opacity-50 z-50" : ""}`
-      },
-      /* @__PURE__ */ React.createElement("div", { className: "flex items-center justify-center gap-2 w-full" }, onColumnReorder && /* @__PURE__ */ React.createElement(
-        "div",
-        __spreadProps(__spreadValues(__spreadValues({}, attributes), listeners2), {
-          className: "cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground p-1 opacity-0 group-hover:opacity-100 transition-opacity",
-          style: { touchAction: "none" }
-        }),
-        /* @__PURE__ */ React.createElement(GripVertical, { className: "h-3 w-3" })
-      ), children)
+        className: `relative px-6 py-4 text-center ${isDragging ? "opacity-50 z-50" : ""}`,
+        children: /* @__PURE__ */ (0, import_jsx_runtime42.jsxs)("div", { className: "flex items-center justify-center gap-2 w-full", children: [
+          onColumnReorder && /* @__PURE__ */ (0, import_jsx_runtime42.jsx)(
+            "div",
+            __spreadProps(__spreadValues(__spreadValues({}, attributes), listeners2), {
+              className: "cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground p-1 opacity-0 group-hover:opacity-100 transition-opacity",
+              style: { touchAction: "none" },
+              children: /* @__PURE__ */ (0, import_jsx_runtime42.jsx)(GripVertical, { className: "h-3 w-3" })
+            })
+          ),
+          children
+        ] })
+      }
     );
   }
   __name(SortableTableHeader, "SortableTableHeader");
@@ -28658,13 +28782,13 @@ For more information, see https://radix-ui.com/primitives/docs/components/${titl
     const getStatusBadge = /* @__PURE__ */ __name((status) => {
       switch (status) {
         case "ACTIVE":
-          return /* @__PURE__ */ React.createElement(Badge, { className: "bg-green-100 text-green-800 hover:bg-green-100" }, "Active");
+          return /* @__PURE__ */ (0, import_jsx_runtime42.jsx)(Badge, { className: "bg-green-100 text-green-800 hover:bg-green-100", children: "Active" });
         case "SUSPENDED":
-          return /* @__PURE__ */ React.createElement(Badge, { className: "bg-yellow-100 text-yellow-800 hover:bg-yellow-100" }, "Suspended");
+          return /* @__PURE__ */ (0, import_jsx_runtime42.jsx)(Badge, { className: "bg-yellow-100 text-yellow-800 hover:bg-yellow-100", children: "Suspended" });
         case "DEPROVISIONED":
-          return /* @__PURE__ */ React.createElement(Badge, { className: "bg-red-100 text-red-800 hover:bg-red-100" }, "Deprovisioned");
+          return /* @__PURE__ */ (0, import_jsx_runtime42.jsx)(Badge, { className: "bg-red-100 text-red-800 hover:bg-red-100", children: "Deprovisioned" });
         default:
-          return /* @__PURE__ */ React.createElement(Badge, { variant: "secondary" }, status);
+          return /* @__PURE__ */ (0, import_jsx_runtime42.jsx)(Badge, { variant: "secondary", children: status });
       }
     }, "getStatusBadge");
     const getUserInitials = /* @__PURE__ */ __name((firstName, lastName) => {
@@ -28681,9 +28805,9 @@ For more information, see https://radix-ui.com/primitives/docs/components/${titl
     }, "formatLastLogin");
     const getSortIcon = /* @__PURE__ */ __name((column) => {
       if (sortBy !== column || !onSort) {
-        return /* @__PURE__ */ React.createElement(ArrowUpDown, { className: "ml-1 w-3 h-3 opacity-50" });
+        return /* @__PURE__ */ (0, import_jsx_runtime42.jsx)(ArrowUpDown, { className: "ml-1 w-3 h-3 opacity-50" });
       }
-      return sortOrder === "asc" ? /* @__PURE__ */ React.createElement(ArrowUpDown, { className: "ml-1 w-3 h-3 rotate-180" }) : /* @__PURE__ */ React.createElement(ArrowUpDown, { className: "ml-1 w-3 h-3" });
+      return sortOrder === "asc" ? /* @__PURE__ */ (0, import_jsx_runtime42.jsx)(ArrowUpDown, { className: "ml-1 w-3 h-3 rotate-180" }) : /* @__PURE__ */ (0, import_jsx_runtime42.jsx)(ArrowUpDown, { className: "ml-1 w-3 h-3" });
     }, "getSortIcon");
     const handleSort = /* @__PURE__ */ __name((column) => {
       if (onSort) {
@@ -28698,55 +28822,75 @@ For more information, see https://radix-ui.com/primitives/docs/components/${titl
     }, [columnConfig, visibleColumns]);
     const renderEmployeeTypeFilter = /* @__PURE__ */ __name(() => {
       const employeeTypes = ["EMPLOYEE", "CONTRACTOR", "INTERN", "PART_TIME", "CONSULTANT"];
-      return /* @__PURE__ */ React.createElement(Popover2, null, /* @__PURE__ */ React.createElement(PopoverTrigger2, { asChild: true }, /* @__PURE__ */ React.createElement(Button, { variant: "ghost", size: "sm", className: "h-8 w-8 p-0" }, /* @__PURE__ */ React.createElement(Filter, { className: "h-4 w-4" }))), /* @__PURE__ */ React.createElement(PopoverContent2, { className: "w-56", align: "start" }, /* @__PURE__ */ React.createElement("div", { className: "space-y-3" }, /* @__PURE__ */ React.createElement(Label2, { className: "text-sm font-medium" }, "Employee Type"), /* @__PURE__ */ React.createElement("div", { className: "space-y-2" }, employeeTypes.map((type) => /* @__PURE__ */ React.createElement("div", { key: type, className: "flex items-center space-x-2" }, /* @__PURE__ */ React.createElement(
-        Checkbox2,
-        {
-          id: type,
-          checked: employeeTypeFilter.includes(type),
-          onCheckedChange: (checked) => {
-            if (checked) {
-              setEmployeeTypeFilter([...employeeTypeFilter, type]);
-            } else {
-              setEmployeeTypeFilter(employeeTypeFilter.filter((t3) => t3 !== type));
+      return /* @__PURE__ */ (0, import_jsx_runtime42.jsxs)(Popover2, { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime42.jsx)(PopoverTrigger2, { asChild: true, children: /* @__PURE__ */ (0, import_jsx_runtime42.jsx)(Button, { variant: "ghost", size: "sm", className: "h-8 w-8 p-0", children: /* @__PURE__ */ (0, import_jsx_runtime42.jsx)(Filter, { className: "h-4 w-4" }) }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime42.jsx)(PopoverContent2, { className: "w-56", align: "start", children: /* @__PURE__ */ (0, import_jsx_runtime42.jsxs)("div", { className: "space-y-3", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime42.jsx)(Label2, { className: "text-sm font-medium", children: "Employee Type" }),
+          /* @__PURE__ */ (0, import_jsx_runtime42.jsx)("div", { className: "space-y-2", children: employeeTypes.map((type) => /* @__PURE__ */ (0, import_jsx_runtime42.jsxs)("div", { className: "flex items-center space-x-2", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime42.jsx)(
+              Checkbox2,
+              {
+                id: type,
+                checked: employeeTypeFilter.includes(type),
+                onCheckedChange: (checked) => {
+                  if (checked) {
+                    setEmployeeTypeFilter([...employeeTypeFilter, type]);
+                  } else {
+                    setEmployeeTypeFilter(employeeTypeFilter.filter((t3) => t3 !== type));
+                  }
+                }
+              }
+            ),
+            /* @__PURE__ */ (0, import_jsx_runtime42.jsx)(Label2, { htmlFor: type, className: "text-sm font-normal", children: type })
+          ] }, type)) }),
+          /* @__PURE__ */ (0, import_jsx_runtime42.jsx)("div", { className: "flex gap-2", children: /* @__PURE__ */ (0, import_jsx_runtime42.jsx)(
+            Button,
+            {
+              variant: "outline",
+              size: "sm",
+              onClick: () => setEmployeeTypeFilter([]),
+              className: "text-xs",
+              children: "Clear"
             }
-          }
-        }
-      ), /* @__PURE__ */ React.createElement(Label2, { htmlFor: type, className: "text-sm font-normal" }, type)))), /* @__PURE__ */ React.createElement("div", { className: "flex gap-2" }, /* @__PURE__ */ React.createElement(
-        Button,
-        {
-          variant: "outline",
-          size: "sm",
-          onClick: () => setEmployeeTypeFilter([]),
-          className: "text-xs"
-        },
-        "Clear"
-      )))));
+          ) })
+        ] }) })
+      ] });
     }, "renderEmployeeTypeFilter");
     const renderStatusFilter = /* @__PURE__ */ __name(() => {
       const statusOptions = ["ACTIVE", "SUSPENDED", "DEPROVISIONED", "PROVISIONED", "STAGED", "RECOVERY", "LOCKED_OUT", "PASSWORD_EXPIRED"];
-      return /* @__PURE__ */ React.createElement(Popover2, null, /* @__PURE__ */ React.createElement(PopoverTrigger2, { asChild: true }, /* @__PURE__ */ React.createElement(Button, { variant: "ghost", size: "sm", className: "h-8 w-8 p-0" }, /* @__PURE__ */ React.createElement(Filter, { className: "h-4 w-4" }))), /* @__PURE__ */ React.createElement(PopoverContent2, { className: "w-56", align: "start" }, /* @__PURE__ */ React.createElement("div", { className: "space-y-3" }, /* @__PURE__ */ React.createElement(Label2, { className: "text-sm font-medium" }, "Status"), /* @__PURE__ */ React.createElement("div", { className: "space-y-2 max-h-48 overflow-y-auto" }, statusOptions.map((status) => /* @__PURE__ */ React.createElement("div", { key: status, className: "flex items-center space-x-2" }, /* @__PURE__ */ React.createElement(
-        Checkbox2,
-        {
-          id: status,
-          checked: statusFilter.includes(status),
-          onCheckedChange: (checked) => {
-            if (checked) {
-              setStatusFilter([...statusFilter, status]);
-            } else {
-              setStatusFilter(statusFilter.filter((s2) => s2 !== status));
+      return /* @__PURE__ */ (0, import_jsx_runtime42.jsxs)(Popover2, { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime42.jsx)(PopoverTrigger2, { asChild: true, children: /* @__PURE__ */ (0, import_jsx_runtime42.jsx)(Button, { variant: "ghost", size: "sm", className: "h-8 w-8 p-0", children: /* @__PURE__ */ (0, import_jsx_runtime42.jsx)(Filter, { className: "h-4 w-4" }) }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime42.jsx)(PopoverContent2, { className: "w-56", align: "start", children: /* @__PURE__ */ (0, import_jsx_runtime42.jsxs)("div", { className: "space-y-3", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime42.jsx)(Label2, { className: "text-sm font-medium", children: "Status" }),
+          /* @__PURE__ */ (0, import_jsx_runtime42.jsx)("div", { className: "space-y-2 max-h-48 overflow-y-auto", children: statusOptions.map((status) => /* @__PURE__ */ (0, import_jsx_runtime42.jsxs)("div", { className: "flex items-center space-x-2", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime42.jsx)(
+              Checkbox2,
+              {
+                id: status,
+                checked: statusFilter.includes(status),
+                onCheckedChange: (checked) => {
+                  if (checked) {
+                    setStatusFilter([...statusFilter, status]);
+                  } else {
+                    setStatusFilter(statusFilter.filter((s2) => s2 !== status));
+                  }
+                }
+              }
+            ),
+            /* @__PURE__ */ (0, import_jsx_runtime42.jsx)(Label2, { htmlFor: status, className: "text-sm font-normal", children: status })
+          ] }, status)) }),
+          /* @__PURE__ */ (0, import_jsx_runtime42.jsx)("div", { className: "flex gap-2", children: /* @__PURE__ */ (0, import_jsx_runtime42.jsx)(
+            Button,
+            {
+              variant: "outline",
+              size: "sm",
+              onClick: () => setStatusFilter([]),
+              className: "text-xs",
+              children: "Clear"
             }
-          }
-        }
-      ), /* @__PURE__ */ React.createElement(Label2, { htmlFor: status, className: "text-sm font-normal" }, status)))), /* @__PURE__ */ React.createElement("div", { className: "flex gap-2" }, /* @__PURE__ */ React.createElement(
-        Button,
-        {
-          variant: "outline",
-          size: "sm",
-          onClick: () => setStatusFilter([]),
-          className: "text-xs"
-        },
-        "Clear"
-      )))));
+          ) })
+        ] }) })
+      ] });
     }, "renderStatusFilter");
     const renderLastLoginFilter = /* @__PURE__ */ __name(() => {
       const lastLoginOptions = [
@@ -28758,123 +28902,161 @@ For more information, see https://radix-ui.com/primitives/docs/components/${titl
         { value: "31", label: "Longer than 30 days" },
         { value: "never", label: "Never logged in" }
       ];
-      return /* @__PURE__ */ React.createElement(Popover2, null, /* @__PURE__ */ React.createElement(PopoverTrigger2, { asChild: true }, /* @__PURE__ */ React.createElement(Button, { variant: "ghost", size: "sm", className: "h-8 w-8 p-0" }, /* @__PURE__ */ React.createElement(Filter, { className: "h-4 w-4" }))), /* @__PURE__ */ React.createElement(PopoverContent2, { className: "w-56", align: "start" }, /* @__PURE__ */ React.createElement("div", { className: "space-y-3" }, /* @__PURE__ */ React.createElement(Label2, { className: "text-sm font-medium" }, "Last Login"), /* @__PURE__ */ React.createElement("div", { className: "space-y-2" }, lastLoginOptions.map((option) => /* @__PURE__ */ React.createElement("div", { key: option.value, className: "flex items-center space-x-2" }, /* @__PURE__ */ React.createElement(
-        "input",
-        {
-          type: "radio",
-          id: option.value,
-          name: "lastLogin",
-          value: option.value,
-          checked: lastLoginFilter === option.value,
-          onChange: (e) => setLastLoginFilter(e.target.value),
-          className: "w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500"
-        }
-      ), /* @__PURE__ */ React.createElement(Label2, { htmlFor: option.value, className: "text-sm font-normal" }, option.label)))), /* @__PURE__ */ React.createElement("div", { className: "flex gap-2" }, /* @__PURE__ */ React.createElement(
-        Button,
-        {
-          variant: "outline",
-          size: "sm",
-          onClick: () => setLastLoginFilter(""),
-          className: "text-xs"
-        },
-        "Clear"
-      )))));
+      return /* @__PURE__ */ (0, import_jsx_runtime42.jsxs)(Popover2, { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime42.jsx)(PopoverTrigger2, { asChild: true, children: /* @__PURE__ */ (0, import_jsx_runtime42.jsx)(Button, { variant: "ghost", size: "sm", className: "h-8 w-8 p-0", children: /* @__PURE__ */ (0, import_jsx_runtime42.jsx)(Filter, { className: "h-4 w-4" }) }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime42.jsx)(PopoverContent2, { className: "w-56", align: "start", children: /* @__PURE__ */ (0, import_jsx_runtime42.jsxs)("div", { className: "space-y-3", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime42.jsx)(Label2, { className: "text-sm font-medium", children: "Last Login" }),
+          /* @__PURE__ */ (0, import_jsx_runtime42.jsx)("div", { className: "space-y-2", children: lastLoginOptions.map((option) => /* @__PURE__ */ (0, import_jsx_runtime42.jsxs)("div", { className: "flex items-center space-x-2", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime42.jsx)(
+              "input",
+              {
+                type: "radio",
+                id: option.value,
+                name: "lastLogin",
+                value: option.value,
+                checked: lastLoginFilter === option.value,
+                onChange: (e) => setLastLoginFilter(e.target.value),
+                className: "w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500"
+              }
+            ),
+            /* @__PURE__ */ (0, import_jsx_runtime42.jsx)(Label2, { htmlFor: option.value, className: "text-sm font-normal", children: option.label })
+          ] }, option.value)) }),
+          /* @__PURE__ */ (0, import_jsx_runtime42.jsx)("div", { className: "flex gap-2", children: /* @__PURE__ */ (0, import_jsx_runtime42.jsx)(
+            Button,
+            {
+              variant: "outline",
+              size: "sm",
+              onClick: () => setLastLoginFilter(""),
+              className: "text-xs",
+              children: "Clear"
+            }
+          ) })
+        ] }) })
+      ] });
     }, "renderLastLoginFilter");
     const renderMobilePhoneFilter = /* @__PURE__ */ __name(() => {
-      return /* @__PURE__ */ React.createElement(Popover2, null, /* @__PURE__ */ React.createElement(PopoverTrigger2, { asChild: true }, /* @__PURE__ */ React.createElement(Button, { variant: "ghost", size: "sm", className: "h-8 w-8 p-0" }, /* @__PURE__ */ React.createElement(Filter, { className: "h-4 w-4" }))), /* @__PURE__ */ React.createElement(PopoverContent2, { className: "w-56", align: "start" }, /* @__PURE__ */ React.createElement("div", { className: "space-y-3" }, /* @__PURE__ */ React.createElement(Label2, { className: "text-sm font-medium" }, "Mobile Phone"), /* @__PURE__ */ React.createElement(
-        Input,
-        {
-          placeholder: "Search phone number...",
-          value: mobilePhoneFilter,
-          onChange: (e) => setMobilePhoneFilter(e.target.value),
-          className: "text-sm"
-        }
-      ), /* @__PURE__ */ React.createElement(
-        Button,
-        {
-          variant: "outline",
-          size: "sm",
-          onClick: () => setMobilePhoneFilter(""),
-          className: "text-xs"
-        },
-        "Clear"
-      ))));
+      return /* @__PURE__ */ (0, import_jsx_runtime42.jsxs)(Popover2, { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime42.jsx)(PopoverTrigger2, { asChild: true, children: /* @__PURE__ */ (0, import_jsx_runtime42.jsx)(Button, { variant: "ghost", size: "sm", className: "h-8 w-8 p-0", children: /* @__PURE__ */ (0, import_jsx_runtime42.jsx)(Filter, { className: "h-4 w-4" }) }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime42.jsx)(PopoverContent2, { className: "w-56", align: "start", children: /* @__PURE__ */ (0, import_jsx_runtime42.jsxs)("div", { className: "space-y-3", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime42.jsx)(Label2, { className: "text-sm font-medium", children: "Mobile Phone" }),
+          /* @__PURE__ */ (0, import_jsx_runtime42.jsx)(
+            Input,
+            {
+              placeholder: "Search phone number...",
+              value: mobilePhoneFilter,
+              onChange: (e) => setMobilePhoneFilter(e.target.value),
+              className: "text-sm"
+            }
+          ),
+          /* @__PURE__ */ (0, import_jsx_runtime42.jsx)(
+            Button,
+            {
+              variant: "outline",
+              size: "sm",
+              onClick: () => setMobilePhoneFilter(""),
+              className: "text-xs",
+              children: "Clear"
+            }
+          )
+        ] }) })
+      ] });
     }, "renderMobilePhoneFilter");
     const renderManagerFilter = /* @__PURE__ */ __name(() => {
-      return /* @__PURE__ */ React.createElement(Popover2, { open: managerOpen, onOpenChange: setManagerOpen }, /* @__PURE__ */ React.createElement(PopoverTrigger2, { asChild: true }, /* @__PURE__ */ React.createElement(Button, { variant: "ghost", size: "sm", className: "h-8 w-8 p-0" }, /* @__PURE__ */ React.createElement(Filter, { className: "h-4 w-4" }))), /* @__PURE__ */ React.createElement(PopoverContent2, { className: "w-56 p-0", align: "start" }, /* @__PURE__ */ React.createElement(Command, { shouldFilter: false }, /* @__PURE__ */ React.createElement(
-        CommandInput,
-        {
-          placeholder: "Search manager...",
-          value: managerSearchQuery,
-          onValueChange: setManagerSearchQuery,
-          autoFocus: true
-        }
-      ), /* @__PURE__ */ React.createElement(CommandList, null, /* @__PURE__ */ React.createElement(CommandEmpty, null, "No managers found."), /* @__PURE__ */ React.createElement(CommandGroup, null, managerFilter && /* @__PURE__ */ React.createElement(
-        CommandItem,
-        {
-          onSelect: () => {
-            setManagerFilter("");
-            setManagerSearchQuery("");
-            setManagerOpen(false);
-          }
-        },
-        /* @__PURE__ */ React.createElement("span", { className: "text-muted-foreground" }, "Clear filter")
-      ), managerSuggestions.map((manager) => /* @__PURE__ */ React.createElement(
-        CommandItem,
-        {
-          key: manager,
-          onSelect: () => {
-            setManagerFilter(manager);
-            setManagerSearchQuery("");
-            setManagerOpen(false);
-          }
-        },
-        /* @__PURE__ */ React.createElement(
-          Check,
-          {
-            className: cn(
-              "mr-2 h-4 w-4",
-              managerFilter === manager ? "opacity-100" : "opacity-0"
-            )
-          }
-        ),
-        manager
-      )))))));
+      return /* @__PURE__ */ (0, import_jsx_runtime42.jsxs)(Popover2, { open: managerOpen, onOpenChange: setManagerOpen, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime42.jsx)(PopoverTrigger2, { asChild: true, children: /* @__PURE__ */ (0, import_jsx_runtime42.jsx)(Button, { variant: "ghost", size: "sm", className: "h-8 w-8 p-0", children: /* @__PURE__ */ (0, import_jsx_runtime42.jsx)(Filter, { className: "h-4 w-4" }) }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime42.jsx)(PopoverContent2, { className: "w-56 p-0", align: "start", children: /* @__PURE__ */ (0, import_jsx_runtime42.jsxs)(Command, { shouldFilter: false, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime42.jsx)(
+            CommandInput,
+            {
+              placeholder: "Search manager...",
+              value: managerSearchQuery,
+              onValueChange: setManagerSearchQuery,
+              autoFocus: true
+            }
+          ),
+          /* @__PURE__ */ (0, import_jsx_runtime42.jsxs)(CommandList, { children: [
+            /* @__PURE__ */ (0, import_jsx_runtime42.jsx)(CommandEmpty, { children: "No managers found." }),
+            /* @__PURE__ */ (0, import_jsx_runtime42.jsxs)(CommandGroup, { children: [
+              managerFilter && /* @__PURE__ */ (0, import_jsx_runtime42.jsx)(
+                CommandItem,
+                {
+                  onSelect: () => {
+                    setManagerFilter("");
+                    setManagerSearchQuery("");
+                    setManagerOpen(false);
+                  },
+                  children: /* @__PURE__ */ (0, import_jsx_runtime42.jsx)("span", { className: "text-muted-foreground", children: "Clear filter" })
+                }
+              ),
+              managerSuggestions.map((manager) => /* @__PURE__ */ (0, import_jsx_runtime42.jsxs)(
+                CommandItem,
+                {
+                  onSelect: () => {
+                    setManagerFilter(manager);
+                    setManagerSearchQuery("");
+                    setManagerOpen(false);
+                  },
+                  children: [
+                    /* @__PURE__ */ (0, import_jsx_runtime42.jsx)(
+                      Check,
+                      {
+                        className: cn(
+                          "mr-2 h-4 w-4",
+                          managerFilter === manager ? "opacity-100" : "opacity-0"
+                        )
+                      }
+                    ),
+                    manager
+                  ]
+                },
+                manager
+              ))
+            ] })
+          ] })
+        ] }) })
+      ] });
     }, "renderManagerFilter");
     const renderCellContent = /* @__PURE__ */ __name((user, columnId) => {
       switch (columnId) {
         case "name":
-          return /* @__PURE__ */ React.createElement("div", { className: "flex items-center" }, /* @__PURE__ */ React.createElement("div", { className: "flex-shrink-0 h-10 w-10" }, /* @__PURE__ */ React.createElement("div", { className: "h-10 w-10 rounded-full bg-blue-600 flex items-center justify-center" }, /* @__PURE__ */ React.createElement("span", { className: "text-sm font-medium text-white" }, getUserInitials(user.firstName, user.lastName)))), /* @__PURE__ */ React.createElement("div", { className: "ml-4" }, /* @__PURE__ */ React.createElement("div", { className: "text-sm font-medium text-foreground" }, user.firstName, " ", user.lastName)));
+          return /* @__PURE__ */ (0, import_jsx_runtime42.jsxs)("div", { className: "flex items-center", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime42.jsx)("div", { className: "flex-shrink-0 h-10 w-10", children: /* @__PURE__ */ (0, import_jsx_runtime42.jsx)("div", { className: "h-10 w-10 rounded-full bg-blue-600 flex items-center justify-center", children: /* @__PURE__ */ (0, import_jsx_runtime42.jsx)("span", { className: "text-sm font-medium text-white", children: getUserInitials(user.firstName, user.lastName) }) }) }),
+            /* @__PURE__ */ (0, import_jsx_runtime42.jsx)("div", { className: "ml-4", children: /* @__PURE__ */ (0, import_jsx_runtime42.jsxs)("div", { className: "text-sm font-medium text-foreground", children: [
+              user.firstName,
+              " ",
+              user.lastName
+            ] }) })
+          ] });
         case "login":
-          return /* @__PURE__ */ React.createElement("div", { className: "text-sm text-foreground" }, user.login);
+          return /* @__PURE__ */ (0, import_jsx_runtime42.jsx)("div", { className: "text-sm text-foreground", children: user.login });
         case "title":
-          return /* @__PURE__ */ React.createElement("div", { className: "text-sm text-foreground" }, user.title || "-");
+          return /* @__PURE__ */ (0, import_jsx_runtime42.jsx)("div", { className: "text-sm text-foreground", children: user.title || "-" });
         case "department":
-          return /* @__PURE__ */ React.createElement("div", { className: "text-sm text-foreground" }, user.department || "-");
+          return /* @__PURE__ */ (0, import_jsx_runtime42.jsx)("div", { className: "text-sm text-foreground", children: user.department || "-" });
         case "employeeType":
-          return /* @__PURE__ */ React.createElement(Badge, { variant: "outline" }, user.employeeType);
+          return /* @__PURE__ */ (0, import_jsx_runtime42.jsx)(Badge, { variant: "outline", children: user.employeeType });
         case "manager":
-          return /* @__PURE__ */ React.createElement("div", { className: "text-sm text-foreground" }, user.manager || "-");
+          return /* @__PURE__ */ (0, import_jsx_runtime42.jsx)("div", { className: "text-sm text-foreground", children: user.manager || "-" });
         case "mobilePhone":
-          return /* @__PURE__ */ React.createElement("div", { className: "text-sm text-foreground" }, user.mobilePhone || "-");
+          return /* @__PURE__ */ (0, import_jsx_runtime42.jsx)("div", { className: "text-sm text-foreground", children: user.mobilePhone || "-" });
         case "status":
           return getStatusBadge(user.status);
         case "disabled":
           const isDisabled = user.status === "SUSPENDED" || user.status === "DEPROVISIONED";
           if (isDisabled && user.lastUpdated) {
-            return /* @__PURE__ */ React.createElement("div", { className: "text-sm text-red-600 dark:text-red-400" }, format(new Date(user.lastUpdated), "MMM dd, yyyy"));
+            return /* @__PURE__ */ (0, import_jsx_runtime42.jsx)("div", { className: "text-sm text-red-600 dark:text-red-400", children: format(new Date(user.lastUpdated), "MMM dd, yyyy") });
           }
-          return /* @__PURE__ */ React.createElement("div", { className: "text-sm text-muted-foreground" }, "-");
+          return /* @__PURE__ */ (0, import_jsx_runtime42.jsx)("div", { className: "text-sm text-muted-foreground", children: "-" });
         case "activated":
-          return /* @__PURE__ */ React.createElement("div", { className: "text-sm text-muted-foreground" }, user.created ? format(new Date(user.created), "MMM dd, yyyy") : "-");
+          return /* @__PURE__ */ (0, import_jsx_runtime42.jsx)("div", { className: "text-sm text-muted-foreground", children: user.created ? format(new Date(user.created), "MMM dd, yyyy") : "-" });
         case "lastLogin":
-          return /* @__PURE__ */ React.createElement("div", { className: "text-sm text-muted-foreground" }, formatLastLogin(user.lastLogin));
+          return /* @__PURE__ */ (0, import_jsx_runtime42.jsx)("div", { className: "text-sm text-muted-foreground", children: formatLastLogin(user.lastLogin) });
         case "lastUpdated":
-          return /* @__PURE__ */ React.createElement("div", { className: "text-sm text-muted-foreground" }, user.lastUpdated ? format(new Date(user.lastUpdated), "MMM dd, yyyy") : "-");
+          return /* @__PURE__ */ (0, import_jsx_runtime42.jsx)("div", { className: "text-sm text-muted-foreground", children: user.lastUpdated ? format(new Date(user.lastUpdated), "MMM dd, yyyy") : "-" });
         case "passwordChanged":
-          return /* @__PURE__ */ React.createElement("div", { className: "text-sm text-muted-foreground" }, user.passwordChanged ? format(new Date(user.passwordChanged), "MMM dd, yyyy") : "-");
+          return /* @__PURE__ */ (0, import_jsx_runtime42.jsx)("div", { className: "text-sm text-muted-foreground", children: user.passwordChanged ? format(new Date(user.passwordChanged), "MMM dd, yyyy") : "-" });
         default:
-          return /* @__PURE__ */ React.createElement("div", { className: "text-sm text-foreground" }, "-");
+          return /* @__PURE__ */ (0, import_jsx_runtime42.jsx)("div", { className: "text-sm text-foreground", children: "-" });
       }
     }, "renderCellContent");
     const startIndex = (currentPage - 1) * usersPerPage + 1;
@@ -28883,131 +29065,189 @@ For more information, see https://radix-ui.com/primitives/docs/components/${titl
     const itemHeight = 57;
     const containerHeight = Math.min(600, Math.max(300, users2.length * itemHeight));
     if (isLoading) {
-      return /* @__PURE__ */ React.createElement(Card, null, /* @__PURE__ */ React.createElement(CardContent, { className: "p-6" }, /* @__PURE__ */ React.createElement("div", { className: "space-y-4" }, /* @__PURE__ */ React.createElement(Skeleton, { className: "h-4 w-full" }), /* @__PURE__ */ React.createElement(Skeleton, { className: "h-4 w-full" }), /* @__PURE__ */ React.createElement(Skeleton, { className: "h-4 w-full" }), /* @__PURE__ */ React.createElement(Skeleton, { className: "h-4 w-full" }), /* @__PURE__ */ React.createElement(Skeleton, { className: "h-4 w-full" }))));
+      return /* @__PURE__ */ (0, import_jsx_runtime42.jsx)(Card, { children: /* @__PURE__ */ (0, import_jsx_runtime42.jsx)(CardContent, { className: "p-6", children: /* @__PURE__ */ (0, import_jsx_runtime42.jsxs)("div", { className: "space-y-4", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime42.jsx)(Skeleton, { className: "h-4 w-full" }),
+        /* @__PURE__ */ (0, import_jsx_runtime42.jsx)(Skeleton, { className: "h-4 w-full" }),
+        /* @__PURE__ */ (0, import_jsx_runtime42.jsx)(Skeleton, { className: "h-4 w-full" }),
+        /* @__PURE__ */ (0, import_jsx_runtime42.jsx)(Skeleton, { className: "h-4 w-full" }),
+        /* @__PURE__ */ (0, import_jsx_runtime42.jsx)(Skeleton, { className: "h-4 w-full" })
+      ] }) }) });
     }
-    return /* @__PURE__ */ React.createElement(React.Fragment, null, /* @__PURE__ */ React.createElement(Card, null, /* @__PURE__ */ React.createElement("div", { className: "overflow-x-auto" }, /* @__PURE__ */ React.createElement(
-      DndContext,
-      {
-        sensors,
-        collisionDetection: closestCenter,
-        onDragEnd: handleDragEnd
-      },
-      /* @__PURE__ */ React.createElement(Table, null, /* @__PURE__ */ React.createElement(TableHeader, null, /* @__PURE__ */ React.createElement(TableRow, { className: "group" }, /* @__PURE__ */ React.createElement(
-        SortableContext,
-        {
-          items: orderedColumns,
-          strategy: horizontalListSortingStrategy
-        },
-        orderedColumns.map((columnId) => {
-          const column = COLUMN_DEFINITIONS[columnId];
-          if (!column) return null;
-          return /* @__PURE__ */ React.createElement(
-            SortableTableHeader,
-            {
-              key: columnId,
-              columnId,
-              onColumnReorder,
-              columnConfig
-            },
-            /* @__PURE__ */ React.createElement("div", { className: "flex items-center justify-center space-x-2 w-full" }, /* @__PURE__ */ React.createElement(
+    return /* @__PURE__ */ (0, import_jsx_runtime42.jsxs)(import_jsx_runtime42.Fragment, { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime42.jsxs)(Card, { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime42.jsx)("div", { className: "overflow-x-auto", children: /* @__PURE__ */ (0, import_jsx_runtime42.jsx)(
+          DndContext,
+          {
+            sensors,
+            collisionDetection: closestCenter,
+            onDragEnd: handleDragEnd,
+            children: /* @__PURE__ */ (0, import_jsx_runtime42.jsxs)(Table, { children: [
+              /* @__PURE__ */ (0, import_jsx_runtime42.jsx)(TableHeader, { children: /* @__PURE__ */ (0, import_jsx_runtime42.jsx)(TableRow, { className: "group", children: /* @__PURE__ */ (0, import_jsx_runtime42.jsx)(
+                SortableContext,
+                {
+                  items: orderedColumns,
+                  strategy: horizontalListSortingStrategy,
+                  children: orderedColumns.map((columnId) => {
+                    const column = COLUMN_DEFINITIONS[columnId];
+                    if (!column) return null;
+                    return /* @__PURE__ */ (0, import_jsx_runtime42.jsx)(
+                      SortableTableHeader,
+                      {
+                        columnId,
+                        onColumnReorder,
+                        columnConfig,
+                        children: /* @__PURE__ */ (0, import_jsx_runtime42.jsxs)("div", { className: "flex items-center justify-center space-x-2 w-full", children: [
+                          /* @__PURE__ */ (0, import_jsx_runtime42.jsxs)(
+                            Button,
+                            {
+                              variant: "ghost",
+                              className: "h-auto p-0 font-medium text-xs text-muted-foreground uppercase tracking-wider hover:text-foreground",
+                              onClick: () => handleSort(column.sortKey),
+                              children: [
+                                column.label,
+                                getSortIcon(column.sortKey)
+                              ]
+                            }
+                          ),
+                          column.hasFilter && columnId === "employeeType" && renderEmployeeTypeFilter(),
+                          column.hasFilter && columnId === "mobilePhone" && renderMobilePhoneFilter(),
+                          column.hasFilter && columnId === "manager" && renderManagerFilter(),
+                          column.hasFilter && columnId === "status" && renderStatusFilter(),
+                          column.hasFilter && columnId === "lastLogin" && renderLastLoginFilter()
+                        ] })
+                      },
+                      columnId
+                    );
+                  })
+                }
+              ) }) }),
+              /* @__PURE__ */ (0, import_jsx_runtime42.jsx)(TableBody, { children: users2.map((user) => /* @__PURE__ */ (0, import_jsx_runtime42.jsx)(
+                TableRow,
+                {
+                  className: "table-row-light cursor-pointer",
+                  onClick: () => onUserClick(user.id),
+                  children: orderedColumns.map((columnId) => /* @__PURE__ */ (0, import_jsx_runtime42.jsx)(TableCell, { className: "px-6 py-4 text-center", children: renderCellContent(user, columnId) }, columnId))
+                },
+                user.id
+              )) })
+            ] })
+          }
+        ) }),
+        /* @__PURE__ */ (0, import_jsx_runtime42.jsxs)("div", { className: "bg-background px-6 py-3 border-t border-border flex items-center justify-between", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime42.jsxs)("div", { className: "flex items-center space-x-4", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime42.jsxs)("div", { className: "flex items-center text-sm text-muted-foreground", children: [
+              "Showing ",
+              /* @__PURE__ */ (0, import_jsx_runtime42.jsx)("span", { className: "font-medium mx-1", children: startIndex }),
+              " to",
+              " ",
+              /* @__PURE__ */ (0, import_jsx_runtime42.jsx)("span", { className: "font-medium mx-1", children: endIndex }),
+              " of",
+              " ",
+              /* @__PURE__ */ (0, import_jsx_runtime42.jsx)("span", { className: "font-medium mx-1", children: total }),
+              " users"
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime42.jsxs)("div", { className: "flex items-center space-x-2 text-sm text-muted-foreground", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime42.jsx)("span", { children: "Show:" }),
+              /* @__PURE__ */ (0, import_jsx_runtime42.jsxs)(Select2, { value: usersPerPage.toString(), onValueChange: (value) => onPerPageChange(parseInt(value)), children: [
+                /* @__PURE__ */ (0, import_jsx_runtime42.jsx)(SelectTrigger2, { className: "w-20 h-8", children: /* @__PURE__ */ (0, import_jsx_runtime42.jsx)(SelectValue2, {}) }),
+                /* @__PURE__ */ (0, import_jsx_runtime42.jsxs)(SelectContent2, { children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime42.jsx)(SelectItem2, { value: "10", children: "10" }),
+                  /* @__PURE__ */ (0, import_jsx_runtime42.jsx)(SelectItem2, { value: "25", children: "25" }),
+                  /* @__PURE__ */ (0, import_jsx_runtime42.jsx)(SelectItem2, { value: "50", children: "50" }),
+                  /* @__PURE__ */ (0, import_jsx_runtime42.jsx)(SelectItem2, { value: "100", children: "100" }),
+                  /* @__PURE__ */ (0, import_jsx_runtime42.jsx)(SelectItem2, { value: "200", children: "200" }),
+                  /* @__PURE__ */ (0, import_jsx_runtime42.jsx)(SelectItem2, { value: "500", children: "500" })
+                ] })
+              ] }),
+              /* @__PURE__ */ (0, import_jsx_runtime42.jsx)("span", { children: "per page" })
+            ] })
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime42.jsxs)("div", { className: "flex items-center space-x-2", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime42.jsx)(
               Button,
               {
-                variant: "ghost",
-                className: "h-auto p-0 font-medium text-xs text-muted-foreground uppercase tracking-wider hover:text-foreground",
-                onClick: () => handleSort(column.sortKey)
-              },
-              column.label,
-              getSortIcon(column.sortKey)
-            ), column.hasFilter && columnId === "employeeType" && renderEmployeeTypeFilter(), column.hasFilter && columnId === "mobilePhone" && renderMobilePhoneFilter(), column.hasFilter && columnId === "manager" && renderManagerFilter(), column.hasFilter && columnId === "status" && renderStatusFilter(), column.hasFilter && columnId === "lastLogin" && renderLastLoginFilter())
-          );
-        })
-      ))), /* @__PURE__ */ React.createElement(TableBody, null, users2.map((user) => /* @__PURE__ */ React.createElement(
-        TableRow,
+                variant: "outline",
+                size: "sm",
+                onClick: () => onPageChange(currentPage - 1),
+                disabled: currentPage === 1,
+                children: /* @__PURE__ */ (0, import_jsx_runtime42.jsx)(ChevronLeft, { className: "w-4 h-4" })
+              }
+            ),
+            (() => {
+              const pages = [];
+              const maxVisiblePages = 5;
+              if (totalPages <= maxVisiblePages) {
+                for (let i2 = 1; i2 <= totalPages; i2++) {
+                  pages.push(i2);
+                }
+              } else {
+                if (currentPage <= 3) {
+                  pages.push(1, 2, 3, 4);
+                  if (totalPages > 5) {
+                    pages.push("...", totalPages);
+                  } else {
+                    pages.push(5);
+                  }
+                } else if (currentPage >= totalPages - 2) {
+                  pages.push(1, "...");
+                  for (let i2 = totalPages - 3; i2 <= totalPages; i2++) {
+                    pages.push(i2);
+                  }
+                } else {
+                  pages.push(1, "...");
+                  for (let i2 = currentPage - 1; i2 <= currentPage + 1; i2++) {
+                    pages.push(i2);
+                  }
+                  pages.push("...", totalPages);
+                }
+              }
+              return pages.map((page, index3) => {
+                if (page === "...") {
+                  return /* @__PURE__ */ (0, import_jsx_runtime42.jsx)("span", { className: "px-2 text-gray-400", children: "..." }, `ellipsis-${index3}`);
+                }
+                const pageNum = page;
+                return /* @__PURE__ */ (0, import_jsx_runtime42.jsx)(
+                  Button,
+                  {
+                    variant: currentPage === pageNum ? "default" : "outline",
+                    size: "sm",
+                    onClick: () => onPageChange(pageNum),
+                    className: currentPage === pageNum ? "bg-blue-600 hover:bg-blue-700 text-white" : "",
+                    children: pageNum
+                  },
+                  pageNum
+                );
+              });
+            })(),
+            /* @__PURE__ */ (0, import_jsx_runtime42.jsx)(
+              Button,
+              {
+                variant: "outline",
+                size: "sm",
+                onClick: () => onPageChange(currentPage + 1),
+                disabled: currentPage === totalPages,
+                children: /* @__PURE__ */ (0, import_jsx_runtime42.jsx)(ChevronRight, { className: "w-4 h-4" })
+              }
+            )
+          ] })
+        ] })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime42.jsx)(
+        ConfirmationModal,
         {
-          key: user.id,
-          className: "table-row-light cursor-pointer",
-          onClick: () => onUserClick(user.id)
-        },
-        orderedColumns.map((columnId) => /* @__PURE__ */ React.createElement(TableCell, { key: columnId, className: "px-6 py-4 text-center" }, renderCellContent(user, columnId)))
-      ))))
-    )), /* @__PURE__ */ React.createElement("div", { className: "bg-background px-6 py-3 border-t border-border flex items-center justify-between" }, /* @__PURE__ */ React.createElement("div", { className: "flex items-center space-x-4" }, /* @__PURE__ */ React.createElement("div", { className: "flex items-center text-sm text-muted-foreground" }, "Showing ", /* @__PURE__ */ React.createElement("span", { className: "font-medium mx-1" }, startIndex), " to", " ", /* @__PURE__ */ React.createElement("span", { className: "font-medium mx-1" }, endIndex), " of", " ", /* @__PURE__ */ React.createElement("span", { className: "font-medium mx-1" }, total), " users"), /* @__PURE__ */ React.createElement("div", { className: "flex items-center space-x-2 text-sm text-muted-foreground" }, /* @__PURE__ */ React.createElement("span", null, "Show:"), /* @__PURE__ */ React.createElement(Select2, { value: usersPerPage.toString(), onValueChange: (value) => onPerPageChange(parseInt(value)) }, /* @__PURE__ */ React.createElement(SelectTrigger2, { className: "w-20 h-8" }, /* @__PURE__ */ React.createElement(SelectValue2, null)), /* @__PURE__ */ React.createElement(SelectContent2, null, /* @__PURE__ */ React.createElement(SelectItem2, { value: "10" }, "10"), /* @__PURE__ */ React.createElement(SelectItem2, { value: "25" }, "25"), /* @__PURE__ */ React.createElement(SelectItem2, { value: "50" }, "50"), /* @__PURE__ */ React.createElement(SelectItem2, { value: "100" }, "100"), /* @__PURE__ */ React.createElement(SelectItem2, { value: "200" }, "200"), /* @__PURE__ */ React.createElement(SelectItem2, { value: "500" }, "500"))), /* @__PURE__ */ React.createElement("span", null, "per page"))), /* @__PURE__ */ React.createElement("div", { className: "flex items-center space-x-2" }, /* @__PURE__ */ React.createElement(
-      Button,
-      {
-        variant: "outline",
-        size: "sm",
-        onClick: () => onPageChange(currentPage - 1),
-        disabled: currentPage === 1
-      },
-      /* @__PURE__ */ React.createElement(ChevronLeft, { className: "w-4 h-4" })
-    ), (() => {
-      const pages = [];
-      const maxVisiblePages = 5;
-      if (totalPages <= maxVisiblePages) {
-        for (let i2 = 1; i2 <= totalPages; i2++) {
-          pages.push(i2);
-        }
-      } else {
-        if (currentPage <= 3) {
-          pages.push(1, 2, 3, 4);
-          if (totalPages > 5) {
-            pages.push("...", totalPages);
-          } else {
-            pages.push(5);
-          }
-        } else if (currentPage >= totalPages - 2) {
-          pages.push(1, "...");
-          for (let i2 = totalPages - 3; i2 <= totalPages; i2++) {
-            pages.push(i2);
-          }
-        } else {
-          pages.push(1, "...");
-          for (let i2 = currentPage - 1; i2 <= currentPage + 1; i2++) {
-            pages.push(i2);
-          }
-          pages.push("...", totalPages);
-        }
-      }
-      return pages.map((page, index3) => {
-        if (page === "...") {
-          return /* @__PURE__ */ React.createElement("span", { key: `ellipsis-${index3}`, className: "px-2 text-gray-400" }, "...");
-        }
-        const pageNum = page;
-        return /* @__PURE__ */ React.createElement(
-          Button,
-          {
-            key: pageNum,
-            variant: currentPage === pageNum ? "default" : "outline",
-            size: "sm",
-            onClick: () => onPageChange(pageNum),
-            className: currentPage === pageNum ? "bg-blue-600 hover:bg-blue-700 text-white" : ""
+          open: !!confirmAction,
+          onClose: () => setConfirmAction(null),
+          title: (confirmAction == null ? void 0 : confirmAction.title) || "",
+          message: (confirmAction == null ? void 0 : confirmAction.message) || "",
+          onConfirm: () => {
+            confirmAction == null ? void 0 : confirmAction.action();
+            setConfirmAction(null);
           },
-          pageNum
-        );
-      });
-    })(), /* @__PURE__ */ React.createElement(
-      Button,
-      {
-        variant: "outline",
-        size: "sm",
-        onClick: () => onPageChange(currentPage + 1),
-        disabled: currentPage === totalPages
-      },
-      /* @__PURE__ */ React.createElement(ChevronRight, { className: "w-4 h-4" })
-    )))), /* @__PURE__ */ React.createElement(
-      ConfirmationModal,
-      {
-        open: !!confirmAction,
-        onClose: () => setConfirmAction(null),
-        title: (confirmAction == null ? void 0 : confirmAction.title) || "",
-        message: (confirmAction == null ? void 0 : confirmAction.message) || "",
-        onConfirm: () => {
-          confirmAction == null ? void 0 : confirmAction.action();
-          setConfirmAction(null);
-        },
-        confirmText: (confirmAction == null ? void 0 : confirmAction.type) === "delete" ? "Delete" : "Confirm",
-        variant: (confirmAction == null ? void 0 : confirmAction.type) === "delete" ? "destructive" : "default"
-      }
-    ));
+          confirmText: (confirmAction == null ? void 0 : confirmAction.type) === "delete" ? "Delete" : "Confirm",
+          variant: (confirmAction == null ? void 0 : confirmAction.type) === "delete" ? "destructive" : "default"
+        }
+      )
+    ] });
   }
   __name(UserTable, "UserTable");
 
@@ -30702,13 +30942,14 @@ For more information, see https://radix-ui.com/primitives/docs/components/${titl
 
   // client/src/components/ui/form.tsx
   var React64 = __toESM(require_react(), 1);
+  var import_jsx_runtime43 = __toESM(require_jsx_runtime(), 1);
   var Form = FormProvider;
   var FormFieldContext = React64.createContext(
     {}
   );
   var FormField = /* @__PURE__ */ __name((_a121) => {
     var props = __objRest(_a121, []);
-    return /* @__PURE__ */ React64.createElement(FormFieldContext.Provider, { value: { name: props.name } }, /* @__PURE__ */ React64.createElement(Controller, __spreadValues({}, props)));
+    return /* @__PURE__ */ (0, import_jsx_runtime43.jsx)(FormFieldContext.Provider, { value: { name: props.name }, children: /* @__PURE__ */ (0, import_jsx_runtime43.jsx)(Controller, __spreadValues({}, props)) });
   }, "FormField");
   var useFormField = /* @__PURE__ */ __name(() => {
     const fieldContext = React64.useContext(FormFieldContext);
@@ -30733,13 +30974,13 @@ For more information, see https://radix-ui.com/primitives/docs/components/${titl
   var FormItem = React64.forwardRef((_a121, ref) => {
     var _b93 = _a121, { className } = _b93, props = __objRest(_b93, ["className"]);
     const id = React64.useId();
-    return /* @__PURE__ */ React64.createElement(FormItemContext.Provider, { value: { id } }, /* @__PURE__ */ React64.createElement("div", __spreadValues({ ref, className: cn("space-y-2", className) }, props)));
+    return /* @__PURE__ */ (0, import_jsx_runtime43.jsx)(FormItemContext.Provider, { value: { id }, children: /* @__PURE__ */ (0, import_jsx_runtime43.jsx)("div", __spreadValues({ ref, className: cn("space-y-2", className) }, props)) });
   });
   FormItem.displayName = "FormItem";
   var FormLabel = React64.forwardRef((_a121, ref) => {
     var _b93 = _a121, { className } = _b93, props = __objRest(_b93, ["className"]);
     const { error, formItemId } = useFormField();
-    return /* @__PURE__ */ React64.createElement(
+    return /* @__PURE__ */ (0, import_jsx_runtime43.jsx)(
       Label2,
       __spreadValues({
         ref,
@@ -30752,7 +30993,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${titl
   var FormControl = React64.forwardRef((_a121, ref) => {
     var props = __objRest(_a121, []);
     const { error, formItemId, formDescriptionId, formMessageId } = useFormField();
-    return /* @__PURE__ */ React64.createElement(
+    return /* @__PURE__ */ (0, import_jsx_runtime43.jsx)(
       Slot,
       __spreadValues({
         ref,
@@ -30766,7 +31007,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${titl
   var FormDescription = React64.forwardRef((_a121, ref) => {
     var _b93 = _a121, { className } = _b93, props = __objRest(_b93, ["className"]);
     const { formDescriptionId } = useFormField();
-    return /* @__PURE__ */ React64.createElement(
+    return /* @__PURE__ */ (0, import_jsx_runtime43.jsx)(
       "p",
       __spreadValues({
         ref,
@@ -30784,14 +31025,15 @@ For more information, see https://radix-ui.com/primitives/docs/components/${titl
     if (!body) {
       return null;
     }
-    return /* @__PURE__ */ React64.createElement(
+    return /* @__PURE__ */ (0, import_jsx_runtime43.jsx)(
       "p",
-      __spreadValues({
+      __spreadProps(__spreadValues({
         ref,
         id: formMessageId,
         className: cn("text-sm font-medium text-destructive", className)
-      }, props),
-      body
+      }, props), {
+        children: body
+      })
     );
   });
   FormMessage.displayName = "FormMessage";
@@ -38122,6 +38364,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${titl
   });
 
   // client/src/components/create-user-modal.tsx
+  var import_jsx_runtime44 = __toESM(require_jsx_runtime(), 1);
   function CreateUserModal({ open, onClose, onSuccess }) {
     const { toast: toast2 } = useToast();
     const [selectedGroups, setSelectedGroups] = (0, import_react16.useState)([]);
@@ -38263,161 +38506,265 @@ For more information, see https://radix-ui.com/primitives/docs/components/${titl
       "Finance Team",
       "Managers"
     ];
-    return /* @__PURE__ */ React.createElement(Dialog2, { open, onOpenChange: handleClose }, /* @__PURE__ */ React.createElement(DialogContent2, { className: "max-w-2xl max-h-screen overflow-y-auto" }, /* @__PURE__ */ React.createElement(DialogHeader, null, /* @__PURE__ */ React.createElement("div", { className: "flex items-center justify-between" }, /* @__PURE__ */ React.createElement(DialogTitle2, { className: "text-lg font-semibold text-gray-900" }, "Create New User"), /* @__PURE__ */ React.createElement(
-      Button,
-      {
-        variant: "ghost",
-        size: "icon",
-        onClick: handleClose,
-        className: "text-gray-400 hover:text-gray-600"
-      },
-      /* @__PURE__ */ React.createElement(X, { className: "w-4 h-4" })
-    ))), /* @__PURE__ */ React.createElement(Form, __spreadValues({}, form), /* @__PURE__ */ React.createElement("form", { onSubmit: form.handleSubmit(onSubmit), className: "space-y-6" }, /* @__PURE__ */ React.createElement("div", { className: "grid grid-cols-1 md:grid-cols-2 gap-4" }, /* @__PURE__ */ React.createElement(
-      FormField,
-      {
-        control: form.control,
-        name: "firstName",
-        render: ({ field }) => /* @__PURE__ */ React.createElement(FormItem, null, /* @__PURE__ */ React.createElement(FormLabel, null, "First Name *"), /* @__PURE__ */ React.createElement(FormControl, null, /* @__PURE__ */ React.createElement(Input, __spreadValues({ placeholder: "Enter first name" }, field))), /* @__PURE__ */ React.createElement(FormMessage, null))
-      }
-    ), /* @__PURE__ */ React.createElement(
-      FormField,
-      {
-        control: form.control,
-        name: "lastName",
-        render: ({ field }) => /* @__PURE__ */ React.createElement(FormItem, null, /* @__PURE__ */ React.createElement(FormLabel, null, "Last Name *"), /* @__PURE__ */ React.createElement(FormControl, null, /* @__PURE__ */ React.createElement(Input, __spreadValues({ placeholder: "Enter last name" }, field))), /* @__PURE__ */ React.createElement(FormMessage, null))
-      }
-    )), /* @__PURE__ */ React.createElement("div", { className: "grid grid-cols-1 md:grid-cols-2 gap-4" }, /* @__PURE__ */ React.createElement(
-      FormField,
-      {
-        control: form.control,
-        name: "email",
-        render: ({ field }) => /* @__PURE__ */ React.createElement(FormItem, null, /* @__PURE__ */ React.createElement(FormLabel, null, "Email Username *"), /* @__PURE__ */ React.createElement(FormControl, null, /* @__PURE__ */ React.createElement("div", { className: "flex" }, /* @__PURE__ */ React.createElement(
-          Input,
+    return /* @__PURE__ */ (0, import_jsx_runtime44.jsx)(Dialog2, { open, onOpenChange: handleClose, children: /* @__PURE__ */ (0, import_jsx_runtime44.jsxs)(DialogContent2, { className: "max-w-2xl max-h-screen overflow-y-auto", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime44.jsx)(DialogHeader, { children: /* @__PURE__ */ (0, import_jsx_runtime44.jsxs)("div", { className: "flex items-center justify-between", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime44.jsx)(DialogTitle2, { className: "text-lg font-semibold text-gray-900", children: "Create New User" }),
+        /* @__PURE__ */ (0, import_jsx_runtime44.jsx)(
+          Button,
           {
-            placeholder: "username",
-            value: field.value ? field.value.replace("@mazetx.com", "") : "",
-            onChange: (e) => {
-              const username = e.target.value;
-              const fullEmail = username ? `${username}@mazetx.com` : "";
-              field.onChange(fullEmail);
-              form.setValue("login", fullEmail);
-            },
-            className: "rounded-r-none"
+            variant: "ghost",
+            size: "icon",
+            onClick: handleClose,
+            className: "text-gray-400 hover:text-gray-600",
+            children: /* @__PURE__ */ (0, import_jsx_runtime44.jsx)(X, { className: "w-4 h-4" })
           }
-        ), /* @__PURE__ */ React.createElement("div", { className: "flex items-center px-3 bg-gray-50 border border-l-0 border-gray-300 rounded-r-md text-sm text-gray-500" }, "@mazetx.com"))), /* @__PURE__ */ React.createElement(FormMessage, null))
-      }
-    ), /* @__PURE__ */ React.createElement(
-      FormField,
-      {
-        control: form.control,
-        name: "login",
-        render: ({ field }) => /* @__PURE__ */ React.createElement(FormItem, null, /* @__PURE__ */ React.createElement(FormLabel, null, "Login *"), /* @__PURE__ */ React.createElement(FormControl, null, /* @__PURE__ */ React.createElement(
-          Input,
-          __spreadProps(__spreadValues({
-            placeholder: "Login will auto-populate"
-          }, field), {
-            className: "bg-gray-50",
-            readOnly: true
-          })
-        )), /* @__PURE__ */ React.createElement(FormMessage, null))
-      }
-    )), /* @__PURE__ */ React.createElement("div", { className: "grid grid-cols-1 md:grid-cols-2 gap-4" }, /* @__PURE__ */ React.createElement(
-      FormField,
-      {
-        control: form.control,
-        name: "mobilePhone",
-        render: ({ field }) => /* @__PURE__ */ React.createElement(FormItem, null, /* @__PURE__ */ React.createElement(FormLabel, null, "Mobile Phone"), /* @__PURE__ */ React.createElement(FormControl, null, /* @__PURE__ */ React.createElement(Input, __spreadValues({ type: "tel", placeholder: "Enter mobile phone" }, field))), /* @__PURE__ */ React.createElement(FormMessage, null))
-      }
-    ), /* @__PURE__ */ React.createElement(
-      FormField,
-      {
-        control: form.control,
-        name: "department",
-        render: ({ field }) => /* @__PURE__ */ React.createElement(FormItem, null, /* @__PURE__ */ React.createElement(FormLabel, null, "Department"), /* @__PURE__ */ React.createElement(Select2, { onValueChange: field.onChange, value: field.value || "" }, /* @__PURE__ */ React.createElement(FormControl, null, /* @__PURE__ */ React.createElement(SelectTrigger2, null, /* @__PURE__ */ React.createElement(SelectValue2, { placeholder: "Select Department" }))), /* @__PURE__ */ React.createElement(SelectContent2, null, /* @__PURE__ */ React.createElement(SelectItem2, { value: "none" }, "Select Department"), /* @__PURE__ */ React.createElement(SelectItem2, { value: "Engineering" }, "Engineering"), /* @__PURE__ */ React.createElement(SelectItem2, { value: "Marketing" }, "Marketing"), /* @__PURE__ */ React.createElement(SelectItem2, { value: "Sales" }, "Sales"), /* @__PURE__ */ React.createElement(SelectItem2, { value: "HR" }, "Human Resources"), /* @__PURE__ */ React.createElement(SelectItem2, { value: "Finance" }, "Finance"))), /* @__PURE__ */ React.createElement(FormMessage, null))
-      }
-    )), /* @__PURE__ */ React.createElement(
-      FormField,
-      {
-        control: form.control,
-        name: "title",
-        render: ({ field }) => /* @__PURE__ */ React.createElement(FormItem, null, /* @__PURE__ */ React.createElement(FormLabel, null, "Job Title"), /* @__PURE__ */ React.createElement(FormControl, null, /* @__PURE__ */ React.createElement(Input, __spreadValues({ placeholder: "Enter job title" }, field))), /* @__PURE__ */ React.createElement(FormMessage, null))
-      }
-    ), /* @__PURE__ */ React.createElement(
-      FormField,
-      {
-        control: form.control,
-        name: "employeeType",
-        render: ({ field }) => /* @__PURE__ */ React.createElement(FormItem, null, /* @__PURE__ */ React.createElement(FormLabel, null, "Employee Type"), /* @__PURE__ */ React.createElement(Select2, { onValueChange: field.onChange, value: field.value || "" }, /* @__PURE__ */ React.createElement(FormControl, null, /* @__PURE__ */ React.createElement(SelectTrigger2, null, /* @__PURE__ */ React.createElement(SelectValue2, { placeholder: "Select Employee Type" }))), /* @__PURE__ */ React.createElement(SelectContent2, null, /* @__PURE__ */ React.createElement(SelectItem2, { value: "Employee" }, "Employee"), /* @__PURE__ */ React.createElement(SelectItem2, { value: "Contractor" }, "Contractor"), /* @__PURE__ */ React.createElement(SelectItem2, { value: "Intern" }, "Intern"), /* @__PURE__ */ React.createElement(SelectItem2, { value: "Part Time" }, "Part Time"))), /* @__PURE__ */ React.createElement(FormMessage, null))
-      }
-    ), /* @__PURE__ */ React.createElement(
-      FormField,
-      {
-        control: form.control,
-        name: "manager",
-        render: ({ field }) => /* @__PURE__ */ React.createElement(FormItem, null, /* @__PURE__ */ React.createElement(FormLabel, null, "Manager"), /* @__PURE__ */ React.createElement(FormControl, null, /* @__PURE__ */ React.createElement("div", { className: "relative" }, /* @__PURE__ */ React.createElement(
-          Input,
-          __spreadProps(__spreadValues({}, field), {
-            onChange: (e) => {
-              field.onChange(e);
-              setManagerSearch(e.target.value);
-              setShowManagerDropdown(e.target.value.length > 0);
-              if (e.target.value === "") {
-                setSelectedManager(null);
-              }
-            },
-            placeholder: "Type to search for manager..."
-          })
-        ), managerSearch && filteredManagers.length > 0 && /* @__PURE__ */ React.createElement("div", { className: "absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto" }, filteredManagers.map((manager) => /* @__PURE__ */ React.createElement(
-          "div",
-          {
-            key: manager.id,
-            className: "px-3 py-2 cursor-pointer hover:bg-gray-100",
-            onClick: () => {
-              const fullName = `${manager.firstName} ${manager.lastName}`;
-              field.onChange(fullName);
-              setSelectedManager(manager);
-              setManagerSearch("");
-              setShowManagerDropdown(false);
+        )
+      ] }) }),
+      /* @__PURE__ */ (0, import_jsx_runtime44.jsx)(Form, __spreadProps(__spreadValues({}, form), { children: /* @__PURE__ */ (0, import_jsx_runtime44.jsxs)("form", { onSubmit: form.handleSubmit(onSubmit), className: "space-y-6", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime44.jsxs)("div", { className: "grid grid-cols-1 md:grid-cols-2 gap-4", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime44.jsx)(
+            FormField,
+            {
+              control: form.control,
+              name: "firstName",
+              render: ({ field }) => /* @__PURE__ */ (0, import_jsx_runtime44.jsxs)(FormItem, { children: [
+                /* @__PURE__ */ (0, import_jsx_runtime44.jsx)(FormLabel, { children: "First Name *" }),
+                /* @__PURE__ */ (0, import_jsx_runtime44.jsx)(FormControl, { children: /* @__PURE__ */ (0, import_jsx_runtime44.jsx)(Input, __spreadValues({ placeholder: "Enter first name" }, field)) }),
+                /* @__PURE__ */ (0, import_jsx_runtime44.jsx)(FormMessage, {})
+              ] })
             }
-          },
-          /* @__PURE__ */ React.createElement("div", { className: "font-medium" }, manager.firstName, " ", manager.lastName),
-          /* @__PURE__ */ React.createElement("div", { className: "text-sm text-gray-500" }, manager.email),
-          manager.title && /* @__PURE__ */ React.createElement("div", { className: "text-sm text-gray-400" }, manager.title)
-        ))))), /* @__PURE__ */ React.createElement(FormMessage, null))
-      }
-    ), /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement(Label2, { className: "text-sm font-medium text-gray-700 mb-2 block" }, "Groups"), /* @__PURE__ */ React.createElement("div", { className: "space-y-2" }, availableGroups.map((group) => /* @__PURE__ */ React.createElement("div", { key: group, className: "flex items-center space-x-2" }, /* @__PURE__ */ React.createElement(
-      Checkbox2,
-      {
-        id: `group-${group}`,
-        checked: selectedGroups.includes(group),
-        onCheckedChange: (checked) => handleGroupToggle(group, checked)
-      }
-    ), /* @__PURE__ */ React.createElement(Label2, { htmlFor: `group-${group}`, className: "text-sm text-gray-700" }, group))))), /* @__PURE__ */ React.createElement(
-      FormField,
-      {
-        control: form.control,
-        name: "sendActivationEmail",
-        render: ({ field }) => /* @__PURE__ */ React.createElement(FormItem, { className: "flex flex-row items-start space-x-3 space-y-0" }, /* @__PURE__ */ React.createElement(FormControl, null, /* @__PURE__ */ React.createElement(
-          Checkbox2,
+          ),
+          /* @__PURE__ */ (0, import_jsx_runtime44.jsx)(
+            FormField,
+            {
+              control: form.control,
+              name: "lastName",
+              render: ({ field }) => /* @__PURE__ */ (0, import_jsx_runtime44.jsxs)(FormItem, { children: [
+                /* @__PURE__ */ (0, import_jsx_runtime44.jsx)(FormLabel, { children: "Last Name *" }),
+                /* @__PURE__ */ (0, import_jsx_runtime44.jsx)(FormControl, { children: /* @__PURE__ */ (0, import_jsx_runtime44.jsx)(Input, __spreadValues({ placeholder: "Enter last name" }, field)) }),
+                /* @__PURE__ */ (0, import_jsx_runtime44.jsx)(FormMessage, {})
+              ] })
+            }
+          )
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime44.jsxs)("div", { className: "grid grid-cols-1 md:grid-cols-2 gap-4", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime44.jsx)(
+            FormField,
+            {
+              control: form.control,
+              name: "email",
+              render: ({ field }) => /* @__PURE__ */ (0, import_jsx_runtime44.jsxs)(FormItem, { children: [
+                /* @__PURE__ */ (0, import_jsx_runtime44.jsx)(FormLabel, { children: "Email Username *" }),
+                /* @__PURE__ */ (0, import_jsx_runtime44.jsx)(FormControl, { children: /* @__PURE__ */ (0, import_jsx_runtime44.jsxs)("div", { className: "flex", children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime44.jsx)(
+                    Input,
+                    {
+                      placeholder: "username",
+                      value: field.value ? field.value.replace("@mazetx.com", "") : "",
+                      onChange: (e) => {
+                        const username = e.target.value;
+                        const fullEmail = username ? `${username}@mazetx.com` : "";
+                        field.onChange(fullEmail);
+                        form.setValue("login", fullEmail);
+                      },
+                      className: "rounded-r-none"
+                    }
+                  ),
+                  /* @__PURE__ */ (0, import_jsx_runtime44.jsx)("div", { className: "flex items-center px-3 bg-gray-50 border border-l-0 border-gray-300 rounded-r-md text-sm text-gray-500", children: "@mazetx.com" })
+                ] }) }),
+                /* @__PURE__ */ (0, import_jsx_runtime44.jsx)(FormMessage, {})
+              ] })
+            }
+          ),
+          /* @__PURE__ */ (0, import_jsx_runtime44.jsx)(
+            FormField,
+            {
+              control: form.control,
+              name: "login",
+              render: ({ field }) => /* @__PURE__ */ (0, import_jsx_runtime44.jsxs)(FormItem, { children: [
+                /* @__PURE__ */ (0, import_jsx_runtime44.jsx)(FormLabel, { children: "Login *" }),
+                /* @__PURE__ */ (0, import_jsx_runtime44.jsx)(FormControl, { children: /* @__PURE__ */ (0, import_jsx_runtime44.jsx)(
+                  Input,
+                  __spreadProps(__spreadValues({
+                    placeholder: "Login will auto-populate"
+                  }, field), {
+                    className: "bg-gray-50",
+                    readOnly: true
+                  })
+                ) }),
+                /* @__PURE__ */ (0, import_jsx_runtime44.jsx)(FormMessage, {})
+              ] })
+            }
+          )
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime44.jsxs)("div", { className: "grid grid-cols-1 md:grid-cols-2 gap-4", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime44.jsx)(
+            FormField,
+            {
+              control: form.control,
+              name: "mobilePhone",
+              render: ({ field }) => /* @__PURE__ */ (0, import_jsx_runtime44.jsxs)(FormItem, { children: [
+                /* @__PURE__ */ (0, import_jsx_runtime44.jsx)(FormLabel, { children: "Mobile Phone" }),
+                /* @__PURE__ */ (0, import_jsx_runtime44.jsx)(FormControl, { children: /* @__PURE__ */ (0, import_jsx_runtime44.jsx)(Input, __spreadValues({ type: "tel", placeholder: "Enter mobile phone" }, field)) }),
+                /* @__PURE__ */ (0, import_jsx_runtime44.jsx)(FormMessage, {})
+              ] })
+            }
+          ),
+          /* @__PURE__ */ (0, import_jsx_runtime44.jsx)(
+            FormField,
+            {
+              control: form.control,
+              name: "department",
+              render: ({ field }) => /* @__PURE__ */ (0, import_jsx_runtime44.jsxs)(FormItem, { children: [
+                /* @__PURE__ */ (0, import_jsx_runtime44.jsx)(FormLabel, { children: "Department" }),
+                /* @__PURE__ */ (0, import_jsx_runtime44.jsxs)(Select2, { onValueChange: field.onChange, value: field.value || "", children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime44.jsx)(FormControl, { children: /* @__PURE__ */ (0, import_jsx_runtime44.jsx)(SelectTrigger2, { children: /* @__PURE__ */ (0, import_jsx_runtime44.jsx)(SelectValue2, { placeholder: "Select Department" }) }) }),
+                  /* @__PURE__ */ (0, import_jsx_runtime44.jsxs)(SelectContent2, { children: [
+                    /* @__PURE__ */ (0, import_jsx_runtime44.jsx)(SelectItem2, { value: "none", children: "Select Department" }),
+                    /* @__PURE__ */ (0, import_jsx_runtime44.jsx)(SelectItem2, { value: "Engineering", children: "Engineering" }),
+                    /* @__PURE__ */ (0, import_jsx_runtime44.jsx)(SelectItem2, { value: "Marketing", children: "Marketing" }),
+                    /* @__PURE__ */ (0, import_jsx_runtime44.jsx)(SelectItem2, { value: "Sales", children: "Sales" }),
+                    /* @__PURE__ */ (0, import_jsx_runtime44.jsx)(SelectItem2, { value: "HR", children: "Human Resources" }),
+                    /* @__PURE__ */ (0, import_jsx_runtime44.jsx)(SelectItem2, { value: "Finance", children: "Finance" })
+                  ] })
+                ] }),
+                /* @__PURE__ */ (0, import_jsx_runtime44.jsx)(FormMessage, {})
+              ] })
+            }
+          )
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime44.jsx)(
+          FormField,
           {
-            checked: field.value,
-            onCheckedChange: field.onChange
+            control: form.control,
+            name: "title",
+            render: ({ field }) => /* @__PURE__ */ (0, import_jsx_runtime44.jsxs)(FormItem, { children: [
+              /* @__PURE__ */ (0, import_jsx_runtime44.jsx)(FormLabel, { children: "Job Title" }),
+              /* @__PURE__ */ (0, import_jsx_runtime44.jsx)(FormControl, { children: /* @__PURE__ */ (0, import_jsx_runtime44.jsx)(Input, __spreadValues({ placeholder: "Enter job title" }, field)) }),
+              /* @__PURE__ */ (0, import_jsx_runtime44.jsx)(FormMessage, {})
+            ] })
           }
-        )), /* @__PURE__ */ React.createElement("div", { className: "space-y-1 leading-none" }, /* @__PURE__ */ React.createElement(FormLabel, null, "Send activation email to user")))
-      }
-    ), /* @__PURE__ */ React.createElement("div", { className: "flex justify-end space-x-3 pt-4 border-t border-gray-200" }, /* @__PURE__ */ React.createElement(Button, { type: "button", variant: "outline", onClick: handleClose }, "Cancel"), /* @__PURE__ */ React.createElement(
-      Button,
-      {
-        type: "submit",
-        className: "bg-blue-600 hover:bg-blue-700 text-white",
-        disabled: createUserMutation.isPending
-      },
-      createUserMutation.isPending ? "Creating..." : "Create User"
-    ))))));
+        ),
+        /* @__PURE__ */ (0, import_jsx_runtime44.jsx)(
+          FormField,
+          {
+            control: form.control,
+            name: "employeeType",
+            render: ({ field }) => /* @__PURE__ */ (0, import_jsx_runtime44.jsxs)(FormItem, { children: [
+              /* @__PURE__ */ (0, import_jsx_runtime44.jsx)(FormLabel, { children: "Employee Type" }),
+              /* @__PURE__ */ (0, import_jsx_runtime44.jsxs)(Select2, { onValueChange: field.onChange, value: field.value || "", children: [
+                /* @__PURE__ */ (0, import_jsx_runtime44.jsx)(FormControl, { children: /* @__PURE__ */ (0, import_jsx_runtime44.jsx)(SelectTrigger2, { children: /* @__PURE__ */ (0, import_jsx_runtime44.jsx)(SelectValue2, { placeholder: "Select Employee Type" }) }) }),
+                /* @__PURE__ */ (0, import_jsx_runtime44.jsxs)(SelectContent2, { children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime44.jsx)(SelectItem2, { value: "Employee", children: "Employee" }),
+                  /* @__PURE__ */ (0, import_jsx_runtime44.jsx)(SelectItem2, { value: "Contractor", children: "Contractor" }),
+                  /* @__PURE__ */ (0, import_jsx_runtime44.jsx)(SelectItem2, { value: "Intern", children: "Intern" }),
+                  /* @__PURE__ */ (0, import_jsx_runtime44.jsx)(SelectItem2, { value: "Part Time", children: "Part Time" })
+                ] })
+              ] }),
+              /* @__PURE__ */ (0, import_jsx_runtime44.jsx)(FormMessage, {})
+            ] })
+          }
+        ),
+        /* @__PURE__ */ (0, import_jsx_runtime44.jsx)(
+          FormField,
+          {
+            control: form.control,
+            name: "manager",
+            render: ({ field }) => /* @__PURE__ */ (0, import_jsx_runtime44.jsxs)(FormItem, { children: [
+              /* @__PURE__ */ (0, import_jsx_runtime44.jsx)(FormLabel, { children: "Manager" }),
+              /* @__PURE__ */ (0, import_jsx_runtime44.jsx)(FormControl, { children: /* @__PURE__ */ (0, import_jsx_runtime44.jsxs)("div", { className: "relative", children: [
+                /* @__PURE__ */ (0, import_jsx_runtime44.jsx)(
+                  Input,
+                  __spreadProps(__spreadValues({}, field), {
+                    onChange: (e) => {
+                      field.onChange(e);
+                      setManagerSearch(e.target.value);
+                      setShowManagerDropdown(e.target.value.length > 0);
+                      if (e.target.value === "") {
+                        setSelectedManager(null);
+                      }
+                    },
+                    placeholder: "Type to search for manager..."
+                  })
+                ),
+                managerSearch && filteredManagers.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime44.jsx)("div", { className: "absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto", children: filteredManagers.map((manager) => /* @__PURE__ */ (0, import_jsx_runtime44.jsxs)(
+                  "div",
+                  {
+                    className: "px-3 py-2 cursor-pointer hover:bg-gray-100",
+                    onClick: () => {
+                      const fullName = `${manager.firstName} ${manager.lastName}`;
+                      field.onChange(fullName);
+                      setSelectedManager(manager);
+                      setManagerSearch("");
+                      setShowManagerDropdown(false);
+                    },
+                    children: [
+                      /* @__PURE__ */ (0, import_jsx_runtime44.jsxs)("div", { className: "font-medium", children: [
+                        manager.firstName,
+                        " ",
+                        manager.lastName
+                      ] }),
+                      /* @__PURE__ */ (0, import_jsx_runtime44.jsx)("div", { className: "text-sm text-gray-500", children: manager.email }),
+                      manager.title && /* @__PURE__ */ (0, import_jsx_runtime44.jsx)("div", { className: "text-sm text-gray-400", children: manager.title })
+                    ]
+                  },
+                  manager.id
+                )) })
+              ] }) }),
+              /* @__PURE__ */ (0, import_jsx_runtime44.jsx)(FormMessage, {})
+            ] })
+          }
+        ),
+        /* @__PURE__ */ (0, import_jsx_runtime44.jsxs)("div", { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime44.jsx)(Label2, { className: "text-sm font-medium text-gray-700 mb-2 block", children: "Groups" }),
+          /* @__PURE__ */ (0, import_jsx_runtime44.jsx)("div", { className: "space-y-2", children: availableGroups.map((group) => /* @__PURE__ */ (0, import_jsx_runtime44.jsxs)("div", { className: "flex items-center space-x-2", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime44.jsx)(
+              Checkbox2,
+              {
+                id: `group-${group}`,
+                checked: selectedGroups.includes(group),
+                onCheckedChange: (checked) => handleGroupToggle(group, checked)
+              }
+            ),
+            /* @__PURE__ */ (0, import_jsx_runtime44.jsx)(Label2, { htmlFor: `group-${group}`, className: "text-sm text-gray-700", children: group })
+          ] }, group)) })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime44.jsx)(
+          FormField,
+          {
+            control: form.control,
+            name: "sendActivationEmail",
+            render: ({ field }) => /* @__PURE__ */ (0, import_jsx_runtime44.jsxs)(FormItem, { className: "flex flex-row items-start space-x-3 space-y-0", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime44.jsx)(FormControl, { children: /* @__PURE__ */ (0, import_jsx_runtime44.jsx)(
+                Checkbox2,
+                {
+                  checked: field.value,
+                  onCheckedChange: field.onChange
+                }
+              ) }),
+              /* @__PURE__ */ (0, import_jsx_runtime44.jsx)("div", { className: "space-y-1 leading-none", children: /* @__PURE__ */ (0, import_jsx_runtime44.jsx)(FormLabel, { children: "Send activation email to user" }) })
+            ] })
+          }
+        ),
+        /* @__PURE__ */ (0, import_jsx_runtime44.jsxs)("div", { className: "flex justify-end space-x-3 pt-4 border-t border-gray-200", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime44.jsx)(Button, { type: "button", variant: "outline", onClick: handleClose, children: "Cancel" }),
+          /* @__PURE__ */ (0, import_jsx_runtime44.jsx)(
+            Button,
+            {
+              type: "submit",
+              className: "bg-blue-600 hover:bg-blue-700 text-white",
+              disabled: createUserMutation.isPending,
+              children: createUserMutation.isPending ? "Creating..." : "Create User"
+            }
+          )
+        ] })
+      ] }) }))
+    ] }) });
   }
   __name(CreateUserModal, "CreateUserModal");
 
   // client/src/pages/dashboard.tsx
+  var import_jsx_runtime45 = __toESM(require_jsx_runtime(), 1);
   function Dashboard() {
     var _a121, _b93;
     const [, setLocation] = useLocation();
@@ -38440,56 +38787,121 @@ For more information, see https://radix-ui.com/primitives/docs/components/${titl
       refetch();
     }, "handleRefresh");
     const totalPages = Math.ceil(((data == null ? void 0 : data.total) || 0) / usersPerPage);
-    return /* @__PURE__ */ React.createElement("div", { className: "flex-1 flex flex-col" }, /* @__PURE__ */ React.createElement("header", { className: "bg-white border-b border-gray-200 px-6 py-4" }, /* @__PURE__ */ React.createElement("div", { className: "flex items-center justify-between" }, /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("nav", { className: "flex text-sm text-gray-500 mb-1" }, /* @__PURE__ */ React.createElement("span", null, "Directory"), /* @__PURE__ */ React.createElement("span", { className: "mx-2" }, "/"), /* @__PURE__ */ React.createElement("span", { className: "text-gray-900 font-medium" }, "Users")), /* @__PURE__ */ React.createElement("h2", { className: "text-2xl font-semibold text-gray-900" }, "User Management")), /* @__PURE__ */ React.createElement("div", { className: "flex items-center space-x-3" }, /* @__PURE__ */ React.createElement(
-      Button,
-      {
-        onClick: () => setIsCreateModalOpen(true),
-        className: "bg-blue-600 hover:bg-blue-700 text-white"
-      },
-      /* @__PURE__ */ React.createElement(Plus, { className: "w-4 h-4 mr-2" }),
-      "Add User"
-    ), /* @__PURE__ */ React.createElement("div", { className: "flex items-center space-x-2 px-3 py-2 bg-gray-50 rounded-lg border" }, /* @__PURE__ */ React.createElement("div", { className: "w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center" }, /* @__PURE__ */ React.createElement("span", { className: "text-white text-sm font-medium" }, (_a121 = currentUser == null ? void 0 : currentUser.firstName) == null ? void 0 : _a121[0], (_b93 = currentUser == null ? void 0 : currentUser.lastName) == null ? void 0 : _b93[0])), /* @__PURE__ */ React.createElement("div", { className: "text-sm" }, /* @__PURE__ */ React.createElement("p", { className: "font-medium text-gray-900" }, currentUser == null ? void 0 : currentUser.firstName, " ", currentUser == null ? void 0 : currentUser.lastName), /* @__PURE__ */ React.createElement("p", { className: "text-gray-500" }, currentUser == null ? void 0 : currentUser.email)))))), /* @__PURE__ */ React.createElement("div", { className: "flex-1 overflow-auto p-6" }, /* @__PURE__ */ React.createElement("div", { className: "mb-6" }, /* @__PURE__ */ React.createElement("div", { className: "flex flex-col sm:flex-row gap-4" }, /* @__PURE__ */ React.createElement("div", { className: "flex-1 relative" }, /* @__PURE__ */ React.createElement(Search, { className: "absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" }), /* @__PURE__ */ React.createElement(
-      Input,
-      {
-        type: "text",
-        placeholder: "Search users...",
-        value: searchQuery,
-        onChange: (e) => setSearchQuery(e.target.value),
-        className: "pl-10"
-      }
-    )), /* @__PURE__ */ React.createElement("div", { className: "flex gap-3" }, /* @__PURE__ */ React.createElement(Select2, { value: statusFilter, onValueChange: setStatusFilter }, /* @__PURE__ */ React.createElement(SelectTrigger2, { className: "w-40" }, /* @__PURE__ */ React.createElement(SelectValue2, { placeholder: "All Status" })), /* @__PURE__ */ React.createElement(SelectContent2, null, /* @__PURE__ */ React.createElement(SelectItem2, { value: "all" }, "All Status"), /* @__PURE__ */ React.createElement(SelectItem2, { value: "ACTIVE" }, "Active"), /* @__PURE__ */ React.createElement(SelectItem2, { value: "SUSPENDED" }, "Suspended"), /* @__PURE__ */ React.createElement(SelectItem2, { value: "DEPROVISIONED" }, "Deprovisioned"))), /* @__PURE__ */ React.createElement(Select2, { value: departmentFilter, onValueChange: setDepartmentFilter }, /* @__PURE__ */ React.createElement(SelectTrigger2, { className: "w-40" }, /* @__PURE__ */ React.createElement(SelectValue2, { placeholder: "All Departments" })), /* @__PURE__ */ React.createElement(SelectContent2, null, /* @__PURE__ */ React.createElement(SelectItem2, { value: "all" }, "All Departments"), /* @__PURE__ */ React.createElement(SelectItem2, { value: "Information Technology" }, "IT"), /* @__PURE__ */ React.createElement(SelectItem2, { value: "Human Resources" }, "HR"), /* @__PURE__ */ React.createElement(SelectItem2, { value: "Marketing" }, "Marketing"), /* @__PURE__ */ React.createElement(SelectItem2, { value: "Sales" }, "Sales"), /* @__PURE__ */ React.createElement(SelectItem2, { value: "Finance" }, "Finance"))), /* @__PURE__ */ React.createElement(
-      Button,
-      {
-        variant: "outline",
-        onClick: handleRefresh,
-        disabled: isLoading
-      },
-      /* @__PURE__ */ React.createElement(RotateCcw, { className: "w-4 h-4 mr-2" }),
-      "Refresh"
-    )))), /* @__PURE__ */ React.createElement(
-      UserTable,
-      {
-        users: (data == null ? void 0 : data.users) || [],
-        total: (data == null ? void 0 : data.total) || 0,
-        currentPage,
-        totalPages,
-        usersPerPage,
-        isLoading,
-        onUserClick: handleUserClick,
-        onPageChange: setCurrentPage,
-        onPerPageChange: setUsersPerPage
-      }
-    )), /* @__PURE__ */ React.createElement(
-      CreateUserModal,
-      {
-        open: isCreateModalOpen,
-        onClose: () => setIsCreateModalOpen(false),
-        onSuccess: () => {
-          setIsCreateModalOpen(false);
-          refetch();
+    return /* @__PURE__ */ (0, import_jsx_runtime45.jsxs)("div", { className: "flex-1 flex flex-col", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime45.jsx)("header", { className: "bg-white border-b border-gray-200 px-6 py-4", children: /* @__PURE__ */ (0, import_jsx_runtime45.jsxs)("div", { className: "flex items-center justify-between", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime45.jsxs)("div", { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime45.jsxs)("nav", { className: "flex text-sm text-gray-500 mb-1", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime45.jsx)("span", { children: "Directory" }),
+            /* @__PURE__ */ (0, import_jsx_runtime45.jsx)("span", { className: "mx-2", children: "/" }),
+            /* @__PURE__ */ (0, import_jsx_runtime45.jsx)("span", { className: "text-gray-900 font-medium", children: "Users" })
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime45.jsx)("h2", { className: "text-2xl font-semibold text-gray-900", children: "User Management" })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime45.jsxs)("div", { className: "flex items-center space-x-3", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime45.jsxs)(
+            Button,
+            {
+              onClick: () => setIsCreateModalOpen(true),
+              className: "bg-blue-600 hover:bg-blue-700 text-white",
+              children: [
+                /* @__PURE__ */ (0, import_jsx_runtime45.jsx)(Plus, { className: "w-4 h-4 mr-2" }),
+                "Add User"
+              ]
+            }
+          ),
+          /* @__PURE__ */ (0, import_jsx_runtime45.jsxs)("div", { className: "flex items-center space-x-2 px-3 py-2 bg-gray-50 rounded-lg border", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime45.jsx)("div", { className: "w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center", children: /* @__PURE__ */ (0, import_jsx_runtime45.jsxs)("span", { className: "text-white text-sm font-medium", children: [
+              (_a121 = currentUser == null ? void 0 : currentUser.firstName) == null ? void 0 : _a121[0],
+              (_b93 = currentUser == null ? void 0 : currentUser.lastName) == null ? void 0 : _b93[0]
+            ] }) }),
+            /* @__PURE__ */ (0, import_jsx_runtime45.jsxs)("div", { className: "text-sm", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime45.jsxs)("p", { className: "font-medium text-gray-900", children: [
+                currentUser == null ? void 0 : currentUser.firstName,
+                " ",
+                currentUser == null ? void 0 : currentUser.lastName
+              ] }),
+              /* @__PURE__ */ (0, import_jsx_runtime45.jsx)("p", { className: "text-gray-500", children: currentUser == null ? void 0 : currentUser.email })
+            ] })
+          ] })
+        ] })
+      ] }) }),
+      /* @__PURE__ */ (0, import_jsx_runtime45.jsxs)("div", { className: "flex-1 overflow-auto p-6", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime45.jsx)("div", { className: "mb-6", children: /* @__PURE__ */ (0, import_jsx_runtime45.jsxs)("div", { className: "flex flex-col sm:flex-row gap-4", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime45.jsxs)("div", { className: "flex-1 relative", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime45.jsx)(Search, { className: "absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" }),
+            /* @__PURE__ */ (0, import_jsx_runtime45.jsx)(
+              Input,
+              {
+                type: "text",
+                placeholder: "Search users...",
+                value: searchQuery,
+                onChange: (e) => setSearchQuery(e.target.value),
+                className: "pl-10"
+              }
+            )
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime45.jsxs)("div", { className: "flex gap-3", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime45.jsxs)(Select2, { value: statusFilter, onValueChange: setStatusFilter, children: [
+              /* @__PURE__ */ (0, import_jsx_runtime45.jsx)(SelectTrigger2, { className: "w-40", children: /* @__PURE__ */ (0, import_jsx_runtime45.jsx)(SelectValue2, { placeholder: "All Status" }) }),
+              /* @__PURE__ */ (0, import_jsx_runtime45.jsxs)(SelectContent2, { children: [
+                /* @__PURE__ */ (0, import_jsx_runtime45.jsx)(SelectItem2, { value: "all", children: "All Status" }),
+                /* @__PURE__ */ (0, import_jsx_runtime45.jsx)(SelectItem2, { value: "ACTIVE", children: "Active" }),
+                /* @__PURE__ */ (0, import_jsx_runtime45.jsx)(SelectItem2, { value: "SUSPENDED", children: "Suspended" }),
+                /* @__PURE__ */ (0, import_jsx_runtime45.jsx)(SelectItem2, { value: "DEPROVISIONED", children: "Deprovisioned" })
+              ] })
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime45.jsxs)(Select2, { value: departmentFilter, onValueChange: setDepartmentFilter, children: [
+              /* @__PURE__ */ (0, import_jsx_runtime45.jsx)(SelectTrigger2, { className: "w-40", children: /* @__PURE__ */ (0, import_jsx_runtime45.jsx)(SelectValue2, { placeholder: "All Departments" }) }),
+              /* @__PURE__ */ (0, import_jsx_runtime45.jsxs)(SelectContent2, { children: [
+                /* @__PURE__ */ (0, import_jsx_runtime45.jsx)(SelectItem2, { value: "all", children: "All Departments" }),
+                /* @__PURE__ */ (0, import_jsx_runtime45.jsx)(SelectItem2, { value: "Information Technology", children: "IT" }),
+                /* @__PURE__ */ (0, import_jsx_runtime45.jsx)(SelectItem2, { value: "Human Resources", children: "HR" }),
+                /* @__PURE__ */ (0, import_jsx_runtime45.jsx)(SelectItem2, { value: "Marketing", children: "Marketing" }),
+                /* @__PURE__ */ (0, import_jsx_runtime45.jsx)(SelectItem2, { value: "Sales", children: "Sales" }),
+                /* @__PURE__ */ (0, import_jsx_runtime45.jsx)(SelectItem2, { value: "Finance", children: "Finance" })
+              ] })
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime45.jsxs)(
+              Button,
+              {
+                variant: "outline",
+                onClick: handleRefresh,
+                disabled: isLoading,
+                children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime45.jsx)(RotateCcw, { className: "w-4 h-4 mr-2" }),
+                  "Refresh"
+                ]
+              }
+            )
+          ] })
+        ] }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime45.jsx)(
+          UserTable,
+          {
+            users: (data == null ? void 0 : data.users) || [],
+            total: (data == null ? void 0 : data.total) || 0,
+            currentPage,
+            totalPages,
+            usersPerPage,
+            isLoading,
+            onUserClick: handleUserClick,
+            onPageChange: setCurrentPage,
+            onPerPageChange: setUsersPerPage
+          }
+        )
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime45.jsx)(
+        CreateUserModal,
+        {
+          open: isCreateModalOpen,
+          onClose: () => setIsCreateModalOpen(false),
+          onSuccess: () => {
+            setIsCreateModalOpen(false);
+            refetch();
+          }
         }
-      }
-    ));
+      )
+    ] });
   }
   __name(Dashboard, "Dashboard");
 
@@ -38498,12 +38910,13 @@ For more information, see https://radix-ui.com/primitives/docs/components/${titl
 
   // client/src/components/ui/sheet.tsx
   var React65 = __toESM(require_react(), 1);
+  var import_jsx_runtime46 = __toESM(require_jsx_runtime(), 1);
   var Sheet = Root5;
   var SheetTrigger = Trigger4;
   var SheetPortal = Portal4;
   var SheetOverlay = React65.forwardRef((_a121, ref) => {
     var _b93 = _a121, { className } = _b93, props = __objRest(_b93, ["className"]);
-    return /* @__PURE__ */ React65.createElement(
+    return /* @__PURE__ */ (0, import_jsx_runtime46.jsx)(
       Overlay,
       __spreadProps(__spreadValues({
         className: cn(
@@ -38534,15 +38947,24 @@ For more information, see https://radix-ui.com/primitives/docs/components/${titl
   );
   var SheetContent = React65.forwardRef((_a121, ref) => {
     var _b93 = _a121, { side = "right", className, children } = _b93, props = __objRest(_b93, ["side", "className", "children"]);
-    return /* @__PURE__ */ React65.createElement(SheetPortal, null, /* @__PURE__ */ React65.createElement(SheetOverlay, null), /* @__PURE__ */ React65.createElement(
-      Content3,
-      __spreadValues({
-        ref,
-        className: cn(sheetVariants({ side }), className)
-      }, props),
-      children,
-      /* @__PURE__ */ React65.createElement(Close2, { className: "absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-secondary" }, /* @__PURE__ */ React65.createElement(X, { className: "h-4 w-4" }), /* @__PURE__ */ React65.createElement("span", { className: "sr-only" }, "Close"))
-    ));
+    return /* @__PURE__ */ (0, import_jsx_runtime46.jsxs)(SheetPortal, { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime46.jsx)(SheetOverlay, {}),
+      /* @__PURE__ */ (0, import_jsx_runtime46.jsxs)(
+        Content3,
+        __spreadProps(__spreadValues({
+          ref,
+          className: cn(sheetVariants({ side }), className)
+        }, props), {
+          children: [
+            children,
+            /* @__PURE__ */ (0, import_jsx_runtime46.jsxs)(Close2, { className: "absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-secondary", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime46.jsx)(X, { className: "h-4 w-4" }),
+              /* @__PURE__ */ (0, import_jsx_runtime46.jsx)("span", { className: "sr-only", children: "Close" })
+            ] })
+          ]
+        })
+      )
+    ] });
   });
   SheetContent.displayName = Content3.displayName;
   var SheetHeader = /* @__PURE__ */ __name((_a121) => {
@@ -38551,7 +38973,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${titl
     } = _b93, props = __objRest(_b93, [
       "className"
     ]);
-    return /* @__PURE__ */ React65.createElement(
+    return /* @__PURE__ */ (0, import_jsx_runtime46.jsx)(
       "div",
       __spreadValues({
         className: cn(
@@ -38568,7 +38990,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${titl
     } = _b93, props = __objRest(_b93, [
       "className"
     ]);
-    return /* @__PURE__ */ React65.createElement(
+    return /* @__PURE__ */ (0, import_jsx_runtime46.jsx)(
       "div",
       __spreadValues({
         className: cn(
@@ -38581,7 +39003,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${titl
   SheetFooter.displayName = "SheetFooter";
   var SheetTitle = React65.forwardRef((_a121, ref) => {
     var _b93 = _a121, { className } = _b93, props = __objRest(_b93, ["className"]);
-    return /* @__PURE__ */ React65.createElement(
+    return /* @__PURE__ */ (0, import_jsx_runtime46.jsx)(
       Title2,
       __spreadValues({
         ref,
@@ -38592,7 +39014,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${titl
   SheetTitle.displayName = Title2.displayName;
   var SheetDescription = React65.forwardRef((_a121, ref) => {
     var _b93 = _a121, { className } = _b93, props = __objRest(_b93, ["className"]);
-    return /* @__PURE__ */ React65.createElement(
+    return /* @__PURE__ */ (0, import_jsx_runtime46.jsx)(
       Description2,
       __spreadValues({
         ref,
@@ -38603,6 +39025,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${titl
   SheetDescription.displayName = Description2.displayName;
 
   // client/src/components/column-manager.tsx
+  var import_jsx_runtime47 = __toESM(require_jsx_runtime(), 1);
   var AVAILABLE_COLUMNS = [
     { id: "name", label: "Name", type: "text", hasFilter: false },
     { id: "login", label: "Login", type: "text", hasFilter: false },
@@ -38632,28 +39055,33 @@ For more information, see https://radix-ui.com/primitives/docs/components/${titl
       transition
     };
     const availableColumn = AVAILABLE_COLUMNS.find((col) => col.id === column.id);
-    return /* @__PURE__ */ React.createElement(
+    return /* @__PURE__ */ (0, import_jsx_runtime47.jsx)(
       "div",
       {
         ref: setNodeRef,
         style,
-        className: "flex items-center justify-between p-2 border rounded-md bg-card transition-all hover:shadow-sm"
-      },
-      /* @__PURE__ */ React.createElement("div", { className: "flex items-center space-x-2" }, /* @__PURE__ */ React.createElement(
-        "div",
-        __spreadProps(__spreadValues(__spreadValues({}, attributes), listeners2), {
-          className: "cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground p-0.5 hover:bg-muted/50 rounded transition-colors touch-none",
-          style: { touchAction: "none" }
-        }),
-        /* @__PURE__ */ React.createElement(GripVertical, { className: "h-3 w-3" })
-      ), /* @__PURE__ */ React.createElement(
-        Checkbox2,
-        {
-          checked: column.visible,
-          onCheckedChange: () => onToggle(column.id),
-          className: "h-4 w-4"
-        }
-      ), /* @__PURE__ */ React.createElement(Label2, { className: "text-sm font-medium flex-1" }, (availableColumn == null ? void 0 : availableColumn.label) || column.id), (availableColumn == null ? void 0 : availableColumn.hasFilter) && /* @__PURE__ */ React.createElement(Badge, { variant: "secondary", className: "text-xs px-1 py-0" }, /* @__PURE__ */ React.createElement(Filter, { className: "h-2 w-2" })))
+        className: "flex items-center justify-between p-2 border rounded-md bg-card transition-all hover:shadow-sm",
+        children: /* @__PURE__ */ (0, import_jsx_runtime47.jsxs)("div", { className: "flex items-center space-x-2", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime47.jsx)(
+            "div",
+            __spreadProps(__spreadValues(__spreadValues({}, attributes), listeners2), {
+              className: "cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground p-0.5 hover:bg-muted/50 rounded transition-colors touch-none",
+              style: { touchAction: "none" },
+              children: /* @__PURE__ */ (0, import_jsx_runtime47.jsx)(GripVertical, { className: "h-3 w-3" })
+            })
+          ),
+          /* @__PURE__ */ (0, import_jsx_runtime47.jsx)(
+            Checkbox2,
+            {
+              checked: column.visible,
+              onCheckedChange: () => onToggle(column.id),
+              className: "h-4 w-4"
+            }
+          ),
+          /* @__PURE__ */ (0, import_jsx_runtime47.jsx)(Label2, { className: "text-sm font-medium flex-1", children: (availableColumn == null ? void 0 : availableColumn.label) || column.id }),
+          (availableColumn == null ? void 0 : availableColumn.hasFilter) && /* @__PURE__ */ (0, import_jsx_runtime47.jsx)(Badge, { variant: "secondary", className: "text-xs px-1 py-0", children: /* @__PURE__ */ (0, import_jsx_runtime47.jsx)(Filter, { className: "h-2 w-2" }) })
+        ] })
+      }
     );
   }
   __name(SortableColumnItem, "SortableColumnItem");
@@ -38686,34 +39114,50 @@ For more information, see https://radix-ui.com/primitives/docs/components/${titl
       onColumnsChange(updatedColumns);
     }, "toggleColumn");
     const sortedColumns = [...columns].sort((a, b) => a.order - b.order);
-    return /* @__PURE__ */ React.createElement(Sheet, null, /* @__PURE__ */ React.createElement(SheetTrigger, { asChild: true }, /* @__PURE__ */ React.createElement(Button, { variant: "outline", className: "gap-2" }, /* @__PURE__ */ React.createElement(Settings, { className: "w-4 h-4" }), "Columns")), /* @__PURE__ */ React.createElement(SheetContent, { className: "w-[450px] sm:w-[500px]" }, /* @__PURE__ */ React.createElement(SheetHeader, null, /* @__PURE__ */ React.createElement(SheetTitle, null, "Manage Columns"), /* @__PURE__ */ React.createElement(SheetDescription, null, "Customize which columns are visible and drag to reorder them")), /* @__PURE__ */ React.createElement("div", { className: "space-y-6 mt-6" }, /* @__PURE__ */ React.createElement(Card, null, /* @__PURE__ */ React.createElement(CardHeader, null, /* @__PURE__ */ React.createElement(CardTitle, { className: "text-sm" }, "Visible Columns")), /* @__PURE__ */ React.createElement(CardContent, { className: "space-y-2 max-h-[500px] overflow-y-auto scrollbar-thin scrollbar-thumb-muted-foreground/20 scrollbar-track-transparent" }, /* @__PURE__ */ React.createElement(
-      DndContext,
-      {
-        sensors,
-        collisionDetection: closestCenter,
-        onDragEnd: handleDragEnd
-      },
-      /* @__PURE__ */ React.createElement(
-        SortableContext,
-        {
-          items: sortedColumns.map((col) => col.id),
-          strategy: verticalListSortingStrategy
-        },
-        /* @__PURE__ */ React.createElement("div", { className: "space-y-1" }, sortedColumns.map((columnConfig) => /* @__PURE__ */ React.createElement(
-          SortableColumnItem,
-          {
-            key: columnConfig.id,
-            column: columnConfig,
-            onToggle: toggleColumn
-          }
-        )))
-      )
-    ))))));
+    return /* @__PURE__ */ (0, import_jsx_runtime47.jsxs)(Sheet, { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime47.jsx)(SheetTrigger, { asChild: true, children: /* @__PURE__ */ (0, import_jsx_runtime47.jsxs)(Button, { variant: "outline", className: "gap-2", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime47.jsx)(Settings, { className: "w-4 h-4" }),
+        "Columns"
+      ] }) }),
+      /* @__PURE__ */ (0, import_jsx_runtime47.jsxs)(SheetContent, { className: "w-[450px] sm:w-[500px]", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime47.jsxs)(SheetHeader, { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime47.jsx)(SheetTitle, { children: "Manage Columns" }),
+          /* @__PURE__ */ (0, import_jsx_runtime47.jsx)(SheetDescription, { children: "Customize which columns are visible and drag to reorder them" })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime47.jsx)("div", { className: "space-y-6 mt-6", children: /* @__PURE__ */ (0, import_jsx_runtime47.jsxs)(Card, { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime47.jsx)(CardHeader, { children: /* @__PURE__ */ (0, import_jsx_runtime47.jsx)(CardTitle, { className: "text-sm", children: "Visible Columns" }) }),
+          /* @__PURE__ */ (0, import_jsx_runtime47.jsx)(CardContent, { className: "space-y-2 max-h-[500px] overflow-y-auto scrollbar-thin scrollbar-thumb-muted-foreground/20 scrollbar-track-transparent", children: /* @__PURE__ */ (0, import_jsx_runtime47.jsx)(
+            DndContext,
+            {
+              sensors,
+              collisionDetection: closestCenter,
+              onDragEnd: handleDragEnd,
+              children: /* @__PURE__ */ (0, import_jsx_runtime47.jsx)(
+                SortableContext,
+                {
+                  items: sortedColumns.map((col) => col.id),
+                  strategy: verticalListSortingStrategy,
+                  children: /* @__PURE__ */ (0, import_jsx_runtime47.jsx)("div", { className: "space-y-1", children: sortedColumns.map((columnConfig) => /* @__PURE__ */ (0, import_jsx_runtime47.jsx)(
+                    SortableColumnItem,
+                    {
+                      column: columnConfig,
+                      onToggle: toggleColumn
+                    },
+                    columnConfig.id
+                  )) })
+                }
+              )
+            }
+          ) })
+        ] }) })
+      ] })
+    ] });
   }
   __name(ColumnManager, "ColumnManager");
 
   // client/src/components/export-modal.tsx
   var import_react18 = __toESM(require_react(), 1);
+  var import_jsx_runtime48 = __toESM(require_jsx_runtime(), 1);
   function ExportModal({ users: users2, currentColumns, totalUsers, onExport }) {
     const [open, setOpen] = (0, import_react18.useState)(false);
     const [exportType, setExportType] = (0, import_react18.useState)("current");
@@ -38734,33 +39178,85 @@ For more information, see https://radix-ui.com/primitives/docs/components/${titl
         (prev) => prev.includes(columnId) ? prev.filter((id) => id !== columnId) : [...prev, columnId]
       );
     }, "toggleColumn");
-    return /* @__PURE__ */ React.createElement(Dialog2, { open, onOpenChange: setOpen }, /* @__PURE__ */ React.createElement(DialogTrigger2, { asChild: true }, /* @__PURE__ */ React.createElement(Button, { variant: "outline", className: "gap-2" }, /* @__PURE__ */ React.createElement(Download, { className: "w-4 h-4" }), "Export")), /* @__PURE__ */ React.createElement(DialogContent2, { className: "max-w-md" }, /* @__PURE__ */ React.createElement(DialogHeader, null, /* @__PURE__ */ React.createElement(DialogTitle2, null, "Export Users"), /* @__PURE__ */ React.createElement(DialogDescription2, null, "Choose your export options and download user data as CSV")), /* @__PURE__ */ React.createElement("div", { className: "space-y-4" }, /* @__PURE__ */ React.createElement(Card, null, /* @__PURE__ */ React.createElement(CardHeader, { className: "pb-3" }, /* @__PURE__ */ React.createElement(CardTitle, { className: "text-sm" }, "Export Options")), /* @__PURE__ */ React.createElement(CardContent, { className: "space-y-3" }, /* @__PURE__ */ React.createElement("div", { className: "flex items-center space-x-2" }, /* @__PURE__ */ React.createElement(
-      Checkbox2,
-      {
-        id: "current-view",
-        checked: exportType === "current",
-        onCheckedChange: () => setExportType("current")
-      }
-    ), /* @__PURE__ */ React.createElement(Label2, { htmlFor: "current-view", className: "text-sm font-medium" }, "Export with current view (", currentColumns.filter((col) => col.visible).length, " columns)")), /* @__PURE__ */ React.createElement("div", { className: "flex items-center space-x-2" }, /* @__PURE__ */ React.createElement(
-      Checkbox2,
-      {
-        id: "custom-columns",
-        checked: exportType === "custom",
-        onCheckedChange: () => setExportType("custom")
-      }
-    ), /* @__PURE__ */ React.createElement(Label2, { htmlFor: "custom-columns", className: "text-sm font-medium" }, "Select columns to export")))), exportType === "custom" && /* @__PURE__ */ React.createElement(Card, null, /* @__PURE__ */ React.createElement(CardHeader, { className: "pb-3" }, /* @__PURE__ */ React.createElement(CardTitle, { className: "text-sm" }, "Select Columns")), /* @__PURE__ */ React.createElement(CardContent, { className: "space-y-2 max-h-60 overflow-y-auto scrollbar-thin" }, AVAILABLE_COLUMNS.map((column) => /* @__PURE__ */ React.createElement("div", { key: column.id, className: "flex items-center space-x-2" }, /* @__PURE__ */ React.createElement(
-      Checkbox2,
-      {
-        id: `export-${column.id}`,
-        checked: selectedColumns.includes(column.id),
-        onCheckedChange: () => toggleColumn(column.id),
-        className: "h-4 w-4"
-      }
-    ), /* @__PURE__ */ React.createElement(Label2, { htmlFor: `export-${column.id}`, className: "text-sm font-medium flex-1" }, column.label))))), /* @__PURE__ */ React.createElement("div", { className: "text-sm text-muted-foreground" }, totalUsers, " users will be exported with", " ", exportType === "current" ? currentColumns.filter((col) => col.visible).length : selectedColumns.length, " columns"), /* @__PURE__ */ React.createElement("div", { className: "flex gap-2" }, /* @__PURE__ */ React.createElement(Button, { onClick: handleExport, className: "flex-1" }, /* @__PURE__ */ React.createElement(Download, { className: "w-4 h-4 mr-2" }), "Export CSV"), /* @__PURE__ */ React.createElement(Button, { variant: "outline", onClick: () => setOpen(false) }, "Cancel")))));
+    return /* @__PURE__ */ (0, import_jsx_runtime48.jsxs)(Dialog2, { open, onOpenChange: setOpen, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime48.jsx)(DialogTrigger2, { asChild: true, children: /* @__PURE__ */ (0, import_jsx_runtime48.jsxs)(Button, { variant: "outline", className: "gap-2", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime48.jsx)(Download, { className: "w-4 h-4" }),
+        "Export"
+      ] }) }),
+      /* @__PURE__ */ (0, import_jsx_runtime48.jsxs)(DialogContent2, { className: "max-w-md", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime48.jsxs)(DialogHeader, { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime48.jsx)(DialogTitle2, { children: "Export Users" }),
+          /* @__PURE__ */ (0, import_jsx_runtime48.jsx)(DialogDescription2, { children: "Choose your export options and download user data as CSV" })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime48.jsxs)("div", { className: "space-y-4", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime48.jsxs)(Card, { children: [
+            /* @__PURE__ */ (0, import_jsx_runtime48.jsx)(CardHeader, { className: "pb-3", children: /* @__PURE__ */ (0, import_jsx_runtime48.jsx)(CardTitle, { className: "text-sm", children: "Export Options" }) }),
+            /* @__PURE__ */ (0, import_jsx_runtime48.jsxs)(CardContent, { className: "space-y-3", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime48.jsxs)("div", { className: "flex items-center space-x-2", children: [
+                /* @__PURE__ */ (0, import_jsx_runtime48.jsx)(
+                  Checkbox2,
+                  {
+                    id: "current-view",
+                    checked: exportType === "current",
+                    onCheckedChange: () => setExportType("current")
+                  }
+                ),
+                /* @__PURE__ */ (0, import_jsx_runtime48.jsxs)(Label2, { htmlFor: "current-view", className: "text-sm font-medium", children: [
+                  "Export with current view (",
+                  currentColumns.filter((col) => col.visible).length,
+                  " columns)"
+                ] })
+              ] }),
+              /* @__PURE__ */ (0, import_jsx_runtime48.jsxs)("div", { className: "flex items-center space-x-2", children: [
+                /* @__PURE__ */ (0, import_jsx_runtime48.jsx)(
+                  Checkbox2,
+                  {
+                    id: "custom-columns",
+                    checked: exportType === "custom",
+                    onCheckedChange: () => setExportType("custom")
+                  }
+                ),
+                /* @__PURE__ */ (0, import_jsx_runtime48.jsx)(Label2, { htmlFor: "custom-columns", className: "text-sm font-medium", children: "Select columns to export" })
+              ] })
+            ] })
+          ] }),
+          exportType === "custom" && /* @__PURE__ */ (0, import_jsx_runtime48.jsxs)(Card, { children: [
+            /* @__PURE__ */ (0, import_jsx_runtime48.jsx)(CardHeader, { className: "pb-3", children: /* @__PURE__ */ (0, import_jsx_runtime48.jsx)(CardTitle, { className: "text-sm", children: "Select Columns" }) }),
+            /* @__PURE__ */ (0, import_jsx_runtime48.jsx)(CardContent, { className: "space-y-2 max-h-60 overflow-y-auto scrollbar-thin", children: AVAILABLE_COLUMNS.map((column) => /* @__PURE__ */ (0, import_jsx_runtime48.jsxs)("div", { className: "flex items-center space-x-2", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime48.jsx)(
+                Checkbox2,
+                {
+                  id: `export-${column.id}`,
+                  checked: selectedColumns.includes(column.id),
+                  onCheckedChange: () => toggleColumn(column.id),
+                  className: "h-4 w-4"
+                }
+              ),
+              /* @__PURE__ */ (0, import_jsx_runtime48.jsx)(Label2, { htmlFor: `export-${column.id}`, className: "text-sm font-medium flex-1", children: column.label })
+            ] }, column.id)) })
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime48.jsxs)("div", { className: "text-sm text-muted-foreground", children: [
+            totalUsers,
+            " users will be exported with",
+            " ",
+            exportType === "current" ? currentColumns.filter((col) => col.visible).length : selectedColumns.length,
+            " columns"
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime48.jsxs)("div", { className: "flex gap-2", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime48.jsxs)(Button, { onClick: handleExport, className: "flex-1", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime48.jsx)(Download, { className: "w-4 h-4 mr-2" }),
+              "Export CSV"
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime48.jsx)(Button, { variant: "outline", onClick: () => setOpen(false), children: "Cancel" })
+          ] })
+        ] })
+      ] })
+    ] });
   }
   __name(ExportModal, "ExportModal");
 
   // client/src/pages/users.tsx
+  var import_jsx_runtime49 = __toESM(require_jsx_runtime(), 1);
   function Users2() {
     var _a121, _b93, _c5, _d4;
     const [searchQuery, setSearchQuery] = (0, import_react19.useState)("");
@@ -39060,71 +39556,118 @@ For more information, see https://radix-ui.com/primitives/docs/components/${titl
         });
       }
     }, "handleExport");
-    return /* @__PURE__ */ React.createElement("div", { className: "flex-1 flex flex-col overflow-hidden" }, /* @__PURE__ */ React.createElement("div", { className: "bg-background px-6 py-4" }, /* @__PURE__ */ React.createElement("div", { className: "grid grid-cols-5 gap-3" }, /* @__PURE__ */ React.createElement(Card, null, /* @__PURE__ */ React.createElement(CardContent, { className: "p-3" }, /* @__PURE__ */ React.createElement("div", { className: "flex flex-col items-center text-center" }, /* @__PURE__ */ React.createElement(Users, { className: "w-6 h-6 text-blue-600 mb-1" }), /* @__PURE__ */ React.createElement("p", { className: "text-xs font-medium text-muted-foreground" }, "Total Users"), /* @__PURE__ */ React.createElement("p", { className: "text-xl font-bold text-gray-900 dark:text-gray-100" }, total)))), /* @__PURE__ */ React.createElement(Card, null, /* @__PURE__ */ React.createElement(CardContent, { className: "p-3" }, /* @__PURE__ */ React.createElement("div", { className: "flex flex-col items-center text-center" }, /* @__PURE__ */ React.createElement(Users, { className: `w-6 h-6 mb-1 ${employeeTypeFilter === "EMPLOYEE" ? "text-blue-700" : "text-blue-600"}` }), /* @__PURE__ */ React.createElement("p", { className: "text-xs font-medium text-muted-foreground" }, "Employees"), /* @__PURE__ */ React.createElement("p", { className: "text-xl font-bold text-gray-900 dark:text-gray-100" }, (_a121 = employeeTypeCounts == null ? void 0 : employeeTypeCounts.EMPLOYEE) != null ? _a121 : allUsers.filter((u2) => u2.employeeType === "EMPLOYEE").length)))), /* @__PURE__ */ React.createElement(Card, null, /* @__PURE__ */ React.createElement(CardContent, { className: "p-3" }, /* @__PURE__ */ React.createElement("div", { className: "flex flex-col items-center text-center" }, /* @__PURE__ */ React.createElement(Building, { className: `w-6 h-6 mb-1 ${employeeTypeFilter === "CONTRACTOR" ? "text-green-700" : "text-green-600"}` }), /* @__PURE__ */ React.createElement("p", { className: "text-xs font-medium text-muted-foreground" }, "Contractors"), /* @__PURE__ */ React.createElement("p", { className: "text-xl font-bold text-gray-900 dark:text-gray-100" }, (_b93 = employeeTypeCounts == null ? void 0 : employeeTypeCounts.CONTRACTOR) != null ? _b93 : allUsers.filter((u2) => u2.employeeType === "CONTRACTOR").length)))), /* @__PURE__ */ React.createElement(Card, null, /* @__PURE__ */ React.createElement(CardContent, { className: "p-3" }, /* @__PURE__ */ React.createElement("div", { className: "flex flex-col items-center text-center" }, /* @__PURE__ */ React.createElement(Calendar, { className: "w-6 h-6 mb-1 text-purple-600" }), /* @__PURE__ */ React.createElement("p", { className: "text-xs font-medium text-muted-foreground" }, "Part Time"), /* @__PURE__ */ React.createElement("p", { className: "text-xl font-bold text-gray-900 dark:text-gray-100" }, (_c5 = employeeTypeCounts == null ? void 0 : employeeTypeCounts.PART_TIME) != null ? _c5 : allUsers.filter((u2) => u2.employeeType === "PART_TIME").length)))), /* @__PURE__ */ React.createElement(Card, null, /* @__PURE__ */ React.createElement(CardContent, { className: "p-3" }, /* @__PURE__ */ React.createElement("div", { className: "flex flex-col items-center text-center" }, /* @__PURE__ */ React.createElement(Eye, { className: "w-6 h-6 mb-1 text-orange-600" }), /* @__PURE__ */ React.createElement("p", { className: "text-xs font-medium text-muted-foreground" }, "Interns"), /* @__PURE__ */ React.createElement("p", { className: "text-xl font-bold text-gray-900 dark:text-gray-100" }, (_d4 = employeeTypeCounts == null ? void 0 : employeeTypeCounts.INTERN) != null ? _d4 : allUsers.filter((u2) => u2.employeeType === "INTERN").length)))))), /* @__PURE__ */ React.createElement("div", { className: "bg-background border-b border-border px-6 py-4" }, /* @__PURE__ */ React.createElement("form", { onSubmit: handleSearch, className: "flex items-center justify-between" }, /* @__PURE__ */ React.createElement("div", { className: "flex items-center space-x-4" }, /* @__PURE__ */ React.createElement("div", { className: "w-96 relative" }, /* @__PURE__ */ React.createElement(Search, { className: "w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" }), /* @__PURE__ */ React.createElement(
-      Input,
-      {
-        type: "text",
-        placeholder: "Search users by name, email, or login...",
-        value: searchQuery,
-        onChange: (e) => setSearchQuery(e.target.value),
-        className: "pl-10 border-blue-500 ring-1 ring-blue-500 focus:border-blue-600 focus:ring-blue-600"
-      }
-    )), /* @__PURE__ */ React.createElement(Button, { onClick: () => setShowCreateModal(true), className: "bg-blue-600 hover:bg-blue-700 text-white" }, /* @__PURE__ */ React.createElement(UserPlus, { className: "w-4 h-4 mr-2" }), "Add User")), /* @__PURE__ */ React.createElement("div", { className: "flex items-center space-x-4" }, (searchQuery || employeeTypeFilter) && /* @__PURE__ */ React.createElement(Button, { type: "button", variant: "outline", onClick: clearFilters }, "Clear Filters"), /* @__PURE__ */ React.createElement(
-      ExportModal,
-      {
-        users: users2,
-        currentColumns: columns,
-        totalUsers: total,
-        onExport: handleExport
-      }
-    ), /* @__PURE__ */ React.createElement(
-      ColumnManager,
-      {
-        columns,
-        onColumnsChange: setColumns
-      }
-    )))), /* @__PURE__ */ React.createElement("div", { className: "flex-1 overflow-auto bg-background" }, /* @__PURE__ */ React.createElement(
-      UserTable,
-      {
-        users: users2,
-        total,
-        currentPage,
-        totalPages,
-        usersPerPage,
-        isLoading: isLoading || isFetching,
-        onUserClick: handleUserClick,
-        onPageChange: setCurrentPage,
-        onPerPageChange: handlePerPageChange,
-        onRefresh: handleRefresh,
-        sortBy,
-        sortOrder,
-        onSort: handleSort,
-        visibleColumns: columns.filter((col) => col.visible).map((col) => col.id),
-        columnConfig: columns,
-        onColumnReorder: setColumns,
-        filters,
-        onFiltersChange: setFilters
-      }
-    )), /* @__PURE__ */ React.createElement(
-      CreateUserModal,
-      {
-        open: showCreateModal,
-        onClose: () => setShowCreateModal(false),
-        onSuccess: handleCreateSuccess
-      }
-    ));
+    return /* @__PURE__ */ (0, import_jsx_runtime49.jsxs)("div", { className: "flex-1 flex flex-col overflow-hidden", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime49.jsx)("div", { className: "bg-background px-6 py-4", children: /* @__PURE__ */ (0, import_jsx_runtime49.jsxs)("div", { className: "grid grid-cols-5 gap-3", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime49.jsx)(Card, { children: /* @__PURE__ */ (0, import_jsx_runtime49.jsx)(CardContent, { className: "p-3", children: /* @__PURE__ */ (0, import_jsx_runtime49.jsxs)("div", { className: "flex flex-col items-center text-center", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime49.jsx)(Users, { className: "w-6 h-6 text-blue-600 mb-1" }),
+          /* @__PURE__ */ (0, import_jsx_runtime49.jsx)("p", { className: "text-xs font-medium text-muted-foreground", children: "Total Users" }),
+          /* @__PURE__ */ (0, import_jsx_runtime49.jsx)("p", { className: "text-xl font-bold text-gray-900 dark:text-gray-100", children: total })
+        ] }) }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime49.jsx)(Card, { children: /* @__PURE__ */ (0, import_jsx_runtime49.jsx)(CardContent, { className: "p-3", children: /* @__PURE__ */ (0, import_jsx_runtime49.jsxs)("div", { className: "flex flex-col items-center text-center", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime49.jsx)(Users, { className: `w-6 h-6 mb-1 ${employeeTypeFilter === "EMPLOYEE" ? "text-blue-700" : "text-blue-600"}` }),
+          /* @__PURE__ */ (0, import_jsx_runtime49.jsx)("p", { className: "text-xs font-medium text-muted-foreground", children: "Employees" }),
+          /* @__PURE__ */ (0, import_jsx_runtime49.jsx)("p", { className: "text-xl font-bold text-gray-900 dark:text-gray-100", children: (_a121 = employeeTypeCounts == null ? void 0 : employeeTypeCounts.EMPLOYEE) != null ? _a121 : allUsers.filter((u2) => u2.employeeType === "EMPLOYEE").length })
+        ] }) }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime49.jsx)(Card, { children: /* @__PURE__ */ (0, import_jsx_runtime49.jsx)(CardContent, { className: "p-3", children: /* @__PURE__ */ (0, import_jsx_runtime49.jsxs)("div", { className: "flex flex-col items-center text-center", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime49.jsx)(Building, { className: `w-6 h-6 mb-1 ${employeeTypeFilter === "CONTRACTOR" ? "text-green-700" : "text-green-600"}` }),
+          /* @__PURE__ */ (0, import_jsx_runtime49.jsx)("p", { className: "text-xs font-medium text-muted-foreground", children: "Contractors" }),
+          /* @__PURE__ */ (0, import_jsx_runtime49.jsx)("p", { className: "text-xl font-bold text-gray-900 dark:text-gray-100", children: (_b93 = employeeTypeCounts == null ? void 0 : employeeTypeCounts.CONTRACTOR) != null ? _b93 : allUsers.filter((u2) => u2.employeeType === "CONTRACTOR").length })
+        ] }) }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime49.jsx)(Card, { children: /* @__PURE__ */ (0, import_jsx_runtime49.jsx)(CardContent, { className: "p-3", children: /* @__PURE__ */ (0, import_jsx_runtime49.jsxs)("div", { className: "flex flex-col items-center text-center", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime49.jsx)(Calendar, { className: "w-6 h-6 mb-1 text-purple-600" }),
+          /* @__PURE__ */ (0, import_jsx_runtime49.jsx)("p", { className: "text-xs font-medium text-muted-foreground", children: "Part Time" }),
+          /* @__PURE__ */ (0, import_jsx_runtime49.jsx)("p", { className: "text-xl font-bold text-gray-900 dark:text-gray-100", children: (_c5 = employeeTypeCounts == null ? void 0 : employeeTypeCounts.PART_TIME) != null ? _c5 : allUsers.filter((u2) => u2.employeeType === "PART_TIME").length })
+        ] }) }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime49.jsx)(Card, { children: /* @__PURE__ */ (0, import_jsx_runtime49.jsx)(CardContent, { className: "p-3", children: /* @__PURE__ */ (0, import_jsx_runtime49.jsxs)("div", { className: "flex flex-col items-center text-center", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime49.jsx)(Eye, { className: "w-6 h-6 mb-1 text-orange-600" }),
+          /* @__PURE__ */ (0, import_jsx_runtime49.jsx)("p", { className: "text-xs font-medium text-muted-foreground", children: "Interns" }),
+          /* @__PURE__ */ (0, import_jsx_runtime49.jsx)("p", { className: "text-xl font-bold text-gray-900 dark:text-gray-100", children: (_d4 = employeeTypeCounts == null ? void 0 : employeeTypeCounts.INTERN) != null ? _d4 : allUsers.filter((u2) => u2.employeeType === "INTERN").length })
+        ] }) }) })
+      ] }) }),
+      /* @__PURE__ */ (0, import_jsx_runtime49.jsx)("div", { className: "bg-background border-b border-border px-6 py-4", children: /* @__PURE__ */ (0, import_jsx_runtime49.jsxs)("form", { onSubmit: handleSearch, className: "flex items-center justify-between", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime49.jsxs)("div", { className: "flex items-center space-x-4", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime49.jsxs)("div", { className: "w-96 relative", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime49.jsx)(Search, { className: "w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" }),
+            /* @__PURE__ */ (0, import_jsx_runtime49.jsx)(
+              Input,
+              {
+                type: "text",
+                placeholder: "Search users by name, email, or login...",
+                value: searchQuery,
+                onChange: (e) => setSearchQuery(e.target.value),
+                className: "pl-10 border-blue-500 ring-1 ring-blue-500 focus:border-blue-600 focus:ring-blue-600"
+              }
+            )
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime49.jsxs)(Button, { onClick: () => setShowCreateModal(true), className: "bg-blue-600 hover:bg-blue-700 text-white", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime49.jsx)(UserPlus, { className: "w-4 h-4 mr-2" }),
+            "Add User"
+          ] })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime49.jsxs)("div", { className: "flex items-center space-x-4", children: [
+          (searchQuery || employeeTypeFilter) && /* @__PURE__ */ (0, import_jsx_runtime49.jsx)(Button, { type: "button", variant: "outline", onClick: clearFilters, children: "Clear Filters" }),
+          /* @__PURE__ */ (0, import_jsx_runtime49.jsx)(
+            ExportModal,
+            {
+              users: users2,
+              currentColumns: columns,
+              totalUsers: total,
+              onExport: handleExport
+            }
+          ),
+          /* @__PURE__ */ (0, import_jsx_runtime49.jsx)(
+            ColumnManager,
+            {
+              columns,
+              onColumnsChange: setColumns
+            }
+          )
+        ] })
+      ] }) }),
+      /* @__PURE__ */ (0, import_jsx_runtime49.jsx)("div", { className: "flex-1 overflow-auto bg-background", children: /* @__PURE__ */ (0, import_jsx_runtime49.jsx)(
+        UserTable,
+        {
+          users: users2,
+          total,
+          currentPage,
+          totalPages,
+          usersPerPage,
+          isLoading: isLoading || isFetching,
+          onUserClick: handleUserClick,
+          onPageChange: setCurrentPage,
+          onPerPageChange: handlePerPageChange,
+          onRefresh: handleRefresh,
+          sortBy,
+          sortOrder,
+          onSort: handleSort,
+          visibleColumns: columns.filter((col) => col.visible).map((col) => col.id),
+          columnConfig: columns,
+          onColumnReorder: setColumns,
+          filters,
+          onFiltersChange: setFilters
+        }
+      ) }),
+      /* @__PURE__ */ (0, import_jsx_runtime49.jsx)(
+        CreateUserModal,
+        {
+          open: showCreateModal,
+          onClose: () => setShowCreateModal(false),
+          onSuccess: handleCreateSuccess
+        }
+      )
+    ] });
   }
   __name(Users2, "Users");
 
   // client/src/components/ui/tabs.tsx
-  var React68 = __toESM(require_react(), 1);
+  var React69 = __toESM(require_react(), 1);
 
   // node_modules/@radix-ui/react-tabs/dist/index.mjs
-  var React67 = __toESM(require_react(), 1);
+  var React68 = __toESM(require_react(), 1);
 
   // node_modules/@radix-ui/react-roving-focus/dist/index.mjs
-  var React66 = __toESM(require_react(), 1);
-  var import_jsx_runtime21 = __toESM(require_jsx_runtime(), 1);
+  var React67 = __toESM(require_react(), 1);
+  var import_jsx_runtime50 = __toESM(require_jsx_runtime(), 1);
   var ENTRY_FOCUS = "rovingFocusGroup.onEntryFocus";
   var EVENT_OPTIONS2 = { bubbles: false, cancelable: true };
   var GROUP_NAME2 = "RovingFocusGroup";
@@ -39134,13 +39677,13 @@ For more information, see https://radix-ui.com/primitives/docs/components/${titl
     [createCollectionScope3]
   );
   var [RovingFocusProvider, useRovingFocusContext] = createRovingFocusGroupContext(GROUP_NAME2);
-  var RovingFocusGroup = React66.forwardRef(
+  var RovingFocusGroup = React67.forwardRef(
     (props, forwardedRef) => {
-      return /* @__PURE__ */ (0, import_jsx_runtime21.jsx)(Collection3.Provider, { scope: props.__scopeRovingFocusGroup, children: /* @__PURE__ */ (0, import_jsx_runtime21.jsx)(Collection3.Slot, { scope: props.__scopeRovingFocusGroup, children: /* @__PURE__ */ (0, import_jsx_runtime21.jsx)(RovingFocusGroupImpl, __spreadProps(__spreadValues({}, props), { ref: forwardedRef })) }) });
+      return /* @__PURE__ */ (0, import_jsx_runtime50.jsx)(Collection3.Provider, { scope: props.__scopeRovingFocusGroup, children: /* @__PURE__ */ (0, import_jsx_runtime50.jsx)(Collection3.Slot, { scope: props.__scopeRovingFocusGroup, children: /* @__PURE__ */ (0, import_jsx_runtime50.jsx)(RovingFocusGroupImpl, __spreadProps(__spreadValues({}, props), { ref: forwardedRef })) }) });
     }
   );
   RovingFocusGroup.displayName = GROUP_NAME2;
-  var RovingFocusGroupImpl = React66.forwardRef((props, forwardedRef) => {
+  var RovingFocusGroupImpl = React67.forwardRef((props, forwardedRef) => {
     const _a121 = props, {
       __scopeRovingFocusGroup,
       orientation,
@@ -39162,7 +39705,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${titl
       "onEntryFocus",
       "preventScrollOnEntryFocus"
     ]);
-    const ref = React66.useRef(null);
+    const ref = React67.useRef(null);
     const composedRefs = useComposedRefs(forwardedRef, ref);
     const direction = useDirection(dir);
     const [currentTabStopId = null, setCurrentTabStopId] = useControllableState({
@@ -39170,19 +39713,19 @@ For more information, see https://radix-ui.com/primitives/docs/components/${titl
       defaultProp: defaultCurrentTabStopId,
       onChange: onCurrentTabStopIdChange
     });
-    const [isTabbingBackOut, setIsTabbingBackOut] = React66.useState(false);
+    const [isTabbingBackOut, setIsTabbingBackOut] = React67.useState(false);
     const handleEntryFocus = useCallbackRef(onEntryFocus);
     const getItems = useCollection3(__scopeRovingFocusGroup);
-    const isClickFocusRef = React66.useRef(false);
-    const [focusableItemsCount, setFocusableItemsCount] = React66.useState(0);
-    React66.useEffect(() => {
+    const isClickFocusRef = React67.useRef(false);
+    const [focusableItemsCount, setFocusableItemsCount] = React67.useState(0);
+    React67.useEffect(() => {
       const node = ref.current;
       if (node) {
         node.addEventListener(ENTRY_FOCUS, handleEntryFocus);
         return () => node.removeEventListener(ENTRY_FOCUS, handleEntryFocus);
       }
     }, [handleEntryFocus]);
-    return /* @__PURE__ */ (0, import_jsx_runtime21.jsx)(
+    return /* @__PURE__ */ (0, import_jsx_runtime50.jsx)(
       RovingFocusProvider,
       {
         scope: __scopeRovingFocusGroup,
@@ -39190,20 +39733,20 @@ For more information, see https://radix-ui.com/primitives/docs/components/${titl
         dir: direction,
         loop,
         currentTabStopId,
-        onItemFocus: React66.useCallback(
+        onItemFocus: React67.useCallback(
           (tabStopId) => setCurrentTabStopId(tabStopId),
           [setCurrentTabStopId]
         ),
-        onItemShiftTab: React66.useCallback(() => setIsTabbingBackOut(true), []),
-        onFocusableItemAdd: React66.useCallback(
+        onItemShiftTab: React67.useCallback(() => setIsTabbingBackOut(true), []),
+        onFocusableItemAdd: React67.useCallback(
           () => setFocusableItemsCount((prevCount) => prevCount + 1),
           []
         ),
-        onFocusableItemRemove: React66.useCallback(
+        onFocusableItemRemove: React67.useCallback(
           () => setFocusableItemsCount((prevCount) => prevCount - 1),
           []
         ),
-        children: /* @__PURE__ */ (0, import_jsx_runtime21.jsx)(
+        children: /* @__PURE__ */ (0, import_jsx_runtime50.jsx)(
           Primitive.div,
           __spreadProps(__spreadValues({
             tabIndex: isTabbingBackOut || focusableItemsCount === 0 ? -1 : 0,
@@ -39239,7 +39782,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${titl
     );
   });
   var ITEM_NAME2 = "RovingFocusGroupItem";
-  var RovingFocusGroupItem = React66.forwardRef(
+  var RovingFocusGroupItem = React67.forwardRef(
     (props, forwardedRef) => {
       const _a121 = props, {
         __scopeRovingFocusGroup,
@@ -39258,20 +39801,20 @@ For more information, see https://radix-ui.com/primitives/docs/components/${titl
       const isCurrentTabStop = context.currentTabStopId === id;
       const getItems = useCollection3(__scopeRovingFocusGroup);
       const { onFocusableItemAdd, onFocusableItemRemove } = context;
-      React66.useEffect(() => {
+      React67.useEffect(() => {
         if (focusable) {
           onFocusableItemAdd();
           return () => onFocusableItemRemove();
         }
       }, [focusable, onFocusableItemAdd, onFocusableItemRemove]);
-      return /* @__PURE__ */ (0, import_jsx_runtime21.jsx)(
+      return /* @__PURE__ */ (0, import_jsx_runtime50.jsx)(
         Collection3.ItemSlot,
         {
           scope: __scopeRovingFocusGroup,
           id,
           focusable,
           active,
-          children: /* @__PURE__ */ (0, import_jsx_runtime21.jsx)(
+          children: /* @__PURE__ */ (0, import_jsx_runtime50.jsx)(
             Primitive.span,
             __spreadProps(__spreadValues({
               tabIndex: isCurrentTabStop ? 0 : -1,
@@ -39350,14 +39893,14 @@ For more information, see https://radix-ui.com/primitives/docs/components/${titl
   var Item2 = RovingFocusGroupItem;
 
   // node_modules/@radix-ui/react-tabs/dist/index.mjs
-  var import_jsx_runtime22 = __toESM(require_jsx_runtime(), 1);
+  var import_jsx_runtime51 = __toESM(require_jsx_runtime(), 1);
   var TABS_NAME = "Tabs";
   var [createTabsContext, createTabsScope] = createContextScope(TABS_NAME, [
     createRovingFocusGroupScope
   ]);
   var useRovingFocusGroupScope = createRovingFocusGroupScope();
   var [TabsProvider, useTabsContext] = createTabsContext(TABS_NAME);
-  var Tabs = React67.forwardRef(
+  var Tabs = React68.forwardRef(
     (props, forwardedRef) => {
       const _a121 = props, {
         __scopeTabs,
@@ -39382,7 +39925,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${titl
         onChange: onValueChange,
         defaultProp: defaultValue2
       });
-      return /* @__PURE__ */ (0, import_jsx_runtime22.jsx)(
+      return /* @__PURE__ */ (0, import_jsx_runtime51.jsx)(
         TabsProvider,
         {
           scope: __scopeTabs,
@@ -39392,7 +39935,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${titl
           orientation,
           dir: direction,
           activationMode,
-          children: /* @__PURE__ */ (0, import_jsx_runtime22.jsx)(
+          children: /* @__PURE__ */ (0, import_jsx_runtime51.jsx)(
             Primitive.div,
             __spreadProps(__spreadValues({
               dir: direction,
@@ -39407,12 +39950,12 @@ For more information, see https://radix-ui.com/primitives/docs/components/${titl
   );
   Tabs.displayName = TABS_NAME;
   var TAB_LIST_NAME = "TabsList";
-  var TabsList = React67.forwardRef(
+  var TabsList = React68.forwardRef(
     (props, forwardedRef) => {
       const _a121 = props, { __scopeTabs, loop = true } = _a121, listProps = __objRest(_a121, ["__scopeTabs", "loop"]);
       const context = useTabsContext(TAB_LIST_NAME, __scopeTabs);
       const rovingFocusGroupScope = useRovingFocusGroupScope(__scopeTabs);
-      return /* @__PURE__ */ (0, import_jsx_runtime22.jsx)(
+      return /* @__PURE__ */ (0, import_jsx_runtime51.jsx)(
         Root7,
         __spreadProps(__spreadValues({
           asChild: true
@@ -39420,7 +39963,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${titl
           orientation: context.orientation,
           dir: context.dir,
           loop,
-          children: /* @__PURE__ */ (0, import_jsx_runtime22.jsx)(
+          children: /* @__PURE__ */ (0, import_jsx_runtime51.jsx)(
             Primitive.div,
             __spreadProps(__spreadValues({
               role: "tablist",
@@ -39435,7 +39978,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${titl
   );
   TabsList.displayName = TAB_LIST_NAME;
   var TRIGGER_NAME5 = "TabsTrigger";
-  var TabsTrigger = React67.forwardRef(
+  var TabsTrigger = React68.forwardRef(
     (props, forwardedRef) => {
       const _a121 = props, { __scopeTabs, value, disabled = false } = _a121, triggerProps = __objRest(_a121, ["__scopeTabs", "value", "disabled"]);
       const context = useTabsContext(TRIGGER_NAME5, __scopeTabs);
@@ -39443,14 +39986,14 @@ For more information, see https://radix-ui.com/primitives/docs/components/${titl
       const triggerId = makeTriggerId(context.baseId, value);
       const contentId = makeContentId(context.baseId, value);
       const isSelected = value === context.value;
-      return /* @__PURE__ */ (0, import_jsx_runtime22.jsx)(
+      return /* @__PURE__ */ (0, import_jsx_runtime51.jsx)(
         Item2,
         __spreadProps(__spreadValues({
           asChild: true
         }, rovingFocusGroupScope), {
           focusable: !disabled,
           active: isSelected,
-          children: /* @__PURE__ */ (0, import_jsx_runtime22.jsx)(
+          children: /* @__PURE__ */ (0, import_jsx_runtime51.jsx)(
             Primitive.button,
             __spreadProps(__spreadValues({
               type: "button",
@@ -39487,19 +40030,19 @@ For more information, see https://radix-ui.com/primitives/docs/components/${titl
   );
   TabsTrigger.displayName = TRIGGER_NAME5;
   var CONTENT_NAME6 = "TabsContent";
-  var TabsContent = React67.forwardRef(
+  var TabsContent = React68.forwardRef(
     (props, forwardedRef) => {
       const _a121 = props, { __scopeTabs, value, forceMount, children } = _a121, contentProps = __objRest(_a121, ["__scopeTabs", "value", "forceMount", "children"]);
       const context = useTabsContext(CONTENT_NAME6, __scopeTabs);
       const triggerId = makeTriggerId(context.baseId, value);
       const contentId = makeContentId(context.baseId, value);
       const isSelected = value === context.value;
-      const isMountAnimationPreventedRef = React67.useRef(isSelected);
-      React67.useEffect(() => {
+      const isMountAnimationPreventedRef = React68.useRef(isSelected);
+      React68.useEffect(() => {
         const rAF = requestAnimationFrame(() => isMountAnimationPreventedRef.current = false);
         return () => cancelAnimationFrame(rAF);
       }, []);
-      return /* @__PURE__ */ (0, import_jsx_runtime22.jsx)(Presence, { present: forceMount || isSelected, children: /* @__PURE__ */ __name(({ present }) => /* @__PURE__ */ (0, import_jsx_runtime22.jsx)(
+      return /* @__PURE__ */ (0, import_jsx_runtime51.jsx)(Presence, { present: forceMount || isSelected, children: /* @__PURE__ */ __name(({ present }) => /* @__PURE__ */ (0, import_jsx_runtime51.jsx)(
         Primitive.div,
         __spreadProps(__spreadValues({
           "data-state": isSelected ? "active" : "inactive",
@@ -39534,10 +40077,11 @@ For more information, see https://radix-ui.com/primitives/docs/components/${titl
   var Content4 = TabsContent;
 
   // client/src/components/ui/tabs.tsx
+  var import_jsx_runtime52 = __toESM(require_jsx_runtime(), 1);
   var Tabs2 = Root26;
-  var TabsList2 = React68.forwardRef((_a121, ref) => {
+  var TabsList2 = React69.forwardRef((_a121, ref) => {
     var _b93 = _a121, { className } = _b93, props = __objRest(_b93, ["className"]);
-    return /* @__PURE__ */ React68.createElement(
+    return /* @__PURE__ */ (0, import_jsx_runtime52.jsx)(
       List,
       __spreadValues({
         ref,
@@ -39549,9 +40093,9 @@ For more information, see https://radix-ui.com/primitives/docs/components/${titl
     );
   });
   TabsList2.displayName = List.displayName;
-  var TabsTrigger2 = React68.forwardRef((_a121, ref) => {
+  var TabsTrigger2 = React69.forwardRef((_a121, ref) => {
     var _b93 = _a121, { className } = _b93, props = __objRest(_b93, ["className"]);
-    return /* @__PURE__ */ React68.createElement(
+    return /* @__PURE__ */ (0, import_jsx_runtime52.jsx)(
       Trigger5,
       __spreadValues({
         ref,
@@ -39563,9 +40107,9 @@ For more information, see https://radix-ui.com/primitives/docs/components/${titl
     );
   });
   TabsTrigger2.displayName = Trigger5.displayName;
-  var TabsContent2 = React68.forwardRef((_a121, ref) => {
+  var TabsContent2 = React69.forwardRef((_a121, ref) => {
     var _b93 = _a121, { className } = _b93, props = __objRest(_b93, ["className"]);
-    return /* @__PURE__ */ React68.createElement(
+    return /* @__PURE__ */ (0, import_jsx_runtime52.jsx)(
       Content4,
       __spreadValues({
         ref,
@@ -39580,6 +40124,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${titl
 
   // client/src/components/assign-app-modal.tsx
   var import_react20 = __toESM(require_react(), 1);
+  var import_jsx_runtime53 = __toESM(require_jsx_runtime(), 1);
   function AssignAppModal({ open, onClose, userId, userApps }) {
     const [searchTerm, setSearchTerm] = (0, import_react20.useState)("");
     const [selectedApps, setSelectedApps] = (0, import_react20.useState)(/* @__PURE__ */ new Set());
@@ -39656,29 +40201,51 @@ For more information, see https://radix-ui.com/primitives/docs/components/${titl
     const handleSave = /* @__PURE__ */ __name(() => {
       saveMutation.mutate();
     }, "handleSave");
-    return /* @__PURE__ */ React.createElement(Dialog2, { open, onOpenChange: onClose }, /* @__PURE__ */ React.createElement(DialogContent2, { className: "max-w-2xl max-h-[80vh] flex flex-col" }, /* @__PURE__ */ React.createElement(DialogHeader, null, /* @__PURE__ */ React.createElement(DialogTitle2, null, "Assign Applications"), /* @__PURE__ */ React.createElement(DialogDescription2, null, "Select applications to assign to this user. Checked applications are currently assigned.")), /* @__PURE__ */ React.createElement("div", { className: "flex flex-col flex-1 min-h-0" }, /* @__PURE__ */ React.createElement("div", { className: "relative mb-4" }, /* @__PURE__ */ React.createElement(Search, { className: "absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" }), /* @__PURE__ */ React.createElement(
-      Input,
-      {
-        placeholder: "Search applications...",
-        value: searchTerm,
-        onChange: (e) => setSearchTerm(e.target.value),
-        className: "pl-10"
-      }
-    )), /* @__PURE__ */ React.createElement("div", { className: "flex-1 overflow-y-auto border rounded-lg" }, isLoading ? /* @__PURE__ */ React.createElement("div", { className: "p-4 text-center text-gray-500" }, "Loading applications...") : filteredApplications.length === 0 ? /* @__PURE__ */ React.createElement("div", { className: "p-4 text-center text-gray-500" }, searchTerm ? `No applications found matching "${searchTerm}"` : "No applications available") : /* @__PURE__ */ React.createElement("div", { className: "space-y-1 p-2" }, filteredApplications.map((app) => /* @__PURE__ */ React.createElement("div", { key: app.id, className: "flex items-center space-x-3 p-3 hover:bg-gray-50 rounded-lg" }, /* @__PURE__ */ React.createElement(
-      Checkbox2,
-      {
-        id: app.id,
-        checked: selectedApps.has(app.id),
-        onCheckedChange: () => handleAppToggle(app.id)
-      }
-    ), /* @__PURE__ */ React.createElement("label", { htmlFor: app.id, className: "flex-1 cursor-pointer" }, /* @__PURE__ */ React.createElement("div", { className: "font-medium" }, app.label || app.name), app.description && /* @__PURE__ */ React.createElement("div", { className: "text-sm text-gray-500" }, app.description))))))), /* @__PURE__ */ React.createElement(DialogFooter, { className: "mt-4" }, /* @__PURE__ */ React.createElement(Button, { variant: "outline", onClick: onClose }, "Cancel"), /* @__PURE__ */ React.createElement(
-      Button,
-      {
-        onClick: handleSave,
-        disabled: saveMutation.isPending
-      },
-      saveMutation.isPending ? "Saving..." : "Save"
-    ))));
+    return /* @__PURE__ */ (0, import_jsx_runtime53.jsx)(Dialog2, { open, onOpenChange: onClose, children: /* @__PURE__ */ (0, import_jsx_runtime53.jsxs)(DialogContent2, { className: "max-w-2xl max-h-[80vh] flex flex-col", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime53.jsxs)(DialogHeader, { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime53.jsx)(DialogTitle2, { children: "Assign Applications" }),
+        /* @__PURE__ */ (0, import_jsx_runtime53.jsx)(DialogDescription2, { children: "Select applications to assign to this user. Checked applications are currently assigned." })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime53.jsxs)("div", { className: "flex flex-col flex-1 min-h-0", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime53.jsxs)("div", { className: "relative mb-4", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime53.jsx)(Search, { className: "absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" }),
+          /* @__PURE__ */ (0, import_jsx_runtime53.jsx)(
+            Input,
+            {
+              placeholder: "Search applications...",
+              value: searchTerm,
+              onChange: (e) => setSearchTerm(e.target.value),
+              className: "pl-10"
+            }
+          )
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime53.jsx)("div", { className: "flex-1 overflow-y-auto border rounded-lg", children: isLoading ? /* @__PURE__ */ (0, import_jsx_runtime53.jsx)("div", { className: "p-4 text-center text-gray-500", children: "Loading applications..." }) : filteredApplications.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime53.jsx)("div", { className: "p-4 text-center text-gray-500", children: searchTerm ? `No applications found matching "${searchTerm}"` : "No applications available" }) : /* @__PURE__ */ (0, import_jsx_runtime53.jsx)("div", { className: "space-y-1 p-2", children: filteredApplications.map((app) => /* @__PURE__ */ (0, import_jsx_runtime53.jsxs)("div", { className: "flex items-center space-x-3 p-3 hover:bg-gray-50 rounded-lg", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime53.jsx)(
+            Checkbox2,
+            {
+              id: app.id,
+              checked: selectedApps.has(app.id),
+              onCheckedChange: () => handleAppToggle(app.id)
+            }
+          ),
+          /* @__PURE__ */ (0, import_jsx_runtime53.jsxs)("label", { htmlFor: app.id, className: "flex-1 cursor-pointer", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime53.jsx)("div", { className: "font-medium", children: app.label || app.name }),
+            app.description && /* @__PURE__ */ (0, import_jsx_runtime53.jsx)("div", { className: "text-sm text-gray-500", children: app.description })
+          ] })
+        ] }, app.id)) }) })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime53.jsxs)(DialogFooter, { className: "mt-4", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime53.jsx)(Button, { variant: "outline", onClick: onClose, children: "Cancel" }),
+        /* @__PURE__ */ (0, import_jsx_runtime53.jsx)(
+          Button,
+          {
+            onClick: handleSave,
+            disabled: saveMutation.isPending,
+            children: saveMutation.isPending ? "Saving..." : "Save"
+          }
+        )
+      ] })
+    ] }) });
   }
   __name(AssignAppModal, "AssignAppModal");
 
@@ -39686,12 +40253,12 @@ For more information, see https://radix-ui.com/primitives/docs/components/${titl
   var import_react21 = __toESM(require_react(), 1);
 
   // node_modules/@radix-ui/react-collapsible/dist/index.mjs
-  var React69 = __toESM(require_react(), 1);
-  var import_jsx_runtime23 = __toESM(require_jsx_runtime(), 1);
+  var React70 = __toESM(require_react(), 1);
+  var import_jsx_runtime54 = __toESM(require_jsx_runtime(), 1);
   var COLLAPSIBLE_NAME = "Collapsible";
   var [createCollapsibleContext, createCollapsibleScope] = createContextScope(COLLAPSIBLE_NAME);
   var [CollapsibleProvider, useCollapsibleContext] = createCollapsibleContext(COLLAPSIBLE_NAME);
-  var Collapsible = React69.forwardRef(
+  var Collapsible = React70.forwardRef(
     (props, forwardedRef) => {
       const _a121 = props, {
         __scopeCollapsible,
@@ -39711,15 +40278,15 @@ For more information, see https://radix-ui.com/primitives/docs/components/${titl
         defaultProp: defaultOpen,
         onChange: onOpenChange
       });
-      return /* @__PURE__ */ (0, import_jsx_runtime23.jsx)(
+      return /* @__PURE__ */ (0, import_jsx_runtime54.jsx)(
         CollapsibleProvider,
         {
           scope: __scopeCollapsible,
           disabled,
           contentId: useId(),
           open,
-          onOpenToggle: React69.useCallback(() => setOpen((prevOpen) => !prevOpen), [setOpen]),
-          children: /* @__PURE__ */ (0, import_jsx_runtime23.jsx)(
+          onOpenToggle: React70.useCallback(() => setOpen((prevOpen) => !prevOpen), [setOpen]),
+          children: /* @__PURE__ */ (0, import_jsx_runtime54.jsx)(
             Primitive.div,
             __spreadProps(__spreadValues({
               "data-state": getState4(open),
@@ -39734,11 +40301,11 @@ For more information, see https://radix-ui.com/primitives/docs/components/${titl
   );
   Collapsible.displayName = COLLAPSIBLE_NAME;
   var TRIGGER_NAME6 = "CollapsibleTrigger";
-  var CollapsibleTrigger = React69.forwardRef(
+  var CollapsibleTrigger = React70.forwardRef(
     (props, forwardedRef) => {
       const _a121 = props, { __scopeCollapsible } = _a121, triggerProps = __objRest(_a121, ["__scopeCollapsible"]);
       const context = useCollapsibleContext(TRIGGER_NAME6, __scopeCollapsible);
-      return /* @__PURE__ */ (0, import_jsx_runtime23.jsx)(
+      return /* @__PURE__ */ (0, import_jsx_runtime54.jsx)(
         Primitive.button,
         __spreadProps(__spreadValues({
           type: "button",
@@ -39756,28 +40323,28 @@ For more information, see https://radix-ui.com/primitives/docs/components/${titl
   );
   CollapsibleTrigger.displayName = TRIGGER_NAME6;
   var CONTENT_NAME7 = "CollapsibleContent";
-  var CollapsibleContent = React69.forwardRef(
+  var CollapsibleContent = React70.forwardRef(
     (props, forwardedRef) => {
       const _a121 = props, { forceMount } = _a121, contentProps = __objRest(_a121, ["forceMount"]);
       const context = useCollapsibleContext(CONTENT_NAME7, props.__scopeCollapsible);
-      return /* @__PURE__ */ (0, import_jsx_runtime23.jsx)(Presence, { present: forceMount || context.open, children: /* @__PURE__ */ __name(({ present }) => /* @__PURE__ */ (0, import_jsx_runtime23.jsx)(CollapsibleContentImpl, __spreadProps(__spreadValues({}, contentProps), { ref: forwardedRef, present })), "children") });
+      return /* @__PURE__ */ (0, import_jsx_runtime54.jsx)(Presence, { present: forceMount || context.open, children: /* @__PURE__ */ __name(({ present }) => /* @__PURE__ */ (0, import_jsx_runtime54.jsx)(CollapsibleContentImpl, __spreadProps(__spreadValues({}, contentProps), { ref: forwardedRef, present })), "children") });
     }
   );
   CollapsibleContent.displayName = CONTENT_NAME7;
-  var CollapsibleContentImpl = React69.forwardRef((props, forwardedRef) => {
+  var CollapsibleContentImpl = React70.forwardRef((props, forwardedRef) => {
     const _a121 = props, { __scopeCollapsible, present, children } = _a121, contentProps = __objRest(_a121, ["__scopeCollapsible", "present", "children"]);
     const context = useCollapsibleContext(CONTENT_NAME7, __scopeCollapsible);
-    const [isPresent, setIsPresent] = React69.useState(present);
-    const ref = React69.useRef(null);
+    const [isPresent, setIsPresent] = React70.useState(present);
+    const ref = React70.useRef(null);
     const composedRefs = useComposedRefs(forwardedRef, ref);
-    const heightRef = React69.useRef(0);
+    const heightRef = React70.useRef(0);
     const height = heightRef.current;
-    const widthRef = React69.useRef(0);
+    const widthRef = React70.useRef(0);
     const width = widthRef.current;
     const isOpen = context.open || isPresent;
-    const isMountAnimationPreventedRef = React69.useRef(isOpen);
-    const originalStylesRef = React69.useRef(void 0);
-    React69.useEffect(() => {
+    const isMountAnimationPreventedRef = React70.useRef(isOpen);
+    const originalStylesRef = React70.useRef(void 0);
+    React70.useEffect(() => {
       const rAF = requestAnimationFrame(() => isMountAnimationPreventedRef.current = false);
       return () => cancelAnimationFrame(rAF);
     }, []);
@@ -39800,7 +40367,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${titl
         setIsPresent(present);
       }
     }, [context.open, present]);
-    return /* @__PURE__ */ (0, import_jsx_runtime23.jsx)(
+    return /* @__PURE__ */ (0, import_jsx_runtime54.jsx)(
       Primitive.div,
       __spreadProps(__spreadValues({
         "data-state": getState4(context.open),
@@ -39829,7 +40396,8 @@ For more information, see https://radix-ui.com/primitives/docs/components/${titl
   var CollapsibleContent2 = CollapsibleContent;
 
   // client/src/components/ui/alert.tsx
-  var React70 = __toESM(require_react(), 1);
+  var React71 = __toESM(require_react(), 1);
+  var import_jsx_runtime55 = __toESM(require_jsx_runtime(), 1);
   var alertVariants = cva(
     "relative w-full rounded-lg border p-4 [&>svg~*]:pl-7 [&>svg+div]:translate-y-[-3px] [&>svg]:absolute [&>svg]:left-4 [&>svg]:top-4 [&>svg]:text-foreground",
     {
@@ -39844,9 +40412,9 @@ For more information, see https://radix-ui.com/primitives/docs/components/${titl
       }
     }
   );
-  var Alert = React70.forwardRef((_a121, ref) => {
+  var Alert = React71.forwardRef((_a121, ref) => {
     var _b93 = _a121, { className, variant } = _b93, props = __objRest(_b93, ["className", "variant"]);
-    return /* @__PURE__ */ React70.createElement(
+    return /* @__PURE__ */ (0, import_jsx_runtime55.jsx)(
       "div",
       __spreadValues({
         ref,
@@ -39856,9 +40424,9 @@ For more information, see https://radix-ui.com/primitives/docs/components/${titl
     );
   });
   Alert.displayName = "Alert";
-  var AlertTitle = React70.forwardRef((_a121, ref) => {
+  var AlertTitle = React71.forwardRef((_a121, ref) => {
     var _b93 = _a121, { className } = _b93, props = __objRest(_b93, ["className"]);
-    return /* @__PURE__ */ React70.createElement(
+    return /* @__PURE__ */ (0, import_jsx_runtime55.jsx)(
       "h5",
       __spreadValues({
         ref,
@@ -39867,9 +40435,9 @@ For more information, see https://radix-ui.com/primitives/docs/components/${titl
     );
   });
   AlertTitle.displayName = "AlertTitle";
-  var AlertDescription = React70.forwardRef((_a121, ref) => {
+  var AlertDescription = React71.forwardRef((_a121, ref) => {
     var _b93 = _a121, { className } = _b93, props = __objRest(_b93, ["className"]);
-    return /* @__PURE__ */ React70.createElement(
+    return /* @__PURE__ */ (0, import_jsx_runtime55.jsx)(
       "div",
       __spreadValues({
         ref,
@@ -39880,6 +40448,7 @@ For more information, see https://radix-ui.com/primitives/docs/components/${titl
   AlertDescription.displayName = "AlertDescription";
 
   // client/src/components/knowbe4-user-display.tsx
+  var import_jsx_runtime56 = __toESM(require_jsx_runtime(), 1);
   function formatDate(dateString) {
     if (!dateString) return "Never";
     return new Date(dateString).toLocaleDateString();
@@ -39967,16 +40536,75 @@ For more information, see https://radix-ui.com/primitives/docs/components/${titl
     console.log("Enrollment Count:", campaignEnrollments == null ? void 0 : campaignEnrollments.length);
     console.log("=== END DEBUG DATA ===");
     if (connectionLoading) {
-      return /* @__PURE__ */ import_react21.default.createElement(Card, null, /* @__PURE__ */ import_react21.default.createElement(CardHeader, null, /* @__PURE__ */ import_react21.default.createElement(CardTitle, { className: "flex items-center gap-2" }, /* @__PURE__ */ import_react21.default.createElement(Shield, { className: "h-5 w-5" }), "KnowBe4 Security Training")), /* @__PURE__ */ import_react21.default.createElement(CardContent, null, /* @__PURE__ */ import_react21.default.createElement("div", { className: "animate-pulse space-y-4" }, /* @__PURE__ */ import_react21.default.createElement("div", { className: "h-4 bg-gray-200 rounded w-3/4" }), /* @__PURE__ */ import_react21.default.createElement("div", { className: "h-4 bg-gray-200 rounded w-1/2" }))));
+      return /* @__PURE__ */ (0, import_jsx_runtime56.jsxs)(Card, { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime56.jsx)(CardHeader, { children: /* @__PURE__ */ (0, import_jsx_runtime56.jsxs)(CardTitle, { className: "flex items-center gap-2", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime56.jsx)(Shield, { className: "h-5 w-5" }),
+          "KnowBe4 Security Training"
+        ] }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime56.jsx)(CardContent, { children: /* @__PURE__ */ (0, import_jsx_runtime56.jsxs)("div", { className: "animate-pulse space-y-4", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime56.jsx)("div", { className: "h-4 bg-gray-200 rounded w-3/4" }),
+          /* @__PURE__ */ (0, import_jsx_runtime56.jsx)("div", { className: "h-4 bg-gray-200 rounded w-1/2" })
+        ] }) })
+      ] });
     }
     if (!(connectionTest == null ? void 0 : connectionTest.success)) {
-      return /* @__PURE__ */ import_react21.default.createElement(Card, null, /* @__PURE__ */ import_react21.default.createElement(CardHeader, null, /* @__PURE__ */ import_react21.default.createElement(CardTitle, { className: "flex items-center gap-2" }, /* @__PURE__ */ import_react21.default.createElement(Shield, { className: "h-5 w-5" }), "KnowBe4 Security Training")), /* @__PURE__ */ import_react21.default.createElement(CardContent, null, /* @__PURE__ */ import_react21.default.createElement(Alert, null, /* @__PURE__ */ import_react21.default.createElement(TriangleAlert, { className: "h-4 w-4" }), /* @__PURE__ */ import_react21.default.createElement(AlertDescription, null, /* @__PURE__ */ import_react21.default.createElement("div", { className: "space-y-2" }, /* @__PURE__ */ import_react21.default.createElement("p", { className: "font-medium" }, "KnowBe4 API Not Available"), /* @__PURE__ */ import_react21.default.createElement("p", { className: "text-sm text-gray-600" }, (connectionTest == null ? void 0 : connectionTest.message) || "Unable to connect to KnowBe4 API"), /* @__PURE__ */ import_react21.default.createElement("div", { className: "text-xs text-gray-500 mt-2" }, /* @__PURE__ */ import_react21.default.createElement("p", null, "Account Details:"), /* @__PURE__ */ import_react21.default.createElement("p", null, "\u2022 Organization: ", ((_d4 = connectionTest == null ? void 0 : connectionTest.details) == null ? void 0 : _d4.account_name) || "Unknown"), /* @__PURE__ */ import_react21.default.createElement("p", null, "\u2022 Subscription: ", ((_e4 = connectionTest == null ? void 0 : connectionTest.details) == null ? void 0 : _e4.subscription_level) || "Unknown"), /* @__PURE__ */ import_react21.default.createElement("p", null, "\u2022 Seats: ", ((_f2 = connectionTest == null ? void 0 : connectionTest.details) == null ? void 0 : _f2.number_of_seats) || "Unknown"), /* @__PURE__ */ import_react21.default.createElement("p", null, "\u2022 Risk Score: ", ((_g2 = connectionTest == null ? void 0 : connectionTest.details) == null ? void 0 : _g2.current_risk_score) || "Unknown")))))));
+      return /* @__PURE__ */ (0, import_jsx_runtime56.jsxs)(Card, { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime56.jsx)(CardHeader, { children: /* @__PURE__ */ (0, import_jsx_runtime56.jsxs)(CardTitle, { className: "flex items-center gap-2", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime56.jsx)(Shield, { className: "h-5 w-5" }),
+          "KnowBe4 Security Training"
+        ] }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime56.jsx)(CardContent, { children: /* @__PURE__ */ (0, import_jsx_runtime56.jsxs)(Alert, { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime56.jsx)(TriangleAlert, { className: "h-4 w-4" }),
+          /* @__PURE__ */ (0, import_jsx_runtime56.jsx)(AlertDescription, { children: /* @__PURE__ */ (0, import_jsx_runtime56.jsxs)("div", { className: "space-y-2", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime56.jsx)("p", { className: "font-medium", children: "KnowBe4 API Not Available" }),
+            /* @__PURE__ */ (0, import_jsx_runtime56.jsx)("p", { className: "text-sm text-gray-600", children: (connectionTest == null ? void 0 : connectionTest.message) || "Unable to connect to KnowBe4 API" }),
+            /* @__PURE__ */ (0, import_jsx_runtime56.jsxs)("div", { className: "text-xs text-gray-500 mt-2", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime56.jsx)("p", { children: "Account Details:" }),
+              /* @__PURE__ */ (0, import_jsx_runtime56.jsxs)("p", { children: [
+                "\u2022 Organization: ",
+                ((_d4 = connectionTest == null ? void 0 : connectionTest.details) == null ? void 0 : _d4.account_name) || "Unknown"
+              ] }),
+              /* @__PURE__ */ (0, import_jsx_runtime56.jsxs)("p", { children: [
+                "\u2022 Subscription: ",
+                ((_e4 = connectionTest == null ? void 0 : connectionTest.details) == null ? void 0 : _e4.subscription_level) || "Unknown"
+              ] }),
+              /* @__PURE__ */ (0, import_jsx_runtime56.jsxs)("p", { children: [
+                "\u2022 Seats: ",
+                ((_f2 = connectionTest == null ? void 0 : connectionTest.details) == null ? void 0 : _f2.number_of_seats) || "Unknown"
+              ] }),
+              /* @__PURE__ */ (0, import_jsx_runtime56.jsxs)("p", { children: [
+                "\u2022 Risk Score: ",
+                ((_g2 = connectionTest == null ? void 0 : connectionTest.details) == null ? void 0 : _g2.current_risk_score) || "Unknown"
+              ] })
+            ] })
+          ] }) })
+        ] }) })
+      ] });
     }
     if (userLoading) {
-      return /* @__PURE__ */ import_react21.default.createElement(Card, null, /* @__PURE__ */ import_react21.default.createElement(CardHeader, null, /* @__PURE__ */ import_react21.default.createElement(CardTitle, { className: "flex items-center gap-2" }, /* @__PURE__ */ import_react21.default.createElement(Shield, { className: "h-5 w-5" }), "KnowBe4 Security Training")), /* @__PURE__ */ import_react21.default.createElement(CardContent, null, /* @__PURE__ */ import_react21.default.createElement("div", { className: "animate-pulse space-y-4" }, /* @__PURE__ */ import_react21.default.createElement("div", { className: "h-4 bg-gray-200 rounded w-3/4" }), /* @__PURE__ */ import_react21.default.createElement("div", { className: "h-4 bg-gray-200 rounded w-1/2" }), /* @__PURE__ */ import_react21.default.createElement("div", { className: "h-4 bg-gray-200 rounded w-2/3" }))));
+      return /* @__PURE__ */ (0, import_jsx_runtime56.jsxs)(Card, { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime56.jsx)(CardHeader, { children: /* @__PURE__ */ (0, import_jsx_runtime56.jsxs)(CardTitle, { className: "flex items-center gap-2", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime56.jsx)(Shield, { className: "h-5 w-5" }),
+          "KnowBe4 Security Training"
+        ] }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime56.jsx)(CardContent, { children: /* @__PURE__ */ (0, import_jsx_runtime56.jsxs)("div", { className: "animate-pulse space-y-4", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime56.jsx)("div", { className: "h-4 bg-gray-200 rounded w-3/4" }),
+          /* @__PURE__ */ (0, import_jsx_runtime56.jsx)("div", { className: "h-4 bg-gray-200 rounded w-1/2" }),
+          /* @__PURE__ */ (0, import_jsx_runtime56.jsx)("div", { className: "h-4 bg-gray-200 rounded w-2/3" })
+        ] }) })
+      ] });
     }
     if (userError || !knowbe4User) {
-      return /* @__PURE__ */ import_react21.default.createElement(Card, null, /* @__PURE__ */ import_react21.default.createElement(CardHeader, null, /* @__PURE__ */ import_react21.default.createElement(CardTitle, { className: "flex items-center gap-2" }, /* @__PURE__ */ import_react21.default.createElement(Shield, { className: "h-5 w-5" }), "KnowBe4 Security Training")), /* @__PURE__ */ import_react21.default.createElement(CardContent, null, /* @__PURE__ */ import_react21.default.createElement(Alert, null, /* @__PURE__ */ import_react21.default.createElement(TriangleAlert, { className: "h-4 w-4" }), /* @__PURE__ */ import_react21.default.createElement(AlertDescription, null, "User not found in KnowBe4 system or no training data available."))));
+      return /* @__PURE__ */ (0, import_jsx_runtime56.jsxs)(Card, { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime56.jsx)(CardHeader, { children: /* @__PURE__ */ (0, import_jsx_runtime56.jsxs)(CardTitle, { className: "flex items-center gap-2", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime56.jsx)(Shield, { className: "h-5 w-5" }),
+          "KnowBe4 Security Training"
+        ] }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime56.jsx)(CardContent, { children: /* @__PURE__ */ (0, import_jsx_runtime56.jsxs)(Alert, { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime56.jsx)(TriangleAlert, { className: "h-4 w-4" }),
+          /* @__PURE__ */ (0, import_jsx_runtime56.jsx)(AlertDescription, { children: "User not found in KnowBe4 system or no training data available." })
+        ] }) })
+      ] });
     }
     const riskLevel = knowbe4User ? getRiskLevel(knowbe4User.current_risk_score) : null;
     const phishProneLevel = knowbe4User ? getPhishProneLevel(knowbe4User.phish_prone_percentage) : null;
@@ -40003,19 +40631,121 @@ For more information, see https://radix-ui.com/primitives/docs/components/${titl
     console.log("Not Started enrollments:", notStarted);
     console.log("Total enrollments:", total);
     console.log("Completion percentage:", completionPercentage);
-    return /* @__PURE__ */ import_react21.default.createElement(Card, null, /* @__PURE__ */ import_react21.default.createElement(CardHeader, null, /* @__PURE__ */ import_react21.default.createElement(CardTitle, { className: "flex items-center gap-2" }, /* @__PURE__ */ import_react21.default.createElement(Shield, { className: "h-5 w-5" }), "KnowBe4 Security Training"), /* @__PURE__ */ import_react21.default.createElement(CardDescription, null, "Security awareness and phishing simulation data from KnowBe4")), /* @__PURE__ */ import_react21.default.createElement(CardContent, { className: "space-y-4" }, /* @__PURE__ */ import_react21.default.createElement("div", { className: "text-sm" }, /* @__PURE__ */ import_react21.default.createElement("span", { className: "font-medium" }, "Last Sign In: "), /* @__PURE__ */ import_react21.default.createElement("span", { className: "text-gray-600 dark:text-gray-300" }, formatDate(knowbe4User.last_sign_in))), /* @__PURE__ */ import_react21.default.createElement("div", { className: "grid grid-cols-2 gap-4" }, /* @__PURE__ */ import_react21.default.createElement("div", null, /* @__PURE__ */ import_react21.default.createElement("div", { className: "flex items-center gap-2 mb-3" }, /* @__PURE__ */ import_react21.default.createElement(Shield, { className: "w-4 h-4 text-blue-500" }), /* @__PURE__ */ import_react21.default.createElement("span", { className: "text-sm font-medium" }, "Phishing Results")), /* @__PURE__ */ import_react21.default.createElement("div", { className: "text-3xl font-bold text-blue-600 dark:text-blue-400 mb-1" }, knowbe4User.phish_prone_percentage, "%"), /* @__PURE__ */ import_react21.default.createElement("div", { className: "text-xs text-gray-500 dark:text-gray-400 mb-3" }, "Phish-prone Percentage"), /* @__PURE__ */ import_react21.default.createElement("div", { className: "space-y-1 text-xs" }, /* @__PURE__ */ import_react21.default.createElement("div", { className: "flex justify-between" }, /* @__PURE__ */ import_react21.default.createElement("span", { className: "text-gray-600 dark:text-gray-400" }, "Emails Delivered"), /* @__PURE__ */ import_react21.default.createElement("span", { className: "font-medium" }, totalPhishingCampaigns)), /* @__PURE__ */ import_react21.default.createElement("div", { className: "flex justify-between" }, /* @__PURE__ */ import_react21.default.createElement("span", { className: "text-gray-600 dark:text-gray-400" }, "Failures"), /* @__PURE__ */ import_react21.default.createElement("span", { className: "font-medium" }, emailsClicked)), /* @__PURE__ */ import_react21.default.createElement("div", { className: "flex justify-between" }, /* @__PURE__ */ import_react21.default.createElement("span", { className: "text-gray-600 dark:text-gray-400" }, "Emails Reported"), /* @__PURE__ */ import_react21.default.createElement("span", { className: "font-medium" }, emailsReported)))), /* @__PURE__ */ import_react21.default.createElement("div", null, /* @__PURE__ */ import_react21.default.createElement("div", { className: "flex items-center gap-2 mb-3" }, /* @__PURE__ */ import_react21.default.createElement(GraduationCap, { className: "w-4 h-4 text-green-500" }), /* @__PURE__ */ import_react21.default.createElement("span", { className: "text-sm font-medium" }, "Security Training")), finalTrainingData.length > 0 ? /* @__PURE__ */ import_react21.default.createElement(import_react21.default.Fragment, null, /* @__PURE__ */ import_react21.default.createElement("div", { className: "text-3xl font-bold text-green-600 dark:text-green-400 mb-1" }, completionPercentage, "%"), /* @__PURE__ */ import_react21.default.createElement("div", { className: "text-xs text-gray-500 dark:text-gray-400 mb-3" }, "Completion Rate"), /* @__PURE__ */ import_react21.default.createElement("div", { className: "space-y-1 text-xs" }, /* @__PURE__ */ import_react21.default.createElement("div", { className: "flex justify-between" }, /* @__PURE__ */ import_react21.default.createElement("span", { className: "text-gray-600 dark:text-gray-400" }, "Total Enrollments"), /* @__PURE__ */ import_react21.default.createElement("span", { className: "font-medium" }, total)), /* @__PURE__ */ import_react21.default.createElement("div", { className: "flex justify-between" }, /* @__PURE__ */ import_react21.default.createElement("span", { className: "text-gray-600 dark:text-gray-400" }, "Completed"), /* @__PURE__ */ import_react21.default.createElement("span", { className: "font-medium text-green-600" }, completed)), /* @__PURE__ */ import_react21.default.createElement("div", { className: "flex justify-between" }, /* @__PURE__ */ import_react21.default.createElement("span", { className: "text-gray-600 dark:text-gray-400" }, "In Progress"), /* @__PURE__ */ import_react21.default.createElement("span", { className: "font-medium text-yellow-600" }, inProgress)), /* @__PURE__ */ import_react21.default.createElement("div", { className: "flex justify-between" }, /* @__PURE__ */ import_react21.default.createElement("span", { className: "text-gray-600 dark:text-gray-400" }, "Not Started"), /* @__PURE__ */ import_react21.default.createElement("span", { className: "font-medium text-gray-600" }, notStarted)))) : /* @__PURE__ */ import_react21.default.createElement(import_react21.default.Fragment, null, /* @__PURE__ */ import_react21.default.createElement("div", { className: "text-3xl font-bold text-gray-400 mb-1" }, "0%"), /* @__PURE__ */ import_react21.default.createElement("div", { className: "text-xs text-gray-500 dark:text-gray-400 mb-3" }, "No training data"), /* @__PURE__ */ import_react21.default.createElement("div", { className: "text-xs text-gray-500" }, "User not enrolled in any training campaigns")))), finalTrainingData.length > 0 && /* @__PURE__ */ import_react21.default.createElement("div", { className: "mt-6" }, /* @__PURE__ */ import_react21.default.createElement(Collapsible2, { open: enrollmentsExpanded, onOpenChange: setEnrollmentsExpanded }, /* @__PURE__ */ import_react21.default.createElement(CollapsibleTrigger2, { asChild: true }, /* @__PURE__ */ import_react21.default.createElement(Button, { variant: "ghost", className: "flex items-center justify-between w-full p-3 text-left hover:bg-gray-100 rounded-lg" }, /* @__PURE__ */ import_react21.default.createElement("span", { className: "font-medium text-sm text-gray-700" }, "Training Enrollments (", finalTrainingData.length, ")"), enrollmentsExpanded ? /* @__PURE__ */ import_react21.default.createElement(ChevronDown, { className: "h-4 w-4" }) : /* @__PURE__ */ import_react21.default.createElement(ChevronRight, { className: "h-4 w-4" }))), /* @__PURE__ */ import_react21.default.createElement(CollapsibleContent2, { className: "space-y-2 mt-2 max-h-96 overflow-y-auto" }, finalTrainingData.map((enrollment, index3) => /* @__PURE__ */ import_react21.default.createElement("div", { key: index3, className: "flex items-center justify-between p-3 bg-gray-50 rounded-lg" }, /* @__PURE__ */ import_react21.default.createElement("div", { className: "flex-1" }, /* @__PURE__ */ import_react21.default.createElement("div", { className: "font-medium text-sm text-gray-900" }, enrollment.module_name || enrollment.name), /* @__PURE__ */ import_react21.default.createElement("div", { className: "text-xs text-gray-600" }, enrollment.campaign_name), /* @__PURE__ */ import_react21.default.createElement("div", { className: "text-xs text-gray-500 mt-1" }, "Enrolled: ", formatDate(enrollment.enrollment_date), enrollment.completion_date && /* @__PURE__ */ import_react21.default.createElement("span", null, " \u2022 Completed: ", formatDate(enrollment.completion_date)))), /* @__PURE__ */ import_react21.default.createElement("div", { className: "ml-4" }, /* @__PURE__ */ import_react21.default.createElement(
-      Badge,
-      {
-        variant: enrollment.status === "Completed" ? "default" : enrollment.status === "In Progress" ? "secondary" : "outline",
-        className: enrollment.status === "Completed" ? "bg-green-100 text-green-800" : enrollment.status === "In Progress" ? "bg-yellow-100 text-yellow-800" : "bg-gray-100 text-gray-800"
-      },
-      enrollment.status || "Not Started"
-    )))))))));
+    return /* @__PURE__ */ (0, import_jsx_runtime56.jsxs)(Card, { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime56.jsxs)(CardHeader, { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime56.jsxs)(CardTitle, { className: "flex items-center gap-2", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime56.jsx)(Shield, { className: "h-5 w-5" }),
+          "KnowBe4 Security Training"
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime56.jsx)(CardDescription, { children: "Security awareness and phishing simulation data from KnowBe4" })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime56.jsxs)(CardContent, { className: "space-y-4", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime56.jsxs)("div", { className: "text-sm", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime56.jsx)("span", { className: "font-medium", children: "Last Sign In: " }),
+          /* @__PURE__ */ (0, import_jsx_runtime56.jsx)("span", { className: "text-gray-600 dark:text-gray-300", children: formatDate(knowbe4User.last_sign_in) })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime56.jsxs)("div", { className: "grid grid-cols-2 gap-4", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime56.jsxs)("div", { children: [
+            /* @__PURE__ */ (0, import_jsx_runtime56.jsxs)("div", { className: "flex items-center gap-2 mb-3", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime56.jsx)(Shield, { className: "w-4 h-4 text-blue-500" }),
+              /* @__PURE__ */ (0, import_jsx_runtime56.jsx)("span", { className: "text-sm font-medium", children: "Phishing Results" })
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime56.jsxs)("div", { className: "text-3xl font-bold text-blue-600 dark:text-blue-400 mb-1", children: [
+              knowbe4User.phish_prone_percentage,
+              "%"
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime56.jsx)("div", { className: "text-xs text-gray-500 dark:text-gray-400 mb-3", children: "Phish-prone Percentage" }),
+            /* @__PURE__ */ (0, import_jsx_runtime56.jsxs)("div", { className: "space-y-1 text-xs", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime56.jsxs)("div", { className: "flex justify-between", children: [
+                /* @__PURE__ */ (0, import_jsx_runtime56.jsx)("span", { className: "text-gray-600 dark:text-gray-400", children: "Emails Delivered" }),
+                /* @__PURE__ */ (0, import_jsx_runtime56.jsx)("span", { className: "font-medium", children: totalPhishingCampaigns })
+              ] }),
+              /* @__PURE__ */ (0, import_jsx_runtime56.jsxs)("div", { className: "flex justify-between", children: [
+                /* @__PURE__ */ (0, import_jsx_runtime56.jsx)("span", { className: "text-gray-600 dark:text-gray-400", children: "Failures" }),
+                /* @__PURE__ */ (0, import_jsx_runtime56.jsx)("span", { className: "font-medium", children: emailsClicked })
+              ] }),
+              /* @__PURE__ */ (0, import_jsx_runtime56.jsxs)("div", { className: "flex justify-between", children: [
+                /* @__PURE__ */ (0, import_jsx_runtime56.jsx)("span", { className: "text-gray-600 dark:text-gray-400", children: "Emails Reported" }),
+                /* @__PURE__ */ (0, import_jsx_runtime56.jsx)("span", { className: "font-medium", children: emailsReported })
+              ] })
+            ] })
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime56.jsxs)("div", { children: [
+            /* @__PURE__ */ (0, import_jsx_runtime56.jsxs)("div", { className: "flex items-center gap-2 mb-3", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime56.jsx)(GraduationCap, { className: "w-4 h-4 text-green-500" }),
+              /* @__PURE__ */ (0, import_jsx_runtime56.jsx)("span", { className: "text-sm font-medium", children: "Security Training" })
+            ] }),
+            finalTrainingData.length > 0 ? /* @__PURE__ */ (0, import_jsx_runtime56.jsxs)(import_jsx_runtime56.Fragment, { children: [
+              /* @__PURE__ */ (0, import_jsx_runtime56.jsxs)("div", { className: "text-3xl font-bold text-green-600 dark:text-green-400 mb-1", children: [
+                completionPercentage,
+                "%"
+              ] }),
+              /* @__PURE__ */ (0, import_jsx_runtime56.jsx)("div", { className: "text-xs text-gray-500 dark:text-gray-400 mb-3", children: "Completion Rate" }),
+              /* @__PURE__ */ (0, import_jsx_runtime56.jsxs)("div", { className: "space-y-1 text-xs", children: [
+                /* @__PURE__ */ (0, import_jsx_runtime56.jsxs)("div", { className: "flex justify-between", children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime56.jsx)("span", { className: "text-gray-600 dark:text-gray-400", children: "Total Enrollments" }),
+                  /* @__PURE__ */ (0, import_jsx_runtime56.jsx)("span", { className: "font-medium", children: total })
+                ] }),
+                /* @__PURE__ */ (0, import_jsx_runtime56.jsxs)("div", { className: "flex justify-between", children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime56.jsx)("span", { className: "text-gray-600 dark:text-gray-400", children: "Completed" }),
+                  /* @__PURE__ */ (0, import_jsx_runtime56.jsx)("span", { className: "font-medium text-green-600", children: completed })
+                ] }),
+                /* @__PURE__ */ (0, import_jsx_runtime56.jsxs)("div", { className: "flex justify-between", children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime56.jsx)("span", { className: "text-gray-600 dark:text-gray-400", children: "In Progress" }),
+                  /* @__PURE__ */ (0, import_jsx_runtime56.jsx)("span", { className: "font-medium text-yellow-600", children: inProgress })
+                ] }),
+                /* @__PURE__ */ (0, import_jsx_runtime56.jsxs)("div", { className: "flex justify-between", children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime56.jsx)("span", { className: "text-gray-600 dark:text-gray-400", children: "Not Started" }),
+                  /* @__PURE__ */ (0, import_jsx_runtime56.jsx)("span", { className: "font-medium text-gray-600", children: notStarted })
+                ] })
+              ] })
+            ] }) : /* @__PURE__ */ (0, import_jsx_runtime56.jsxs)(import_jsx_runtime56.Fragment, { children: [
+              /* @__PURE__ */ (0, import_jsx_runtime56.jsx)("div", { className: "text-3xl font-bold text-gray-400 mb-1", children: "0%" }),
+              /* @__PURE__ */ (0, import_jsx_runtime56.jsx)("div", { className: "text-xs text-gray-500 dark:text-gray-400 mb-3", children: "No training data" }),
+              /* @__PURE__ */ (0, import_jsx_runtime56.jsx)("div", { className: "text-xs text-gray-500", children: "User not enrolled in any training campaigns" })
+            ] })
+          ] })
+        ] }),
+        finalTrainingData.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime56.jsx)("div", { className: "mt-6", children: /* @__PURE__ */ (0, import_jsx_runtime56.jsxs)(Collapsible2, { open: enrollmentsExpanded, onOpenChange: setEnrollmentsExpanded, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime56.jsx)(CollapsibleTrigger2, { asChild: true, children: /* @__PURE__ */ (0, import_jsx_runtime56.jsxs)(Button, { variant: "ghost", className: "flex items-center justify-between w-full p-3 text-left hover:bg-gray-100 rounded-lg", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime56.jsxs)("span", { className: "font-medium text-sm text-gray-700", children: [
+              "Training Enrollments (",
+              finalTrainingData.length,
+              ")"
+            ] }),
+            enrollmentsExpanded ? /* @__PURE__ */ (0, import_jsx_runtime56.jsx)(ChevronDown, { className: "h-4 w-4" }) : /* @__PURE__ */ (0, import_jsx_runtime56.jsx)(ChevronRight, { className: "h-4 w-4" })
+          ] }) }),
+          /* @__PURE__ */ (0, import_jsx_runtime56.jsx)(CollapsibleContent2, { className: "space-y-2 mt-2 max-h-96 overflow-y-auto", children: finalTrainingData.map((enrollment, index3) => /* @__PURE__ */ (0, import_jsx_runtime56.jsxs)("div", { className: "flex items-center justify-between p-3 bg-gray-50 rounded-lg", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime56.jsxs)("div", { className: "flex-1", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime56.jsx)("div", { className: "font-medium text-sm text-gray-900", children: enrollment.module_name || enrollment.name }),
+              /* @__PURE__ */ (0, import_jsx_runtime56.jsx)("div", { className: "text-xs text-gray-600", children: enrollment.campaign_name }),
+              /* @__PURE__ */ (0, import_jsx_runtime56.jsxs)("div", { className: "text-xs text-gray-500 mt-1", children: [
+                "Enrolled: ",
+                formatDate(enrollment.enrollment_date),
+                enrollment.completion_date && /* @__PURE__ */ (0, import_jsx_runtime56.jsxs)("span", { children: [
+                  " \u2022 Completed: ",
+                  formatDate(enrollment.completion_date)
+                ] })
+              ] })
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime56.jsx)("div", { className: "ml-4", children: /* @__PURE__ */ (0, import_jsx_runtime56.jsx)(
+              Badge,
+              {
+                variant: enrollment.status === "Completed" ? "default" : enrollment.status === "In Progress" ? "secondary" : "outline",
+                className: enrollment.status === "Completed" ? "bg-green-100 text-green-800" : enrollment.status === "In Progress" ? "bg-yellow-100 text-yellow-800" : "bg-gray-100 text-gray-800",
+                children: enrollment.status || "Not Started"
+              }
+            ) })
+          ] }, index3)) })
+        ] }) })
+      ] })
+    ] });
   }
   __name(KnowBe4UserDisplay, "KnowBe4UserDisplay");
 
   // client/src/pages/user-detail.tsx
   var import_react22 = __toESM(require_react(), 1);
+  var import_jsx_runtime57 = __toESM(require_jsx_runtime(), 1);
   var editUserSchema = z.object({
     firstName: z.string().min(1, "First name is required"),
     lastName: z.string().min(1, "Last name is required"),
@@ -40485,23 +41215,43 @@ ${syncDetails.join("\n")}` : syncMessage;
     const getStatusBadge = /* @__PURE__ */ __name((status) => {
       switch (status) {
         case "ACTIVE":
-          return /* @__PURE__ */ React.createElement(Badge, { className: "bg-green-600 text-white" }, "Active");
+          return /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(Badge, { className: "bg-green-600 text-white", children: "Active" });
         case "SUSPENDED":
-          return /* @__PURE__ */ React.createElement(Badge, { className: "bg-yellow-100 text-yellow-800" }, "Suspended");
+          return /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(Badge, { className: "bg-yellow-100 text-yellow-800", children: "Suspended" });
         case "DEPROVISIONED":
-          return /* @__PURE__ */ React.createElement(Badge, { className: "bg-red-100 text-red-800" }, "Deprovisioned");
+          return /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(Badge, { className: "bg-red-100 text-red-800", children: "Deprovisioned" });
         default:
-          return /* @__PURE__ */ React.createElement(Badge, { variant: "secondary" }, status);
+          return /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(Badge, { variant: "secondary", children: status });
       }
     }, "getStatusBadge");
     if (isLoading) {
-      return /* @__PURE__ */ React.createElement("div", { className: "flex-1 flex items-center justify-center" }, /* @__PURE__ */ React.createElement("div", { className: "text-center" }, /* @__PURE__ */ React.createElement("div", { className: "animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto mb-4" }), /* @__PURE__ */ React.createElement("p", { className: "text-gray-600" }, "Loading user details...")));
+      return /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("div", { className: "flex-1 flex items-center justify-center", children: /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)("div", { className: "text-center", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("div", { className: "animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto mb-4" }),
+        /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("p", { className: "text-gray-600", children: "Loading user details..." })
+      ] }) });
     }
     if (error) {
-      return /* @__PURE__ */ React.createElement("div", { className: "flex-1 flex items-center justify-center" }, /* @__PURE__ */ React.createElement("div", { className: "text-center" }, /* @__PURE__ */ React.createElement("h1", { className: "text-2xl font-bold text-gray-900 mb-2" }, "Error Loading User"), /* @__PURE__ */ React.createElement("p", { className: "text-gray-600 mb-6" }, "Failed to load user data: ", error.message), /* @__PURE__ */ React.createElement(Button, { onClick: () => setLocation("/"), variant: "outline" }, /* @__PURE__ */ React.createElement(ArrowLeft, { className: "w-4 h-4 mr-2" }), "Back to Users")));
+      return /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("div", { className: "flex-1 flex items-center justify-center", children: /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)("div", { className: "text-center", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("h1", { className: "text-2xl font-bold text-gray-900 mb-2", children: "Error Loading User" }),
+        /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)("p", { className: "text-gray-600 mb-6", children: [
+          "Failed to load user data: ",
+          error.message
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)(Button, { onClick: () => setLocation("/"), variant: "outline", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(ArrowLeft, { className: "w-4 h-4 mr-2" }),
+          "Back to Users"
+        ] })
+      ] }) });
     }
     if (!user) {
-      return /* @__PURE__ */ React.createElement("div", { className: "flex-1 flex items-center justify-center" }, /* @__PURE__ */ React.createElement("div", { className: "text-center" }, /* @__PURE__ */ React.createElement("h1", { className: "text-2xl font-bold text-gray-900 mb-2" }, "User Not Found"), /* @__PURE__ */ React.createElement("p", { className: "text-gray-600 mb-6" }, "The user you're looking for doesn't exist or has been removed."), /* @__PURE__ */ React.createElement(Button, { onClick: () => setLocation("/"), variant: "outline" }, /* @__PURE__ */ React.createElement(ArrowLeft, { className: "w-4 h-4 mr-2" }), "Back to Users")));
+      return /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("div", { className: "flex-1 flex items-center justify-center", children: /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)("div", { className: "text-center", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("h1", { className: "text-2xl font-bold text-gray-900 mb-2", children: "User Not Found" }),
+        /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("p", { className: "text-gray-600 mb-6", children: "The user you're looking for doesn't exist or has been removed." }),
+        /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)(Button, { onClick: () => setLocation("/"), variant: "outline", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(ArrowLeft, { className: "w-4 h-4 mr-2" }),
+          "Back to Users"
+        ] })
+      ] }) });
     }
     const getEmployeeType = /* @__PURE__ */ __name((groups) => {
       if (!groups || groups.length === 0) return "Not specified";
@@ -40513,455 +41263,1142 @@ ${syncDetails.join("\n")}` : syncMessage;
       const appName = app.label || app.name || "";
       return appName.toLowerCase().includes(appSearchTerm.toLowerCase());
     });
-    return /* @__PURE__ */ React.createElement("div", { className: "flex-1 overflow-hidden" }, /* @__PURE__ */ React.createElement("div", { className: "h-full flex flex-col" }, /* @__PURE__ */ React.createElement("div", { className: "flex-shrink-0 bg-background border-b border-border px-4 py-3" }, /* @__PURE__ */ React.createElement("div", { className: "flex items-center justify-between" }, /* @__PURE__ */ React.createElement("div", { className: "flex items-center gap-4" }, /* @__PURE__ */ React.createElement(
-      Button,
-      {
-        variant: "ghost",
-        size: "sm",
-        onClick: () => setLocation("/"),
-        className: "flex items-center gap-2"
-      },
-      /* @__PURE__ */ React.createElement(ArrowLeft, { className: "w-4 h-4" }),
-      "Back to Users"
-    ), /* @__PURE__ */ React.createElement("div", { className: "flex items-center gap-4" }, /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("h1", { className: "text-xl font-bold text-foreground leading-tight" }, user.firstName || "Unknown", " ", user.lastName || "User"), /* @__PURE__ */ React.createElement("div", { className: "flex items-center gap-2" }, /* @__PURE__ */ React.createElement("span", { className: "text-sm text-muted-foreground" }, user.email || "No email"), /* @__PURE__ */ React.createElement("span", { className: "text-sm text-muted-foreground" }, "\u2022"), getStatusBadge(user.status || "UNKNOWN"))), /* @__PURE__ */ React.createElement("div", { className: "flex items-center gap-2" }, /* @__PURE__ */ React.createElement(
-      Button,
-      {
-        variant: "outline",
-        size: "sm",
-        onClick: () => setShowPasswordModal("reset"),
-        className: "flex items-center gap-2 text-blue-600 dark:text-blue-400 border-blue-300 dark:border-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900"
-      },
-      /* @__PURE__ */ React.createElement(Key, { className: "w-4 h-4" }),
-      "Reset Password"
-    ), /* @__PURE__ */ React.createElement(
-      Button,
-      {
-        variant: "outline",
-        size: "sm",
-        onClick: () => setShowPasswordModal("expire"),
-        className: "flex items-center gap-2 text-purple-600 dark:text-purple-400 border-purple-300 dark:border-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900"
-      },
-      /* @__PURE__ */ React.createElement(KeyRound, { className: "w-4 h-4" }),
-      "Expire Password"
-    ), user.status === "ACTIVE" ? /* @__PURE__ */ React.createElement(
-      Button,
-      {
-        variant: "outline",
-        size: "sm",
-        onClick: () => handleStatusChange("SUSPENDED"),
-        className: "flex items-center gap-2 text-orange-600 dark:text-orange-400 border-orange-300 dark:border-orange-600 hover:bg-orange-50 dark:hover:bg-orange-900"
-      },
-      /* @__PURE__ */ React.createElement(UserX, { className: "w-4 h-4" }),
-      "Suspend"
-    ) : user.status === "LOCKED_OUT" ? /* @__PURE__ */ React.createElement(
-      Button,
-      {
-        variant: "outline",
-        size: "sm",
-        onClick: () => handleStatusChange("ACTIVE"),
-        className: "flex items-center gap-2 text-blue-600 dark:text-blue-400 border-blue-300 dark:border-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900"
-      },
-      /* @__PURE__ */ React.createElement(UserCheck, { className: "w-4 h-4" }),
-      "Unlock User"
-    ) : /* @__PURE__ */ React.createElement(
-      Button,
-      {
-        variant: "outline",
-        size: "sm",
-        onClick: () => handleStatusChange("ACTIVE"),
-        className: "flex items-center gap-2 text-green-600 dark:text-green-400 border-green-300 dark:border-green-600 hover:bg-green-50 dark:hover:bg-green-900"
-      },
-      /* @__PURE__ */ React.createElement(UserCheck, { className: "w-4 h-4" }),
-      "Activate"
-    ), /* @__PURE__ */ React.createElement(
-      Button,
-      {
-        variant: "outline",
-        size: "sm",
-        onClick: handleDeleteUser,
-        className: "flex items-center gap-2 text-red-600 dark:text-red-400 border-red-300 dark:border-red-600 hover:bg-red-50 dark:hover:bg-red-900"
-      },
-      /* @__PURE__ */ React.createElement(Trash2, { className: "w-4 h-4" }),
-      "Delete"
-    )))), /* @__PURE__ */ React.createElement("div", { className: "flex items-center" }, !isEditing && /* @__PURE__ */ React.createElement(
-      Button,
-      {
-        variant: "outline",
-        size: "sm",
-        onClick: () => setIsEditing(true),
-        className: "flex items-center gap-2"
-      },
-      /* @__PURE__ */ React.createElement(SquarePen, { className: "w-4 h-4" }),
-      "Edit Profile"
-    )))), /* @__PURE__ */ React.createElement("div", { className: "flex-1 overflow-auto" }, /* @__PURE__ */ React.createElement(Tabs2, { value: activeTab, onValueChange: setActiveTab, className: "h-full flex flex-col" }, /* @__PURE__ */ React.createElement("div", { className: "flex-shrink-0 px-6 pt-4" }, /* @__PURE__ */ React.createElement(TabsList2, { className: "grid w-full grid-cols-5" }, /* @__PURE__ */ React.createElement(TabsTrigger2, { value: "profile" }, "Profile"), /* @__PURE__ */ React.createElement(TabsTrigger2, { value: "monitoring" }, "Monitoring"), /* @__PURE__ */ React.createElement(TabsTrigger2, { value: "applications" }, "Applications (", userApps.length, ")"), /* @__PURE__ */ React.createElement(TabsTrigger2, { value: "devices" }, "Devices (", userDevices.length, ")"), /* @__PURE__ */ React.createElement(TabsTrigger2, { value: "activity" }, "Recent Activity"))), /* @__PURE__ */ React.createElement("div", { className: "flex-1 overflow-auto px-6 py-4" }, /* @__PURE__ */ React.createElement(TabsContent2, { value: "profile", className: "space-y-6 mt-0" }, isEditing ? /* @__PURE__ */ React.createElement(Form, __spreadValues({}, form), /* @__PURE__ */ React.createElement("form", { onSubmit: form.handleSubmit(handleEditSubmit), className: "space-y-6" }, /* @__PURE__ */ React.createElement(Card, null, /* @__PURE__ */ React.createElement(CardHeader, { className: "flex flex-row items-center justify-between" }, /* @__PURE__ */ React.createElement(CardTitle, null, "Edit Profile Information"), /* @__PURE__ */ React.createElement("div", { className: "flex gap-2" }, /* @__PURE__ */ React.createElement(
-      Button,
-      {
-        type: "button",
-        variant: "outline",
-        size: "sm",
-        onClick: handleCancelEdit
-      },
-      /* @__PURE__ */ React.createElement(X, { className: "w-4 h-4 mr-2" }),
-      "Cancel"
-    ), /* @__PURE__ */ React.createElement(
-      Button,
-      {
-        type: "submit",
-        size: "sm",
-        disabled: updateUserMutation.isPending
-      },
-      /* @__PURE__ */ React.createElement(Save, { className: "w-4 h-4 mr-2" }),
-      "Save Changes"
-    ))), /* @__PURE__ */ React.createElement(CardContent, { className: "space-y-4" }, /* @__PURE__ */ React.createElement("div", { className: "grid grid-cols-2 gap-4" }, /* @__PURE__ */ React.createElement(
-      FormField,
-      {
-        control: form.control,
-        name: "firstName",
-        render: ({ field }) => /* @__PURE__ */ React.createElement(FormItem, null, /* @__PURE__ */ React.createElement(FormLabel, null, "First Name"), /* @__PURE__ */ React.createElement(FormControl, null, /* @__PURE__ */ React.createElement(Input, __spreadValues({}, field))), /* @__PURE__ */ React.createElement(FormMessage, null))
-      }
-    ), /* @__PURE__ */ React.createElement(
-      FormField,
-      {
-        control: form.control,
-        name: "lastName",
-        render: ({ field }) => /* @__PURE__ */ React.createElement(FormItem, null, /* @__PURE__ */ React.createElement(FormLabel, null, "Last Name"), /* @__PURE__ */ React.createElement(FormControl, null, /* @__PURE__ */ React.createElement(Input, __spreadValues({}, field))), /* @__PURE__ */ React.createElement(FormMessage, null))
-      }
-    )), /* @__PURE__ */ React.createElement(
-      FormField,
-      {
-        control: form.control,
-        name: "email",
-        render: ({ field }) => /* @__PURE__ */ React.createElement(FormItem, null, /* @__PURE__ */ React.createElement(FormLabel, null, "Email"), /* @__PURE__ */ React.createElement(FormControl, null, /* @__PURE__ */ React.createElement(Input, __spreadProps(__spreadValues({}, field), { type: "email" }))), /* @__PURE__ */ React.createElement(FormMessage, null))
-      }
-    ), /* @__PURE__ */ React.createElement("div", { className: "grid grid-cols-2 gap-4" }, /* @__PURE__ */ React.createElement(
-      FormField,
-      {
-        control: form.control,
-        name: "title",
-        render: ({ field }) => /* @__PURE__ */ React.createElement(FormItem, null, /* @__PURE__ */ React.createElement(FormLabel, null, "Job Title"), /* @__PURE__ */ React.createElement(FormControl, null, /* @__PURE__ */ React.createElement(Input, __spreadValues({}, field))), /* @__PURE__ */ React.createElement(FormMessage, null))
-      }
-    ), /* @__PURE__ */ React.createElement(
-      FormField,
-      {
-        control: form.control,
-        name: "department",
-        render: ({ field }) => /* @__PURE__ */ React.createElement(FormItem, null, /* @__PURE__ */ React.createElement(FormLabel, null, "Department"), /* @__PURE__ */ React.createElement(FormControl, null, /* @__PURE__ */ React.createElement(Input, __spreadValues({}, field))), /* @__PURE__ */ React.createElement(FormMessage, null))
-      }
-    )), /* @__PURE__ */ React.createElement(
-      FormField,
-      {
-        control: form.control,
-        name: "login",
-        render: ({ field }) => /* @__PURE__ */ React.createElement(FormItem, null, /* @__PURE__ */ React.createElement(FormLabel, null, "Login"), /* @__PURE__ */ React.createElement(FormControl, null, /* @__PURE__ */ React.createElement(Input, __spreadValues({}, field))), /* @__PURE__ */ React.createElement(FormMessage, null))
-      }
-    ), /* @__PURE__ */ React.createElement(
-      FormField,
-      {
-        control: form.control,
-        name: "mobilePhone",
-        render: ({ field }) => /* @__PURE__ */ React.createElement(FormItem, null, /* @__PURE__ */ React.createElement(FormLabel, null, "Mobile Phone"), /* @__PURE__ */ React.createElement(FormControl, null, /* @__PURE__ */ React.createElement(Input, __spreadProps(__spreadValues({}, field), { type: "tel" }))), /* @__PURE__ */ React.createElement(FormMessage, null))
-      }
-    ), /* @__PURE__ */ React.createElement("div", { className: "grid grid-cols-2 gap-4" }, /* @__PURE__ */ React.createElement(
-      FormField,
-      {
-        control: form.control,
-        name: "manager",
-        render: ({ field }) => /* @__PURE__ */ React.createElement(FormItem, null, /* @__PURE__ */ React.createElement(FormLabel, null, "Manager"), /* @__PURE__ */ React.createElement(FormControl, null, /* @__PURE__ */ React.createElement("div", { className: "relative" }, /* @__PURE__ */ React.createElement(
-          Input,
-          __spreadProps(__spreadValues({}, field), {
-            onChange: (e) => {
-              field.onChange(e);
-              setManagerSearch(e.target.value);
-            },
-            placeholder: "Type to search for manager..."
-          })
-        ), managerSearch && availableManagers.length > 0 && /* @__PURE__ */ React.createElement("div", { className: "absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto" }, availableManagers.map((manager) => /* @__PURE__ */ React.createElement(
-          "div",
-          {
-            key: manager.id,
-            className: "px-3 py-2 cursor-pointer hover:bg-gray-100",
-            onClick: () => {
-              const fullName = `${manager.firstName} ${manager.lastName}`;
-              field.onChange(fullName);
-              setManagerSearch("");
+    return /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)("div", { className: "flex-1 overflow-hidden", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)("div", { className: "h-full flex flex-col", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("div", { className: "flex-shrink-0 bg-background border-b border-border px-4 py-3", children: /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)("div", { className: "flex items-center justify-between", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)("div", { className: "flex items-center gap-4", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)(
+              Button,
+              {
+                variant: "ghost",
+                size: "sm",
+                onClick: () => setLocation("/"),
+                className: "flex items-center gap-2",
+                children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(ArrowLeft, { className: "w-4 h-4" }),
+                  "Back to Users"
+                ]
+              }
+            ),
+            /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)("div", { className: "flex items-center gap-4", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)("div", { children: [
+                /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)("h1", { className: "text-xl font-bold text-foreground leading-tight", children: [
+                  user.firstName || "Unknown",
+                  " ",
+                  user.lastName || "User"
+                ] }),
+                /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)("div", { className: "flex items-center gap-2", children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("span", { className: "text-sm text-muted-foreground", children: user.email || "No email" }),
+                  /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("span", { className: "text-sm text-muted-foreground", children: "\u2022" }),
+                  getStatusBadge(user.status || "UNKNOWN")
+                ] })
+              ] }),
+              /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)("div", { className: "flex items-center gap-2", children: [
+                /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)(
+                  Button,
+                  {
+                    variant: "outline",
+                    size: "sm",
+                    onClick: () => setShowPasswordModal("reset"),
+                    className: "flex items-center gap-2 text-blue-600 dark:text-blue-400 border-blue-300 dark:border-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900",
+                    children: [
+                      /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(Key, { className: "w-4 h-4" }),
+                      "Reset Password"
+                    ]
+                  }
+                ),
+                /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)(
+                  Button,
+                  {
+                    variant: "outline",
+                    size: "sm",
+                    onClick: () => setShowPasswordModal("expire"),
+                    className: "flex items-center gap-2 text-purple-600 dark:text-purple-400 border-purple-300 dark:border-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900",
+                    children: [
+                      /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(KeyRound, { className: "w-4 h-4" }),
+                      "Expire Password"
+                    ]
+                  }
+                ),
+                user.status === "ACTIVE" ? /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)(
+                  Button,
+                  {
+                    variant: "outline",
+                    size: "sm",
+                    onClick: () => handleStatusChange("SUSPENDED"),
+                    className: "flex items-center gap-2 text-orange-600 dark:text-orange-400 border-orange-300 dark:border-orange-600 hover:bg-orange-50 dark:hover:bg-orange-900",
+                    children: [
+                      /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(UserX, { className: "w-4 h-4" }),
+                      "Suspend"
+                    ]
+                  }
+                ) : user.status === "LOCKED_OUT" ? /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)(
+                  Button,
+                  {
+                    variant: "outline",
+                    size: "sm",
+                    onClick: () => handleStatusChange("ACTIVE"),
+                    className: "flex items-center gap-2 text-blue-600 dark:text-blue-400 border-blue-300 dark:border-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900",
+                    children: [
+                      /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(UserCheck, { className: "w-4 h-4" }),
+                      "Unlock User"
+                    ]
+                  }
+                ) : /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)(
+                  Button,
+                  {
+                    variant: "outline",
+                    size: "sm",
+                    onClick: () => handleStatusChange("ACTIVE"),
+                    className: "flex items-center gap-2 text-green-600 dark:text-green-400 border-green-300 dark:border-green-600 hover:bg-green-50 dark:hover:bg-green-900",
+                    children: [
+                      /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(UserCheck, { className: "w-4 h-4" }),
+                      "Activate"
+                    ]
+                  }
+                ),
+                /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)(
+                  Button,
+                  {
+                    variant: "outline",
+                    size: "sm",
+                    onClick: handleDeleteUser,
+                    className: "flex items-center gap-2 text-red-600 dark:text-red-400 border-red-300 dark:border-red-600 hover:bg-red-50 dark:hover:bg-red-900",
+                    children: [
+                      /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(Trash2, { className: "w-4 h-4" }),
+                      "Delete"
+                    ]
+                  }
+                )
+              ] })
+            ] })
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("div", { className: "flex items-center", children: !isEditing && /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)(
+            Button,
+            {
+              variant: "outline",
+              size: "sm",
+              onClick: () => setIsEditing(true),
+              className: "flex items-center gap-2",
+              children: [
+                /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(SquarePen, { className: "w-4 h-4" }),
+                "Edit Profile"
+              ]
             }
-          },
-          /* @__PURE__ */ React.createElement("div", { className: "font-medium" }, manager.firstName, " ", manager.lastName),
-          /* @__PURE__ */ React.createElement("div", { className: "text-sm text-gray-500" }, manager.email),
-          manager.title && /* @__PURE__ */ React.createElement("div", { className: "text-sm text-gray-400" }, manager.title)
-        ))))), /* @__PURE__ */ React.createElement(FormMessage, null))
-      }
-    ), /* @__PURE__ */ React.createElement(
-      FormField,
-      {
-        control: form.control,
-        name: "employeeType",
-        render: ({ field }) => /* @__PURE__ */ React.createElement(FormItem, null, /* @__PURE__ */ React.createElement(FormLabel, null, "Employee Type"), /* @__PURE__ */ React.createElement(FormControl, null, /* @__PURE__ */ React.createElement(
-          "select",
-          __spreadProps(__spreadValues({}, field), {
-            className: "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-          }),
-          /* @__PURE__ */ React.createElement("option", { value: "" }, "Select Employee Type"),
-          /* @__PURE__ */ React.createElement("option", { value: "EMPLOYEE" }, "Employee"),
-          /* @__PURE__ */ React.createElement("option", { value: "CONTRACTOR" }, "Contractor"),
-          /* @__PURE__ */ React.createElement("option", { value: "PART_TIME" }, "Part Time"),
-          /* @__PURE__ */ React.createElement("option", { value: "INTERN" }, "Intern")
-        )), /* @__PURE__ */ React.createElement(FormMessage, null))
-      }
-    )))))) : /* @__PURE__ */ React.createElement("div", { className: "space-y-4" }, /* @__PURE__ */ React.createElement(Tabs2, { value: profileSubTab, onValueChange: setProfileSubTab, className: "w-full" }, /* @__PURE__ */ React.createElement(TabsList2, { className: "grid w-full grid-cols-2" }, /* @__PURE__ */ React.createElement(TabsTrigger2, { value: "okta" }, "OKTA"), /* @__PURE__ */ React.createElement(TabsTrigger2, { value: "microsoft" }, "Microsoft")), /* @__PURE__ */ React.createElement(TabsContent2, { value: "okta", className: "space-y-6 mt-4" }, /* @__PURE__ */ React.createElement("div", { className: "grid grid-cols-1 lg:grid-cols-2 gap-6" }, /* @__PURE__ */ React.createElement(Card, null, /* @__PURE__ */ React.createElement(CardHeader, null, /* @__PURE__ */ React.createElement(CardTitle, null, "Personal Information")), /* @__PURE__ */ React.createElement(CardContent, { className: "space-y-4" }, /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("label", { className: "text-sm font-medium text-muted-foreground" }, "First Name"), /* @__PURE__ */ React.createElement("p", { className: "text-foreground" }, user.firstName)), /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("label", { className: "text-sm font-medium text-muted-foreground" }, "Last Name"), /* @__PURE__ */ React.createElement("p", { className: "text-foreground" }, user.lastName)), /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("label", { className: "text-sm font-medium text-muted-foreground" }, "Email"), /* @__PURE__ */ React.createElement("p", { className: "text-foreground" }, user.email)), /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("label", { className: "text-sm font-medium text-muted-foreground" }, "Login"), /* @__PURE__ */ React.createElement("p", { className: "text-foreground" }, user.login)), /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("label", { className: "text-sm font-medium text-muted-foreground" }, "Mobile Phone"), /* @__PURE__ */ React.createElement("p", { className: "text-foreground" }, user.mobilePhone || "Not specified")))), /* @__PURE__ */ React.createElement(Card, null, /* @__PURE__ */ React.createElement(CardHeader, null, /* @__PURE__ */ React.createElement(CardTitle, null, "Work Information")), /* @__PURE__ */ React.createElement(CardContent, { className: "space-y-4" }, /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("label", { className: "text-sm font-medium text-muted-foreground" }, "Title"), /* @__PURE__ */ React.createElement("p", { className: "text-foreground" }, user.title || "Not specified")), /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("label", { className: "text-sm font-medium text-muted-foreground" }, "Department"), /* @__PURE__ */ React.createElement("p", { className: "text-foreground" }, user.department || "Not specified")), /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("label", { className: "text-sm font-medium text-muted-foreground" }, "Manager"), /* @__PURE__ */ React.createElement("p", { className: "text-foreground" }, user.manager || "Not specified")), /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("label", { className: "text-sm font-medium text-muted-foreground" }, "Employee Type"), /* @__PURE__ */ React.createElement("p", { className: "text-foreground" }, user.employeeType || "Not specified")))), /* @__PURE__ */ React.createElement(Card, null, /* @__PURE__ */ React.createElement(CardHeader, null, /* @__PURE__ */ React.createElement(CardTitle, null, "Account Information")), /* @__PURE__ */ React.createElement(CardContent, { className: "space-y-4" }, /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("label", { className: "text-sm font-medium text-muted-foreground" }, "Account Created"), /* @__PURE__ */ React.createElement("p", { className: "text-foreground" }, formatTimestampWithPST(user.created) || "Not available")), /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("label", { className: "text-sm font-medium text-muted-foreground" }, "Last Update"), /* @__PURE__ */ React.createElement("p", { className: "text-foreground" }, formatTimestampWithPST(user.lastUpdated) || "Not available")), /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("label", { className: "text-sm font-medium text-muted-foreground" }, "Last Password Change"), /* @__PURE__ */ React.createElement("p", { className: "text-foreground" }, formatTimestampWithPST(user.passwordChanged) || "Never changed")), /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("label", { className: "text-sm font-medium text-muted-foreground" }, "Last Login"), /* @__PURE__ */ React.createElement("p", { className: "text-foreground" }, formatTimestampWithPST(user.lastLogin) || "Never logged in")))))), /* @__PURE__ */ React.createElement(TabsContent2, { value: "microsoft", className: "space-y-6 mt-4" }, /* @__PURE__ */ React.createElement("div", { className: "grid grid-cols-1 lg:grid-cols-2 gap-6" }, /* @__PURE__ */ React.createElement(Card, null, /* @__PURE__ */ React.createElement(CardHeader, null, /* @__PURE__ */ React.createElement(CardTitle, { className: "flex items-center gap-2" }, /* @__PURE__ */ React.createElement(Monitor, { className: "w-5 h-5 text-blue-600" }), "Microsoft Account")), /* @__PURE__ */ React.createElement(CardContent, { className: "space-y-4" }, /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("label", { className: "text-sm font-medium text-muted-foreground" }, "Azure AD User ID"), /* @__PURE__ */ React.createElement("p", { className: "text-foreground" }, "Loading...")), /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("label", { className: "text-sm font-medium text-muted-foreground" }, "Office 365 License"), /* @__PURE__ */ React.createElement("p", { className: "text-foreground" }, "Loading...")), /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("label", { className: "text-sm font-medium text-muted-foreground" }, "Teams Status"), /* @__PURE__ */ React.createElement("p", { className: "text-foreground" }, "Loading...")), /* @__PURE__ */ React.createElement(
-      Button,
-      {
-        variant: "outline",
-        size: "sm",
-        className: "w-full",
-        onClick: () => {
-          console.log("Fetching Microsoft data...");
-        }
-      },
-      /* @__PURE__ */ React.createElement(RefreshCw, { className: "w-4 h-4 mr-2" }),
-      "Refresh Data"
-    ))), /* @__PURE__ */ React.createElement(Card, null, /* @__PURE__ */ React.createElement(CardHeader, null, /* @__PURE__ */ React.createElement(CardTitle, null, "Microsoft Graph API")), /* @__PURE__ */ React.createElement(CardContent, { className: "space-y-4" }, /* @__PURE__ */ React.createElement("div", { className: "space-y-2" }, /* @__PURE__ */ React.createElement("label", { className: "text-sm font-medium text-muted-foreground" }, "Quick Actions"), /* @__PURE__ */ React.createElement("div", { className: "grid grid-cols-1 gap-2" }, /* @__PURE__ */ React.createElement(
-      Button,
-      {
-        variant: "outline",
-        size: "sm",
-        onClick: () => {
-          console.log("Resetting MFA for user...");
-        }
-      },
-      "Reset MFA"
-    ), /* @__PURE__ */ React.createElement(
-      Button,
-      {
-        variant: "outline",
-        size: "sm",
-        onClick: () => {
-          console.log("Revoking all sessions...");
-        }
-      },
-      "Revoke Sessions"
-    ), /* @__PURE__ */ React.createElement(
-      Button,
-      {
-        variant: "outline",
-        size: "sm",
-        onClick: () => {
-          console.log("Fetching sign-in logs...");
-        }
-      },
-      "Get Sign-in Logs"
-    ))), /* @__PURE__ */ React.createElement("div", { className: "space-y-2" }, /* @__PURE__ */ React.createElement("label", { className: "text-sm font-medium text-muted-foreground" }, "Custom Query"), /* @__PURE__ */ React.createElement(
-      Input,
-      {
-        placeholder: "Enter Graph API endpoint...",
-        className: "text-sm"
-      }
-    ), /* @__PURE__ */ React.createElement(Button, { variant: "default", size: "sm", className: "w-full" }, "Execute Query"))))))))), /* @__PURE__ */ React.createElement(TabsContent2, { value: "monitoring", className: "space-y-6 mt-0" }, /* @__PURE__ */ React.createElement("div", { className: "grid grid-cols-1 lg:grid-cols-2 gap-6" }, /* @__PURE__ */ React.createElement(KnowBe4UserDisplay, { userEmail: user.email || "" }), /* @__PURE__ */ React.createElement(Card, null, /* @__PURE__ */ React.createElement(CardHeader, null, /* @__PURE__ */ React.createElement(CardTitle, { className: "flex items-center gap-2" }, /* @__PURE__ */ React.createElement(Eye, { className: "w-5 h-5 text-purple-600" }), "SentinelOne")), /* @__PURE__ */ React.createElement(CardContent, { className: "space-y-4" }, /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("label", { className: "text-sm font-medium text-muted-foreground" }, "Agent Status"), /* @__PURE__ */ React.createElement("p", { className: "text-foreground" }, "Loading...")), /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("label", { className: "text-sm font-medium text-muted-foreground" }, "Last Check-in"), /* @__PURE__ */ React.createElement("p", { className: "text-foreground" }, "Loading...")), /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("label", { className: "text-sm font-medium text-muted-foreground" }, "Threats Detected"), /* @__PURE__ */ React.createElement("p", { className: "text-foreground" }, "Loading...")), /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("label", { className: "text-sm font-medium text-muted-foreground" }, "Policy Compliance"), /* @__PURE__ */ React.createElement("p", { className: "text-foreground" }, "Loading...")), /* @__PURE__ */ React.createElement("div", { className: "flex gap-2 pt-2" }, /* @__PURE__ */ React.createElement(
-      Button,
-      {
-        variant: "outline",
-        size: "sm",
-        className: "flex-1",
-        onClick: () => {
-          console.log("Fetching SentinelOne data...");
-        }
-      },
-      /* @__PURE__ */ React.createElement(RefreshCw, { className: "w-4 h-4 mr-1" }),
-      "Refresh"
-    ), /* @__PURE__ */ React.createElement(
-      Button,
-      {
-        variant: "default",
-        size: "sm",
-        className: "flex-1",
-        onClick: () => {
-          console.log("Initiating SentinelOne scan...");
-        }
-      },
-      "Full Scan"
-    )))), /* @__PURE__ */ React.createElement(Card, null, /* @__PURE__ */ React.createElement(CardHeader, null, /* @__PURE__ */ React.createElement(CardTitle, { className: "flex items-center gap-2" }, /* @__PURE__ */ React.createElement(Monitor, { className: "w-5 h-5 text-orange-600" }), "Device Management")), /* @__PURE__ */ React.createElement(CardContent, { className: "space-y-6" }, /* @__PURE__ */ React.createElement("div", { className: "grid grid-cols-2 gap-4" }, /* @__PURE__ */ React.createElement("div", { className: "space-y-3" }, /* @__PURE__ */ React.createElement("h4", { className: "font-medium text-sm text-orange-600 border-b pb-1" }, "Addigy"), /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("label", { className: "text-xs font-medium text-muted-foreground" }, "Status"), /* @__PURE__ */ React.createElement("div", { className: "flex items-center gap-2" }, /* @__PURE__ */ React.createElement(Badge, { className: "bg-green-600 text-white text-xs" }, "Managed"))), /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("label", { className: "text-xs font-medium text-muted-foreground" }, "Last Sync"), /* @__PURE__ */ React.createElement("p", { className: "text-foreground text-sm" }, "5 min ago")), /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("label", { className: "text-xs font-medium text-muted-foreground" }, "Updates"), /* @__PURE__ */ React.createElement("p", { className: "text-foreground text-sm" }, "Up to Date"))), /* @__PURE__ */ React.createElement("div", { className: "space-y-3" }, /* @__PURE__ */ React.createElement("h4", { className: "font-medium text-sm text-blue-500 border-b pb-1" }, "Intune"), /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("label", { className: "text-xs font-medium text-muted-foreground" }, "Enrollment"), /* @__PURE__ */ React.createElement("div", { className: "flex items-center gap-2" }, /* @__PURE__ */ React.createElement(Badge, { className: "bg-green-600 text-white text-xs" }, "Enrolled"))), /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("label", { className: "text-xs font-medium text-muted-foreground" }, "Check-in"), /* @__PURE__ */ React.createElement("p", { className: "text-foreground text-sm" }, "1 hour ago")), /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("label", { className: "text-xs font-medium text-muted-foreground" }, "Policies"), /* @__PURE__ */ React.createElement("p", { className: "text-foreground text-sm" }, "5/5 Applied")))), /* @__PURE__ */ React.createElement("div", { className: "flex gap-2 pt-2" }, /* @__PURE__ */ React.createElement(
-      Button,
-      {
-        variant: "outline",
-        size: "sm",
-        className: "flex-1",
-        onClick: () => {
-          console.log("Fetching Addigy data...");
-        }
-      },
-      /* @__PURE__ */ React.createElement(RefreshCw, { className: "w-3 h-3 mr-1" }),
-      "Sync Addigy"
-    ), /* @__PURE__ */ React.createElement(
-      Button,
-      {
-        variant: "outline",
-        size: "sm",
-        className: "flex-1",
-        onClick: () => {
-          console.log("Fetching Intune data...");
-        }
-      },
-      /* @__PURE__ */ React.createElement(RefreshCw, { className: "w-3 h-3 mr-1" }),
-      "Sync Intune"
-    )))), /* @__PURE__ */ React.createElement(Card, null, /* @__PURE__ */ React.createElement(CardHeader, null, /* @__PURE__ */ React.createElement(CardTitle, { className: "flex items-center gap-2" }, /* @__PURE__ */ React.createElement(Search, { className: "w-5 h-5 text-blue-700" }), "Jira Service Management")), /* @__PURE__ */ React.createElement(CardContent, { className: "space-y-4" }, /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("label", { className: "text-sm font-medium text-muted-foreground" }, "Open Tickets"), /* @__PURE__ */ React.createElement("p", { className: "text-foreground" }, "Loading...")), /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("label", { className: "text-sm font-medium text-muted-foreground" }, "Recent Activity"), /* @__PURE__ */ React.createElement("p", { className: "text-foreground" }, "Loading...")), /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("label", { className: "text-sm font-medium text-muted-foreground" }, "Priority Issues"), /* @__PURE__ */ React.createElement("p", { className: "text-foreground" }, "Loading...")), /* @__PURE__ */ React.createElement("div", { className: "flex gap-2 pt-2" }, /* @__PURE__ */ React.createElement(
-      Button,
-      {
-        variant: "outline",
-        size: "sm",
-        className: "flex-1",
-        onClick: () => {
-          console.log("Fetching Jira tickets...");
-        }
-      },
-      /* @__PURE__ */ React.createElement(RefreshCw, { className: "w-4 h-4 mr-1" }),
-      "Refresh"
-    ), /* @__PURE__ */ React.createElement(
-      Button,
-      {
-        variant: "default",
-        size: "sm",
-        className: "flex-1",
-        onClick: () => {
-          console.log("Creating new Jira ticket...");
-        }
-      },
-      "Create Ticket"
-    )))))), /* @__PURE__ */ React.createElement(TabsContent2, { value: "applications", className: "space-y-4 mt-0" }, /* @__PURE__ */ React.createElement(Card, null, /* @__PURE__ */ React.createElement(CardHeader, { className: "flex flex-row items-center justify-between" }, /* @__PURE__ */ React.createElement(CardTitle, null, "Applications (", userApps.length, ")"), /* @__PURE__ */ React.createElement("div", { className: "flex items-center gap-3" }, /* @__PURE__ */ React.createElement(
-      Button,
-      {
-        variant: "outline",
-        size: "sm",
-        onClick: () => setShowAssignAppModal(true)
-      },
-      "Assign App"
-    ), /* @__PURE__ */ React.createElement("div", { className: "relative w-64" }, /* @__PURE__ */ React.createElement(Search, { className: "absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" }), /* @__PURE__ */ React.createElement(
-      Input,
-      {
-        placeholder: "Search applications...",
-        value: appSearchTerm,
-        onChange: (e) => setAppSearchTerm(e.target.value),
-        className: "pl-10"
-      }
-    )))), /* @__PURE__ */ React.createElement(CardContent, null, filteredApps.length === 0 ? /* @__PURE__ */ React.createElement("p", { className: "text-gray-500 text-center py-8" }, appSearchTerm ? `No applications found matching "${appSearchTerm}"` : "No applications assigned") : /* @__PURE__ */ React.createElement("div", { className: "space-y-2" }, filteredApps.map((app) => {
-      var _a121, _b93;
-      return /* @__PURE__ */ React.createElement("div", { key: app.id, className: "flex items-center justify-between p-2 border rounded-lg" }, /* @__PURE__ */ React.createElement("div", { className: "flex items-center gap-3" }, app.logo && /* @__PURE__ */ React.createElement("img", { src: app.logo, alt: app.label, className: "w-8 h-8 rounded" }), /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("h4", { className: "font-medium" }, app.label || app.name || "Unknown Application"), /* @__PURE__ */ React.createElement("p", { className: "text-sm text-gray-500" }, app.description || ((_b93 = (_a121 = app.settings) == null ? void 0 : _a121.app) == null ? void 0 : _b93.authURL) || ""))), /* @__PURE__ */ React.createElement("div", { className: "flex items-center gap-2" }, /* @__PURE__ */ React.createElement(Badge, { variant: app.status === "ACTIVE" ? "default" : "secondary" }, app.status), /* @__PURE__ */ React.createElement(Badge, { variant: "outline" }, app.signOnMode)));
-    }))))), /* @__PURE__ */ React.createElement(TabsContent2, { value: "devices", className: "space-y-4 mt-0" }, /* @__PURE__ */ React.createElement(Card, null, /* @__PURE__ */ React.createElement(CardHeader, null, /* @__PURE__ */ React.createElement(CardTitle, null, "Registered Devices")), /* @__PURE__ */ React.createElement(CardContent, null, userDevices.length === 0 ? /* @__PURE__ */ React.createElement("p", { className: "text-gray-500 text-center py-8" }, "No devices registered") : /* @__PURE__ */ React.createElement("div", { className: "space-y-2" }, userDevices.map((device, index3) => {
-      var _a121, _b93, _c5, _d4, _e4, _f2, _g2;
-      return /* @__PURE__ */ React.createElement("div", { key: device.id || index3, className: "flex items-center justify-between p-2 border rounded-lg" }, /* @__PURE__ */ React.createElement("div", { className: "flex items-center gap-3" }, /* @__PURE__ */ React.createElement("div", { className: "w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center" }, /* @__PURE__ */ React.createElement("span", { className: "text-lg" }, "\u{1F4F1}")), /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("h4", { className: "font-medium" }, ((_a121 = device.profile) == null ? void 0 : _a121.deviceName) || ((_b93 = device.profile) == null ? void 0 : _b93.name) || ((_c5 = device.profile) == null ? void 0 : _c5.displayName) || device.displayName || device.name || `${device.factorType || "Device"} Factor` || "Unknown Device"), /* @__PURE__ */ React.createElement("p", { className: "text-sm text-gray-500" }, ((_d4 = device.profile) == null ? void 0 : _d4.platform) || ((_e4 = device.profile) == null ? void 0 : _e4.deviceType) || device.platform || device.deviceType || device.provider || "Unknown Platform"), (((_f2 = device.profile) == null ? void 0 : _f2.serialNumber) || device.serialNumber) && /* @__PURE__ */ React.createElement("p", { className: "text-xs text-gray-400" }, "Serial: ", ((_g2 = device.profile) == null ? void 0 : _g2.serialNumber) || device.serialNumber), device.factorType && /* @__PURE__ */ React.createElement("p", { className: "text-xs text-gray-400" }, "Type: ", device.factorType))), /* @__PURE__ */ React.createElement("div", { className: "flex items-center gap-2" }, /* @__PURE__ */ React.createElement(Badge, { variant: device.status === "ACTIVE" ? "default" : "secondary" }, device.status || "UNKNOWN"), (device.lastUpdated || device.created) && /* @__PURE__ */ React.createElement("span", { className: "text-xs text-gray-500" }, "Last seen: ", new Date(device.lastUpdated || device.created).toLocaleDateString())));
-    }))))), /* @__PURE__ */ React.createElement(TabsContent2, { value: "activity", className: "space-y-4 mt-0" }, /* @__PURE__ */ React.createElement(Card, null, /* @__PURE__ */ React.createElement(CardHeader, { className: "flex flex-row items-center justify-between" }, /* @__PURE__ */ React.createElement(CardTitle, null, "Events: ", userLogs.length), /* @__PURE__ */ React.createElement("div", { className: "flex items-center gap-2" }, /* @__PURE__ */ React.createElement(Button, { variant: "outline", size: "sm" }, /* @__PURE__ */ React.createElement(Download, { className: "w-4 h-4 mr-2" }), "Download CSV"))), /* @__PURE__ */ React.createElement(CardContent, null, userLogs.length === 0 ? /* @__PURE__ */ React.createElement("p", { className: "text-gray-500 text-center py-8" }, "No recent activity found") : /* @__PURE__ */ React.createElement("div", { className: "space-y-0 border rounded-lg" }, /* @__PURE__ */ React.createElement("div", { className: "grid grid-cols-12 gap-4 p-3 bg-gray-50 dark:bg-gray-800 border-b text-sm font-medium text-gray-700 dark:text-gray-300" }, /* @__PURE__ */ React.createElement("div", { className: "col-span-2" }, "Time"), /* @__PURE__ */ React.createElement("div", { className: "col-span-3" }, "Actor"), /* @__PURE__ */ React.createElement("div", { className: "col-span-4" }, "Event Info"), /* @__PURE__ */ React.createElement("div", { className: "col-span-2" }, "Targets"), /* @__PURE__ */ React.createElement("div", { className: "col-span-1" })), userLogs.map((log, index3) => {
-      var _a121, _b93, _c5, _d4, _e4, _f2, _g2, _h2, _i2, _j2;
-      return /* @__PURE__ */ React.createElement("div", { key: log.id, className: `${index3 % 2 === 0 ? "bg-white dark:bg-gray-900" : "bg-gray-50 dark:bg-gray-800"}` }, /* @__PURE__ */ React.createElement(
-        "div",
+          ) })
+        ] }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("div", { className: "flex-1 overflow-auto", children: /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)(Tabs2, { value: activeTab, onValueChange: setActiveTab, className: "h-full flex flex-col", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("div", { className: "flex-shrink-0 px-6 pt-4", children: /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)(TabsList2, { className: "grid w-full grid-cols-5", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(TabsTrigger2, { value: "profile", children: "Profile" }),
+            /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(TabsTrigger2, { value: "monitoring", children: "Monitoring" }),
+            /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)(TabsTrigger2, { value: "applications", children: [
+              "Applications (",
+              userApps.length,
+              ")"
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)(TabsTrigger2, { value: "devices", children: [
+              "Devices (",
+              userDevices.length,
+              ")"
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(TabsTrigger2, { value: "activity", children: "Recent Activity" })
+          ] }) }),
+          /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)("div", { className: "flex-1 overflow-auto px-6 py-4", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(TabsContent2, { value: "profile", className: "space-y-6 mt-0", children: isEditing ? /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(Form, __spreadProps(__spreadValues({}, form), { children: /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("form", { onSubmit: form.handleSubmit(handleEditSubmit), className: "space-y-6", children: /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)(Card, { children: [
+              /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)(CardHeader, { className: "flex flex-row items-center justify-between", children: [
+                /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(CardTitle, { children: "Edit Profile Information" }),
+                /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)("div", { className: "flex gap-2", children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)(
+                    Button,
+                    {
+                      type: "button",
+                      variant: "outline",
+                      size: "sm",
+                      onClick: handleCancelEdit,
+                      children: [
+                        /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(X, { className: "w-4 h-4 mr-2" }),
+                        "Cancel"
+                      ]
+                    }
+                  ),
+                  /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)(
+                    Button,
+                    {
+                      type: "submit",
+                      size: "sm",
+                      disabled: updateUserMutation.isPending,
+                      children: [
+                        /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(Save, { className: "w-4 h-4 mr-2" }),
+                        "Save Changes"
+                      ]
+                    }
+                  )
+                ] })
+              ] }),
+              /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)(CardContent, { className: "space-y-4", children: [
+                /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)("div", { className: "grid grid-cols-2 gap-4", children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(
+                    FormField,
+                    {
+                      control: form.control,
+                      name: "firstName",
+                      render: ({ field }) => /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)(FormItem, { children: [
+                        /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(FormLabel, { children: "First Name" }),
+                        /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(FormControl, { children: /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(Input, __spreadValues({}, field)) }),
+                        /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(FormMessage, {})
+                      ] })
+                    }
+                  ),
+                  /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(
+                    FormField,
+                    {
+                      control: form.control,
+                      name: "lastName",
+                      render: ({ field }) => /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)(FormItem, { children: [
+                        /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(FormLabel, { children: "Last Name" }),
+                        /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(FormControl, { children: /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(Input, __spreadValues({}, field)) }),
+                        /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(FormMessage, {})
+                      ] })
+                    }
+                  )
+                ] }),
+                /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(
+                  FormField,
+                  {
+                    control: form.control,
+                    name: "email",
+                    render: ({ field }) => /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)(FormItem, { children: [
+                      /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(FormLabel, { children: "Email" }),
+                      /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(FormControl, { children: /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(Input, __spreadProps(__spreadValues({}, field), { type: "email" })) }),
+                      /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(FormMessage, {})
+                    ] })
+                  }
+                ),
+                /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)("div", { className: "grid grid-cols-2 gap-4", children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(
+                    FormField,
+                    {
+                      control: form.control,
+                      name: "title",
+                      render: ({ field }) => /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)(FormItem, { children: [
+                        /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(FormLabel, { children: "Job Title" }),
+                        /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(FormControl, { children: /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(Input, __spreadValues({}, field)) }),
+                        /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(FormMessage, {})
+                      ] })
+                    }
+                  ),
+                  /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(
+                    FormField,
+                    {
+                      control: form.control,
+                      name: "department",
+                      render: ({ field }) => /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)(FormItem, { children: [
+                        /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(FormLabel, { children: "Department" }),
+                        /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(FormControl, { children: /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(Input, __spreadValues({}, field)) }),
+                        /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(FormMessage, {})
+                      ] })
+                    }
+                  )
+                ] }),
+                /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(
+                  FormField,
+                  {
+                    control: form.control,
+                    name: "login",
+                    render: ({ field }) => /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)(FormItem, { children: [
+                      /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(FormLabel, { children: "Login" }),
+                      /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(FormControl, { children: /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(Input, __spreadValues({}, field)) }),
+                      /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(FormMessage, {})
+                    ] })
+                  }
+                ),
+                /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(
+                  FormField,
+                  {
+                    control: form.control,
+                    name: "mobilePhone",
+                    render: ({ field }) => /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)(FormItem, { children: [
+                      /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(FormLabel, { children: "Mobile Phone" }),
+                      /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(FormControl, { children: /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(Input, __spreadProps(__spreadValues({}, field), { type: "tel" })) }),
+                      /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(FormMessage, {})
+                    ] })
+                  }
+                ),
+                /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)("div", { className: "grid grid-cols-2 gap-4", children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(
+                    FormField,
+                    {
+                      control: form.control,
+                      name: "manager",
+                      render: ({ field }) => /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)(FormItem, { children: [
+                        /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(FormLabel, { children: "Manager" }),
+                        /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(FormControl, { children: /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)("div", { className: "relative", children: [
+                          /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(
+                            Input,
+                            __spreadProps(__spreadValues({}, field), {
+                              onChange: (e) => {
+                                field.onChange(e);
+                                setManagerSearch(e.target.value);
+                              },
+                              placeholder: "Type to search for manager..."
+                            })
+                          ),
+                          managerSearch && availableManagers.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("div", { className: "absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto", children: availableManagers.map((manager) => /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)(
+                            "div",
+                            {
+                              className: "px-3 py-2 cursor-pointer hover:bg-gray-100",
+                              onClick: () => {
+                                const fullName = `${manager.firstName} ${manager.lastName}`;
+                                field.onChange(fullName);
+                                setManagerSearch("");
+                              },
+                              children: [
+                                /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)("div", { className: "font-medium", children: [
+                                  manager.firstName,
+                                  " ",
+                                  manager.lastName
+                                ] }),
+                                /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("div", { className: "text-sm text-gray-500", children: manager.email }),
+                                manager.title && /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("div", { className: "text-sm text-gray-400", children: manager.title })
+                              ]
+                            },
+                            manager.id
+                          )) })
+                        ] }) }),
+                        /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(FormMessage, {})
+                      ] })
+                    }
+                  ),
+                  /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(
+                    FormField,
+                    {
+                      control: form.control,
+                      name: "employeeType",
+                      render: ({ field }) => /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)(FormItem, { children: [
+                        /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(FormLabel, { children: "Employee Type" }),
+                        /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(FormControl, { children: /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)(
+                          "select",
+                          __spreadProps(__spreadValues({}, field), {
+                            className: "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
+                            children: [
+                              /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("option", { value: "", children: "Select Employee Type" }),
+                              /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("option", { value: "EMPLOYEE", children: "Employee" }),
+                              /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("option", { value: "CONTRACTOR", children: "Contractor" }),
+                              /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("option", { value: "PART_TIME", children: "Part Time" }),
+                              /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("option", { value: "INTERN", children: "Intern" })
+                            ]
+                          })
+                        ) }),
+                        /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(FormMessage, {})
+                      ] })
+                    }
+                  )
+                ] })
+              ] })
+            ] }) }) })) : /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("div", { className: "space-y-4", children: /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)(Tabs2, { value: profileSubTab, onValueChange: setProfileSubTab, className: "w-full", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)(TabsList2, { className: "grid w-full grid-cols-2", children: [
+                /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(TabsTrigger2, { value: "okta", children: "OKTA" }),
+                /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(TabsTrigger2, { value: "microsoft", children: "Microsoft" })
+              ] }),
+              /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(TabsContent2, { value: "okta", className: "space-y-6 mt-4", children: /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)("div", { className: "grid grid-cols-1 lg:grid-cols-2 gap-6", children: [
+                /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)(Card, { children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(CardHeader, { children: /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(CardTitle, { children: "Personal Information" }) }),
+                  /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)(CardContent, { className: "space-y-4", children: [
+                    /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)("div", { children: [
+                      /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("label", { className: "text-sm font-medium text-muted-foreground", children: "First Name" }),
+                      /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("p", { className: "text-foreground", children: user.firstName })
+                    ] }),
+                    /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)("div", { children: [
+                      /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("label", { className: "text-sm font-medium text-muted-foreground", children: "Last Name" }),
+                      /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("p", { className: "text-foreground", children: user.lastName })
+                    ] }),
+                    /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)("div", { children: [
+                      /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("label", { className: "text-sm font-medium text-muted-foreground", children: "Email" }),
+                      /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("p", { className: "text-foreground", children: user.email })
+                    ] }),
+                    /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)("div", { children: [
+                      /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("label", { className: "text-sm font-medium text-muted-foreground", children: "Login" }),
+                      /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("p", { className: "text-foreground", children: user.login })
+                    ] }),
+                    /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)("div", { children: [
+                      /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("label", { className: "text-sm font-medium text-muted-foreground", children: "Mobile Phone" }),
+                      /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("p", { className: "text-foreground", children: user.mobilePhone || "Not specified" })
+                    ] })
+                  ] })
+                ] }),
+                /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)(Card, { children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(CardHeader, { children: /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(CardTitle, { children: "Work Information" }) }),
+                  /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)(CardContent, { className: "space-y-4", children: [
+                    /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)("div", { children: [
+                      /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("label", { className: "text-sm font-medium text-muted-foreground", children: "Title" }),
+                      /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("p", { className: "text-foreground", children: user.title || "Not specified" })
+                    ] }),
+                    /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)("div", { children: [
+                      /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("label", { className: "text-sm font-medium text-muted-foreground", children: "Department" }),
+                      /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("p", { className: "text-foreground", children: user.department || "Not specified" })
+                    ] }),
+                    /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)("div", { children: [
+                      /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("label", { className: "text-sm font-medium text-muted-foreground", children: "Manager" }),
+                      /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("p", { className: "text-foreground", children: user.manager || "Not specified" })
+                    ] }),
+                    /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)("div", { children: [
+                      /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("label", { className: "text-sm font-medium text-muted-foreground", children: "Employee Type" }),
+                      /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("p", { className: "text-foreground", children: user.employeeType || "Not specified" })
+                    ] })
+                  ] })
+                ] }),
+                /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)(Card, { children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(CardHeader, { children: /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(CardTitle, { children: "Account Information" }) }),
+                  /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)(CardContent, { className: "space-y-4", children: [
+                    /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)("div", { children: [
+                      /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("label", { className: "text-sm font-medium text-muted-foreground", children: "Account Created" }),
+                      /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("p", { className: "text-foreground", children: formatTimestampWithPST(user.created) || "Not available" })
+                    ] }),
+                    /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)("div", { children: [
+                      /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("label", { className: "text-sm font-medium text-muted-foreground", children: "Last Update" }),
+                      /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("p", { className: "text-foreground", children: formatTimestampWithPST(user.lastUpdated) || "Not available" })
+                    ] }),
+                    /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)("div", { children: [
+                      /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("label", { className: "text-sm font-medium text-muted-foreground", children: "Last Password Change" }),
+                      /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("p", { className: "text-foreground", children: formatTimestampWithPST(user.passwordChanged) || "Never changed" })
+                    ] }),
+                    /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)("div", { children: [
+                      /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("label", { className: "text-sm font-medium text-muted-foreground", children: "Last Login" }),
+                      /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("p", { className: "text-foreground", children: formatTimestampWithPST(user.lastLogin) || "Never logged in" })
+                    ] })
+                  ] })
+                ] })
+              ] }) }),
+              /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(TabsContent2, { value: "microsoft", className: "space-y-6 mt-4", children: /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)("div", { className: "grid grid-cols-1 lg:grid-cols-2 gap-6", children: [
+                /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)(Card, { children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(CardHeader, { children: /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)(CardTitle, { className: "flex items-center gap-2", children: [
+                    /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(Monitor, { className: "w-5 h-5 text-blue-600" }),
+                    "Microsoft Account"
+                  ] }) }),
+                  /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)(CardContent, { className: "space-y-4", children: [
+                    /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)("div", { children: [
+                      /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("label", { className: "text-sm font-medium text-muted-foreground", children: "Azure AD User ID" }),
+                      /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("p", { className: "text-foreground", children: "Loading..." })
+                    ] }),
+                    /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)("div", { children: [
+                      /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("label", { className: "text-sm font-medium text-muted-foreground", children: "Office 365 License" }),
+                      /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("p", { className: "text-foreground", children: "Loading..." })
+                    ] }),
+                    /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)("div", { children: [
+                      /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("label", { className: "text-sm font-medium text-muted-foreground", children: "Teams Status" }),
+                      /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("p", { className: "text-foreground", children: "Loading..." })
+                    ] }),
+                    /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)(
+                      Button,
+                      {
+                        variant: "outline",
+                        size: "sm",
+                        className: "w-full",
+                        onClick: () => {
+                          console.log("Fetching Microsoft data...");
+                        },
+                        children: [
+                          /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(RefreshCw, { className: "w-4 h-4 mr-2" }),
+                          "Refresh Data"
+                        ]
+                      }
+                    )
+                  ] })
+                ] }),
+                /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)(Card, { children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(CardHeader, { children: /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(CardTitle, { children: "Microsoft Graph API" }) }),
+                  /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)(CardContent, { className: "space-y-4", children: [
+                    /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)("div", { className: "space-y-2", children: [
+                      /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("label", { className: "text-sm font-medium text-muted-foreground", children: "Quick Actions" }),
+                      /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)("div", { className: "grid grid-cols-1 gap-2", children: [
+                        /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(
+                          Button,
+                          {
+                            variant: "outline",
+                            size: "sm",
+                            onClick: () => {
+                              console.log("Resetting MFA for user...");
+                            },
+                            children: "Reset MFA"
+                          }
+                        ),
+                        /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(
+                          Button,
+                          {
+                            variant: "outline",
+                            size: "sm",
+                            onClick: () => {
+                              console.log("Revoking all sessions...");
+                            },
+                            children: "Revoke Sessions"
+                          }
+                        ),
+                        /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(
+                          Button,
+                          {
+                            variant: "outline",
+                            size: "sm",
+                            onClick: () => {
+                              console.log("Fetching sign-in logs...");
+                            },
+                            children: "Get Sign-in Logs"
+                          }
+                        )
+                      ] })
+                    ] }),
+                    /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)("div", { className: "space-y-2", children: [
+                      /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("label", { className: "text-sm font-medium text-muted-foreground", children: "Custom Query" }),
+                      /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(
+                        Input,
+                        {
+                          placeholder: "Enter Graph API endpoint...",
+                          className: "text-sm"
+                        }
+                      ),
+                      /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(Button, { variant: "default", size: "sm", className: "w-full", children: "Execute Query" })
+                    ] })
+                  ] })
+                ] })
+              ] }) })
+            ] }) }) }),
+            /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(TabsContent2, { value: "monitoring", className: "space-y-6 mt-0", children: /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)("div", { className: "grid grid-cols-1 lg:grid-cols-2 gap-6", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(KnowBe4UserDisplay, { userEmail: user.email || "" }),
+              /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)(Card, { children: [
+                /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(CardHeader, { children: /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)(CardTitle, { className: "flex items-center gap-2", children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(Eye, { className: "w-5 h-5 text-purple-600" }),
+                  "SentinelOne"
+                ] }) }),
+                /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)(CardContent, { className: "space-y-4", children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)("div", { children: [
+                    /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("label", { className: "text-sm font-medium text-muted-foreground", children: "Agent Status" }),
+                    /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("p", { className: "text-foreground", children: "Loading..." })
+                  ] }),
+                  /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)("div", { children: [
+                    /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("label", { className: "text-sm font-medium text-muted-foreground", children: "Last Check-in" }),
+                    /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("p", { className: "text-foreground", children: "Loading..." })
+                  ] }),
+                  /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)("div", { children: [
+                    /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("label", { className: "text-sm font-medium text-muted-foreground", children: "Threats Detected" }),
+                    /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("p", { className: "text-foreground", children: "Loading..." })
+                  ] }),
+                  /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)("div", { children: [
+                    /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("label", { className: "text-sm font-medium text-muted-foreground", children: "Policy Compliance" }),
+                    /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("p", { className: "text-foreground", children: "Loading..." })
+                  ] }),
+                  /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)("div", { className: "flex gap-2 pt-2", children: [
+                    /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)(
+                      Button,
+                      {
+                        variant: "outline",
+                        size: "sm",
+                        className: "flex-1",
+                        onClick: () => {
+                          console.log("Fetching SentinelOne data...");
+                        },
+                        children: [
+                          /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(RefreshCw, { className: "w-4 h-4 mr-1" }),
+                          "Refresh"
+                        ]
+                      }
+                    ),
+                    /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(
+                      Button,
+                      {
+                        variant: "default",
+                        size: "sm",
+                        className: "flex-1",
+                        onClick: () => {
+                          console.log("Initiating SentinelOne scan...");
+                        },
+                        children: "Full Scan"
+                      }
+                    )
+                  ] })
+                ] })
+              ] }),
+              /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)(Card, { children: [
+                /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(CardHeader, { children: /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)(CardTitle, { className: "flex items-center gap-2", children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(Monitor, { className: "w-5 h-5 text-orange-600" }),
+                  "Device Management"
+                ] }) }),
+                /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)(CardContent, { className: "space-y-6", children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)("div", { className: "grid grid-cols-2 gap-4", children: [
+                    /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)("div", { className: "space-y-3", children: [
+                      /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("h4", { className: "font-medium text-sm text-orange-600 border-b pb-1", children: "Addigy" }),
+                      /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)("div", { children: [
+                        /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("label", { className: "text-xs font-medium text-muted-foreground", children: "Status" }),
+                        /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("div", { className: "flex items-center gap-2", children: /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(Badge, { className: "bg-green-600 text-white text-xs", children: "Managed" }) })
+                      ] }),
+                      /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)("div", { children: [
+                        /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("label", { className: "text-xs font-medium text-muted-foreground", children: "Last Sync" }),
+                        /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("p", { className: "text-foreground text-sm", children: "5 min ago" })
+                      ] }),
+                      /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)("div", { children: [
+                        /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("label", { className: "text-xs font-medium text-muted-foreground", children: "Updates" }),
+                        /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("p", { className: "text-foreground text-sm", children: "Up to Date" })
+                      ] })
+                    ] }),
+                    /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)("div", { className: "space-y-3", children: [
+                      /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("h4", { className: "font-medium text-sm text-blue-500 border-b pb-1", children: "Intune" }),
+                      /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)("div", { children: [
+                        /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("label", { className: "text-xs font-medium text-muted-foreground", children: "Enrollment" }),
+                        /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("div", { className: "flex items-center gap-2", children: /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(Badge, { className: "bg-green-600 text-white text-xs", children: "Enrolled" }) })
+                      ] }),
+                      /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)("div", { children: [
+                        /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("label", { className: "text-xs font-medium text-muted-foreground", children: "Check-in" }),
+                        /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("p", { className: "text-foreground text-sm", children: "1 hour ago" })
+                      ] }),
+                      /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)("div", { children: [
+                        /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("label", { className: "text-xs font-medium text-muted-foreground", children: "Policies" }),
+                        /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("p", { className: "text-foreground text-sm", children: "5/5 Applied" })
+                      ] })
+                    ] })
+                  ] }),
+                  /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)("div", { className: "flex gap-2 pt-2", children: [
+                    /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)(
+                      Button,
+                      {
+                        variant: "outline",
+                        size: "sm",
+                        className: "flex-1",
+                        onClick: () => {
+                          console.log("Fetching Addigy data...");
+                        },
+                        children: [
+                          /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(RefreshCw, { className: "w-3 h-3 mr-1" }),
+                          "Sync Addigy"
+                        ]
+                      }
+                    ),
+                    /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)(
+                      Button,
+                      {
+                        variant: "outline",
+                        size: "sm",
+                        className: "flex-1",
+                        onClick: () => {
+                          console.log("Fetching Intune data...");
+                        },
+                        children: [
+                          /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(RefreshCw, { className: "w-3 h-3 mr-1" }),
+                          "Sync Intune"
+                        ]
+                      }
+                    )
+                  ] })
+                ] })
+              ] }),
+              /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)(Card, { children: [
+                /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(CardHeader, { children: /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)(CardTitle, { className: "flex items-center gap-2", children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(Search, { className: "w-5 h-5 text-blue-700" }),
+                  "Jira Service Management"
+                ] }) }),
+                /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)(CardContent, { className: "space-y-4", children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)("div", { children: [
+                    /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("label", { className: "text-sm font-medium text-muted-foreground", children: "Open Tickets" }),
+                    /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("p", { className: "text-foreground", children: "Loading..." })
+                  ] }),
+                  /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)("div", { children: [
+                    /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("label", { className: "text-sm font-medium text-muted-foreground", children: "Recent Activity" }),
+                    /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("p", { className: "text-foreground", children: "Loading..." })
+                  ] }),
+                  /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)("div", { children: [
+                    /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("label", { className: "text-sm font-medium text-muted-foreground", children: "Priority Issues" }),
+                    /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("p", { className: "text-foreground", children: "Loading..." })
+                  ] }),
+                  /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)("div", { className: "flex gap-2 pt-2", children: [
+                    /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)(
+                      Button,
+                      {
+                        variant: "outline",
+                        size: "sm",
+                        className: "flex-1",
+                        onClick: () => {
+                          console.log("Fetching Jira tickets...");
+                        },
+                        children: [
+                          /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(RefreshCw, { className: "w-4 h-4 mr-1" }),
+                          "Refresh"
+                        ]
+                      }
+                    ),
+                    /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(
+                      Button,
+                      {
+                        variant: "default",
+                        size: "sm",
+                        className: "flex-1",
+                        onClick: () => {
+                          console.log("Creating new Jira ticket...");
+                        },
+                        children: "Create Ticket"
+                      }
+                    )
+                  ] })
+                ] })
+              ] })
+            ] }) }),
+            /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(TabsContent2, { value: "applications", className: "space-y-4 mt-0", children: /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)(Card, { children: [
+              /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)(CardHeader, { className: "flex flex-row items-center justify-between", children: [
+                /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)(CardTitle, { children: [
+                  "Applications (",
+                  userApps.length,
+                  ")"
+                ] }),
+                /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)("div", { className: "flex items-center gap-3", children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(
+                    Button,
+                    {
+                      variant: "outline",
+                      size: "sm",
+                      onClick: () => setShowAssignAppModal(true),
+                      children: "Assign App"
+                    }
+                  ),
+                  /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)("div", { className: "relative w-64", children: [
+                    /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(Search, { className: "absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" }),
+                    /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(
+                      Input,
+                      {
+                        placeholder: "Search applications...",
+                        value: appSearchTerm,
+                        onChange: (e) => setAppSearchTerm(e.target.value),
+                        className: "pl-10"
+                      }
+                    )
+                  ] })
+                ] })
+              ] }),
+              /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(CardContent, { children: filteredApps.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("p", { className: "text-gray-500 text-center py-8", children: appSearchTerm ? `No applications found matching "${appSearchTerm}"` : "No applications assigned" }) : /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("div", { className: "space-y-2", children: filteredApps.map((app) => {
+                var _a121, _b93;
+                return /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)("div", { className: "flex items-center justify-between p-2 border rounded-lg", children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)("div", { className: "flex items-center gap-3", children: [
+                    app.logo && /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("img", { src: app.logo, alt: app.label, className: "w-8 h-8 rounded" }),
+                    /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)("div", { children: [
+                      /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("h4", { className: "font-medium", children: app.label || app.name || "Unknown Application" }),
+                      /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("p", { className: "text-sm text-gray-500", children: app.description || ((_b93 = (_a121 = app.settings) == null ? void 0 : _a121.app) == null ? void 0 : _b93.authURL) || "" })
+                    ] })
+                  ] }),
+                  /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)("div", { className: "flex items-center gap-2", children: [
+                    /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(Badge, { variant: app.status === "ACTIVE" ? "default" : "secondary", children: app.status }),
+                    /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(Badge, { variant: "outline", children: app.signOnMode })
+                  ] })
+                ] }, app.id);
+              }) }) })
+            ] }) }),
+            /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(TabsContent2, { value: "devices", className: "space-y-4 mt-0", children: /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)(Card, { children: [
+              /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(CardHeader, { children: /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(CardTitle, { children: "Registered Devices" }) }),
+              /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(CardContent, { children: userDevices.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("p", { className: "text-gray-500 text-center py-8", children: "No devices registered" }) : /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("div", { className: "space-y-2", children: userDevices.map((device, index3) => {
+                var _a121, _b93, _c5, _d4, _e4, _f2, _g2;
+                return /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)("div", { className: "flex items-center justify-between p-2 border rounded-lg", children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)("div", { className: "flex items-center gap-3", children: [
+                    /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("div", { className: "w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center", children: /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("span", { className: "text-lg", children: "\u{1F4F1}" }) }),
+                    /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)("div", { children: [
+                      /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("h4", { className: "font-medium", children: ((_a121 = device.profile) == null ? void 0 : _a121.deviceName) || ((_b93 = device.profile) == null ? void 0 : _b93.name) || ((_c5 = device.profile) == null ? void 0 : _c5.displayName) || device.displayName || device.name || `${device.factorType || "Device"} Factor` || "Unknown Device" }),
+                      /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("p", { className: "text-sm text-gray-500", children: ((_d4 = device.profile) == null ? void 0 : _d4.platform) || ((_e4 = device.profile) == null ? void 0 : _e4.deviceType) || device.platform || device.deviceType || device.provider || "Unknown Platform" }),
+                      (((_f2 = device.profile) == null ? void 0 : _f2.serialNumber) || device.serialNumber) && /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)("p", { className: "text-xs text-gray-400", children: [
+                        "Serial: ",
+                        ((_g2 = device.profile) == null ? void 0 : _g2.serialNumber) || device.serialNumber
+                      ] }),
+                      device.factorType && /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)("p", { className: "text-xs text-gray-400", children: [
+                        "Type: ",
+                        device.factorType
+                      ] })
+                    ] })
+                  ] }),
+                  /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)("div", { className: "flex items-center gap-2", children: [
+                    /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(Badge, { variant: device.status === "ACTIVE" ? "default" : "secondary", children: device.status || "UNKNOWN" }),
+                    (device.lastUpdated || device.created) && /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)("span", { className: "text-xs text-gray-500", children: [
+                      "Last seen: ",
+                      new Date(device.lastUpdated || device.created).toLocaleDateString()
+                    ] })
+                  ] })
+                ] }, device.id || index3);
+              }) }) })
+            ] }) }),
+            /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(TabsContent2, { value: "activity", className: "space-y-4 mt-0", children: /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)(Card, { children: [
+              /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)(CardHeader, { className: "flex flex-row items-center justify-between", children: [
+                /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)(CardTitle, { children: [
+                  "Events: ",
+                  userLogs.length
+                ] }),
+                /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("div", { className: "flex items-center gap-2", children: /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)(Button, { variant: "outline", size: "sm", children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(Download, { className: "w-4 h-4 mr-2" }),
+                  "Download CSV"
+                ] }) })
+              ] }),
+              /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(CardContent, { children: userLogs.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("p", { className: "text-gray-500 text-center py-8", children: "No recent activity found" }) : /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)("div", { className: "space-y-0 border rounded-lg", children: [
+                /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)("div", { className: "grid grid-cols-12 gap-4 p-3 bg-gray-50 dark:bg-gray-800 border-b text-sm font-medium text-gray-700 dark:text-gray-300", children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("div", { className: "col-span-2", children: "Time" }),
+                  /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("div", { className: "col-span-3", children: "Actor" }),
+                  /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("div", { className: "col-span-4", children: "Event Info" }),
+                  /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("div", { className: "col-span-2", children: "Targets" }),
+                  /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("div", { className: "col-span-1" })
+                ] }),
+                userLogs.map((log, index3) => {
+                  var _a121, _b93, _c5, _d4, _e4, _f2, _g2, _h2, _i2, _j2;
+                  return /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)("div", { className: `${index3 % 2 === 0 ? "bg-white dark:bg-gray-900" : "bg-gray-50 dark:bg-gray-800"}`, children: [
+                    /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)(
+                      "div",
+                      {
+                        className: "grid grid-cols-12 gap-4 p-3 border-b border-gray-200 dark:border-gray-700 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors cursor-pointer",
+                        onClick: () => {
+                          toggleLogExpansion(log.id);
+                          if (!expandedLogs.has(log.id)) {
+                            expandAllSections(log.id);
+                          }
+                        },
+                        children: [
+                          /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("div", { className: "col-span-2 text-sm", children: /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)("div", { className: "flex items-center gap-2", children: [
+                            /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("span", { className: "text-lg", children: getEventIcon(log.eventType) }),
+                            /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("div", { children: /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("div", { className: "font-medium", children: formatEventTime(log.published) }) })
+                          ] }) }),
+                          /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)("div", { className: "col-span-3 text-sm", children: [
+                            /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("div", { className: "font-medium", children: ((_a121 = log.actor) == null ? void 0 : _a121.displayName) || "Unknown Actor" }),
+                            /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("div", { className: "text-gray-500", children: ((_b93 = log.client) == null ? void 0 : _b93.ipAddress) || "Unknown IP" })
+                          ] }),
+                          /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)("div", { className: "col-span-4 text-sm", children: [
+                            /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("div", { className: "font-medium", children: log.displayMessage || log.eventType }),
+                            /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("div", { className: `${getOutcomeColor(log.outcome)} font-medium`, children: log.outcome })
+                          ] }),
+                          /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("div", { className: "col-span-2 text-sm", children: log.target && log.target.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)("div", { children: [
+                            /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("div", { className: "font-medium", children: log.target[0].displayName }),
+                            /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)("div", { className: "text-gray-500", children: [
+                              "(",
+                              log.target[0].type,
+                              ")"
+                            ] })
+                          ] }) }),
+                          /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)("div", { className: "col-span-1 flex items-center justify-end", children: [
+                            /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(
+                              Button,
+                              {
+                                variant: "ghost",
+                                size: "sm",
+                                onClick: (e) => {
+                                  e.stopPropagation();
+                                  toggleLogExpansion(log.id);
+                                },
+                                className: "h-8 w-8 p-0",
+                                children: expandedLogs.has(log.id) ? /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(ChevronUp, { className: "w-4 h-4" }) : /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(ChevronDown, { className: "w-4 h-4" })
+                              }
+                            ),
+                            /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(
+                              Button,
+                              {
+                                variant: "ghost",
+                                size: "sm",
+                                onClick: (e) => e.stopPropagation(),
+                                className: "h-8 w-8 p-0 ml-1",
+                                children: /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(Copy, { className: "w-4 h-4" })
+                              }
+                            )
+                          ] })
+                        ]
+                      }
+                    ),
+                    expandedLogs.has(log.id) && /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("div", { className: "bg-gray-100 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700", children: /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("div", { className: "p-4 space-y-4", children: /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)("div", { className: "grid grid-cols-1 md:grid-cols-2 gap-6", children: [
+                      /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)("div", { children: [
+                        /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)("div", { className: "flex items-center gap-2 mb-2", children: [
+                          /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(
+                            Button,
+                            {
+                              variant: "ghost",
+                              size: "sm",
+                              className: "p-0 h-auto",
+                              onClick: () => toggleSection(log.id, "actor"),
+                              children: isSectionExpanded(log.id, "actor") ? /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(ChevronDown, { className: "w-4 h-4 text-foreground" }) : /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(ChevronRight, { className: "w-4 h-4 text-foreground" })
+                            }
+                          ),
+                          /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("span", { className: "font-semibold text-foreground", children: "Actor" }),
+                          /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(
+                            Button,
+                            {
+                              variant: "outline",
+                              size: "sm",
+                              className: "ml-auto h-6 text-xs",
+                              onClick: () => areAllSectionsExpanded(log.id) ? collapseAllSections(log.id) : expandAllSections(log.id),
+                              children: areAllSectionsExpanded(log.id) ? "Collapse All" : "Expand All"
+                            }
+                          )
+                        ] }),
+                        isSectionExpanded(log.id, "actor") && /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)("div", { className: "bg-white dark:bg-gray-900 p-3 rounded border border-border space-y-2 text-sm text-foreground", children: [
+                          /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)("div", { children: [
+                            /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("span", { className: "font-medium", children: "ID:" }),
+                            " ",
+                            ((_c5 = log.actor) == null ? void 0 : _c5.id) || "N/A"
+                          ] }),
+                          /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)("div", { children: [
+                            /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("span", { className: "font-medium", children: "Display Name:" }),
+                            " ",
+                            ((_d4 = log.actor) == null ? void 0 : _d4.displayName) || "N/A"
+                          ] }),
+                          /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)("div", { children: [
+                            /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("span", { className: "font-medium", children: "Type:" }),
+                            " ",
+                            ((_e4 = log.actor) == null ? void 0 : _e4.type) || "N/A"
+                          ] })
+                        ] })
+                      ] }),
+                      /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)("div", { children: [
+                        /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)("div", { className: "flex items-center gap-2 mb-2", children: [
+                          /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(
+                            Button,
+                            {
+                              variant: "ghost",
+                              size: "sm",
+                              className: "p-0 h-auto",
+                              onClick: () => toggleSection(log.id, "client"),
+                              children: isSectionExpanded(log.id, "client") ? /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(ChevronDown, { className: "w-4 h-4 text-foreground" }) : /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(ChevronRight, { className: "w-4 h-4 text-foreground" })
+                            }
+                          ),
+                          /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("span", { className: "font-semibold text-foreground", children: "Client" })
+                        ] }),
+                        isSectionExpanded(log.id, "client") && /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)("div", { className: "bg-white dark:bg-gray-900 p-3 rounded border border-border space-y-2 text-sm text-foreground", children: [
+                          /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)("div", { children: [
+                            /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("span", { className: "font-medium", children: "IP Address:" }),
+                            " ",
+                            ((_f2 = log.client) == null ? void 0 : _f2.ipAddress) || "N/A"
+                          ] }),
+                          /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)("div", { children: [
+                            /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("span", { className: "font-medium", children: "User Agent:" }),
+                            /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("div", { className: "mt-1 text-xs text-muted-foreground break-all", children: ((_g2 = log.client) == null ? void 0 : _g2.userAgent) || "N/A" })
+                          ] }),
+                          ((_h2 = log.client) == null ? void 0 : _h2.geographicalContext) && /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)("div", { children: [
+                            /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("span", { className: "font-medium", children: "Location:" }),
+                            log.client.geographicalContext.city,
+                            ", ",
+                            log.client.geographicalContext.state,
+                            ", ",
+                            log.client.geographicalContext.country
+                          ] }),
+                          ((_i2 = log.client) == null ? void 0 : _i2.device) && /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)(import_jsx_runtime57.Fragment, { children: [
+                            /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("div", { className: "pt-2 border-t border-border", children: /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("span", { className: "font-medium text-blue-600 dark:text-blue-400", children: "Device Information" }) }),
+                            /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)("div", { children: [
+                              /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("span", { className: "font-medium", children: "Device ID:" }),
+                              " ",
+                              log.client.device.id || "N/A"
+                            ] }),
+                            /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)("div", { children: [
+                              /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("span", { className: "font-medium", children: "UDID:" }),
+                              " ",
+                              log.client.device.udid || "N/A"
+                            ] }),
+                            /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)("div", { children: [
+                              /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("span", { className: "font-medium", children: "Device Name:" }),
+                              " ",
+                              log.client.device.name || "N/A"
+                            ] }),
+                            /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)("div", { children: [
+                              /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("span", { className: "font-medium", children: "OS Platform:" }),
+                              " ",
+                              log.client.device.os_platform || "N/A"
+                            ] }),
+                            /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)("div", { children: [
+                              /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("span", { className: "font-medium", children: "OS Version:" }),
+                              " ",
+                              log.client.device.os_version || "N/A"
+                            ] }),
+                            /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)("div", { children: [
+                              /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("span", { className: "font-medium", children: "Managed:" }),
+                              /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("span", { className: `ml-1 ${log.client.device.managed ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}`, children: log.client.device.managed ? "Yes" : "No" })
+                            ] }),
+                            /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)("div", { children: [
+                              /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("span", { className: "font-medium", children: "Verified:" }),
+                              /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("span", { className: `ml-1 ${log.client.device.registered ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}`, children: log.client.device.registered ? "Yes" : "No" })
+                            ] }),
+                            /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)("div", { children: [
+                              /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("span", { className: "font-medium", children: "Screen Lock Type:" }),
+                              " ",
+                              log.client.device.screen_lock_type || "N/A"
+                            ] }),
+                            /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)("div", { children: [
+                              /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("span", { className: "font-medium", children: "Disk Encryption Type:" }),
+                              " ",
+                              log.client.device.disk_encryption_type || "N/A"
+                            ] })
+                          ] }),
+                          log.request && /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)(import_jsx_runtime57.Fragment, { children: [
+                            /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("div", { className: "pt-2 border-t border-border", children: /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("span", { className: "font-medium text-purple-600 dark:text-purple-400", children: "Request Information" }) }),
+                            /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)("div", { children: [
+                              /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("span", { className: "font-medium", children: "IP Chain:" }),
+                              /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("div", { className: "mt-1 text-xs text-muted-foreground", children: ((_j2 = log.request.ipChain) == null ? void 0 : _j2.map((ip, idx) => {
+                                var _a122;
+                                return /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)("div", { className: "ml-2", children: [
+                                  "\u2022 ",
+                                  ip.ip,
+                                  " (",
+                                  ip.source || "Unknown",
+                                  ") - ",
+                                  ((_a122 = ip.geographicalContext) == null ? void 0 : _a122.city) || "Unknown location"
+                                ] }, idx);
+                              })) || "N/A" })
+                            ] })
+                          ] })
+                        ] })
+                      ] }),
+                      /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)("div", { children: [
+                        /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)("div", { className: "flex items-center gap-2 mb-2", children: [
+                          /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(
+                            Button,
+                            {
+                              variant: "ghost",
+                              size: "sm",
+                              className: "p-0 h-auto",
+                              onClick: () => toggleSection(log.id, "event"),
+                              children: isSectionExpanded(log.id, "event") ? /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(ChevronDown, { className: "w-4 h-4 text-foreground" }) : /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(ChevronRight, { className: "w-4 h-4 text-foreground" })
+                            }
+                          ),
+                          /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("span", { className: "font-semibold text-foreground", children: "Event" })
+                        ] }),
+                        isSectionExpanded(log.id, "event") && /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)("div", { className: "bg-white dark:bg-gray-900 p-3 rounded border border-border space-y-2 text-sm text-foreground", children: [
+                          /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)("div", { children: [
+                            /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("span", { className: "font-medium", children: "Event Type:" }),
+                            " ",
+                            log.eventType
+                          ] }),
+                          /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)("div", { children: [
+                            /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("span", { className: "font-medium", children: "Display Message:" }),
+                            " ",
+                            log.displayMessage || "N/A"
+                          ] }),
+                          /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)("div", { children: [
+                            /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("span", { className: "font-medium", children: "Outcome:" }),
+                            /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("span", { className: `ml-1 ${getOutcomeColor(log.outcome)}`, children: log.outcome })
+                          ] }),
+                          /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)("div", { children: [
+                            /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("span", { className: "font-medium", children: "Event ID:" }),
+                            " ",
+                            log.id
+                          ] })
+                        ] })
+                      ] }),
+                      /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)("div", { children: [
+                        /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)("div", { className: "flex items-center gap-2 mb-2", children: [
+                          /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(
+                            Button,
+                            {
+                              variant: "ghost",
+                              size: "sm",
+                              className: "p-0 h-auto",
+                              onClick: () => toggleSection(log.id, "target"),
+                              children: isSectionExpanded(log.id, "target") ? /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(ChevronDown, { className: "w-4 h-4 text-foreground" }) : /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(ChevronRight, { className: "w-4 h-4 text-foreground" })
+                            }
+                          ),
+                          /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("span", { className: "font-semibold text-foreground", children: "Target" })
+                        ] }),
+                        isSectionExpanded(log.id, "target") && /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("div", { className: "bg-white dark:bg-gray-900 p-3 rounded border border-border space-y-2 text-sm text-foreground", children: log.target && log.target.length > 0 ? log.target.map((target, idx) => /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)("div", { className: idx > 0 ? "pt-2 border-t border-border" : "", children: [
+                          /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)("div", { children: [
+                            /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("span", { className: "font-medium", children: "ID:" }),
+                            " ",
+                            target.id || "N/A"
+                          ] }),
+                          /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)("div", { children: [
+                            /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("span", { className: "font-medium", children: "Type:" }),
+                            /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("span", { className: "ml-1 text-green-600 dark:text-green-400", children: target.type || "N/A" })
+                          ] }),
+                          /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)("div", { children: [
+                            /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("span", { className: "font-medium", children: "Display Name:" }),
+                            /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("span", { className: "ml-1 text-blue-600 dark:text-blue-400", children: target.displayName || "N/A" })
+                          ] })
+                        ] }, idx)) : /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("div", { children: "No target information available" }) })
+                      ] })
+                    ] }) }) })
+                  ] }, log.id);
+                })
+              ] }) })
+            ] }) })
+          ] })
+        ] }) })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(
+        AssignAppModal,
         {
-          className: "grid grid-cols-12 gap-4 p-3 border-b border-gray-200 dark:border-gray-700 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors cursor-pointer",
-          onClick: () => {
-            toggleLogExpansion(log.id);
-            if (!expandedLogs.has(log.id)) {
-              expandAllSections(log.id);
-            }
-          }
-        },
-        /* @__PURE__ */ React.createElement("div", { className: "col-span-2 text-sm" }, /* @__PURE__ */ React.createElement("div", { className: "flex items-center gap-2" }, /* @__PURE__ */ React.createElement("span", { className: "text-lg" }, getEventIcon(log.eventType)), /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("div", { className: "font-medium" }, formatEventTime(log.published))))),
-        /* @__PURE__ */ React.createElement("div", { className: "col-span-3 text-sm" }, /* @__PURE__ */ React.createElement("div", { className: "font-medium" }, ((_a121 = log.actor) == null ? void 0 : _a121.displayName) || "Unknown Actor"), /* @__PURE__ */ React.createElement("div", { className: "text-gray-500" }, ((_b93 = log.client) == null ? void 0 : _b93.ipAddress) || "Unknown IP")),
-        /* @__PURE__ */ React.createElement("div", { className: "col-span-4 text-sm" }, /* @__PURE__ */ React.createElement("div", { className: "font-medium" }, log.displayMessage || log.eventType), /* @__PURE__ */ React.createElement("div", { className: `${getOutcomeColor(log.outcome)} font-medium` }, log.outcome)),
-        /* @__PURE__ */ React.createElement("div", { className: "col-span-2 text-sm" }, log.target && log.target.length > 0 && /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("div", { className: "font-medium" }, log.target[0].displayName), /* @__PURE__ */ React.createElement("div", { className: "text-gray-500" }, "(", log.target[0].type, ")"))),
-        /* @__PURE__ */ React.createElement("div", { className: "col-span-1 flex items-center justify-end" }, /* @__PURE__ */ React.createElement(
-          Button,
-          {
-            variant: "ghost",
-            size: "sm",
-            onClick: (e) => {
-              e.stopPropagation();
-              toggleLogExpansion(log.id);
-            },
-            className: "h-8 w-8 p-0"
-          },
-          expandedLogs.has(log.id) ? /* @__PURE__ */ React.createElement(ChevronUp, { className: "w-4 h-4" }) : /* @__PURE__ */ React.createElement(ChevronDown, { className: "w-4 h-4" })
-        ), /* @__PURE__ */ React.createElement(
-          Button,
-          {
-            variant: "ghost",
-            size: "sm",
-            onClick: (e) => e.stopPropagation(),
-            className: "h-8 w-8 p-0 ml-1"
-          },
-          /* @__PURE__ */ React.createElement(Copy, { className: "w-4 h-4" })
-        ))
-      ), expandedLogs.has(log.id) && /* @__PURE__ */ React.createElement("div", { className: "bg-gray-100 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700" }, /* @__PURE__ */ React.createElement("div", { className: "p-4 space-y-4" }, /* @__PURE__ */ React.createElement("div", { className: "grid grid-cols-1 md:grid-cols-2 gap-6" }, /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("div", { className: "flex items-center gap-2 mb-2" }, /* @__PURE__ */ React.createElement(
-        Button,
-        {
-          variant: "ghost",
-          size: "sm",
-          className: "p-0 h-auto",
-          onClick: () => toggleSection(log.id, "actor")
-        },
-        isSectionExpanded(log.id, "actor") ? /* @__PURE__ */ React.createElement(ChevronDown, { className: "w-4 h-4 text-foreground" }) : /* @__PURE__ */ React.createElement(ChevronRight, { className: "w-4 h-4 text-foreground" })
-      ), /* @__PURE__ */ React.createElement("span", { className: "font-semibold text-foreground" }, "Actor"), /* @__PURE__ */ React.createElement(
-        Button,
-        {
-          variant: "outline",
-          size: "sm",
-          className: "ml-auto h-6 text-xs",
-          onClick: () => areAllSectionsExpanded(log.id) ? collapseAllSections(log.id) : expandAllSections(log.id)
-        },
-        areAllSectionsExpanded(log.id) ? "Collapse All" : "Expand All"
-      )), isSectionExpanded(log.id, "actor") && /* @__PURE__ */ React.createElement("div", { className: "bg-white dark:bg-gray-900 p-3 rounded border border-border space-y-2 text-sm text-foreground" }, /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("span", { className: "font-medium" }, "ID:"), " ", ((_c5 = log.actor) == null ? void 0 : _c5.id) || "N/A"), /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("span", { className: "font-medium" }, "Display Name:"), " ", ((_d4 = log.actor) == null ? void 0 : _d4.displayName) || "N/A"), /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("span", { className: "font-medium" }, "Type:"), " ", ((_e4 = log.actor) == null ? void 0 : _e4.type) || "N/A"))), /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("div", { className: "flex items-center gap-2 mb-2" }, /* @__PURE__ */ React.createElement(
-        Button,
-        {
-          variant: "ghost",
-          size: "sm",
-          className: "p-0 h-auto",
-          onClick: () => toggleSection(log.id, "client")
-        },
-        isSectionExpanded(log.id, "client") ? /* @__PURE__ */ React.createElement(ChevronDown, { className: "w-4 h-4 text-foreground" }) : /* @__PURE__ */ React.createElement(ChevronRight, { className: "w-4 h-4 text-foreground" })
-      ), /* @__PURE__ */ React.createElement("span", { className: "font-semibold text-foreground" }, "Client")), isSectionExpanded(log.id, "client") && /* @__PURE__ */ React.createElement("div", { className: "bg-white dark:bg-gray-900 p-3 rounded border border-border space-y-2 text-sm text-foreground" }, /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("span", { className: "font-medium" }, "IP Address:"), " ", ((_f2 = log.client) == null ? void 0 : _f2.ipAddress) || "N/A"), /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("span", { className: "font-medium" }, "User Agent:"), /* @__PURE__ */ React.createElement("div", { className: "mt-1 text-xs text-muted-foreground break-all" }, ((_g2 = log.client) == null ? void 0 : _g2.userAgent) || "N/A")), ((_h2 = log.client) == null ? void 0 : _h2.geographicalContext) && /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("span", { className: "font-medium" }, "Location:"), log.client.geographicalContext.city, ", ", log.client.geographicalContext.state, ", ", log.client.geographicalContext.country), ((_i2 = log.client) == null ? void 0 : _i2.device) && /* @__PURE__ */ React.createElement(React.Fragment, null, /* @__PURE__ */ React.createElement("div", { className: "pt-2 border-t border-border" }, /* @__PURE__ */ React.createElement("span", { className: "font-medium text-blue-600 dark:text-blue-400" }, "Device Information")), /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("span", { className: "font-medium" }, "Device ID:"), " ", log.client.device.id || "N/A"), /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("span", { className: "font-medium" }, "UDID:"), " ", log.client.device.udid || "N/A"), /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("span", { className: "font-medium" }, "Device Name:"), " ", log.client.device.name || "N/A"), /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("span", { className: "font-medium" }, "OS Platform:"), " ", log.client.device.os_platform || "N/A"), /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("span", { className: "font-medium" }, "OS Version:"), " ", log.client.device.os_version || "N/A"), /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("span", { className: "font-medium" }, "Managed:"), /* @__PURE__ */ React.createElement("span", { className: `ml-1 ${log.client.device.managed ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}` }, log.client.device.managed ? "Yes" : "No")), /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("span", { className: "font-medium" }, "Verified:"), /* @__PURE__ */ React.createElement("span", { className: `ml-1 ${log.client.device.registered ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}` }, log.client.device.registered ? "Yes" : "No")), /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("span", { className: "font-medium" }, "Screen Lock Type:"), " ", log.client.device.screen_lock_type || "N/A"), /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("span", { className: "font-medium" }, "Disk Encryption Type:"), " ", log.client.device.disk_encryption_type || "N/A")), log.request && /* @__PURE__ */ React.createElement(React.Fragment, null, /* @__PURE__ */ React.createElement("div", { className: "pt-2 border-t border-border" }, /* @__PURE__ */ React.createElement("span", { className: "font-medium text-purple-600 dark:text-purple-400" }, "Request Information")), /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("span", { className: "font-medium" }, "IP Chain:"), /* @__PURE__ */ React.createElement("div", { className: "mt-1 text-xs text-muted-foreground" }, ((_j2 = log.request.ipChain) == null ? void 0 : _j2.map((ip, idx) => {
-        var _a122;
-        return /* @__PURE__ */ React.createElement("div", { key: idx, className: "ml-2" }, "\u2022 ", ip.ip, " (", ip.source || "Unknown", ") - ", ((_a122 = ip.geographicalContext) == null ? void 0 : _a122.city) || "Unknown location");
-      })) || "N/A"))))), /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("div", { className: "flex items-center gap-2 mb-2" }, /* @__PURE__ */ React.createElement(
-        Button,
-        {
-          variant: "ghost",
-          size: "sm",
-          className: "p-0 h-auto",
-          onClick: () => toggleSection(log.id, "event")
-        },
-        isSectionExpanded(log.id, "event") ? /* @__PURE__ */ React.createElement(ChevronDown, { className: "w-4 h-4 text-foreground" }) : /* @__PURE__ */ React.createElement(ChevronRight, { className: "w-4 h-4 text-foreground" })
-      ), /* @__PURE__ */ React.createElement("span", { className: "font-semibold text-foreground" }, "Event")), isSectionExpanded(log.id, "event") && /* @__PURE__ */ React.createElement("div", { className: "bg-white dark:bg-gray-900 p-3 rounded border border-border space-y-2 text-sm text-foreground" }, /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("span", { className: "font-medium" }, "Event Type:"), " ", log.eventType), /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("span", { className: "font-medium" }, "Display Message:"), " ", log.displayMessage || "N/A"), /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("span", { className: "font-medium" }, "Outcome:"), /* @__PURE__ */ React.createElement("span", { className: `ml-1 ${getOutcomeColor(log.outcome)}` }, log.outcome)), /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("span", { className: "font-medium" }, "Event ID:"), " ", log.id))), /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("div", { className: "flex items-center gap-2 mb-2" }, /* @__PURE__ */ React.createElement(
-        Button,
-        {
-          variant: "ghost",
-          size: "sm",
-          className: "p-0 h-auto",
-          onClick: () => toggleSection(log.id, "target")
-        },
-        isSectionExpanded(log.id, "target") ? /* @__PURE__ */ React.createElement(ChevronDown, { className: "w-4 h-4 text-foreground" }) : /* @__PURE__ */ React.createElement(ChevronRight, { className: "w-4 h-4 text-foreground" })
-      ), /* @__PURE__ */ React.createElement("span", { className: "font-semibold text-foreground" }, "Target")), isSectionExpanded(log.id, "target") && /* @__PURE__ */ React.createElement("div", { className: "bg-white dark:bg-gray-900 p-3 rounded border border-border space-y-2 text-sm text-foreground" }, log.target && log.target.length > 0 ? log.target.map((target, idx) => /* @__PURE__ */ React.createElement("div", { key: idx, className: idx > 0 ? "pt-2 border-t border-border" : "" }, /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("span", { className: "font-medium" }, "ID:"), " ", target.id || "N/A"), /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("span", { className: "font-medium" }, "Type:"), /* @__PURE__ */ React.createElement("span", { className: "ml-1 text-green-600 dark:text-green-400" }, target.type || "N/A")), /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("span", { className: "font-medium" }, "Display Name:"), /* @__PURE__ */ React.createElement("span", { className: "ml-1 text-blue-600 dark:text-blue-400" }, target.displayName || "N/A")))) : /* @__PURE__ */ React.createElement("div", null, "No target information available")))))));
-    }))))))))), /* @__PURE__ */ React.createElement(
-      AssignAppModal,
-      {
-        open: showAssignAppModal,
-        onClose: () => setShowAssignAppModal(false),
-        userId: (userId == null ? void 0 : userId.toString()) || "",
-        userApps
-      }
-    ), /* @__PURE__ */ React.createElement(Dialog2, { open: showPasswordModal === "reset", onOpenChange: () => setShowPasswordModal(null) }, /* @__PURE__ */ React.createElement(DialogContent2, { className: "sm:max-w-md" }, /* @__PURE__ */ React.createElement(DialogHeader, null, /* @__PURE__ */ React.createElement(DialogTitle2, null, "Reset Password"), /* @__PURE__ */ React.createElement(DialogDescription2, null, "Set a new password for ", user == null ? void 0 : user.firstName, " ", user == null ? void 0 : user.lastName, ". The user will be notified and can use this password to log in immediately.")), /* @__PURE__ */ React.createElement("div", { className: "space-y-4" }, /* @__PURE__ */ React.createElement("div", { className: "space-y-2" }, /* @__PURE__ */ React.createElement("label", { className: "text-sm font-medium" }, "New Password"), /* @__PURE__ */ React.createElement("div", { className: "flex gap-2" }, /* @__PURE__ */ React.createElement(
-      Input,
-      {
-        type: "text",
-        value: newPassword,
-        onChange: (e) => setNewPassword(e.target.value),
-        placeholder: "Enter new password",
-        className: "flex-1"
-      }
-    ), /* @__PURE__ */ React.createElement(
-      Button,
-      {
-        variant: "outline",
-        onClick: generatePassword,
-        className: "px-3"
-      },
-      "Generate"
-    )), generatedPassword && /* @__PURE__ */ React.createElement("div", { className: "text-xs text-muted-foreground" }, "Generated: ", generatedPassword))), /* @__PURE__ */ React.createElement(DialogFooter, null, /* @__PURE__ */ React.createElement(Button, { variant: "outline", onClick: () => setShowPasswordModal(null) }, "Cancel"), /* @__PURE__ */ React.createElement(Button, { onClick: handlePasswordReset, disabled: !newPassword }, "Reset Password")))), /* @__PURE__ */ React.createElement(Dialog2, { open: showPasswordModal === "expire", onOpenChange: () => setShowPasswordModal(null) }, /* @__PURE__ */ React.createElement(DialogContent2, { className: "sm:max-w-md" }, /* @__PURE__ */ React.createElement(DialogHeader, null, /* @__PURE__ */ React.createElement(DialogTitle2, null, "Expire Password"), /* @__PURE__ */ React.createElement(DialogDescription2, null, "This action will expire ", user == null ? void 0 : user.firstName, " ", user == null ? void 0 : user.lastName, "'s current password. Here's what will happen:")), /* @__PURE__ */ React.createElement("div", { className: "space-y-3 text-sm" }, /* @__PURE__ */ React.createElement("div", { className: "flex items-start gap-2" }, /* @__PURE__ */ React.createElement("div", { className: "w-1.5 h-1.5 rounded-full bg-blue-500 mt-2 flex-shrink-0" }), /* @__PURE__ */ React.createElement("span", null, "User will be forced to change their password on next login")), /* @__PURE__ */ React.createElement("div", { className: "flex items-start gap-2" }, /* @__PURE__ */ React.createElement("div", { className: "w-1.5 h-1.5 rounded-full bg-blue-500 mt-2 flex-shrink-0" }), /* @__PURE__ */ React.createElement("span", null, "Current password will become invalid immediately")), /* @__PURE__ */ React.createElement("div", { className: "flex items-start gap-2" }, /* @__PURE__ */ React.createElement("div", { className: "w-1.5 h-1.5 rounded-full bg-blue-500 mt-2 flex-shrink-0" }), /* @__PURE__ */ React.createElement("span", null, "User will receive an email notification")), /* @__PURE__ */ React.createElement("div", { className: "flex items-start gap-2" }, /* @__PURE__ */ React.createElement("div", { className: "w-1.5 h-1.5 rounded-full bg-orange-500 mt-2 flex-shrink-0" }), /* @__PURE__ */ React.createElement("span", { className: "text-orange-600 dark:text-orange-400" }, "User cannot access any applications until password is changed"))), /* @__PURE__ */ React.createElement(DialogFooter, null, /* @__PURE__ */ React.createElement(Button, { variant: "outline", onClick: () => setShowPasswordModal(null) }, "Cancel"), /* @__PURE__ */ React.createElement(Button, { onClick: handlePasswordExpire, variant: "destructive" }, "Expire Password")))));
+          open: showAssignAppModal,
+          onClose: () => setShowAssignAppModal(false),
+          userId: (userId == null ? void 0 : userId.toString()) || "",
+          userApps
+        }
+      ),
+      /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(Dialog2, { open: showPasswordModal === "reset", onOpenChange: () => setShowPasswordModal(null), children: /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)(DialogContent2, { className: "sm:max-w-md", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)(DialogHeader, { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(DialogTitle2, { children: "Reset Password" }),
+          /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)(DialogDescription2, { children: [
+            "Set a new password for ",
+            user == null ? void 0 : user.firstName,
+            " ",
+            user == null ? void 0 : user.lastName,
+            ". The user will be notified and can use this password to log in immediately."
+          ] })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("div", { className: "space-y-4", children: /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)("div", { className: "space-y-2", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("label", { className: "text-sm font-medium", children: "New Password" }),
+          /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)("div", { className: "flex gap-2", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(
+              Input,
+              {
+                type: "text",
+                value: newPassword,
+                onChange: (e) => setNewPassword(e.target.value),
+                placeholder: "Enter new password",
+                className: "flex-1"
+              }
+            ),
+            /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(
+              Button,
+              {
+                variant: "outline",
+                onClick: generatePassword,
+                className: "px-3",
+                children: "Generate"
+              }
+            )
+          ] }),
+          generatedPassword && /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)("div", { className: "text-xs text-muted-foreground", children: [
+            "Generated: ",
+            generatedPassword
+          ] })
+        ] }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)(DialogFooter, { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(Button, { variant: "outline", onClick: () => setShowPasswordModal(null), children: "Cancel" }),
+          /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(Button, { onClick: handlePasswordReset, disabled: !newPassword, children: "Reset Password" })
+        ] })
+      ] }) }),
+      /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(Dialog2, { open: showPasswordModal === "expire", onOpenChange: () => setShowPasswordModal(null), children: /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)(DialogContent2, { className: "sm:max-w-md", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)(DialogHeader, { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(DialogTitle2, { children: "Expire Password" }),
+          /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)(DialogDescription2, { children: [
+            "This action will expire ",
+            user == null ? void 0 : user.firstName,
+            " ",
+            user == null ? void 0 : user.lastName,
+            "'s current password. Here's what will happen:"
+          ] })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)("div", { className: "space-y-3 text-sm", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)("div", { className: "flex items-start gap-2", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("div", { className: "w-1.5 h-1.5 rounded-full bg-blue-500 mt-2 flex-shrink-0" }),
+            /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("span", { children: "User will be forced to change their password on next login" })
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)("div", { className: "flex items-start gap-2", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("div", { className: "w-1.5 h-1.5 rounded-full bg-blue-500 mt-2 flex-shrink-0" }),
+            /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("span", { children: "Current password will become invalid immediately" })
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)("div", { className: "flex items-start gap-2", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("div", { className: "w-1.5 h-1.5 rounded-full bg-blue-500 mt-2 flex-shrink-0" }),
+            /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("span", { children: "User will receive an email notification" })
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)("div", { className: "flex items-start gap-2", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("div", { className: "w-1.5 h-1.5 rounded-full bg-orange-500 mt-2 flex-shrink-0" }),
+            /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("span", { className: "text-orange-600 dark:text-orange-400", children: "User cannot access any applications until password is changed" })
+          ] })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)(DialogFooter, { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(Button, { variant: "outline", onClick: () => setShowPasswordModal(null), children: "Cancel" }),
+          /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(Button, { onClick: handlePasswordExpire, variant: "destructive", children: "Expire Password" })
+        ] })
+      ] }) })
+    ] });
   }
   __name(UserDetail, "UserDetail");
 
@@ -40970,6 +42407,7 @@ ${syncDetails.join("\n")}` : syncMessage;
 
   // client/src/hooks/use-auth.tsx
   var import_react23 = __toESM(require_react(), 1);
+  var import_jsx_runtime58 = __toESM(require_jsx_runtime(), 1);
   var AuthContext = (0, import_react23.createContext)(null);
   function useAuth2() {
     const context = (0, import_react23.useContext)(AuthContext);
@@ -40981,6 +42419,7 @@ ${syncDetails.join("\n")}` : syncMessage;
   __name(useAuth2, "useAuth");
 
   // client/src/pages/groups.tsx
+  var import_jsx_runtime59 = __toESM(require_jsx_runtime(), 1);
   function Groups() {
     var _a121, _b93;
     const [searchQuery, setSearchQuery] = (0, import_react24.useState)("");
@@ -41042,49 +42481,139 @@ ${syncDetails.join("\n")}` : syncMessage;
     const getGroupTypeBadge = /* @__PURE__ */ __name((type) => {
       switch (type) {
         case "BUILT_IN":
-          return /* @__PURE__ */ React.createElement(Badge, { className: "bg-blue-100 text-blue-800 hover:bg-blue-100" }, "Built-in");
+          return /* @__PURE__ */ (0, import_jsx_runtime59.jsx)(Badge, { className: "bg-blue-100 text-blue-800 hover:bg-blue-100", children: "Built-in" });
         case "OKTA_GROUP":
-          return /* @__PURE__ */ React.createElement(Badge, { className: "bg-green-100 text-green-800 hover:bg-green-100" }, "OKTA Group");
+          return /* @__PURE__ */ (0, import_jsx_runtime59.jsx)(Badge, { className: "bg-green-100 text-green-800 hover:bg-green-100", children: "OKTA Group" });
         case "APP_GROUP":
-          return /* @__PURE__ */ React.createElement(Badge, { className: "bg-purple-100 text-purple-800 hover:bg-purple-100" }, "App Group");
+          return /* @__PURE__ */ (0, import_jsx_runtime59.jsx)(Badge, { className: "bg-purple-100 text-purple-800 hover:bg-purple-100", children: "App Group" });
         default:
-          return /* @__PURE__ */ React.createElement(Badge, { variant: "secondary" }, type);
+          return /* @__PURE__ */ (0, import_jsx_runtime59.jsx)(Badge, { variant: "secondary", children: type });
       }
     }, "getGroupTypeBadge");
     const formatDate2 = /* @__PURE__ */ __name((dateString) => {
       return new Date(dateString).toLocaleDateString();
     }, "formatDate");
-    return /* @__PURE__ */ React.createElement("div", { className: "flex-1 flex flex-col overflow-hidden" }, /* @__PURE__ */ React.createElement("header", { className: "bg-white border-b border-gray-200 px-6 py-4" }, /* @__PURE__ */ React.createElement("div", { className: "flex items-center justify-between" }, /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("nav", { className: "flex text-sm text-gray-500 mb-1" }, /* @__PURE__ */ React.createElement("span", null, "Directory"), /* @__PURE__ */ React.createElement("span", { className: "mx-2" }, "/"), /* @__PURE__ */ React.createElement("span", { className: "text-gray-900 font-medium" }, "Groups")), /* @__PURE__ */ React.createElement("h2", { className: "text-2xl font-semibold text-gray-900" }, "Group Management")), /* @__PURE__ */ React.createElement("div", { className: "flex items-center space-x-3" }, /* @__PURE__ */ React.createElement(Button, { className: "bg-blue-600 hover:bg-blue-700 text-white" }, /* @__PURE__ */ React.createElement(Plus, { className: "w-4 h-4 mr-2" }), "Create Group"), /* @__PURE__ */ React.createElement("div", { className: "flex items-center space-x-2 px-3 py-2 bg-gray-50 rounded-lg border" }, /* @__PURE__ */ React.createElement("div", { className: "w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center" }, /* @__PURE__ */ React.createElement("span", { className: "text-white text-sm font-medium" }, (_a121 = currentUser == null ? void 0 : currentUser.firstName) == null ? void 0 : _a121[0], (_b93 = currentUser == null ? void 0 : currentUser.lastName) == null ? void 0 : _b93[0])), /* @__PURE__ */ React.createElement("div", { className: "text-sm" }, /* @__PURE__ */ React.createElement("p", { className: "font-medium text-gray-900" }, currentUser == null ? void 0 : currentUser.firstName, " ", currentUser == null ? void 0 : currentUser.lastName), /* @__PURE__ */ React.createElement("p", { className: "text-gray-500" }, currentUser == null ? void 0 : currentUser.email)))))), /* @__PURE__ */ React.createElement("div", { className: "flex-1 overflow-auto p-6" }, /* @__PURE__ */ React.createElement("div", { className: "mb-6" }, /* @__PURE__ */ React.createElement("div", { className: "relative max-w-md" }, /* @__PURE__ */ React.createElement(Search, { className: "absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" }), /* @__PURE__ */ React.createElement(
-      Input,
-      {
-        type: "text",
-        placeholder: "Search groups...",
-        value: searchQuery,
-        onChange: (e) => setSearchQuery(e.target.value),
-        className: "pl-10"
-      }
-    ))), /* @__PURE__ */ React.createElement("div", { className: "grid grid-cols-1 md:grid-cols-4 gap-6 mb-6" }, /* @__PURE__ */ React.createElement(Card, null, /* @__PURE__ */ React.createElement(CardContent, { className: "p-6" }, /* @__PURE__ */ React.createElement("div", { className: "flex items-center" }, /* @__PURE__ */ React.createElement(Users, { className: "w-8 h-8 text-blue-600" }), /* @__PURE__ */ React.createElement("div", { className: "ml-4" }, /* @__PURE__ */ React.createElement("p", { className: "text-sm font-medium text-gray-600" }, "Total Groups"), /* @__PURE__ */ React.createElement("p", { className: "text-2xl font-bold text-gray-900" }, groups.length))))), /* @__PURE__ */ React.createElement(Card, null, /* @__PURE__ */ React.createElement(CardContent, { className: "p-6" }, /* @__PURE__ */ React.createElement("div", { className: "flex items-center" }, /* @__PURE__ */ React.createElement(Users, { className: "w-8 h-8 text-green-600" }), /* @__PURE__ */ React.createElement("div", { className: "ml-4" }, /* @__PURE__ */ React.createElement("p", { className: "text-sm font-medium text-gray-600" }, "OKTA Groups"), /* @__PURE__ */ React.createElement("p", { className: "text-2xl font-bold text-gray-900" }, groups.filter((g) => g.type === "OKTA_GROUP").length))))), /* @__PURE__ */ React.createElement(Card, null, /* @__PURE__ */ React.createElement(CardContent, { className: "p-6" }, /* @__PURE__ */ React.createElement("div", { className: "flex items-center" }, /* @__PURE__ */ React.createElement(Users, { className: "w-8 h-8 text-purple-600" }), /* @__PURE__ */ React.createElement("div", { className: "ml-4" }, /* @__PURE__ */ React.createElement("p", { className: "text-sm font-medium text-gray-600" }, "App Groups"), /* @__PURE__ */ React.createElement("p", { className: "text-2xl font-bold text-gray-900" }, groups.filter((g) => g.type === "APP_GROUP").length))))), /* @__PURE__ */ React.createElement(Card, null, /* @__PURE__ */ React.createElement(CardContent, { className: "p-6" }, /* @__PURE__ */ React.createElement("div", { className: "flex items-center" }, /* @__PURE__ */ React.createElement(Users, { className: "w-8 h-8 text-gray-600" }), /* @__PURE__ */ React.createElement("div", { className: "ml-4" }, /* @__PURE__ */ React.createElement("p", { className: "text-sm font-medium text-gray-600" }, "Total Members"), /* @__PURE__ */ React.createElement("p", { className: "text-2xl font-bold text-gray-900" }, groups.reduce((sum, g) => sum + g.memberCount, 0))))))), /* @__PURE__ */ React.createElement(Card, null, /* @__PURE__ */ React.createElement("div", { className: "overflow-x-auto" }, /* @__PURE__ */ React.createElement(Table, null, /* @__PURE__ */ React.createElement(TableHeader, null, /* @__PURE__ */ React.createElement(TableRow, { className: "bg-gray-50" }, /* @__PURE__ */ React.createElement(TableHead, { className: "px-6 py-4 text-xs font-medium text-gray-500 uppercase tracking-wider" }, "Group Name"), /* @__PURE__ */ React.createElement(TableHead, { className: "px-6 py-4 text-xs font-medium text-gray-500 uppercase tracking-wider" }, "Type"), /* @__PURE__ */ React.createElement(TableHead, { className: "px-6 py-4 text-xs font-medium text-gray-500 uppercase tracking-wider" }, "Members"), /* @__PURE__ */ React.createElement(TableHead, { className: "px-6 py-4 text-xs font-medium text-gray-500 uppercase tracking-wider" }, "Created"), /* @__PURE__ */ React.createElement(TableHead, { className: "px-6 py-4 text-xs font-medium text-gray-500 uppercase tracking-wider" }, "Actions"))), /* @__PURE__ */ React.createElement(TableBody, null, groups.map((group) => /* @__PURE__ */ React.createElement(TableRow, { key: group.id, className: "hover:bg-gray-50" }, /* @__PURE__ */ React.createElement(TableCell, { className: "px-6 py-4" }, /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("div", { className: "text-sm font-medium text-gray-900" }, group.name), /* @__PURE__ */ React.createElement("div", { className: "text-sm text-gray-500" }, group.description))), /* @__PURE__ */ React.createElement(TableCell, { className: "px-6 py-4" }, getGroupTypeBadge(group.type)), /* @__PURE__ */ React.createElement(TableCell, { className: "px-6 py-4 text-sm text-gray-900" }, group.memberCount), /* @__PURE__ */ React.createElement(TableCell, { className: "px-6 py-4 text-sm text-gray-500" }, formatDate2(group.created)), /* @__PURE__ */ React.createElement(TableCell, { className: "px-6 py-4" }, /* @__PURE__ */ React.createElement("div", { className: "flex items-center space-x-2" }, /* @__PURE__ */ React.createElement(
-      Button,
-      {
-        variant: "ghost",
-        size: "icon",
-        className: "h-8 w-8 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-      },
-      /* @__PURE__ */ React.createElement(Eye, { className: "w-4 h-4" })
-    ), /* @__PURE__ */ React.createElement(
-      Button,
-      {
-        variant: "ghost",
-        size: "icon",
-        className: "h-8 w-8 text-gray-500 hover:text-gray-700 hover:bg-gray-50"
-      },
-      /* @__PURE__ */ React.createElement(Settings, { className: "w-4 h-4" })
-    )))))))))));
+    return /* @__PURE__ */ (0, import_jsx_runtime59.jsxs)("div", { className: "flex-1 flex flex-col overflow-hidden", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime59.jsx)("header", { className: "bg-white border-b border-gray-200 px-6 py-4", children: /* @__PURE__ */ (0, import_jsx_runtime59.jsxs)("div", { className: "flex items-center justify-between", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime59.jsxs)("div", { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime59.jsxs)("nav", { className: "flex text-sm text-gray-500 mb-1", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime59.jsx)("span", { children: "Directory" }),
+            /* @__PURE__ */ (0, import_jsx_runtime59.jsx)("span", { className: "mx-2", children: "/" }),
+            /* @__PURE__ */ (0, import_jsx_runtime59.jsx)("span", { className: "text-gray-900 font-medium", children: "Groups" })
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime59.jsx)("h2", { className: "text-2xl font-semibold text-gray-900", children: "Group Management" })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime59.jsxs)("div", { className: "flex items-center space-x-3", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime59.jsxs)(Button, { className: "bg-blue-600 hover:bg-blue-700 text-white", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime59.jsx)(Plus, { className: "w-4 h-4 mr-2" }),
+            "Create Group"
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime59.jsxs)("div", { className: "flex items-center space-x-2 px-3 py-2 bg-gray-50 rounded-lg border", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime59.jsx)("div", { className: "w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center", children: /* @__PURE__ */ (0, import_jsx_runtime59.jsxs)("span", { className: "text-white text-sm font-medium", children: [
+              (_a121 = currentUser == null ? void 0 : currentUser.firstName) == null ? void 0 : _a121[0],
+              (_b93 = currentUser == null ? void 0 : currentUser.lastName) == null ? void 0 : _b93[0]
+            ] }) }),
+            /* @__PURE__ */ (0, import_jsx_runtime59.jsxs)("div", { className: "text-sm", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime59.jsxs)("p", { className: "font-medium text-gray-900", children: [
+                currentUser == null ? void 0 : currentUser.firstName,
+                " ",
+                currentUser == null ? void 0 : currentUser.lastName
+              ] }),
+              /* @__PURE__ */ (0, import_jsx_runtime59.jsx)("p", { className: "text-gray-500", children: currentUser == null ? void 0 : currentUser.email })
+            ] })
+          ] })
+        ] })
+      ] }) }),
+      /* @__PURE__ */ (0, import_jsx_runtime59.jsxs)("div", { className: "flex-1 overflow-auto p-6", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime59.jsx)("div", { className: "mb-6", children: /* @__PURE__ */ (0, import_jsx_runtime59.jsxs)("div", { className: "relative max-w-md", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime59.jsx)(Search, { className: "absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" }),
+          /* @__PURE__ */ (0, import_jsx_runtime59.jsx)(
+            Input,
+            {
+              type: "text",
+              placeholder: "Search groups...",
+              value: searchQuery,
+              onChange: (e) => setSearchQuery(e.target.value),
+              className: "pl-10"
+            }
+          )
+        ] }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime59.jsxs)("div", { className: "grid grid-cols-1 md:grid-cols-4 gap-6 mb-6", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime59.jsx)(Card, { children: /* @__PURE__ */ (0, import_jsx_runtime59.jsx)(CardContent, { className: "p-6", children: /* @__PURE__ */ (0, import_jsx_runtime59.jsxs)("div", { className: "flex items-center", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime59.jsx)(Users, { className: "w-8 h-8 text-blue-600" }),
+            /* @__PURE__ */ (0, import_jsx_runtime59.jsxs)("div", { className: "ml-4", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime59.jsx)("p", { className: "text-sm font-medium text-gray-600", children: "Total Groups" }),
+              /* @__PURE__ */ (0, import_jsx_runtime59.jsx)("p", { className: "text-2xl font-bold text-gray-900", children: groups.length })
+            ] })
+          ] }) }) }),
+          /* @__PURE__ */ (0, import_jsx_runtime59.jsx)(Card, { children: /* @__PURE__ */ (0, import_jsx_runtime59.jsx)(CardContent, { className: "p-6", children: /* @__PURE__ */ (0, import_jsx_runtime59.jsxs)("div", { className: "flex items-center", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime59.jsx)(Users, { className: "w-8 h-8 text-green-600" }),
+            /* @__PURE__ */ (0, import_jsx_runtime59.jsxs)("div", { className: "ml-4", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime59.jsx)("p", { className: "text-sm font-medium text-gray-600", children: "OKTA Groups" }),
+              /* @__PURE__ */ (0, import_jsx_runtime59.jsx)("p", { className: "text-2xl font-bold text-gray-900", children: groups.filter((g) => g.type === "OKTA_GROUP").length })
+            ] })
+          ] }) }) }),
+          /* @__PURE__ */ (0, import_jsx_runtime59.jsx)(Card, { children: /* @__PURE__ */ (0, import_jsx_runtime59.jsx)(CardContent, { className: "p-6", children: /* @__PURE__ */ (0, import_jsx_runtime59.jsxs)("div", { className: "flex items-center", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime59.jsx)(Users, { className: "w-8 h-8 text-purple-600" }),
+            /* @__PURE__ */ (0, import_jsx_runtime59.jsxs)("div", { className: "ml-4", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime59.jsx)("p", { className: "text-sm font-medium text-gray-600", children: "App Groups" }),
+              /* @__PURE__ */ (0, import_jsx_runtime59.jsx)("p", { className: "text-2xl font-bold text-gray-900", children: groups.filter((g) => g.type === "APP_GROUP").length })
+            ] })
+          ] }) }) }),
+          /* @__PURE__ */ (0, import_jsx_runtime59.jsx)(Card, { children: /* @__PURE__ */ (0, import_jsx_runtime59.jsx)(CardContent, { className: "p-6", children: /* @__PURE__ */ (0, import_jsx_runtime59.jsxs)("div", { className: "flex items-center", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime59.jsx)(Users, { className: "w-8 h-8 text-gray-600" }),
+            /* @__PURE__ */ (0, import_jsx_runtime59.jsxs)("div", { className: "ml-4", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime59.jsx)("p", { className: "text-sm font-medium text-gray-600", children: "Total Members" }),
+              /* @__PURE__ */ (0, import_jsx_runtime59.jsx)("p", { className: "text-2xl font-bold text-gray-900", children: groups.reduce((sum, g) => sum + g.memberCount, 0) })
+            ] })
+          ] }) }) })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime59.jsx)(Card, { children: /* @__PURE__ */ (0, import_jsx_runtime59.jsx)("div", { className: "overflow-x-auto", children: /* @__PURE__ */ (0, import_jsx_runtime59.jsxs)(Table, { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime59.jsx)(TableHeader, { children: /* @__PURE__ */ (0, import_jsx_runtime59.jsxs)(TableRow, { className: "bg-gray-50", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime59.jsx)(TableHead, { className: "px-6 py-4 text-xs font-medium text-gray-500 uppercase tracking-wider", children: "Group Name" }),
+            /* @__PURE__ */ (0, import_jsx_runtime59.jsx)(TableHead, { className: "px-6 py-4 text-xs font-medium text-gray-500 uppercase tracking-wider", children: "Type" }),
+            /* @__PURE__ */ (0, import_jsx_runtime59.jsx)(TableHead, { className: "px-6 py-4 text-xs font-medium text-gray-500 uppercase tracking-wider", children: "Members" }),
+            /* @__PURE__ */ (0, import_jsx_runtime59.jsx)(TableHead, { className: "px-6 py-4 text-xs font-medium text-gray-500 uppercase tracking-wider", children: "Created" }),
+            /* @__PURE__ */ (0, import_jsx_runtime59.jsx)(TableHead, { className: "px-6 py-4 text-xs font-medium text-gray-500 uppercase tracking-wider", children: "Actions" })
+          ] }) }),
+          /* @__PURE__ */ (0, import_jsx_runtime59.jsx)(TableBody, { children: groups.map((group) => /* @__PURE__ */ (0, import_jsx_runtime59.jsxs)(TableRow, { className: "hover:bg-gray-50", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime59.jsx)(TableCell, { className: "px-6 py-4", children: /* @__PURE__ */ (0, import_jsx_runtime59.jsxs)("div", { children: [
+              /* @__PURE__ */ (0, import_jsx_runtime59.jsx)("div", { className: "text-sm font-medium text-gray-900", children: group.name }),
+              /* @__PURE__ */ (0, import_jsx_runtime59.jsx)("div", { className: "text-sm text-gray-500", children: group.description })
+            ] }) }),
+            /* @__PURE__ */ (0, import_jsx_runtime59.jsx)(TableCell, { className: "px-6 py-4", children: getGroupTypeBadge(group.type) }),
+            /* @__PURE__ */ (0, import_jsx_runtime59.jsx)(TableCell, { className: "px-6 py-4 text-sm text-gray-900", children: group.memberCount }),
+            /* @__PURE__ */ (0, import_jsx_runtime59.jsx)(TableCell, { className: "px-6 py-4 text-sm text-gray-500", children: formatDate2(group.created) }),
+            /* @__PURE__ */ (0, import_jsx_runtime59.jsx)(TableCell, { className: "px-6 py-4", children: /* @__PURE__ */ (0, import_jsx_runtime59.jsxs)("div", { className: "flex items-center space-x-2", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime59.jsx)(
+                Button,
+                {
+                  variant: "ghost",
+                  size: "icon",
+                  className: "h-8 w-8 text-blue-600 hover:text-blue-700 hover:bg-blue-50",
+                  children: /* @__PURE__ */ (0, import_jsx_runtime59.jsx)(Eye, { className: "w-4 h-4" })
+                }
+              ),
+              /* @__PURE__ */ (0, import_jsx_runtime59.jsx)(
+                Button,
+                {
+                  variant: "ghost",
+                  size: "icon",
+                  className: "h-8 w-8 text-gray-500 hover:text-gray-700 hover:bg-gray-50",
+                  children: /* @__PURE__ */ (0, import_jsx_runtime59.jsx)(Settings, { className: "w-4 h-4" })
+                }
+              )
+            ] }) })
+          ] }, group.id)) })
+        ] }) }) })
+      ] })
+    ] });
   }
   __name(Groups, "Groups");
 
   // client/src/pages/applications.tsx
   var import_react25 = __toESM(require_react(), 1);
+  var import_jsx_runtime60 = __toESM(require_jsx_runtime(), 1);
   function Applications() {
     var _a121, _b93;
     const [searchQuery, setSearchQuery] = (0, import_react25.useState)("");
@@ -41141,11 +42670,11 @@ ${syncDetails.join("\n")}` : syncMessage;
     const getStatusBadge = /* @__PURE__ */ __name((status) => {
       switch (status) {
         case "ACTIVE":
-          return /* @__PURE__ */ React.createElement(Badge, { className: "bg-green-100 text-green-800 hover:bg-green-100" }, "Active");
+          return /* @__PURE__ */ (0, import_jsx_runtime60.jsx)(Badge, { className: "bg-green-100 text-green-800 hover:bg-green-100", children: "Active" });
         case "INACTIVE":
-          return /* @__PURE__ */ React.createElement(Badge, { className: "bg-red-100 text-red-800 hover:bg-red-100" }, "Inactive");
+          return /* @__PURE__ */ (0, import_jsx_runtime60.jsx)(Badge, { className: "bg-red-100 text-red-800 hover:bg-red-100", children: "Inactive" });
         default:
-          return /* @__PURE__ */ React.createElement(Badge, { variant: "secondary" }, status);
+          return /* @__PURE__ */ (0, import_jsx_runtime60.jsx)(Badge, { variant: "secondary", children: status });
       }
     }, "getStatusBadge");
     const getSignOnModeBadge = /* @__PURE__ */ __name((mode) => {
@@ -41155,61 +42684,156 @@ ${syncDetails.join("\n")}` : syncMessage;
         "SECURE_WEB_AUTHENTICATION": "SWA",
         "AUTO_LOGIN": "Auto Login"
       };
-      return /* @__PURE__ */ React.createElement(Badge, { variant: "outline" }, modeMap[mode] || mode);
+      return /* @__PURE__ */ (0, import_jsx_runtime60.jsx)(Badge, { variant: "outline", children: modeMap[mode] || mode });
     }, "getSignOnModeBadge");
     const formatDate2 = /* @__PURE__ */ __name((dateString) => {
       return new Date(dateString).toLocaleDateString();
     }, "formatDate");
     const activeApps = applications.filter((app) => app.status === "ACTIVE");
     const totalUsers = applications.reduce((sum, app) => sum + app.userCount, 0);
-    return /* @__PURE__ */ React.createElement("div", { className: "flex-1 flex flex-col overflow-hidden" }, /* @__PURE__ */ React.createElement("header", { className: "bg-white border-b border-gray-200 px-6 py-4" }, /* @__PURE__ */ React.createElement("div", { className: "flex items-center justify-between" }, /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("nav", { className: "flex text-sm text-gray-500 mb-1" }, /* @__PURE__ */ React.createElement("span", null, "Directory"), /* @__PURE__ */ React.createElement("span", { className: "mx-2" }, "/"), /* @__PURE__ */ React.createElement("span", { className: "text-gray-900 font-medium" }, "Applications")), /* @__PURE__ */ React.createElement("h2", { className: "text-2xl font-semibold text-gray-900" }, "Application Management")), /* @__PURE__ */ React.createElement("div", { className: "flex items-center space-x-3" }, /* @__PURE__ */ React.createElement(Button, { className: "bg-blue-600 hover:bg-blue-700 text-white" }, /* @__PURE__ */ React.createElement(Plus, { className: "w-4 h-4 mr-2" }), "Add Application"), /* @__PURE__ */ React.createElement("div", { className: "flex items-center space-x-2 px-3 py-2 bg-gray-50 rounded-lg border" }, /* @__PURE__ */ React.createElement("div", { className: "w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center" }, /* @__PURE__ */ React.createElement("span", { className: "text-white text-sm font-medium" }, (_a121 = currentUser == null ? void 0 : currentUser.firstName) == null ? void 0 : _a121[0], (_b93 = currentUser == null ? void 0 : currentUser.lastName) == null ? void 0 : _b93[0])), /* @__PURE__ */ React.createElement("div", { className: "text-sm" }, /* @__PURE__ */ React.createElement("p", { className: "font-medium text-gray-900" }, currentUser == null ? void 0 : currentUser.firstName, " ", currentUser == null ? void 0 : currentUser.lastName), /* @__PURE__ */ React.createElement("p", { className: "text-gray-500" }, currentUser == null ? void 0 : currentUser.email)))))), /* @__PURE__ */ React.createElement("div", { className: "flex-1 overflow-auto p-6" }, /* @__PURE__ */ React.createElement("div", { className: "mb-6" }, /* @__PURE__ */ React.createElement("div", { className: "relative max-w-md" }, /* @__PURE__ */ React.createElement(Search, { className: "absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" }), /* @__PURE__ */ React.createElement(
-      Input,
-      {
-        type: "text",
-        placeholder: "Search applications...",
-        value: searchQuery,
-        onChange: (e) => setSearchQuery(e.target.value),
-        className: "pl-10"
-      }
-    ))), /* @__PURE__ */ React.createElement("div", { className: "grid grid-cols-1 md:grid-cols-4 gap-6 mb-6" }, /* @__PURE__ */ React.createElement(Card, null, /* @__PURE__ */ React.createElement(CardContent, { className: "p-6" }, /* @__PURE__ */ React.createElement("div", { className: "flex items-center" }, /* @__PURE__ */ React.createElement(Grid3x3, { className: "w-8 h-8 text-blue-600" }), /* @__PURE__ */ React.createElement("div", { className: "ml-4" }, /* @__PURE__ */ React.createElement("p", { className: "text-sm font-medium text-gray-600" }, "Total Applications"), /* @__PURE__ */ React.createElement("p", { className: "text-2xl font-bold text-gray-900" }, applications.length))))), /* @__PURE__ */ React.createElement(Card, null, /* @__PURE__ */ React.createElement(CardContent, { className: "p-6" }, /* @__PURE__ */ React.createElement("div", { className: "flex items-center" }, /* @__PURE__ */ React.createElement(Grid3x3, { className: "w-8 h-8 text-green-600" }), /* @__PURE__ */ React.createElement("div", { className: "ml-4" }, /* @__PURE__ */ React.createElement("p", { className: "text-sm font-medium text-gray-600" }, "Active Apps"), /* @__PURE__ */ React.createElement("p", { className: "text-2xl font-bold text-gray-900" }, activeApps.length))))), /* @__PURE__ */ React.createElement(Card, null, /* @__PURE__ */ React.createElement(CardContent, { className: "p-6" }, /* @__PURE__ */ React.createElement("div", { className: "flex items-center" }, /* @__PURE__ */ React.createElement(Grid3x3, { className: "w-8 h-8 text-gray-600" }), /* @__PURE__ */ React.createElement("div", { className: "ml-4" }, /* @__PURE__ */ React.createElement("p", { className: "text-sm font-medium text-gray-600" }, "Total Users"), /* @__PURE__ */ React.createElement("p", { className: "text-2xl font-bold text-gray-900" }, totalUsers))))), /* @__PURE__ */ React.createElement(Card, null, /* @__PURE__ */ React.createElement(CardContent, { className: "p-6" }, /* @__PURE__ */ React.createElement("div", { className: "flex items-center" }, /* @__PURE__ */ React.createElement(Grid3x3, { className: "w-8 h-8 text-purple-600" }), /* @__PURE__ */ React.createElement("div", { className: "ml-4" }, /* @__PURE__ */ React.createElement("p", { className: "text-sm font-medium text-gray-600" }, "SSO Apps"), /* @__PURE__ */ React.createElement("p", { className: "text-2xl font-bold text-gray-900" }, applications.filter((app) => app.signOnMode === "SAML_2_0" || app.signOnMode === "OPENID_CONNECT").length)))))), /* @__PURE__ */ React.createElement(Card, null, /* @__PURE__ */ React.createElement("div", { className: "overflow-x-auto" }, /* @__PURE__ */ React.createElement(Table, null, /* @__PURE__ */ React.createElement(TableHeader, null, /* @__PURE__ */ React.createElement(TableRow, { className: "bg-gray-50" }, /* @__PURE__ */ React.createElement(TableHead, { className: "px-6 py-4 text-xs font-medium text-gray-500 uppercase tracking-wider" }, "Application"), /* @__PURE__ */ React.createElement(TableHead, { className: "px-6 py-4 text-xs font-medium text-gray-500 uppercase tracking-wider" }, "Status"), /* @__PURE__ */ React.createElement(TableHead, { className: "px-6 py-4 text-xs font-medium text-gray-500 uppercase tracking-wider" }, "Sign-On Mode"), /* @__PURE__ */ React.createElement(TableHead, { className: "px-6 py-4 text-xs font-medium text-gray-500 uppercase tracking-wider" }, "Users"), /* @__PURE__ */ React.createElement(TableHead, { className: "px-6 py-4 text-xs font-medium text-gray-500 uppercase tracking-wider" }, "Last Updated"), /* @__PURE__ */ React.createElement(TableHead, { className: "px-6 py-4 text-xs font-medium text-gray-500 uppercase tracking-wider" }, "Actions"))), /* @__PURE__ */ React.createElement(TableBody, null, applications.map((app) => /* @__PURE__ */ React.createElement(TableRow, { key: app.id, className: "hover:bg-gray-50" }, /* @__PURE__ */ React.createElement(TableCell, { className: "px-6 py-4" }, /* @__PURE__ */ React.createElement("div", { className: "flex items-center" }, /* @__PURE__ */ React.createElement("div", { className: "flex-shrink-0 h-10 w-10" }, /* @__PURE__ */ React.createElement("div", { className: "h-10 w-10 rounded-lg bg-blue-100 flex items-center justify-center" }, /* @__PURE__ */ React.createElement(Grid3x3, { className: "w-6 h-6 text-blue-600" }))), /* @__PURE__ */ React.createElement("div", { className: "ml-4" }, /* @__PURE__ */ React.createElement("div", { className: "text-sm font-medium text-gray-900" }, app.name), /* @__PURE__ */ React.createElement("div", { className: "text-sm text-gray-500" }, app.label)))), /* @__PURE__ */ React.createElement(TableCell, { className: "px-6 py-4" }, getStatusBadge(app.status)), /* @__PURE__ */ React.createElement(TableCell, { className: "px-6 py-4" }, getSignOnModeBadge(app.signOnMode)), /* @__PURE__ */ React.createElement(TableCell, { className: "px-6 py-4 text-sm text-gray-900" }, app.userCount), /* @__PURE__ */ React.createElement(TableCell, { className: "px-6 py-4 text-sm text-gray-500" }, formatDate2(app.lastUpdated)), /* @__PURE__ */ React.createElement(TableCell, { className: "px-6 py-4" }, /* @__PURE__ */ React.createElement("div", { className: "flex items-center space-x-2" }, /* @__PURE__ */ React.createElement(
-      Button,
-      {
-        variant: "ghost",
-        size: "icon",
-        className: "h-8 w-8 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-      },
-      /* @__PURE__ */ React.createElement(Eye, { className: "w-4 h-4" })
-    ), /* @__PURE__ */ React.createElement(
-      Button,
-      {
-        variant: "ghost",
-        size: "icon",
-        className: "h-8 w-8 text-gray-500 hover:text-gray-700 hover:bg-gray-50"
-      },
-      /* @__PURE__ */ React.createElement(Settings, { className: "w-4 h-4" })
-    ), /* @__PURE__ */ React.createElement(
-      Button,
-      {
-        variant: "ghost",
-        size: "icon",
-        className: "h-8 w-8 text-gray-500 hover:text-gray-700 hover:bg-gray-50"
-      },
-      /* @__PURE__ */ React.createElement(ExternalLink, { className: "w-4 h-4" })
-    )))))))))));
+    return /* @__PURE__ */ (0, import_jsx_runtime60.jsxs)("div", { className: "flex-1 flex flex-col overflow-hidden", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime60.jsx)("header", { className: "bg-white border-b border-gray-200 px-6 py-4", children: /* @__PURE__ */ (0, import_jsx_runtime60.jsxs)("div", { className: "flex items-center justify-between", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime60.jsxs)("div", { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime60.jsxs)("nav", { className: "flex text-sm text-gray-500 mb-1", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime60.jsx)("span", { children: "Directory" }),
+            /* @__PURE__ */ (0, import_jsx_runtime60.jsx)("span", { className: "mx-2", children: "/" }),
+            /* @__PURE__ */ (0, import_jsx_runtime60.jsx)("span", { className: "text-gray-900 font-medium", children: "Applications" })
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime60.jsx)("h2", { className: "text-2xl font-semibold text-gray-900", children: "Application Management" })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime60.jsxs)("div", { className: "flex items-center space-x-3", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime60.jsxs)(Button, { className: "bg-blue-600 hover:bg-blue-700 text-white", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime60.jsx)(Plus, { className: "w-4 h-4 mr-2" }),
+            "Add Application"
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime60.jsxs)("div", { className: "flex items-center space-x-2 px-3 py-2 bg-gray-50 rounded-lg border", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime60.jsx)("div", { className: "w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center", children: /* @__PURE__ */ (0, import_jsx_runtime60.jsxs)("span", { className: "text-white text-sm font-medium", children: [
+              (_a121 = currentUser == null ? void 0 : currentUser.firstName) == null ? void 0 : _a121[0],
+              (_b93 = currentUser == null ? void 0 : currentUser.lastName) == null ? void 0 : _b93[0]
+            ] }) }),
+            /* @__PURE__ */ (0, import_jsx_runtime60.jsxs)("div", { className: "text-sm", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime60.jsxs)("p", { className: "font-medium text-gray-900", children: [
+                currentUser == null ? void 0 : currentUser.firstName,
+                " ",
+                currentUser == null ? void 0 : currentUser.lastName
+              ] }),
+              /* @__PURE__ */ (0, import_jsx_runtime60.jsx)("p", { className: "text-gray-500", children: currentUser == null ? void 0 : currentUser.email })
+            ] })
+          ] })
+        ] })
+      ] }) }),
+      /* @__PURE__ */ (0, import_jsx_runtime60.jsxs)("div", { className: "flex-1 overflow-auto p-6", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime60.jsx)("div", { className: "mb-6", children: /* @__PURE__ */ (0, import_jsx_runtime60.jsxs)("div", { className: "relative max-w-md", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime60.jsx)(Search, { className: "absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" }),
+          /* @__PURE__ */ (0, import_jsx_runtime60.jsx)(
+            Input,
+            {
+              type: "text",
+              placeholder: "Search applications...",
+              value: searchQuery,
+              onChange: (e) => setSearchQuery(e.target.value),
+              className: "pl-10"
+            }
+          )
+        ] }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime60.jsxs)("div", { className: "grid grid-cols-1 md:grid-cols-4 gap-6 mb-6", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime60.jsx)(Card, { children: /* @__PURE__ */ (0, import_jsx_runtime60.jsx)(CardContent, { className: "p-6", children: /* @__PURE__ */ (0, import_jsx_runtime60.jsxs)("div", { className: "flex items-center", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime60.jsx)(Grid3x3, { className: "w-8 h-8 text-blue-600" }),
+            /* @__PURE__ */ (0, import_jsx_runtime60.jsxs)("div", { className: "ml-4", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime60.jsx)("p", { className: "text-sm font-medium text-gray-600", children: "Total Applications" }),
+              /* @__PURE__ */ (0, import_jsx_runtime60.jsx)("p", { className: "text-2xl font-bold text-gray-900", children: applications.length })
+            ] })
+          ] }) }) }),
+          /* @__PURE__ */ (0, import_jsx_runtime60.jsx)(Card, { children: /* @__PURE__ */ (0, import_jsx_runtime60.jsx)(CardContent, { className: "p-6", children: /* @__PURE__ */ (0, import_jsx_runtime60.jsxs)("div", { className: "flex items-center", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime60.jsx)(Grid3x3, { className: "w-8 h-8 text-green-600" }),
+            /* @__PURE__ */ (0, import_jsx_runtime60.jsxs)("div", { className: "ml-4", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime60.jsx)("p", { className: "text-sm font-medium text-gray-600", children: "Active Apps" }),
+              /* @__PURE__ */ (0, import_jsx_runtime60.jsx)("p", { className: "text-2xl font-bold text-gray-900", children: activeApps.length })
+            ] })
+          ] }) }) }),
+          /* @__PURE__ */ (0, import_jsx_runtime60.jsx)(Card, { children: /* @__PURE__ */ (0, import_jsx_runtime60.jsx)(CardContent, { className: "p-6", children: /* @__PURE__ */ (0, import_jsx_runtime60.jsxs)("div", { className: "flex items-center", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime60.jsx)(Grid3x3, { className: "w-8 h-8 text-gray-600" }),
+            /* @__PURE__ */ (0, import_jsx_runtime60.jsxs)("div", { className: "ml-4", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime60.jsx)("p", { className: "text-sm font-medium text-gray-600", children: "Total Users" }),
+              /* @__PURE__ */ (0, import_jsx_runtime60.jsx)("p", { className: "text-2xl font-bold text-gray-900", children: totalUsers })
+            ] })
+          ] }) }) }),
+          /* @__PURE__ */ (0, import_jsx_runtime60.jsx)(Card, { children: /* @__PURE__ */ (0, import_jsx_runtime60.jsx)(CardContent, { className: "p-6", children: /* @__PURE__ */ (0, import_jsx_runtime60.jsxs)("div", { className: "flex items-center", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime60.jsx)(Grid3x3, { className: "w-8 h-8 text-purple-600" }),
+            /* @__PURE__ */ (0, import_jsx_runtime60.jsxs)("div", { className: "ml-4", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime60.jsx)("p", { className: "text-sm font-medium text-gray-600", children: "SSO Apps" }),
+              /* @__PURE__ */ (0, import_jsx_runtime60.jsx)("p", { className: "text-2xl font-bold text-gray-900", children: applications.filter((app) => app.signOnMode === "SAML_2_0" || app.signOnMode === "OPENID_CONNECT").length })
+            ] })
+          ] }) }) })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime60.jsx)(Card, { children: /* @__PURE__ */ (0, import_jsx_runtime60.jsx)("div", { className: "overflow-x-auto", children: /* @__PURE__ */ (0, import_jsx_runtime60.jsxs)(Table, { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime60.jsx)(TableHeader, { children: /* @__PURE__ */ (0, import_jsx_runtime60.jsxs)(TableRow, { className: "bg-gray-50", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime60.jsx)(TableHead, { className: "px-6 py-4 text-xs font-medium text-gray-500 uppercase tracking-wider", children: "Application" }),
+            /* @__PURE__ */ (0, import_jsx_runtime60.jsx)(TableHead, { className: "px-6 py-4 text-xs font-medium text-gray-500 uppercase tracking-wider", children: "Status" }),
+            /* @__PURE__ */ (0, import_jsx_runtime60.jsx)(TableHead, { className: "px-6 py-4 text-xs font-medium text-gray-500 uppercase tracking-wider", children: "Sign-On Mode" }),
+            /* @__PURE__ */ (0, import_jsx_runtime60.jsx)(TableHead, { className: "px-6 py-4 text-xs font-medium text-gray-500 uppercase tracking-wider", children: "Users" }),
+            /* @__PURE__ */ (0, import_jsx_runtime60.jsx)(TableHead, { className: "px-6 py-4 text-xs font-medium text-gray-500 uppercase tracking-wider", children: "Last Updated" }),
+            /* @__PURE__ */ (0, import_jsx_runtime60.jsx)(TableHead, { className: "px-6 py-4 text-xs font-medium text-gray-500 uppercase tracking-wider", children: "Actions" })
+          ] }) }),
+          /* @__PURE__ */ (0, import_jsx_runtime60.jsx)(TableBody, { children: applications.map((app) => /* @__PURE__ */ (0, import_jsx_runtime60.jsxs)(TableRow, { className: "hover:bg-gray-50", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime60.jsx)(TableCell, { className: "px-6 py-4", children: /* @__PURE__ */ (0, import_jsx_runtime60.jsxs)("div", { className: "flex items-center", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime60.jsx)("div", { className: "flex-shrink-0 h-10 w-10", children: /* @__PURE__ */ (0, import_jsx_runtime60.jsx)("div", { className: "h-10 w-10 rounded-lg bg-blue-100 flex items-center justify-center", children: /* @__PURE__ */ (0, import_jsx_runtime60.jsx)(Grid3x3, { className: "w-6 h-6 text-blue-600" }) }) }),
+              /* @__PURE__ */ (0, import_jsx_runtime60.jsxs)("div", { className: "ml-4", children: [
+                /* @__PURE__ */ (0, import_jsx_runtime60.jsx)("div", { className: "text-sm font-medium text-gray-900", children: app.name }),
+                /* @__PURE__ */ (0, import_jsx_runtime60.jsx)("div", { className: "text-sm text-gray-500", children: app.label })
+              ] })
+            ] }) }),
+            /* @__PURE__ */ (0, import_jsx_runtime60.jsx)(TableCell, { className: "px-6 py-4", children: getStatusBadge(app.status) }),
+            /* @__PURE__ */ (0, import_jsx_runtime60.jsx)(TableCell, { className: "px-6 py-4", children: getSignOnModeBadge(app.signOnMode) }),
+            /* @__PURE__ */ (0, import_jsx_runtime60.jsx)(TableCell, { className: "px-6 py-4 text-sm text-gray-900", children: app.userCount }),
+            /* @__PURE__ */ (0, import_jsx_runtime60.jsx)(TableCell, { className: "px-6 py-4 text-sm text-gray-500", children: formatDate2(app.lastUpdated) }),
+            /* @__PURE__ */ (0, import_jsx_runtime60.jsx)(TableCell, { className: "px-6 py-4", children: /* @__PURE__ */ (0, import_jsx_runtime60.jsxs)("div", { className: "flex items-center space-x-2", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime60.jsx)(
+                Button,
+                {
+                  variant: "ghost",
+                  size: "icon",
+                  className: "h-8 w-8 text-blue-600 hover:text-blue-700 hover:bg-blue-50",
+                  children: /* @__PURE__ */ (0, import_jsx_runtime60.jsx)(Eye, { className: "w-4 h-4" })
+                }
+              ),
+              /* @__PURE__ */ (0, import_jsx_runtime60.jsx)(
+                Button,
+                {
+                  variant: "ghost",
+                  size: "icon",
+                  className: "h-8 w-8 text-gray-500 hover:text-gray-700 hover:bg-gray-50",
+                  children: /* @__PURE__ */ (0, import_jsx_runtime60.jsx)(Settings, { className: "w-4 h-4" })
+                }
+              ),
+              /* @__PURE__ */ (0, import_jsx_runtime60.jsx)(
+                Button,
+                {
+                  variant: "ghost",
+                  size: "icon",
+                  className: "h-8 w-8 text-gray-500 hover:text-gray-700 hover:bg-gray-50",
+                  children: /* @__PURE__ */ (0, import_jsx_runtime60.jsx)(ExternalLink, { className: "w-4 h-4" })
+                }
+              )
+            ] }) })
+          ] }, app.id)) })
+        ] }) }) })
+      ] })
+    ] });
   }
   __name(Applications, "Applications");
 
   // client/src/components/ui/progress.tsx
-  var React73 = __toESM(require_react(), 1);
+  var React74 = __toESM(require_react(), 1);
 
   // node_modules/@radix-ui/react-progress/dist/index.mjs
-  var React72 = __toESM(require_react(), 1);
-  var import_jsx_runtime24 = __toESM(require_jsx_runtime(), 1);
+  var React73 = __toESM(require_react(), 1);
+  var import_jsx_runtime61 = __toESM(require_jsx_runtime(), 1);
   var PROGRESS_NAME = "Progress";
   var DEFAULT_MAX = 100;
   var [createProgressContext, createProgressScope] = createContextScope(PROGRESS_NAME);
   var [ProgressProvider, useProgressContext] = createProgressContext(PROGRESS_NAME);
-  var Progress = React72.forwardRef(
+  var Progress = React73.forwardRef(
     (props, forwardedRef) => {
       const _a121 = props, {
         __scopeProgress,
@@ -41231,7 +42855,7 @@ ${syncDetails.join("\n")}` : syncMessage;
       }
       const value = isValidValueNumber(valueProp, max2) ? valueProp : null;
       const valueLabel = isNumber2(value) ? getValueLabel(value, max2) : void 0;
-      return /* @__PURE__ */ (0, import_jsx_runtime24.jsx)(ProgressProvider, { scope: __scopeProgress, value, max: max2, children: /* @__PURE__ */ (0, import_jsx_runtime24.jsx)(
+      return /* @__PURE__ */ (0, import_jsx_runtime61.jsx)(ProgressProvider, { scope: __scopeProgress, value, max: max2, children: /* @__PURE__ */ (0, import_jsx_runtime61.jsx)(
         Primitive.div,
         __spreadProps(__spreadValues({
           "aria-valuemax": max2,
@@ -41250,12 +42874,12 @@ ${syncDetails.join("\n")}` : syncMessage;
   );
   Progress.displayName = PROGRESS_NAME;
   var INDICATOR_NAME2 = "ProgressIndicator";
-  var ProgressIndicator = React72.forwardRef(
+  var ProgressIndicator = React73.forwardRef(
     (props, forwardedRef) => {
       var _b93;
       const _a121 = props, { __scopeProgress } = _a121, indicatorProps = __objRest(_a121, ["__scopeProgress"]);
       const context = useProgressContext(INDICATOR_NAME2, __scopeProgress);
-      return /* @__PURE__ */ (0, import_jsx_runtime24.jsx)(
+      return /* @__PURE__ */ (0, import_jsx_runtime61.jsx)(
         Primitive.div,
         __spreadProps(__spreadValues({
           "data-state": getProgressState(context.value, context.max),
@@ -41305,29 +42929,32 @@ Defaulting to \`null\`.`;
   var Indicator2 = ProgressIndicator;
 
   // client/src/components/ui/progress.tsx
-  var Progress2 = React73.forwardRef((_a121, ref) => {
+  var import_jsx_runtime62 = __toESM(require_jsx_runtime(), 1);
+  var Progress2 = React74.forwardRef((_a121, ref) => {
     var _b93 = _a121, { className, value } = _b93, props = __objRest(_b93, ["className", "value"]);
-    return /* @__PURE__ */ React73.createElement(
+    return /* @__PURE__ */ (0, import_jsx_runtime62.jsx)(
       Root9,
-      __spreadValues({
+      __spreadProps(__spreadValues({
         ref,
         className: cn(
           "relative h-4 w-full overflow-hidden rounded-full bg-secondary",
           className
         )
-      }, props),
-      /* @__PURE__ */ React73.createElement(
-        Indicator2,
-        {
-          className: "h-full w-full flex-1 bg-primary transition-all",
-          style: { transform: `translateX(-${100 - (value || 0)}%)` }
-        }
-      )
+      }, props), {
+        children: /* @__PURE__ */ (0, import_jsx_runtime62.jsx)(
+          Indicator2,
+          {
+            className: "h-full w-full flex-1 bg-primary transition-all",
+            style: { transform: `translateX(-${100 - (value || 0)}%)` }
+          }
+        )
+      })
     );
   });
   Progress2.displayName = Root9.displayName;
 
   // client/src/pages/security.tsx
+  var import_jsx_runtime63 = __toESM(require_jsx_runtime(), 1);
   function Security() {
     const { data: metrics } = useQuery({
       queryKey: ["/api/security/metrics"],
@@ -41375,39 +43002,39 @@ Defaulting to \`null\`.`;
     const getRiskBadge = /* @__PURE__ */ __name((level) => {
       switch (level) {
         case "HIGH":
-          return /* @__PURE__ */ React.createElement(Badge, { className: "bg-red-100 text-red-800 hover:bg-red-100" }, "High Risk");
+          return /* @__PURE__ */ (0, import_jsx_runtime63.jsx)(Badge, { className: "bg-red-100 text-red-800 hover:bg-red-100", children: "High Risk" });
         case "MEDIUM":
-          return /* @__PURE__ */ React.createElement(Badge, { className: "bg-yellow-100 text-yellow-800 hover:bg-yellow-100" }, "Medium Risk");
+          return /* @__PURE__ */ (0, import_jsx_runtime63.jsx)(Badge, { className: "bg-yellow-100 text-yellow-800 hover:bg-yellow-100", children: "Medium Risk" });
         case "LOW":
-          return /* @__PURE__ */ React.createElement(Badge, { className: "bg-green-100 text-green-800 hover:bg-green-100" }, "Low Risk");
+          return /* @__PURE__ */ (0, import_jsx_runtime63.jsx)(Badge, { className: "bg-green-100 text-green-800 hover:bg-green-100", children: "Low Risk" });
         default:
-          return /* @__PURE__ */ React.createElement(Badge, { variant: "secondary" }, level);
+          return /* @__PURE__ */ (0, import_jsx_runtime63.jsx)(Badge, { variant: "secondary", children: level });
       }
     }, "getRiskBadge");
     const getStatusBadge = /* @__PURE__ */ __name((status) => {
       switch (status) {
         case "OPEN":
-          return /* @__PURE__ */ React.createElement(Badge, { className: "bg-red-100 text-red-800 hover:bg-red-100" }, "Open");
+          return /* @__PURE__ */ (0, import_jsx_runtime63.jsx)(Badge, { className: "bg-red-100 text-red-800 hover:bg-red-100", children: "Open" });
         case "INVESTIGATING":
-          return /* @__PURE__ */ React.createElement(Badge, { className: "bg-yellow-100 text-yellow-800 hover:bg-yellow-100" }, "Investigating");
+          return /* @__PURE__ */ (0, import_jsx_runtime63.jsx)(Badge, { className: "bg-yellow-100 text-yellow-800 hover:bg-yellow-100", children: "Investigating" });
         case "RESOLVED":
-          return /* @__PURE__ */ React.createElement(Badge, { className: "bg-green-100 text-green-800 hover:bg-green-100" }, "Resolved");
+          return /* @__PURE__ */ (0, import_jsx_runtime63.jsx)(Badge, { className: "bg-green-100 text-green-800 hover:bg-green-100", children: "Resolved" });
         default:
-          return /* @__PURE__ */ React.createElement(Badge, { variant: "secondary" }, status);
+          return /* @__PURE__ */ (0, import_jsx_runtime63.jsx)(Badge, { variant: "secondary", children: status });
       }
     }, "getStatusBadge");
     const getEventIcon = /* @__PURE__ */ __name((type) => {
       switch (type) {
         case "SUSPICIOUS_LOGIN":
-          return /* @__PURE__ */ React.createElement(TriangleAlert, { className: "w-4 h-4 text-red-500" });
+          return /* @__PURE__ */ (0, import_jsx_runtime63.jsx)(TriangleAlert, { className: "w-4 h-4 text-red-500" });
         case "MFA_FAILURE":
-          return /* @__PURE__ */ React.createElement(Smartphone, { className: "w-4 h-4 text-yellow-500" });
+          return /* @__PURE__ */ (0, import_jsx_runtime63.jsx)(Smartphone, { className: "w-4 h-4 text-yellow-500" });
         case "PASSWORD_BREACH":
-          return /* @__PURE__ */ React.createElement(Key, { className: "w-4 h-4 text-red-500" });
+          return /* @__PURE__ */ (0, import_jsx_runtime63.jsx)(Key, { className: "w-4 h-4 text-red-500" });
         case "DEVICE_TRUST":
-          return /* @__PURE__ */ React.createElement(Shield, { className: "w-4 h-4 text-blue-500" });
+          return /* @__PURE__ */ (0, import_jsx_runtime63.jsx)(Shield, { className: "w-4 h-4 text-blue-500" });
         default:
-          return /* @__PURE__ */ React.createElement(Activity, { className: "w-4 h-4 text-gray-500" });
+          return /* @__PURE__ */ (0, import_jsx_runtime63.jsx)(Activity, { className: "w-4 h-4 text-gray-500" });
       }
     }, "getEventIcon");
     const formatEventType = /* @__PURE__ */ __name((type) => {
@@ -41418,7 +43045,150 @@ Defaulting to \`null\`.`;
     const formatTimestamp = /* @__PURE__ */ __name((timestamp2) => {
       return new Date(timestamp2).toLocaleString();
     }, "formatTimestamp");
-    return /* @__PURE__ */ React.createElement("div", { className: "flex-1 flex flex-col overflow-hidden" }, /* @__PURE__ */ React.createElement("header", { className: "bg-white border-b border-gray-200 px-6 py-4" }, /* @__PURE__ */ React.createElement("div", { className: "flex items-center justify-between" }, /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("nav", { className: "flex text-sm text-gray-500 mb-1" }, /* @__PURE__ */ React.createElement("span", null, "Security"), /* @__PURE__ */ React.createElement("span", { className: "mx-2" }, "/"), /* @__PURE__ */ React.createElement("span", { className: "text-gray-900 font-medium" }, "Overview")), /* @__PURE__ */ React.createElement("h2", { className: "text-2xl font-semibold text-gray-900" }, "Security Dashboard")), /* @__PURE__ */ React.createElement("div", { className: "flex items-center space-x-3" }, /* @__PURE__ */ React.createElement(Button, { variant: "outline" }, "Security Report"), /* @__PURE__ */ React.createElement(Button, { className: "bg-blue-600 hover:bg-blue-700 text-white" }, /* @__PURE__ */ React.createElement(Shield, { className: "w-4 h-4 mr-2" }), "Configure Policies")))), /* @__PURE__ */ React.createElement("div", { className: "flex-1 overflow-auto p-6" }, /* @__PURE__ */ React.createElement("div", { className: "grid grid-cols-1 md:grid-cols-4 gap-6 mb-6" }, /* @__PURE__ */ React.createElement(Card, null, /* @__PURE__ */ React.createElement(CardContent, { className: "p-6" }, /* @__PURE__ */ React.createElement("div", { className: "flex items-center justify-between" }, /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("p", { className: "text-sm font-medium text-gray-600" }, "MFA Adoption"), /* @__PURE__ */ React.createElement("p", { className: "text-2xl font-bold text-gray-900" }, metrics == null ? void 0 : metrics.mfaAdoption, "%"), /* @__PURE__ */ React.createElement("p", { className: "text-xs text-gray-500" }, metrics == null ? void 0 : metrics.mfaEnabledUsers, " of ", metrics == null ? void 0 : metrics.totalUsers, " users")), /* @__PURE__ */ React.createElement(Smartphone, { className: "w-8 h-8 text-green-600" })), /* @__PURE__ */ React.createElement(Progress2, { value: (metrics == null ? void 0 : metrics.mfaAdoption) || 0, className: "mt-3" }))), /* @__PURE__ */ React.createElement(Card, null, /* @__PURE__ */ React.createElement(CardContent, { className: "p-6" }, /* @__PURE__ */ React.createElement("div", { className: "flex items-center justify-between" }, /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("p", { className: "text-sm font-medium text-gray-600" }, "Risk Events"), /* @__PURE__ */ React.createElement("p", { className: "text-2xl font-bold text-red-600" }, metrics == null ? void 0 : metrics.riskEvents), /* @__PURE__ */ React.createElement("p", { className: "text-xs text-gray-500" }, "Last 24 hours")), /* @__PURE__ */ React.createElement(TriangleAlert, { className: "w-8 h-8 text-red-600" })))), /* @__PURE__ */ React.createElement(Card, null, /* @__PURE__ */ React.createElement(CardContent, { className: "p-6" }, /* @__PURE__ */ React.createElement("div", { className: "flex items-center justify-between" }, /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("p", { className: "text-sm font-medium text-gray-600" }, "Password Compliance"), /* @__PURE__ */ React.createElement("p", { className: "text-2xl font-bold text-gray-900" }, metrics == null ? void 0 : metrics.passwordPolicyCompliance, "%"), /* @__PURE__ */ React.createElement("p", { className: "text-xs text-gray-500" }, "Policy adherence")), /* @__PURE__ */ React.createElement(Key, { className: "w-8 h-8 text-blue-600" })), /* @__PURE__ */ React.createElement(Progress2, { value: (metrics == null ? void 0 : metrics.passwordPolicyCompliance) || 0, className: "mt-3" }))), /* @__PURE__ */ React.createElement(Card, null, /* @__PURE__ */ React.createElement(CardContent, { className: "p-6" }, /* @__PURE__ */ React.createElement("div", { className: "flex items-center justify-between" }, /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("p", { className: "text-sm font-medium text-gray-600" }, "Suspicious Logins"), /* @__PURE__ */ React.createElement("p", { className: "text-2xl font-bold text-yellow-600" }, metrics == null ? void 0 : metrics.suspiciousLogins), /* @__PURE__ */ React.createElement("p", { className: "text-xs text-gray-500" }, "Under investigation")), /* @__PURE__ */ React.createElement(Shield, { className: "w-8 h-8 text-yellow-600" }))))), /* @__PURE__ */ React.createElement(Tabs2, { defaultValue: "events", className: "space-y-6" }, /* @__PURE__ */ React.createElement(TabsList2, null, /* @__PURE__ */ React.createElement(TabsTrigger2, { value: "events" }, "Security Events"), /* @__PURE__ */ React.createElement(TabsTrigger2, { value: "policies" }, "Security Policies"), /* @__PURE__ */ React.createElement(TabsTrigger2, { value: "reports" }, "Reports")), /* @__PURE__ */ React.createElement(TabsContent2, { value: "events" }, /* @__PURE__ */ React.createElement(Card, null, /* @__PURE__ */ React.createElement(CardHeader, null, /* @__PURE__ */ React.createElement(CardTitle, null, "Recent Security Events")), /* @__PURE__ */ React.createElement(CardContent, null, /* @__PURE__ */ React.createElement("div", { className: "space-y-4" }, events3.map((event) => /* @__PURE__ */ React.createElement("div", { key: event.id, className: "flex items-center justify-between p-4 border border-gray-200 rounded-lg" }, /* @__PURE__ */ React.createElement("div", { className: "flex items-center space-x-3" }, getEventIcon(event.type), /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("div", { className: "text-sm font-medium text-gray-900" }, formatEventType(event.type)), /* @__PURE__ */ React.createElement("div", { className: "text-sm text-gray-500" }, event.user, " \u2022 ", event.location), /* @__PURE__ */ React.createElement("div", { className: "text-xs text-gray-400" }, formatTimestamp(event.timestamp)))), /* @__PURE__ */ React.createElement("div", { className: "flex items-center space-x-2" }, getRiskBadge(event.riskLevel), getStatusBadge(event.status), /* @__PURE__ */ React.createElement(Button, { variant: "outline", size: "sm" }, "Investigate")))))))), /* @__PURE__ */ React.createElement(TabsContent2, { value: "policies" }, /* @__PURE__ */ React.createElement(Card, null, /* @__PURE__ */ React.createElement(CardHeader, null, /* @__PURE__ */ React.createElement(CardTitle, null, "Security Policies")), /* @__PURE__ */ React.createElement(CardContent, null, /* @__PURE__ */ React.createElement("div", { className: "space-y-4" }, /* @__PURE__ */ React.createElement("div", { className: "flex items-center justify-between p-4 border border-gray-200 rounded-lg" }, /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("div", { className: "text-sm font-medium text-gray-900" }, "Password Policy"), /* @__PURE__ */ React.createElement("div", { className: "text-sm text-gray-500" }, "Minimum 12 characters, complexity required")), /* @__PURE__ */ React.createElement("div", { className: "flex items-center space-x-2" }, /* @__PURE__ */ React.createElement(CircleCheckBig, { className: "w-5 h-5 text-green-500" }), /* @__PURE__ */ React.createElement("span", { className: "text-sm text-green-600" }, "Active"))), /* @__PURE__ */ React.createElement("div", { className: "flex items-center justify-between p-4 border border-gray-200 rounded-lg" }, /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("div", { className: "text-sm font-medium text-gray-900" }, "MFA Enforcement"), /* @__PURE__ */ React.createElement("div", { className: "text-sm text-gray-500" }, "Required for all admin users")), /* @__PURE__ */ React.createElement("div", { className: "flex items-center space-x-2" }, /* @__PURE__ */ React.createElement(CircleCheckBig, { className: "w-5 h-5 text-green-500" }), /* @__PURE__ */ React.createElement("span", { className: "text-sm text-green-600" }, "Active"))), /* @__PURE__ */ React.createElement("div", { className: "flex items-center justify-between p-4 border border-gray-200 rounded-lg" }, /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("div", { className: "text-sm font-medium text-gray-900" }, "Session Timeout"), /* @__PURE__ */ React.createElement("div", { className: "text-sm text-gray-500" }, "8 hours of inactivity")), /* @__PURE__ */ React.createElement("div", { className: "flex items-center space-x-2" }, /* @__PURE__ */ React.createElement(CircleCheckBig, { className: "w-5 h-5 text-green-500" }), /* @__PURE__ */ React.createElement("span", { className: "text-sm text-green-600" }, "Active"))))))), /* @__PURE__ */ React.createElement(TabsContent2, { value: "reports" }, /* @__PURE__ */ React.createElement(Card, null, /* @__PURE__ */ React.createElement(CardHeader, null, /* @__PURE__ */ React.createElement(CardTitle, null, "Security Reports")), /* @__PURE__ */ React.createElement(CardContent, null, /* @__PURE__ */ React.createElement("div", { className: "text-center py-8" }, /* @__PURE__ */ React.createElement(Shield, { className: "w-12 h-12 text-gray-400 mx-auto mb-4" }), /* @__PURE__ */ React.createElement("p", { className: "text-gray-500" }, "Security reports and analytics coming soon"), /* @__PURE__ */ React.createElement(Button, { variant: "outline", className: "mt-4" }, "Generate Report"))))))));
+    return /* @__PURE__ */ (0, import_jsx_runtime63.jsxs)("div", { className: "flex-1 flex flex-col overflow-hidden", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime63.jsx)("header", { className: "bg-white border-b border-gray-200 px-6 py-4", children: /* @__PURE__ */ (0, import_jsx_runtime63.jsxs)("div", { className: "flex items-center justify-between", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime63.jsxs)("div", { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime63.jsxs)("nav", { className: "flex text-sm text-gray-500 mb-1", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime63.jsx)("span", { children: "Security" }),
+            /* @__PURE__ */ (0, import_jsx_runtime63.jsx)("span", { className: "mx-2", children: "/" }),
+            /* @__PURE__ */ (0, import_jsx_runtime63.jsx)("span", { className: "text-gray-900 font-medium", children: "Overview" })
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime63.jsx)("h2", { className: "text-2xl font-semibold text-gray-900", children: "Security Dashboard" })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime63.jsxs)("div", { className: "flex items-center space-x-3", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime63.jsx)(Button, { variant: "outline", children: "Security Report" }),
+          /* @__PURE__ */ (0, import_jsx_runtime63.jsxs)(Button, { className: "bg-blue-600 hover:bg-blue-700 text-white", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime63.jsx)(Shield, { className: "w-4 h-4 mr-2" }),
+            "Configure Policies"
+          ] })
+        ] })
+      ] }) }),
+      /* @__PURE__ */ (0, import_jsx_runtime63.jsxs)("div", { className: "flex-1 overflow-auto p-6", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime63.jsxs)("div", { className: "grid grid-cols-1 md:grid-cols-4 gap-6 mb-6", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime63.jsx)(Card, { children: /* @__PURE__ */ (0, import_jsx_runtime63.jsxs)(CardContent, { className: "p-6", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime63.jsxs)("div", { className: "flex items-center justify-between", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime63.jsxs)("div", { children: [
+                /* @__PURE__ */ (0, import_jsx_runtime63.jsx)("p", { className: "text-sm font-medium text-gray-600", children: "MFA Adoption" }),
+                /* @__PURE__ */ (0, import_jsx_runtime63.jsxs)("p", { className: "text-2xl font-bold text-gray-900", children: [
+                  metrics == null ? void 0 : metrics.mfaAdoption,
+                  "%"
+                ] }),
+                /* @__PURE__ */ (0, import_jsx_runtime63.jsxs)("p", { className: "text-xs text-gray-500", children: [
+                  metrics == null ? void 0 : metrics.mfaEnabledUsers,
+                  " of ",
+                  metrics == null ? void 0 : metrics.totalUsers,
+                  " users"
+                ] })
+              ] }),
+              /* @__PURE__ */ (0, import_jsx_runtime63.jsx)(Smartphone, { className: "w-8 h-8 text-green-600" })
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime63.jsx)(Progress2, { value: (metrics == null ? void 0 : metrics.mfaAdoption) || 0, className: "mt-3" })
+          ] }) }),
+          /* @__PURE__ */ (0, import_jsx_runtime63.jsx)(Card, { children: /* @__PURE__ */ (0, import_jsx_runtime63.jsx)(CardContent, { className: "p-6", children: /* @__PURE__ */ (0, import_jsx_runtime63.jsxs)("div", { className: "flex items-center justify-between", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime63.jsxs)("div", { children: [
+              /* @__PURE__ */ (0, import_jsx_runtime63.jsx)("p", { className: "text-sm font-medium text-gray-600", children: "Risk Events" }),
+              /* @__PURE__ */ (0, import_jsx_runtime63.jsx)("p", { className: "text-2xl font-bold text-red-600", children: metrics == null ? void 0 : metrics.riskEvents }),
+              /* @__PURE__ */ (0, import_jsx_runtime63.jsx)("p", { className: "text-xs text-gray-500", children: "Last 24 hours" })
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime63.jsx)(TriangleAlert, { className: "w-8 h-8 text-red-600" })
+          ] }) }) }),
+          /* @__PURE__ */ (0, import_jsx_runtime63.jsx)(Card, { children: /* @__PURE__ */ (0, import_jsx_runtime63.jsxs)(CardContent, { className: "p-6", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime63.jsxs)("div", { className: "flex items-center justify-between", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime63.jsxs)("div", { children: [
+                /* @__PURE__ */ (0, import_jsx_runtime63.jsx)("p", { className: "text-sm font-medium text-gray-600", children: "Password Compliance" }),
+                /* @__PURE__ */ (0, import_jsx_runtime63.jsxs)("p", { className: "text-2xl font-bold text-gray-900", children: [
+                  metrics == null ? void 0 : metrics.passwordPolicyCompliance,
+                  "%"
+                ] }),
+                /* @__PURE__ */ (0, import_jsx_runtime63.jsx)("p", { className: "text-xs text-gray-500", children: "Policy adherence" })
+              ] }),
+              /* @__PURE__ */ (0, import_jsx_runtime63.jsx)(Key, { className: "w-8 h-8 text-blue-600" })
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime63.jsx)(Progress2, { value: (metrics == null ? void 0 : metrics.passwordPolicyCompliance) || 0, className: "mt-3" })
+          ] }) }),
+          /* @__PURE__ */ (0, import_jsx_runtime63.jsx)(Card, { children: /* @__PURE__ */ (0, import_jsx_runtime63.jsx)(CardContent, { className: "p-6", children: /* @__PURE__ */ (0, import_jsx_runtime63.jsxs)("div", { className: "flex items-center justify-between", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime63.jsxs)("div", { children: [
+              /* @__PURE__ */ (0, import_jsx_runtime63.jsx)("p", { className: "text-sm font-medium text-gray-600", children: "Suspicious Logins" }),
+              /* @__PURE__ */ (0, import_jsx_runtime63.jsx)("p", { className: "text-2xl font-bold text-yellow-600", children: metrics == null ? void 0 : metrics.suspiciousLogins }),
+              /* @__PURE__ */ (0, import_jsx_runtime63.jsx)("p", { className: "text-xs text-gray-500", children: "Under investigation" })
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime63.jsx)(Shield, { className: "w-8 h-8 text-yellow-600" })
+          ] }) }) })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime63.jsxs)(Tabs2, { defaultValue: "events", className: "space-y-6", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime63.jsxs)(TabsList2, { children: [
+            /* @__PURE__ */ (0, import_jsx_runtime63.jsx)(TabsTrigger2, { value: "events", children: "Security Events" }),
+            /* @__PURE__ */ (0, import_jsx_runtime63.jsx)(TabsTrigger2, { value: "policies", children: "Security Policies" }),
+            /* @__PURE__ */ (0, import_jsx_runtime63.jsx)(TabsTrigger2, { value: "reports", children: "Reports" })
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime63.jsx)(TabsContent2, { value: "events", children: /* @__PURE__ */ (0, import_jsx_runtime63.jsxs)(Card, { children: [
+            /* @__PURE__ */ (0, import_jsx_runtime63.jsx)(CardHeader, { children: /* @__PURE__ */ (0, import_jsx_runtime63.jsx)(CardTitle, { children: "Recent Security Events" }) }),
+            /* @__PURE__ */ (0, import_jsx_runtime63.jsx)(CardContent, { children: /* @__PURE__ */ (0, import_jsx_runtime63.jsx)("div", { className: "space-y-4", children: events3.map((event) => /* @__PURE__ */ (0, import_jsx_runtime63.jsxs)("div", { className: "flex items-center justify-between p-4 border border-gray-200 rounded-lg", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime63.jsxs)("div", { className: "flex items-center space-x-3", children: [
+                getEventIcon(event.type),
+                /* @__PURE__ */ (0, import_jsx_runtime63.jsxs)("div", { children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime63.jsx)("div", { className: "text-sm font-medium text-gray-900", children: formatEventType(event.type) }),
+                  /* @__PURE__ */ (0, import_jsx_runtime63.jsxs)("div", { className: "text-sm text-gray-500", children: [
+                    event.user,
+                    " \u2022 ",
+                    event.location
+                  ] }),
+                  /* @__PURE__ */ (0, import_jsx_runtime63.jsx)("div", { className: "text-xs text-gray-400", children: formatTimestamp(event.timestamp) })
+                ] })
+              ] }),
+              /* @__PURE__ */ (0, import_jsx_runtime63.jsxs)("div", { className: "flex items-center space-x-2", children: [
+                getRiskBadge(event.riskLevel),
+                getStatusBadge(event.status),
+                /* @__PURE__ */ (0, import_jsx_runtime63.jsx)(Button, { variant: "outline", size: "sm", children: "Investigate" })
+              ] })
+            ] }, event.id)) }) })
+          ] }) }),
+          /* @__PURE__ */ (0, import_jsx_runtime63.jsx)(TabsContent2, { value: "policies", children: /* @__PURE__ */ (0, import_jsx_runtime63.jsxs)(Card, { children: [
+            /* @__PURE__ */ (0, import_jsx_runtime63.jsx)(CardHeader, { children: /* @__PURE__ */ (0, import_jsx_runtime63.jsx)(CardTitle, { children: "Security Policies" }) }),
+            /* @__PURE__ */ (0, import_jsx_runtime63.jsx)(CardContent, { children: /* @__PURE__ */ (0, import_jsx_runtime63.jsxs)("div", { className: "space-y-4", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime63.jsxs)("div", { className: "flex items-center justify-between p-4 border border-gray-200 rounded-lg", children: [
+                /* @__PURE__ */ (0, import_jsx_runtime63.jsxs)("div", { children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime63.jsx)("div", { className: "text-sm font-medium text-gray-900", children: "Password Policy" }),
+                  /* @__PURE__ */ (0, import_jsx_runtime63.jsx)("div", { className: "text-sm text-gray-500", children: "Minimum 12 characters, complexity required" })
+                ] }),
+                /* @__PURE__ */ (0, import_jsx_runtime63.jsxs)("div", { className: "flex items-center space-x-2", children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime63.jsx)(CircleCheckBig, { className: "w-5 h-5 text-green-500" }),
+                  /* @__PURE__ */ (0, import_jsx_runtime63.jsx)("span", { className: "text-sm text-green-600", children: "Active" })
+                ] })
+              ] }),
+              /* @__PURE__ */ (0, import_jsx_runtime63.jsxs)("div", { className: "flex items-center justify-between p-4 border border-gray-200 rounded-lg", children: [
+                /* @__PURE__ */ (0, import_jsx_runtime63.jsxs)("div", { children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime63.jsx)("div", { className: "text-sm font-medium text-gray-900", children: "MFA Enforcement" }),
+                  /* @__PURE__ */ (0, import_jsx_runtime63.jsx)("div", { className: "text-sm text-gray-500", children: "Required for all admin users" })
+                ] }),
+                /* @__PURE__ */ (0, import_jsx_runtime63.jsxs)("div", { className: "flex items-center space-x-2", children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime63.jsx)(CircleCheckBig, { className: "w-5 h-5 text-green-500" }),
+                  /* @__PURE__ */ (0, import_jsx_runtime63.jsx)("span", { className: "text-sm text-green-600", children: "Active" })
+                ] })
+              ] }),
+              /* @__PURE__ */ (0, import_jsx_runtime63.jsxs)("div", { className: "flex items-center justify-between p-4 border border-gray-200 rounded-lg", children: [
+                /* @__PURE__ */ (0, import_jsx_runtime63.jsxs)("div", { children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime63.jsx)("div", { className: "text-sm font-medium text-gray-900", children: "Session Timeout" }),
+                  /* @__PURE__ */ (0, import_jsx_runtime63.jsx)("div", { className: "text-sm text-gray-500", children: "8 hours of inactivity" })
+                ] }),
+                /* @__PURE__ */ (0, import_jsx_runtime63.jsxs)("div", { className: "flex items-center space-x-2", children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime63.jsx)(CircleCheckBig, { className: "w-5 h-5 text-green-500" }),
+                  /* @__PURE__ */ (0, import_jsx_runtime63.jsx)("span", { className: "text-sm text-green-600", children: "Active" })
+                ] })
+              ] })
+            ] }) })
+          ] }) }),
+          /* @__PURE__ */ (0, import_jsx_runtime63.jsx)(TabsContent2, { value: "reports", children: /* @__PURE__ */ (0, import_jsx_runtime63.jsxs)(Card, { children: [
+            /* @__PURE__ */ (0, import_jsx_runtime63.jsx)(CardHeader, { children: /* @__PURE__ */ (0, import_jsx_runtime63.jsx)(CardTitle, { children: "Security Reports" }) }),
+            /* @__PURE__ */ (0, import_jsx_runtime63.jsx)(CardContent, { children: /* @__PURE__ */ (0, import_jsx_runtime63.jsxs)("div", { className: "text-center py-8", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime63.jsx)(Shield, { className: "w-12 h-12 text-gray-400 mx-auto mb-4" }),
+              /* @__PURE__ */ (0, import_jsx_runtime63.jsx)("p", { className: "text-gray-500", children: "Security reports and analytics coming soon" }),
+              /* @__PURE__ */ (0, import_jsx_runtime63.jsx)(Button, { variant: "outline", className: "mt-4", children: "Generate Report" })
+            ] }) })
+          ] }) })
+        ] })
+      ] })
+    ] });
   }
   __name(Security, "Security");
 
@@ -41426,15 +43196,15 @@ Defaulting to \`null\`.`;
   var import_react26 = __toESM(require_react(), 1);
 
   // client/src/components/ui/switch.tsx
-  var React75 = __toESM(require_react(), 1);
+  var React76 = __toESM(require_react(), 1);
 
   // node_modules/@radix-ui/react-switch/dist/index.mjs
-  var React74 = __toESM(require_react(), 1);
-  var import_jsx_runtime25 = __toESM(require_jsx_runtime(), 1);
+  var React75 = __toESM(require_react(), 1);
+  var import_jsx_runtime64 = __toESM(require_jsx_runtime(), 1);
   var SWITCH_NAME = "Switch";
   var [createSwitchContext, createSwitchScope] = createContextScope(SWITCH_NAME);
   var [SwitchProvider, useSwitchContext] = createSwitchContext(SWITCH_NAME);
-  var Switch2 = React74.forwardRef(
+  var Switch2 = React75.forwardRef(
     (props, forwardedRef) => {
       const _a121 = props, {
         __scopeSwitch,
@@ -41457,17 +43227,17 @@ Defaulting to \`null\`.`;
         "onCheckedChange",
         "form"
       ]);
-      const [button, setButton] = React74.useState(null);
+      const [button, setButton] = React75.useState(null);
       const composedRefs = useComposedRefs(forwardedRef, (node) => setButton(node));
-      const hasConsumerStoppedPropagationRef = React74.useRef(false);
+      const hasConsumerStoppedPropagationRef = React75.useRef(false);
       const isFormControl = button ? form || !!button.closest("form") : true;
       const [checked = false, setChecked] = useControllableState({
         prop: checkedProp,
         defaultProp: defaultChecked,
         onChange: onCheckedChange
       });
-      return /* @__PURE__ */ (0, import_jsx_runtime25.jsxs)(SwitchProvider, { scope: __scopeSwitch, checked, disabled, children: [
-        /* @__PURE__ */ (0, import_jsx_runtime25.jsx)(
+      return /* @__PURE__ */ (0, import_jsx_runtime64.jsxs)(SwitchProvider, { scope: __scopeSwitch, checked, disabled, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime64.jsx)(
           Primitive.button,
           __spreadProps(__spreadValues({
             type: "button",
@@ -41489,7 +43259,7 @@ Defaulting to \`null\`.`;
             })
           })
         ),
-        isFormControl && /* @__PURE__ */ (0, import_jsx_runtime25.jsx)(
+        isFormControl && /* @__PURE__ */ (0, import_jsx_runtime64.jsx)(
           BubbleInput2,
           {
             control: button,
@@ -41508,11 +43278,11 @@ Defaulting to \`null\`.`;
   );
   Switch2.displayName = SWITCH_NAME;
   var THUMB_NAME = "SwitchThumb";
-  var SwitchThumb = React74.forwardRef(
+  var SwitchThumb = React75.forwardRef(
     (props, forwardedRef) => {
       const _a121 = props, { __scopeSwitch } = _a121, thumbProps = __objRest(_a121, ["__scopeSwitch"]);
       const context = useSwitchContext(THUMB_NAME, __scopeSwitch);
-      return /* @__PURE__ */ (0, import_jsx_runtime25.jsx)(
+      return /* @__PURE__ */ (0, import_jsx_runtime64.jsx)(
         Primitive.span,
         __spreadProps(__spreadValues({
           "data-state": getState5(context.checked),
@@ -41526,10 +43296,10 @@ Defaulting to \`null\`.`;
   SwitchThumb.displayName = THUMB_NAME;
   var BubbleInput2 = /* @__PURE__ */ __name((props) => {
     const _a121 = props, { control, checked, bubbles = true } = _a121, inputProps = __objRest(_a121, ["control", "checked", "bubbles"]);
-    const ref = React74.useRef(null);
+    const ref = React75.useRef(null);
     const prevChecked = usePrevious(checked);
     const controlSize = useSize(control);
-    React74.useEffect(() => {
+    React75.useEffect(() => {
       const input = ref.current;
       const inputProto = window.HTMLInputElement.prototype;
       const descriptor = Object.getOwnPropertyDescriptor(inputProto, "checked");
@@ -41540,7 +43310,7 @@ Defaulting to \`null\`.`;
         input.dispatchEvent(event);
       }
     }, [prevChecked, checked, bubbles]);
-    return /* @__PURE__ */ (0, import_jsx_runtime25.jsx)(
+    return /* @__PURE__ */ (0, import_jsx_runtime64.jsx)(
       "input",
       __spreadProps(__spreadValues({
         type: "checkbox",
@@ -41566,9 +43336,10 @@ Defaulting to \`null\`.`;
   var Thumb = SwitchThumb;
 
   // client/src/components/ui/switch.tsx
-  var Switch3 = React75.forwardRef((_a121, ref) => {
+  var import_jsx_runtime65 = __toESM(require_jsx_runtime(), 1);
+  var Switch3 = React76.forwardRef((_a121, ref) => {
     var _b93 = _a121, { className } = _b93, props = __objRest(_b93, ["className"]);
-    return /* @__PURE__ */ React75.createElement(
+    return /* @__PURE__ */ (0, import_jsx_runtime65.jsx)(
       Root10,
       __spreadProps(__spreadValues({
         className: cn(
@@ -41576,21 +43347,22 @@ Defaulting to \`null\`.`;
           className
         )
       }, props), {
-        ref
-      }),
-      /* @__PURE__ */ React75.createElement(
-        Thumb,
-        {
-          className: cn(
-            "pointer-events-none block h-5 w-5 rounded-full bg-background shadow-lg ring-0 transition-transform data-[state=checked]:translate-x-5 data-[state=unchecked]:translate-x-0"
-          )
-        }
-      )
+        ref,
+        children: /* @__PURE__ */ (0, import_jsx_runtime65.jsx)(
+          Thumb,
+          {
+            className: cn(
+              "pointer-events-none block h-5 w-5 rounded-full bg-background shadow-lg ring-0 transition-transform data-[state=checked]:translate-x-5 data-[state=unchecked]:translate-x-0"
+            )
+          }
+        )
+      })
     );
   });
   Switch3.displayName = Root10.displayName;
 
   // client/src/pages/settings.tsx
+  var import_jsx_runtime66 = __toESM(require_jsx_runtime(), 1);
   function Settings3() {
     const [orgName, setOrgName] = (0, import_react26.useState)("Maze Therapeutics");
     const [domain, setDomain] = (0, import_react26.useState)("company.okta.com");
@@ -41600,82 +43372,298 @@ Defaulting to \`null\`.`;
     const handleSave = /* @__PURE__ */ __name(() => {
       console.log("Saving settings...");
     }, "handleSave");
-    return /* @__PURE__ */ React.createElement("div", { className: "flex-1 flex flex-col overflow-hidden" }, /* @__PURE__ */ React.createElement("header", { className: "bg-white border-b border-gray-200 px-6 py-4" }, /* @__PURE__ */ React.createElement("div", { className: "flex items-center justify-between" }, /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("nav", { className: "flex text-sm text-gray-500 mb-1" }, /* @__PURE__ */ React.createElement("span", null, "Settings"), /* @__PURE__ */ React.createElement("span", { className: "mx-2" }, "/"), /* @__PURE__ */ React.createElement("span", { className: "text-gray-900 font-medium" }, "General")), /* @__PURE__ */ React.createElement("h2", { className: "text-2xl font-semibold text-gray-900" }, "Organization Settings")), /* @__PURE__ */ React.createElement(Button, { onClick: handleSave, className: "bg-blue-600 hover:bg-blue-700 text-white" }, /* @__PURE__ */ React.createElement(Save, { className: "w-4 h-4 mr-2" }), "Save Changes"))), /* @__PURE__ */ React.createElement("div", { className: "flex-1 overflow-auto p-6" }, /* @__PURE__ */ React.createElement("div", { className: "max-w-4xl mx-auto" }, /* @__PURE__ */ React.createElement(Tabs2, { defaultValue: "general", className: "space-y-6" }, /* @__PURE__ */ React.createElement(TabsList2, null, /* @__PURE__ */ React.createElement(TabsTrigger2, { value: "general" }, "General"), /* @__PURE__ */ React.createElement(TabsTrigger2, { value: "security" }, "Security"), /* @__PURE__ */ React.createElement(TabsTrigger2, { value: "authentication" }, "Authentication"), /* @__PURE__ */ React.createElement(TabsTrigger2, { value: "notifications" }, "Notifications")), /* @__PURE__ */ React.createElement(TabsContent2, { value: "general" }, /* @__PURE__ */ React.createElement(Card, null, /* @__PURE__ */ React.createElement(CardHeader, null, /* @__PURE__ */ React.createElement(CardTitle, { className: "flex items-center" }, /* @__PURE__ */ React.createElement(Globe, { className: "w-5 h-5 mr-2" }), "Organization Information")), /* @__PURE__ */ React.createElement(CardContent, { className: "space-y-6" }, /* @__PURE__ */ React.createElement("div", { className: "grid grid-cols-1 md:grid-cols-2 gap-6" }, /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement(Label2, { htmlFor: "orgName" }, "Organization Name"), /* @__PURE__ */ React.createElement(
-      Input,
-      {
-        id: "orgName",
-        value: orgName,
-        onChange: (e) => setOrgName(e.target.value),
-        className: "mt-1"
-      }
-    )), /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement(Label2, { htmlFor: "domain" }, "OKTA Domain"), /* @__PURE__ */ React.createElement(
-      Input,
-      {
-        id: "domain",
-        value: domain,
-        onChange: (e) => setDomain(e.target.value),
-        className: "mt-1",
-        disabled: true
-      }
-    ))), /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement(Label2, { htmlFor: "subdomain" }, "Subdomain"), /* @__PURE__ */ React.createElement(
-      Input,
-      {
-        id: "subdomain",
-        value: "company",
-        className: "mt-1",
-        disabled: true
-      }
-    ), /* @__PURE__ */ React.createElement("p", { className: "text-sm text-gray-500 mt-1" }, "Contact OKTA support to change your subdomain")), /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement(Label2, { htmlFor: "timezone" }, "Timezone"), /* @__PURE__ */ React.createElement(Select2, { defaultValue: "america/los_angeles" }, /* @__PURE__ */ React.createElement(SelectTrigger2, { className: "mt-1" }, /* @__PURE__ */ React.createElement(SelectValue2, null)), /* @__PURE__ */ React.createElement(SelectContent2, null, /* @__PURE__ */ React.createElement(SelectItem2, { value: "america/los_angeles" }, "America/Los Angeles (PST)"), /* @__PURE__ */ React.createElement(SelectItem2, { value: "america/new_york" }, "America/New York (EST)"), /* @__PURE__ */ React.createElement(SelectItem2, { value: "america/chicago" }, "America/Chicago (CST)"), /* @__PURE__ */ React.createElement(SelectItem2, { value: "europe/london" }, "Europe/London (GMT)"), /* @__PURE__ */ React.createElement(SelectItem2, { value: "asia/tokyo" }, "Asia/Tokyo (JST)"))))))), /* @__PURE__ */ React.createElement(TabsContent2, { value: "security" }, /* @__PURE__ */ React.createElement(Card, null, /* @__PURE__ */ React.createElement(CardHeader, null, /* @__PURE__ */ React.createElement(CardTitle, { className: "flex items-center" }, /* @__PURE__ */ React.createElement(Shield, { className: "w-5 h-5 mr-2" }), "Security Settings")), /* @__PURE__ */ React.createElement(CardContent, { className: "space-y-6" }, /* @__PURE__ */ React.createElement("div", { className: "flex items-center justify-between" }, /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement(Label2, { htmlFor: "mfa-required" }, "Require MFA for all users"), /* @__PURE__ */ React.createElement("p", { className: "text-sm text-gray-500" }, "Enforce multi-factor authentication for enhanced security")), /* @__PURE__ */ React.createElement(
-      Switch3,
-      {
-        id: "mfa-required",
-        checked: mfaRequired,
-        onCheckedChange: setMfaRequired
-      }
-    )), /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement(Label2, { htmlFor: "session-timeout" }, "Session Timeout (hours)"), /* @__PURE__ */ React.createElement(Select2, { value: sessionTimeout, onValueChange: setSessionTimeout }, /* @__PURE__ */ React.createElement(SelectTrigger2, { className: "mt-1 max-w-xs" }, /* @__PURE__ */ React.createElement(SelectValue2, null)), /* @__PURE__ */ React.createElement(SelectContent2, null, /* @__PURE__ */ React.createElement(SelectItem2, { value: "1" }, "1 hour"), /* @__PURE__ */ React.createElement(SelectItem2, { value: "2" }, "2 hours"), /* @__PURE__ */ React.createElement(SelectItem2, { value: "4" }, "4 hours"), /* @__PURE__ */ React.createElement(SelectItem2, { value: "8" }, "8 hours"), /* @__PURE__ */ React.createElement(SelectItem2, { value: "12" }, "12 hours"), /* @__PURE__ */ React.createElement(SelectItem2, { value: "24" }, "24 hours")))), /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement(Label2, null, "Password Policy"), /* @__PURE__ */ React.createElement("div", { className: "mt-2 p-4 bg-gray-50 rounded-lg" }, /* @__PURE__ */ React.createElement("ul", { className: "text-sm text-gray-600 space-y-1" }, /* @__PURE__ */ React.createElement("li", null, "\u2022 Minimum 12 characters"), /* @__PURE__ */ React.createElement("li", null, "\u2022 At least one uppercase letter"), /* @__PURE__ */ React.createElement("li", null, "\u2022 At least one lowercase letter"), /* @__PURE__ */ React.createElement("li", null, "\u2022 At least one number"), /* @__PURE__ */ React.createElement("li", null, "\u2022 At least one special character"))))))), /* @__PURE__ */ React.createElement(TabsContent2, { value: "authentication" }, /* @__PURE__ */ React.createElement(Card, null, /* @__PURE__ */ React.createElement(CardHeader, null, /* @__PURE__ */ React.createElement(CardTitle, { className: "flex items-center" }, /* @__PURE__ */ React.createElement(Key, { className: "w-5 h-5 mr-2" }), "Authentication Settings")), /* @__PURE__ */ React.createElement(CardContent, { className: "space-y-6" }, /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement(Label2, null, "Supported MFA Methods"), /* @__PURE__ */ React.createElement("div", { className: "mt-2 space-y-3" }, /* @__PURE__ */ React.createElement("div", { className: "flex items-center justify-between p-3 border border-gray-200 rounded-lg" }, /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("div", { className: "font-medium" }, "OKTA Verify"), /* @__PURE__ */ React.createElement("div", { className: "text-sm text-gray-500" }, "Push notifications and TOTP")), /* @__PURE__ */ React.createElement(Switch3, { defaultChecked: true })), /* @__PURE__ */ React.createElement("div", { className: "flex items-center justify-between p-3 border border-gray-200 rounded-lg" }, /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("div", { className: "font-medium" }, "SMS Authentication"), /* @__PURE__ */ React.createElement("div", { className: "text-sm text-gray-500" }, "Text message verification codes")), /* @__PURE__ */ React.createElement(Switch3, { defaultChecked: true })), /* @__PURE__ */ React.createElement("div", { className: "flex items-center justify-between p-3 border border-gray-200 rounded-lg" }, /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("div", { className: "font-medium" }, "Security Questions"), /* @__PURE__ */ React.createElement("div", { className: "text-sm text-gray-500" }, "Backup authentication method")), /* @__PURE__ */ React.createElement(Switch3, null)))), /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement(Label2, null, "Sign-On Policy"), /* @__PURE__ */ React.createElement(Select2, { defaultValue: "balanced" }, /* @__PURE__ */ React.createElement(SelectTrigger2, { className: "mt-1" }, /* @__PURE__ */ React.createElement(SelectValue2, null)), /* @__PURE__ */ React.createElement(SelectContent2, null, /* @__PURE__ */ React.createElement(SelectItem2, { value: "lenient" }, "Lenient - Faster access, lower security"), /* @__PURE__ */ React.createElement(SelectItem2, { value: "balanced" }, "Balanced - Default security settings"), /* @__PURE__ */ React.createElement(SelectItem2, { value: "strict" }, "Strict - Maximum security, slower access"))))))), /* @__PURE__ */ React.createElement(TabsContent2, { value: "notifications" }, /* @__PURE__ */ React.createElement(Card, null, /* @__PURE__ */ React.createElement(CardHeader, null, /* @__PURE__ */ React.createElement(CardTitle, { className: "flex items-center" }, /* @__PURE__ */ React.createElement(Bell, { className: "w-5 h-5 mr-2" }), "Notification Settings")), /* @__PURE__ */ React.createElement(CardContent, { className: "space-y-6" }, /* @__PURE__ */ React.createElement("div", { className: "flex items-center justify-between" }, /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement(Label2, { htmlFor: "email-notifications" }, "Email Notifications"), /* @__PURE__ */ React.createElement("p", { className: "text-sm text-gray-500" }, "Receive email alerts for security events and admin activities")), /* @__PURE__ */ React.createElement(
-      Switch3,
-      {
-        id: "email-notifications",
-        checked: emailNotifications,
-        onCheckedChange: setEmailNotifications
-      }
-    )), /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement(Label2, null, "Notification Types"), /* @__PURE__ */ React.createElement("div", { className: "mt-2 space-y-3" }, /* @__PURE__ */ React.createElement("div", { className: "flex items-center justify-between p-3 border border-gray-200 rounded-lg" }, /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("div", { className: "font-medium" }, "Security Events"), /* @__PURE__ */ React.createElement("div", { className: "text-sm text-gray-500" }, "Suspicious logins, failed authentications")), /* @__PURE__ */ React.createElement(Switch3, { defaultChecked: true })), /* @__PURE__ */ React.createElement("div", { className: "flex items-center justify-between p-3 border border-gray-200 rounded-lg" }, /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("div", { className: "font-medium" }, "User Management"), /* @__PURE__ */ React.createElement("div", { className: "text-sm text-gray-500" }, "User creation, suspension, deletion")), /* @__PURE__ */ React.createElement(Switch3, { defaultChecked: true })), /* @__PURE__ */ React.createElement("div", { className: "flex items-center justify-between p-3 border border-gray-200 rounded-lg" }, /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("div", { className: "font-medium" }, "System Updates"), /* @__PURE__ */ React.createElement("div", { className: "text-sm text-gray-500" }, "Maintenance, feature updates")), /* @__PURE__ */ React.createElement(Switch3, null)))), /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement(Label2, { htmlFor: "admin-email" }, "Admin Email"), /* @__PURE__ */ React.createElement(
-      Input,
-      {
-        id: "admin-email",
-        type: "email",
-        value: "admin@company.com",
-        className: "mt-1"
-      }
-    )))))))));
+    return /* @__PURE__ */ (0, import_jsx_runtime66.jsxs)("div", { className: "flex-1 flex flex-col overflow-hidden", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime66.jsx)("header", { className: "bg-white border-b border-gray-200 px-6 py-4", children: /* @__PURE__ */ (0, import_jsx_runtime66.jsxs)("div", { className: "flex items-center justify-between", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime66.jsxs)("div", { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime66.jsxs)("nav", { className: "flex text-sm text-gray-500 mb-1", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime66.jsx)("span", { children: "Settings" }),
+            /* @__PURE__ */ (0, import_jsx_runtime66.jsx)("span", { className: "mx-2", children: "/" }),
+            /* @__PURE__ */ (0, import_jsx_runtime66.jsx)("span", { className: "text-gray-900 font-medium", children: "General" })
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime66.jsx)("h2", { className: "text-2xl font-semibold text-gray-900", children: "Organization Settings" })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime66.jsxs)(Button, { onClick: handleSave, className: "bg-blue-600 hover:bg-blue-700 text-white", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime66.jsx)(Save, { className: "w-4 h-4 mr-2" }),
+          "Save Changes"
+        ] })
+      ] }) }),
+      /* @__PURE__ */ (0, import_jsx_runtime66.jsx)("div", { className: "flex-1 overflow-auto p-6", children: /* @__PURE__ */ (0, import_jsx_runtime66.jsx)("div", { className: "max-w-4xl mx-auto", children: /* @__PURE__ */ (0, import_jsx_runtime66.jsxs)(Tabs2, { defaultValue: "general", className: "space-y-6", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime66.jsxs)(TabsList2, { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime66.jsx)(TabsTrigger2, { value: "general", children: "General" }),
+          /* @__PURE__ */ (0, import_jsx_runtime66.jsx)(TabsTrigger2, { value: "security", children: "Security" }),
+          /* @__PURE__ */ (0, import_jsx_runtime66.jsx)(TabsTrigger2, { value: "authentication", children: "Authentication" }),
+          /* @__PURE__ */ (0, import_jsx_runtime66.jsx)(TabsTrigger2, { value: "notifications", children: "Notifications" })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime66.jsx)(TabsContent2, { value: "general", children: /* @__PURE__ */ (0, import_jsx_runtime66.jsxs)(Card, { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime66.jsx)(CardHeader, { children: /* @__PURE__ */ (0, import_jsx_runtime66.jsxs)(CardTitle, { className: "flex items-center", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime66.jsx)(Globe, { className: "w-5 h-5 mr-2" }),
+            "Organization Information"
+          ] }) }),
+          /* @__PURE__ */ (0, import_jsx_runtime66.jsxs)(CardContent, { className: "space-y-6", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime66.jsxs)("div", { className: "grid grid-cols-1 md:grid-cols-2 gap-6", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime66.jsxs)("div", { children: [
+                /* @__PURE__ */ (0, import_jsx_runtime66.jsx)(Label2, { htmlFor: "orgName", children: "Organization Name" }),
+                /* @__PURE__ */ (0, import_jsx_runtime66.jsx)(
+                  Input,
+                  {
+                    id: "orgName",
+                    value: orgName,
+                    onChange: (e) => setOrgName(e.target.value),
+                    className: "mt-1"
+                  }
+                )
+              ] }),
+              /* @__PURE__ */ (0, import_jsx_runtime66.jsxs)("div", { children: [
+                /* @__PURE__ */ (0, import_jsx_runtime66.jsx)(Label2, { htmlFor: "domain", children: "OKTA Domain" }),
+                /* @__PURE__ */ (0, import_jsx_runtime66.jsx)(
+                  Input,
+                  {
+                    id: "domain",
+                    value: domain,
+                    onChange: (e) => setDomain(e.target.value),
+                    className: "mt-1",
+                    disabled: true
+                  }
+                )
+              ] })
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime66.jsxs)("div", { children: [
+              /* @__PURE__ */ (0, import_jsx_runtime66.jsx)(Label2, { htmlFor: "subdomain", children: "Subdomain" }),
+              /* @__PURE__ */ (0, import_jsx_runtime66.jsx)(
+                Input,
+                {
+                  id: "subdomain",
+                  value: "company",
+                  className: "mt-1",
+                  disabled: true
+                }
+              ),
+              /* @__PURE__ */ (0, import_jsx_runtime66.jsx)("p", { className: "text-sm text-gray-500 mt-1", children: "Contact OKTA support to change your subdomain" })
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime66.jsxs)("div", { children: [
+              /* @__PURE__ */ (0, import_jsx_runtime66.jsx)(Label2, { htmlFor: "timezone", children: "Timezone" }),
+              /* @__PURE__ */ (0, import_jsx_runtime66.jsxs)(Select2, { defaultValue: "america/los_angeles", children: [
+                /* @__PURE__ */ (0, import_jsx_runtime66.jsx)(SelectTrigger2, { className: "mt-1", children: /* @__PURE__ */ (0, import_jsx_runtime66.jsx)(SelectValue2, {}) }),
+                /* @__PURE__ */ (0, import_jsx_runtime66.jsxs)(SelectContent2, { children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime66.jsx)(SelectItem2, { value: "america/los_angeles", children: "America/Los Angeles (PST)" }),
+                  /* @__PURE__ */ (0, import_jsx_runtime66.jsx)(SelectItem2, { value: "america/new_york", children: "America/New York (EST)" }),
+                  /* @__PURE__ */ (0, import_jsx_runtime66.jsx)(SelectItem2, { value: "america/chicago", children: "America/Chicago (CST)" }),
+                  /* @__PURE__ */ (0, import_jsx_runtime66.jsx)(SelectItem2, { value: "europe/london", children: "Europe/London (GMT)" }),
+                  /* @__PURE__ */ (0, import_jsx_runtime66.jsx)(SelectItem2, { value: "asia/tokyo", children: "Asia/Tokyo (JST)" })
+                ] })
+              ] })
+            ] })
+          ] })
+        ] }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime66.jsx)(TabsContent2, { value: "security", children: /* @__PURE__ */ (0, import_jsx_runtime66.jsxs)(Card, { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime66.jsx)(CardHeader, { children: /* @__PURE__ */ (0, import_jsx_runtime66.jsxs)(CardTitle, { className: "flex items-center", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime66.jsx)(Shield, { className: "w-5 h-5 mr-2" }),
+            "Security Settings"
+          ] }) }),
+          /* @__PURE__ */ (0, import_jsx_runtime66.jsxs)(CardContent, { className: "space-y-6", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime66.jsxs)("div", { className: "flex items-center justify-between", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime66.jsxs)("div", { children: [
+                /* @__PURE__ */ (0, import_jsx_runtime66.jsx)(Label2, { htmlFor: "mfa-required", children: "Require MFA for all users" }),
+                /* @__PURE__ */ (0, import_jsx_runtime66.jsx)("p", { className: "text-sm text-gray-500", children: "Enforce multi-factor authentication for enhanced security" })
+              ] }),
+              /* @__PURE__ */ (0, import_jsx_runtime66.jsx)(
+                Switch3,
+                {
+                  id: "mfa-required",
+                  checked: mfaRequired,
+                  onCheckedChange: setMfaRequired
+                }
+              )
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime66.jsxs)("div", { children: [
+              /* @__PURE__ */ (0, import_jsx_runtime66.jsx)(Label2, { htmlFor: "session-timeout", children: "Session Timeout (hours)" }),
+              /* @__PURE__ */ (0, import_jsx_runtime66.jsxs)(Select2, { value: sessionTimeout, onValueChange: setSessionTimeout, children: [
+                /* @__PURE__ */ (0, import_jsx_runtime66.jsx)(SelectTrigger2, { className: "mt-1 max-w-xs", children: /* @__PURE__ */ (0, import_jsx_runtime66.jsx)(SelectValue2, {}) }),
+                /* @__PURE__ */ (0, import_jsx_runtime66.jsxs)(SelectContent2, { children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime66.jsx)(SelectItem2, { value: "1", children: "1 hour" }),
+                  /* @__PURE__ */ (0, import_jsx_runtime66.jsx)(SelectItem2, { value: "2", children: "2 hours" }),
+                  /* @__PURE__ */ (0, import_jsx_runtime66.jsx)(SelectItem2, { value: "4", children: "4 hours" }),
+                  /* @__PURE__ */ (0, import_jsx_runtime66.jsx)(SelectItem2, { value: "8", children: "8 hours" }),
+                  /* @__PURE__ */ (0, import_jsx_runtime66.jsx)(SelectItem2, { value: "12", children: "12 hours" }),
+                  /* @__PURE__ */ (0, import_jsx_runtime66.jsx)(SelectItem2, { value: "24", children: "24 hours" })
+                ] })
+              ] })
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime66.jsxs)("div", { children: [
+              /* @__PURE__ */ (0, import_jsx_runtime66.jsx)(Label2, { children: "Password Policy" }),
+              /* @__PURE__ */ (0, import_jsx_runtime66.jsx)("div", { className: "mt-2 p-4 bg-gray-50 rounded-lg", children: /* @__PURE__ */ (0, import_jsx_runtime66.jsxs)("ul", { className: "text-sm text-gray-600 space-y-1", children: [
+                /* @__PURE__ */ (0, import_jsx_runtime66.jsx)("li", { children: "\u2022 Minimum 12 characters" }),
+                /* @__PURE__ */ (0, import_jsx_runtime66.jsx)("li", { children: "\u2022 At least one uppercase letter" }),
+                /* @__PURE__ */ (0, import_jsx_runtime66.jsx)("li", { children: "\u2022 At least one lowercase letter" }),
+                /* @__PURE__ */ (0, import_jsx_runtime66.jsx)("li", { children: "\u2022 At least one number" }),
+                /* @__PURE__ */ (0, import_jsx_runtime66.jsx)("li", { children: "\u2022 At least one special character" })
+              ] }) })
+            ] })
+          ] })
+        ] }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime66.jsx)(TabsContent2, { value: "authentication", children: /* @__PURE__ */ (0, import_jsx_runtime66.jsxs)(Card, { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime66.jsx)(CardHeader, { children: /* @__PURE__ */ (0, import_jsx_runtime66.jsxs)(CardTitle, { className: "flex items-center", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime66.jsx)(Key, { className: "w-5 h-5 mr-2" }),
+            "Authentication Settings"
+          ] }) }),
+          /* @__PURE__ */ (0, import_jsx_runtime66.jsxs)(CardContent, { className: "space-y-6", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime66.jsxs)("div", { children: [
+              /* @__PURE__ */ (0, import_jsx_runtime66.jsx)(Label2, { children: "Supported MFA Methods" }),
+              /* @__PURE__ */ (0, import_jsx_runtime66.jsxs)("div", { className: "mt-2 space-y-3", children: [
+                /* @__PURE__ */ (0, import_jsx_runtime66.jsxs)("div", { className: "flex items-center justify-between p-3 border border-gray-200 rounded-lg", children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime66.jsxs)("div", { children: [
+                    /* @__PURE__ */ (0, import_jsx_runtime66.jsx)("div", { className: "font-medium", children: "OKTA Verify" }),
+                    /* @__PURE__ */ (0, import_jsx_runtime66.jsx)("div", { className: "text-sm text-gray-500", children: "Push notifications and TOTP" })
+                  ] }),
+                  /* @__PURE__ */ (0, import_jsx_runtime66.jsx)(Switch3, { defaultChecked: true })
+                ] }),
+                /* @__PURE__ */ (0, import_jsx_runtime66.jsxs)("div", { className: "flex items-center justify-between p-3 border border-gray-200 rounded-lg", children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime66.jsxs)("div", { children: [
+                    /* @__PURE__ */ (0, import_jsx_runtime66.jsx)("div", { className: "font-medium", children: "SMS Authentication" }),
+                    /* @__PURE__ */ (0, import_jsx_runtime66.jsx)("div", { className: "text-sm text-gray-500", children: "Text message verification codes" })
+                  ] }),
+                  /* @__PURE__ */ (0, import_jsx_runtime66.jsx)(Switch3, { defaultChecked: true })
+                ] }),
+                /* @__PURE__ */ (0, import_jsx_runtime66.jsxs)("div", { className: "flex items-center justify-between p-3 border border-gray-200 rounded-lg", children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime66.jsxs)("div", { children: [
+                    /* @__PURE__ */ (0, import_jsx_runtime66.jsx)("div", { className: "font-medium", children: "Security Questions" }),
+                    /* @__PURE__ */ (0, import_jsx_runtime66.jsx)("div", { className: "text-sm text-gray-500", children: "Backup authentication method" })
+                  ] }),
+                  /* @__PURE__ */ (0, import_jsx_runtime66.jsx)(Switch3, {})
+                ] })
+              ] })
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime66.jsxs)("div", { children: [
+              /* @__PURE__ */ (0, import_jsx_runtime66.jsx)(Label2, { children: "Sign-On Policy" }),
+              /* @__PURE__ */ (0, import_jsx_runtime66.jsxs)(Select2, { defaultValue: "balanced", children: [
+                /* @__PURE__ */ (0, import_jsx_runtime66.jsx)(SelectTrigger2, { className: "mt-1", children: /* @__PURE__ */ (0, import_jsx_runtime66.jsx)(SelectValue2, {}) }),
+                /* @__PURE__ */ (0, import_jsx_runtime66.jsxs)(SelectContent2, { children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime66.jsx)(SelectItem2, { value: "lenient", children: "Lenient - Faster access, lower security" }),
+                  /* @__PURE__ */ (0, import_jsx_runtime66.jsx)(SelectItem2, { value: "balanced", children: "Balanced - Default security settings" }),
+                  /* @__PURE__ */ (0, import_jsx_runtime66.jsx)(SelectItem2, { value: "strict", children: "Strict - Maximum security, slower access" })
+                ] })
+              ] })
+            ] })
+          ] })
+        ] }) }),
+        /* @__PURE__ */ (0, import_jsx_runtime66.jsx)(TabsContent2, { value: "notifications", children: /* @__PURE__ */ (0, import_jsx_runtime66.jsxs)(Card, { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime66.jsx)(CardHeader, { children: /* @__PURE__ */ (0, import_jsx_runtime66.jsxs)(CardTitle, { className: "flex items-center", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime66.jsx)(Bell, { className: "w-5 h-5 mr-2" }),
+            "Notification Settings"
+          ] }) }),
+          /* @__PURE__ */ (0, import_jsx_runtime66.jsxs)(CardContent, { className: "space-y-6", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime66.jsxs)("div", { className: "flex items-center justify-between", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime66.jsxs)("div", { children: [
+                /* @__PURE__ */ (0, import_jsx_runtime66.jsx)(Label2, { htmlFor: "email-notifications", children: "Email Notifications" }),
+                /* @__PURE__ */ (0, import_jsx_runtime66.jsx)("p", { className: "text-sm text-gray-500", children: "Receive email alerts for security events and admin activities" })
+              ] }),
+              /* @__PURE__ */ (0, import_jsx_runtime66.jsx)(
+                Switch3,
+                {
+                  id: "email-notifications",
+                  checked: emailNotifications,
+                  onCheckedChange: setEmailNotifications
+                }
+              )
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime66.jsxs)("div", { children: [
+              /* @__PURE__ */ (0, import_jsx_runtime66.jsx)(Label2, { children: "Notification Types" }),
+              /* @__PURE__ */ (0, import_jsx_runtime66.jsxs)("div", { className: "mt-2 space-y-3", children: [
+                /* @__PURE__ */ (0, import_jsx_runtime66.jsxs)("div", { className: "flex items-center justify-between p-3 border border-gray-200 rounded-lg", children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime66.jsxs)("div", { children: [
+                    /* @__PURE__ */ (0, import_jsx_runtime66.jsx)("div", { className: "font-medium", children: "Security Events" }),
+                    /* @__PURE__ */ (0, import_jsx_runtime66.jsx)("div", { className: "text-sm text-gray-500", children: "Suspicious logins, failed authentications" })
+                  ] }),
+                  /* @__PURE__ */ (0, import_jsx_runtime66.jsx)(Switch3, { defaultChecked: true })
+                ] }),
+                /* @__PURE__ */ (0, import_jsx_runtime66.jsxs)("div", { className: "flex items-center justify-between p-3 border border-gray-200 rounded-lg", children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime66.jsxs)("div", { children: [
+                    /* @__PURE__ */ (0, import_jsx_runtime66.jsx)("div", { className: "font-medium", children: "User Management" }),
+                    /* @__PURE__ */ (0, import_jsx_runtime66.jsx)("div", { className: "text-sm text-gray-500", children: "User creation, suspension, deletion" })
+                  ] }),
+                  /* @__PURE__ */ (0, import_jsx_runtime66.jsx)(Switch3, { defaultChecked: true })
+                ] }),
+                /* @__PURE__ */ (0, import_jsx_runtime66.jsxs)("div", { className: "flex items-center justify-between p-3 border border-gray-200 rounded-lg", children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime66.jsxs)("div", { children: [
+                    /* @__PURE__ */ (0, import_jsx_runtime66.jsx)("div", { className: "font-medium", children: "System Updates" }),
+                    /* @__PURE__ */ (0, import_jsx_runtime66.jsx)("div", { className: "text-sm text-gray-500", children: "Maintenance, feature updates" })
+                  ] }),
+                  /* @__PURE__ */ (0, import_jsx_runtime66.jsx)(Switch3, {})
+                ] })
+              ] })
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime66.jsxs)("div", { children: [
+              /* @__PURE__ */ (0, import_jsx_runtime66.jsx)(Label2, { htmlFor: "admin-email", children: "Admin Email" }),
+              /* @__PURE__ */ (0, import_jsx_runtime66.jsx)(
+                Input,
+                {
+                  id: "admin-email",
+                  type: "email",
+                  value: "admin@company.com",
+                  className: "mt-1"
+                }
+              )
+            ] })
+          ] })
+        ] }) })
+      ] }) }) })
+    ] });
   }
   __name(Settings3, "Settings");
 
   // client/src/pages/not-found.tsx
+  var import_jsx_runtime67 = __toESM(require_jsx_runtime(), 1);
   function NotFound() {
-    return /* @__PURE__ */ React.createElement("div", { className: "min-h-screen w-full flex items-center justify-center bg-gray-50" }, /* @__PURE__ */ React.createElement(Card, { className: "w-full max-w-md mx-4" }, /* @__PURE__ */ React.createElement(CardContent, { className: "pt-6" }, /* @__PURE__ */ React.createElement("div", { className: "flex mb-4 gap-2" }, /* @__PURE__ */ React.createElement(CircleAlert, { className: "h-8 w-8 text-red-500" }), /* @__PURE__ */ React.createElement("h1", { className: "text-2xl font-bold text-gray-900" }, "404 Page Not Found")), /* @__PURE__ */ React.createElement("p", { className: "mt-4 text-sm text-gray-600" }, "Did you forget to add the page to the router?"))));
+    return /* @__PURE__ */ (0, import_jsx_runtime67.jsx)("div", { className: "min-h-screen w-full flex items-center justify-center bg-gray-50", children: /* @__PURE__ */ (0, import_jsx_runtime67.jsx)(Card, { className: "w-full max-w-md mx-4", children: /* @__PURE__ */ (0, import_jsx_runtime67.jsxs)(CardContent, { className: "pt-6", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime67.jsxs)("div", { className: "flex mb-4 gap-2", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime67.jsx)(CircleAlert, { className: "h-8 w-8 text-red-500" }),
+        /* @__PURE__ */ (0, import_jsx_runtime67.jsx)("h1", { className: "text-2xl font-bold text-gray-900", children: "404 Page Not Found" })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime67.jsx)("p", { className: "mt-4 text-sm text-gray-600", children: "Did you forget to add the page to the router?" })
+    ] }) }) });
   }
   __name(NotFound, "NotFound");
 
   // client/src/App.tsx
+  var import_jsx_runtime68 = __toESM(require_jsx_runtime(), 1);
   function Router2() {
     const { user, isLoading } = useAuth();
     if (isLoading) {
-      return /* @__PURE__ */ React.createElement("div", { className: "min-h-screen flex items-center justify-center" }, /* @__PURE__ */ React.createElement("div", { className: "text-center" }, /* @__PURE__ */ React.createElement("div", { className: "animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4" }), /* @__PURE__ */ React.createElement("p", { className: "text-gray-600" }, "Loading...")));
+      return /* @__PURE__ */ (0, import_jsx_runtime68.jsx)("div", { className: "min-h-screen flex items-center justify-center", children: /* @__PURE__ */ (0, import_jsx_runtime68.jsxs)("div", { className: "text-center", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime68.jsx)("div", { className: "animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4" }),
+        /* @__PURE__ */ (0, import_jsx_runtime68.jsx)("p", { className: "text-gray-600", children: "Loading..." })
+      ] }) });
     }
     if (!user) {
-      return /* @__PURE__ */ React.createElement(Switch, null, /* @__PURE__ */ React.createElement(Route, { path: "/login", component: Login }), /* @__PURE__ */ React.createElement(Route, { path: "*", component: Login }));
+      return /* @__PURE__ */ (0, import_jsx_runtime68.jsxs)(Switch, { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime68.jsx)(Route, { path: "/login", component: Login }),
+        /* @__PURE__ */ (0, import_jsx_runtime68.jsx)(Route, { path: "*", component: Login })
+      ] });
     }
-    return /* @__PURE__ */ React.createElement(SSOLayout, null, /* @__PURE__ */ React.createElement(Switch, null, /* @__PURE__ */ React.createElement(Route, { path: "/", component: Users2 }), /* @__PURE__ */ React.createElement(Route, { path: "/dashboard", component: Dashboard }), /* @__PURE__ */ React.createElement(Route, { path: "/users", component: Users2 }), /* @__PURE__ */ React.createElement(Route, { path: "/users/:id", component: UserDetail }), /* @__PURE__ */ React.createElement(Route, { path: "/groups", component: Groups }), /* @__PURE__ */ React.createElement(Route, { path: "/applications", component: Applications }), /* @__PURE__ */ React.createElement(Route, { path: "/security", component: Security }), /* @__PURE__ */ React.createElement(Route, { path: "/settings", component: Settings3 }), /* @__PURE__ */ React.createElement(Route, { component: NotFound })));
+    return /* @__PURE__ */ (0, import_jsx_runtime68.jsx)(SSOLayout, { children: /* @__PURE__ */ (0, import_jsx_runtime68.jsxs)(Switch, { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime68.jsx)(Route, { path: "/", component: Users2 }),
+      /* @__PURE__ */ (0, import_jsx_runtime68.jsx)(Route, { path: "/dashboard", component: Dashboard }),
+      /* @__PURE__ */ (0, import_jsx_runtime68.jsx)(Route, { path: "/users", component: Users2 }),
+      /* @__PURE__ */ (0, import_jsx_runtime68.jsx)(Route, { path: "/users/:id", component: UserDetail }),
+      /* @__PURE__ */ (0, import_jsx_runtime68.jsx)(Route, { path: "/groups", component: Groups }),
+      /* @__PURE__ */ (0, import_jsx_runtime68.jsx)(Route, { path: "/applications", component: Applications }),
+      /* @__PURE__ */ (0, import_jsx_runtime68.jsx)(Route, { path: "/security", component: Security }),
+      /* @__PURE__ */ (0, import_jsx_runtime68.jsx)(Route, { path: "/settings", component: Settings3 }),
+      /* @__PURE__ */ (0, import_jsx_runtime68.jsx)(Route, { component: NotFound })
+    ] }) });
   }
   __name(Router2, "Router");
   function App() {
-    return /* @__PURE__ */ React.createElement(QueryClientProvider, { client: queryClient }, /* @__PURE__ */ React.createElement(TooltipProvider2, null, /* @__PURE__ */ React.createElement(Toaster, null), /* @__PURE__ */ React.createElement(Router2, null)));
+    return /* @__PURE__ */ (0, import_jsx_runtime68.jsx)(QueryClientProvider, { client: queryClient, children: /* @__PURE__ */ (0, import_jsx_runtime68.jsxs)(TooltipProvider2, { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime68.jsx)(Toaster, {}),
+      /* @__PURE__ */ (0, import_jsx_runtime68.jsx)(Router2, {})
+    ] }) });
   }
   __name(App, "App");
   var App_default = App;
 
   // client/src/main-production.tsx
+  var import_jsx_runtime69 = __toESM(require_jsx_runtime(), 1);
   function initApp() {
     var _a121, _b93;
     console.log("\u{1F680} initApp() called");
@@ -41690,7 +43678,7 @@ Defaulting to \`null\`.`;
         const root = (0, import_client.createRoot)(rootElement);
         console.log("\u{1F3A8} Rendering app...");
         root.render(
-          /* @__PURE__ */ import_react27.default.createElement(ThemeProvider, { defaultTheme: "dark", storageKey: "ui-theme" }, /* @__PURE__ */ import_react27.default.createElement(App_default, null))
+          /* @__PURE__ */ (0, import_jsx_runtime69.jsx)(ThemeProvider, { defaultTheme: "dark", storageKey: "ui-theme", children: /* @__PURE__ */ (0, import_jsx_runtime69.jsx)(App_default, {}) })
         );
         console.log("\u2705 React app rendered successfully");
       } catch (error) {
