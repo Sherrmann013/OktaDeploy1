@@ -472,38 +472,6 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FormField
                 control={form.control}
-                name="password"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Password *</FormLabel>
-                    <FormControl>
-                      <div className="relative">
-                        <Input 
-                          type="text" 
-                          placeholder="Enter password" 
-                          value={password}
-                          onChange={(e) => {
-                            setPassword(e.target.value);
-                            field.onChange(e.target.value);
-                          }}
-                        />
-                        <Button
-                          type="button"
-                          size="sm"
-                          variant="ghost"
-                          className="absolute right-2 top-1/2 transform -translate-y-1/2 h-6 w-6 p-0 hover:bg-gray-100 dark:hover:bg-gray-700"
-                          onClick={generatePassword}
-                        >
-                          <RefreshCw className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
                 name="manager"
                 render={({ field }) => (
                   <FormItem>
