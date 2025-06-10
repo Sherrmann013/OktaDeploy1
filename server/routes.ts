@@ -1054,13 +1054,94 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       res.json({
         success: true,
-        message: "OKTA sync completed successfully",
-        totalUsers: allUsers.length,
-        newUsers: syncedCount,
-        updatedUsers: updatedCount
+        message: `OKTA sync completed successfully. ${syncedCount} new users synced, ${updatedCount} users updated.`
       });
     } catch (error) {
       console.error("OKTA sync error:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to sync OKTA users",
+        error: error instanceof Error ? error.message : "Unknown error"
+      });
+    }
+  });
+
+  // Temporary debug sync endpoint without auth
+  app.post("/api/debug-sync-okta", async (req, res) => {
+    try {
+      console.log("Starting DEBUG OKTA sync...");
+      const allUsers = await oktaService.getUsers(500);
+      console.log(`Found ${allUsers.length} users in OKTA`);
+      
+      let syncedCount = 0;
+      let updatedCount = 0;
+      
+      for (const oktaUser of allUsers) {
+        try {
+          const existingUser = await storage.getUserByOktaId(oktaUser.id);
+          
+          if (!existingUser) {
+            await storage.createUser({
+              oktaId: oktaUser.id,
+              firstName: oktaUser.profile.firstName || '',
+              lastName: oktaUser.profile.lastName || '',
+              email: oktaUser.profile.email || '',
+              login: oktaUser.profile.login || '',
+              mobilePhone: oktaUser.profile.mobilePhone || null,
+              department: oktaUser.profile.department || null,
+              title: oktaUser.profile.title || null,
+              employeeType: null,
+              profileImageUrl: null,
+              status: oktaUser.status,
+              groups: [],
+              applications: []
+            });
+            syncedCount++;
+          } else {
+            // Debug logging for agiwa user specifically
+            if (oktaUser.profile.email === 'agiwa@mazetx.com') {
+              console.log(`=== DEBUG SYNC FOR agiwa@mazetx.com ===`);
+              console.log(`OKTA lastLogin: ${oktaUser.lastLogin}`);
+              console.log(`Local lastLogin before update: ${existingUser.lastLogin}`);
+              console.log(`Will update to: ${oktaUser.lastLogin ? new Date(oktaUser.lastLogin) : null}`);
+              console.log(`OKTA lastUpdated: ${oktaUser.lastUpdated}`);
+              console.log(`OKTA status: ${oktaUser.status}`);
+            }
+            
+            await storage.updateUser(existingUser.id, {
+              firstName: oktaUser.profile.firstName || '',
+              lastName: oktaUser.profile.lastName || '',
+              email: oktaUser.profile.email || '',
+              login: oktaUser.profile.login || '',
+              mobilePhone: oktaUser.profile.mobilePhone || null,
+              department: oktaUser.profile.department || null,
+              title: oktaUser.profile.title || null,
+              manager: oktaUser.profile.manager || null,
+              status: oktaUser.status,
+              lastUpdated: new Date(oktaUser.lastUpdated),
+              lastLogin: oktaUser.lastLogin ? new Date(oktaUser.lastLogin) : null,
+              passwordChanged: oktaUser.passwordChanged ? new Date(oktaUser.passwordChanged) : null
+            });
+            updatedCount++;
+            
+            // Additional debug logging after update for agiwa user
+            if (oktaUser.profile.email === 'agiwa@mazetx.com') {
+              const updatedUser = await storage.getUserByOktaId(oktaUser.id);
+              console.log(`Local lastLogin after update: ${updatedUser?.lastLogin}`);
+              console.log(`=== END DEBUG SYNC FOR agiwa@mazetx.com ===`);
+            }
+          }
+        } catch (userError) {
+          console.error(`Error syncing user ${oktaUser.profile.email}:`, userError);
+        }
+      }
+      
+      res.json({
+        success: true,
+        message: `DEBUG OKTA sync completed successfully. ${syncedCount} new users synced, ${updatedCount} users updated.`
+      });
+    } catch (error) {
+      console.error("DEBUG OKTA sync error:", error);
       res.status(500).json({
         success: false,
         message: "Failed to sync OKTA users",
