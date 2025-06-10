@@ -1,0 +1,75 @@
+#!/usr/bin/env node
+// Ultra-simple build that preserves all custom configurations
+import { build } from 'esbuild';
+import { mkdir, writeFile, copyFile } from 'fs/promises';
+import { resolve } from 'path';
+
+async function simpleBuild() {
+  console.log('=== SIMPLE BUILD START ===');
+  const startTime = Date.now();
+  
+  // Create output directories matching your structure
+  await mkdir('dist', { recursive: true });
+  await mkdir('dist/public', { recursive: true });
+
+  // Build client with your exact alias configuration
+  await build({
+    entryPoints: ['client/src/main.tsx'],
+    bundle: true,
+    outfile: 'dist/public/assets/index.js',
+    format: 'iife',
+    target: 'es2017',
+    minify: true,
+    platform: 'browser',
+    define: {
+      'process.env.NODE_ENV': '"production"',
+      'global': 'globalThis'
+    },
+    alias: {
+      '@': resolve('./client/src'),
+      '@shared': resolve('./shared'), 
+      '@assets': resolve('./attached_assets'),
+    },
+    jsx: 'automatic',
+    jsxImportSource: 'react',
+    external: [],
+    keepNames: false,
+    sourcemap: false,
+  });
+
+  // Create matching HTML structure
+  const html = `<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vite + React + TS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/assets/index.js"></script>
+  </body>
+</html>`;
+
+  await writeFile('dist/public/index.html', html);
+  
+  // Build server
+  await build({
+    entryPoints: ['server/index.ts'],
+    bundle: true,
+    outfile: 'dist/index.js',
+    format: 'esm',
+    platform: 'node',
+    target: 'node20',
+    minify: true,
+    packages: 'external',
+  });
+
+  const elapsed = Date.now() - startTime;
+  console.log(`✓ Build completed in ${elapsed}ms`);
+  console.log('=== SIMPLE BUILD END ===');
+}
+
+simpleBuild().catch(console.error);
