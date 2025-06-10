@@ -4,8 +4,8 @@ import { Shield, Users, Settings, BarChart3 } from "lucide-react";
 
 export default function Landing() {
   const handleSSOLogin = () => {
-    // Redirect to the server's login endpoint which handles OKTA OAuth
-    window.location.href = '/api/login';
+    // Redirect to the users page
+    window.location.href = '/users';
   };
 
   return (
