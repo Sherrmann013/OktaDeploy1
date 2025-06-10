@@ -176,15 +176,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         let managerList = Array.from(managers).sort();
         
-        // Filter by query if provided - search from beginning of names
+        // Filter by query if provided - search anywhere in names
         if (query && query.trim().length > 0) {
           const searchTerm = query.trim().toLowerCase();
           console.log(`Manager search query: "${searchTerm}", total managers: ${managerList.length}`);
           managerList = managerList.filter(manager => {
             const fullName = manager.toLowerCase();
             const nameParts = fullName.split(' ');
-            // Match if query starts any part of the name (first name, last name)
-            return nameParts.some(part => part.startsWith(searchTerm)) || fullName.startsWith(searchTerm);
+            // Match if query starts any part of the name OR is contained anywhere in the name
+            return nameParts.some(part => part.startsWith(searchTerm)) || 
+                   fullName.startsWith(searchTerm) ||
+                   fullName.includes(searchTerm) ||
+                   nameParts.some(part => part.includes(searchTerm));
           });
           console.log(`Filtered managers: ${managerList.length}`);
         }
