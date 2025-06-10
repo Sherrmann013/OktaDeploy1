@@ -44,7 +44,7 @@ async function simpleBuild() {
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vite + React + TS</title>
+    <title>Maze User Management Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
       tailwind.config = {
@@ -220,8 +220,10 @@ async function simpleBuild() {
         background-color: hsl(var(--muted)/0.4) !important;
       }
       
-      /* Individual employee cards - darker backgrounds */
-      .dark [class*="CardContent"] {
+      /* Individual table rows - darker backgrounds */
+      .dark [data-state] tr,
+      .dark tbody tr,
+      .dark .table-row-light {
         background-color: hsl(215 20% 16%) !important;
         border: 1px solid yellow !important;
       }
