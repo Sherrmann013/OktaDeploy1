@@ -8,6 +8,7 @@ import { syncSpecificUser } from "./okta-sync";
 import { knowBe4Service } from "./knowbe4-service";
 import { knowBe4GraphService } from "./knowbe4-graph-service";
 import { syncUserGroupsAndEmployeeType, syncAllUsersGroupsAndEmployeeTypes } from "./sync-user-groups";
+import { bulkSyncUserGroupsAndEmployeeTypes } from "./bulk-groups-sync";
 
 // Helper function to determine employee type from user groups
 function determineEmployeeTypeFromGroups(userGroups: any[], employeeTypeApps: Set<string>): string | null {
@@ -2305,6 +2306,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error('Error syncing all user groups:', error);
       res.status(500).json({ 
         message: 'Failed to sync all user groups',
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
+  // Bulk sync all users' groups and employee types with detailed reporting
+  app.post('/api/bulk-sync-user-groups', isAuthenticated, requireAdmin, async (req, res) => {
+    try {
+      const result = await bulkSyncUserGroupsAndEmployeeTypes();
+      
+      res.json({
+        success: true,
+        message: `Bulk groups sync completed. Updated: ${result.updated}, Errors: ${result.errors}`,
+        updated: result.updated,
+        errors: result.errors,
+        details: result.details.slice(0, 50) // Limit details to first 50 entries
+      });
+    } catch (error) {
+      console.error('Error during bulk groups sync:', error);
+      res.status(500).json({ 
+        message: 'Failed to sync user groups',
         error: error instanceof Error ? error.message : 'Unknown error'
       });
     }
