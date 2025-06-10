@@ -295,7 +295,8 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
     "Labusers@mazetx.com", 
     "finfacit@mazetx.com",
     "HR@mazetx.com",
-    "GXP@mazetx.com"
+    "GXP@mazetx.com",
+    "MTXCW-SG-ZOOM-PRO"
   ];
 
   const availableApps = [
