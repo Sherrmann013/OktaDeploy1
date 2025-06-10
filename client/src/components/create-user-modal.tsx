@@ -30,7 +30,18 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
 
   // Fetch existing users for manager dropdown
   const { data: usersData } = useQuery({
-    queryKey: ["/api/users"],
+    queryKey: ["/api/users", "all"],
+    queryFn: async () => {
+      const response = await fetch('/api/users?limit=1000', {
+        credentials: 'include'
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch users for manager selection');
+      }
+      
+      return response.json();
+    },
     enabled: open,
   });
 
@@ -196,19 +207,9 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="max-w-2xl max-h-screen overflow-y-auto">
         <DialogHeader>
-          <div className="flex items-center justify-between">
-            <DialogTitle className="text-lg font-semibold text-gray-900 dark:text-white">
-              Create New User
-            </DialogTitle>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleClose}
-              className="text-gray-400 hover:text-gray-600"
-            >
-              <X className="w-4 h-4" />
-            </Button>
-          </div>
+          <DialogTitle className="text-lg font-semibold text-gray-900 dark:text-white">
+            Create New User
+          </DialogTitle>
         </DialogHeader>
 
         <Form {...form}>
@@ -431,7 +432,7 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
                     />
                   </FormControl>
                   <div className="space-y-1 leading-none">
-                    <FormLabel>Send activation email to user</FormLabel>
+                    <FormLabel>Send activation email to manager</FormLabel>
                   </div>
                 </FormItem>
               )}
