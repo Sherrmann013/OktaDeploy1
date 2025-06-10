@@ -235,11 +235,13 @@ async function simpleBuild() {
         border: 1px solid hsl(var(--border)) !important;
       }
       
-      /* Table header row - darker background */
+      /* Table header row - much darker background */
       thead tr,
-      .table-header-row {
-        background-color: hsl(215 20% 16%) !important;
+      .table-header-row,
+      th {
+        background-color: hsl(215 25% 12%) !important;
         border-bottom: 2px solid hsl(215 15% 25%) !important;
+        color: hsl(0 0% 98%) !important;
       }
       
       /* Table container overall */
