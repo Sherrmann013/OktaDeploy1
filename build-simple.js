@@ -223,7 +223,7 @@ async function simpleBuild() {
       /* Individual employee cards - darker backgrounds */
       .dark [class*="CardContent"] {
         background-color: hsl(215 20% 16%) !important;
-        border: 1px solid hsl(215 12% 35%) !important;
+        border: 1px solid hsl(215 12% 28%) !important;
       }
       
       /* Search and filter row - darker background */
