@@ -100,6 +100,30 @@ async function simpleBuild() {
         font-family: system-ui, -apple-system, sans-serif;
       }
 
+      .bg-background {
+        background-color: hsl(var(--background));
+      }
+
+      .bg-card {
+        background-color: hsl(var(--card));
+      }
+
+      .text-card-foreground {
+        color: hsl(var(--card-foreground));
+      }
+
+      .border-border {
+        border-color: hsl(var(--border));
+      }
+
+      .bg-muted {
+        background-color: hsl(var(--muted));
+      }
+
+      .text-muted-foreground {
+        color: hsl(var(--muted-foreground));
+      }
+
       .table-row-light {
         background-color: #f8f9fa;
       }
