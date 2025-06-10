@@ -25,7 +25,7 @@ export default function Login() {
         title: "Login successful",
         description: "Welcome back!",
       });
-      setLocation("/");
+      setLocation("/users");
     },
     onError: (error: Error) => {
       toast({
