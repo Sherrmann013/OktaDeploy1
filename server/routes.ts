@@ -683,31 +683,62 @@ export async function registerRoutes(app: Express): Promise<Server> {
         sendActivationEmail: userData.sendActivationEmail,
       });
 
-      // Add user to employee type groups if specified
-      if (userData.employeeType) {
-        try {
-          const groupMapping = {
-            'EMPLOYEE': 'MTX-ET-Employee',
-            'CONTRACTOR': 'MTX-ET-Contractor', 
-            'INTERN': 'MTX-ET-Intern',
-            'PART_TIME': 'MTX-ET-Part_Time'
+      // Add user to groups based on employee type, department, and selected apps
+      try {
+        const groups = await oktaService.getGroups();
+        
+        // Employee type group mapping
+        if (userData.employeeType) {
+          const employeeTypeMapping = {
+            'Employee': 'MTXCW-ET-EMPLOYEE',
+            'Contractor': 'MTXCW-ET-CONTRACTOR'
           };
           
-          const groupName = groupMapping[userData.employeeType.toUpperCase()];
+          const groupName = employeeTypeMapping[userData.employeeType];
           if (groupName) {
-            // Find the group ID in OKTA
-            const groups = await oktaService.getGroups();
             const targetGroup = groups.find(g => g.profile.name === groupName);
-            
             if (targetGroup) {
               await oktaService.addUserToGroup(oktaUser.id, targetGroup.id);
-              console.log(`Added user to group: ${groupName}`);
+              console.log(`Added user to employee type group: ${groupName}`);
+            } else {
+              console.log(`Group not found: ${groupName}`);
             }
           }
-        } catch (error) {
-          console.error('Error adding user to employee type group:', error);
-          // Don't fail the entire request for group assignment issues
         }
+        
+        // Department group mapping
+        if (userData.department) {
+          const departmentMapping = {
+            'Finance': 'finfacit@mazetx.com',
+            'HR': 'HR@mazetx.com'
+          };
+          
+          const groupName = departmentMapping[userData.department];
+          if (groupName) {
+            const targetGroup = groups.find(g => g.profile.name === groupName);
+            if (targetGroup) {
+              await oktaService.addUserToGroup(oktaUser.id, targetGroup.id);
+              console.log(`Added user to department group: ${groupName}`);
+            } else {
+              console.log(`Group not found: ${groupName}`);
+            }
+          }
+        }
+        
+        // Check selected apps for Zoom Pro
+        if (userData.selectedApps && userData.selectedApps.includes('Zoom Pro')) {
+          const zoomProGroup = groups.find(g => g.profile.name === 'MTXCW-SG-ZOOM-PRO');
+          if (zoomProGroup) {
+            await oktaService.addUserToGroup(oktaUser.id, zoomProGroup.id);
+            console.log('Added user to Zoom Pro group: MTXCW-SG-ZOOM-PRO');
+          } else {
+            console.log('Group not found: MTXCW-SG-ZOOM-PRO');
+          }
+        }
+        
+      } catch (error) {
+        console.error('Error adding user to groups:', error);
+        // Don't fail the entire request for group assignment issues
       }
 
       res.status(201).json(user);

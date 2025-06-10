@@ -49,6 +49,8 @@ export const insertUserSchema = createInsertSchema(users).omit({
   email: z.string().email("Invalid email address"),
   login: z.string().min(1, "Login is required"),
   sendActivationEmail: z.boolean().optional(),
+  selectedApps: z.array(z.string()).optional(),
+  selectedGroups: z.array(z.string()).optional(),
 });
 
 export const updateUserSchema = createInsertSchema(users).partial().omit({

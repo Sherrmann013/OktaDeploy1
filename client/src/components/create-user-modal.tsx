@@ -154,28 +154,11 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
   });
 
   const onSubmit = (data: InsertUser) => {
-    // Automatically assign groups based on employee type (OKTA group mapping)
-    const autoGroups: string[] = [];
-    if (data.employeeType) {
-      switch (data.employeeType) {
-        case "Employee":
-          autoGroups.push("MTX-ET-Employee");
-          break;
-        case "Contractor":
-          autoGroups.push("MTX-ET-Contractor");
-          break;
-        case "Intern":
-          autoGroups.push("MTX-ET-Intern");
-          break;
-        case "Part Time":
-          autoGroups.push("MTX-ET-Part_Time");
-          break;
-      }
-    }
-
     createUserMutation.mutate({
       ...data,
-      groups: [...autoGroups, ...selectedGroups],
+      selectedApps,
+      selectedGroups,
+      groups: selectedGroups,
       applications: selectedApps,
     });
   };
