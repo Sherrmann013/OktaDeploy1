@@ -940,7 +940,7 @@ export default function UserDetail() {
                           {/* Combined Personal & Work Information */}
                           <Card>
                             <CardHeader>
-                              <CardTitle>Personal & Work Information</CardTitle>
+                              <CardTitle className="text-center">Personal & Work Information</CardTitle>
                             </CardHeader>
                             <CardContent className="space-y-4">
                               {/* First Name --- Last Name */}
@@ -996,7 +996,7 @@ export default function UserDetail() {
                           {/* Account Information */}
                           <Card>
                             <CardHeader>
-                              <CardTitle>Account Information</CardTitle>
+                              <CardTitle className="text-center">Account Information</CardTitle>
                             </CardHeader>
                             <CardContent className="space-y-4">
                               <div>
