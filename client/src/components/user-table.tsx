@@ -619,12 +619,13 @@ export default function UserTable({
       case 'department':
         return <div className="text-sm text-foreground">{user.department || '-'}</div>;
       case 'employeeType':
+        const employeeTypeColorClass = getEmployeeTypeColor ? getEmployeeTypeColor(user.employeeType || '') : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300';
         return (
-          <Badge 
-            className={getEmployeeTypeColor ? getEmployeeTypeColor(user.employeeType || '') : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'}
+          <span 
+            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${employeeTypeColorClass}`}
           >
             {user.employeeType || 'Not specified'}
-          </Badge>
+          </span>
         );
       case 'manager':
         return <div className="text-sm text-foreground">{user.manager || '-'}</div>;
