@@ -994,8 +994,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // OKTA sync endpoint that frontend expects
   app.post("/api/sync-okta", isAuthenticated, requireAdmin, async (req, res) => {
     try {
-      console.log("Starting OKTA sync...");
-      const allUsers = await oktaService.getUsers(500);
+      console.log("Starting OKTA sync with full pagination...");
+      const allUsers = await oktaService.getUsers(1000); // Get all users with pagination
       console.log(`Found ${allUsers.length} users in OKTA`);
       
       let syncedCount = 0;
@@ -1150,88 +1150,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Test sync endpoint without auth for debugging
-  app.post("/api/test-sync-okta", async (req, res) => {
-    try {
-      console.log("Starting TEST OKTA sync with full pagination...");
-      const allUsers = await oktaService.getUsers(1000); // Get more users with pagination
-      console.log(`Found ${allUsers.length} users in OKTA`);
-      
-      let syncedCount = 0;
-      let updatedCount = 0;
-      
-      for (const oktaUser of allUsers) {
-        try {
-          const existingUser = await storage.getUserByOktaId(oktaUser.id);
-          
-          if (!existingUser) {
-            await storage.createUser({
-              oktaId: oktaUser.id,
-              firstName: oktaUser.profile.firstName || '',
-              lastName: oktaUser.profile.lastName || '',
-              email: oktaUser.profile.email || '',
-              login: oktaUser.profile.login || '',
-              mobilePhone: oktaUser.profile.mobilePhone || null,
-              department: oktaUser.profile.department || null,
-              title: oktaUser.profile.title || null,
-              employeeType: null,
-              profileImageUrl: null,
-              status: oktaUser.status,
-              groups: [],
-              applications: []
-            });
-            syncedCount++;
-          } else {
-            // Debug logging for specific users
-            if (oktaUser.profile.email === 'ejimenez@mazetx.com') {
-              console.log(`=== TEST SYNC DEBUG FOR ${oktaUser.profile.email} ===`);
-              console.log(`OKTA lastLogin: ${oktaUser.lastLogin}`);
-              console.log(`Local lastLogin before update: ${existingUser.lastLogin}`);
-              console.log(`Will update to: ${oktaUser.lastLogin ? new Date(oktaUser.lastLogin) : null}`);
-            }
-            
-            await storage.updateUser(existingUser.id, {
-              firstName: oktaUser.profile.firstName || '',
-              lastName: oktaUser.profile.lastName || '',
-              email: oktaUser.profile.email || '',
-              login: oktaUser.profile.login || '',
-              mobilePhone: oktaUser.profile.mobilePhone || null,
-              department: oktaUser.profile.department || null,
-              title: oktaUser.profile.title || null,
-              manager: oktaUser.profile.manager || null,
-              status: oktaUser.status,
-              lastUpdated: new Date(oktaUser.lastUpdated),
-              lastLogin: oktaUser.lastLogin ? new Date(oktaUser.lastLogin) : null,
-              passwordChanged: oktaUser.passwordChanged ? new Date(oktaUser.passwordChanged) : null
-            });
-            updatedCount++;
-            
-            // Post-update verification for ejimenez
-            if (oktaUser.profile.email === 'ejimenez@mazetx.com') {
-              const verifyUser = await storage.getUserByOktaId(oktaUser.id);
-              console.log(`Local lastLogin after update: ${verifyUser?.lastLogin}`);
-              console.log(`=== END TEST SYNC DEBUG FOR ${oktaUser.profile.email} ===`);
-            }
-          }
-        } catch (userError) {
-          console.error(`Error syncing user ${oktaUser.profile.email}:`, userError);
-        }
-      }
-      
-      res.json({
-        success: true,
-        message: `TEST OKTA sync completed successfully. ${syncedCount} new users synced, ${updatedCount} users updated.`,
-        totalUsers: allUsers.length
-      });
-    } catch (error) {
-      console.error("TEST OKTA sync error:", error);
-      res.status(500).json({
-        success: false,
-        message: "Failed to sync OKTA users",
-        error: error instanceof Error ? error.message : "Unknown error"
-      });
-    }
-  });
 
   // Full OKTA sync - fetch all users with pagination
   app.get("/api/okta/sync-all", requireAdmin, async (req, res) => {
