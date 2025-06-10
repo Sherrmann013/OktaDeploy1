@@ -26,6 +26,7 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
   const { toast } = useToast();
   const [selectedGroups, setSelectedGroups] = useState<string[]>([]);
   const [selectedApps, setSelectedApps] = useState<string[]>([]);
+  const [selectedZoomOption, setSelectedZoomOption] = useState<string>("");
 
   const [managerSearch, setManagerSearch] = useState("");
   const [showManagerDropdown, setShowManagerDropdown] = useState(false);
@@ -183,6 +184,7 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
     form.reset();
     setSelectedGroups([]);
     setSelectedApps([]);
+    setSelectedZoomOption("");
     setManagerSearch("");
     setShowManagerDropdown(false);
     onClose();
@@ -198,8 +200,12 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
 
   const availableApps = [
     "Microsoft",
-    "Slack",
-    "Zoom"
+    "Slack"
+  ];
+
+  const zoomOptions = [
+    "Zoom Basic",
+    "Zoom Pro"
   ];
 
   return (
@@ -484,6 +490,36 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
                     </div>
                   ))}
                   
+                  {/* Zoom dropdown */}
+                  <div className="space-y-2">
+                    <Label className="text-sm text-gray-700 dark:text-gray-300">Zoom</Label>
+                    <Select 
+                      value={selectedZoomOption} 
+                      onValueChange={(value) => {
+                        setSelectedZoomOption(value);
+                        // Remove any existing Zoom options from selectedApps
+                        const filteredApps = selectedApps.filter(app => !app.startsWith("Zoom"));
+                        // Add the new Zoom option if one is selected and it's not "none"
+                        if (value && value !== "none") {
+                          setSelectedApps([...filteredApps, value]);
+                        } else {
+                          setSelectedApps(filteredApps);
+                        }
+                      }}
+                    >
+                      <SelectTrigger className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600">
+                        <SelectValue placeholder="Select Zoom option" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600">
+                        <SelectItem value="none">None</SelectItem>
+                        {zoomOptions.map((option) => (
+                          <SelectItem key={option} value={option}>
+                            {option}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
 
                 </div>
               </div>
