@@ -220,12 +220,12 @@ async function simpleBuild() {
         background-color: hsl(var(--muted)/0.4) !important;
       }
       
-      /* Individual table rows - darker backgrounds with blue outline */
+      /* Individual table rows - darker backgrounds */
       .dark [data-state] tr,
       .dark tbody tr,
       .dark .table-row-light {
         background-color: hsl(215 20% 16%) !important;
-        border: 1px solid hsl(207 90% 54%) !important;
+        border: none !important;
       }
       
       /* Search and filter row - darker background */
@@ -252,11 +252,11 @@ async function simpleBuild() {
         border-radius: 0.5rem !important;
       }
       
-      /* UserTable card wrapper */
+      /* UserTable card wrapper with blue outline */
       .dark .UserTable [role="table"],
       .dark [data-table-container] {
         background-color: hsl(215 22% 18%) !important;
-        border: 1px solid hsl(215 15% 25%) !important;
+        border: 1px solid hsl(207 90% 54%) !important;
       }
 
       /* Remove white outlines from all interactive elements in dark mode */
