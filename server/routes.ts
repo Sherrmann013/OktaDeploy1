@@ -1046,6 +1046,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               title: oktaUser.profile.title || null,
               manager: oktaUser.profile.manager || null,
               status: oktaUser.status,
+              created: new Date(oktaUser.created),
               lastUpdated: new Date(oktaUser.lastUpdated),
               lastLogin: oktaUser.lastLogin ? new Date(oktaUser.lastLogin) : null,
               passwordChanged: oktaUser.passwordChanged ? new Date(oktaUser.passwordChanged) : null
