@@ -197,12 +197,8 @@ class OktaService {
       return this.getUsersBatch(limit);
     }
 
-    // Check cache first for user lists
-    const cacheKey = `users_${limit}`;
-    const cached = this.userCache.get(cacheKey);
-    if (cached && (Date.now() - cached.timestamp) < this.USER_CACHE_TTL) {
-      return cached.data;
-    }
+    // Skip cache for sync operations to ensure fresh data
+    console.log("Fetching fresh user data from OKTA (bypassing cache)");
 
     try {
       let allUsers: any[] = [];
@@ -233,11 +229,8 @@ class OktaService {
         }
       } while (after);
       
-      // Cache the result
-      this.userCache.set(cacheKey, {
-        data: allUsers,
-        timestamp: Date.now()
-      });
+      // Don't cache during sync operations to ensure fresh data
+      console.log(`Retrieved ${allUsers.length} users from OKTA with fresh data`);
       
       return allUsers;
     } catch (error) {
@@ -247,11 +240,8 @@ class OktaService {
 
   // Batch loading method for large datasets
   private async getUsersBatch(limit: number): Promise<any[]> {
-    const cacheKey = `users_batch_${limit}`;
-    const cached = this.userCache.get(cacheKey);
-    if (cached && (Date.now() - cached.timestamp) < this.USER_CACHE_TTL) {
-      return cached.data;
-    }
+    // Skip cache for sync operations to ensure fresh data
+    console.log("Fetching fresh batch user data from OKTA (bypassing cache)");
 
     try {
       await this.throttleRequest();
@@ -262,11 +252,8 @@ class OktaService {
       if (response.ok) {
         const users = await response.json();
         
-        // Cache the result
-        this.userCache.set(cacheKey, {
-          data: users,
-          timestamp: Date.now()
-        });
+        // Don't cache during sync operations to ensure fresh data
+        console.log(`Retrieved ${users.length} users from OKTA batch with fresh data`);
         
         return users;
       } else {

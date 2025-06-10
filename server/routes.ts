@@ -1023,6 +1023,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
             });
             syncedCount++;
           } else {
+            // Debug logging for agiwa user specifically
+            if (oktaUser.profile.email === 'agiwa@mazetx.com') {
+              console.log(`=== SYNC DEBUG FOR agiwa@mazetx.com ===`);
+              console.log(`OKTA lastLogin: ${oktaUser.lastLogin}`);
+              console.log(`Local lastLogin before update: ${existingUser.lastLogin}`);
+              console.log(`Will update to: ${oktaUser.lastLogin ? new Date(oktaUser.lastLogin) : null}`);
+            }
+            
             await storage.updateUser(existingUser.id, {
               firstName: oktaUser.profile.firstName || '',
               lastName: oktaUser.profile.lastName || '',
