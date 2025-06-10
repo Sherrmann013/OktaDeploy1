@@ -14,7 +14,7 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { insertUserSchema, type InsertUser, type User } from "@shared/schema";
-import { X, Check } from "lucide-react";
+import { X, Check, RefreshCw } from "lucide-react";
 
 interface CreateUserModalProps {
   open: boolean;
@@ -29,6 +29,7 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
 
   const [managerSearch, setManagerSearch] = useState("");
   const [showManagerDropdown, setShowManagerDropdown] = useState(false);
+  const [password, setPassword] = useState("");
 
   // Fetch existing users for manager dropdown
   const { data: usersData } = useQuery({
@@ -118,7 +119,7 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
       lastName: "",
       email: "",
       login: "",
-      mobilePhone: "",
+      password: "",
       department: "",
       title: "",
       employeeType: "",
@@ -179,12 +180,66 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
     }
   };
 
+  const generatePassword = () => {
+    const words = [
+      'blue', 'red', 'green', 'cat', 'dog', 'sun', 'moon', 'star', 'tree', 'bird',
+      'fish', 'car', 'book', 'key', 'box', 'cup', 'pen', 'hat', 'bag', 'run',
+      'jump', 'fast', 'slow', 'big', 'small', 'hot', 'cold', 'new', 'old', 'good',
+      'bad', 'easy', 'hard', 'soft', 'loud', 'quiet', 'dark', 'light', 'win', 'lose',
+      'open', 'close', 'start', 'stop', 'home', 'work', 'play', 'rest', 'love', 'hope'
+    ];
+    
+    const symbols = ['!', '@', '#', '$', '%', '^', '&', '*'];
+    const numbers = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+    
+    // Generate 2-3 unique words
+    const wordCount = Math.random() < 0.5 ? 2 : 3;
+    const selectedWords = [];
+    const usedIndices = new Set();
+    
+    for (let i = 0; i < wordCount; i++) {
+      let randomIndex;
+      do {
+        randomIndex = Math.floor(Math.random() * words.length);
+      } while (usedIndices.has(randomIndex));
+      
+      usedIndices.add(randomIndex);
+      selectedWords.push(words[randomIndex]);
+    }
+    
+    // Capitalize first letter of each word
+    const capitalizedWords = selectedWords.map(word => 
+      word.charAt(0).toUpperCase() + word.slice(1)
+    );
+    
+    // Add one symbol
+    const randomSymbol = symbols[Math.floor(Math.random() * symbols.length)];
+    
+    // Add two numbers
+    const randomNumbers = [
+      numbers[Math.floor(Math.random() * numbers.length)],
+      numbers[Math.floor(Math.random() * numbers.length)]
+    ];
+    
+    // Combine all parts
+    const generatedPassword = capitalizedWords.join('') + randomSymbol + randomNumbers.join('');
+    
+    // Ensure password is between 8-12 characters
+    if (generatedPassword.length >= 8 && generatedPassword.length <= 12) {
+      setPassword(generatedPassword);
+    } else {
+      // If not in range, regenerate
+      generatePassword();
+    }
+  };
+
   const handleClose = () => {
     form.reset();
     setSelectedGroups([]);
     setSelectedApps([]);
     setManagerSearch("");
     setShowManagerDropdown(false);
+    setPassword("");
     onClose();
   };
 
@@ -390,12 +445,31 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FormField
                 control={form.control}
-                name="mobilePhone"
+                name="password"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Mobile Phone</FormLabel>
+                    <FormLabel>Password *</FormLabel>
                     <FormControl>
-                      <Input type="tel" placeholder="Enter mobile phone" {...field} />
+                      <div className="relative">
+                        <Input 
+                          type="password" 
+                          placeholder="Enter password" 
+                          value={password}
+                          onChange={(e) => {
+                            setPassword(e.target.value);
+                            field.onChange(e.target.value);
+                          }}
+                        />
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="ghost"
+                          className="absolute right-2 top-1/2 transform -translate-y-1/2 h-6 w-6 p-0 hover:bg-gray-100 dark:hover:bg-gray-700"
+                          onClick={generatePassword}
+                        >
+                          <RefreshCw className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
