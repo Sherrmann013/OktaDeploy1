@@ -46,6 +46,14 @@ async function simpleBuild() {
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Vite + React + TS</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {}
+        }
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>
@@ -54,6 +62,13 @@ async function simpleBuild() {
 </html>`;
 
   await writeFile('dist/public/index.html', html);
+  
+  // Copy original assets to build directory
+  try {
+    await copyFile('client/public/maze-logo.png', 'dist/public/maze-logo.png');
+  } catch (err) {
+    console.log('Warning: Could not copy maze-logo.png');
+  }
   
   // Build server
   await build({
