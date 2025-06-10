@@ -25,21 +25,37 @@ interface CreateUserModalProps {
 export default function CreateUserModal({ open, onClose, onSuccess }: CreateUserModalProps) {
   const { toast } = useToast();
   const [selectedGroups, setSelectedGroups] = useState<string[]>([]);
-  const [managerOpen, setManagerOpen] = useState(false);
-  const [managerSearchQuery, setManagerSearchQuery] = useState("");
-  const [managerFilter, setManagerFilter] = useState("");
+  const [managerSearch, setManagerSearch] = useState("");
+  const [showManagerDropdown, setShowManagerDropdown] = useState(false);
 
-  // Fetch manager suggestions from API
-  const { data: managerSuggestions = [] } = useQuery({
-    queryKey: ["/api/managers", managerSearchQuery],
-    queryFn: async () => {
-      if (!managerSearchQuery || managerSearchQuery.length < 2) return [];
-      const response = await fetch(`/api/managers?q=${encodeURIComponent(managerSearchQuery)}`);
-      if (!response.ok) return [];
-      return response.json();
-    },
-    enabled: open && managerSearchQuery.length >= 2,
+  // Fetch existing users for manager dropdown
+  const { data: usersData } = useQuery({
+    queryKey: ["/api/users"],
+    enabled: open,
   });
+
+  const availableManagers = usersData?.users || [];
+
+  // Filter managers based on search input
+  const filteredManagers = useMemo(() => {
+    if (!managerSearch || managerSearch.length < 2) return [];
+    
+    const searchTerm = managerSearch.toLowerCase().trim();
+    
+    return availableManagers
+      .filter(user => {
+        const firstName = user.firstName?.toLowerCase() || '';
+        const lastName = user.lastName?.toLowerCase() || '';
+        const email = user.email?.toLowerCase() || '';
+        const fullName = `${firstName} ${lastName}`;
+        
+        return firstName.includes(searchTerm) ||
+               lastName.includes(searchTerm) ||
+               fullName.includes(searchTerm) ||
+               email.includes(searchTerm);
+      })
+      .slice(0, 10);
+  }, [availableManagers, managerSearch]);
 
 
   const form = useForm<InsertUser>({
@@ -254,20 +270,21 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
               />
             </div>
 
+            <FormField
+              control={form.control}
+              name="title"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Job Title</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter job title" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="mobilePhone"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Mobile Phone</FormLabel>
-                    <FormControl>
-                      <Input type="tel" placeholder="Enter mobile phone" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
               <FormField
                 control={form.control}
                 name="department"
@@ -295,43 +312,44 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
               />
             </div>
 
-            <FormField
-              control={form.control}
-              name="title"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Job Title</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Enter job title" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="employeeType"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Employee Type</FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value || ""}>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="mobilePhone"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Mobile Phone</FormLabel>
                     <FormControl>
-                      <SelectTrigger className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600">
-                        <SelectValue placeholder="Select Employee Type" />
-                      </SelectTrigger>
+                      <Input type="tel" placeholder="Enter mobile phone" {...field} />
                     </FormControl>
-                    <SelectContent className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600">
-                      <SelectItem value="Employee">Employee</SelectItem>
-                      <SelectItem value="Contractor">Contractor</SelectItem>
-                      <SelectItem value="Intern">Intern</SelectItem>
-                      <SelectItem value="Part Time">Part Time</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="employeeType"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Employee Type</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value || ""}>
+                      <FormControl>
+                        <SelectTrigger className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600">
+                          <SelectValue placeholder="Select Employee Type" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600">
+                        <SelectItem value="Employee">Employee</SelectItem>
+                        <SelectItem value="Contractor">Contractor</SelectItem>
+                        <SelectItem value="Intern">Intern</SelectItem>
+                        <SelectItem value="Part Time">Part Time</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
 
             <FormField
               control={form.control}
@@ -340,59 +358,38 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
                 <FormItem>
                   <FormLabel>Manager</FormLabel>
                   <FormControl>
-                    <div className="flex items-center gap-2">
+                    <div className="relative">
                       <Input 
                         {...field} 
-                        placeholder="Type manager name or click search..."
-                        className="flex-1"
+                        onChange={(e) => {
+                          field.onChange(e);
+                          setManagerSearch(e.target.value);
+                          setShowManagerDropdown(e.target.value.length > 0);
+                        }}
+                        placeholder="Type to search for manager..."
                       />
-                      <Popover open={managerOpen} onOpenChange={setManagerOpen}>
-                        <PopoverTrigger asChild>
-                          <Button variant="outline" size="sm" className="px-3">
-                            Search
-                          </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-56 p-0 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-lg z-50" align="start">
-                          <Command shouldFilter={false}>
-                            <CommandInput 
-                              placeholder="Search manager..." 
-                              value={managerSearchQuery}
-                              onValueChange={setManagerSearchQuery}
-                              autoFocus
-                            />
-                            <CommandList>
-                              <CommandEmpty>No managers found.</CommandEmpty>
-                              <CommandGroup>
-                                {managerFilter && (
-                                  <CommandItem
-                                    onSelect={() => {
-                                      setManagerFilter("");
-                                      field.onChange("");
-                                      setManagerSearchQuery("");
-                                      setManagerOpen(false);
-                                    }}
-                                  >
-                                    <span className="text-muted-foreground">Clear manager</span>
-                                  </CommandItem>
-                                )}
-                                {managerSuggestions.map((manager: string) => (
-                                  <CommandItem
-                                    key={manager}
-                                    onSelect={() => {
-                                      setManagerFilter(manager);
-                                      field.onChange(manager);
-                                      setManagerSearchQuery("");
-                                      setManagerOpen(false);
-                                    }}
-                                  >
-                                    {manager}
-                                  </CommandItem>
-                                ))}
-                              </CommandGroup>
-                            </CommandList>
-                          </Command>
-                        </PopoverContent>
-                      </Popover>
+                      {managerSearch && filteredManagers.length > 0 && showManagerDropdown && (
+                        <div className="absolute z-10 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md shadow-lg max-h-60 overflow-auto">
+                          {filteredManagers.map((manager: User) => (
+                            <div
+                              key={manager.id}
+                              className="px-3 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700"
+                              onClick={() => {
+                                const fullName = `${manager.firstName} ${manager.lastName}`;
+                                field.onChange(fullName);
+                                setManagerSearch("");
+                                setShowManagerDropdown(false);
+                              }}
+                            >
+                              <div className="font-medium text-gray-900 dark:text-white">{manager.firstName} {manager.lastName}</div>
+                              <div className="text-sm text-gray-500 dark:text-gray-400">{manager.email}</div>
+                              {manager.title && (
+                                <div className="text-sm text-gray-400 dark:text-gray-500">{manager.title}</div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   </FormControl>
                   <FormMessage />
