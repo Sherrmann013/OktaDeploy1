@@ -1031,7 +1031,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
               mobilePhone: oktaUser.profile.mobilePhone || null,
               department: oktaUser.profile.department || null,
               title: oktaUser.profile.title || null,
-              status: oktaUser.status
+              manager: oktaUser.profile.manager || null,
+              status: oktaUser.status,
+              lastUpdated: new Date(oktaUser.lastUpdated),
+              lastLogin: oktaUser.lastLogin ? new Date(oktaUser.lastLogin) : null,
+              passwordChanged: oktaUser.passwordChanged ? new Date(oktaUser.passwordChanged) : null
             });
             updatedCount++;
           }
@@ -1712,6 +1716,56 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Debug user error:", error);
       res.status(500).json({ message: "Failed to debug user data" });
+    }
+  });
+
+  // Mass update all users' lastLogin from OKTA (admin only)
+  app.post('/api/sync-all-lastlogin', isAuthenticated, requireAdmin, async (req, res) => {
+    try {
+      console.log("Starting mass lastLogin sync from OKTA...");
+      const allUsers = await oktaService.getUsers(500);
+      console.log(`Found ${allUsers.length} users in OKTA`);
+      
+      let updatedCount = 0;
+      const updates = [];
+      
+      for (const oktaUser of allUsers) {
+        try {
+          const localUser = await storage.getUserByEmail(oktaUser.profile.email);
+          if (localUser && oktaUser.lastLogin) {
+            const oktaLastLogin = new Date(oktaUser.lastLogin);
+            const localLastLogin = localUser.lastLogin;
+            
+            // Only update if OKTA has different (newer) data
+            if (!localLastLogin || oktaLastLogin.getTime() !== localLastLogin.getTime()) {
+              await storage.updateUser(localUser.id, {
+                lastLogin: oktaLastLogin,
+                lastUpdated: new Date()
+              });
+              
+              updates.push({
+                email: oktaUser.profile.email,
+                oldLogin: localLastLogin?.toISOString() || 'never',
+                newLogin: oktaLastLogin.toISOString()
+              });
+              updatedCount++;
+            }
+          }
+        } catch (userError) {
+          console.error(`Error updating lastLogin for ${oktaUser.profile.email}:`, userError);
+        }
+      }
+      
+      res.json({
+        success: true,
+        message: `Updated lastLogin for ${updatedCount} users`,
+        totalChecked: allUsers.length,
+        updatedCount,
+        sampleUpdates: updates.slice(0, 10)
+      });
+    } catch (error) {
+      console.error("Mass lastLogin sync error:", error);
+      res.status(500).json({ message: "Failed to sync lastLogin data" });
     }
   });
 
