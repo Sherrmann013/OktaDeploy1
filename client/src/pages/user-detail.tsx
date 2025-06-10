@@ -1828,7 +1828,7 @@ export default function UserDetail() {
       {/* Confirmation Modal */}
       {confirmAction && (
         <ConfirmationModal
-          isOpen={!!confirmAction}
+          open={!!confirmAction}
           onClose={() => setConfirmAction(null)}
           onConfirm={() => {
             confirmAction.action();
