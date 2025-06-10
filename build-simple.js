@@ -291,6 +291,36 @@ async function simpleBuild() {
         outline-offset: 2px !important;
         box-shadow: none !important;
       }
+
+      /* Specific fixes for dialog and modal elements */
+      .dark [role="dialog"],
+      .dark [role="dialog"] *,
+      .dark .dialog-content,
+      .dark .dialog-content *,
+      .dark [data-radix-dialog-content],
+      .dark [data-radix-dialog-content] * {
+        outline: none !important;
+        box-shadow: none !important;
+      }
+
+      /* Column management dialog specific fixes */
+      .dark [role="dialog"] button,
+      .dark [role="dialog"] input,
+      .dark [role="dialog"] [role="checkbox"],
+      .dark .column-item,
+      .dark .column-item * {
+        outline: none !important;
+        box-shadow: none !important;
+        border-color: hsl(var(--border)) !important;
+      }
+
+      .dark [role="dialog"] button:focus,
+      .dark [role="dialog"] input:focus,
+      .dark [role="dialog"] [role="checkbox"]:focus {
+        outline: none !important;
+        box-shadow: none !important;
+        border-color: hsl(var(--primary)) !important;
+      }
     </style>
   </head>
   <body>
