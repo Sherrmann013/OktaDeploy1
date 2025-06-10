@@ -12,11 +12,11 @@ async function simpleBuild() {
   await mkdir('dist', { recursive: true });
   await mkdir('dist/public', { recursive: true });
 
-  // Build client with your exact alias configuration
+  // Build client bundle to match server expectations
   await build({
     entryPoints: ['client/src/main.tsx'],
     bundle: true,
-    outfile: 'dist/public/assets/index.js',
+    outfile: 'public/app.js',
     format: 'iife',
     target: 'es2017',
     minify: true,
@@ -37,7 +37,7 @@ async function simpleBuild() {
     sourcemap: false,
   });
 
-  // Create matching HTML structure
+  // Create HTML that matches server structure
   const html = `<!DOCTYPE html>
 <html lang="en">
   <head>
@@ -49,11 +49,11 @@ async function simpleBuild() {
   </head>
   <body>
     <div id="root"></div>
-    <script type="module" src="/assets/index.js"></script>
+    <script src="/app.js"></script>
   </body>
 </html>`;
 
-  await writeFile('dist/public/index.html', html);
+  await writeFile('public/index.html', html);
   
   // Build server
   await build({
