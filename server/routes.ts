@@ -725,18 +725,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
         }
         
-        // Check selected apps for Zoom
-        if (userData.selectedApps && userData.selectedApps.includes('Zoom')) {
-          console.log('Looking for Zoom groups in available groups:', groups.map(g => g.profile.name).filter(name => name.includes('ZOOM')));
+        // Add user to selected groups
+        if (userData.selectedGroups && userData.selectedGroups.length > 0) {
+          console.log('Processing selected groups:', userData.selectedGroups);
           
-          // Try to find any Zoom-related group
+          for (const selectedGroupName of userData.selectedGroups) {
+            const targetGroup = groups.find(g => g.profile.name === selectedGroupName);
+            if (targetGroup) {
+              try {
+                await oktaService.addUserToGroup(oktaUser.id, targetGroup.id);
+                console.log(`Added user to group: ${selectedGroupName}`);
+              } catch (groupError) {
+                console.error(`Failed to add user to group ${selectedGroupName}:`, groupError);
+              }
+            } else {
+              console.log(`Group not found: ${selectedGroupName}`);
+            }
+          }
+        }
+        
+        // Legacy: Check selected apps for Zoom (for backward compatibility)
+        if (userData.selectedApps && userData.selectedApps.includes('Zoom')) {
+          console.log('Legacy Zoom app selection detected');
           const zoomGroup = groups.find(g => g.profile.name.includes('ZOOM'));
           if (zoomGroup) {
             console.log(`Found Zoom group: ${zoomGroup.profile.name}`);
             await oktaService.addUserToGroup(oktaUser.id, zoomGroup.id);
             console.log(`Added user to Zoom group: ${zoomGroup.profile.name}`);
-          } else {
-            console.log('No Zoom groups found in OKTA. Available groups:', groups.map(g => g.profile.name).slice(0, 10));
           }
         }
         
