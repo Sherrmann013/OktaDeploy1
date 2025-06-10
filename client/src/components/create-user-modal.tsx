@@ -193,45 +193,27 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
     const symbols = ['!', '@', '#', '$', '%', '^', '&', '*'];
     const numbers = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
     
-    // Generate 2-3 unique words
-    const wordCount = Math.random() < 0.5 ? 2 : 3;
-    const selectedWords = [];
-    const usedIndices = new Set();
-    
-    for (let i = 0; i < wordCount; i++) {
-      let randomIndex;
-      do {
-        randomIndex = Math.floor(Math.random() * words.length);
-      } while (usedIndices.has(randomIndex));
-      
-      usedIndices.add(randomIndex);
-      selectedWords.push(words[randomIndex]);
-    }
-    
-    // Capitalize first letter of each word
-    const capitalizedWords = selectedWords.map(word => 
-      word.charAt(0).toUpperCase() + word.slice(1)
-    );
+    // Start with one base word (4-5 characters)
+    const baseWord = words[Math.floor(Math.random() * words.length)];
+    const capitalizedBase = baseWord.charAt(0).toUpperCase() + baseWord.slice(1);
     
     // Add one symbol
     const randomSymbol = symbols[Math.floor(Math.random() * symbols.length)];
     
-    // Add two numbers
-    const randomNumbers = [
-      numbers[Math.floor(Math.random() * numbers.length)],
-      numbers[Math.floor(Math.random() * numbers.length)]
-    ];
+    // Calculate remaining characters needed to reach 12 total
+    const currentLength = capitalizedBase.length + 1; // base word + symbol
+    const remainingChars = 12 - currentLength;
     
-    // Combine all parts
-    const generatedPassword = capitalizedWords.join('') + randomSymbol + randomNumbers.join('');
-    
-    // Ensure password is between 8-12 characters
-    if (generatedPassword.length >= 8 && generatedPassword.length <= 12) {
-      setPassword(generatedPassword);
-    } else {
-      // If not in range, regenerate
-      generatePassword();
+    // Fill remaining space with numbers
+    const randomNumbers = [];
+    for (let i = 0; i < remainingChars; i++) {
+      randomNumbers.push(numbers[Math.floor(Math.random() * numbers.length)]);
     }
+    
+    // Combine all parts to exactly 12 characters
+    const generatedPassword = capitalizedBase + randomSymbol + randomNumbers.join('');
+    
+    setPassword(generatedPassword);
   };
 
   const handleClose = () => {
