@@ -31,7 +31,62 @@ export async function setupAuth(app: Express) {
   app.set("trust proxy", 1);
   app.use(getSession());
 
-  // Direct OKTA login route
+  // Local admin login route
+  app.post("/api/login", async (req, res) => {
+    console.log('=== LOCAL ADMIN LOGIN ATTEMPT ===');
+    const { username, password } = req.body;
+    
+    console.log('Username provided:', username);
+    
+    if (!username || !password) {
+      console.log('Missing credentials');
+      return res.status(400).json({ error: "Username and password required" });
+    }
+    
+    // Check local admin credentials
+    const ADMIN_USERNAME = "CW-Admin";
+    const ADMIN_PASSWORD = "YellowDr@g0nFly";
+    
+    if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
+      console.log('Local admin login successful');
+      
+      const adminUser = {
+        id: 1,
+        oktaId: null,
+        firstName: "CW",
+        lastName: "Admin",
+        email: "admin@mazetx.com",
+        login: ADMIN_USERNAME,
+        mobilePhone: null,
+        department: "IT",
+        title: "System Administrator",
+        employeeType: "ADMIN",
+        profileImageUrl: null,
+        managerId: null,
+        manager: null,
+        status: "ACTIVE",
+        groups: [],
+        applications: [],
+        created: new Date(),
+        lastUpdated: new Date(),
+        lastLogin: new Date(),
+        passwordChanged: null,
+        username: ADMIN_USERNAME,
+        role: "admin"
+      };
+      
+      // Store user in session
+      (req.session as any).user = adminUser;
+      
+      console.log('Session created for admin user');
+      res.json(adminUser);
+    } else {
+      console.log('Invalid credentials provided');
+      res.status(401).json({ error: "Invalid credentials" });
+    }
+  });
+
+  // Direct OKTA login route (GET)
   app.get("/api/login", (req, res) => {
     console.log('Initiating direct OKTA login');
     
