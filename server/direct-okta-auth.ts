@@ -117,7 +117,7 @@ export async function setupAuth(app: Express) {
       if (error) {
         console.error('OKTA OAuth error:', error, error_description);
         console.error('Full callback query params:', req.query);
-        return res.redirect(`/?error=oauth_failed&details=${encodeURIComponent(error_description || error)}`);
+        return res.redirect(`/?error=oauth_failed&details=${encodeURIComponent(String(error_description || error))}`);
       }
       
       // Validate state parameter
