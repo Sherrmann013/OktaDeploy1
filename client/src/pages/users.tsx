@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import UserTable from "@/components/user-table";
 import CreateUserModal from "@/components/create-user-modal";
+import UserDetailModal from "@/components/user-detail-modal";
 import ColumnManager, { ColumnConfig, AVAILABLE_COLUMNS } from "@/components/column-manager";
 import ExportModal from "@/components/export-modal";
 import { User } from "@shared/schema";
@@ -36,6 +37,8 @@ export default function Users() {
   const [currentPage, setCurrentPage] = useState(1);
   const [usersPerPage, setUsersPerPage] = useState(10);
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
+  const [showUserDetail, setShowUserDetail] = useState(false);
   const [sortBy, setSortBy] = useState("firstName");
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [employeeTypeFilter, setEmployeeTypeFilter] = useState<string>("");
@@ -213,6 +216,13 @@ export default function Users() {
   const clearFilters = () => {
     setEmployeeTypeFilter("");
     setSearchQuery("");
+    setFilters({
+      employeeType: [],
+      mobilePhone: "",
+      manager: "",
+      status: [],
+      lastLogin: ""
+    });
     setCurrentPage(1);
   };
 
@@ -491,9 +501,20 @@ export default function Users() {
             </Button>
           </div>
           
-          <div className="flex items-center space-x-4">
-            {(searchQuery || employeeTypeFilter) && (
+          <div className="flex items-center space-x-3">
+            <Button
+              variant="ghost"
+              onClick={handleRefresh}
+              disabled={isFetching}
+              className="gap-2"
+            >
+              <RefreshCw className={`h-4 w-4 ${isFetching ? 'animate-spin' : ''}`} />
+              Refresh
+            </Button>
+            
+            {(searchQuery || employeeTypeFilter || filters.employeeType.length > 0 || filters.mobilePhone || filters.manager || filters.status.length > 0 || filters.lastLogin) && (
               <Button type="button" variant="outline" onClick={clearFilters}>
+                <RotateCcw className="h-4 w-4 mr-2" />
                 Clear Filters
               </Button>
             )}
@@ -529,7 +550,7 @@ export default function Users() {
           sortBy={sortBy}
           sortOrder={sortOrder}
           onSort={handleSort}
-          visibleColumns={columns.filter(col => col.visible).map(col => col.id)}
+          visibleColumns={columns.filter(col => col.visible).sort((a, b) => a.order - b.order).map(col => col.id)}
           columnConfig={columns}
           onColumnReorder={setColumns}
           filters={filters}
@@ -543,6 +564,16 @@ export default function Users() {
         open={showCreateModal}
         onClose={() => setShowCreateModal(false)}
         onSuccess={handleCreateSuccess}
+      />
+
+      {/* User Detail Modal */}
+      <UserDetailModal
+        open={showUserDetail}
+        onClose={() => {
+          setShowUserDetail(false);
+          setSelectedUserId(null);
+        }}
+        userId={selectedUserId}
       />
     </div>
   );
