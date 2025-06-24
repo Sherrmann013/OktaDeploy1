@@ -117,7 +117,10 @@ export async function setupAuth(app: Express) {
       if (error) {
         console.error('OKTA OAuth error:', error, error_description);
         console.error('Full callback query params:', req.query);
-        return res.redirect(`/?error=oauth_failed&details=${encodeURIComponent(String(error_description || error))}`);
+        const errorMsg = Array.isArray(error_description) ? error_description[0] : 
+                         Array.isArray(error) ? error[0] : 
+                         String(error_description || error);
+        return res.redirect(`/?error=oauth_failed&details=${encodeURIComponent(errorMsg)}`);
       }
       
       // Validate state parameter
@@ -209,18 +212,35 @@ export async function setupAuth(app: Express) {
         mobilePhone: detailedUser.profile.mobilePhone || null,
         manager: detailedUser.profile.manager || null,
         status: detailedUser.status,
-        created: new Date(detailedUser.created),
-        lastUpdated: new Date(detailedUser.lastUpdated),
-        lastLogin: detailedUser.lastLogin ? new Date(detailedUser.lastLogin) : null,
-        passwordChanged: detailedUser.passwordChanged ? new Date(detailedUser.passwordChanged) : null,
+        employeeType: null,
+        managerId: null,
+        profileImageUrl: null,
+        groups: [],
+        applications: [],
       };
       
       // Try to find existing user
       let user = await storage.getUserByOktaId(userData.oktaId);
       
       if (user) {
-        // Update existing user
-        const updatedUser = await storage.updateUser(user.id, userData);
+        // Update existing user - only pass fields that match UpdateUser type
+        const updateData = {
+          firstName: userData.firstName,
+          lastName: userData.lastName,
+          email: userData.email,
+          login: userData.login,
+          title: userData.title,
+          department: userData.department,
+          mobilePhone: userData.mobilePhone,
+          manager: userData.manager,
+          status: userData.status,
+          employeeType: userData.employeeType,
+          managerId: userData.managerId,
+          profileImageUrl: userData.profileImageUrl,
+          groups: userData.groups,
+          applications: userData.applications,
+        };
+        const updatedUser = await storage.updateUser(user.id, updateData);
         user = updatedUser || user;
         console.log('Updated existing user:', user.id);
       } else {
