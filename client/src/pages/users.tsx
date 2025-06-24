@@ -197,6 +197,11 @@ export default function Users() {
     refetch();
   };
 
+  const handleUserClick = (userId: number) => {
+    setSelectedUserId(userId);
+    setShowUserDetail(true);
+  };
+
   const handleCreateSuccess = () => {
     setShowCreateModal(false);
     refetch();
