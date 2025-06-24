@@ -307,101 +307,13 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
   });
 
   const onSubmit = (data: InsertUser) => {
-    createUserMutation.mutate({
+    const userData = {
       ...data,
-      password,
-      selectedApps,
-      selectedGroups,
       groups: selectedGroups,
       applications: selectedApps,
-    });
+    };
+    createUserMutation.mutate(userData);
   };
-
-  const handleGroupToggle = (groupName: string, checked: boolean) => {
-    if (checked) {
-      setSelectedGroups([...selectedGroups, groupName]);
-    } else {
-      setSelectedGroups(selectedGroups.filter(g => g !== groupName));
-    }
-  };
-
-  const handleAppToggle = (appName: string, checked: boolean) => {
-    if (checked) {
-      setSelectedApps([...selectedApps, appName]);
-    } else {
-      setSelectedApps(selectedApps.filter(a => a !== appName));
-    }
-  };
-
-  const generatePassword = () => {
-    const words = [
-      'blue', 'red', 'green', 'cat', 'dog', 'sun', 'moon', 'star', 'tree', 'bird',
-      'fish', 'car', 'book', 'key', 'box', 'cup', 'pen', 'hat', 'bag', 'run',
-      'jump', 'fast', 'slow', 'big', 'small', 'hot', 'cold', 'new', 'old', 'good',
-      'bad', 'easy', 'hard', 'soft', 'loud', 'quiet', 'dark', 'light', 'win', 'lose',
-      'open', 'close', 'start', 'stop', 'home', 'work', 'play', 'rest', 'love', 'hope'
-    ];
-    
-    const symbols = ['!', '@', '#', '$', '%', '^', '&', '*'];
-    const numbers = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
-    
-    // Generate exactly 2 words to fit 12 characters total
-    let attempts = 0;
-    let generatedPassword = '';
-    
-    while (attempts < 20) {
-      // Select 2 unique words
-      const selectedWords = [];
-      const usedIndices = new Set();
-      
-      for (let i = 0; i < 2; i++) {
-        let randomIndex;
-        do {
-          randomIndex = Math.floor(Math.random() * words.length);
-        } while (usedIndices.has(randomIndex));
-        
-        usedIndices.add(randomIndex);
-        selectedWords.push(words[randomIndex]);
-      }
-      
-      // Capitalize first letter of each word
-      const capitalizedWords = selectedWords.map(word => 
-        word.charAt(0).toUpperCase() + word.slice(1)
-      );
-      
-      // Add one symbol
-      const randomSymbol = symbols[Math.floor(Math.random() * symbols.length)];
-      
-      // Add exactly two numbers
-      const randomNumbers = [
-        numbers[Math.floor(Math.random() * numbers.length)],
-        numbers[Math.floor(Math.random() * numbers.length)]
-      ];
-      
-      // Combine all parts
-      const testPassword = capitalizedWords.join('') + randomSymbol + randomNumbers.join('');
-      
-      // Check if exactly 12 characters
-      if (testPassword.length === 12) {
-        generatedPassword = testPassword;
-        break;
-      }
-      
-      attempts++;
-    }
-    
-    // Fallback: force exactly 12 characters with 2 words + symbol + 2 numbers
-    if (!generatedPassword) {
-      // Use words that together make exactly 9 characters (12 - 1 symbol - 2 numbers)
-      const targetWordLength = 9;
-      const word1 = words[Math.floor(Math.random() * words.length)];
-      const word2 = words[Math.floor(Math.random() * words.length)];
-      
-      let cap1 = word1.charAt(0).toUpperCase() + word1.slice(1);
-      let cap2 = word2.charAt(0).toUpperCase() + word2.slice(1);
-      
-      // Adjust word lengths to reach exactly 9 characters total
-      const currentWordLength = cap1.length + cap2.length;
       if (currentWordLength > targetWordLength) {
         // Trim words to fit
         const excess = currentWordLength - targetWordLength;

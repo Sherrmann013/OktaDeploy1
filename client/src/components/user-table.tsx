@@ -306,6 +306,86 @@ export default function UserTable({
     });
   };
 
+  // Generate user initials for avatars
+  const getUserInitials = (user: User) => {
+    const firstInitial = user.firstName?.charAt(0) || '';
+    const lastInitial = user.lastName?.charAt(0) || '';
+    return (firstInitial + lastInitial).toUpperCase() || 'U';
+  };
+
+  // Get status badge color
+  const getStatusBadgeColor = (status: string) => {
+    switch (status?.toUpperCase()) {
+      case 'ACTIVE': return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300';
+      case 'SUSPENDED': return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300';
+      case 'DEPROVISIONED': return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300';
+      default: return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300';
+    }
+  };
+
+  // Format date for display
+  const formatDate = (date: string | null) => {
+    if (!date) return '—';
+    try {
+      return format(new Date(date), 'MMM dd, yyyy');
+    } catch {
+      return '—';
+    }
+  };
+
+  // Render table cell content based on column type
+  const renderCellContent = (user: User, columnId: string) => {
+    switch (columnId) {
+      case 'name':
+        return (
+          <div className="flex items-center space-x-3">
+            <Avatar className="h-8 w-8">
+              <AvatarFallback className="bg-blue-600 text-white text-xs">
+                {getUserInitials(user)}
+              </AvatarFallback>
+            </Avatar>
+            <div>
+              <div className="font-medium text-gray-900 dark:text-gray-100">
+                {user.firstName} {user.lastName}
+              </div>
+            </div>
+          </div>
+        );
+      case 'login':
+        return <span className="text-gray-600 dark:text-gray-400">{user.login || '—'}</span>;
+      case 'title':
+        return <span className="text-gray-900 dark:text-gray-100">{user.title || '—'}</span>;
+      case 'department':
+        return <span className="text-gray-900 dark:text-gray-100">{user.department || '—'}</span>;
+      case 'manager':
+        return <span className="text-gray-900 dark:text-gray-100">{user.manager || '—'}</span>;
+      case 'employeeType':
+        return (
+          <Badge className={getEmployeeTypeColor ? getEmployeeTypeColor(user.employeeType || '') : ''}>
+            {user.employeeType || 'UNKNOWN'}
+          </Badge>
+        );
+      case 'status':
+        return (
+          <Badge className={getStatusBadgeColor(user.status || '')}>
+            {user.status || 'UNKNOWN'}
+          </Badge>
+        );
+      case 'mobilePhone':
+        return <span className="text-gray-900 dark:text-gray-100">{user.mobilePhone || '—'}</span>;
+      case 'lastLogin':
+        return <span className="text-gray-600 dark:text-gray-400">{formatDate(user.lastLogin)}</span>;
+      case 'activated':
+        return <span className="text-gray-600 dark:text-gray-400">{formatDate(user.created)}</span>;
+      case 'lastUpdated':
+        return <span className="text-gray-600 dark:text-gray-400">{formatDate(user.lastUpdated)}</span>;
+      case 'passwordChanged':
+        return <span className="text-gray-600 dark:text-gray-400">{formatDate(user.passwordChanged)}</span>;
+      default:
+        return <span>—</span>;
+    }
+  };
+
   if (isLoading) {
     return (
       <Card>
@@ -443,13 +523,6 @@ export default function UserTable({
       />
     </div>
   );
-    setConfirmAction({
-      type: "delete",
-      title: "Delete User",
-      message: "Are you sure you want to delete this user? This action cannot be undone.",
-      action: () => deleteUserMutation.mutate(userId),
-    });
-  };
 
   const getStatusBadge = (status: string) => {
     switch (status) {
