@@ -1,363 +1,324 @@
-# Security Dashboard Demo - Complete Replit Setup
+# EXACT REPLIT CONFIGURATION FIX
 
-## Step 1: Create New Replit Project
-1. Go to Replit.com → Create → Node.js template
-2. Name: "security-dashboard-demo"
+## The Missing Configuration Causing the Error
 
-## Step 2: Install Dependencies
-Run in Shell:
-```bash
-npm install express express-session memorystore @tanstack/react-query react react-dom wouter zod @types/express @types/express-session @types/node typescript tsx vite @vitejs/plugin-react tailwindcss autoprefixer postcss @radix-ui/react-slot @radix-ui/react-dialog @radix-ui/react-select @radix-ui/react-label lucide-react clsx tailwind-merge class-variance-authority
+### CRITICAL: vite.config.ts (EXACTLY as needed for Replit)
+```typescript
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
+import path from "path";
+
+export default defineConfig({
+  plugins: [react()],
+  resolve: {
+    alias: {
+      "@": path.resolve(__dirname, "client/src"),
+      "@shared": path.resolve(__dirname, "shared"),
+    },
+  },
+  optimizeDeps: {
+    exclude: ["lucide-react"],
+  },
+  build: {
+    outDir: "dist/public",
+    emptyOutDir: true,
+  },
+  server: {
+    host: "0.0.0.0",
+    port: 5000,
+    hmr: {
+      clientPort: 443,
+    },
+    allowedHosts: [
+      ".replit.dev",
+      ".repl.co",
+      "localhost",
+    ],
+  },
+});
 ```
 
-## Step 3: Create File Structure
-Create these directories:
-- server/
-- client/src/
-- shared/
-
-## Step 4: Copy Files (in next sections)
-
----
-
-## FILE: package.json
-Replace entire contents:
+### REQUIRED: tsconfig.node.json
 ```json
 {
-  "name": "security-dashboard-demo",
-  "version": "1.0.0",
-  "type": "module",
-  "scripts": {
-    "dev": "NODE_ENV=development tsx server/index.ts",
-    "build": "vite build",
-    "start": "NODE_ENV=production node dist/index.js"
+  "compilerOptions": {
+    "composite": true,
+    "skipLibCheck": true,
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "allowSyntheticDefaultImports": true
   },
-  "dependencies": {
-    "express": "^4.21.2",
-    "express-session": "^1.18.1",
-    "memorystore": "^1.6.7",
-    "@tanstack/react-query": "^5.60.5",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "wouter": "^3.3.5",
-    "zod": "^3.24.2",
-    "lucide-react": "^0.453.0",
-    "clsx": "^2.1.1",
-    "tailwind-merge": "^2.6.0",
-    "class-variance-authority": "^0.7.1",
-    "@radix-ui/react-slot": "^1.2.0",
-    "@radix-ui/react-dialog": "^1.1.7",
-    "@radix-ui/react-select": "^2.1.7",
-    "@radix-ui/react-label": "^2.1.3"
-  },
-  "devDependencies": {
-    "@types/express": "4.17.21",
-    "@types/express-session": "^1.18.0",
-    "@types/node": "20.16.11",
-    "@types/react": "^18.3.11",
-    "@types/react-dom": "^18.3.1",
-    "typescript": "5.6.3",
-    "tsx": "^4.19.1",
-    "vite": "^5.4.14",
-    "@vitejs/plugin-react": "^4.3.2",
-    "tailwindcss": "^3.4.17",
-    "autoprefixer": "^10.4.20",
-    "postcss": "^8.4.47"
-  }
+  "include": ["vite.config.ts"]
 }
 ```
 
----
+### REQUIRED: .replit
+```
+run = "npm run dev"
 
-## FILE: server/index.ts
-```typescript
-import express, { type Request, Response, NextFunction } from "express";
-import { registerRoutes } from "./routes.js";
-import { setupVite, log } from "./vite.js";
-import session from "express-session";
-import MemoryStore from "memorystore";
+[nix]
+channel = "stable-24_05"
 
-const app = express();
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+[deployment]
+run = ["sh", "-c", "npm run dev"]
 
-const MemoryStoreSession = MemoryStore(session);
-app.use(session({
-  secret: 'demo-secret-key',
-  resave: false,
-  saveUninitialized: false,
-  store: new MemoryStoreSession({
-    checkPeriod: 86400000
-  }),
-  cookie: {
-    secure: false,
-    httpOnly: true,
-    maxAge: 24 * 60 * 60 * 1000
-  }
-}));
+[[ports]]
+localPort = 5000
+externalPort = 80
+```
 
-app.use((req, res, next) => {
-  const start = Date.now();
-  const path = req.path;
-  let capturedJsonResponse: Record<string, any> | undefined = undefined;
+### Missing Users Page Component
 
-  const originalResJson = res.json;
-  res.json = function (bodyJson, ...args) {
-    capturedJsonResponse = bodyJson;
-    return originalResJson.apply(res, [bodyJson, ...args]);
+#### client/src/pages/users.tsx
+```tsx
+import React, { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { User } from "@shared/schema";
+import { Search, Filter, Users as UsersIcon } from "lucide-react";
+
+export default function Users() {
+  const [searchQuery, setSearchQuery] = useState("");
+  const [employeeTypeFilter, setEmployeeTypeFilter] = useState<string>("");
+  const [statusFilter, setStatusFilter] = useState<string>("");
+
+  const { data: usersData, isLoading } = useQuery({
+    queryKey: ["/api/users", { search: searchQuery, employeeType: employeeTypeFilter, status: statusFilter }],
+    queryFn: async () => {
+      const params = new URLSearchParams();
+      if (searchQuery) params.append('search', searchQuery);
+      if (employeeTypeFilter) params.append('employeeType', employeeTypeFilter);
+      if (statusFilter) params.append('status', statusFilter);
+      
+      const response = await fetch(`/api/users?${params}`, {
+        credentials: 'include'
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch users');
+      }
+      
+      return response.json();
+    },
+  });
+
+  const { data: employeeTypeCounts } = useQuery({
+    queryKey: ["/api/employee-type-counts"],
+    queryFn: async () => {
+      const response = await fetch('/api/employee-type-counts', {
+        credentials: 'include'
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch employee type counts');
+      }
+      
+      return response.json();
+    },
+  });
+
+  const users = usersData?.users || [];
+  const total = usersData?.total || 0;
+
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'ACTIVE':
+        return <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100">Active</Badge>;
+      case 'SUSPENDED':
+        return <Badge className="bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-100">Suspended</Badge>;
+      case 'DEPROVISIONED':
+        return <Badge className="bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-100">Deprovisioned</Badge>;
+      default:
+        return <Badge className="bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-100">{status}</Badge>;
+    }
   };
 
-  res.on("finish", () => {
-    const duration = Date.now() - start;
-    if (path.startsWith("/api")) {
-      let logLine = `${req.method} ${path} ${res.statusCode} in ${duration}ms`;
-      if (capturedJsonResponse) {
-        logLine += ` :: ${JSON.stringify(capturedJsonResponse)}`;
-      }
-      if (logLine.length > 80) {
-        logLine = logLine.slice(0, 79) + "…";
-      }
-      log(logLine);
-    }
-  });
+  const getEmployeeTypeBadge = (type: string | null) => {
+    if (!type) return null;
+    
+    const colors = {
+      'EMPLOYEE': 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-100',
+      'CONTRACTOR': 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-100',
+      'INTERN': 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-100',
+      'PART_TIME': 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-100'
+    };
 
-  next();
-});
+    return (
+      <Badge className={colors[type as keyof typeof colors] || colors.EMPLOYEE}>
+        {type.replace('_', ' ')}
+      </Badge>
+    );
+  };
 
-(async () => {
-  const server = await registerRoutes(app);
+  if (isLoading) {
+    return (
+      <div className="p-6">
+        <div className="animate-pulse space-y-4">
+          <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-64"></div>
+          <div className="h-64 bg-gray-200 dark:bg-gray-700 rounded"></div>
+        </div>
+      </div>
+    );
+  }
 
-  app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
-    const status = err.status || err.statusCode || 500;
-    const message = err.message || "Internal Server Error";
-    res.status(status).json({ message });
-    throw err;
-  });
+  return (
+    <div className="p-6 space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center space-x-3">
+          <UsersIcon className="w-8 h-8 text-blue-600" />
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Users</h1>
+            <p className="text-gray-600 dark:text-gray-400">{total} total users</p>
+          </div>
+        </div>
+      </div>
 
-  log("Demo mode, setting up Vite");
-  await setupVite(app, server);
+      {/* Employee Type Counts */}
+      {employeeTypeCounts && (
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {Object.entries(employeeTypeCounts).map(([type, count]) => (
+            <Card key={type} className="p-4">
+              <div className="text-center">
+                <div className="text-2xl font-bold text-blue-600">{count as number}</div>
+                <div className="text-sm text-gray-600 dark:text-gray-400">
+                  {type.replace('_', ' ')}
+                </div>
+              </div>
+            </Card>
+          ))}
+        </div>
+      )}
 
-  const port = 5000;
-  server.listen({
-    port,
-    host: "0.0.0.0",
-    reusePort: true,
-  }, () => {
-    log(`Demo dashboard serving on port ${port}`);
-  });
-})();
+      {/* Filters */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center space-x-2">
+            <Filter className="w-5 h-5" />
+            <span>Filters</span>
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <Input
+                placeholder="Search users..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+            
+            <Select value={employeeTypeFilter} onValueChange={setEmployeeTypeFilter}>
+              <SelectTrigger>
+                <SelectValue placeholder="Employee Type" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">All Types</SelectItem>
+                <SelectItem value="EMPLOYEE">Employee</SelectItem>
+                <SelectItem value="CONTRACTOR">Contractor</SelectItem>
+                <SelectItem value="INTERN">Intern</SelectItem>
+                <SelectItem value="PART_TIME">Part Time</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger>
+                <SelectValue placeholder="Status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">All Statuses</SelectItem>
+                <SelectItem value="ACTIVE">Active</SelectItem>
+                <SelectItem value="SUSPENDED">Suspended</SelectItem>
+                <SelectItem value="DEPROVISIONED">Deprovisioned</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {(searchQuery || employeeTypeFilter || statusFilter) && (
+            <Button 
+              variant="outline" 
+              onClick={() => {
+                setSearchQuery("");
+                setEmployeeTypeFilter("");
+                setStatusFilter("");
+              }}
+            >
+              Clear Filters
+            </Button>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Users List */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Users ({users.length})</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            {users.map((user: User) => (
+              <div key={user.id} className="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                <div className="flex items-center space-x-4">
+                  <Avatar>
+                    <AvatarFallback className="bg-blue-100 text-blue-600 dark:bg-blue-900 dark:text-blue-300">
+                      {user.firstName?.[0]}{user.lastName?.[0]}
+                    </AvatarFallback>
+                  </Avatar>
+                  
+                  <div>
+                    <div className="flex items-center space-x-2">
+                      <h3 className="font-medium text-gray-900 dark:text-gray-100">
+                        {user.firstName} {user.lastName}
+                      </h3>
+                      {getStatusBadge(user.status)}
+                    </div>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">{user.email}</p>
+                    {user.title && (
+                      <p className="text-sm text-gray-500 dark:text-gray-500">{user.title}</p>
+                    )}
+                  </div>
+                </div>
+
+                <div className="flex items-center space-x-4">
+                  <div className="text-right">
+                    <div className="text-sm text-gray-600 dark:text-gray-400">{user.department}</div>
+                    {user.manager && (
+                      <div className="text-xs text-gray-500 dark:text-gray-500">Manager: {user.manager}</div>
+                    )}
+                  </div>
+                  
+                  {getEmployeeTypeBadge(user.employeeType)}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {users.length === 0 && (
+            <div className="text-center py-8">
+              <UsersIcon className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+              <p className="text-gray-600 dark:text-gray-400">No users found</p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
 ```
 
----
+## Setup Instructions
 
-## FILE: server/storage.ts
-```typescript
-import { z } from "zod";
+1. Replace the `vite.config.ts` with the exact version above (includes `allowedHosts`)
+2. Add the `tsconfig.node.json` file 
+3. Add the `.replit` configuration file
+4. Add the Users page component
+5. Run `npm install` then `npm run dev`
 
-export const demoUserSchema = z.object({
-  id: z.number(),
-  firstName: z.string(),
-  lastName: z.string(),
-  email: z.string().email(),
-  login: z.string(),
-  mobilePhone: z.string().nullable(),
-  department: z.string().nullable(),
-  title: z.string().nullable(),
-  employeeType: z.enum(['EMPLOYEE', 'CONTRACTOR', 'INTERN', 'PART_TIME']).nullable(),
-  manager: z.string().nullable(),
-  status: z.enum(['ACTIVE', 'SUSPENDED', 'DEPROVISIONED']).default('ACTIVE'),
-  groups: z.array(z.string()).default([]),
-  applications: z.array(z.string()).default([]),
-  created: z.date(),
-  lastUpdated: z.date(),
-  lastLogin: z.date().nullable(),
-  passwordChanged: z.date().nullable(),
-});
-
-export const insertDemoUserSchema = demoUserSchema.omit({ id: true, created: true, lastUpdated: true });
-
-export type DemoUser = z.infer<typeof demoUserSchema>;
-export type InsertDemoUser = z.infer<typeof insertDemoUserSchema>;
-
-export interface IDemoStorage {
-  getUser(id: number): Promise<DemoUser | undefined>;
-  getUserByEmail(email: string): Promise<DemoUser | undefined>;
-  getUserByLogin(login: string): Promise<DemoUser | undefined>;
-  getAllUsers(options?: {
-    search?: string;
-    status?: string;
-    department?: string;
-    employeeType?: string;
-    limit?: number;
-    offset?: number;
-  }): Promise<{ users: DemoUser[]; total: number }>;
-  createUser(user: InsertDemoUser): Promise<DemoUser>;
-  updateUser(id: number, updates: Partial<InsertDemoUser>): Promise<DemoUser | undefined>;
-  deleteUser(id: number): Promise<boolean>;
-  authenticateAdmin(username: string, password: string): Promise<boolean>;
-}
-
-export class DemoStorage implements IDemoStorage {
-  private users: Map<number, DemoUser>;
-  private currentId: number;
-
-  constructor() {
-    this.users = new Map();
-    this.currentId = 1;
-    this.seedDemoData();
-  }
-
-  private seedDemoData() {
-    const demoUsers = [
-      {
-        firstName: "Christopher", lastName: "Walker", email: "christopher.walker@company.com", login: "christopher.walker",
-        mobilePhone: "+1 (555) 123-4567", department: "IT Security", title: "CISO", employeeType: "EMPLOYEE" as const,
-        manager: "Sarah Johnson", status: "ACTIVE" as const, groups: ["IT Security", "Executive"], applications: ["Microsoft 365", "Okta"],
-        lastLogin: new Date(Date.now() - 2 * 60 * 60 * 1000), passwordChanged: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000)
-      },
-      {
-        firstName: "Sarah", lastName: "Johnson", email: "sarah.johnson@company.com", login: "sarah.johnson",
-        mobilePhone: "+1 (555) 234-5678", department: "Executive", title: "CEO", employeeType: "EMPLOYEE" as const,
-        manager: null, status: "ACTIVE" as const, groups: ["Executive", "All Staff"], applications: ["Microsoft 365", "Salesforce"],
-        lastLogin: new Date(Date.now() - 4 * 60 * 60 * 1000), passwordChanged: new Date(Date.now() - 21 * 24 * 60 * 60 * 1000)
-      },
-      {
-        firstName: "Michael", lastName: "Chen", email: "michael.chen@company.com", login: "michael.chen",
-        mobilePhone: "+1 (555) 345-6789", department: "IT Security", title: "Security Engineer", employeeType: "EMPLOYEE" as const,
-        manager: "Christopher Walker", status: "ACTIVE" as const, groups: ["IT Security", "Engineering"], applications: ["Microsoft 365", "Splunk"],
-        lastLogin: new Date(Date.now() - 1 * 60 * 60 * 1000), passwordChanged: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
-      },
-      {
-        firstName: "Emily", lastName: "Rodriguez", email: "emily.rodriguez@company.com", login: "emily.rodriguez",
-        mobilePhone: "+1 (555) 456-7890", department: "HR", title: "HR Director", employeeType: "EMPLOYEE" as const,
-        manager: "Sarah Johnson", status: "ACTIVE" as const, groups: ["HR", "Management"], applications: ["Microsoft 365", "BambooHR"],
-        lastLogin: new Date(Date.now() - 3 * 60 * 60 * 1000), passwordChanged: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000)
-      },
-      {
-        firstName: "David", lastName: "Thompson", email: "david.thompson@company.com", login: "david.thompson",
-        mobilePhone: "+1 (555) 567-8901", department: "IT", title: "IT Manager", employeeType: "EMPLOYEE" as const,
-        manager: "Christopher Walker", status: "ACTIVE" as const, groups: ["IT", "Management"], applications: ["Microsoft 365", "ServiceNow"],
-        lastLogin: new Date(Date.now() - 6 * 60 * 60 * 1000), passwordChanged: new Date(Date.now() - 28 * 24 * 60 * 60 * 1000)
-      }
-    ];
-
-    demoUsers.forEach((userData) => {
-      const user: DemoUser = {
-        id: this.currentId++,
-        ...userData,
-        created: new Date(Date.now() - Math.random() * 90 * 24 * 60 * 60 * 1000),
-        lastUpdated: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000),
-      };
-      this.users.set(user.id, user);
-    });
-  }
-
-  async authenticateAdmin(username: string, password: string): Promise<boolean> {
-    return username === "demo-admin" && password === "demo123";
-  }
-
-  async getUser(id: number): Promise<DemoUser | undefined> {
-    return this.users.get(id);
-  }
-
-  async getUserByEmail(email: string): Promise<DemoUser | undefined> {
-    return Array.from(this.users.values()).find(user => user.email === email);
-  }
-
-  async getUserByLogin(login: string): Promise<DemoUser | undefined> {
-    return Array.from(this.users.values()).find(user => user.login === login);
-  }
-
-  async getAllUsers(options?: {
-    search?: string;
-    status?: string;
-    department?: string;
-    employeeType?: string;
-    limit?: number;
-    offset?: number;
-  }): Promise<{ users: DemoUser[]; total: number }> {
-    let filteredUsers = Array.from(this.users.values());
-
-    if (options?.search) {
-      const search = options.search.toLowerCase();
-      filteredUsers = filteredUsers.filter(user =>
-        user.firstName.toLowerCase().includes(search) ||
-        user.lastName.toLowerCase().includes(search) ||
-        user.email.toLowerCase().includes(search) ||
-        user.login.toLowerCase().includes(search)
-      );
-    }
-
-    if (options?.status) {
-      filteredUsers = filteredUsers.filter(user => user.status === options.status);
-    }
-
-    if (options?.department) {
-      filteredUsers = filteredUsers.filter(user => user.department === options.department);
-    }
-
-    if (options?.employeeType) {
-      filteredUsers = filteredUsers.filter(user => user.employeeType === options.employeeType);
-    }
-
-    const total = filteredUsers.length;
-
-    if (options?.offset) {
-      filteredUsers = filteredUsers.slice(options.offset);
-    }
-    if (options?.limit) {
-      filteredUsers = filteredUsers.slice(0, options.limit);
-    }
-
-    return { users: filteredUsers, total };
-  }
-
-  async createUser(insertUser: InsertDemoUser): Promise<DemoUser> {
-    const id = this.currentId++;
-    const user: DemoUser = {
-      id,
-      firstName: insertUser.firstName,
-      lastName: insertUser.lastName,
-      email: insertUser.email,
-      login: insertUser.login,
-      mobilePhone: insertUser.mobilePhone || null,
-      department: insertUser.department || null,
-      title: insertUser.title || null,
-      employeeType: insertUser.employeeType || null,
-      manager: insertUser.manager || null,
-      status: insertUser.status || "ACTIVE",
-      groups: insertUser.groups || [],
-      applications: insertUser.applications || [],
-      created: new Date(),
-      lastUpdated: new Date(),
-      lastLogin: insertUser.lastLogin || null,
-      passwordChanged: insertUser.passwordChanged || null,
-    };
-    this.users.set(id, user);
-    return user;
-  }
-
-  async updateUser(id: number, updates: Partial<InsertDemoUser>): Promise<DemoUser | undefined> {
-    const user = this.users.get(id);
-    if (!user) return undefined;
-
-    const updatedUser: DemoUser = {
-      ...user,
-      ...updates,
-      lastUpdated: new Date(),
-    };
-    this.users.set(id, updatedUser);
-    return updatedUser;
-  }
-
-  async deleteUser(id: number): Promise<boolean> {
-    return this.users.delete(id);
-  }
-}
-
-export const demoStorage = new DemoStorage();
-```
-
-## Next: Continue with routes.ts and frontend files...
-
-Copy this file into your new Replit project and I'll provide the remaining files in the next response.
+This fixes the "host not allowed" error by adding the proper Replit domain configuration to Vite's `allowedHosts`.
