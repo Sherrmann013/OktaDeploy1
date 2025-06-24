@@ -59,26 +59,14 @@ export default function Sidebar() {
 
   return (
     <aside className="w-32 bg-white dark:bg-gray-800 shadow-md border-r border-gray-200 dark:border-gray-700 flex-shrink-0 flex flex-col">
-      <div className="p-3 border-b border-gray-200 dark:border-gray-700 bg-purple-600 dark:bg-purple-700 flex flex-col rounded-br-lg">
+      <div className="p-3 border-b border-gray-200 dark:border-gray-700 sidebar-purple flex flex-col rounded-br-lg">
         <div className="text-center flex-1">
           <div className="relative inline-block mb-1">
             <div className="relative w-24 h-24 mx-auto rounded bg-purple-600 flex items-center justify-center">
-              <div className="relative w-20 h-20">
-                <img 
-                  src="/maze-logo.png" 
-                  alt="MAZE Logo" 
-                  className="w-20 h-20 absolute inset-0 object-contain"
-                  style={{
-                    filter: 'invert(1)'
-                  }}
-                />
-                <div 
-                  className="w-20 h-20 absolute inset-0"
-                  style={{
-                    backgroundColor: '#f97316',
-                    mixBlendMode: 'multiply'
-                  }}
-                />
+              <div className="relative w-20 h-20 flex items-center justify-center">
+                <div className="maze-logo text-4xl font-black tracking-wider">
+                  MAZE
+                </div>
               </div>
             </div>
           </div>

@@ -299,6 +299,151 @@ export default function UserTable({
 
   const handleDeleteUser = (userId: number) => {
     setConfirmAction({
+      type: "DELETE",
+      title: "Delete User",
+      message: "Are you sure you want to delete this user? This action cannot be undone.",
+      action: () => deleteUserMutation.mutate(userId),
+    });
+  };
+
+  if (isLoading) {
+    return (
+      <Card>
+        <CardContent className="p-6">
+          <div className="space-y-4">
+            {[...Array(5)].map((_, i) => (
+              <div key={i} className="flex items-center space-x-4">
+                <Skeleton className="h-8 w-8 rounded-full" />
+                <div className="space-y-2 flex-1">
+                  <Skeleton className="h-4 w-[200px]" />
+                  <Skeleton className="h-4 w-[150px]" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <div className="space-y-4">
+      <Card>
+        <CardContent className="p-0">
+          <Table>
+            <TableHeader>
+              <TableRow className="bg-gray-50 dark:bg-gray-800">
+                {visibleColumns.map((columnId) => {
+                  const column = COLUMN_DEFINITIONS[columnId as keyof typeof COLUMN_DEFINITIONS];
+                  if (!column) return null;
+                  
+                  return (
+                    <TableHead 
+                      key={columnId}
+                      className="text-center font-semibold text-gray-700 dark:text-gray-300"
+                    >
+                      <div className="flex items-center justify-center space-x-1">
+                        <span>{column.label}</span>
+                        {onSort && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-4 w-4 p-0"
+                            onClick={() => onSort(column.sortKey)}
+                          >
+                            <ArrowUpDown className="h-3 w-3" />
+                          </Button>
+                        )}
+                      </div>
+                    </TableHead>
+                  );
+                })}
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {users.map((user) => (
+                <TableRow 
+                  key={user.id}
+                  className="hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer user-table-row"
+                  onClick={() => onUserClick(user.id)}
+                >
+                  {visibleColumns.map((columnId) => (
+                    <TableCell key={columnId} className="text-center">
+                      {renderCellContent(user, columnId)}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
+
+      {/* Pagination */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center space-x-2">
+          <p className="text-sm text-gray-600 dark:text-gray-400">
+            Showing {Math.min((currentPage - 1) * usersPerPage + 1, total)} to{' '}
+            {Math.min(currentPage * usersPerPage, total)} of {total} users
+          </p>
+        </div>
+        
+        <div className="flex items-center space-x-2">
+          <Select value={usersPerPage.toString()} onValueChange={(value) => onPerPageChange(parseInt(value))}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="10">10 per page</SelectItem>
+              <SelectItem value="25">25 per page</SelectItem>
+              <SelectItem value="50">50 per page</SelectItem>
+              <SelectItem value="100">100 per page</SelectItem>
+            </SelectContent>
+          </Select>
+          
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => onPageChange(currentPage - 1)}
+            disabled={currentPage <= 1}
+          >
+            <ChevronLeft className="h-4 w-4" />
+            Previous
+          </Button>
+          
+          <span className="text-sm text-gray-600 dark:text-gray-400">
+            Page {currentPage} of {totalPages}
+          </span>
+          
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => onPageChange(currentPage + 1)}
+            disabled={currentPage >= totalPages}
+          >
+            Next
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+        </div>
+      </div>
+
+      {/* Confirmation Modal */}
+      <ConfirmationModal
+        open={confirmAction !== null}
+        onClose={() => setConfirmAction(null)}
+        onConfirm={() => {
+          if (confirmAction) {
+            confirmAction.action();
+            setConfirmAction(null);
+          }
+        }}
+        title={confirmAction?.title || ""}
+        message={confirmAction?.message || ""}
+        variant={confirmAction?.type === "DELETE" ? "destructive" : "default"}
+      />
+    </div>
+  );
+    setConfirmAction({
       type: "delete",
       title: "Delete User",
       message: "Are you sure you want to delete this user? This action cannot be undone.",

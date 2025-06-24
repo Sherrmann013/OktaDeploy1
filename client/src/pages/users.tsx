@@ -13,7 +13,7 @@ import ColumnManager, { ColumnConfig, AVAILABLE_COLUMNS } from "@/components/col
 import ExportModal from "@/components/export-modal";
 import { User } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/hooks/use-auth";
+import { useAuth } from "@/hooks/useAuth";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { 
   Users as UsersIcon, 
