@@ -76,6 +76,83 @@ function AdminComponent() {
   const [userToDelete, setUserToDelete] = useState<SiteUser | null>(null);
   const [isLogoUploadOpen, setIsLogoUploadOpen] = useState(false);
   const [layoutTab, setLayoutTab] = useState("logo");
+  const [isAddDashboardCardOpen, setIsAddDashboardCardOpen] = useState(false);
+  const [draggedItem, setDraggedItem] = useState<number | null>(null);
+  const [dashboardCards, setDashboardCards] = useState([
+    {
+      id: 1,
+      name: 'User Overview',
+      description: 'Total users and employee types'
+    },
+    {
+      id: 2,
+      name: 'Security Training',
+      description: 'KnowBe4 training progress'
+    },
+    {
+      id: 3,
+      name: 'Device Management',
+      description: 'SentinelOne endpoint status'
+    }
+  ]);
+
+  // Drag and drop functions
+  const handleDragStart = (e: React.DragEvent, index: number) => {
+    setDraggedItem(index);
+    e.dataTransfer.effectAllowed = 'move';
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+  };
+
+  const handleDrop = (e: React.DragEvent, dropIndex: number) => {
+    e.preventDefault();
+    if (draggedItem === null) return;
+
+    const newCards = [...dashboardCards];
+    const draggedCard = newCards[draggedItem];
+    
+    // Remove the dragged item
+    newCards.splice(draggedItem, 1);
+    
+    // Insert at new position
+    if (dropIndex >= newCards.length) {
+      newCards.push(draggedCard);
+    } else {
+      newCards.splice(dropIndex, 0, draggedCard);
+    }
+    
+    setDashboardCards(newCards);
+    setDraggedItem(null);
+  };
+
+  const removeDashboardCard = (cardId: number) => {
+    setDashboardCards(cards => cards.filter(card => card.id !== cardId));
+  };
+
+  const addDashboardCard = (cardName: string, cardDescription: string) => {
+    const newCard = {
+      id: Date.now(),
+      name: cardName,
+      description: cardDescription
+    };
+    setDashboardCards(cards => [...cards, newCard]);
+    setIsAddDashboardCardOpen(false);
+  };
+
+  // Available integrations for dashboard cards
+  const availableIntegrations = [
+    { id: 1, name: 'User Analytics', description: 'User count and activity metrics' },
+    { id: 2, name: 'Security Training', description: 'KnowBe4 training progress' },
+    { id: 3, name: 'Device Management', description: 'SentinelOne endpoint status' },
+    { id: 4, name: 'Access Control', description: 'OKTA user and group management' },
+    { id: 5, name: 'Compliance Status', description: 'Security compliance overview' },
+    { id: 6, name: 'Threat Detection', description: 'Security alerts and incidents' },
+    { id: 7, name: 'Asset Management', description: 'IT asset inventory and status' },
+    { id: 8, name: 'Performance Metrics', description: 'System performance dashboard' }
+  ];
 
   // Get current logo setting
   const { data: logoSetting } = useQuery({
@@ -515,7 +592,7 @@ function AdminComponent() {
   };
 
   // Available integration types for the new integration modal
-  const availableIntegrations = [
+  const availableIntegrationTypes = [
     { value: "okta", label: "OKTA" },
     { value: "knowbe4", label: "KnowBe4" },
     { value: "sentinelone", label: "SentinelOne" },
@@ -1359,6 +1436,80 @@ function AdminComponent() {
                         </div>
                       </div>
                     )}
+
+                    {layoutTab === "dashboard" && (
+                      <div className="bg-white dark:bg-gray-800 rounded-lg border dark:border-gray-700 p-6">
+                        <div className="flex items-center justify-between mb-6">
+                          <h4 className="text-lg font-semibold">Dashboard Layout</h4>
+                          <Button 
+                            onClick={() => setIsAddDashboardCardOpen(true)}
+                            className="bg-blue-600 hover:bg-blue-700 text-white flex items-center"
+                          >
+                            <Plus className="w-4 h-4 mr-2" />
+                            Add Integration
+                          </Button>
+                        </div>
+                        
+                        <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
+                          Drag and drop cards to reorganize your dashboard. Click "Add Integration" to add new app cards.
+                        </p>
+
+                        {/* Dashboard Grid Preview */}
+                        <div className="grid grid-cols-2 gap-4">
+                          {dashboardCards.map((card, index) => (
+                            <div
+                              key={card.id}
+                              draggable
+                              onDragStart={(e) => handleDragStart(e, index)}
+                              onDragOver={handleDragOver}
+                              onDrop={(e) => handleDrop(e, index)}
+                              className={`
+                                p-4 border-2 border-dashed rounded-lg cursor-move transition-all
+                                ${draggedItem === index 
+                                  ? 'border-blue-500 bg-blue-50 dark:bg-blue-950 opacity-50' 
+                                  : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500'
+                                }
+                                bg-gray-50 dark:bg-gray-800
+                              `}
+                            >
+                              <div className="flex items-center justify-between mb-2">
+                                <div className="flex items-center gap-2">
+                                  <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded flex items-center justify-center">
+                                    <span className="text-white text-xs font-bold">
+                                      {card.name.charAt(0)}
+                                    </span>
+                                  </div>
+                                  <span className="font-medium text-sm">{card.name}</span>
+                                </div>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => removeDashboardCard(card.id)}
+                                  className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950"
+                                >
+                                  <X className="w-4 h-4" />
+                                </Button>
+                              </div>
+                              <div className="text-xs text-gray-500">
+                                {card.description}
+                              </div>
+                            </div>
+                          ))}
+                          
+                          {/* Empty slots */}
+                          {Array.from({ length: 4 - dashboardCards.length }, (_, index) => (
+                            <div
+                              key={`empty-${index}`}
+                              onDragOver={handleDragOver}
+                              onDrop={(e) => handleDrop(e, dashboardCards.length + index)}
+                              className="p-4 border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-lg flex items-center justify-center min-h-[100px]"
+                            >
+                              <span className="text-gray-400 text-sm">Empty slot</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -1698,6 +1849,49 @@ function AdminComponent() {
         isOpen={isLogoUploadOpen} 
         onClose={() => setIsLogoUploadOpen(false)} 
       />
+
+      {/* Add Dashboard Card Dialog */}
+      <Dialog open={isAddDashboardCardOpen} onOpenChange={setIsAddDashboardCardOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Add Integration Card</DialogTitle>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="cardName">Integration Name</Label>
+              <Select onValueChange={(value) => {
+                const integration = availableIntegrations.find(i => i.name === value);
+                if (integration) {
+                  addDashboardCard(integration.name, integration.description);
+                }
+              }}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select an integration" />
+                </SelectTrigger>
+                <SelectContent>
+                  {availableIntegrations.map((integration) => (
+                    <SelectItem key={integration.id} value={integration.name}>
+                      <div className="flex items-center gap-2">
+                        <div className="w-6 h-6 bg-gradient-to-br from-blue-500 to-purple-600 rounded flex items-center justify-center">
+                          <span className="text-white text-xs font-bold">
+                            {integration.name.charAt(0)}
+                          </span>
+                        </div>
+                        {integration.name}
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <div className="flex justify-end space-x-2">
+            <Button variant="outline" onClick={() => setIsAddDashboardCardOpen(false)}>
+              Cancel
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Add App Mapping Dialog */}
       <Dialog open={isNewMappingOpen} onOpenChange={setIsNewMappingOpen}>
