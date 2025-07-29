@@ -3142,7 +3142,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.patch("/api/dashboard-cards/:id", isAuthenticated, requireAdmin, async (req, res) => {
     try {
-      const id = z.coerce.number().parse(req.params.id);
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ error: "Invalid card ID" });
+      }
       const updates = updateDashboardCardSchema.parse(req.body);
       
       const existing = await db.select().from(dashboardCards).where(eq(dashboardCards.id, id)).limit(1);
@@ -3178,7 +3181,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.delete("/api/dashboard-cards/:id", isAuthenticated, requireAdmin, async (req, res) => {
     try {
-      const id = z.coerce.number().parse(req.params.id);
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ error: "Invalid card ID" });
+      }
       
       const existing = await db.select().from(dashboardCards).where(eq(dashboardCards.id, id)).limit(1);
       if (existing.length === 0) {
