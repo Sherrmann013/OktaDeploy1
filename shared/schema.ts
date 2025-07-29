@@ -88,3 +88,31 @@ export const insertSiteAccessUserSchema = createInsertSchema(siteAccessUsers).om
 
 export type InsertSiteAccessUser = z.infer<typeof insertSiteAccessUserSchema>;
 export type SiteAccessUser = typeof siteAccessUsers.$inferSelect;
+
+// Integrations table for storing API configurations
+export const integrations = pgTable('integrations', {
+  id: serial('id').primaryKey(),
+  name: varchar('name', { length: 100 }).notNull().unique(),
+  displayName: varchar('display_name', { length: 100 }).notNull(),
+  description: text('description'),
+  status: varchar('status', { length: 20 }).notNull().default('disconnected'), // connected, pending, disconnected
+  apiKeys: jsonb('api_keys').notNull().default('{}'), // Store encrypted API keys as JSON
+  config: jsonb('config').default('{}'), // Additional configuration
+  created: timestamp('created').defaultNow().notNull(),
+  lastUpdated: timestamp('last_updated').defaultNow().notNull(),
+});
+
+export const insertIntegrationSchema = createInsertSchema(integrations).omit({
+  id: true,
+  created: true,
+  lastUpdated: true,
+}).extend({
+  name: z.string().min(1, "Integration name is required"),
+  displayName: z.string().min(1, "Display name is required"),
+  status: z.enum(["connected", "pending", "disconnected"], { required_error: "Status is required" }),
+  apiKeys: z.record(z.string()).default({}),
+  config: z.record(z.any()).default({})
+});
+
+export type InsertIntegration = z.infer<typeof insertIntegrationSchema>;
+export type Integration = typeof integrations.$inferSelect;

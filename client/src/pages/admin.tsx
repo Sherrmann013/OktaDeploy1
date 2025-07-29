@@ -22,11 +22,25 @@ interface SiteUser {
   lastUpdated?: Date;
 }
 
+interface Integration {
+  id: number;
+  name: string;
+  displayName: string;
+  description: string;
+  status: "connected" | "pending" | "disconnected";
+  apiKeys: Record<string, string>;
+  config: Record<string, any>;
+  created: string;
+  lastUpdated: string;
+}
+
 export default function Admin() {
   const [activeTab, setActiveTab] = useState("site-access");
   const [isNewUserOpen, setIsNewUserOpen] = useState(false);
   const [isEditUserOpen, setIsEditUserOpen] = useState(false);
+  const [isConfigureIntegrationOpen, setIsConfigureIntegrationOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<SiteUser | null>(null);
+  const [editingIntegration, setEditingIntegration] = useState<Integration | null>(null);
   const [newUser, setNewUser] = useState({
     name: "",
     username: "",
@@ -39,6 +53,12 @@ export default function Admin() {
   const { data: siteUsers = [], isLoading } = useQuery<SiteUser[]>({
     queryKey: ["/api/site-access-users"],
     refetchInterval: 5000
+  });
+
+  // Fetch integrations from database
+  const { data: integrationsData = [], isLoading: integrationsLoading } = useQuery<Integration[]>({
+    queryKey: ["/api/integrations"],
+    refetchInterval: 30000
   });
 
   // Create site access user mutation
@@ -119,6 +139,32 @@ export default function Admin() {
     }
   });
 
+  // Update integration mutation
+  const updateIntegrationMutation = useMutation({
+    mutationFn: async ({ id, integrationData }: { id: number; integrationData: { name: string; displayName: string; description: string; status: "connected" | "pending" | "disconnected"; apiKeys: Record<string, string>; config: Record<string, any> } }) => {
+      const response = await fetch(`/api/integrations/${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        credentials: "include",
+        body: JSON.stringify(integrationData)
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || `HTTP ${response.status}: ${response.statusText}`);
+      }
+      
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/integrations"] });
+      setIsConfigureIntegrationOpen(false);
+      setEditingIntegration(null);
+    }
+  });
+
   const getRandomColor = () => {
     const colors = ["bg-blue-600", "bg-green-600", "bg-purple-600", "bg-orange-600", "bg-cyan-600", "bg-pink-600", "bg-indigo-600", "bg-teal-600"];
     return colors[Math.floor(Math.random() * colors.length)];
@@ -184,6 +230,137 @@ export default function Admin() {
       };
       
       updateUserMutation.mutate({ id: editingUser.id, userData });
+    }
+  };
+
+  const handleConfigureIntegration = (integration: Integration) => {
+    setEditingIntegration(integration);
+    setIsConfigureIntegrationOpen(true);
+  };
+
+  const handleUpdateIntegration = () => {
+    if (editingIntegration) {
+      const integrationData = {
+        name: editingIntegration.name,
+        displayName: editingIntegration.displayName,
+        description: editingIntegration.description,
+        status: editingIntegration.status,
+        apiKeys: editingIntegration.apiKeys,
+        config: editingIntegration.config
+      };
+      
+      updateIntegrationMutation.mutate({ id: editingIntegration.id, integrationData });
+    }
+  };
+
+  const renderApiKeyFields = (integration: Integration | null) => {
+    if (!integration) return null;
+
+    switch (integration.name) {
+      case 'okta':
+        return (
+          <>
+            <div className="grid gap-2">
+              <Label htmlFor="readOnly">Read Only API Key</Label>
+              <Input
+                id="readOnly"
+                type="password"
+                value={integration.apiKeys.readOnly || ""}
+                onChange={(e) => setEditingIntegration(prev => prev ? { 
+                  ...prev, 
+                  apiKeys: { ...prev.apiKeys, readOnly: e.target.value }
+                } : null)}
+                placeholder="Enter Read Only API key"
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="userManagement">User Management API Key</Label>
+              <Input
+                id="userManagement"
+                type="password"
+                value={integration.apiKeys.userManagement || ""}
+                onChange={(e) => setEditingIntegration(prev => prev ? { 
+                  ...prev, 
+                  apiKeys: { ...prev.apiKeys, userManagement: e.target.value }
+                } : null)}
+                placeholder="Enter User Management API key"
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="groupAndAppsManagement">Group and Apps Management API Key</Label>
+              <Input
+                id="groupAndAppsManagement"
+                type="password"
+                value={integration.apiKeys.groupAndAppsManagement || ""}
+                onChange={(e) => setEditingIntegration(prev => prev ? { 
+                  ...prev, 
+                  apiKeys: { ...prev.apiKeys, groupAndAppsManagement: e.target.value }
+                } : null)}
+                placeholder="Enter Group and Apps Management API key"
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="superAdmin">Super Admin API Key</Label>
+              <Input
+                id="superAdmin"
+                type="password"
+                value={integration.apiKeys.superAdmin || ""}
+                onChange={(e) => setEditingIntegration(prev => prev ? { 
+                  ...prev, 
+                  apiKeys: { ...prev.apiKeys, superAdmin: e.target.value }
+                } : null)}
+                placeholder="Enter Super Admin API key"
+              />
+            </div>
+          </>
+        );
+      case 'sentinelone':
+        return (
+          <>
+            <div className="grid gap-2">
+              <Label htmlFor="readOnlyApiKey">Read Only API Key</Label>
+              <Input
+                id="readOnlyApiKey"
+                type="password"
+                value={integration.apiKeys.readOnlyApiKey || ""}
+                onChange={(e) => setEditingIntegration(prev => prev ? { 
+                  ...prev, 
+                  apiKeys: { ...prev.apiKeys, readOnlyApiKey: e.target.value }
+                } : null)}
+                placeholder="Enter Read Only API key"
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="fullAccessApiKey">Full Access API Key</Label>
+              <Input
+                id="fullAccessApiKey"
+                type="password"
+                value={integration.apiKeys.fullAccessApiKey || ""}
+                onChange={(e) => setEditingIntegration(prev => prev ? { 
+                  ...prev, 
+                  apiKeys: { ...prev.apiKeys, fullAccessApiKey: e.target.value }
+                } : null)}
+                placeholder="Enter Full Access API key"
+              />
+            </div>
+          </>
+        );
+      default:
+        return (
+          <div className="grid gap-2">
+            <Label htmlFor="apiKey">API Key</Label>
+            <Input
+              id="apiKey"
+              type="password"
+              value={integration.apiKeys.apiKey || ""}
+              onChange={(e) => setEditingIntegration(prev => prev ? { 
+                ...prev, 
+                apiKeys: { ...prev.apiKeys, apiKey: e.target.value }
+              } : null)}
+              placeholder="Enter API key"
+            />
+          </div>
+        );
     }
   };
 
@@ -399,113 +576,42 @@ export default function Admin() {
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {/* OKTA Integration */}
-                <Card className="border-2">
-                  <CardContent className="p-4">
-                    <div className="flex items-center justify-between mb-3">
-                      <h3 className="font-semibold text-lg">OKTA</h3>
-                      <span className="px-2 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 rounded-full text-xs font-medium">
-                        Connected
-                      </span>
-                    </div>
-                    <p className="text-sm text-muted-foreground mb-3">
-                      Identity and access management platform for secure authentication.
-                    </p>
-                    <Button variant="outline" size="sm" className="w-full">
-                      Configure
-                    </Button>
-                  </CardContent>
-                </Card>
-
-                {/* KnowBe4 Integration */}
-                <Card className="border-2">
-                  <CardContent className="p-4">
-                    <div className="flex items-center justify-between mb-3">
-                      <h3 className="font-semibold text-lg">KnowBe4</h3>
-                      <span className="px-2 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 rounded-full text-xs font-medium">
-                        Connected
-                      </span>
-                    </div>
-                    <p className="text-sm text-muted-foreground mb-3">
-                      Security awareness training and phishing simulation platform.
-                    </p>
-                    <Button variant="outline" size="sm" className="w-full">
-                      Configure
-                    </Button>
-                  </CardContent>
-                </Card>
-
-                {/* SentinelOne Integration */}
-                <Card className="border-2">
-                  <CardContent className="p-4">
-                    <div className="flex items-center justify-between mb-3">
-                      <h3 className="font-semibold text-lg">SentinelOne</h3>
-                      <span className="px-2 py-1 bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200 rounded-full text-xs font-medium">
-                        Pending
-                      </span>
-                    </div>
-                    <p className="text-sm text-muted-foreground mb-3">
-                      AI-powered endpoint protection and detection platform.
-                    </p>
-                    <Button variant="outline" size="sm" className="w-full">
-                      Configure
-                    </Button>
-                  </CardContent>
-                </Card>
-
-                {/* Addigy Integration */}
-                <Card className="border-2">
-                  <CardContent className="p-4">
-                    <div className="flex items-center justify-between mb-3">
-                      <h3 className="font-semibold text-lg">Addigy</h3>
-                      <span className="px-2 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 rounded-full text-xs font-medium">
-                        Connected
-                      </span>
-                    </div>
-                    <p className="text-sm text-muted-foreground mb-3">
-                      macOS device management and monitoring solution.
-                    </p>
-                    <Button variant="outline" size="sm" className="w-full">
-                      Configure
-                    </Button>
-                  </CardContent>
-                </Card>
-
-                {/* Microsoft Integration */}
-                <Card className="border-2">
-                  <CardContent className="p-4">
-                    <div className="flex items-center justify-between mb-3">
-                      <h3 className="font-semibold text-lg">Microsoft</h3>
-                      <span className="px-2 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 rounded-full text-xs font-medium">
-                        Connected
-                      </span>
-                    </div>
-                    <p className="text-sm text-muted-foreground mb-3">
-                      Microsoft 365 and Intune device management integration.
-                    </p>
-                    <Button variant="outline" size="sm" className="w-full">
-                      Configure
-                    </Button>
-                  </CardContent>
-                </Card>
-
-                {/* Jira Integration */}
-                <Card className="border-2">
-                  <CardContent className="p-4">
-                    <div className="flex items-center justify-between mb-3">
-                      <h3 className="font-semibold text-lg">Jira</h3>
-                      <span className="px-2 py-1 bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 rounded-full text-xs font-medium">
-                        Disconnected
-                      </span>
-                    </div>
-                    <p className="text-sm text-muted-foreground mb-3">
-                      Project management and issue tracking system integration.
-                    </p>
-                    <Button variant="outline" size="sm" className="w-full">
-                      Configure
-                    </Button>
-                  </CardContent>
-                </Card>
+                {integrationsLoading ? (
+                  <div className="col-span-full text-center py-8">
+                    <div className="text-muted-foreground">Loading integrations...</div>
+                  </div>
+                ) : (
+                  integrationsData.map((integration) => (
+                    <Card key={integration.id} className="border-2">
+                      <CardContent className="p-4">
+                        <div className="flex items-center justify-between mb-3">
+                          <h3 className="font-semibold text-lg">{integration.displayName}</h3>
+                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                            integration.status === "connected" 
+                              ? "bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200" 
+                              : integration.status === "pending"
+                              ? "bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200"
+                              : "bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200"
+                          }`}>
+                            {integration.status === "connected" ? "Connected" : 
+                             integration.status === "pending" ? "Pending" : "Disconnected"}
+                          </span>
+                        </div>
+                        <p className="text-sm text-muted-foreground mb-3">
+                          {integration.description}
+                        </p>
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="w-full"
+                          onClick={() => handleConfigureIntegration(integration)}
+                        >
+                          Configure
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  ))
+                )}
               </div>
             </CardContent>
           </Card>
@@ -582,6 +688,48 @@ export default function Admin() {
           </div>
         </TabsContent>
       </Tabs>
+
+      {/* Configure Integration Dialog */}
+      <Dialog open={isConfigureIntegrationOpen} onOpenChange={setIsConfigureIntegrationOpen}>
+        <DialogContent className="sm:max-w-[425px] max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Configure {editingIntegration?.displayName}</DialogTitle>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="status">Status</Label>
+              <Select
+                value={editingIntegration?.status || ""}
+                onValueChange={(value: "connected" | "pending" | "disconnected") => 
+                  setEditingIntegration(prev => prev ? { ...prev, status: value } : null)
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="connected">Connected</SelectItem>
+                  <SelectItem value="pending">Pending</SelectItem>
+                  <SelectItem value="disconnected">Disconnected</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            {renderApiKeyFields(editingIntegration)}
+          </div>
+          <div className="flex justify-end space-x-2">
+            <Button variant="outline" onClick={() => setIsConfigureIntegrationOpen(false)}>
+              Cancel
+            </Button>
+            <Button 
+              onClick={handleUpdateIntegration}
+              disabled={updateIntegrationMutation.isPending}
+            >
+              {updateIntegrationMutation.isPending ? "Saving..." : "Save Configuration"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

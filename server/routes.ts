@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertUserSchema, updateUserSchema, insertSiteAccessUserSchema, siteAccessUsers } from "@shared/schema";
+import { insertUserSchema, updateUserSchema, insertSiteAccessUserSchema, siteAccessUsers, insertIntegrationSchema, integrations } from "@shared/schema";
 import { db } from "./db";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
@@ -2580,6 +2580,80 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error deleting site access user:", error);
       res.status(500).json({ message: "Failed to delete site access user" });
+    }
+  });
+
+  // Integrations routes
+  app.get("/api/integrations", isAuthenticated, requireAdmin, async (req, res) => {
+    try {
+      const integrationsData = await db.select().from(integrations);
+      res.json(integrationsData);
+    } catch (error) {
+      console.error("Error fetching integrations:", error);
+      res.status(500).json({ message: "Failed to fetch integrations" });
+    }
+  });
+
+  app.post("/api/integrations", isAuthenticated, requireAdmin, async (req, res) => {
+    try {
+      const integrationData = insertIntegrationSchema.parse(req.body);
+      const [integration] = await db.insert(integrations).values(integrationData).returning();
+      res.json(integration);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({
+          message: "Validation error",
+          errors: error.errors
+        });
+      }
+      console.error("Error creating integration:", error);
+      res.status(500).json({ message: "Failed to create integration" });
+    }
+  });
+
+  app.put("/api/integrations/:id", isAuthenticated, requireAdmin, async (req, res) => {
+    try {
+      const id = z.coerce.number().parse(req.params.id);
+      const integrationData = insertIntegrationSchema.parse(req.body);
+      const [integration] = await db
+        .update(integrations)
+        .set({ ...integrationData, lastUpdated: new Date() })
+        .where(eq(integrations.id, id))
+        .returning();
+      
+      if (!integration) {
+        return res.status(404).json({ message: "Integration not found" });
+      }
+      
+      res.json(integration);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({
+          message: "Validation error",
+          errors: error.errors
+        });
+      }
+      console.error("Error updating integration:", error);
+      res.status(500).json({ message: "Failed to update integration" });
+    }
+  });
+
+  app.delete("/api/integrations/:id", isAuthenticated, requireAdmin, async (req, res) => {
+    try {
+      const id = z.coerce.number().parse(req.params.id);
+      const [deletedIntegration] = await db
+        .delete(integrations)
+        .where(eq(integrations.id, id))
+        .returning();
+      
+      if (!deletedIntegration) {
+        return res.status(404).json({ message: "Integration not found" });
+      }
+      
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting integration:", error);
+      res.status(500).json({ message: "Failed to delete integration" });
     }
   });
 
