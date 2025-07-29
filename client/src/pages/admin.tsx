@@ -39,6 +39,7 @@ export default function Admin() {
   const [isNewUserOpen, setIsNewUserOpen] = useState(false);
   const [isEditUserOpen, setIsEditUserOpen] = useState(false);
   const [isConfigureIntegrationOpen, setIsConfigureIntegrationOpen] = useState(false);
+  const [isNewIntegrationOpen, setIsNewIntegrationOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<SiteUser | null>(null);
   const [editingIntegration, setEditingIntegration] = useState<Integration | null>(null);
   const [newUser, setNewUser] = useState({
@@ -46,6 +47,7 @@ export default function Admin() {
     username: "",
     accessLevel: ""
   });
+  const [selectedIntegrationType, setSelectedIntegrationType] = useState("");
 
   const queryClient = useQueryClient();
 
@@ -252,6 +254,24 @@ export default function Admin() {
       updateIntegrationMutation.mutate({ id: editingIntegration.id, integrationData });
     }
   };
+
+  // Available integration types for the new integration modal
+  const availableIntegrations = [
+    { value: "okta", label: "OKTA", description: "Identity and access management platform" },
+    { value: "knowbe4", label: "KnowBe4", description: "Security awareness training and phishing simulation" },
+    { value: "sentinelone", label: "SentinelOne", description: "AI-powered endpoint protection and detection" },
+    { value: "addigy", label: "Addigy", description: "macOS device management and monitoring" },
+    { value: "microsoft", label: "Microsoft", description: "Microsoft 365 and Intune device management" },
+    { value: "jira", label: "Jira", description: "Project management and issue tracking" },
+    { value: "screenconnect", label: "ScreenConnect", description: "Remote access and support software" },
+    { value: "ninjaone", label: "Ninja One", description: "Unified IT management platform" },
+    { value: "zendesk", label: "Zendesk", description: "Customer service and support platform" },
+    { value: "meshai", label: "Mesh AI", description: "AI-powered security analysis platform" },
+    { value: "abnormal", label: "Abnormal Security", description: "Email security and threat detection" },
+    { value: "arcticwolf", label: "Arctic Wolf", description: "Security operations and threat detection" },
+    { value: "msdefender", label: "Microsoft Defender", description: "Advanced threat protection platform" },
+    { value: "hexnode", label: "Hexnode", description: "Unified endpoint management solution" }
+  ];
 
   const renderApiKeyFields = (integration: Integration | null) => {
     if (!integration) return null;
@@ -613,7 +633,7 @@ export default function Admin() {
             <CardContent className="pt-6">
               <div className="flex justify-between items-center mb-6">
                 <h2 className="text-2xl font-bold">Integrations</h2>
-                <Button>
+                <Button onClick={() => setIsNewIntegrationOpen(true)}>
                   <Plus className="w-4 h-4 mr-2" />
                   New Integration
                 </Button>
@@ -757,6 +777,68 @@ export default function Admin() {
               disabled={updateIntegrationMutation.isPending}
             >
               {updateIntegrationMutation.isPending ? "Saving..." : "Save Configuration"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* New Integration Dialog */}
+      <Dialog open={isNewIntegrationOpen} onOpenChange={setIsNewIntegrationOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Add New Integration</DialogTitle>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="integrationType">Select Integration Type</Label>
+              <Select
+                value={selectedIntegrationType}
+                onValueChange={setSelectedIntegrationType}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Choose an integration..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {availableIntegrations.map((integration) => (
+                    <SelectItem key={integration.value} value={integration.value}>
+                      <div className="flex flex-col">
+                        <span className="font-medium">{integration.label}</span>
+                        <span className="text-xs text-muted-foreground">{integration.description}</span>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            
+            {selectedIntegrationType && (
+              <div className="mt-4 p-4 bg-muted rounded-lg">
+                <h4 className="font-medium mb-2">
+                  {availableIntegrations.find(i => i.value === selectedIntegrationType)?.label}
+                </h4>
+                <p className="text-sm text-muted-foreground">
+                  {availableIntegrations.find(i => i.value === selectedIntegrationType)?.description}
+                </p>
+              </div>
+            )}
+          </div>
+          <div className="flex justify-end space-x-2">
+            <Button variant="outline" onClick={() => {
+              setIsNewIntegrationOpen(false);
+              setSelectedIntegrationType("");
+            }}>
+              Cancel
+            </Button>
+            <Button 
+              disabled={!selectedIntegrationType}
+              onClick={() => {
+                // Handle integration creation
+                console.log("Creating integration:", selectedIntegrationType);
+                setIsNewIntegrationOpen(false);
+                setSelectedIntegrationType("");
+              }}
+            >
+              Add Integration
             </Button>
           </div>
         </DialogContent>
