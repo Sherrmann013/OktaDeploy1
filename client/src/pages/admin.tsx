@@ -1,8 +1,10 @@
-import React from "react";
+import React, { useState } from "react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Settings, Shield, Database, Users } from "lucide-react";
 
 export default function Admin() {
+  const [activeTab, setActiveTab] = useState("site-access");
+
   return (
     <div className="p-6">
       <div className="mb-6">
@@ -12,55 +14,66 @@ export default function Admin() {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Card>
-          <CardHeader className="flex flex-row items-center space-y-0 pb-2">
-            <Settings className="h-5 w-5 mr-2" />
-            <CardTitle>System Settings</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-muted-foreground">
-              Configure system-wide settings and preferences.
-            </p>
-          </CardContent>
-        </Card>
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="site-access">Site access</TabsTrigger>
+          <TabsTrigger value="integrations">Integrations</TabsTrigger>
+          <TabsTrigger value="layout">Layout</TabsTrigger>
+          <TabsTrigger value="logs">Logs</TabsTrigger>
+        </TabsList>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center space-y-0 pb-2">
-            <Shield className="h-5 w-5 mr-2" />
-            <CardTitle>Security Configuration</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-muted-foreground">
-              Manage security policies and authentication settings.
-            </p>
-          </CardContent>
-        </Card>
+        <TabsContent value="site-access" className="mt-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Site Access Management</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-muted-foreground">
+                Configure site access permissions and authentication settings.
+              </p>
+            </CardContent>
+          </Card>
+        </TabsContent>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center space-y-0 pb-2">
-            <Database className="h-5 w-5 mr-2" />
-            <CardTitle>Database Management</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-muted-foreground">
-              Database administration and maintenance tools.
-            </p>
-          </CardContent>
-        </Card>
+        <TabsContent value="integrations" className="mt-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>System Integrations</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-muted-foreground">
+                Manage OKTA, KnowBe4, SentinelOne, and other service integrations.
+              </p>
+            </CardContent>
+          </Card>
+        </TabsContent>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center space-y-0 pb-2">
-            <Users className="h-5 w-5 mr-2" />
-            <CardTitle>User Administration</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-muted-foreground">
-              Advanced user management and bulk operations.
-            </p>
-          </CardContent>
-        </Card>
-      </div>
+        <TabsContent value="layout" className="mt-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Layout Configuration</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-muted-foreground">
+                Customize dashboard layout, themes, and UI preferences.
+              </p>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="logs" className="mt-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>System Logs</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-muted-foreground">
+                View and manage system logs, audit trails, and error reports.
+              </p>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
