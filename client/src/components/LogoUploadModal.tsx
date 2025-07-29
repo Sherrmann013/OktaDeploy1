@@ -15,6 +15,7 @@ interface LogoUploadModalProps {
 export function LogoUploadModal({ isOpen, onClose }: LogoUploadModalProps) {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [isDragOver, setIsDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -87,35 +88,64 @@ export function LogoUploadModal({ isOpen, onClose }: LogoUploadModalProps) {
     },
   });
 
+  const validateAndProcessFile = (file: File) => {
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toast({
+        title: "Invalid file type",
+        description: "Please select an image file",
+        variant: "destructive",
+      });
+      return false;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast({
+        title: "File too large",
+        description: "Please select an image smaller than 5MB",
+        variant: "destructive",
+      });
+      return false;
+    }
+
+    setSelectedFile(file);
+    
+    // Create preview URL
+    const reader = new FileReader();
+    reader.onload = () => setPreviewUrl(reader.result as string);
+    reader.readAsDataURL(file);
+    return true;
+  };
+
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      // Validate file type
-      if (!file.type.startsWith('image/')) {
-        toast({
-          title: "Invalid file type",
-          description: "Please select an image file",
-          variant: "destructive",
-        });
-        return;
-      }
+      validateAndProcessFile(file);
+    }
+  };
 
-      // Validate file size (max 5MB)
-      if (file.size > 5 * 1024 * 1024) {
-        toast({
-          title: "File too large",
-          description: "Please select an image smaller than 5MB",
-          variant: "destructive",
-        });
-        return;
-      }
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOver(true);
+  };
 
-      setSelectedFile(file);
-      
-      // Create preview URL
-      const reader = new FileReader();
-      reader.onload = () => setPreviewUrl(reader.result as string);
-      reader.readAsDataURL(file);
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOver(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOver(false);
+
+    const files = e.dataTransfer.files;
+    if (files.length > 0) {
+      const file = files[0];
+      validateAndProcessFile(file);
     }
   };
 
@@ -181,19 +211,25 @@ export function LogoUploadModal({ isOpen, onClose }: LogoUploadModalProps) {
               />
               
               <div className="space-y-4">
-                <Button
-                  variant="outline"
+                <div
+                  onDragOver={handleDragOver}
+                  onDragLeave={handleDragLeave}
+                  onDrop={handleDrop}
                   onClick={() => fileInputRef.current?.click()}
-                  className="w-full border-dashed border-2 h-24 flex flex-col items-center justify-center gap-2"
+                  className={`w-full border-dashed border-2 h-24 flex flex-col items-center justify-center gap-2 cursor-pointer transition-colors ${
+                    isDragOver 
+                      ? 'border-blue-500 bg-blue-50 dark:bg-blue-950' 
+                      : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500'
+                  }`}
                 >
                   <Upload className="w-6 h-6 text-gray-400" />
                   <span className="text-sm text-gray-600 dark:text-gray-400">
-                    Click to select image
+                    {isDragOver ? 'Drop image here' : 'Click to select image or drag & drop'}
                   </span>
                   <span className="text-xs text-gray-500">
                     PNG, JPG up to 5MB
                   </span>
-                </Button>
+                </div>
 
                 {/* Preview Selected Image */}
                 {previewUrl && (
