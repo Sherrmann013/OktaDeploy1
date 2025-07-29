@@ -3140,6 +3140,65 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Bulk update dashboard card positions (for drag and drop) - MUST come before /:id route
+  app.patch("/api/dashboard-cards/positions", isAuthenticated, requireAdmin, async (req, res) => {
+    try {
+      console.log('🔄 BULK UPDATE ENDPOINT HIT - Raw request body:', req.body);
+      console.log('🔄 Session user:', req.session?.user?.email);
+      console.log('🔄 User role:', req.session?.user?.role);
+      
+      const { cards } = req.body;
+      console.log('🔄 Extracted cards:', cards);
+      
+      if (!Array.isArray(cards)) {
+        console.error('❌ Cards is not an array:', typeof cards, cards);
+        return res.status(400).json({ error: "Cards must be an array" });
+      }
+
+      // Update positions in bulk
+      console.log('🔄 Processing card updates:', cards);
+      const updates = await Promise.all(
+        cards.map(async (card: any) => {
+          console.log('📝 Processing card:', card);
+          
+          // Ensure we have valid numbers
+          const id = typeof card.id === 'number' ? card.id : parseInt(String(card.id));
+          const position = typeof card.position === 'number' ? card.position : parseInt(String(card.position));
+          
+          if (isNaN(id) || isNaN(position)) {
+            console.error(`❌ Invalid card data: id=${card.id} (${typeof card.id}), position=${card.position} (${typeof card.position})`);
+            throw new Error(`Invalid card data: id=${card.id}, position=${card.position}`);
+          }
+          
+          console.log(`🔄 Updating card ${id} to position ${position}`);
+          const [result] = await db.update(dashboardCards)
+            .set({ position, updated: new Date() })
+            .where(eq(dashboardCards.id, id))
+            .returning();
+          
+          console.log(`✅ Updated card ${id}:`, result);
+          return result;
+        })
+      );
+
+      await AuditLogger.log({
+        req,
+        action: 'UPDATE',
+        resourceType: 'DASHBOARD_LAYOUT',
+        resourceId: 'bulk_position_update',
+        resourceName: 'Dashboard Card Positions',
+        details: { cardCount: cards.length },
+        newValues: { positions: cards }
+      });
+
+      console.log('✅ All card positions updated successfully:', updates);
+      res.json(updates);
+    } catch (error) {
+      console.error("Error updating dashboard card positions:", error);
+      res.status(500).json({ error: "Failed to update dashboard card positions" });
+    }
+  });
+
   app.patch("/api/dashboard-cards/:id", isAuthenticated, requireAdmin, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
@@ -3207,64 +3266,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error deleting dashboard card:", error);
       res.status(500).json({ error: "Failed to delete dashboard card" });
-    }
-  });
-
-  // Bulk update dashboard card positions (for drag and drop)
-  app.patch("/api/dashboard-cards/positions", isAuthenticated, requireAdmin, async (req, res) => {
-    try {
-      console.log('🔄 BULK UPDATE ENDPOINT HIT - Raw request body:', req.body);
-      console.log('🔄 Session user:', req.session?.user?.email);
-      console.log('🔄 User role:', req.session?.user?.role);
-      
-      const { cards } = req.body;
-      console.log('🔄 Extracted cards:', cards);
-      
-      if (!Array.isArray(cards)) {
-        console.error('❌ Cards is not an array:', typeof cards, cards);
-        return res.status(400).json({ error: "Cards must be an array" });
-      }
-
-      // Update positions in bulk
-      console.log('🔄 Processing card updates:', cards);
-      const updates = await Promise.all(
-        cards.map(async (card: any) => {
-          console.log('📝 Processing card:', card);
-          
-          // Ensure we have valid numbers
-          const id = typeof card.id === 'number' ? card.id : parseInt(String(card.id));
-          const position = typeof card.position === 'number' ? card.position : parseInt(String(card.position));
-          
-          if (isNaN(id) || isNaN(position)) {
-            console.error(`❌ Invalid card data: id=${card.id} (${typeof card.id}), position=${card.position} (${typeof card.position})`);
-            throw new Error(`Invalid card data: id=${card.id}, position=${card.position}`);
-          }
-          
-          console.log(`🔄 Updating card ${id} to position ${position}`);
-          const [result] = await db.update(dashboardCards)
-            .set({ position, updated: new Date() })
-            .where(eq(dashboardCards.id, id))
-            .returning();
-          
-          console.log(`✅ Updated card ${id}:`, result);
-          return result;
-        })
-      );
-
-      await AuditLogger.log({
-        req,
-        action: 'UPDATE',
-        resourceType: 'DASHBOARD_LAYOUT',
-        resourceId: 'bulk_position_update',
-        resourceName: 'Dashboard Card Positions',
-        details: { cardCount: cards.length },
-        newValues: { cardPositions: cards }
-      });
-
-      res.json(updates);
-    } catch (error) {
-      console.error("Error updating dashboard card positions:", error);
-      res.status(500).json({ error: "Failed to update dashboard card positions" });
     }
   });
 
