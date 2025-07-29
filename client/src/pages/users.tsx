@@ -165,6 +165,9 @@ export default function Users() {
         ...(filters.lastLogin && { lastLoginDays: filters.lastLogin })
       });
       
+      console.log('🔄 API Request:', `/api/users?${params}`);
+      console.log('📊 Sort params:', { sortBy, sortOrder });
+      
       const response = await fetch(`/api/users?${params}`, {
         credentials: 'include'
       });
@@ -243,11 +246,16 @@ export default function Users() {
   };
 
   const handleSort = (column: string) => {
+    console.log('🎯 Sort clicked:', { column, currentSortBy: sortBy, currentOrder: sortOrder });
+    
     if (sortBy === column) {
-      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+      const newOrder = sortOrder === 'asc' ? 'desc' : 'asc';
+      setSortOrder(newOrder);
+      console.log('🔄 Same column, toggling order to:', newOrder);
     } else {
       setSortBy(column);
       setSortOrder('asc');
+      console.log('🆕 New column:', column, 'order: asc');
     }
     setCurrentPage(1);
   };
