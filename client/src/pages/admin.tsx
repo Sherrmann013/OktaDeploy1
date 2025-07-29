@@ -1042,30 +1042,32 @@ export default function Admin() {
                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-full p-0 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
-                  <Command>
-                    <CommandInput placeholder="Search integrations..." className="bg-white dark:bg-gray-800" />
-                    <CommandList className="bg-white dark:bg-gray-800 max-h-[200px] overflow-y-auto">
-                      <CommandEmpty>No integration found.</CommandEmpty>
-                      <CommandGroup>
-                        {availableIntegrations.map((integration) => (
-                          <CommandItem
-                            key={integration.value}
-                            value={integration.value}
-                            onSelect={() => {
-                              setSelectedIntegrationType(integration.value);
-                              setOpenIntegrationCombobox(false);
-                            }}
-                            className="hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"
-                          >
-                            <div className="flex items-center gap-2">
-                              {getIntegrationLogo(integration.value)}
-                              <span className="font-medium">{integration.label}</span>
-                            </div>
-                          </CommandItem>
-                        ))}
-                      </CommandGroup>
-                    </CommandList>
+                <PopoverContent className="w-full p-0 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700" align="start">
+                  <Command className="bg-white dark:bg-gray-800">
+                    <CommandInput placeholder="Search integrations..." className="bg-white dark:bg-gray-800 border-0" />
+                    <div className="max-h-[200px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 dark:scrollbar-thumb-gray-600">
+                      <CommandList className="bg-white dark:bg-gray-800">
+                        <CommandEmpty>No integration found.</CommandEmpty>
+                        <CommandGroup>
+                          {availableIntegrations.map((integration) => (
+                            <CommandItem
+                              key={integration.value}
+                              value={integration.value}
+                              onSelect={() => {
+                                setSelectedIntegrationType(integration.value);
+                                setOpenIntegrationCombobox(false);
+                              }}
+                              className="hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"
+                            >
+                              <div className="flex items-center gap-2">
+                                {getIntegrationLogo(integration.value)}
+                                <span className="font-medium">{integration.label}</span>
+                              </div>
+                            </CommandItem>
+                          ))}
+                        </CommandGroup>
+                      </CommandList>
+                    </div>
                   </Command>
                 </PopoverContent>
               </Popover>
