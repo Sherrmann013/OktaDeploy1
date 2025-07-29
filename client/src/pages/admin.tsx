@@ -279,35 +279,155 @@ export default function Admin() {
     
     switch (name) {
       case 'okta':
-        return <div className={`${logoClass} bg-blue-500 rounded-sm flex items-center justify-center text-white text-xs font-bold`}>O</div>;
+        return (
+          <div className={logoClass}>
+            <svg viewBox="0 0 24 24" className="w-full h-full">
+              <circle cx="12" cy="12" r="12" fill="#007DC1"/>
+              <path d="M12 6c3.3 0 6 2.7 6 6s-2.7 6-6 6-6-2.7-6-6 2.7-6 6-6z" fill="white"/>
+              <circle cx="12" cy="12" r="2" fill="#007DC1"/>
+            </svg>
+          </div>
+        );
       case 'knowbe4':
-        return <div className={`${logoClass} bg-orange-500 rounded-sm flex items-center justify-center text-white text-xs font-bold`}>K4</div>;
+        return (
+          <div className={logoClass}>
+            <svg viewBox="0 0 24 24" className="w-full h-full">
+              <circle cx="12" cy="12" r="12" fill="#FF6B35"/>
+              <text x="12" y="16" textAnchor="middle" fill="white" fontSize="8" fontWeight="bold">KB4</text>
+            </svg>
+          </div>
+        );
       case 'sentinelone':
-        return <div className={`${logoClass} bg-purple-600 rounded-sm flex items-center justify-center text-white text-xs font-bold`}>S1</div>;
+        return (
+          <div className={logoClass}>
+            <svg viewBox="0 0 24 24" className="w-full h-full">
+              <rect width="24" height="24" rx="4" fill="#4A1A4A"/>
+              <path d="M6 8l6 4 6-4v8l-6 4-6-4V8z" fill="#8B5FBF"/>
+              <path d="M6 8l6-4 6 4-6 4-6-4z" fill="#A855F7"/>
+            </svg>
+          </div>
+        );
       case 'addigy':
-        return <div className={`${logoClass} bg-green-600 rounded-sm flex items-center justify-center text-white text-xs font-bold`}>AD</div>;
+        return (
+          <div className={logoClass}>
+            <svg viewBox="0 0 24 24" className="w-full h-full">
+              <rect width="24" height="24" rx="4" fill="#10B981"/>
+              <path d="M8 6h8l-2 6h2l-4 6-4-6h2l-2-6z" fill="white"/>
+            </svg>
+          </div>
+        );
       case 'microsoft':
-        return <div className={`${logoClass} bg-blue-600 rounded-sm flex items-center justify-center text-white text-xs font-bold`}>MS</div>;
+        return (
+          <div className={logoClass}>
+            <svg viewBox="0 0 24 24" className="w-full h-full">
+              <rect x="2" y="2" width="9" height="9" fill="#F35325"/>
+              <rect x="13" y="2" width="9" height="9" fill="#81BC06"/>
+              <rect x="2" y="13" width="9" height="9" fill="#05A6F0"/>
+              <rect x="13" y="13" width="9" height="9" fill="#FFBA08"/>
+            </svg>
+          </div>
+        );
       case 'jira':
-        return <div className={`${logoClass} bg-blue-500 rounded-sm flex items-center justify-center text-white text-xs font-bold`}>JR</div>;
+        return (
+          <div className={logoClass}>
+            <svg viewBox="0 0 24 24" className="w-full h-full">
+              <rect width="24" height="24" rx="4" fill="#0052CC"/>
+              <path d="M12 3l-6 6 3 3 3-3 3 3 3-3-6-6z" fill="white"/>
+              <path d="M12 9l-3 3 3 3 3-3-3-3z" fill="#2684FF"/>
+            </svg>
+          </div>
+        );
       case 'screenconnect':
-        return <div className={`${logoClass} bg-red-500 rounded-sm flex items-center justify-center text-white text-xs font-bold`}>SC</div>;
+        return (
+          <div className={logoClass}>
+            <svg viewBox="0 0 24 24" className="w-full h-full">
+              <rect width="24" height="24" rx="4" fill="#E53E3E"/>
+              <rect x="4" y="6" width="16" height="10" rx="2" fill="white"/>
+              <rect x="6" y="8" width="12" height="1" fill="#E53E3E"/>
+              <circle cx="18" cy="10" r="1" fill="#E53E3E"/>
+            </svg>
+          </div>
+        );
       case 'ninjaone':
-        return <div className={`${logoClass} bg-gray-800 rounded-sm flex items-center justify-center text-white text-xs font-bold`}>N1</div>;
+        return (
+          <div className={logoClass}>
+            <svg viewBox="0 0 24 24" className="w-full h-full">
+              <rect width="24" height="24" rx="4" fill="#1A202C"/>
+              <path d="M6 12l3-6 3 6-3 6-3-6z" fill="#4299E1"/>
+              <path d="M15 12l3-6 3 6-3 6-3-6z" fill="#63B3ED"/>
+            </svg>
+          </div>
+        );
       case 'zendesk':
-        return <div className={`${logoClass} bg-green-500 rounded-sm flex items-center justify-center text-white text-xs font-bold`}>ZD</div>;
+        return (
+          <div className={logoClass}>
+            <svg viewBox="0 0 24 24" className="w-full h-full">
+              <rect width="24" height="24" rx="4" fill="#03363D"/>
+              <path d="M6 6h6v6L6 18V6z" fill="#17494D"/>
+              <path d="M12 6h6v12l-6-6V6z" fill="#78A300"/>
+            </svg>
+          </div>
+        );
       case 'meshai':
-        return <div className={`${logoClass} bg-cyan-500 rounded-sm flex items-center justify-center text-white text-xs font-bold`}>AI</div>;
+        return (
+          <div className={logoClass}>
+            <svg viewBox="0 0 24 24" className="w-full h-full">
+              <rect width="24" height="24" rx="12" fill="#06B6D4"/>
+              <path d="M8 8h8v2h-8V8zM8 11h6v2h-6v-2zM8 14h8v2h-8v-2z" fill="white"/>
+              <circle cx="17" cy="9" r="2" fill="#0891B2"/>
+            </svg>
+          </div>
+        );
       case 'abnormal':
-        return <div className={`${logoClass} bg-red-600 rounded-sm flex items-center justify-center text-white text-xs font-bold`}>AB</div>;
+        return (
+          <div className={logoClass}>
+            <svg viewBox="0 0 24 24" className="w-full h-full">
+              <rect width="24" height="24" rx="4" fill="#DC2626"/>
+              <path d="M12 3l9 18H3L12 3z" fill="white"/>
+              <path d="M12 8v6M12 16h.01" stroke="#DC2626" strokeWidth="2" strokeLinecap="round"/>
+            </svg>
+          </div>
+        );
       case 'arcticwolf':
-        return <div className={`${logoClass} bg-indigo-600 rounded-sm flex items-center justify-center text-white text-xs font-bold`}>AW</div>;
+        return (
+          <div className={logoClass}>
+            <svg viewBox="0 0 24 24" className="w-full h-full">
+              <rect width="24" height="24" rx="4" fill="#4338CA"/>
+              <path d="M12 4l6 8-2 8h-8l-2-8 6-8z" fill="#A5B4FC"/>
+              <circle cx="10" cy="10" r="1" fill="#4338CA"/>
+              <circle cx="14" cy="10" r="1" fill="#4338CA"/>
+            </svg>
+          </div>
+        );
       case 'msdefender':
-        return <div className={`${logoClass} bg-blue-700 rounded-sm flex items-center justify-center text-white text-xs font-bold`}>MD</div>;
+        return (
+          <div className={logoClass}>
+            <svg viewBox="0 0 24 24" className="w-full h-full">
+              <rect width="24" height="24" rx="4" fill="#1E3A8A"/>
+              <path d="M12 3l8 5v6c0 5.5-8 7-8 7s-8-1.5-8-7V8l8-5z" fill="#3B82F6"/>
+              <path d="M8 10l3 3 5-5" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </div>
+        );
       case 'hexnode':
-        return <div className={`${logoClass} bg-orange-600 rounded-sm flex items-center justify-center text-white text-xs font-bold`}>HX</div>;
+        return (
+          <div className={logoClass}>
+            <svg viewBox="0 0 24 24" className="w-full h-full">
+              <rect width="24" height="24" rx="4" fill="#EA580C"/>
+              <path d="M12 4l6 4v8l-6 4-6-4V8l6-4z" fill="white"/>
+              <path d="M12 7l4 3v6l-4 3-4-3v-6l4-3z" fill="#EA580C"/>
+            </svg>
+          </div>
+        );
       default:
-        return <div className={`${logoClass} bg-gray-500 rounded-sm flex items-center justify-center text-white text-xs font-bold`}>?</div>;
+        return (
+          <div className={logoClass}>
+            <svg viewBox="0 0 24 24" className="w-full h-full">
+              <rect width="24" height="24" rx="4" fill="#6B7280"/>
+              <text x="12" y="16" textAnchor="middle" fill="white" fontSize="10">?</text>
+            </svg>
+          </div>
+        );
     }
   };
 
