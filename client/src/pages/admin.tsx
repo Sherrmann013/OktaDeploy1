@@ -1,9 +1,23 @@
 import React, { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import { Plus } from "lucide-react";
 
 export default function Admin() {
   const [activeTab, setActiveTab] = useState("site-access");
+  const [isNewUserOpen, setIsNewUserOpen] = useState(false);
+  const [newUser, setNewUser] = useState({
+    name: "",
+    username: "",
+    description: "",
+    accessLevel: ""
+  });
 
   return (
     <div className="p-6">
@@ -17,13 +31,78 @@ export default function Admin() {
 
         <TabsContent value="site-access" className="mt-6">
           <Card>
-            <CardHeader>
-              <CardTitle>Site Access Management</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground mb-6">
-                Configure site access permissions and user access levels.
-              </p>
+            <CardContent className="pt-6">
+              <div className="flex justify-between items-center mb-6">
+                <div></div>
+                <Dialog open={isNewUserOpen} onOpenChange={setIsNewUserOpen}>
+                  <DialogTrigger asChild>
+                    <Button>
+                      <Plus className="w-4 h-4 mr-2" />
+                      New User
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-[425px]">
+                    <DialogHeader>
+                      <DialogTitle>Add New User</DialogTitle>
+                    </DialogHeader>
+                    <div className="grid gap-4 py-4">
+                      <div className="grid gap-2">
+                        <Label htmlFor="name">Name</Label>
+                        <Input
+                          id="name"
+                          value={newUser.name}
+                          onChange={(e) => setNewUser({ ...newUser, name: e.target.value })}
+                          placeholder="Enter full name"
+                        />
+                      </div>
+                      <div className="grid gap-2">
+                        <Label htmlFor="username">Username</Label>
+                        <Input
+                          id="username"
+                          value={newUser.username}
+                          onChange={(e) => setNewUser({ ...newUser, username: e.target.value })}
+                          placeholder="Enter username"
+                        />
+                      </div>
+                      <div className="grid gap-2">
+                        <Label htmlFor="description">Description</Label>
+                        <Textarea
+                          id="description"
+                          value={newUser.description}
+                          onChange={(e) => setNewUser({ ...newUser, description: e.target.value })}
+                          placeholder="Enter user description"
+                          rows={3}
+                        />
+                      </div>
+                      <div className="grid gap-2">
+                        <Label htmlFor="accessLevel">Access Level</Label>
+                        <Select value={newUser.accessLevel} onValueChange={(value) => setNewUser({ ...newUser, accessLevel: value })}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select access level" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="standard">Standard</SelectItem>
+                            <SelectItem value="admin">Admin</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                    <div className="flex justify-end gap-2">
+                      <Button variant="outline" onClick={() => setIsNewUserOpen(false)}>
+                        Cancel
+                      </Button>
+                      <Button onClick={() => {
+                        // Handle user creation here
+                        console.log("Creating user:", newUser);
+                        setIsNewUserOpen(false);
+                        setNewUser({ name: "", username: "", description: "", accessLevel: "" });
+                      }}>
+                        Create User
+                      </Button>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+              </div>
               
               <div className="space-y-4">
                 <div className="flex items-center justify-between p-4 border rounded-lg">
