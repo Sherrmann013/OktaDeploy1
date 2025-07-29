@@ -3223,10 +3223,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const updates = await Promise.all(
         cards.map(async (card: any) => {
           console.log('📝 Processing card:', card);
-          const id = parseInt(String(card.id));
-          const position = parseInt(String(card.position));
+          
+          // Ensure we have valid numbers
+          const id = typeof card.id === 'number' ? card.id : parseInt(String(card.id));
+          const position = typeof card.position === 'number' ? card.position : parseInt(String(card.position));
           
           if (isNaN(id) || isNaN(position)) {
+            console.error(`❌ Invalid card data: id=${card.id} (${typeof card.id}), position=${card.position} (${typeof card.position})`);
             throw new Error(`Invalid card data: id=${card.id}, position=${card.position}`);
           }
           
@@ -3236,6 +3239,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             .where(eq(dashboardCards.id, id))
             .returning();
           
+          console.log(`✅ Updated card ${id}:`, result);
           return result;
         })
       );
