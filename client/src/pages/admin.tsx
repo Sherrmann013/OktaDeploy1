@@ -52,7 +52,7 @@ export default function Admin() {
     accessLevel: ""
   });
   const [selectedIntegrationType, setSelectedIntegrationType] = useState("");
-  const [openIntegrationCombobox, setOpenIntegrationCombobox] = useState(false);
+  const [integrationSearchTerm, setIntegrationSearchTerm] = useState("");
 
   const queryClient = useQueryClient();
 
@@ -201,7 +201,7 @@ export default function Admin() {
       queryClient.invalidateQueries({ queryKey: ["/api/integrations"] });
       setIsNewIntegrationOpen(false);
       setSelectedIntegrationType("");
-      setOpenIntegrationCombobox(false);
+      setIntegrationSearchTerm("");
     }
   });
 
@@ -1028,49 +1028,42 @@ export default function Admin() {
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
               <Label htmlFor="integrationType">Select Integration Type</Label>
-              <Popover open={openIntegrationCombobox} onOpenChange={setOpenIntegrationCombobox}>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    role="combobox"
-                    aria-expanded={openIntegrationCombobox}
-                    className="w-full justify-between bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700"
-                  >
-                    <span className="text-muted-foreground">
-                      Search and select an integration...
-                    </span>
-                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-full p-0 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700" align="start">
-                  <Command className="bg-white dark:bg-gray-800">
-                    <CommandInput placeholder="Search integrations..." className="bg-white dark:bg-gray-800 border-0" />
-                    <div className="max-h-[200px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 dark:scrollbar-thumb-gray-600">
-                      <CommandList className="bg-white dark:bg-gray-800">
-                        <CommandEmpty>No integration found.</CommandEmpty>
-                        <CommandGroup>
-                          {availableIntegrations.map((integration) => (
-                            <CommandItem
-                              key={integration.value}
-                              value={integration.value}
-                              onSelect={() => {
-                                setSelectedIntegrationType(integration.value);
-                                setOpenIntegrationCombobox(false);
-                              }}
-                              className="hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"
-                            >
-                              <div className="flex items-center gap-2">
-                                {getIntegrationLogo(integration.value)}
-                                <span className="font-medium">{integration.label}</span>
-                              </div>
-                            </CommandItem>
-                          ))}
-                        </CommandGroup>
-                      </CommandList>
-                    </div>
-                  </Command>
-                </PopoverContent>
-              </Popover>
+              <div className="relative">
+                <Input
+                  placeholder="Search integrations..."
+                  value={integrationSearchTerm}
+                  onChange={(e) => setIntegrationSearchTerm(e.target.value)}
+                  className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700"
+                />
+              </div>
+              
+              {integrationSearchTerm && (
+                <div className="mt-2 max-h-[200px] overflow-y-auto bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md">
+                  {availableIntegrations
+                    .filter(integration => 
+                      integration.label.toLowerCase().includes(integrationSearchTerm.toLowerCase())
+                    )
+                    .map((integration) => (
+                      <div
+                        key={integration.value}
+                        onClick={() => {
+                          setSelectedIntegrationType(integration.value);
+                          setIntegrationSearchTerm("");
+                        }}
+                        className="flex items-center gap-2 p-3 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"
+                      >
+                        {getIntegrationLogo(integration.value)}
+                        <span className="font-medium">{integration.label}</span>
+                      </div>
+                    ))
+                  }
+                  {availableIntegrations.filter(integration => 
+                    integration.label.toLowerCase().includes(integrationSearchTerm.toLowerCase())
+                  ).length === 0 && (
+                    <div className="p-3 text-muted-foreground">No integration found.</div>
+                  )}
+                </div>
+              )}
             </div>
             
             {selectedIntegrationType && (
@@ -1088,7 +1081,7 @@ export default function Admin() {
             <Button variant="outline" onClick={() => {
               setIsNewIntegrationOpen(false);
               setSelectedIntegrationType("");
-              setOpenIntegrationCombobox(false);
+              setIntegrationSearchTerm("");
             }}>
               Cancel
             </Button>
