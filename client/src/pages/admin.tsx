@@ -389,13 +389,124 @@ export default function Admin() {
 
         <TabsContent value="integrations" className="mt-6">
           <Card>
-            <CardHeader>
-              <CardTitle>System Integrations</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground">
-                Manage OKTA, KnowBe4, SentinelOne, and other service integrations.
-              </p>
+            <CardContent className="pt-6">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-2xl font-bold">Integrations</h2>
+                <Button>
+                  <Plus className="w-4 h-4 mr-2" />
+                  New Integration
+                </Button>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {/* OKTA Integration */}
+                <Card className="border-2">
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <h3 className="font-semibold text-lg">OKTA</h3>
+                      <span className="px-2 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 rounded-full text-xs font-medium">
+                        Connected
+                      </span>
+                    </div>
+                    <p className="text-sm text-muted-foreground mb-3">
+                      Identity and access management platform for secure authentication.
+                    </p>
+                    <Button variant="outline" size="sm" className="w-full">
+                      Configure
+                    </Button>
+                  </CardContent>
+                </Card>
+
+                {/* KnowBe4 Integration */}
+                <Card className="border-2">
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <h3 className="font-semibold text-lg">KnowBe4</h3>
+                      <span className="px-2 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 rounded-full text-xs font-medium">
+                        Connected
+                      </span>
+                    </div>
+                    <p className="text-sm text-muted-foreground mb-3">
+                      Security awareness training and phishing simulation platform.
+                    </p>
+                    <Button variant="outline" size="sm" className="w-full">
+                      Configure
+                    </Button>
+                  </CardContent>
+                </Card>
+
+                {/* SentinelOne Integration */}
+                <Card className="border-2">
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <h3 className="font-semibold text-lg">SentinelOne</h3>
+                      <span className="px-2 py-1 bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200 rounded-full text-xs font-medium">
+                        Pending
+                      </span>
+                    </div>
+                    <p className="text-sm text-muted-foreground mb-3">
+                      AI-powered endpoint protection and detection platform.
+                    </p>
+                    <Button variant="outline" size="sm" className="w-full">
+                      Configure
+                    </Button>
+                  </CardContent>
+                </Card>
+
+                {/* Addigy Integration */}
+                <Card className="border-2">
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <h3 className="font-semibold text-lg">Addigy</h3>
+                      <span className="px-2 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 rounded-full text-xs font-medium">
+                        Connected
+                      </span>
+                    </div>
+                    <p className="text-sm text-muted-foreground mb-3">
+                      macOS device management and monitoring solution.
+                    </p>
+                    <Button variant="outline" size="sm" className="w-full">
+                      Configure
+                    </Button>
+                  </CardContent>
+                </Card>
+
+                {/* Microsoft Integration */}
+                <Card className="border-2">
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <h3 className="font-semibold text-lg">Microsoft</h3>
+                      <span className="px-2 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 rounded-full text-xs font-medium">
+                        Connected
+                      </span>
+                    </div>
+                    <p className="text-sm text-muted-foreground mb-3">
+                      Microsoft 365 and Intune device management integration.
+                    </p>
+                    <Button variant="outline" size="sm" className="w-full">
+                      Configure
+                    </Button>
+                  </CardContent>
+                </Card>
+
+                {/* Jira Integration */}
+                <Card className="border-2">
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <h3 className="font-semibold text-lg">Jira</h3>
+                      <span className="px-2 py-1 bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 rounded-full text-xs font-medium">
+                        Disconnected
+                      </span>
+                    </div>
+                    <p className="text-sm text-muted-foreground mb-3">
+                      Project management and issue tracking system integration.
+                    </p>
+                    <Button variant="outline" size="sm" className="w-full">
+                      Configure
+                    </Button>
+                  </CardContent>
+                </Card>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
