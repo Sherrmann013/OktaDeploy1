@@ -167,8 +167,8 @@ export default function Dashboard() {
               <CardTitle className="text-orange-700 dark:text-orange-300">Device Management</CardTitle>
             </div>
           </CardHeader>
-          <CardContent className="relative">
-            <div className="grid grid-cols-2 gap-6">
+          <CardContent>
+            <div className="grid grid-cols-2 gap-6 relative">
               {/* Addigy Section */}
               <div>
                 <h4 className="font-medium text-orange-600 mb-3">Addigy</h4>
@@ -203,6 +203,9 @@ export default function Dashboard() {
                   </ResponsiveContainer>
                 </div>
               </div>
+
+              {/* Vertical Divider */}
+              <div className="absolute left-1/2 top-0 bottom-0 w-px bg-gray-600 dark:bg-gray-400 transform -translate-x-1/2 z-10"></div>
 
               {/* Intune Section */}
               <div>
@@ -239,9 +242,6 @@ export default function Dashboard() {
                 </div>
               </div>
             </div>
-            
-            {/* Vertical Divider */}
-            <div className="absolute left-1/2 top-0 bottom-0 w-px bg-border transform -translate-x-1/2"></div>
           </CardContent>
         </Card>
 
