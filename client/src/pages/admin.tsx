@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Pencil, Trash2, Check, ChevronsUpDown } from "lucide-react";
+import { Plus, Pencil, Trash2, Check, ChevronsUpDown, Edit } from "lucide-react";
 
 interface SiteUser {
   id: number;
@@ -1033,58 +1033,117 @@ export default function Admin() {
         <TabsContent value="apps" className="mt-6">
           <Card>
             <CardHeader>
-              <CardTitle>Application Management</CardTitle>
+              <div className="flex justify-between items-center">
+                <div>
+                  <CardTitle>OKTA Application Mappings</CardTitle>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Configure application-to-group mappings for OKTA integration
+                  </p>
+                </div>
+                <Button className="bg-blue-600 hover:bg-blue-700 text-white">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add Mapping
+                </Button>
+              </div>
             </CardHeader>
             <CardContent>
-              <p className="text-sm text-muted-foreground mb-4">
-                Manage application assignments, permissions, and user access across all integrated platforms.
-              </p>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                <Card className="p-4">
-                  <div className="flex items-center space-x-3">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                  <div className="flex items-center space-x-4">
                     <div className="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900 flex items-center justify-center">
                       <svg className="w-6 h-6 text-blue-600 dark:text-blue-400" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M12 2l10 6-10 6-10-6 10-6z"/>
-                        <path d="M2 12l10 6 10-6"/>
-                        <path d="M2 18l10 6 10-6"/>
+                        <path d="M21.698 10.658l1.302 2.317-1.302 2.317-1.518.87-1.302-2.317-1.302 2.317-1.518-.87 1.302-2.317-1.302-2.317 1.518-.87 1.302 2.317 1.302-2.317 1.518.87z"/>
+                        <path d="M12 2c5.523 0 10 4.477 10 10s-4.477 10-10 10S2 17.523 2 12 6.477 2 12 2z"/>
                       </svg>
                     </div>
                     <div>
-                      <h4 className="font-semibold">Active Applications</h4>
-                      <p className="text-sm text-muted-foreground">24 apps</p>
+                      <h4 className="font-semibold">Zoom</h4>
+                      <p className="text-sm text-muted-foreground">Video conferencing platform</p>
                     </div>
                   </div>
-                </Card>
-                <Card className="p-4">
                   <div className="flex items-center space-x-3">
-                    <div className="w-10 h-10 rounded-lg bg-green-100 dark:bg-green-900 flex items-center justify-center">
-                      <svg className="w-6 h-6 text-green-600 dark:text-green-400" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
-                        <circle cx="9" cy="7" r="4"/>
-                        <path d="m22 2-5 10-3-3-3 3-5-10"/>
+                    <div className="text-right">
+                      <p className="text-sm font-medium">MTX-SG-ZOOM-USER</p>
+                      <p className="text-xs text-muted-foreground">OKTA Security Group</p>
+                    </div>
+                    <span className="px-2 py-1 bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200 text-xs rounded-full">
+                      Active
+                    </span>
+                    <Button variant="outline" size="sm">
+                      <Edit className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                  <div className="flex items-center space-x-4">
+                    <div className="w-10 h-10 rounded-lg bg-purple-100 dark:bg-purple-900 flex items-center justify-center">
+                      <svg className="w-6 h-6 text-purple-600 dark:text-purple-400" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M5.04 15.165c0 .375.12.735.335 1.035l6.61 9.645c.24.35.62.565 1.015.565s.775-.215 1.015-.565l6.61-9.645c.215-.3.335-.66.335-1.035V8.835c0-.375-.12-.735-.335-1.035L14.015.155C13.775-.195 13.395-.41 13-.41s-.775.215-1.015.565L5.375 7.8c-.215.3-.335.66-.335 1.035v6.33z"/>
                       </svg>
                     </div>
                     <div>
-                      <h4 className="font-semibold">User Assignments</h4>
-                      <p className="text-sm text-muted-foreground">156 assignments</p>
+                      <h4 className="font-semibold">Slack</h4>
+                      <p className="text-sm text-muted-foreground">Team communication platform</p>
                     </div>
                   </div>
-                </Card>
-                <Card className="p-4">
                   <div className="flex items-center space-x-3">
-                    <div className="w-10 h-10 rounded-lg bg-orange-100 dark:bg-orange-900 flex items-center justify-center">
-                      <svg className="w-6 h-6 text-orange-600 dark:text-orange-400" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M9 12l2 2 4-4"/>
-                        <path d="M21 12c.552 0 1-.448 1-1V5c0-.552-.448-1-1-1H3c-.552 0-1 .448-1 1v6c0 .552.448 1 1 1h18z"/>
-                        <path d="M21 16H3c-.552 0-1 .448-1 1v2c0 .552.448 1 1 1h18c.552 0 1-.448 1-1v-2c0-.552-.448-1-1-1z"/>
+                    <div className="text-right">
+                      <p className="text-sm font-medium">MTX-SG-SLACK-USER</p>
+                      <p className="text-xs text-muted-foreground">OKTA Security Group</p>
+                    </div>
+                    <span className="px-2 py-1 bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200 text-xs rounded-full">
+                      Active
+                    </span>
+                    <Button variant="outline" size="sm">
+                      <Edit className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                  <div className="flex items-center space-x-4">
+                    <div className="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900 flex items-center justify-center">
+                      <svg className="w-6 h-6 text-blue-600 dark:text-blue-400" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M22.46 6c-.77.35-1.6.58-2.46.69.88-.53 1.56-1.37 1.88-2.38-.83.5-1.75.85-2.72 1.05C18.37 4.5 17.26 4 16 4c-2.35 0-4.27 1.92-4.27 4.29 0 .34.04.67.11.98C8.28 9.09 5.11 7.38 3 4.79c-.37.63-.58 1.37-.58 2.15 0 1.49.75 2.81 1.91 3.56-.71 0-1.37-.2-1.95-.5v.03c0 2.08 1.48 3.82 3.44 4.21a4.22 4.22 0 0 1-1.93.07 4.28 4.28 0 0 0 4 2.98 8.521 8.521 0 0 1-5.33 1.84c-.34 0-.68-.02-1.02-.06C3.44 20.29 5.7 21 8.12 21 16 21 20.33 14.46 20.33 8.79c0-.19 0-.37-.01-.56.84-.6 1.56-1.36 2.14-2.23z"/>
                       </svg>
                     </div>
                     <div>
-                      <h4 className="font-semibold">Pending Approvals</h4>
-                      <p className="text-sm text-muted-foreground">3 pending</p>
+                      <h4 className="font-semibold">Microsoft 365</h4>
+                      <p className="text-sm text-muted-foreground">Office productivity suite</p>
                     </div>
                   </div>
-                </Card>
+                  <div className="flex items-center space-x-3">
+                    <div className="text-right">
+                      <p className="text-sm font-medium">MTX-SG-MICROSOFT-E3</p>
+                      <p className="text-xs text-muted-foreground">OKTA Security Group</p>
+                    </div>
+                    <span className="px-2 py-1 bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200 text-xs rounded-full">
+                      Active
+                    </span>
+                    <Button variant="outline" size="sm">
+                      <Edit className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-6 p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                <h4 className="font-medium mb-2">Mapping Overview</h4>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Total Mappings:</span>
+                    <span className="font-medium">3</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Active Groups:</span>
+                    <span className="font-medium">3</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Last Updated:</span>
+                    <span className="font-medium">Today</span>
+                  </div>
+                </div>
               </div>
             </CardContent>
           </Card>
