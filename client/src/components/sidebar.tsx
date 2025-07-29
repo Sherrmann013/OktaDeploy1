@@ -11,8 +11,8 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 
 const navigation = [
-  { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard, current: false },
-  { name: "Users", href: "/users", icon: Users, current: true },
+  { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard, current: true },
+  { name: "Users", href: "/users", icon: Users, current: false },
   { name: "Admin", href: "/admin", icon: Settings, current: false },
 ];
 

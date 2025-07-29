@@ -45,7 +45,7 @@ function Router() {
   return (
     <SSOLayout>
       <Switch>
-        <Route path="/" component={Users} />
+        <Route path="/" component={Dashboard} />
         <Route path="/dashboard" component={Dashboard} />
         <Route path="/users" component={Users} />
         <Route path="/users/:id" component={UserDetail} />
