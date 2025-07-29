@@ -3213,11 +3213,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Update positions in bulk
+      console.log('🔄 Processing card updates:', cards);
       const updates = await Promise.all(
         cards.map(async (card: any) => {
-          const id = z.coerce.number().parse(card.id);
-          const position = z.coerce.number().parse(card.position);
+          console.log('📝 Processing card:', card);
+          const id = parseInt(String(card.id));
+          const position = parseInt(String(card.position));
           
+          if (isNaN(id) || isNaN(position)) {
+            throw new Error(`Invalid card data: id=${card.id}, position=${card.position}`);
+          }
+          
+          console.log(`🔄 Updating card ${id} to position ${position}`);
           const [result] = await db.update(dashboardCards)
             .set({ position, updated: new Date() })
             .where(eq(dashboardCards.id, id))
