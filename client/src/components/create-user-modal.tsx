@@ -14,7 +14,7 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { insertUserSchema, type InsertUser, type User } from "@shared/schema";
-import { X, Check, RefreshCw } from "lucide-react";
+import { X, Check, RefreshCw, Eye, EyeOff } from "lucide-react";
 
 interface CreateUserModalProps {
   open: boolean;
@@ -28,6 +28,8 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
   const [selectedApps, setSelectedApps] = useState<string[]>([]);
   const [managerSearch, setManagerSearch] = useState("");
   const [showManagerDropdown, setShowManagerDropdown] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [sendActivationEmail, setSendActivationEmail] = useState(true);
 
   // Fetch existing users for manager dropdown
   const { data: usersData } = useQuery({
@@ -55,7 +57,7 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
     const searchTerm = managerSearch.toLowerCase().trim();
     
     return availableManagers
-      .filter(user => {
+      .filter((user: User) => {
         const firstName = user.firstName?.toLowerCase() || '';
         const lastName = user.lastName?.toLowerCase() || '';
         const email = user.email?.toLowerCase() || '';
@@ -63,7 +65,6 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
         const department = user.department?.toLowerCase() || '';
         const fullName = `${firstName} ${lastName}`;
         
-        // Search in multiple fields - prioritize first name matching
         return firstName.startsWith(searchTerm) ||
                firstName.includes(searchTerm) ||
                lastName.startsWith(searchTerm) ||
@@ -72,8 +73,7 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
                title.includes(searchTerm) ||
                department.includes(searchTerm);
       })
-      .sort((a, b) => {
-        // Sort by relevance - first name exact matches get highest priority
+      .sort((a: User, b: User) => {
         const aFirstName = a.firstName?.toLowerCase() || '';
         const aLastName = a.lastName?.toLowerCase() || '';
         const bFirstName = b.firstName?.toLowerCase() || '';
@@ -81,34 +81,16 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
         const aFullName = `${aFirstName} ${aLastName}`;
         const bFullName = `${bFirstName} ${bLastName}`;
         
-        // First name exact start match gets highest priority
         const aFirstStartsWithSearch = aFirstName.startsWith(searchTerm);
         const bFirstStartsWithSearch = bFirstName.startsWith(searchTerm);
         
         if (aFirstStartsWithSearch && !bFirstStartsWithSearch) return -1;
         if (bFirstStartsWithSearch && !aFirstStartsWithSearch) return 1;
         
-        // If both or neither start with search term, check first name contains
-        const aFirstContainsSearch = aFirstName.includes(searchTerm);
-        const bFirstContainsSearch = bFirstName.includes(searchTerm);
-        
-        if (aFirstContainsSearch && !bFirstContainsSearch) return -1;
-        if (bFirstContainsSearch && !aFirstContainsSearch) return 1;
-        
-        // Last name start match gets next priority
-        if (aLastName.startsWith(searchTerm) && !bLastName.startsWith(searchTerm)) return -1;
-        if (bLastName.startsWith(searchTerm) && !aLastName.startsWith(searchTerm)) return 1;
-        
-        // Full name match gets lower priority
-        if (aFullName.startsWith(searchTerm) && !bFullName.startsWith(searchTerm)) return -1;
-        if (bFullName.startsWith(searchTerm) && !aFullName.startsWith(searchTerm)) return 1;
-        
-        // Sort alphabetically as fallback
         return aFullName.localeCompare(bFullName);
       })
       .slice(0, 15);
   }, [availableManagers, managerSearch]);
-
 
   const form = useForm<InsertUser>({
     resolver: zodResolver(insertUserSchema),
@@ -120,18 +102,29 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
       password: "",
       department: "",
       title: "",
-      employeeType: "",
+      employeeType: "EMPLOYEE",
       managerId: undefined,
       status: "ACTIVE",
       groups: [],
       applications: [],
-      sendActivationEmail: true,
     },
   });
 
   const createUserMutation = useMutation({
     mutationFn: async (userData: InsertUser) => {
-      return apiRequest("POST", "/api/users", userData);
+      const response = await apiRequest("POST", "/api/users", {
+        ...userData,
+        groups: selectedGroups,
+        applications: selectedApps,
+        sendActivationEmail,
+      });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Failed to create user");
+      }
+      
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/users"] });
@@ -141,24 +134,69 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
       });
       form.reset();
       setSelectedGroups([]);
+      setSelectedApps([]);
+      setManagerSearch("");
+      setSendActivationEmail(true);
       onSuccess();
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast({
         title: "Error",
-        description: error.message || "Failed to create user",
+        description: error.message,
         variant: "destructive",
       });
     },
   });
 
   const onSubmit = (data: InsertUser) => {
-    const userData = {
-      ...data,
-      groups: selectedGroups,
-      applications: selectedApps,
-    };
-    createUserMutation.mutate(userData);
+    createUserMutation.mutate(data);
+  };
+
+  const availableGroups = [
+    "R&D@mazetx.com",
+    "Labusers@mazetx.com", 
+    "finfacit@mazetx.com",
+    "HR@mazetx.com",
+    "GXP@mazetx.com"
+  ];
+
+  const availableApps = [
+    "Microsoft",
+    "Slack", 
+    "Zoom"
+  ];
+
+  const handleGroupToggle = (group: string) => {
+    setSelectedGroups(prev => 
+      prev.includes(group)
+        ? prev.filter(g => g !== group)
+        : [...prev, group]
+    );
+  };
+
+  const handleAppToggle = (app: string) => {
+    setSelectedApps(prev => 
+      prev.includes(app)
+        ? prev.filter(a => a !== app)
+        : [...prev, app]
+    );
+  };
+
+  // Generate a random 12-character password
+  const generatePassword = () => {
+    const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*';
+    let password = '';
+    for (let i = 0; i < 12; i++) {
+      password += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    form.setValue('password', password);
+  };
+
+  // Auto-generate login from email 
+  const handleEmailChange = (email: string) => {
+    form.setValue('email', email);
+    const username = email.split('@')[0];
+    form.setValue('login', username);
   };
 
   return (
@@ -167,10 +205,10 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
         <DialogHeader>
           <DialogTitle>Create New User</DialogTitle>
         </DialogHeader>
-
+        
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            {/* Personal Information */}
+            {/* Basic Information */}
             <div className="grid grid-cols-2 gap-4">
               <FormField
                 control={form.control}
@@ -201,35 +239,72 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
               />
             </div>
 
-            <FormField
-              control={form.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Email *</FormLabel>
-                  <FormControl>
-                    <Input type="email" placeholder="Enter email address" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            {/* Email and Password Row */}
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Email Username *</FormLabel>
+                    <FormControl>
+                      <div className="flex">
+                        <Input 
+                          placeholder="username" 
+                          value={field.value.split('@')[0]}
+                          onChange={(e) => handleEmailChange(`${e.target.value}@mazetx.com`)}
+                          className="rounded-r-none border-r-0"
+                        />
+                        <div className="bg-gray-100 dark:bg-gray-800 border border-l-0 rounded-r-md px-3 py-2 text-sm text-gray-600 dark:text-gray-400 flex items-center">
+                          @mazetx.com
+                        </div>
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            <FormField
-              control={form.control}
-              name="login"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Login Username *</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Enter login username" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+              <FormField
+                control={form.control}
+                name="password"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Password *</FormLabel>
+                    <FormControl>
+                      <div className="relative">
+                        <Input 
+                          type={showPassword ? "text" : "password"}
+                          placeholder="Enter password" 
+                          {...field}
+                        />
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="absolute right-0 top-0 h-full px-3"
+                          onClick={() => setShowPassword(!showPassword)}
+                        >
+                          {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                        </Button>
+                      </div>
+                    </FormControl>
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={generatePassword}
+                      className="mt-1"
+                    >
+                      Generate
+                    </Button>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
 
-            {/* Work Information */}
+            {/* Job Information */}
             <div className="grid grid-cols-2 gap-4">
               <FormField
                 control={form.control}
@@ -252,7 +327,20 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
                   <FormItem>
                     <FormLabel>Department</FormLabel>
                     <FormControl>
-                      <Input placeholder="Enter department" {...field} />
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Human Resources" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Human Resources">Human Resources</SelectItem>
+                          <SelectItem value="IT Security">IT Security</SelectItem>
+                          <SelectItem value="IT">IT</SelectItem>
+                          <SelectItem value="Legal">Legal</SelectItem>
+                          <SelectItem value="Executive">Executive</SelectItem>
+                          <SelectItem value="Finance">Finance</SelectItem>
+                          <SelectItem value="Operations">Operations</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -260,29 +348,129 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
               />
             </div>
 
-            <FormField
-              control={form.control}
-              name="employeeType"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Employee Type *</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+            {/* Manager and Employee Type */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Manager</Label>
+                <Popover open={showManagerDropdown} onOpenChange={setShowManagerDropdown}>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      role="combobox"
+                      aria-expanded={showManagerDropdown}
+                      className="w-full justify-between"
+                    >
+                      {managerSearch || "Type to search for manager..."}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-full p-0">
+                    <Command>
+                      <CommandInput 
+                        placeholder="Type to search for manager..." 
+                        value={managerSearch}
+                        onValueChange={setManagerSearch}
+                      />
+                      <CommandList>
+                        <CommandEmpty>No managers found.</CommandEmpty>
+                        <CommandGroup>
+                          {filteredManagers.map((manager) => (
+                            <CommandItem
+                              key={manager.id}
+                              value={`${manager.firstName} ${manager.lastName}`}
+                              onSelect={() => {
+                                setManagerSearch(`${manager.firstName} ${manager.lastName}`);
+                                form.setValue('managerId', manager.id);
+                                setShowManagerDropdown(false);
+                              }}
+                            >
+                              <div className="flex flex-col">
+                                <span>{manager.firstName} {manager.lastName}</span>
+                                <span className="text-sm text-gray-500">{manager.title} - {manager.department}</span>
+                              </div>
+                            </CommandItem>
+                          ))}
+                        </CommandGroup>
+                      </CommandList>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
+              </div>
+
+              <FormField
+                control={form.control}
+                name="employeeType"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Employee Type</FormLabel>
                     <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select employee type" />
-                      </SelectTrigger>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Employee" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="EMPLOYEE">Employee</SelectItem>
+                          <SelectItem value="CONTRACTOR">Contractor</SelectItem>
+                          <SelectItem value="INTERN">Intern</SelectItem>
+                          <SelectItem value="PART_TIME">Part Time</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </FormControl>
-                    <SelectContent>
-                      <SelectItem value="EMPLOYEE">Employee</SelectItem>
-                      <SelectItem value="CONTRACTOR">Contractor</SelectItem>
-                      <SelectItem value="INTERN">Intern</SelectItem>
-                      <SelectItem value="PART_TIME">Part Time</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            {/* Groups and Apps */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Groups</Label>
+                <div className="space-y-2">
+                  {availableGroups.map((group) => (
+                    <div key={group} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={group}
+                        checked={selectedGroups.includes(group)}
+                        onCheckedChange={() => handleGroupToggle(group)}
+                      />
+                      <Label htmlFor={group} className="text-sm font-normal">
+                        {group}
+                      </Label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Apps</Label>
+                <div className="space-y-2">
+                  {availableApps.map((app) => (
+                    <div key={app} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={app}
+                        checked={selectedApps.includes(app)}
+                        onCheckedChange={() => handleAppToggle(app)}
+                      />
+                      <Label htmlFor={app} className="text-sm font-normal">
+                        {app}
+                      </Label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Send Activation Email */}
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="sendActivationEmail"
+                checked={sendActivationEmail}
+                onCheckedChange={setSendActivationEmail}
+              />
+              <Label htmlFor="sendActivationEmail" className="text-sm font-normal">
+                Send activation email to manager
+              </Label>
+            </div>
 
             {/* Action Buttons */}
             <div className="flex justify-end space-x-3 pt-6 border-t">
