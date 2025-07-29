@@ -294,7 +294,7 @@ export async function setupAuth(app: Express) {
     }
   });
 
-  // Logout route
+  // Logout routes
   app.get("/api/logout", (req, res) => {
     req.session.destroy((err) => {
       if (err) {
@@ -305,6 +305,32 @@ export async function setupAuth(app: Express) {
       // Redirect to OKTA logout
       const oktaLogoutUrl = `${process.env.OKTA_DOMAIN}/login/signout?fromURI=${encodeURIComponent(`${req.protocol}://${req.get('host')}`)}`;
       res.redirect(oktaLogoutUrl);
+    });
+  });
+
+  // POST logout route for frontend
+  app.post("/api/logout", async (req, res) => {
+    const user = (req.session as any).user;
+    
+    // Log the logout event before destroying session
+    if (user) {
+      await AuditLogger.logAuthAction(
+        req,
+        'LOGOUT',
+        { 
+          loginType: user.role === 'admin' ? 'Local Admin' : 'SSO',
+          username: user.login || user.email,
+          success: true
+        }
+      );
+    }
+    
+    req.session.destroy((err) => {
+      if (err) {
+        console.error('Session destruction error:', err);
+        return res.status(500).json({ error: 'Logout failed' });
+      }
+      res.json({ message: "Logged out successfully" });
     });
   });
 

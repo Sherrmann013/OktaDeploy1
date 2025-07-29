@@ -1,6 +1,6 @@
 import React from "react";
 import { Link, useLocation } from "wouter";
-import { Shield, Users, UsersRound, Grid3x3, Settings, RotateCcw, LayoutDashboard, Gauge } from "lucide-react";
+import { Shield, Users, UsersRound, Grid3x3, Settings, RotateCcw, LayoutDashboard, Gauge, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { useAuth } from "@/hooks/use-auth";
@@ -40,6 +40,24 @@ export default function Sidebar() {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
+
+  // Logout mutation
+  const logoutMutation = useMutation({
+    mutationFn: async () => {
+      const response = await apiRequest("POST", "/api/logout");
+      return response.json();
+    },
+    onSuccess: () => {
+      // Clear all queries and redirect to login
+      queryClient.clear();
+      window.location.href = '/login';
+    },
+    onError: (error) => {
+      console.error('Logout error:', error);
+      // Still redirect even if logout fails on server
+      window.location.href = '/login';
+    },
+  });
 
   // OKTA sync mutation
   const oktaSyncMutation = useMutation({
@@ -132,7 +150,7 @@ export default function Sidebar() {
                   <p className="font-medium text-gray-900 dark:text-gray-100">{currentUser?.firstName} {currentUser?.lastName}</p>
                   <p className="text-sm text-gray-600 dark:text-gray-400">{currentUser?.email}</p>
                 </div>
-                <div className="p-3">
+                <div className="p-3 space-y-2">
                   <Button
                     variant="outline"
                     onClick={() => {
@@ -144,6 +162,18 @@ export default function Sidebar() {
                   >
                     <RotateCcw className={`w-4 h-4 mr-2 ${oktaSyncMutation.isPending ? 'animate-spin' : ''}`} />
                     Sync OKTA
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      logoutMutation.mutate();
+                      setShowUserDropdown(false);
+                    }}
+                    disabled={logoutMutation.isPending}
+                    className="w-full border-red-300 text-red-700 hover:bg-red-50 dark:border-red-700 dark:text-red-400 dark:hover:bg-red-900/20"
+                  >
+                    <LogOut className="w-4 h-4 mr-2" />
+                    {logoutMutation.isPending ? 'Signing out...' : 'Sign Out'}
                   </Button>
                 </div>
               </div>
