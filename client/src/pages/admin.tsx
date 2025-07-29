@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -33,7 +33,6 @@ export default function Admin() {
           <Card>
             <CardContent className="pt-6">
               <div className="flex justify-between items-center mb-6">
-                <div></div>
                 <Dialog open={isNewUserOpen} onOpenChange={setIsNewUserOpen}>
                   <DialogTrigger asChild>
                     <Button>
@@ -43,7 +42,10 @@ export default function Admin() {
                   </DialogTrigger>
                   <DialogContent className="sm:max-w-[425px]">
                     <DialogHeader>
-                      <DialogTitle>Add New User</DialogTitle>
+                      <DialogTitle>Assign New User</DialogTitle>
+                      <DialogDescription>
+                        Add a new user to the site access list with appropriate permissions.
+                      </DialogDescription>
                     </DialogHeader>
                     <div className="grid gap-4 py-4">
                       <div className="grid gap-2">
@@ -77,7 +79,7 @@ export default function Admin() {
                       <div className="grid gap-2">
                         <Label htmlFor="accessLevel">Access Level</Label>
                         <Select value={newUser.accessLevel} onValueChange={(value) => setNewUser({ ...newUser, accessLevel: value })}>
-                          <SelectTrigger>
+                          <SelectTrigger className="bg-background">
                             <SelectValue placeholder="Select access level" />
                           </SelectTrigger>
                           <SelectContent>
@@ -92,16 +94,17 @@ export default function Admin() {
                         Cancel
                       </Button>
                       <Button onClick={() => {
-                        // Handle user creation here
-                        console.log("Creating user:", newUser);
+                        // Handle user assignment here
+                        console.log("Assigning user:", newUser);
                         setIsNewUserOpen(false);
                         setNewUser({ name: "", username: "", description: "", accessLevel: "" });
                       }}>
-                        Create User
+                        Assign User
                       </Button>
                     </div>
                   </DialogContent>
                 </Dialog>
+                <div></div>
               </div>
               
               <div className="space-y-4">
