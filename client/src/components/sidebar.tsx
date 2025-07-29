@@ -68,7 +68,11 @@ export default function Sidebar() {
                   src="/maze-logo.png" 
                   alt="MAZE Logo" 
                   className="w-20 h-20 absolute inset-0 object-contain"
-                  style={{ filter: "invert(1) sepia(1) saturate(3) hue-rotate(15deg) brightness(1.2)" }}
+                  style={{ filter: "invert(1)" }}
+                />
+                <div 
+                  className="w-20 h-20 absolute inset-0" 
+                  style={{ backgroundColor: "#f97316", mixBlendMode: "multiply" }}
                 />
               </div>
             </div>
