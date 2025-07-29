@@ -680,7 +680,7 @@ export default function Admin() {
                 ) : null}
                 <Dialog open={isNewUserOpen} onOpenChange={setIsNewUserOpen}>
                   <DialogTrigger asChild>
-                    <Button>
+                    <Button className="bg-blue-600 hover:bg-blue-700 text-white">
                       <Plus className="w-4 h-4 mr-2" />
                       New User
                     </Button>
