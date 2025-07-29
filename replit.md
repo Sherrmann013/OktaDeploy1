@@ -53,6 +53,9 @@ A comprehensive React-based enterprise security management dashboard with robust
 - **Integration Configuration Modal:** Added comprehensive configuration dialog with status management (Connected/Pending/Disconnected) and secure API key storage with appropriate field validation
 - **OKTA App Mappings System:** Created comprehensive app-to-group mapping system with database persistence (appMappings table), full CRUD API endpoints, and intuitive admin interface for managing application-to-OKTA-group relationships (Zoom→MTX-SG-ZOOM-USER, Slack→MTX-SG-SLACK-USER, Microsoft 365→MTX-SG-MICROSOFT-E3)
 - **Referenceable App Mappings:** Implemented lookup endpoint (/api/app-mappings/lookup/:appName) enabling other components to dynamically retrieve OKTA group names for user creation workflows, ensuring consistent group assignments across the platform
+- **Role-Based Access Control Implementation:** Created comprehensive access control system with Admin and Standard user levels, protected routes, dynamic sidebar visibility, and ProtectedRoute component for page-level security
+- **Sign Out Functionality:** Added sign out button to user dropdown with proper session destruction, audit logging, and complete logout that prevents automatic re-authentication
+- **Test User Credentials:** Added test standard user account (test-user/test123) for testing role-based access controls alongside existing admin account (CW-Admin/YellowDr@g0nFly)
 
 ### June 24, 2025
 - **Complete Exact Carbon Copy Created:** Extracted ALL actual files from working project including exact users page, sidebar, table components, and styling

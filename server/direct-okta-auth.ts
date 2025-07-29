@@ -50,6 +50,8 @@ export async function setupAuth(app: Express) {
     // Check local admin credentials
     const ADMIN_USERNAME = "CW-Admin";
     const ADMIN_PASSWORD = "YellowDr@g0nFly";
+    const TEST_USERNAME = "test-user";
+    const TEST_PASSWORD = "test123";
     
     if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
       console.log('Local admin login successful');
@@ -95,6 +97,50 @@ export async function setupAuth(app: Express) {
       
       console.log('Session created for admin user');
       res.json(adminUser);
+    } else if (username === TEST_USERNAME && password === TEST_PASSWORD) {
+      console.log('Test standard user login successful');
+      
+      const testUser = {
+        id: 2,
+        oktaId: null,
+        firstName: "Test",
+        lastName: "User",
+        email: "test.user@mazetx.com",
+        login: TEST_USERNAME,
+        mobilePhone: null,
+        department: "IT",
+        title: "Test User",
+        employeeType: "EMPLOYEE",
+        profileImageUrl: null,
+        managerId: null,
+        manager: null,
+        status: "ACTIVE",
+        groups: [],
+        applications: [],
+        created: new Date(),
+        lastUpdated: new Date(),
+        lastLogin: new Date(),
+        passwordChanged: null,
+        username: TEST_USERNAME,
+        role: "standard"
+      };
+      
+      // Store user in session
+      (req.session as any).user = testUser;
+      
+      // Log the authentication event
+      await AuditLogger.logAuthAction(
+        req,
+        'LOGIN',
+        { 
+          loginType: 'Test Standard User', 
+          username: TEST_USERNAME,
+          success: true
+        }
+      );
+      
+      console.log('Session created for test standard user');
+      res.json(testUser);
     } else {
       console.log('Invalid credentials provided');
       

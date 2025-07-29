@@ -50,12 +50,13 @@ export default function Sidebar() {
     onSuccess: () => {
       // Clear all queries and redirect to login
       queryClient.clear();
-      window.location.href = '/login';
+      // Force a full page reload to ensure clean logout
+      window.location.replace('/login');
     },
     onError: (error) => {
       console.error('Logout error:', error);
       // Still redirect even if logout fails on server
-      window.location.href = '/login';
+      window.location.replace('/login');
     },
   });
 
