@@ -9,9 +9,20 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Plus, Pencil, Trash2 } from "lucide-react";
 
+interface SiteUser {
+  id: string;
+  name: string;
+  email: string;
+  accessLevel: "standard" | "admin";
+  initials: string;
+  color: string;
+}
+
 export default function Admin() {
   const [activeTab, setActiveTab] = useState("site-access");
   const [isNewUserOpen, setIsNewUserOpen] = useState(false);
+  const [isEditUserOpen, setIsEditUserOpen] = useState(false);
+  const [editingUser, setEditingUser] = useState<SiteUser | null>(null);
   const [newUser, setNewUser] = useState({
     name: "",
     username: "",
@@ -19,14 +30,94 @@ export default function Admin() {
     accessLevel: ""
   });
 
-  const handleEditUser = (user: any) => {
-    console.log("Editing user:", user);
-    // TODO: Implement edit functionality
+  // Initialize with existing users
+  const [siteUsers, setSiteUsers] = useState<SiteUser[]>([
+    {
+      id: "1",
+      name: "CW-Admin",
+      email: "admin@mazetx.com",
+      accessLevel: "admin",
+      initials: "CW",
+      color: "bg-blue-600"
+    },
+    {
+      id: "2",
+      name: "Emily Davis",
+      email: "emily.davis@company.com",
+      accessLevel: "standard",
+      initials: "ED",
+      color: "bg-green-600"
+    },
+    {
+      id: "3",
+      name: "Michael Wilson",
+      email: "michael.wilson@company.com",
+      accessLevel: "standard",
+      initials: "MW",
+      color: "bg-purple-600"
+    },
+    {
+      id: "4",
+      name: "Sarah Smith",
+      email: "sarah.smith@company.com",
+      accessLevel: "admin",
+      initials: "SS",
+      color: "bg-orange-600"
+    },
+    {
+      id: "5",
+      name: "David Johnson",
+      email: "david.johnson@company.com",
+      accessLevel: "standard",
+      initials: "DJ",
+      color: "bg-cyan-600"
+    }
+  ]);
+
+  const getRandomColor = () => {
+    const colors = ["bg-blue-600", "bg-green-600", "bg-purple-600", "bg-orange-600", "bg-cyan-600", "bg-pink-600", "bg-indigo-600", "bg-teal-600"];
+    return colors[Math.floor(Math.random() * colors.length)];
   };
 
-  const handleDeleteUser = (user: any) => {
-    console.log("Deleting user:", user);
-    // TODO: Implement delete functionality with confirmation
+  const getInitials = (name: string) => {
+    return name.split(' ').map(n => n[0]).join('').toUpperCase();
+  };
+
+  const handleEditUser = (user: SiteUser) => {
+    setEditingUser(user);
+    setIsEditUserOpen(true);
+  };
+
+  const handleDeleteUser = (user: SiteUser) => {
+    if (confirm(`Are you sure you want to remove ${user.name} from site access?`)) {
+      setSiteUsers(prev => prev.filter(u => u.id !== user.id));
+    }
+  };
+
+  const handleAssignUser = () => {
+    if (newUser.name && newUser.username && newUser.accessLevel) {
+      const newSiteUser: SiteUser = {
+        id: Date.now().toString(),
+        name: newUser.name,
+        email: newUser.username,
+        accessLevel: newUser.accessLevel as "standard" | "admin",
+        initials: getInitials(newUser.name),
+        color: getRandomColor()
+      };
+      setSiteUsers(prev => [...prev, newSiteUser]);
+      setIsNewUserOpen(false);
+      setNewUser({ name: "", username: "", description: "", accessLevel: "" });
+    }
+  };
+
+  const handleUpdateUser = () => {
+    if (editingUser) {
+      setSiteUsers(prev => prev.map(u => 
+        u.id === editingUser.id ? editingUser : u
+      ));
+      setIsEditUserOpen(false);
+      setEditingUser(null);
+    }
   };
 
   return (
@@ -100,185 +191,104 @@ export default function Admin() {
                       <Button variant="outline" onClick={() => setIsNewUserOpen(false)}>
                         Cancel
                       </Button>
-                      <Button onClick={() => {
-                        // Handle user assignment here
-                        console.log("Assigning user:", newUser);
-                        setIsNewUserOpen(false);
-                        setNewUser({ name: "", username: "", description: "", accessLevel: "" });
-                      }}>
+                      <Button onClick={handleAssignUser}>
                         Assign User
                       </Button>
                     </div>
                   </DialogContent>
                 </Dialog>
+
+                {/* Edit User Dialog */}
+                <Dialog open={isEditUserOpen} onOpenChange={setIsEditUserOpen}>
+                  <DialogContent className="sm:max-w-[425px]">
+                    <DialogHeader>
+                      <DialogTitle>Edit User Access</DialogTitle>
+                    </DialogHeader>
+                    <div className="grid gap-4 py-4">
+                      <div className="grid gap-2">
+                        <Label htmlFor="editName">Name</Label>
+                        <Input
+                          id="editName"
+                          value={editingUser?.name || ""}
+                          onChange={(e) => setEditingUser(prev => prev ? { ...prev, name: e.target.value } : null)}
+                          placeholder="Enter full name"
+                        />
+                      </div>
+                      <div className="grid gap-2">
+                        <Label htmlFor="editEmail">Email</Label>
+                        <Input
+                          id="editEmail"
+                          value={editingUser?.email || ""}
+                          onChange={(e) => setEditingUser(prev => prev ? { ...prev, email: e.target.value } : null)}
+                          placeholder="Enter email"
+                        />
+                      </div>
+                      <div className="grid gap-2">
+                        <Label htmlFor="editAccessLevel">Access Level</Label>
+                        <Select value={editingUser?.accessLevel || ""} onValueChange={(value) => setEditingUser(prev => prev ? { ...prev, accessLevel: value as "standard" | "admin" } : null)}>
+                          <SelectTrigger className="bg-background">
+                            <SelectValue placeholder="Select access level" />
+                          </SelectTrigger>
+                          <SelectContent className="z-50">
+                            <SelectItem value="standard">Standard</SelectItem>
+                            <SelectItem value="admin">Admin</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                    <div className="flex justify-end gap-2">
+                      <Button variant="outline" onClick={() => setIsEditUserOpen(false)}>
+                        Cancel
+                      </Button>
+                      <Button onClick={handleUpdateUser}>
+                        Update User
+                      </Button>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+
                 <div></div>
               </div>
               
               <div className="space-y-4">
-                <div className="flex items-center justify-between p-4 border rounded-lg">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white text-sm font-medium">
-                      CW
+                {siteUsers.map((user) => (
+                  <div key={user.id} className="flex items-center justify-between p-4 border rounded-lg">
+                    <div className="flex items-center space-x-3">
+                      <div className={`w-8 h-8 ${user.color} rounded-full flex items-center justify-center text-white text-sm font-medium`}>
+                        {user.initials}
+                      </div>
+                      <div>
+                        <p className="font-medium">{user.name}</p>
+                        <p className="text-sm text-muted-foreground">{user.email}</p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="font-medium">CW-Admin</p>
-                      <p className="text-sm text-muted-foreground">admin@mazetx.com</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <span className="px-3 py-1 bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 rounded-full text-sm font-medium">
-                      Admin
-                    </span>
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      onClick={() => handleEditUser({ name: "CW-Admin", email: "admin@mazetx.com", role: "admin" })}
-                      className="h-8 w-8 p-0"
-                    >
-                      <Pencil className="w-4 h-4" />
-                    </Button>
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      onClick={() => handleDeleteUser({ name: "CW-Admin", email: "admin@mazetx.com", role: "admin" })}
-                      className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-between p-4 border rounded-lg">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-8 h-8 bg-green-600 rounded-full flex items-center justify-center text-white text-sm font-medium">
-                      ED
-                    </div>
-                    <div>
-                      <p className="font-medium">Emily Davis</p>
-                      <p className="text-sm text-muted-foreground">emily.davis@company.com</p>
+                    <div className="flex items-center space-x-2">
+                      <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                        user.accessLevel === "admin" 
+                          ? "bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200" 
+                          : "bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200"
+                      }`}>
+                        {user.accessLevel === "admin" ? "Admin" : "Standard"}
+                      </span>
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        onClick={() => handleEditUser(user)}
+                        className="h-8 w-8 p-0"
+                      >
+                        <Pencil className="w-4 h-4" />
+                      </Button>
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        onClick={() => handleDeleteUser(user)}
+                        className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
                     </div>
                   </div>
-                  <div className="flex items-center space-x-2">
-                    <span className="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded-full text-sm font-medium">
-                      Standard
-                    </span>
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      onClick={() => handleEditUser({ name: "Emily Davis", email: "emily.davis@company.com", role: "standard" })}
-                      className="h-8 w-8 p-0"
-                    >
-                      <Pencil className="w-4 h-4" />
-                    </Button>
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      onClick={() => handleDeleteUser({ name: "Emily Davis", email: "emily.davis@company.com", role: "standard" })}
-                      className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-between p-4 border rounded-lg">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center text-white text-sm font-medium">
-                      MW
-                    </div>
-                    <div>
-                      <p className="font-medium">Michael Wilson</p>
-                      <p className="text-sm text-muted-foreground">michael.wilson@company.com</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <span className="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded-full text-sm font-medium">
-                      Standard
-                    </span>
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      onClick={() => handleEditUser({ name: "Michael Wilson", email: "michael.wilson@company.com", role: "standard" })}
-                      className="h-8 w-8 p-0"
-                    >
-                      <Pencil className="w-4 h-4" />
-                    </Button>
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      onClick={() => handleDeleteUser({ name: "Michael Wilson", email: "michael.wilson@company.com", role: "standard" })}
-                      className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-between p-4 border rounded-lg">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-8 h-8 bg-orange-600 rounded-full flex items-center justify-center text-white text-sm font-medium">
-                      SS
-                    </div>
-                    <div>
-                      <p className="font-medium">Sarah Smith</p>
-                      <p className="text-sm text-muted-foreground">sarah.smith@company.com</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <span className="px-3 py-1 bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 rounded-full text-sm font-medium">
-                      Admin
-                    </span>
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      onClick={() => handleEditUser({ name: "Sarah Smith", email: "sarah.smith@company.com", role: "admin" })}
-                      className="h-8 w-8 p-0"
-                    >
-                      <Pencil className="w-4 h-4" />
-                    </Button>
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      onClick={() => handleDeleteUser({ name: "Sarah Smith", email: "sarah.smith@company.com", role: "admin" })}
-                      className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-between p-4 border rounded-lg">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-8 h-8 bg-cyan-600 rounded-full flex items-center justify-center text-white text-sm font-medium">
-                      DJ
-                    </div>
-                    <div>
-                      <p className="font-medium">David Johnson</p>
-                      <p className="text-sm text-muted-foreground">david.johnson@company.com</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <span className="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded-full text-sm font-medium">
-                      Standard
-                    </span>
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      onClick={() => handleEditUser({ name: "David Johnson", email: "david.johnson@company.com", role: "standard" })}
-                      className="h-8 w-8 p-0"
-                    >
-                      <Pencil className="w-4 h-4" />
-                    </Button>
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      onClick={() => handleDeleteUser({ name: "David Johnson", email: "david.johnson@company.com", role: "standard" })}
-                      className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  </div>
-                </div>
+                ))}
               </div>
             </CardContent>
           </Card>
