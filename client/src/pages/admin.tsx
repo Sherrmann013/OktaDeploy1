@@ -292,13 +292,19 @@ export default function Admin() {
         credentials: "include"
       });
       
+      const validGroups = mappingData.oktaGroups.filter(group => group.trim());
+      const mappings = validGroups.map(group => ({
+        appName: mappingData.appName,
+        oktaGroupName: group.trim(),
+        description: null
+      }));
+      
       const response = await fetch('/api/app-mappings/bulk', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
         body: JSON.stringify({
-          appName: mappingData.appName,
-          oktaGroups: mappingData.oktaGroups.filter(group => group.trim())
+          mappings: mappings
         })
       });
       
