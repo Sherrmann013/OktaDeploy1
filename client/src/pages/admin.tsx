@@ -345,6 +345,50 @@ export default function Admin() {
             </div>
           </>
         );
+      case 'microsoft':
+        return (
+          <>
+            <div className="grid gap-2">
+              <Label htmlFor="tenantId">Tenant ID</Label>
+              <Input
+                id="tenantId"
+                type="text"
+                value={integration.apiKeys.tenantId || ""}
+                onChange={(e) => setEditingIntegration(prev => prev ? { 
+                  ...prev, 
+                  apiKeys: { ...prev.apiKeys, tenantId: e.target.value }
+                } : null)}
+                placeholder="Enter Azure AD Tenant ID"
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="clientId">Client ID</Label>
+              <Input
+                id="clientId"
+                type="text"
+                value={integration.apiKeys.clientId || ""}
+                onChange={(e) => setEditingIntegration(prev => prev ? { 
+                  ...prev, 
+                  apiKeys: { ...prev.apiKeys, clientId: e.target.value }
+                } : null)}
+                placeholder="Enter Application (Client) ID"
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="clientSecret">Client Secret</Label>
+              <Input
+                id="clientSecret"
+                type="password"
+                value={integration.apiKeys.clientSecret || ""}
+                onChange={(e) => setEditingIntegration(prev => prev ? { 
+                  ...prev, 
+                  apiKeys: { ...prev.apiKeys, clientSecret: e.target.value }
+                } : null)}
+                placeholder="Enter Client Secret"
+              />
+            </div>
+          </>
+        );
       default:
         return (
           <div className="grid gap-2">
