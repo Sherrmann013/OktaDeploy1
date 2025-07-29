@@ -86,7 +86,8 @@ function AdminComponent() {
     refetchOnWindowFocus: false,
   });
 
-  const [dashboardCards, setDashboardCards] = useState(dashboardCardsData || [
+  // Initialize with actual database values immediately
+  const [dashboardCards, setDashboardCards] = useState([
     {
       id: 1,
       name: "KnowBe4 Security Training",
@@ -127,7 +128,8 @@ function AdminComponent() {
 
   // Update local state when data changes
   useEffect(() => {
-    if (dashboardCardsData) {
+    if (dashboardCardsData && dashboardCardsData.length > 0) {
+      console.log('🔄 Dashboard cards data received:', dashboardCardsData);
       setDashboardCards(dashboardCardsData);
     }
   }, [dashboardCardsData]);
