@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Pencil, Trash2, Check, ChevronsUpDown, Edit, X, Settings } from "lucide-react";
+import { Plus, Pencil, Trash2, Check, ChevronsUpDown, Edit, X, Settings, RefreshCw } from "lucide-react";
 import { LogoUploadModal } from "@/components/LogoUploadModal";
 
 interface SiteUser {
@@ -79,8 +79,9 @@ function AdminComponent() {
   const [isAddDashboardCardOpen, setIsAddDashboardCardOpen] = useState(false);
   const [draggedItem, setDraggedItem] = useState<number | null>(null);
   // Fetch dashboard cards from the database
-  const { data: dashboardCardsData, refetch: refetchDashboardCards } = useQuery({
+  const { data: dashboardCardsData, refetch: refetchDashboardCards, error: dashboardCardsError } = useQuery({
     queryKey: ["/api/dashboard-cards"],
+    retry: 3,
   });
 
   const [dashboardCards, setDashboardCards] = useState(dashboardCardsData || []);
@@ -91,6 +92,13 @@ function AdminComponent() {
       setDashboardCards(dashboardCardsData);
     }
   }, [dashboardCardsData]);
+
+  // Debug authentication issues
+  useEffect(() => {
+    if (dashboardCardsError) {
+      console.error('Dashboard cards fetch error:', dashboardCardsError);
+    }
+  }, [dashboardCardsError]);
 
   // Mutation to update dashboard card positions
   const updateCardPositionsMutation = useMutation({
@@ -1454,13 +1462,23 @@ function AdminComponent() {
                       <div className="bg-white dark:bg-gray-800 rounded-lg border dark:border-gray-700 p-6">
                         <div className="flex items-center justify-between mb-6">
                           <h4 className="text-lg font-semibold">Dashboard Layout</h4>
-                          <Button 
-                            onClick={() => setIsAddDashboardCardOpen(true)}
-                            className="bg-blue-600 hover:bg-blue-700 text-white flex items-center"
-                          >
-                            <Plus className="w-4 h-4 mr-2" />
-                            Add Integration
-                          </Button>
+                          <div className="flex gap-2">
+                            <Button 
+                              onClick={() => refetchDashboardCards()}
+                              variant="outline"
+                              className="flex items-center"
+                            >
+                              <RefreshCw className="w-4 h-4 mr-2" />
+                              Refresh
+                            </Button>
+                            <Button 
+                              onClick={() => setIsAddDashboardCardOpen(true)}
+                              className="bg-blue-600 hover:bg-blue-700 text-white flex items-center"
+                            >
+                              <Plus className="w-4 h-4 mr-2" />
+                              Add Integration
+                            </Button>
+                          </div>
                         </div>
                         
                         <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
@@ -1468,6 +1486,11 @@ function AdminComponent() {
                         </p>
 
                         {/* Dashboard Grid Preview */}
+                        {dashboardCardsError && (
+                          <div className="mb-4 p-3 bg-red-100 border border-red-300 text-red-700 rounded-lg">
+                            Error loading dashboard cards. Please refresh the page.
+                          </div>
+                        )}
                         <div className="grid grid-cols-2 gap-4">
                           {dashboardCards.map((card, index) => (
                             <div
@@ -1489,10 +1512,10 @@ function AdminComponent() {
                                 <div className="flex items-center gap-2">
                                   <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded flex items-center justify-center">
                                     <span className="text-white text-xs font-bold">
-                                      {card.name.charAt(0)}
+                                      {card.name ? card.name.charAt(0) : card.type?.charAt(0)?.toUpperCase() || '?'}
                                     </span>
                                   </div>
-                                  <span className="font-medium text-sm">{card.name}</span>
+                                  <span className="font-medium text-sm">{card.name || `${card.type} Integration`}</span>
                                 </div>
                                 <Button
                                   variant="ghost"
@@ -1504,7 +1527,11 @@ function AdminComponent() {
                                 </Button>
                               </div>
                               <div className="text-xs text-gray-500">
-                                {card.description}
+                                {card.type === 'knowbe4' ? 'KnowBe4 phishing simulation progress' :
+                                 card.type === 'sentinelone' ? 'SentinelOne device protection status' :
+                                 card.type === 'device_management' ? 'Addigy/Intune managed devices' :
+                                 card.type === 'jira' ? 'Jira Service Management tickets' :
+                                 'Integration dashboard card'}
                               </div>
                             </div>
                           ))}
