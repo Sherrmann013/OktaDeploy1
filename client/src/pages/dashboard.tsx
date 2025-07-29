@@ -1,47 +1,330 @@
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { AlertTriangle, Shield, Monitor, Ticket, RefreshCw } from "lucide-react";
+import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip } from 'recharts';
 
 export default function Dashboard() {
+  // KnowBe4 campaign data
+  const knowBe4Data = [
+    { name: 'Completed', value: 75, color: '#22c55e' },
+    { name: 'Remaining', value: 25, color: '#e5e7eb' }
+  ];
+
+  // SentinelOne agent status data
+  const sentinelData = [
+    { name: 'Active', value: 18, color: '#22c55e' },
+    { name: 'Offline', value: 1, color: '#ef4444' },
+    { name: 'Out of Date', value: 1, color: '#f59e0b' }
+  ];
+
+  // Device Management - Addigy data
+  const addigyData = [
+    { name: 'Compliant', value: 7, color: '#22c55e' },
+    { name: 'Non-Compliant', value: 0, color: '#ef4444' }
+  ];
+
+  // Device Management - Intune data
+  const intuneData = [
+    { name: 'Compliant', value: 11, color: '#22c55e' },
+    { name: 'Non-Compliant', value: 2, color: '#ef4444' }
+  ];
+
+  const CustomTooltip = ({ active, payload }: any) => {
+    if (active && payload && payload.length) {
+      return (
+        <div className="bg-white dark:bg-gray-800 p-2 border border-gray-200 dark:border-gray-700 rounded shadow">
+          <p className="text-sm">{`${payload[0].name}: ${payload[0].value}`}</p>
+        </div>
+      );
+    }
+    return null;
+  };
+
   return (
     <div className="p-6">
       <div className="mb-6">
-        <h1 className="text-3xl font-bold text-foreground">Dashboard</h1>
+        <h1 className="text-3xl font-bold text-foreground">Security Dashboard</h1>
         <p className="text-muted-foreground mt-2">
-          Welcome to the enterprise security management dashboard.
+          Comprehensive security monitoring and management overview.
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>Overview</CardTitle>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* KnowBe4 Security Training */}
+        <Card className="border-2 border-blue-200 dark:border-blue-800">
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                <Shield className="w-5 h-5 text-blue-600" />
+                <CardTitle className="text-blue-700 dark:text-blue-300">KnowBe4 Security Training</CardTitle>
+              </div>
+              <Button variant="outline" size="sm" className="h-8">
+                <RefreshCw className="w-3 h-3 mr-1" />
+                Refresh
+              </Button>
+            </div>
           </CardHeader>
-          <CardContent>
-            <p className="text-muted-foreground">
-              Dashboard content coming soon...
-            </p>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Active Campaigns</p>
+                <p className="text-2xl font-bold text-blue-600">1</p>
+              </div>
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Completion Rate</p>
+                <p className="text-2xl font-bold text-green-600">75%</p>
+              </div>
+            </div>
+            
+            <div className="h-32">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={knowBe4Data}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={20}
+                    outerRadius={50}
+                    paddingAngle={2}
+                    dataKey="value"
+                  >
+                    {knowBe4Data.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <Tooltip content={<CustomTooltip />} />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+            
+            <div className="text-center">
+              <Badge variant="secondary" className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">
+                Campaign Active
+              </Badge>
+            </div>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Quick Actions</CardTitle>
+        {/* SentinelOne */}
+        <Card className="border-2 border-purple-200 dark:border-purple-800">
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                <Shield className="w-5 h-5 text-purple-600" />
+                <CardTitle className="text-purple-700 dark:text-purple-300">SentinelOne</CardTitle>
+              </div>
+              <Button variant="outline" size="sm" className="h-8">
+                Full Scan
+              </Button>
+            </div>
           </CardHeader>
-          <CardContent>
-            <p className="text-muted-foreground">
-              Quick action items will be displayed here.
-            </p>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Threats Detected</p>
+                <p className="text-2xl font-bold text-green-600">0</p>
+              </div>
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Total Agents</p>
+                <p className="text-2xl font-bold text-blue-600">20</p>
+              </div>
+            </div>
+
+            <div>
+              <p className="text-sm font-medium text-muted-foreground mb-2">Agent Status</p>
+              <div className="h-32">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={sentinelData}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={20}
+                      outerRadius={50}
+                      paddingAngle={2}
+                      dataKey="value"
+                    >
+                      {sentinelData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))}
+                    </Pie>
+                    <Tooltip content={<CustomTooltip />} />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+
+            <div className="flex justify-between text-xs">
+              <span className="flex items-center">
+                <div className="w-2 h-2 bg-green-500 rounded-full mr-1"></div>
+                Active: 18
+              </span>
+              <span className="flex items-center">
+                <div className="w-2 h-2 bg-red-500 rounded-full mr-1"></div>
+                Offline: 1
+              </span>
+              <span className="flex items-center">
+                <div className="w-2 h-2 bg-yellow-500 rounded-full mr-1"></div>
+                Out of Date: 1
+              </span>
+            </div>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Recent Activity</CardTitle>
+        {/* Device Management */}
+        <Card className="border-2 border-orange-200 dark:border-orange-800">
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                <Monitor className="w-5 h-5 text-orange-600" />
+                <CardTitle className="text-orange-700 dark:text-orange-300">Device Management</CardTitle>
+              </div>
+            </div>
           </CardHeader>
-          <CardContent>
-            <p className="text-muted-foreground">
-              Recent system activity will be shown here.
-            </p>
+          <CardContent className="space-y-6">
+            {/* Addigy Section */}
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <h4 className="font-medium text-orange-600">Addigy</h4>
+                <Button variant="outline" size="sm" className="h-6 text-xs">
+                  Sync Addigy
+                </Button>
+              </div>
+              <div className="grid grid-cols-2 gap-4 mb-2">
+                <div>
+                  <p className="text-xs text-muted-foreground">Devices</p>
+                  <p className="text-lg font-bold text-green-600">7/7</p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Compliance</p>
+                  <p className="text-lg font-bold text-green-600">100%</p>
+                </div>
+              </div>
+              <div className="h-20">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={addigyData}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={15}
+                      outerRadius={35}
+                      paddingAngle={2}
+                      dataKey="value"
+                    >
+                      {addigyData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))}
+                    </Pie>
+                    <Tooltip content={<CustomTooltip />} />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+
+            {/* Intune Section */}
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <h4 className="font-medium text-blue-600">Intune</h4>
+                <Button variant="outline" size="sm" className="h-6 text-xs">
+                  Sync Intune
+                </Button>
+              </div>
+              <div className="grid grid-cols-2 gap-4 mb-2">
+                <div>
+                  <p className="text-xs text-muted-foreground">Devices</p>
+                  <p className="text-lg font-bold text-orange-600">11/13</p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Compliance</p>
+                  <p className="text-lg font-bold text-orange-600">85%</p>
+                </div>
+              </div>
+              <div className="h-20">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={intuneData}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={15}
+                      outerRadius={35}
+                      paddingAngle={2}
+                      dataKey="value"
+                    >
+                      {intuneData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))}
+                    </Pie>
+                    <Tooltip content={<CustomTooltip />} />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Jira Service Management */}
+        <Card className="border-2 border-blue-200 dark:border-blue-800">
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                <Ticket className="w-5 h-5 text-blue-600" />
+                <CardTitle className="text-blue-700 dark:text-blue-300">Jira Service Management</CardTitle>
+              </div>
+              <Button variant="outline" size="sm" className="h-8">
+                Create Ticket
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Open Issues</p>
+                <p className="text-2xl font-bold text-blue-600">7</p>
+              </div>
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Escalated Issues</p>
+                <p className="text-2xl font-bold text-green-600">0</p>
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <div className="flex items-center justify-between p-3 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
+                <div className="flex items-center space-x-2">
+                  <AlertTriangle className="w-4 h-4 text-red-600" />
+                  <span className="text-sm font-medium text-red-700 dark:text-red-300">SLA Violations</span>
+                </div>
+                <Badge variant="destructive">1</Badge>
+              </div>
+
+              <div className="space-y-2">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-muted-foreground">Recent Activity</span>
+                  <Button variant="ghost" size="sm" className="h-6 text-xs">
+                    <RefreshCw className="w-3 h-3 mr-1" />
+                    Refresh
+                  </Button>
+                </div>
+                
+                <div className="space-y-2 text-xs">
+                  <div className="flex justify-between">
+                    <span>High Priority</span>
+                    <span className="text-red-600 font-medium">1</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Medium Priority</span>
+                    <span className="text-yellow-600 font-medium">3</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Low Priority</span>
+                    <span className="text-green-600 font-medium">3</span>
+                  </div>
+                </div>
+              </div>
+            </div>
           </CardContent>
         </Card>
       </div>
