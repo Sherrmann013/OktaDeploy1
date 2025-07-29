@@ -82,9 +82,11 @@ A comprehensive React-based enterprise security management dashboard with robust
 - **Data Security Priority:** Self-hosting required due to sensitive enterprise data requirements
 - **Realistic Test Data:** Preference for authentic enterprise structure over generic placeholders
 - **Complete Solutions:** User prefers comprehensive implementations over incremental changes
+- **Dropdown Styling:** All Select/dropdown components must have explicit background colors (bg-white dark:bg-gray-800) and borders to prevent transparency issues
 
 ## Development Guidelines
 - **Data Integrity:** Always use authentic data sources, never synthetic/mock data
 - **Self-Hosting Focus:** All components must work in air-gapped environments
 - **Enterprise Security:** Implement proper session management, authentication, and data protection
 - **Documentation:** Maintain comprehensive deployment and configuration guides
+- **Dropdown Components:** Use CustomSelect components from @/components/ui/custom-select instead of regular Select components to prevent transparency issues. All dropdowns must have explicit bg-white dark:bg-gray-800 backgrounds and proper borders.

@@ -82,17 +82,22 @@ function AdminComponent() {
     {
       id: 1,
       name: 'User Overview',
-      description: 'Total users and employee types'
+      description: '20 total users across departments'
     },
     {
       id: 2,
       name: 'Security Training',
-      description: 'KnowBe4 training progress'
+      description: 'KnowBe4 phishing simulation progress'
     },
     {
       id: 3,
+      name: 'Endpoint Security',
+      description: 'SentinelOne device protection status'
+    },
+    {
+      id: 4,
       name: 'Device Management',
-      description: 'SentinelOne endpoint status'
+      description: 'Addigy/Intune managed devices'
     }
   ]);
 
@@ -1858,9 +1863,13 @@ function AdminComponent() {
                 <SelectTrigger>
                   <SelectValue placeholder="Select an integration" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
                   {integrationsData?.map((integration) => (
-                    <SelectItem key={integration.id} value={integration.displayName}>
+                    <SelectItem 
+                      key={integration.id} 
+                      value={integration.displayName}
+                      className="bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700"
+                    >
                       <div className="flex items-center gap-2">
                         {getIntegrationLogo(integration.name)}
                         {integration.displayName}
