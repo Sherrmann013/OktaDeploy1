@@ -1284,9 +1284,8 @@ function AdminComponent() {
                           )}
                         </div>
                         <div>
-                          <p className="font-medium">Current Logo</p>
                           <p className="text-sm text-gray-600 dark:text-gray-400">
-                            {logoSetting?.settingValue ? "Custom company logo" : "Default MAZE branding"}
+                            {logoSetting?.settingValue ? "Custom company logo" : "Default branding"}
                           </p>
                         </div>
                       </div>
@@ -1299,7 +1298,7 @@ function AdminComponent() {
                       </Button>
                     </div>
                     <p className="text-xs text-gray-500">
-                      Upload your company logo to replace the default MAZE branding. Recommended size: 200x50px or similar aspect ratio.
+                      Upload the company logo to replace the default branding. Recommended size: 200x50px or similar aspect ratio.
                     </p>
                   </div>
                 </div>
