@@ -75,7 +75,7 @@ function AdminComponent() {
   const [isDeleteUserOpen, setIsDeleteUserOpen] = useState(false);
   const [userToDelete, setUserToDelete] = useState<SiteUser | null>(null);
   const [isLogoUploadOpen, setIsLogoUploadOpen] = useState(false);
-  const [layoutTab, setLayoutTab] = useState("dashboard");
+  const [layoutTab, setLayoutTab] = useState("logo");
 
   // Get current logo setting
   const { data: logoSetting } = useQuery({
@@ -1262,62 +1262,21 @@ function AdminComponent() {
                 Customize your dashboard appearance, company branding, and layout preferences.
               </p>
               <div className="space-y-8">
-                {/* Company Logo Section */}
-                <div>
-                  <h4 className="font-medium mb-4 flex items-center">
-                    <Settings className="w-4 h-4 mr-2" />
-                    Company Logo
-                  </h4>
-                  <div className="space-y-4">
-                    <div className="flex items-center space-x-4">
-                      <div className="flex items-center space-x-3">
-                        <div className="w-16 h-16 bg-orange-500 rounded flex items-center justify-center overflow-hidden">
-                          {logoSetting?.settingValue ? (
-                            <img 
-                              src={logoSetting.settingValue} 
-                              alt="Company Logo" 
-                              className="w-full h-full object-contain"
-                            />
-                          ) : (
-                            <div className="w-16 h-16 bg-purple-600 rounded flex items-center justify-center overflow-hidden">
-                              <div className="relative w-14 h-14">
-                                <img 
-                                  src="/maze-logo.png" 
-                                  alt="MAZE Logo" 
-                                  className="w-14 h-14 absolute inset-0 object-contain"
-                                  style={{ filter: "invert(1)" }}
-                                />
-                                <div 
-                                  className="w-14 h-14 absolute inset-0" 
-                                  style={{ backgroundColor: "#f97316", mixBlendMode: "multiply" }}
-                                />
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                        <div>
-                          {logoSetting?.settingValue && (
-                            <p className="text-sm text-gray-600 dark:text-gray-400">
-                              Custom company logo
-                            </p>
-                          )}
-                        </div>
-                      </div>
-                      <Button 
-                        onClick={() => setIsLogoUploadOpen(true)}
-                        className="bg-blue-600 hover:bg-blue-700 text-white ml-auto"
-                      >
-                        <Settings className="w-4 h-4 mr-2" />
-                        Customize Logo
-                      </Button>
-                    </div>
 
-                  </div>
-                </div>
 
                 {/* Layout Customization Tabs */}
                 <div>
                   <div className="flex space-x-1 bg-gray-100 dark:bg-gray-800 p-1 rounded-lg">
+                    <button 
+                      onClick={() => setLayoutTab("logo")}
+                      className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+                        layoutTab === "logo" 
+                          ? "bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm" 
+                          : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100"
+                      }`}
+                    >
+                      Logo
+                    </button>
                     <button 
                       onClick={() => setLayoutTab("dashboard")}
                       className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
@@ -1360,43 +1319,43 @@ function AdminComponent() {
                     </button>
                   </div>
 
-
-                </div>
-
-                {/* Coming Soon Sections */}
-                <div className="space-y-6 opacity-60">
-                  <div>
-                    <h4 className="font-medium mb-3 text-gray-500">Card Layout & Monitoring (Coming Soon)</h4>
-                    <div className="grid grid-cols-2 gap-4">
-                      <Card className="p-4 border border-gray-200 dark:border-gray-700">
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm">KnowBe4 Security Training</span>
-                          <span className="text-xs text-gray-500">2x2</span>
+                  {/* Tab Content */}
+                  <div className="mt-6">
+                    {layoutTab === "logo" && (
+                      <div className="bg-white dark:bg-gray-800 rounded-lg border dark:border-gray-700 p-6">
+                        <h4 className="text-lg font-semibold mb-4">Company Logo</h4>
+                        <div className="flex items-center gap-4">
+                          <div className="flex-shrink-0">
+                            {logoSetting?.settingValue ? (
+                              <img 
+                                src={logoSetting.settingValue} 
+                                alt="Company logo" 
+                                className="max-h-12 w-auto object-contain"
+                              />
+                            ) : (
+                              <img 
+                                src="/logo.svg" 
+                                alt="MAZE Logo" 
+                                className="max-h-12 w-auto object-contain"
+                              />
+                            )}
+                          </div>
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            onClick={() => setIsLogoUploadOpen(true)}
+                            className="flex items-center"
+                          >
+                            <Settings className="w-4 h-4 mr-2" />
+                            Customize Logo
+                          </Button>
                         </div>
-                      </Card>
-                      <Card className="p-4 border border-gray-200 dark:border-gray-700">
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm">SentinelOne Endpoints</span>
-                          <span className="text-xs text-gray-500">2x1</span>
-                        </div>
-                      </Card>
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <h4 className="font-medium mb-3 text-gray-500">App Configuration (Coming Soon)</h4>
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between p-3 border rounded-lg dark:border-gray-700">
-                        <span className="text-sm">Available Apps Selection</span>
-                        <span className="text-xs text-gray-500">6 active</span>
                       </div>
-                      <div className="flex items-center justify-between p-3 border rounded-lg dark:border-gray-700">
-                        <span className="text-sm">User Creation Mappings</span>
-                        <span className="text-xs text-gray-500">Configurable</span>
-                      </div>
-                    </div>
+                    )}
                   </div>
                 </div>
+
+
               </div>
             </CardContent>
           </Card>
