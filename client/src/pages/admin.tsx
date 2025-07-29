@@ -21,9 +21,96 @@ export default function Admin() {
               <CardTitle>Site Access Management</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-muted-foreground">
-                Configure site access permissions and authentication settings.
+              <p className="text-muted-foreground mb-6">
+                Configure site access permissions and user access levels.
               </p>
+              
+              <div className="space-y-4">
+                <div className="flex items-center justify-between p-4 border rounded-lg">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white text-sm font-medium">
+                      CW
+                    </div>
+                    <div>
+                      <p className="font-medium">CW-Admin</p>
+                      <p className="text-sm text-muted-foreground">admin@mazetx.com</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <span className="px-3 py-1 bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 rounded-full text-sm font-medium">
+                      Admin
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between p-4 border rounded-lg">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-8 h-8 bg-green-600 rounded-full flex items-center justify-center text-white text-sm font-medium">
+                      ED
+                    </div>
+                    <div>
+                      <p className="font-medium">Emily Davis</p>
+                      <p className="text-sm text-muted-foreground">emily.davis@company.com</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <span className="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded-full text-sm font-medium">
+                      Standard
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between p-4 border rounded-lg">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center text-white text-sm font-medium">
+                      MW
+                    </div>
+                    <div>
+                      <p className="font-medium">Michael Wilson</p>
+                      <p className="text-sm text-muted-foreground">michael.wilson@company.com</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <span className="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded-full text-sm font-medium">
+                      Standard
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between p-4 border rounded-lg">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-8 h-8 bg-orange-600 rounded-full flex items-center justify-center text-white text-sm font-medium">
+                      SS
+                    </div>
+                    <div>
+                      <p className="font-medium">Sarah Smith</p>
+                      <p className="text-sm text-muted-foreground">sarah.smith@company.com</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <span className="px-3 py-1 bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 rounded-full text-sm font-medium">
+                      Admin
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between p-4 border rounded-lg">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-8 h-8 bg-cyan-600 rounded-full flex items-center justify-center text-white text-sm font-medium">
+                      DJ
+                    </div>
+                    <div>
+                      <p className="font-medium">David Johnson</p>
+                      <p className="text-sm text-muted-foreground">david.johnson@company.com</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <span className="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded-full text-sm font-medium">
+                      Standard
+                    </span>
+                  </div>
+                </div>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
