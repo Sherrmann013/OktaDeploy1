@@ -804,7 +804,7 @@ export default function Admin() {
                   </div>
                 ) : (
                   integrationsData.map((integration) => (
-                    <Card key={integration.id} className={`border-2 bg-card/50 ${
+                    <Card key={integration.id} className={`border-2 bg-slate-100 dark:bg-slate-800 ${
                       integration.status === "connected" 
                         ? "border-green-500" 
                         : integration.status === "pending"
