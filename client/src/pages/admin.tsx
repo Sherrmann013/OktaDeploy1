@@ -8,8 +8,10 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Pencil, Trash2 } from "lucide-react";
+import { Plus, Pencil, Trash2, Check, ChevronsUpDown } from "lucide-react";
 
 interface SiteUser {
   id: number;
@@ -50,6 +52,7 @@ export default function Admin() {
     accessLevel: ""
   });
   const [selectedIntegrationType, setSelectedIntegrationType] = useState("");
+  const [openIntegrationCombobox, setOpenIntegrationCombobox] = useState(false);
 
   const queryClient = useQueryClient();
 
@@ -198,6 +201,7 @@ export default function Admin() {
       queryClient.invalidateQueries({ queryKey: ["/api/integrations"] });
       setIsNewIntegrationOpen(false);
       setSelectedIntegrationType("");
+      setOpenIntegrationCombobox(false);
     }
   });
 
@@ -1024,45 +1028,65 @@ export default function Admin() {
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
               <Label htmlFor="integrationType">Select Integration Type</Label>
-              <Select
-                value={selectedIntegrationType}
-                onValueChange={setSelectedIntegrationType}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Choose an integration..." />
-                </SelectTrigger>
-                <SelectContent className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
-                  {availableIntegrations.map((integration) => (
-                    <SelectItem 
-                      key={integration.value} 
-                      value={integration.value}
-                      className="hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"
-                    >
+              <Popover open={openIntegrationCombobox} onOpenChange={setOpenIntegrationCombobox}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    role="combobox"
+                    aria-expanded={openIntegrationCombobox}
+                    className="w-full justify-between bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700"
+                  >
+                    {selectedIntegrationType ? (
                       <div className="flex items-center gap-2">
-                        {getIntegrationLogo(integration.value)}
-                        <span className="font-medium">{integration.label}</span>
+                        {getIntegrationLogo(selectedIntegrationType)}
+                        <span className="font-medium">
+                          {availableIntegrations.find(i => i.value === selectedIntegrationType)?.label}
+                        </span>
                       </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                    ) : (
+                      "Search and select an integration..."
+                    )}
+                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-full p-0">
+                  <Command>
+                    <CommandInput placeholder="Search integrations..." />
+                    <CommandList>
+                      <CommandEmpty>No integration found.</CommandEmpty>
+                      <CommandGroup>
+                        {availableIntegrations.map((integration) => (
+                          <CommandItem
+                            key={integration.value}
+                            value={integration.value}
+                            onSelect={() => {
+                              setSelectedIntegrationType(integration.value);
+                              setOpenIntegrationCombobox(false);
+                            }}
+                          >
+                            <div className="flex items-center gap-2">
+                              {getIntegrationLogo(integration.value)}
+                              <span className="font-medium">{integration.label}</span>
+                            </div>
+                            <Check
+                              className={`ml-auto h-4 w-4 ${
+                                selectedIntegrationType === integration.value ? "opacity-100" : "opacity-0"
+                              }`}
+                            />
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
             </div>
-            
-            {selectedIntegrationType && (
-              <div className="mt-4 p-4 bg-muted rounded-lg">
-                <div className="flex items-center gap-3">
-                  {getIntegrationLogo(selectedIntegrationType)}
-                  <h4 className="font-medium">
-                    {availableIntegrations.find(i => i.value === selectedIntegrationType)?.label}
-                  </h4>
-                </div>
-              </div>
-            )}
           </div>
           <div className="flex justify-end space-x-2">
             <Button variant="outline" onClick={() => {
               setIsNewIntegrationOpen(false);
               setSelectedIntegrationType("");
+              setOpenIntegrationCombobox(false);
             }}>
               Cancel
             </Button>
