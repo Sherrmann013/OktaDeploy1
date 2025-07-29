@@ -7,13 +7,6 @@ export default function Admin() {
 
   return (
     <div className="p-6">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-foreground">Admin Panel</h1>
-        <p className="text-muted-foreground mt-2">
-          System administration and configuration settings.
-        </p>
-      </div>
-
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="site-access">Site access</TabsTrigger>
