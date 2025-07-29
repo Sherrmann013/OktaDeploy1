@@ -192,11 +192,49 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
     form.setValue('password', password);
   };
 
-  // Auto-generate login from email 
+  // Auto-generate login from email and link department-based automations
   const handleEmailChange = (email: string) => {
     form.setValue('email', email);
     const username = email.split('@')[0];
     form.setValue('login', username);
+  };
+
+  // Auto-assign groups and apps based on department
+  const handleDepartmentChange = (department: string) => {
+    form.setValue('department', department);
+    
+    // Auto-assign groups based on department
+    let autoGroups: string[] = [];
+    let autoApps: string[] = [];
+    
+    switch (department) {
+      case 'IT Security':
+        autoGroups = ['R&D@mazetx.com', 'finfacit@mazetx.com'];
+        autoApps = ['Microsoft', 'Slack'];
+        break;
+      case 'IT':
+        autoGroups = ['R&D@mazetx.com'];
+        autoApps = ['Microsoft', 'Slack'];
+        break;
+      case 'Human Resources':
+        autoGroups = ['HR@mazetx.com'];
+        autoApps = ['Microsoft'];
+        break;
+      case 'Legal':
+        autoGroups = ['GXP@mazetx.com'];
+        autoApps = ['Microsoft'];
+        break;
+      case 'Executive':
+        autoGroups = ['HR@mazetx.com', 'finfacit@mazetx.com'];
+        autoApps = ['Microsoft', 'Slack', 'Zoom'];
+        break;
+      default:
+        autoGroups = [];
+        autoApps = ['Microsoft'];
+    }
+    
+    setSelectedGroups(autoGroups);
+    setSelectedApps(autoApps);
   };
 
   return (
@@ -251,7 +289,7 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
                       <div className="flex">
                         <Input 
                           placeholder="username" 
-                          value={field.value.split('@')[0]}
+                          value={field.value.split('@')[0] || ''}
                           onChange={(e) => handleEmailChange(`${e.target.value}@mazetx.com`)}
                           className="rounded-r-none border-r-0"
                         />
@@ -327,7 +365,10 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
                   <FormItem>
                     <FormLabel>Department</FormLabel>
                     <FormControl>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <Select onValueChange={(value) => {
+                        field.onChange(value);
+                        handleDepartmentChange(value);
+                      }} defaultValue={field.value}>
                         <SelectTrigger>
                           <SelectValue placeholder="Human Resources" />
                         </SelectTrigger>
