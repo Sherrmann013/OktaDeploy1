@@ -109,6 +109,14 @@ function AdminComponent() {
     }
   }, [dashboardCardsError, refetchDashboardCards]);
 
+  // Trigger fetch when dashboard tab is selected
+  useEffect(() => {
+    if (layoutTab === "dashboard") {
+      console.log('Dashboard tab selected, fetching cards...');
+      refetchDashboardCards();
+    }
+  }, [layoutTab, refetchDashboardCards]);
+
   // Mutation to update dashboard card positions
   const updateCardPositionsMutation = useMutation({
     mutationFn: async (cards: any[]) => {
