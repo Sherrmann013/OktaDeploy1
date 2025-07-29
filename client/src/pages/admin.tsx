@@ -40,8 +40,10 @@ export default function Admin() {
   const [isEditUserOpen, setIsEditUserOpen] = useState(false);
   const [isConfigureIntegrationOpen, setIsConfigureIntegrationOpen] = useState(false);
   const [isNewIntegrationOpen, setIsNewIntegrationOpen] = useState(false);
+  const [isDeleteIntegrationOpen, setIsDeleteIntegrationOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<SiteUser | null>(null);
   const [editingIntegration, setEditingIntegration] = useState<Integration | null>(null);
+  const [integrationToDelete, setIntegrationToDelete] = useState<Integration | null>(null);
   const [newUser, setNewUser] = useState({
     name: "",
     username: "",
@@ -310,8 +312,15 @@ export default function Admin() {
   };
 
   const handleDeleteIntegration = (integration: Integration) => {
-    if (confirm(`Are you sure you want to delete the ${integration.displayName} integration? This action cannot be undone.`)) {
-      deleteIntegrationMutation.mutate(integration.id);
+    setIntegrationToDelete(integration);
+    setIsDeleteIntegrationOpen(true);
+  };
+
+  const confirmDeleteIntegration = () => {
+    if (integrationToDelete) {
+      deleteIntegrationMutation.mutate(integrationToDelete.id);
+      setIsDeleteIntegrationOpen(false);
+      setIntegrationToDelete(null);
     }
   };
 
@@ -1067,6 +1076,39 @@ export default function Admin() {
               }}
             >
               {createIntegrationMutation.isPending ? "Adding..." : "Add Integration"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Integration Confirmation Dialog */}
+      <Dialog open={isDeleteIntegrationOpen} onOpenChange={setIsDeleteIntegrationOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Delete Integration</DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <p className="text-sm text-muted-foreground">
+              Are you sure you want to delete the <strong>{integrationToDelete?.displayName}</strong> integration? 
+              This action cannot be undone and all configuration data will be permanently removed.
+            </p>
+          </div>
+          <div className="flex justify-end space-x-2">
+            <Button 
+              variant="outline" 
+              onClick={() => {
+                setIsDeleteIntegrationOpen(false);
+                setIntegrationToDelete(null);
+              }}
+            >
+              Cancel
+            </Button>
+            <Button 
+              variant="destructive" 
+              onClick={confirmDeleteIntegration}
+              disabled={deleteIntegrationMutation.isPending}
+            >
+              {deleteIntegrationMutation.isPending ? "Deleting..." : "Delete Integration"}
             </Button>
           </div>
         </DialogContent>
