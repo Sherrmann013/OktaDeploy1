@@ -804,7 +804,7 @@ export default function Admin() {
                   </div>
                 ) : (
                   integrationsData.map((integration) => (
-                    <Card key={integration.id} className="bg-slate-100 dark:bg-slate-800">
+                    <Card key={integration.id} className="bg-slate-100 dark:bg-slate-800 border-0">
                       <CardContent className="p-4 bg-gray-50 dark:bg-gray-700 rounded-md">
                         <div className="flex items-center justify-between mb-3">
                           <div className="flex items-center gap-3">
