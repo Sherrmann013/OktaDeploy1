@@ -6,15 +6,18 @@ interface OktaConfig {
 }
 
 class OktaService {
-  private config: OktaConfig;
-  private baseUrl: string;
+  private config: OktaConfig | null = null;
+  private baseUrl: string = '';
+  private initialized: boolean = false;
 
-  constructor() {
+  private initialize() {
+    if (this.initialized) return;
+    
     const domain = process.env.OKTA_DOMAIN;
     const apiToken = process.env.OKTA_API_TOKEN;
 
     if (!domain || !apiToken) {
-      throw new Error('OKTA_DOMAIN and OKTA_API_TOKEN environment variables are required');
+      throw new Error('OKTA_DOMAIN and OKTA_API_TOKEN environment variables are required for OKTA operations');
     }
 
     this.config = {
@@ -23,17 +26,28 @@ class OktaService {
     };
     
     this.baseUrl = `https://${this.config.domain}/api/v1`;
+    this.initialized = true;
+  }
+
+  isConfigured(): boolean {
+    return !!(process.env.OKTA_DOMAIN && process.env.OKTA_API_TOKEN);
   }
 
   private async makeRequest(endpoint: string, options: { method?: string; body?: string; useEnhancedToken?: boolean } = {}): Promise<any> {
+    this.initialize();
+    
+    if (!this.config) {
+      throw new Error('OKTA service not properly configured');
+    }
+
     return new Promise((resolve, reject) => {
       const requestOptions = {
-        hostname: this.config.domain,
+        hostname: this.config!.domain,
         port: 443,
         path: `/api/v1${endpoint}`,
         method: options.method || 'GET',
         headers: {
-          'Authorization': `SSWS ${options.useEnhancedToken && process.env.OKTA_API_TOKEN_ENHANCED ? process.env.OKTA_API_TOKEN_ENHANCED : this.config.apiToken}`,
+          'Authorization': `SSWS ${options.useEnhancedToken && process.env.OKTA_API_TOKEN_ENHANCED ? process.env.OKTA_API_TOKEN_ENHANCED : this.config!.apiToken}`,
           'Accept': 'application/json',
           'Content-Type': 'application/json',
           ...(options.body && { 'Content-Length': Buffer.byteLength(options.body) })
@@ -89,6 +103,11 @@ class OktaService {
 
   async testConnection(): Promise<{ success: boolean; message: string; details?: any }> {
     try {
+      this.initialize();
+      if (!this.config) {
+        throw new Error('OKTA service not properly configured');
+      }
+      
       console.log(`Testing OKTA connection to: ${this.config.domain}`);
       
       // Test connection by making a simple API call to get org info
@@ -928,4 +947,5 @@ class OktaService {
   }
 }
 
+// Export a safe instance that can be used even when OKTA isn't configured
 export const oktaService = new OktaService();

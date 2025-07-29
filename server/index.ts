@@ -13,6 +13,24 @@ if (!process.env.KNOWBE4_BASE_URL) {
   process.env.KNOWBE4_BASE_URL = "https://us.api.knowbe4.com/v1";
 }
 
+// Set default OKTA environment variables if not provided (for local development)
+if (!process.env.OKTA_DOMAIN) {
+  process.env.OKTA_DOMAIN = "dev-local.okta.com";
+  console.log("OKTA_DOMAIN not set - using default for local development");
+}
+if (!process.env.OKTA_API_TOKEN) {
+  process.env.OKTA_API_TOKEN = "dev-token-placeholder";
+  console.log("OKTA_API_TOKEN not set - using placeholder for local development");
+}
+if (!process.env.SESSION_SECRET) {
+  process.env.SESSION_SECRET = "dev-session-secret-change-in-production";
+  console.log("SESSION_SECRET not set - using default for local development");
+}
+if (!process.env.KNOWBE4_GRAPH_API_KEY) {
+  process.env.KNOWBE4_GRAPH_API_KEY = "dev-knowbe4-placeholder";
+  console.log("KNOWBE4_GRAPH_API_KEY not set - using placeholder for local development");
+}
+
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));

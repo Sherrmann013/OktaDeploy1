@@ -11,6 +11,21 @@ import { syncUserGroupsAndEmployeeType, syncAllUsersGroupsAndEmployeeTypes } fro
 import { bulkSyncUserGroupsAndEmployeeTypes } from "./bulk-groups-sync";
 import { EmployeeTypeSync } from "./employee-type-sync";
 
+// Helper function to safely execute OKTA operations
+async function safeOktaOperation<T>(operation: () => Promise<T>, fallbackValue: T): Promise<T> {
+  if (!oktaService.isConfigured()) {
+    console.warn('OKTA not configured - returning fallback value');
+    return fallbackValue;
+  }
+  
+  try {
+    return await operation();
+  } catch (error) {
+    console.error('OKTA operation failed:', error);
+    return fallbackValue;
+  }
+}
+
 // Helper function to determine employee type from user groups
 function determineEmployeeTypeFromGroups(userGroups: any[], employeeTypeApps: Set<string>): string | null {
   // Check if user has access to any employee type applications
@@ -53,7 +68,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log(`Debugging access for user: ${email}`);
       
       // Check if user exists in OKTA
-      const oktaUser = await oktaService.getUserByEmail(email);
+      const oktaUser = await safeOktaOperation(
+        () => oktaService.getUserByEmail(email),
+        null
+      );
       
       if (!oktaUser) {
         return res.json({

@@ -18,9 +18,12 @@ interface GraphQLResponse<T = any> {
 }
 
 class KnowBe4GraphService {
-  private config: KnowBe4GraphConfig;
+  private config: KnowBe4GraphConfig | null = null;
+  private initialized: boolean = false;
 
-  constructor() {
+  private initialize() {
+    if (this.initialized) return;
+    
     const apiKey = process.env.KNOWBE4_GRAPH_API_KEY;
     const graphApiUrl = process.env.KNOWBE4_GRAPH_API_URL;
     
@@ -45,16 +48,27 @@ class KnowBe4GraphService {
     }
 
     if (!finalApiKey) {
-      throw new Error('KNOWBE4_GRAPH_API_KEY environment variable is required');
+      throw new Error('KNOWBE4_GRAPH_API_KEY environment variable is required for KnowBe4 operations');
     }
 
     this.config = {
       apiKey: finalApiKey,
       baseUrl,
     };
+    this.initialized = true;
+  }
+
+  isConfigured(): boolean {
+    return !!process.env.KNOWBE4_GRAPH_API_KEY && process.env.KNOWBE4_GRAPH_API_KEY !== "dev-knowbe4-placeholder";
   }
 
   private async makeGraphQLRequest<T = any>(query: GraphQLQuery): Promise<GraphQLResponse<T>> {
+    this.initialize();
+    
+    if (!this.config) {
+      throw new Error('KnowBe4 service not properly configured');
+    }
+    
     try {
       console.log('Making GraphQL request to:', this.config.baseUrl);
       console.log('Using API key (first 10 chars):', this.config.apiKey.substring(0, 10) + '...');
