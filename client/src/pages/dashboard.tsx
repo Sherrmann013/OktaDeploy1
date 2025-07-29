@@ -167,7 +167,7 @@ export default function Dashboard() {
               <CardTitle className="text-orange-700 dark:text-orange-300">Device Management</CardTitle>
             </div>
           </CardHeader>
-          <CardContent>
+          <CardContent className="relative">
             <div className="grid grid-cols-2 gap-6">
               {/* Addigy Section */}
               <div>
@@ -239,6 +239,9 @@ export default function Dashboard() {
                 </div>
               </div>
             </div>
+            
+            {/* Vertical Divider */}
+            <div className="absolute left-1/2 top-0 bottom-0 w-px bg-border transform -translate-x-1/2"></div>
           </CardContent>
         </Card>
 
