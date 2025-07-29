@@ -950,9 +950,13 @@ export default function Admin() {
                 <SelectTrigger>
                   <SelectValue placeholder="Choose an integration..." />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
                   {availableIntegrations.map((integration) => (
-                    <SelectItem key={integration.value} value={integration.value}>
+                    <SelectItem 
+                      key={integration.value} 
+                      value={integration.value}
+                      className="hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"
+                    >
                       <div className="flex items-center gap-2">
                         {getIntegrationLogo(integration.value)}
                         <span className="font-medium">{integration.label}</span>
