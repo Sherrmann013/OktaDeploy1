@@ -552,6 +552,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
         }
         
+        // Disable caching for sorted results to ensure fresh data
+        res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+        res.set('Pragma', 'no-cache');
+        res.set('Expires', '0');
+        
         res.json({
           users: transformedUsers,
           total: filteredUsers.length,
@@ -572,9 +577,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
           employeeType: employeeTypeFilter,
           limit,
           offset,
+          sortBy,
+          sortOrder,
         });
         
         const totalPages = Math.ceil(result.total / limit);
+        
+        // Disable caching for sorted results to ensure fresh data
+        res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+        res.set('Pragma', 'no-cache');
+        res.set('Expires', '0');
         
         res.json({
           users: result.users,

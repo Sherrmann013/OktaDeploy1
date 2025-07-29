@@ -14,6 +14,8 @@ export interface IStorage {
     employeeType?: string;
     limit?: number;
     offset?: number;
+    sortBy?: string;
+    sortOrder?: 'asc' | 'desc';
   }): Promise<{ users: User[]; total: number }>;
   createUser(user: InsertUser & { oktaId?: string }): Promise<User>;
   updateUser(id: number, updates: UpdateUser): Promise<User | undefined>;
@@ -223,6 +225,8 @@ export class DatabaseStorage implements IStorage {
     employeeType?: string;
     limit?: number;
     offset?: number;
+    sortBy?: string;
+    sortOrder?: 'asc' | 'desc';
   }): Promise<{ users: User[]; total: number }> {
     let whereConditions: any[] = [];
 
@@ -260,8 +264,47 @@ export class DatabaseStorage implements IStorage {
       .where(whereClause);
     const total = totalResult.length;
 
-    // Get paginated results
-    let query = db.select().from(users).where(whereClause).orderBy(desc(users.created));
+    // Get paginated results with dynamic sorting
+    let query = db.select().from(users).where(whereClause);
+    
+    // Apply sorting
+    if (options?.sortBy && options?.sortOrder) {
+      const isDesc = options.sortOrder === 'desc';
+      switch (options.sortBy) {
+        case 'firstName':
+          query = isDesc ? query.orderBy(desc(users.firstName)) : query.orderBy(users.firstName);
+          break;
+        case 'lastName':
+          query = isDesc ? query.orderBy(desc(users.lastName)) : query.orderBy(users.lastName);
+          break;
+        case 'email':
+          query = isDesc ? query.orderBy(desc(users.email)) : query.orderBy(users.email);
+          break;
+        case 'title':
+          query = isDesc ? query.orderBy(desc(users.title)) : query.orderBy(users.title);
+          break;
+        case 'department':
+          query = isDesc ? query.orderBy(desc(users.department)) : query.orderBy(users.department);
+          break;
+        case 'employeeType':
+          query = isDesc ? query.orderBy(desc(users.employeeType)) : query.orderBy(users.employeeType);
+          break;
+        case 'status':
+          query = isDesc ? query.orderBy(desc(users.status)) : query.orderBy(users.status);
+          break;
+        case 'lastLogin':
+          query = isDesc ? query.orderBy(desc(users.lastLogin)) : query.orderBy(users.lastLogin);
+          break;
+        case 'lastUpdated':
+          query = isDesc ? query.orderBy(desc(users.lastUpdated)) : query.orderBy(users.lastUpdated);
+          break;
+        default:
+          query = query.orderBy(desc(users.created));
+      }
+    } else {
+      // Default sorting
+      query = query.orderBy(desc(users.created));
+    }
 
     if (options?.limit) {
       query = query.limit(options.limit);
