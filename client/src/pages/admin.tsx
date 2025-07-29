@@ -196,12 +196,12 @@ export default function Admin() {
                       <div className="grid gap-2">
                         <Label htmlFor="accessLevel">Access Level</Label>
                         <Select value={newUser.accessLevel} onValueChange={(value) => setNewUser({ ...newUser, accessLevel: value })}>
-                          <SelectTrigger className="bg-gray-800 border-gray-600">
+                          <SelectTrigger className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600">
                             <SelectValue placeholder="Select access level" />
                           </SelectTrigger>
-                          <SelectContent className="z-50 bg-gray-800 border-gray-600">
-                            <SelectItem value="standard" className="focus:bg-gray-700">Standard</SelectItem>
-                            <SelectItem value="admin" className="focus:bg-gray-700">Admin</SelectItem>
+                          <SelectContent className="z-50 bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600">
+                            <SelectItem value="standard" className="focus:bg-gray-100 dark:focus:bg-gray-700">Standard</SelectItem>
+                            <SelectItem value="admin" className="focus:bg-gray-100 dark:focus:bg-gray-700">Admin</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
