@@ -1333,18 +1333,25 @@ function AdminComponent() {
                                 className="max-h-12 w-auto object-contain"
                               />
                             ) : (
-                              <img 
-                                src="/logo.svg" 
-                                alt="MAZE Logo" 
-                                className="max-h-12 w-auto object-contain"
-                              />
+                              <div className="w-16 h-16 bg-purple-600 rounded flex items-center justify-center overflow-hidden">
+                                <div className="relative w-14 h-14">
+                                  <img 
+                                    src="/maze-logo.png" 
+                                    alt="MAZE Logo" 
+                                    className="w-14 h-14 absolute inset-0 object-contain"
+                                    style={{ filter: "invert(1)" }}
+                                  />
+                                  <div 
+                                    className="w-14 h-14 absolute inset-0" 
+                                    style={{ backgroundColor: "#f97316", mixBlendMode: "multiply" }}
+                                  />
+                                </div>
+                              </div>
                             )}
                           </div>
                           <Button 
-                            variant="outline" 
-                            size="sm" 
                             onClick={() => setIsLogoUploadOpen(true)}
-                            className="flex items-center"
+                            className="bg-blue-600 hover:bg-blue-700 text-white flex items-center"
                           >
                             <Settings className="w-4 h-4 mr-2" />
                             Customize Logo
