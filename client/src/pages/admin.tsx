@@ -1607,7 +1607,7 @@ function AdminComponent() {
                 
                 {showIntegrationDropdown && (
                   <div className="absolute top-full left-0 right-0 mt-1 max-h-[200px] overflow-y-auto bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg z-50">
-                    {availableIntegrations
+                    {availableIntegrationTypes
                       .filter(integration => 
                         !integrationSearchTerm || integration.label.toLowerCase().includes(integrationSearchTerm.toLowerCase())
                       )
@@ -1626,7 +1626,7 @@ function AdminComponent() {
                         </div>
                       ))
                     }
-                    {availableIntegrations.filter(integration => 
+                    {availableIntegrationTypes.filter(integration => 
                       !integrationSearchTerm || integration.label.toLowerCase().includes(integrationSearchTerm.toLowerCase())
                     ).length === 0 && (
                       <div className="p-3 text-muted-foreground">No integration found.</div>
@@ -1641,7 +1641,7 @@ function AdminComponent() {
                 <div className="flex items-center gap-3">
                   {getIntegrationLogo(selectedIntegrationType)}
                   <h4 className="font-medium">
-                    {availableIntegrations.find(i => i.value === selectedIntegrationType)?.label}
+                    {availableIntegrationTypes.find(i => i.value === selectedIntegrationType)?.label}
                   </h4>
                 </div>
               </div>
@@ -1659,7 +1659,7 @@ function AdminComponent() {
             <Button 
               disabled={!selectedIntegrationType || createIntegrationMutation.isPending}
               onClick={() => {
-                const selectedIntegration = availableIntegrations.find(i => i.value === selectedIntegrationType);
+                const selectedIntegration = availableIntegrationTypes.find(i => i.value === selectedIntegrationType);
                 if (selectedIntegration) {
                   createIntegrationMutation.mutate({
                     name: selectedIntegration.value,
@@ -1850,7 +1850,7 @@ function AdminComponent() {
             <div className="grid gap-2">
               <Label htmlFor="cardName">Integration Name</Label>
               <Select onValueChange={(value) => {
-                const integration = integrations?.find(i => i.displayName === value);
+                const integration = integrationsData?.find(i => i.displayName === value);
                 if (integration) {
                   addDashboardCard(integration.displayName, integration.description || 'Integration dashboard card');
                 }
@@ -1859,7 +1859,7 @@ function AdminComponent() {
                   <SelectValue placeholder="Select an integration" />
                 </SelectTrigger>
                 <SelectContent>
-                  {integrations?.map((integration) => (
+                  {integrationsData?.map((integration) => (
                     <SelectItem key={integration.id} value={integration.displayName}>
                       <div className="flex items-center gap-2">
                         {getIntegrationLogo(integration.name)}
