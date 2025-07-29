@@ -4,6 +4,9 @@ import connectPg from "connect-pg-simple";
 import { storage } from "./storage";
 import { oktaService } from "./okta-service";
 import { AuditLogger } from "./audit";
+import { db } from './db';
+import { siteAccessUsers } from '@shared/schema';
+import { eq } from 'drizzle-orm';
 
 export function getSession() {
   const sessionTtl = 7 * 24 * 60 * 60 * 1000; // 1 week
@@ -323,11 +326,28 @@ export const isAuthenticated: RequestHandler = (req, res, next) => {
   next();
 };
 
-export const requireAdmin: RequestHandler = (req, res, next) => {
+export const requireAdmin: RequestHandler = async (req, res, next) => {
   const user = (req.session as any).user;
   if (!user) {
     return res.status(401).json({ message: "Unauthorized" });
   }
-  // Add admin check logic here if needed
-  next();
+  
+  // Check if user has admin access level
+  try {
+    if (user.role === "admin") {
+      // Local admin user
+      return next();
+    }
+    
+    // Check site access user level
+    const [siteUser] = await db.select().from(siteAccessUsers).where(eq(siteAccessUsers.email, user.email));
+    if (siteUser && siteUser.accessLevel === 'admin') {
+      return next();
+    }
+    
+    return res.status(403).json({ message: "Admin access required" });
+  } catch (error) {
+    console.error('Error checking admin access:', error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
 };

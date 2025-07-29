@@ -62,7 +62,9 @@ interface AppMapping {
   lastUpdated: string;
 }
 
-export default function Admin() {
+import ProtectedRoute from "@/components/ProtectedRoute";
+
+function AdminComponent() {
   const [activeTab, setActiveTab] = useState("site-access");
   const [isNewUserOpen, setIsNewUserOpen] = useState(false);
   const [isEditUserOpen, setIsEditUserOpen] = useState(false);
@@ -1706,5 +1708,13 @@ export default function Admin() {
         </DialogContent>
       </Dialog>
     </div>
+  );
+}
+
+export default function Admin() {
+  return (
+    <ProtectedRoute requireAdmin={true}>
+      <AdminComponent />
+    </ProtectedRoute>
   );
 }

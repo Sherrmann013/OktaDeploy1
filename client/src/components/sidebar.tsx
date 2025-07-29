@@ -3,25 +3,30 @@ import { Link, useLocation } from "wouter";
 import { Shield, Users, UsersRound, Grid3x3, Settings, RotateCcw, LayoutDashboard, Gauge } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/hooks/use-auth";
+import { useRoleAccess } from "@/hooks/useRoleAccess";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect, useRef } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 
-const navigation = [
-  { name: "Dashboard", href: "/dashboard", icon: Gauge, current: true },
-  { name: "Users", href: "/users", icon: Users, current: false },
-  { name: "Admin", href: "/admin", icon: Settings, current: false },
-];
+// Navigation items will be filtered based on user access level
 
 export default function Sidebar() {
   const [location] = useLocation();
   const { user: currentUser } = useAuth();
+  const { canViewAdmin } = useRoleAccess();
   const [showUserDropdown, setShowUserDropdown] = useState(false);
   const { toast } = useToast();
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Filter navigation based on user access level
+  const navigation = [
+    { name: "Dashboard", href: "/dashboard", icon: Gauge, current: true },
+    { name: "Users", href: "/users", icon: Users, current: false },
+    ...(canViewAdmin ? [{ name: "Admin", href: "/admin", icon: Settings, current: false }] : []),
+  ];
 
   // Close dropdown when clicking outside
   useEffect(() => {
