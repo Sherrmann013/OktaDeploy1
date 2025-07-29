@@ -142,17 +142,7 @@ function AdminComponent() {
     setIsAddDashboardCardOpen(false);
   };
 
-  // Available integrations for dashboard cards
-  const availableIntegrations = [
-    { id: 1, name: 'User Analytics', description: 'User count and activity metrics' },
-    { id: 2, name: 'Security Training', description: 'KnowBe4 training progress' },
-    { id: 3, name: 'Device Management', description: 'SentinelOne endpoint status' },
-    { id: 4, name: 'Access Control', description: 'OKTA user and group management' },
-    { id: 5, name: 'Compliance Status', description: 'Security compliance overview' },
-    { id: 6, name: 'Threat Detection', description: 'Security alerts and incidents' },
-    { id: 7, name: 'Asset Management', description: 'IT asset inventory and status' },
-    { id: 8, name: 'Performance Metrics', description: 'System performance dashboard' }
-  ];
+
 
   // Get current logo setting
   const { data: logoSetting } = useQuery({
@@ -1860,24 +1850,20 @@ function AdminComponent() {
             <div className="grid gap-2">
               <Label htmlFor="cardName">Integration Name</Label>
               <Select onValueChange={(value) => {
-                const integration = availableIntegrations.find(i => i.name === value);
+                const integration = integrations?.find(i => i.displayName === value);
                 if (integration) {
-                  addDashboardCard(integration.name, integration.description);
+                  addDashboardCard(integration.displayName, integration.description || 'Integration dashboard card');
                 }
               }}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select an integration" />
                 </SelectTrigger>
                 <SelectContent>
-                  {availableIntegrations.map((integration) => (
-                    <SelectItem key={integration.id} value={integration.name}>
+                  {integrations?.map((integration) => (
+                    <SelectItem key={integration.id} value={integration.displayName}>
                       <div className="flex items-center gap-2">
-                        <div className="w-6 h-6 bg-gradient-to-br from-blue-500 to-purple-600 rounded flex items-center justify-center">
-                          <span className="text-white text-xs font-bold">
-                            {integration.name.charAt(0)}
-                          </span>
-                        </div>
-                        {integration.name}
+                        {getIntegrationLogo(integration.name)}
+                        {integration.displayName}
                       </div>
                     </SelectItem>
                   ))}
