@@ -626,7 +626,13 @@ export default function Admin() {
                   </div>
                 ) : (
                   integrationsData.map((integration) => (
-                    <Card key={integration.id} className="border-2">
+                    <Card key={integration.id} className={`border-2 ${
+                      integration.status === "connected" 
+                        ? "border-green-500" 
+                        : integration.status === "pending"
+                        ? "border-yellow-500"
+                        : "border-red-500"
+                    }`}>
                       <CardContent className="p-4">
                         <div className="flex items-center justify-between mb-3">
                           <h3 className="font-semibold text-lg">{integration.displayName}</h3>
