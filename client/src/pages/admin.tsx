@@ -59,6 +59,8 @@ export default function Admin() {
   const [isConfigureIntegrationOpen, setIsConfigureIntegrationOpen] = useState(false);
   const [isNewIntegrationOpen, setIsNewIntegrationOpen] = useState(false);
   const [isDeleteIntegrationOpen, setIsDeleteIntegrationOpen] = useState(false);
+  const [isDeleteUserOpen, setIsDeleteUserOpen] = useState(false);
+  const [userToDelete, setUserToDelete] = useState<SiteUser | null>(null);
   const [editingUser, setEditingUser] = useState<SiteUser | null>(null);
   const [editingIntegration, setEditingIntegration] = useState<Integration | null>(null);
   const [integrationToDelete, setIntegrationToDelete] = useState<Integration | null>(null);
@@ -166,8 +168,16 @@ export default function Admin() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/site-access-users"] });
+      setIsDeleteUserOpen(false);
+      setUserToDelete(null);
     }
   });
+
+  const confirmDeleteUser = () => {
+    if (userToDelete) {
+      deleteUserMutation.mutate(userToDelete.id);
+    }
+  };
 
   // Update integration mutation
   const updateIntegrationMutation = useMutation({
@@ -266,9 +276,8 @@ export default function Admin() {
   };
 
   const handleDeleteUser = (user: SiteUser) => {
-    if (confirm(`Are you sure you want to remove ${user.name} from site access?`)) {
-      deleteUserMutation.mutate(user.id);
-    }
+    setUserToDelete(user);
+    setIsDeleteUserOpen(true);
   };
 
   const handleAssignUser = async () => {
@@ -686,9 +695,11 @@ export default function Admin() {
   return (
     <div className="p-6">
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="site-access">Site access</TabsTrigger>
           <TabsTrigger value="integrations">Integrations</TabsTrigger>
+          <TabsTrigger value="apps">Apps</TabsTrigger>
+          <TabsTrigger value="layout">Layout</TabsTrigger>
           <TabsTrigger value="audit-logs">Audit Logs</TabsTrigger>
         </TabsList>
 
@@ -1019,8 +1030,146 @@ export default function Admin() {
           </Card>
         </TabsContent>
 
+        <TabsContent value="apps" className="mt-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Application Management</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground mb-4">
+                Manage application assignments, permissions, and user access across all integrated platforms.
+              </p>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <Card className="p-4">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900 flex items-center justify-center">
+                      <svg className="w-6 h-6 text-blue-600 dark:text-blue-400" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 2l10 6-10 6-10-6 10-6z"/>
+                        <path d="M2 12l10 6 10-6"/>
+                        <path d="M2 18l10 6 10-6"/>
+                      </svg>
+                    </div>
+                    <div>
+                      <h4 className="font-semibold">Active Applications</h4>
+                      <p className="text-sm text-muted-foreground">24 apps</p>
+                    </div>
+                  </div>
+                </Card>
+                <Card className="p-4">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-10 h-10 rounded-lg bg-green-100 dark:bg-green-900 flex items-center justify-center">
+                      <svg className="w-6 h-6 text-green-600 dark:text-green-400" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                        <circle cx="9" cy="7" r="4"/>
+                        <path d="m22 2-5 10-3-3-3 3-5-10"/>
+                      </svg>
+                    </div>
+                    <div>
+                      <h4 className="font-semibold">User Assignments</h4>
+                      <p className="text-sm text-muted-foreground">156 assignments</p>
+                    </div>
+                  </div>
+                </Card>
+                <Card className="p-4">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-10 h-10 rounded-lg bg-orange-100 dark:bg-orange-900 flex items-center justify-center">
+                      <svg className="w-6 h-6 text-orange-600 dark:text-orange-400" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M9 12l2 2 4-4"/>
+                        <path d="M21 12c.552 0 1-.448 1-1V5c0-.552-.448-1-1-1H3c-.552 0-1 .448-1 1v6c0 .552.448 1 1 1h18z"/>
+                        <path d="M21 16H3c-.552 0-1 .448-1 1v2c0 .552.448 1 1 1h18c.552 0 1-.448 1-1v-2c0-.552-.448-1-1-1z"/>
+                      </svg>
+                    </div>
+                    <div>
+                      <h4 className="font-semibold">Pending Approvals</h4>
+                      <p className="text-sm text-muted-foreground">3 pending</p>
+                    </div>
+                  </div>
+                </Card>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="layout" className="mt-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Dashboard Layout & Preferences</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground mb-6">
+                Customize dashboard appearance, layout preferences, and administrative interface settings.
+              </p>
+              <div className="space-y-6">
+                <div>
+                  <h4 className="font-medium mb-3">Theme Settings</h4>
+                  <div className="grid grid-cols-2 gap-4">
+                    <Card className="p-4 border-2 border-purple-200 dark:border-purple-700">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-4 h-4 rounded-full bg-gradient-to-r from-purple-600 to-blue-600"></div>
+                        <span className="font-medium">Dark Theme (Active)</span>
+                      </div>
+                    </Card>
+                    <Card className="p-4 border border-gray-200 dark:border-gray-700 opacity-60">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-4 h-4 rounded-full bg-gradient-to-r from-gray-200 to-gray-400"></div>
+                        <span>Light Theme</span>
+                      </div>
+                    </Card>
+                  </div>
+                </div>
+                <div>
+                  <h4 className="font-medium mb-3">Sidebar Configuration</h4>
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between p-3 border rounded-lg dark:border-gray-700">
+                      <span>Purple Accent Color</span>
+                      <span className="text-sm text-green-600 dark:text-green-400">✓ Active</span>
+                    </div>
+                    <div className="flex items-center justify-between p-3 border rounded-lg dark:border-gray-700">
+                      <span>MAZE Branding</span>
+                      <span className="text-sm text-green-600 dark:text-green-400">✓ Enabled</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
 
       </Tabs>
+
+      {/* Delete User Confirmation Dialog */}
+      <Dialog open={isDeleteUserOpen} onOpenChange={setIsDeleteUserOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Remove Site Access</DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <p className="text-sm text-muted-foreground">
+              Are you sure you want to remove <strong>{userToDelete?.name}</strong> from site access? 
+              This action cannot be undone and will immediately revoke their access to the admin dashboard.
+            </p>
+          </div>
+          <div className="flex justify-end space-x-2">
+            <Button 
+              variant="outline" 
+              onClick={() => {
+                setIsDeleteUserOpen(false);
+                setUserToDelete(null);
+              }}
+            >
+              Cancel
+            </Button>
+            <Button 
+              variant="outline"
+              onClick={confirmDeleteUser}
+              disabled={deleteUserMutation.isPending}
+              className="border-red-300 text-red-600 hover:bg-red-50 dark:border-red-700 dark:text-red-400 dark:hover:bg-red-950"
+            >
+              {deleteUserMutation.isPending ? "Removing..." : "Remove Access"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Configure Integration Dialog */}
       <Dialog open={isConfigureIntegrationOpen} onOpenChange={setIsConfigureIntegrationOpen}>
