@@ -26,7 +26,6 @@ export default function Admin() {
   const [newUser, setNewUser] = useState({
     name: "",
     username: "",
-    description: "",
     accessLevel: ""
   });
 
@@ -106,7 +105,7 @@ export default function Admin() {
       };
       setSiteUsers(prev => [...prev, newSiteUser]);
       setIsNewUserOpen(false);
-      setNewUser({ name: "", username: "", description: "", accessLevel: "" });
+      setNewUser({ name: "", username: "", accessLevel: "" });
     }
   };
 
@@ -167,16 +166,7 @@ export default function Admin() {
                           placeholder="Enter username"
                         />
                       </div>
-                      <div className="grid gap-2">
-                        <Label htmlFor="description">Description</Label>
-                        <Textarea
-                          id="description"
-                          value={newUser.description}
-                          onChange={(e) => setNewUser({ ...newUser, description: e.target.value })}
-                          placeholder="Enter user description"
-                          rows={3}
-                        />
-                      </div>
+
                       <div className="grid gap-2">
                         <Label htmlFor="accessLevel">Access Level</Label>
                         <Select value={newUser.accessLevel} onValueChange={(value) => setNewUser({ ...newUser, accessLevel: value })}>
