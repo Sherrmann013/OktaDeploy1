@@ -696,25 +696,6 @@ export default function Admin() {
             <DialogTitle>Configure {editingIntegration?.displayName}</DialogTitle>
           </DialogHeader>
           <div className="grid gap-4 py-4">
-            <div className="grid gap-2">
-              <Label htmlFor="status">Status</Label>
-              <Select
-                value={editingIntegration?.status || ""}
-                onValueChange={(value: "connected" | "pending" | "disconnected") => 
-                  setEditingIntegration(prev => prev ? { ...prev, status: value } : null)
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="connected">Connected</SelectItem>
-                  <SelectItem value="pending">Pending</SelectItem>
-                  <SelectItem value="disconnected">Disconnected</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            
             {renderApiKeyFields(editingIntegration)}
           </div>
           <div className="flex justify-end space-x-2">
