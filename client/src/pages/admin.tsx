@@ -44,25 +44,53 @@ export default function Admin() {
   // Create site access user mutation
   const createUserMutation = useMutation({
     mutationFn: async (userData: { name: string; email: string; accessLevel: "standard" | "admin"; initials: string; color: string }) => {
-      return apiRequest("/api/site-access-users", {
+      console.log('🔄 Making API request to create user:', userData);
+      const response = await fetch("/api/site-access-users", {
         method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        credentials: "include",
         body: JSON.stringify(userData)
       });
+      
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || `HTTP ${response.status}: ${response.statusText}`);
+      }
+      
+      return response.json();
     },
     onSuccess: () => {
+      console.log('✅ User created successfully, refreshing data');
       queryClient.invalidateQueries({ queryKey: ["/api/site-access-users"] });
       setIsNewUserOpen(false);
       setNewUser({ name: "", username: "", accessLevel: "" });
+    },
+    onError: (error) => {
+      console.error('❌ Failed to create user:', error);
+      alert(`Failed to create user: ${error.message || 'Unknown error'}`);
     }
   });
 
   // Update site access user mutation
   const updateUserMutation = useMutation({
     mutationFn: async ({ id, userData }: { id: number; userData: { name: string; email: string; accessLevel: "standard" | "admin"; initials: string; color: string } }) => {
-      return apiRequest(`/api/site-access-users/${id}`, {
+      const response = await fetch(`/api/site-access-users/${id}`, {
         method: "PUT",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        credentials: "include",
         body: JSON.stringify(userData)
       });
+      
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || `HTTP ${response.status}: ${response.statusText}`);
+      }
+      
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/site-access-users"] });
@@ -74,9 +102,17 @@ export default function Admin() {
   // Delete site access user mutation
   const deleteUserMutation = useMutation({
     mutationFn: async (id: number) => {
-      return apiRequest(`/api/site-access-users/${id}`, {
-        method: "DELETE"
+      const response = await fetch(`/api/site-access-users/${id}`, {
+        method: "DELETE",
+        credentials: "include"
       });
+      
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || `HTTP ${response.status}: ${response.statusText}`);
+      }
+      
+      return response.status === 204 ? null : response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/site-access-users"] });
@@ -224,9 +260,13 @@ export default function Admin() {
                         Cancel
                       </Button>
                       <Button 
-                        onClick={handleAssignUser}
+                        type="button"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          handleAssignUser();
+                        }}
                         disabled={createUserMutation.isPending}
-                        className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white"
+                        className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-50"
                       >
                         {createUserMutation.isPending ? "Assigning..." : "Assign User"}
                       </Button>
