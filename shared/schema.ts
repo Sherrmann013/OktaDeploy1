@@ -148,3 +148,27 @@ export const insertAuditLogSchema = createInsertSchema(auditLogs).omit({
 
 export type InsertAuditLog = z.infer<typeof insertAuditLogSchema>;
 export type AuditLog = typeof auditLogs.$inferSelect;
+
+// App mappings table for OKTA application-to-group relationships
+export const appMappings = pgTable('app_mappings', {
+  id: serial('id').primaryKey(),
+  appName: varchar('app_name', { length: 100 }).notNull().unique(),
+  oktaGroupName: varchar('okta_group_name', { length: 200 }).notNull(),
+  description: text('description'),
+  status: varchar('status', { length: 20 }).notNull().default('active'), // active, inactive
+  created: timestamp('created').defaultNow().notNull(),
+  lastUpdated: timestamp('last_updated').defaultNow().notNull(),
+});
+
+export const insertAppMappingSchema = createInsertSchema(appMappings).omit({
+  id: true,
+  created: true,
+  lastUpdated: true,
+}).extend({
+  appName: z.string().min(1, "App name is required"),
+  oktaGroupName: z.string().min(1, "OKTA group name is required"),
+  status: z.enum(["active", "inactive"], { required_error: "Status is required" }).default("active"),
+});
+
+export type InsertAppMapping = z.infer<typeof insertAppMappingSchema>;
+export type AppMapping = typeof appMappings.$inferSelect;

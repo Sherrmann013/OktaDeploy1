@@ -52,6 +52,16 @@ interface AuditLog {
   timestamp: string;
 }
 
+interface AppMapping {
+  id: number;
+  appName: string;
+  oktaGroupName: string;
+  description: string | null;
+  status: "active" | "inactive";
+  created: string;
+  lastUpdated: string;
+}
+
 export default function Admin() {
   const [activeTab, setActiveTab] = useState("site-access");
   const [isNewUserOpen, setIsNewUserOpen] = useState(false);
@@ -63,6 +73,8 @@ export default function Admin() {
   const [userToDelete, setUserToDelete] = useState<SiteUser | null>(null);
   const [editingUser, setEditingUser] = useState<SiteUser | null>(null);
   const [editingIntegration, setEditingIntegration] = useState<Integration | null>(null);
+  const [isNewMappingOpen, setIsNewMappingOpen] = useState(false);
+  const [newMapping, setNewMapping] = useState({ appName: "", oktaGroupName: "", description: "" });
   const [integrationToDelete, setIntegrationToDelete] = useState<Integration | null>(null);
   const [newUser, setNewUser] = useState({
     name: "",
@@ -91,6 +103,12 @@ export default function Admin() {
   const { data: auditLogsData, isLoading: auditLogsLoading } = useQuery<{logs: AuditLog[], pagination: any}>({
     queryKey: ["/api/audit-logs"],
     refetchInterval: 10000
+  });
+
+  // Fetch app mappings from database
+  const { data: appMappingsData = [], isLoading: appMappingsLoading } = useQuery<AppMapping[]>({
+    queryKey: ["/api/app-mappings"],
+    refetchInterval: 30000
   });
 
   // Create site access user mutation
@@ -178,6 +196,41 @@ export default function Admin() {
       deleteUserMutation.mutate(userToDelete.id);
     }
   };
+
+  // App mapping mutations
+  const createAppMappingMutation = useMutation({
+    mutationFn: async (mappingData: { appName: string; oktaGroupName: string; description?: string }) => {
+      const response = await fetch("/api/app-mappings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify(mappingData)
+      });
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || `HTTP ${response.status}: ${response.statusText}`);
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/app-mappings"] });
+      setIsNewMappingOpen(false);
+      setNewMapping({ appName: "", oktaGroupName: "", description: "" });
+    }
+  });
+
+  const deleteAppMappingMutation = useMutation({
+    mutationFn: async (id: number) => {
+      const response = await fetch(`/api/app-mappings/${id}`, {
+        method: "DELETE",
+        credentials: "include"
+      });
+      if (!response.ok) throw new Error("Failed to delete app mapping");
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/app-mappings"] });
+    }
+  });
 
   // Update integration mutation
   const updateIntegrationMutation = useMutation({
@@ -1040,108 +1093,87 @@ export default function Admin() {
                     Configure application-to-group mappings for OKTA integration
                   </p>
                 </div>
-                <Button className="bg-blue-600 hover:bg-blue-700 text-white">
+                <Button 
+                  className="bg-blue-600 hover:bg-blue-700 text-white"
+                  onClick={() => setIsNewMappingOpen(true)}
+                >
                   <Plus className="w-4 h-4 mr-2" />
                   Add Mapping
                 </Button>
               </div>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
-                  <div className="flex items-center space-x-4">
-                    <div className="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900 flex items-center justify-center">
-                      <svg className="w-6 h-6 text-blue-600 dark:text-blue-400" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M21.698 10.658l1.302 2.317-1.302 2.317-1.518.87-1.302-2.317-1.302 2.317-1.518-.87 1.302-2.317-1.302-2.317 1.518-.87 1.302 2.317 1.302-2.317 1.518.87z"/>
-                        <path d="M12 2c5.523 0 10 4.477 10 10s-4.477 10-10 10S2 17.523 2 12 6.477 2 12 2z"/>
-                      </svg>
-                    </div>
-                    <div>
-                      <h4 className="font-semibold">Zoom</h4>
-                      <p className="text-sm text-muted-foreground">Video conferencing platform</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    <div className="text-right">
-                      <p className="text-sm font-medium">MTX-SG-ZOOM-USER</p>
-                      <p className="text-xs text-muted-foreground">OKTA Security Group</p>
-                    </div>
-                    <span className="px-2 py-1 bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200 text-xs rounded-full">
-                      Active
-                    </span>
-                    <Button variant="outline" size="sm">
-                      <Edit className="w-4 h-4" />
-                    </Button>
-                  </div>
+              {appMappingsLoading ? (
+                <div className="text-center py-8">
+                  <div className="text-muted-foreground">Loading app mappings...</div>
                 </div>
-
-                <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
-                  <div className="flex items-center space-x-4">
-                    <div className="w-10 h-10 rounded-lg bg-purple-100 dark:bg-purple-900 flex items-center justify-center">
-                      <svg className="w-6 h-6 text-purple-600 dark:text-purple-400" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M5.04 15.165c0 .375.12.735.335 1.035l6.61 9.645c.24.35.62.565 1.015.565s.775-.215 1.015-.565l6.61-9.645c.215-.3.335-.66.335-1.035V8.835c0-.375-.12-.735-.335-1.035L14.015.155C13.775-.195 13.395-.41 13-.41s-.775.215-1.015.565L5.375 7.8c-.215.3-.335.66-.335 1.035v6.33z"/>
-                      </svg>
-                    </div>
-                    <div>
-                      <h4 className="font-semibold">Slack</h4>
-                      <p className="text-sm text-muted-foreground">Team communication platform</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    <div className="text-right">
-                      <p className="text-sm font-medium">MTX-SG-SLACK-USER</p>
-                      <p className="text-xs text-muted-foreground">OKTA Security Group</p>
-                    </div>
-                    <span className="px-2 py-1 bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200 text-xs rounded-full">
-                      Active
-                    </span>
-                    <Button variant="outline" size="sm">
-                      <Edit className="w-4 h-4" />
-                    </Button>
-                  </div>
+              ) : appMappingsData.length === 0 ? (
+                <div className="text-center py-8">
+                  <div className="text-muted-foreground">No app mappings configured</div>
+                  <p className="text-sm text-muted-foreground mt-2">
+                    Create your first mapping to connect applications with OKTA security groups
+                  </p>
                 </div>
-
-                <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
-                  <div className="flex items-center space-x-4">
-                    <div className="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900 flex items-center justify-center">
-                      <svg className="w-6 h-6 text-blue-600 dark:text-blue-400" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M22.46 6c-.77.35-1.6.58-2.46.69.88-.53 1.56-1.37 1.88-2.38-.83.5-1.75.85-2.72 1.05C18.37 4.5 17.26 4 16 4c-2.35 0-4.27 1.92-4.27 4.29 0 .34.04.67.11.98C8.28 9.09 5.11 7.38 3 4.79c-.37.63-.58 1.37-.58 2.15 0 1.49.75 2.81 1.91 3.56-.71 0-1.37-.2-1.95-.5v.03c0 2.08 1.48 3.82 3.44 4.21a4.22 4.22 0 0 1-1.93.07 4.28 4.28 0 0 0 4 2.98 8.521 8.521 0 0 1-5.33 1.84c-.34 0-.68-.02-1.02-.06C3.44 20.29 5.7 21 8.12 21 16 21 20.33 14.46 20.33 8.79c0-.19 0-.37-.01-.56.84-.6 1.56-1.36 2.14-2.23z"/>
-                      </svg>
+              ) : (
+                <div className="space-y-4">
+                  {appMappingsData.map((mapping) => (
+                    <div key={mapping.id} className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                      <div className="flex items-center space-x-4">
+                        <div className="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900 flex items-center justify-center">
+                          <span className="text-sm font-semibold text-blue-600 dark:text-blue-400">
+                            {mapping.appName.charAt(0).toUpperCase()}
+                          </span>
+                        </div>
+                        <div>
+                          <h4 className="font-semibold">{mapping.appName}</h4>
+                          <p className="text-sm text-muted-foreground">{mapping.description || 'No description'}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center space-x-3">
+                        <div className="text-right">
+                          <p className="text-sm font-medium">{mapping.oktaGroupName}</p>
+                          <p className="text-xs text-muted-foreground">OKTA Security Group</p>
+                        </div>
+                        <span className={`px-2 py-1 text-xs rounded-full ${
+                          mapping.status === 'active' 
+                            ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+                            : 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200'
+                        }`}>
+                          {mapping.status === 'active' ? 'Active' : 'Inactive'}
+                        </span>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:text-red-300 dark:hover:bg-red-950"
+                          onClick={() => deleteAppMappingMutation.mutate(mapping.id)}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
                     </div>
-                    <div>
-                      <h4 className="font-semibold">Microsoft 365</h4>
-                      <p className="text-sm text-muted-foreground">Office productivity suite</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    <div className="text-right">
-                      <p className="text-sm font-medium">MTX-SG-MICROSOFT-E3</p>
-                      <p className="text-xs text-muted-foreground">OKTA Security Group</p>
-                    </div>
-                    <span className="px-2 py-1 bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200 text-xs rounded-full">
-                      Active
-                    </span>
-                    <Button variant="outline" size="sm">
-                      <Edit className="w-4 h-4" />
-                    </Button>
-                  </div>
+                  ))}
                 </div>
-              </div>
+              )}
 
               <div className="mt-6 p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
                 <h4 className="font-medium mb-2">Mapping Overview</h4>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Total Mappings:</span>
-                    <span className="font-medium">3</span>
+                    <span className="font-medium">{appMappingsData.length}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Active Groups:</span>
-                    <span className="font-medium">3</span>
+                    <span className="font-medium">{appMappingsData.filter(m => m.status === 'active').length}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Last Updated:</span>
-                    <span className="font-medium">Today</span>
+                    <span className="font-medium">
+                      {appMappingsData.length > 0 
+                        ? new Date(Math.max(...appMappingsData.map(m => new Date(m.lastUpdated).getTime()))).toLocaleDateString()
+                        : 'N/A'
+                      }
+                    </span>
                   </div>
                 </div>
               </div>
@@ -1389,6 +1421,77 @@ export default function Admin() {
               className="border-red-300 text-red-600 hover:bg-red-50 dark:border-red-700 dark:text-red-400 dark:hover:bg-red-950"
             >
               {deleteIntegrationMutation.isPending ? "Deleting..." : "Delete Integration"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add App Mapping Dialog */}
+      <Dialog open={isNewMappingOpen} onOpenChange={setIsNewMappingOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Add App Mapping</DialogTitle>
+            <p className="text-sm text-muted-foreground">
+              Create a new mapping between an application and OKTA security group
+            </p>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <label htmlFor="appName" className="text-sm font-medium">
+                Application Name
+              </label>
+              <input
+                id="appName"
+                type="text"
+                placeholder="e.g., Zoom, Slack, Microsoft 365"
+                value={newMapping.appName}
+                onChange={(e) => setNewMapping({ ...newMapping, appName: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            <div className="space-y-2">
+              <label htmlFor="oktaGroupName" className="text-sm font-medium">
+                OKTA Group Name
+              </label>
+              <input
+                id="oktaGroupName"
+                type="text"
+                placeholder="e.g., MTX-SG-ZOOM-USER"
+                value={newMapping.oktaGroupName}
+                onChange={(e) => setNewMapping({ ...newMapping, oktaGroupName: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            <div className="space-y-2">
+              <label htmlFor="description" className="text-sm font-medium">
+                Description (Optional)
+              </label>
+              <input
+                id="description"
+                type="text"
+                placeholder="e.g., Video conferencing platform"
+                value={newMapping.description}
+                onChange={(e) => setNewMapping({ ...newMapping, description: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+          </div>
+          <div className="flex justify-end space-x-2">
+            <Button 
+              variant="outline" 
+              onClick={() => {
+                setIsNewMappingOpen(false);
+                setNewMapping({ appName: "", oktaGroupName: "", description: "" });
+              }}
+            >
+              Cancel
+            </Button>
+            <Button 
+              onClick={() => createAppMappingMutation.mutate(newMapping)}
+              disabled={!newMapping.appName || !newMapping.oktaGroupName || createAppMappingMutation.isPending}
+              className="bg-blue-600 hover:bg-blue-700 text-white"
+            >
+              {createAppMappingMutation.isPending ? "Creating..." : "Create Mapping"}
             </Button>
           </div>
         </DialogContent>

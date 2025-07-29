@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertUserSchema, updateUserSchema, insertSiteAccessUserSchema, siteAccessUsers, insertIntegrationSchema, integrations, auditLogs } from "@shared/schema";
+import { insertUserSchema, updateUserSchema, insertSiteAccessUserSchema, siteAccessUsers, insertIntegrationSchema, integrations, auditLogs, insertAppMappingSchema, appMappings } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc } from "drizzle-orm";
 import { AuditLogger, getAuditLogs } from "./audit";
@@ -2806,6 +2806,149 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching audit logs:", error);
       res.status(500).json({ message: "Failed to fetch audit logs" });
+    }
+  });
+
+  // App Mappings API endpoints
+
+  // Get all app mappings
+  app.get("/api/app-mappings", isAuthenticated, requireAdmin, async (req, res) => {
+    try {
+      const mappings = await db.select().from(appMappings).orderBy(desc(appMappings.created));
+      res.json(mappings);
+    } catch (error) {
+      console.error("Error fetching app mappings:", error);
+      res.status(500).json({ message: "Failed to fetch app mappings" });
+    }
+  });
+
+  // Create new app mapping
+  app.post("/api/app-mappings", isAuthenticated, requireAdmin, async (req, res) => {
+    try {
+      const mappingData = insertAppMappingSchema.parse(req.body);
+      
+      // Check if app name already exists
+      const existingMapping = await db.select().from(appMappings).where(eq(appMappings.appName, mappingData.appName));
+      if (existingMapping.length > 0) {
+        return res.status(400).json({ message: "App mapping with this name already exists" });
+      }
+
+      const [newMapping] = await db.insert(appMappings).values(mappingData).returning();
+      
+      // Log the audit event
+      await AuditLogger.log({
+        req,
+        action: "CREATE",
+        resourceType: "APP_MAPPING",
+        resourceId: newMapping.id.toString(),
+        resourceName: newMapping.appName,
+        details: {
+          action: "Created new app mapping",
+          appName: newMapping.appName,
+          oktaGroupName: newMapping.oktaGroupName
+        },
+        newValues: mappingData
+      });
+
+      res.status(201).json(newMapping);
+    } catch (error) {
+      console.error("Error creating app mapping:", error);
+      res.status(500).json({ message: "Failed to create app mapping" });
+    }
+  });
+
+  // Update app mapping
+  app.put("/api/app-mappings/:id", isAuthenticated, requireAdmin, async (req, res) => {
+    try {
+      const id = z.coerce.number().parse(req.params.id);
+      const mappingData = insertAppMappingSchema.partial().parse(req.body);
+      
+      // Get the existing mapping for audit log
+      const [existingMapping] = await db.select().from(appMappings).where(eq(appMappings.id, id));
+      if (!existingMapping) {
+        return res.status(404).json({ message: "App mapping not found" });
+      }
+
+      // Check if app name already exists (excluding current mapping)
+      if (mappingData.appName) {
+        const duplicateMapping = await db.select().from(appMappings)
+          .where(eq(appMappings.appName, mappingData.appName));
+        if (duplicateMapping.length > 0 && duplicateMapping[0].id !== id) {
+          return res.status(400).json({ message: "App mapping with this name already exists" });
+        }
+      }
+
+      const [updatedMapping] = await db.update(appMappings)
+        .set({ ...mappingData, lastUpdated: new Date() })
+        .where(eq(appMappings.id, id))
+        .returning();
+
+      // Log the audit event
+      await AuditLogger.log({
+        req,
+        action: "UPDATE",
+        resourceType: "APP_MAPPING",
+        resourceId: updatedMapping.id.toString(),
+        resourceName: updatedMapping.appName,
+        details: { action: "Updated app mapping" },
+        oldValues: existingMapping,
+        newValues: updatedMapping
+      });
+
+      res.json(updatedMapping);
+    } catch (error) {
+      console.error("Error updating app mapping:", error);
+      res.status(500).json({ message: "Failed to update app mapping" });
+    }
+  });
+
+  // Delete app mapping
+  app.delete("/api/app-mappings/:id", isAuthenticated, requireAdmin, async (req, res) => {
+    try {
+      const id = z.coerce.number().parse(req.params.id);
+      
+      // Get the existing mapping for audit log
+      const [existingMapping] = await db.select().from(appMappings).where(eq(appMappings.id, id));
+      if (!existingMapping) {
+        return res.status(404).json({ message: "App mapping not found" });
+      }
+
+      await db.delete(appMappings).where(eq(appMappings.id, id));
+
+      // Log the audit event
+      await AuditLogger.log({
+        req,
+        action: "DELETE",
+        resourceType: "APP_MAPPING",
+        resourceId: existingMapping.id.toString(),
+        resourceName: existingMapping.appName,
+        details: { action: "Deleted app mapping" },
+        oldValues: existingMapping
+      });
+
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting app mapping:", error);
+      res.status(500).json({ message: "Failed to delete app mapping" });
+    }
+  });
+
+  // Get OKTA group for specific app (helper endpoint for user creation)
+  app.get("/api/app-mappings/lookup/:appName", isAuthenticated, async (req, res) => {
+    try {
+      const appName = req.params.appName;
+      const [mapping] = await db.select().from(appMappings)
+        .where(eq(appMappings.appName, appName))
+        .where(eq(appMappings.status, "active"));
+      
+      if (!mapping) {
+        return res.status(404).json({ message: "App mapping not found" });
+      }
+
+      res.json({ oktaGroupName: mapping.oktaGroupName });
+    } catch (error) {
+      console.error("Error looking up app mapping:", error);
+      res.status(500).json({ message: "Failed to lookup app mapping" });
     }
   });
 
