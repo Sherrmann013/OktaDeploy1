@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Pencil, Trash2, Check, ChevronsUpDown, Edit } from "lucide-react";
+import { Plus, Pencil, Trash2, Check, ChevronsUpDown, Edit, X } from "lucide-react";
 
 interface SiteUser {
   id: number;
@@ -1459,41 +1459,36 @@ export default function Admin() {
               />
             </div>
             <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <label className="text-sm font-medium">
-                  OKTA Group Names
-                </label>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={addGroupInput}
-                  className="text-xs px-2 py-1"
-                >
-                  <Plus className="w-3 h-3 mr-1" />
-                  Add Group
-                </Button>
-              </div>
+              <label className="text-sm font-medium">
+                OKTA Group Names
+              </label>
               <div className="space-y-2">
                 {newMapping.oktaGroups.map((group, index) => (
                   <div key={index} className="flex items-center space-x-2">
-                    <input
-                      type="text"
-                      placeholder="e.g., MTX-SG-ZOOM-USER"
-                      value={group}
-                      onChange={(e) => updateGroupInput(index, e.target.value)}
-                      className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                    {newMapping.oktaGroups.length > 1 && (
-                      <Button
+                    <div className="flex-1 relative">
+                      <input
+                        type="text"
+                        placeholder="e.g., MTX-SG-ZOOM-USER"
+                        value={group}
+                        onChange={(e) => updateGroupInput(index, e.target.value)}
+                        className="w-full pl-3 pr-8 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                      <button
                         type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={() => removeGroupInput(index)}
-                        className="px-2 py-1 text-red-600 hover:text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:text-red-300 dark:hover:bg-red-950"
+                        onClick={addGroupInput}
+                        className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-blue-500 focus:outline-none"
                       >
-                        <X className="w-3 h-3" />
-                      </Button>
+                        <Plus className="w-4 h-4" />
+                      </button>
+                    </div>
+                    {newMapping.oktaGroups.length > 1 && (
+                      <button
+                        type="button"
+                        onClick={() => removeGroupInput(index)}
+                        className="text-gray-400 hover:text-red-500 focus:outline-none p-1"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
                     )}
                   </div>
                 ))}
