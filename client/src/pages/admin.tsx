@@ -1360,37 +1360,7 @@ function AdminComponent() {
                     </button>
                   </div>
 
-                  {/* Tab Content */}
-                  <div className="mt-6 p-4 border rounded-lg dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
-                    {layoutTab === "dashboard" && (
-                      <div>
-                        <h5 className="font-medium mb-2">Dashboard Customization</h5>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">Configure dashboard layout, widget positioning, and card sizes.</p>
-                        <div className="mt-4 text-xs text-gray-500">Coming soon</div>
-                      </div>
-                    )}
-                    {layoutTab === "new-user" && (
-                      <div>
-                        <h5 className="font-medium mb-2">New User Settings</h5>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">Customize user creation workflow and default app assignments.</p>
-                        <div className="mt-4 text-xs text-gray-500">Coming soon</div>
-                      </div>
-                    )}
-                    {layoutTab === "profile" && (
-                      <div>
-                        <h5 className="font-medium mb-2">Profile Configuration</h5>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">Set default profile fields and data display preferences.</p>
-                        <div className="mt-4 text-xs text-gray-500">Coming soon</div>
-                      </div>
-                    )}
-                    {layoutTab === "monitoring" && (
-                      <div>
-                        <h5 className="font-medium mb-2">Monitoring Layout</h5>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">Configure security monitoring displays and alert preferences.</p>
-                        <div className="mt-4 text-xs text-gray-500">Coming soon</div>
-                      </div>
-                    )}
-                  </div>
+
                 </div>
 
                 {/* Coming Soon Sections */}
