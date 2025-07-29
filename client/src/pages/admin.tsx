@@ -159,16 +159,27 @@ function AdminComponent() {
   // Mutation to update dashboard card positions
   const updateCardPositionsMutation = useMutation({
     mutationFn: async (cards: any[]) => {
+      console.log('🔄 Updating card positions:', cards);
       const response = await fetch("/api/dashboard-cards/positions", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ cards }),
       });
-      if (!response.ok) throw new Error("Failed to update card positions");
-      return response.json();
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('❌ Failed to update positions:', response.status, errorText);
+        throw new Error(`Failed to update card positions: ${response.status} ${errorText}`);
+      }
+      const result = await response.json();
+      console.log('✅ Card positions updated successfully:', result);
+      return result;
     },
     onSuccess: () => {
+      console.log('🔄 Refetching dashboard cards after position update...');
       refetchDashboardCards();
+    },
+    onError: (error) => {
+      console.error('❌ Mutation error:', error);
     },
   });
 
@@ -210,6 +221,7 @@ function AdminComponent() {
     setDraggedItem(null);
     
     // Update positions in the database
+    console.log('🎯 Calling mutation with cards:', updatedCards.map(card => ({ id: card.id, position: card.position })));
     updateCardPositionsMutation.mutate(
       updatedCards.map(card => ({ id: card.id, position: card.position }))
     );
