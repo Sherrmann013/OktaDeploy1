@@ -860,7 +860,10 @@ export default function Admin() {
             <CardContent className="pt-6">
               <div className="flex justify-between items-center mb-6">
                 <h2 className="text-2xl font-bold">Integrations</h2>
-                <Button onClick={() => setIsNewIntegrationOpen(true)}>
+                <Button 
+                  onClick={() => setIsNewIntegrationOpen(true)}
+                  className="bg-primary hover:bg-primary/90 text-primary-foreground"
+                >
                   <Plus className="w-4 h-4 mr-2" />
                   New Integration
                 </Button>
