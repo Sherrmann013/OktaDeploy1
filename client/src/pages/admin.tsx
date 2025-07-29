@@ -1460,7 +1460,7 @@ export default function Admin() {
             </div>
             <div className="space-y-2">
               <label className="text-sm font-medium">
-                OKTA Group Names
+                OKTA Group Name(s)
               </label>
               <div className="space-y-2">
                 {newMapping.oktaGroups.map((group, index) => (
@@ -1520,7 +1520,7 @@ export default function Admin() {
             </Button>
             <Button 
               onClick={() => createAppMappingMutation.mutate(newMapping)}
-              disabled={!newMapping.appName || !newMapping.oktaGroups.some(g => g.trim()) || createAppMappingMutation.isPending}
+              disabled={!newMapping.appName.trim() || !newMapping.oktaGroups.some(g => g.trim()) || createAppMappingMutation.isPending}
               className="bg-blue-600 hover:bg-blue-700 text-white"
             >
               {createAppMappingMutation.isPending ? "Creating..." : "Create Mapping"}
