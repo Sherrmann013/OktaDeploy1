@@ -63,3 +63,28 @@ export const updateUserSchema = createInsertSchema(users).partial().omit({
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type UpdateUser = z.infer<typeof updateUserSchema>;
 export type User = typeof users.$inferSelect;
+
+// Site access users table
+export const siteAccessUsers = pgTable("site_access_users", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  email: text("email").notNull().unique(),
+  accessLevel: text("access_level").notNull(), // 'standard' or 'admin'
+  initials: text("initials").notNull(),
+  color: text("color").notNull(),
+  created: timestamp("created").defaultNow(),
+  lastUpdated: timestamp("last_updated").defaultNow(),
+});
+
+export const insertSiteAccessUserSchema = createInsertSchema(siteAccessUsers).omit({
+  id: true,
+  created: true,
+  lastUpdated: true,
+}).extend({
+  name: z.string().min(1, "Name is required"),
+  email: z.string().email("Invalid email address"),
+  accessLevel: z.enum(["standard", "admin"], { required_error: "Access level is required" }),
+});
+
+export type InsertSiteAccessUser = z.infer<typeof insertSiteAccessUserSchema>;
+export type SiteAccessUser = typeof siteAccessUsers.$inferSelect;

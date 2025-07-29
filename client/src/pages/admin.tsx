@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -10,12 +12,14 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Plus, Pencil, Trash2 } from "lucide-react";
 
 interface SiteUser {
-  id: string;
+  id: number;
   name: string;
   email: string;
   accessLevel: "standard" | "admin";
   initials: string;
   color: string;
+  created?: Date;
+  lastUpdated?: Date;
 }
 
 export default function Admin() {
@@ -29,49 +33,55 @@ export default function Admin() {
     accessLevel: ""
   });
 
-  // Initialize with existing users
-  const [siteUsers, setSiteUsers] = useState<SiteUser[]>([
-    {
-      id: "1",
-      name: "CW-Admin",
-      email: "admin@mazetx.com",
-      accessLevel: "admin",
-      initials: "CW",
-      color: "bg-blue-600"
+  const queryClient = useQueryClient();
+
+  // Fetch site access users from database
+  const { data: siteUsers = [], isLoading } = useQuery<SiteUser[]>({
+    queryKey: ["/api/site-access-users"],
+    refetchInterval: 5000
+  });
+
+  // Create site access user mutation
+  const createUserMutation = useMutation({
+    mutationFn: async (userData: { name: string; email: string; accessLevel: "standard" | "admin"; initials: string; color: string }) => {
+      return apiRequest("/api/site-access-users", {
+        method: "POST",
+        body: JSON.stringify(userData)
+      });
     },
-    {
-      id: "2",
-      name: "Emily Davis",
-      email: "emily.davis@company.com",
-      accessLevel: "standard",
-      initials: "ED",
-      color: "bg-green-600"
-    },
-    {
-      id: "3",
-      name: "Michael Wilson",
-      email: "michael.wilson@company.com",
-      accessLevel: "standard",
-      initials: "MW",
-      color: "bg-purple-600"
-    },
-    {
-      id: "4",
-      name: "Sarah Smith",
-      email: "sarah.smith@company.com",
-      accessLevel: "admin",
-      initials: "SS",
-      color: "bg-orange-600"
-    },
-    {
-      id: "5",
-      name: "David Johnson",
-      email: "david.johnson@company.com",
-      accessLevel: "standard",
-      initials: "DJ",
-      color: "bg-cyan-600"
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/site-access-users"] });
+      setIsNewUserOpen(false);
+      setNewUser({ name: "", username: "", accessLevel: "" });
     }
-  ]);
+  });
+
+  // Update site access user mutation
+  const updateUserMutation = useMutation({
+    mutationFn: async ({ id, userData }: { id: number; userData: { name: string; email: string; accessLevel: "standard" | "admin"; initials: string; color: string } }) => {
+      return apiRequest(`/api/site-access-users/${id}`, {
+        method: "PUT",
+        body: JSON.stringify(userData)
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/site-access-users"] });
+      setIsEditUserOpen(false);
+      setEditingUser(null);
+    }
+  });
+
+  // Delete site access user mutation
+  const deleteUserMutation = useMutation({
+    mutationFn: async (id: number) => {
+      return apiRequest(`/api/site-access-users/${id}`, {
+        method: "DELETE"
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/site-access-users"] });
+    }
+  });
 
   const getRandomColor = () => {
     const colors = ["bg-blue-600", "bg-green-600", "bg-purple-600", "bg-orange-600", "bg-cyan-600", "bg-pink-600", "bg-indigo-600", "bg-teal-600"];
@@ -89,7 +99,7 @@ export default function Admin() {
 
   const handleDeleteUser = (user: SiteUser) => {
     if (confirm(`Are you sure you want to remove ${user.name} from site access?`)) {
-      setSiteUsers(prev => prev.filter(u => u.id !== user.id));
+      deleteUserMutation.mutate(user.id);
     }
   };
 
@@ -107,26 +117,28 @@ export default function Admin() {
       return;
     }
     
-    const newSiteUser: SiteUser = {
-      id: Date.now().toString(),
+    const userData = {
       name: newUser.name.trim(),
       email: newUser.username.trim(),
       accessLevel: newUser.accessLevel as "standard" | "admin",
       initials: getInitials(newUser.name.trim()),
       color: getRandomColor()
     };
-    setSiteUsers(prev => [...prev, newSiteUser]);
-    setIsNewUserOpen(false);
-    setNewUser({ name: "", username: "", accessLevel: "" });
+    
+    createUserMutation.mutate(userData);
   };
 
   const handleUpdateUser = () => {
     if (editingUser) {
-      setSiteUsers(prev => prev.map(u => 
-        u.id === editingUser.id ? editingUser : u
-      ));
-      setIsEditUserOpen(false);
-      setEditingUser(null);
+      const userData = {
+        name: editingUser.name,
+        email: editingUser.email,
+        accessLevel: editingUser.accessLevel,
+        initials: editingUser.initials,
+        color: editingUser.color
+      };
+      
+      updateUserMutation.mutate({ id: editingUser.id, userData });
     }
   };
 
@@ -144,6 +156,9 @@ export default function Admin() {
           <Card>
             <CardContent className="pt-6">
               <div className="flex justify-between items-center mb-6">
+                {isLoading ? (
+                  <div className="text-gray-500">Loading users...</div>
+                ) : null}
                 <Dialog open={isNewUserOpen} onOpenChange={setIsNewUserOpen}>
                   <DialogTrigger asChild>
                     <Button>
@@ -195,8 +210,11 @@ export default function Admin() {
                       <Button variant="outline" onClick={() => setIsNewUserOpen(false)}>
                         Cancel
                       </Button>
-                      <Button onClick={handleAssignUser}>
-                        Assign User
+                      <Button 
+                        onClick={handleAssignUser}
+                        disabled={createUserMutation.isPending}
+                      >
+                        {createUserMutation.isPending ? "Assigning..." : "Assign User"}
                       </Button>
                     </div>
                   </DialogContent>
@@ -247,8 +265,11 @@ export default function Admin() {
                       <Button variant="outline" onClick={() => setIsEditUserOpen(false)}>
                         Cancel
                       </Button>
-                      <Button onClick={handleUpdateUser}>
-                        Update User
+                      <Button 
+                        onClick={handleUpdateUser}
+                        disabled={updateUserMutation.isPending}
+                      >
+                        {updateUserMutation.isPending ? "Updating..." : "Update User"}
                       </Button>
                     </div>
                   </DialogContent>
@@ -271,18 +292,13 @@ export default function Admin() {
                     {siteUsers.map((user) => (
                       <TableRow key={user.id}>
                         <TableCell className="font-medium">
-                          <div className="flex items-center space-x-3">
-                            <div className={`w-8 h-8 ${user.color} rounded-full flex items-center justify-center text-white text-sm font-medium`}>
-                              {user.initials}
-                            </div>
-                            <span>{user.name}</span>
-                          </div>
+                          <span>{user.name}</span>
                         </TableCell>
                         <TableCell>{user.email}</TableCell>
                         <TableCell>
                           <span className={`px-3 py-1 rounded-full text-sm font-medium ${
                             user.accessLevel === "admin" 
-                              ? "bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200" 
+                              ? "bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200" 
                               : "bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200"
                           }`}>
                             {user.accessLevel === "admin" ? "Admin" : "Standard"}

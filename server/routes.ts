@@ -1,7 +1,9 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertUserSchema, updateUserSchema } from "@shared/schema";
+import { insertUserSchema, updateUserSchema, insertSiteAccessUserSchema, siteAccessUsers } from "@shared/schema";
+import { db } from "./db";
+import { eq } from "drizzle-orm";
 import { z } from "zod";
 import { oktaService } from "./okta-service";
 import { syncSpecificUser } from "./okta-sync";
@@ -2492,6 +2494,80 @@ export async function registerRoutes(app: Express): Promise<Server> {
         message: 'Failed to create OKTA group',
         error: error instanceof Error ? error.message : 'Unknown error'
       });
+    }
+  });
+
+  // Site Access Users API routes
+  app.get("/api/site-access-users", isAuthenticated, async (req, res) => {
+    try {
+      const users = await db.select().from(siteAccessUsers);
+      res.json(users);
+    } catch (error) {
+      console.error("Error fetching site access users:", error);
+      res.status(500).json({ message: "Failed to fetch site access users" });
+    }
+  });
+
+  app.post("/api/site-access-users", isAuthenticated, requireAdmin, async (req, res) => {
+    try {
+      const userData = insertSiteAccessUserSchema.parse(req.body);
+      const [user] = await db.insert(siteAccessUsers).values(userData).returning();
+      res.json(user);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({
+          message: "Validation error",
+          errors: error.errors
+        });
+      }
+      console.error("Error creating site access user:", error);
+      res.status(500).json({ message: "Failed to create site access user" });
+    }
+  });
+
+  app.put("/api/site-access-users/:id", isAuthenticated, requireAdmin, async (req, res) => {
+    try {
+      const id = z.coerce.number().parse(req.params.id);
+      const userData = insertSiteAccessUserSchema.parse(req.body);
+      const [user] = await db
+        .update(siteAccessUsers)
+        .set({ ...userData, lastUpdated: new Date() })
+        .where(eq(siteAccessUsers.id, id))
+        .returning();
+      
+      if (!user) {
+        return res.status(404).json({ message: "Site access user not found" });
+      }
+      
+      res.json(user);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({
+          message: "Validation error",
+          errors: error.errors
+        });
+      }
+      console.error("Error updating site access user:", error);
+      res.status(500).json({ message: "Failed to update site access user" });
+    }
+  });
+
+  app.delete("/api/site-access-users/:id", isAuthenticated, requireAdmin, async (req, res) => {
+    try {
+      const id = z.coerce.number().parse(req.params.id);
+      const [deletedUser] = await db
+        .delete(siteAccessUsers)
+        .where(eq(siteAccessUsers.id, id))
+        .returning();
+      
+      if (!deletedUser) {
+        return res.status(404).json({ message: "Site access user not found" });
+      }
+      
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting site access user:", error);
+      res.status(500).json({ message: "Failed to delete site access user" });
     }
   });
 
