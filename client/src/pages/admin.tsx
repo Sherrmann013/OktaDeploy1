@@ -796,6 +796,7 @@ export default function Admin() {
                       <Button 
                         onClick={handleUpdateUser}
                         disabled={updateUserMutation.isPending}
+                        className="bg-blue-600 hover:bg-blue-700 text-white"
                       >
                         {updateUserMutation.isPending ? "Updating..." : "Update User"}
                       </Button>
@@ -868,7 +869,7 @@ export default function Admin() {
                 <h2 className="text-2xl font-bold">Integrations</h2>
                 <Button 
                   onClick={() => setIsNewIntegrationOpen(true)}
-                  className="bg-primary hover:bg-primary/90 text-primary-foreground"
+                  className="bg-blue-600 hover:bg-blue-700 text-white"
                 >
                   <Plus className="w-4 h-4 mr-2" />
                   New Integration
@@ -1000,16 +1001,17 @@ export default function Admin() {
           </div>
           <div className="flex justify-between items-center">
             <Button 
-              variant="destructive" 
+              variant="outline"
               onClick={() => editingIntegration && handleDeleteIntegration(editingIntegration)}
               disabled={deleteIntegrationMutation.isPending}
+              className="border-red-300 text-red-600 hover:bg-red-50 dark:border-red-700 dark:text-red-400 dark:hover:bg-red-950"
             >
               {deleteIntegrationMutation.isPending ? "Deleting..." : "Delete Integration"}
             </Button>
             <Button 
               onClick={handleUpdateIntegration}
               disabled={updateIntegrationMutation.isPending}
-              className="bg-primary hover:bg-primary/90 text-primary-foreground"
+              className="bg-blue-600 hover:bg-blue-700 text-white"
             >
               {updateIntegrationMutation.isPending ? "Saving..." : "Save Configuration"}
             </Button>
@@ -1110,7 +1112,7 @@ export default function Admin() {
                   });
                 }
               }}
-              className="bg-primary hover:bg-primary/90 text-primary-foreground"
+              className="bg-blue-600 hover:bg-blue-700 text-white"
             >
               {createIntegrationMutation.isPending ? "Adding..." : "Add Integration"}
             </Button>
@@ -1141,9 +1143,10 @@ export default function Admin() {
               Cancel
             </Button>
             <Button 
-              variant="destructive" 
+              variant="outline"
               onClick={confirmDeleteIntegration}
               disabled={deleteIntegrationMutation.isPending}
+              className="border-red-300 text-red-600 hover:bg-red-50 dark:border-red-700 dark:text-red-400 dark:hover:bg-red-950"
             >
               {deleteIntegrationMutation.isPending ? "Deleting..." : "Delete Integration"}
             </Button>
