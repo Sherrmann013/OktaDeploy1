@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="80" height="80" viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+  <rect width="80" height="80" fill="#8B5CF6" rx="8"/>
+  <text x="40" y="35" font-family="Arial, sans-serif" font-size="20" font-weight="bold" fill="#F97316" text-anchor="middle">maze</text>
+  <rect x="20" y="45" width="40" height="3" fill="#F97316" rx="1.5"/>
+</svg>

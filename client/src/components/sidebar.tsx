@@ -65,14 +65,9 @@ export default function Sidebar() {
             <div className="relative w-24 h-24 mx-auto rounded bg-purple-600 flex items-center justify-center">
               <div className="relative w-20 h-20">
                 <img 
-                  src="/maze-logo.svg" 
+                  src="/maze-logo-correct.svg" 
                   alt="MAZE Logo" 
                   className="w-20 h-20 absolute inset-0 object-contain"
-                  style={{ filter: "invert(1)" }}
-                />
-                <div 
-                  className="w-20 h-20 absolute inset-0" 
-                  style={{ backgroundColor: "#f97316", mixBlendMode: "multiply" }}
                 />
               </div>
             </div>
