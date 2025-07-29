@@ -1154,29 +1154,6 @@ export default function Admin() {
                   ))}
                 </div>
               )}
-
-              <div className="mt-6 p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
-                <h4 className="font-medium mb-2">Mapping Overview</h4>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Total Mappings:</span>
-                    <span className="font-medium">{appMappingsData.length}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Active Groups:</span>
-                    <span className="font-medium">{appMappingsData.filter(m => m.status === 'active').length}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Last Updated:</span>
-                    <span className="font-medium">
-                      {appMappingsData.length > 0 
-                        ? new Date(Math.max(...appMappingsData.map(m => new Date(m.lastUpdated).getTime()))).toLocaleDateString()
-                        : 'N/A'
-                      }
-                    </span>
-                  </div>
-                </div>
-              </div>
             </CardContent>
           </Card>
         </TabsContent>
