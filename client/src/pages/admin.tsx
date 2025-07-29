@@ -75,6 +75,7 @@ function AdminComponent() {
   const [isDeleteUserOpen, setIsDeleteUserOpen] = useState(false);
   const [userToDelete, setUserToDelete] = useState<SiteUser | null>(null);
   const [isLogoUploadOpen, setIsLogoUploadOpen] = useState(false);
+  const [layoutTab, setLayoutTab] = useState("dashboard");
 
   // Get current logo setting
   const { data: logoSetting } = useQuery({
@@ -1310,9 +1311,85 @@ function AdminComponent() {
                         Customize Logo
                       </Button>
                     </div>
-                    <p className="text-xs text-gray-500">
-                      Upload the company logo to replace the default branding. Recommended size: 200x50px or similar aspect ratio.
-                    </p>
+
+                  </div>
+                </div>
+
+                {/* Layout Customization Tabs */}
+                <div>
+                  <div className="flex space-x-1 bg-gray-100 dark:bg-gray-800 p-1 rounded-lg">
+                    <button 
+                      onClick={() => setLayoutTab("dashboard")}
+                      className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+                        layoutTab === "dashboard" 
+                          ? "bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm" 
+                          : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100"
+                      }`}
+                    >
+                      Dashboard
+                    </button>
+                    <button 
+                      onClick={() => setLayoutTab("new-user")}
+                      className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+                        layoutTab === "new-user" 
+                          ? "bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm" 
+                          : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100"
+                      }`}
+                    >
+                      New User
+                    </button>
+                    <button 
+                      onClick={() => setLayoutTab("profile")}
+                      className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+                        layoutTab === "profile" 
+                          ? "bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm" 
+                          : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100"
+                      }`}
+                    >
+                      Profile
+                    </button>
+                    <button 
+                      onClick={() => setLayoutTab("monitoring")}
+                      className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+                        layoutTab === "monitoring" 
+                          ? "bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm" 
+                          : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100"
+                      }`}
+                    >
+                      Monitoring
+                    </button>
+                  </div>
+
+                  {/* Tab Content */}
+                  <div className="mt-6 p-4 border rounded-lg dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
+                    {layoutTab === "dashboard" && (
+                      <div>
+                        <h5 className="font-medium mb-2">Dashboard Customization</h5>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">Configure dashboard layout, widget positioning, and card sizes.</p>
+                        <div className="mt-4 text-xs text-gray-500">Coming soon</div>
+                      </div>
+                    )}
+                    {layoutTab === "new-user" && (
+                      <div>
+                        <h5 className="font-medium mb-2">New User Settings</h5>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">Customize user creation workflow and default app assignments.</p>
+                        <div className="mt-4 text-xs text-gray-500">Coming soon</div>
+                      </div>
+                    )}
+                    {layoutTab === "profile" && (
+                      <div>
+                        <h5 className="font-medium mb-2">Profile Configuration</h5>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">Set default profile fields and data display preferences.</p>
+                        <div className="mt-4 text-xs text-gray-500">Coming soon</div>
+                      </div>
+                    )}
+                    {layoutTab === "monitoring" && (
+                      <div>
+                        <h5 className="font-medium mb-2">Monitoring Layout</h5>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">Configure security monitoring displays and alert preferences.</p>
+                        <div className="mt-4 text-xs text-gray-500">Coming soon</div>
+                      </div>
+                    )}
                   </div>
                 </div>
 
