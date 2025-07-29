@@ -991,7 +991,7 @@ export default function Admin() {
 
       {/* Configure Integration Dialog */}
       <Dialog open={isConfigureIntegrationOpen} onOpenChange={setIsConfigureIntegrationOpen}>
-        <DialogContent className="sm:max-w-[425px] max-h-[80vh] overflow-y-auto">
+        <DialogContent className="sm:max-w-[425px] max-h-[80vh] overflow-y-auto overflow-x-hidden">
           <DialogHeader>
             <DialogTitle>Configure {editingIntegration?.displayName}</DialogTitle>
           </DialogHeader>
@@ -1006,17 +1006,13 @@ export default function Admin() {
             >
               {deleteIntegrationMutation.isPending ? "Deleting..." : "Delete Integration"}
             </Button>
-            <div className="flex space-x-2">
-              <Button variant="outline" onClick={() => setIsConfigureIntegrationOpen(false)}>
-                Cancel
-              </Button>
-              <Button 
-                onClick={handleUpdateIntegration}
-                disabled={updateIntegrationMutation.isPending}
-              >
-                {updateIntegrationMutation.isPending ? "Saving..." : "Save Configuration"}
-              </Button>
-            </div>
+            <Button 
+              onClick={handleUpdateIntegration}
+              disabled={updateIntegrationMutation.isPending}
+              className="bg-primary hover:bg-primary/90 text-primary-foreground"
+            >
+              {updateIntegrationMutation.isPending ? "Saving..." : "Save Configuration"}
+            </Button>
           </div>
         </DialogContent>
       </Dialog>
