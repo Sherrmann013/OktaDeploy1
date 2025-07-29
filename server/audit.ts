@@ -14,7 +14,7 @@ export class AuditLogger {
     newValues?: Record<string, any>;
   }) {
     try {
-      const user = (req as any).session?.user;
+      const user = (params.req as any).session?.user;
       const userEmail = user?.email || 'system@mazetx.com';
       const userId = user?.id || null;
 
@@ -28,8 +28,8 @@ export class AuditLogger {
         details: params.details || {},
         oldValues: params.oldValues || {},
         newValues: params.newValues || {},
-        ipAddress: req.ip || req.connection.remoteAddress || null,
-        userAgent: req.get('User-Agent') || null,
+        ipAddress: params.req.ip || params.req.connection.remoteAddress || null,
+        userAgent: params.req.get('User-Agent') || null,
       };
 
       await db.insert(auditLogs).values(auditLog);
