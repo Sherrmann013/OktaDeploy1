@@ -3213,7 +3213,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Bulk update dashboard card positions (for drag and drop)
   app.patch("/api/dashboard-cards/positions", isAuthenticated, requireAdmin, async (req, res) => {
     try {
-      console.log('🔄 Raw request body:', req.body);
+      console.log('🔄 BULK UPDATE ENDPOINT HIT - Raw request body:', req.body);
+      console.log('🔄 Session user:', req.session?.user?.email);
+      console.log('🔄 User role:', req.session?.user?.role);
+      
       const { cards } = req.body;
       console.log('🔄 Extracted cards:', cards);
       
