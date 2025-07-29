@@ -167,6 +167,38 @@ export default function Admin() {
     }
   });
 
+  // Create integration mutation
+  const createIntegrationMutation = useMutation({
+    mutationFn: async (data: { name: string; displayName: string }) => {
+      const response = await fetch('/api/integrations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          name: data.name,
+          displayName: data.displayName,
+          description: '',
+          status: 'disconnected',
+          apiKeys: {},
+          config: {},
+          lastUpdated: new Date().toISOString()
+        })
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || `HTTP ${response.status}: ${response.statusText}`);
+      }
+      
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/integrations"] });
+      setIsNewIntegrationOpen(false);
+      setSelectedIntegrationType("");
+    }
+  });
+
   const getRandomColor = () => {
     const colors = ["bg-blue-600", "bg-green-600", "bg-purple-600", "bg-orange-600", "bg-cyan-600", "bg-pink-600", "bg-indigo-600", "bg-teal-600"];
     return colors[Math.floor(Math.random() * colors.length)];
@@ -986,15 +1018,18 @@ export default function Admin() {
               Cancel
             </Button>
             <Button 
-              disabled={!selectedIntegrationType}
+              disabled={!selectedIntegrationType || createIntegrationMutation.isPending}
               onClick={() => {
-                // Handle integration creation
-                console.log("Creating integration:", selectedIntegrationType);
-                setIsNewIntegrationOpen(false);
-                setSelectedIntegrationType("");
+                const selectedIntegration = availableIntegrations.find(i => i.value === selectedIntegrationType);
+                if (selectedIntegration) {
+                  createIntegrationMutation.mutate({
+                    name: selectedIntegration.value,
+                    displayName: selectedIntegration.label
+                  });
+                }
               }}
             >
-              Add Integration
+              {createIntegrationMutation.isPending ? "Adding..." : "Add Integration"}
             </Button>
           </div>
         </DialogContent>
