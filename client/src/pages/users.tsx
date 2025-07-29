@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -192,9 +192,10 @@ export default function Users() {
     refetch();
   };
 
+  const [, setLocation] = useLocation();
+  
   const handleUserClick = (userId: number) => {
-    setSelectedUserId(userId);
-    setShowUserDetail(true);
+    setLocation(`/users/${userId}`);
   };
 
   const handleCreateSuccess = () => {
