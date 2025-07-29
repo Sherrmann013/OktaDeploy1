@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertUserSchema, updateUserSchema, insertSiteAccessUserSchema, siteAccessUsers, insertIntegrationSchema, integrations, auditLogs, insertAppMappingSchema, appMappings, insertLayoutSettingSchema, layoutSettings } from "@shared/schema";
+import { insertUserSchema, updateUserSchema, insertSiteAccessUserSchema, siteAccessUsers, insertIntegrationSchema, integrations, auditLogs, insertAppMappingSchema, appMappings, insertLayoutSettingSchema, layoutSettings, dashboardCards, insertDashboardCardSchema, updateDashboardCardSchema } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc } from "drizzle-orm";
 import { AuditLogger, getAuditLogs } from "./audit";
@@ -3099,6 +3099,146 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error deleting layout setting:", error);
       res.status(500).json({ error: "Failed to delete layout setting" });
+    }
+  });
+
+  // Dashboard cards endpoints
+  app.get("/api/dashboard-cards", isAuthenticated, async (req, res) => {
+    try {
+      const cards = await db.select().from(dashboardCards).orderBy(dashboardCards.position);
+      res.json(cards);
+    } catch (error) {
+      console.error("Error fetching dashboard cards:", error);
+      res.status(500).json({ error: "Failed to fetch dashboard cards" });
+    }
+  });
+
+  app.post("/api/dashboard-cards", isAuthenticated, requireAdmin, async (req, res) => {
+    try {
+      const validatedData = insertDashboardCardSchema.parse(req.body);
+      const [result] = await db.insert(dashboardCards).values(validatedData).returning();
+      
+      await AuditLogger.log({
+        req,
+        action: 'CREATE',
+        resourceType: 'DASHBOARD_CARD',
+        resourceId: result.id.toString(),
+        resourceName: result.name,
+        details: { type: result.type, position: result.position },
+        newValues: result
+      });
+      
+      res.json(result);
+    } catch (error) {
+      console.error("Error creating dashboard card:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: error.errors });
+      }
+      res.status(500).json({ error: "Failed to create dashboard card" });
+    }
+  });
+
+  app.patch("/api/dashboard-cards/:id", isAuthenticated, requireAdmin, async (req, res) => {
+    try {
+      const id = z.coerce.number().parse(req.params.id);
+      const updates = updateDashboardCardSchema.parse(req.body);
+      
+      const existing = await db.select().from(dashboardCards).where(eq(dashboardCards.id, id)).limit(1);
+      if (existing.length === 0) {
+        return res.status(404).json({ error: "Dashboard card not found" });
+      }
+      
+      const [result] = await db.update(dashboardCards)
+        .set({ ...updates, updated: new Date() })
+        .where(eq(dashboardCards.id, id))
+        .returning();
+      
+      await AuditLogger.log({
+        req,
+        action: 'UPDATE',
+        resourceType: 'DASHBOARD_CARD',
+        resourceId: result.id.toString(),
+        resourceName: result.name,
+        details: { type: result.type, position: result.position },
+        oldValues: existing[0],
+        newValues: result
+      });
+      
+      res.json(result);
+    } catch (error) {
+      console.error("Error updating dashboard card:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: error.errors });
+      }
+      res.status(500).json({ error: "Failed to update dashboard card" });
+    }
+  });
+
+  app.delete("/api/dashboard-cards/:id", isAuthenticated, requireAdmin, async (req, res) => {
+    try {
+      const id = z.coerce.number().parse(req.params.id);
+      
+      const existing = await db.select().from(dashboardCards).where(eq(dashboardCards.id, id)).limit(1);
+      if (existing.length === 0) {
+        return res.status(404).json({ error: "Dashboard card not found" });
+      }
+      
+      await db.delete(dashboardCards).where(eq(dashboardCards.id, id));
+      
+      await AuditLogger.log({
+        req,
+        action: 'DELETE',
+        resourceType: 'DASHBOARD_CARD',
+        resourceId: existing[0].id.toString(),
+        resourceName: existing[0].name,
+        details: { type: existing[0].type, position: existing[0].position },
+        oldValues: existing[0]
+      });
+      
+      res.json({ message: "Dashboard card deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting dashboard card:", error);
+      res.status(500).json({ error: "Failed to delete dashboard card" });
+    }
+  });
+
+  // Bulk update dashboard card positions (for drag and drop)
+  app.patch("/api/dashboard-cards/positions", isAuthenticated, requireAdmin, async (req, res) => {
+    try {
+      const { cards } = req.body;
+      if (!Array.isArray(cards)) {
+        return res.status(400).json({ error: "Cards must be an array" });
+      }
+
+      // Update positions in bulk
+      const updates = await Promise.all(
+        cards.map(async (card: any) => {
+          const id = z.coerce.number().parse(card.id);
+          const position = z.coerce.number().parse(card.position);
+          
+          const [result] = await db.update(dashboardCards)
+            .set({ position, updated: new Date() })
+            .where(eq(dashboardCards.id, id))
+            .returning();
+          
+          return result;
+        })
+      );
+
+      await AuditLogger.log({
+        req,
+        action: 'UPDATE',
+        resourceType: 'DASHBOARD_LAYOUT',
+        resourceId: 'bulk_position_update',
+        resourceName: 'Dashboard Card Positions',
+        details: { cardCount: cards.length },
+        newValues: { cardPositions: cards }
+      });
+
+      res.json(updates);
+    } catch (error) {
+      console.error("Error updating dashboard card positions:", error);
+      res.status(500).json({ error: "Failed to update dashboard card positions" });
     }
   });
 

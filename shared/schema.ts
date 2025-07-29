@@ -198,3 +198,29 @@ export const insertLayoutSettingSchema = createInsertSchema(layoutSettings).omit
 
 export type InsertLayoutSetting = z.infer<typeof insertLayoutSettingSchema>;
 export type LayoutSetting = typeof layoutSettings.$inferSelect;
+
+// Dashboard cards table for layout management
+export const dashboardCards = pgTable("dashboard_cards", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  type: text("type").notNull(), // knowbe4, sentinelone, device_management, jira
+  position: integer("position").notNull(), // 0, 1, 2, 3 for 2x2 grid
+  enabled: boolean("enabled").notNull().default(true),
+  created: timestamp("created").defaultNow(),
+  updated: timestamp("updated").defaultNow(),
+});
+
+export const insertDashboardCardSchema = createInsertSchema(dashboardCards).omit({
+  id: true,
+  created: true,
+  updated: true,
+});
+
+export const updateDashboardCardSchema = createInsertSchema(dashboardCards).partial().omit({
+  id: true,
+  created: true,
+});
+
+export type InsertDashboardCard = z.infer<typeof insertDashboardCardSchema>;
+export type UpdateDashboardCard = z.infer<typeof updateDashboardCardSchema>;
+export type DashboardCard = typeof dashboardCards.$inferSelect;

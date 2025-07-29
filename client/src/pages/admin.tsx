@@ -78,28 +78,35 @@ function AdminComponent() {
   const [layoutTab, setLayoutTab] = useState("logo");
   const [isAddDashboardCardOpen, setIsAddDashboardCardOpen] = useState(false);
   const [draggedItem, setDraggedItem] = useState<number | null>(null);
-  const [dashboardCards, setDashboardCards] = useState([
-    {
-      id: 1,
-      name: 'User Overview',
-      description: '20 total users across departments'
-    },
-    {
-      id: 2,
-      name: 'Security Training',
-      description: 'KnowBe4 phishing simulation progress'
-    },
-    {
-      id: 3,
-      name: 'Endpoint Security',
-      description: 'SentinelOne device protection status'
-    },
-    {
-      id: 4,
-      name: 'Device Management',
-      description: 'Addigy/Intune managed devices'
+  // Fetch dashboard cards from the database
+  const { data: dashboardCardsData, refetch: refetchDashboardCards } = useQuery({
+    queryKey: ["/api/dashboard-cards"],
+  });
+
+  const [dashboardCards, setDashboardCards] = useState(dashboardCardsData || []);
+
+  // Update local state when data changes
+  useEffect(() => {
+    if (dashboardCardsData) {
+      setDashboardCards(dashboardCardsData);
     }
-  ]);
+  }, [dashboardCardsData]);
+
+  // Mutation to update dashboard card positions
+  const updateCardPositionsMutation = useMutation({
+    mutationFn: async (cards: any[]) => {
+      const response = await fetch("/api/dashboard-cards/positions", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ cards }),
+      });
+      if (!response.ok) throw new Error("Failed to update card positions");
+      return response.json();
+    },
+    onSuccess: () => {
+      refetchDashboardCards();
+    },
+  });
 
   // Drag and drop functions
   const handleDragStart = (e: React.DragEvent, index: number) => {
@@ -129,8 +136,19 @@ function AdminComponent() {
       newCards.splice(dropIndex, 0, draggedCard);
     }
     
-    setDashboardCards(newCards);
+    // Update positions in the new array
+    const updatedCards = newCards.map((card, index) => ({
+      ...card,
+      position: index
+    }));
+    
+    setDashboardCards(updatedCards);
     setDraggedItem(null);
+    
+    // Update positions in the database
+    updateCardPositionsMutation.mutate(
+      updatedCards.map(card => ({ id: card.id, position: card.position }))
+    );
   };
 
   const removeDashboardCard = (cardId: number) => {
