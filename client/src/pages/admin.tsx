@@ -76,6 +76,10 @@ export default function Admin() {
   const [isNewMappingOpen, setIsNewMappingOpen] = useState(false);
   const [newMapping, setNewMapping] = useState({ appName: "", oktaGroups: [""], description: "" });
   const [integrationToDelete, setIntegrationToDelete] = useState<Integration | null>(null);
+  const [mappingToDelete, setMappingToDelete] = useState<AppMapping | null>(null);
+  const [editingMapping, setEditingMapping] = useState<AppMapping | null>(null);
+  const [isEditMappingOpen, setIsEditMappingOpen] = useState(false);
+  const [editMappingData, setEditMappingData] = useState({ appName: "", oktaGroupName: "", description: "" });
   const [newUser, setNewUser] = useState({
     name: "",
     username: "",
@@ -261,6 +265,45 @@ export default function Admin() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/app-mappings"] });
+      setMappingToDelete(null);
+    }
+  });
+
+  const handleDeleteMapping = () => {
+    if (mappingToDelete) {
+      deleteAppMappingMutation.mutate(mappingToDelete.id);
+    }
+  };
+
+  const handleEditMapping = (mapping: AppMapping) => {
+    setEditingMapping(mapping);
+    setEditMappingData({
+      appName: mapping.appName,
+      oktaGroupName: mapping.oktaGroupName,
+      description: mapping.description || ""
+    });
+    setIsEditMappingOpen(true);
+  };
+
+  const updateAppMappingMutation = useMutation({
+    mutationFn: async ({ id, mappingData }: { id: number; mappingData: { appName: string; oktaGroupName: string; description?: string } }) => {
+      const response = await fetch(`/api/app-mappings/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify(mappingData)
+      });
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || `HTTP ${response.status}: ${response.statusText}`);
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/app-mappings"] });
+      setIsEditMappingOpen(false);
+      setEditingMapping(null);
+      setEditMappingData({ appName: "", oktaGroupName: "", description: "" });
     }
   });
 
@@ -1166,18 +1209,19 @@ export default function Admin() {
                           <p className="text-sm font-medium">{mapping.oktaGroupName}</p>
                           <p className="text-xs text-muted-foreground">OKTA Security Group</p>
                         </div>
-                        <span className={`px-2 py-1 text-xs rounded-full ${
-                          mapping.status === 'active' 
-                            ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
-                            : 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200'
-                        }`}>
-                          {mapping.status === 'active' ? 'Active' : 'Inactive'}
-                        </span>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="text-gray-600 hover:text-gray-700 hover:bg-gray-50 dark:text-gray-400 dark:hover:text-gray-300 dark:hover:bg-gray-800"
+                          onClick={() => handleEditMapping(mapping)}
+                        >
+                          <Edit className="w-4 h-4" />
+                        </Button>
                         <Button
                           variant="outline"
                           size="sm"
                           className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:text-red-300 dark:hover:bg-red-950"
-                          onClick={() => deleteAppMappingMutation.mutate(mapping.id)}
+                          onClick={() => setMappingToDelete(mapping)}
                         >
                           <Trash2 className="w-4 h-4" />
                         </Button>
@@ -1396,6 +1440,100 @@ export default function Admin() {
               className="bg-blue-600 hover:bg-blue-700 text-white"
             >
               {createIntegrationMutation.isPending ? "Adding..." : "Add Integration"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit App Mapping Dialog */}
+      <Dialog open={isEditMappingOpen} onOpenChange={setIsEditMappingOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Edit App Mapping</DialogTitle>
+            <DialogDescription>
+              Update the application mapping configuration
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="edit-app-name">Application Name</Label>
+              <Input
+                id="edit-app-name"
+                value={editMappingData.appName}
+                onChange={(e) => setEditMappingData(prev => ({ ...prev, appName: e.target.value }))}
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label htmlFor="edit-okta-group">OKTA Group Name</Label>
+              <Input
+                id="edit-okta-group"
+                value={editMappingData.oktaGroupName}
+                onChange={(e) => setEditMappingData(prev => ({ ...prev, oktaGroupName: e.target.value }))}
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label htmlFor="edit-description">Description (Optional)</Label>
+              <Input
+                id="edit-description"
+                value={editMappingData.description}
+                onChange={(e) => setEditMappingData(prev => ({ ...prev, description: e.target.value }))}
+                className="mt-1"
+              />
+            </div>
+          </div>
+          <div className="flex justify-end space-x-2 mt-6">
+            <Button 
+              variant="outline" 
+              onClick={() => {
+                setIsEditMappingOpen(false);
+                setEditingMapping(null);
+                setEditMappingData({ appName: "", oktaGroupName: "", description: "" });
+              }}
+            >
+              Cancel
+            </Button>
+            <Button 
+              onClick={() => {
+                if (editingMapping && editMappingData.appName && editMappingData.oktaGroupName) {
+                  updateAppMappingMutation.mutate({
+                    id: editingMapping.id,
+                    mappingData: editMappingData
+                  });
+                }
+              }}
+              disabled={updateAppMappingMutation.isPending || !editMappingData.appName || !editMappingData.oktaGroupName}
+              className="bg-blue-600 hover:bg-blue-700 text-white"
+            >
+              {updateAppMappingMutation.isPending ? "Updating..." : "Update Mapping"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete App Mapping Confirmation Dialog */}
+      <Dialog open={!!mappingToDelete} onOpenChange={() => setMappingToDelete(null)}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Delete App Mapping</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete the mapping for "{mappingToDelete?.appName}" → "{mappingToDelete?.oktaGroupName}"? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-end space-x-2 mt-4">
+            <Button 
+              variant="outline" 
+              onClick={() => setMappingToDelete(null)}
+            >
+              Cancel
+            </Button>
+            <Button 
+              onClick={handleDeleteMapping}
+              disabled={deleteAppMappingMutation.isPending}
+              className="bg-red-600 hover:bg-red-700 text-white"
+            >
+              {deleteAppMappingMutation.isPending ? "Deleting..." : "Delete Mapping"}
             </Button>
           </div>
         </DialogContent>
