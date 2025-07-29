@@ -257,21 +257,59 @@ export default function Admin() {
 
   // Available integration types for the new integration modal
   const availableIntegrations = [
-    { value: "okta", label: "OKTA", description: "Identity and access management platform" },
-    { value: "knowbe4", label: "KnowBe4", description: "Security awareness training and phishing simulation" },
-    { value: "sentinelone", label: "SentinelOne", description: "AI-powered endpoint protection and detection" },
-    { value: "addigy", label: "Addigy", description: "macOS device management and monitoring" },
-    { value: "microsoft", label: "Microsoft", description: "Microsoft 365 and Intune device management" },
-    { value: "jira", label: "Jira", description: "Project management and issue tracking" },
-    { value: "screenconnect", label: "ScreenConnect", description: "Remote access and support software" },
-    { value: "ninjaone", label: "Ninja One", description: "Unified IT management platform" },
-    { value: "zendesk", label: "Zendesk", description: "Customer service and support platform" },
-    { value: "meshai", label: "Mesh AI", description: "AI-powered security analysis platform" },
-    { value: "abnormal", label: "Abnormal Security", description: "Email security and threat detection" },
-    { value: "arcticwolf", label: "Arctic Wolf", description: "Security operations and threat detection" },
-    { value: "msdefender", label: "Microsoft Defender", description: "Advanced threat protection platform" },
-    { value: "hexnode", label: "Hexnode", description: "Unified endpoint management solution" }
+    { value: "okta", label: "OKTA" },
+    { value: "knowbe4", label: "KnowBe4" },
+    { value: "sentinelone", label: "SentinelOne" },
+    { value: "addigy", label: "Addigy" },
+    { value: "microsoft", label: "Microsoft" },
+    { value: "jira", label: "Jira" },
+    { value: "screenconnect", label: "ScreenConnect" },
+    { value: "ninjaone", label: "Ninja One" },
+    { value: "zendesk", label: "Zendesk" },
+    { value: "meshai", label: "Mesh AI" },
+    { value: "abnormal", label: "Abnormal Security" },
+    { value: "arcticwolf", label: "Arctic Wolf" },
+    { value: "msdefender", label: "Microsoft Defender" },
+    { value: "hexnode", label: "Hexnode" }
   ];
+
+  // Get integration logo component
+  const getIntegrationLogo = (name: string) => {
+    const logoClass = "w-6 h-6 flex-shrink-0";
+    
+    switch (name) {
+      case 'okta':
+        return <div className={`${logoClass} bg-blue-500 rounded-sm flex items-center justify-center text-white text-xs font-bold`}>O</div>;
+      case 'knowbe4':
+        return <div className={`${logoClass} bg-orange-500 rounded-sm flex items-center justify-center text-white text-xs font-bold`}>K4</div>;
+      case 'sentinelone':
+        return <div className={`${logoClass} bg-purple-600 rounded-sm flex items-center justify-center text-white text-xs font-bold`}>S1</div>;
+      case 'addigy':
+        return <div className={`${logoClass} bg-green-600 rounded-sm flex items-center justify-center text-white text-xs font-bold`}>AD</div>;
+      case 'microsoft':
+        return <div className={`${logoClass} bg-blue-600 rounded-sm flex items-center justify-center text-white text-xs font-bold`}>MS</div>;
+      case 'jira':
+        return <div className={`${logoClass} bg-blue-500 rounded-sm flex items-center justify-center text-white text-xs font-bold`}>JR</div>;
+      case 'screenconnect':
+        return <div className={`${logoClass} bg-red-500 rounded-sm flex items-center justify-center text-white text-xs font-bold`}>SC</div>;
+      case 'ninjaone':
+        return <div className={`${logoClass} bg-gray-800 rounded-sm flex items-center justify-center text-white text-xs font-bold`}>N1</div>;
+      case 'zendesk':
+        return <div className={`${logoClass} bg-green-500 rounded-sm flex items-center justify-center text-white text-xs font-bold`}>ZD</div>;
+      case 'meshai':
+        return <div className={`${logoClass} bg-cyan-500 rounded-sm flex items-center justify-center text-white text-xs font-bold`}>AI</div>;
+      case 'abnormal':
+        return <div className={`${logoClass} bg-red-600 rounded-sm flex items-center justify-center text-white text-xs font-bold`}>AB</div>;
+      case 'arcticwolf':
+        return <div className={`${logoClass} bg-indigo-600 rounded-sm flex items-center justify-center text-white text-xs font-bold`}>AW</div>;
+      case 'msdefender':
+        return <div className={`${logoClass} bg-blue-700 rounded-sm flex items-center justify-center text-white text-xs font-bold`}>MD</div>;
+      case 'hexnode':
+        return <div className={`${logoClass} bg-orange-600 rounded-sm flex items-center justify-center text-white text-xs font-bold`}>HX</div>;
+      default:
+        return <div className={`${logoClass} bg-gray-500 rounded-sm flex items-center justify-center text-white text-xs font-bold`}>?</div>;
+    }
+  };
 
   const renderApiKeyFields = (integration: Integration | null) => {
     if (!integration) return null;
@@ -646,7 +684,7 @@ export default function Admin() {
                   </div>
                 ) : (
                   integrationsData.map((integration) => (
-                    <Card key={integration.id} className={`border-2 ${
+                    <Card key={integration.id} className={`border-2 bg-card/50 ${
                       integration.status === "connected" 
                         ? "border-green-500" 
                         : integration.status === "pending"
@@ -655,7 +693,10 @@ export default function Admin() {
                     }`}>
                       <CardContent className="p-4">
                         <div className="flex items-center justify-between mb-3">
-                          <h3 className="font-semibold text-lg">{integration.displayName}</h3>
+                          <div className="flex items-center gap-3">
+                            {getIntegrationLogo(integration.name)}
+                            <h3 className="font-semibold text-lg">{integration.displayName}</h3>
+                          </div>
                           <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                             integration.status === "connected" 
                               ? "bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200" 
@@ -667,9 +708,6 @@ export default function Admin() {
                              integration.status === "pending" ? "Pending" : "Disconnected"}
                           </span>
                         </div>
-                        <p className="text-sm text-muted-foreground mb-3">
-                          {integration.description}
-                        </p>
                         <Button 
                           variant="outline" 
                           size="sm" 
@@ -801,9 +839,9 @@ export default function Admin() {
                 <SelectContent>
                   {availableIntegrations.map((integration) => (
                     <SelectItem key={integration.value} value={integration.value}>
-                      <div className="flex flex-col">
+                      <div className="flex items-center gap-2">
+                        {getIntegrationLogo(integration.value)}
                         <span className="font-medium">{integration.label}</span>
-                        <span className="text-xs text-muted-foreground">{integration.description}</span>
                       </div>
                     </SelectItem>
                   ))}
@@ -813,12 +851,12 @@ export default function Admin() {
             
             {selectedIntegrationType && (
               <div className="mt-4 p-4 bg-muted rounded-lg">
-                <h4 className="font-medium mb-2">
-                  {availableIntegrations.find(i => i.value === selectedIntegrationType)?.label}
-                </h4>
-                <p className="text-sm text-muted-foreground">
-                  {availableIntegrations.find(i => i.value === selectedIntegrationType)?.description}
-                </p>
+                <div className="flex items-center gap-3">
+                  {getIntegrationLogo(selectedIntegrationType)}
+                  <h4 className="font-medium">
+                    {availableIntegrations.find(i => i.value === selectedIntegrationType)?.label}
+                  </h4>
+                </div>
               </div>
             )}
           </div>
