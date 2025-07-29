@@ -43,9 +43,6 @@ export default function Admin() {
                   <DialogContent className="sm:max-w-[425px]">
                     <DialogHeader>
                       <DialogTitle>Assign New User</DialogTitle>
-                      <DialogDescription>
-                        Add a new user to the site access list with appropriate permissions.
-                      </DialogDescription>
                     </DialogHeader>
                     <div className="grid gap-4 py-4">
                       <div className="grid gap-2">
@@ -82,7 +79,7 @@ export default function Admin() {
                           <SelectTrigger className="bg-background">
                             <SelectValue placeholder="Select access level" />
                           </SelectTrigger>
-                          <SelectContent>
+                          <SelectContent className="z-50">
                             <SelectItem value="standard">Standard</SelectItem>
                             <SelectItem value="admin">Admin</SelectItem>
                           </SelectContent>
