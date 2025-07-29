@@ -103,7 +103,9 @@ export default function Admin() {
     }
   };
 
-  const handleAssignUser = () => {
+  const handleAssignUser = async () => {
+    console.log('🔵 Assign User clicked');
+    
     if (!newUser.name.trim()) {
       alert("Please enter a name");
       return;
@@ -125,7 +127,14 @@ export default function Admin() {
       color: getRandomColor()
     };
     
-    createUserMutation.mutate(userData);
+    console.log('🚀 Creating user:', userData);
+    
+    try {
+      await createUserMutation.mutateAsync(userData);
+      console.log('✅ User created successfully');
+    } catch (error) {
+      console.error('❌ Failed to create user:', error);
+    }
   };
 
   const handleUpdateUser = () => {
@@ -206,13 +215,18 @@ export default function Admin() {
                         </Select>
                       </div>
                     </div>
-                    <div className="flex justify-end gap-2">
-                      <Button variant="outline" onClick={() => setIsNewUserOpen(false)}>
+                    <div className="flex justify-end gap-3 pt-4">
+                      <Button 
+                        variant="outline" 
+                        onClick={() => setIsNewUserOpen(false)}
+                        className="px-4 py-2"
+                      >
                         Cancel
                       </Button>
                       <Button 
                         onClick={handleAssignUser}
                         disabled={createUserMutation.isPending}
+                        className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white"
                       >
                         {createUserMutation.isPending ? "Assigning..." : "Assign User"}
                       </Button>
