@@ -6,7 +6,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Plus, Pencil, Trash2 } from "lucide-react";
 
 interface SiteUser {
@@ -94,19 +94,30 @@ export default function Admin() {
   };
 
   const handleAssignUser = () => {
-    if (newUser.name && newUser.username && newUser.accessLevel) {
-      const newSiteUser: SiteUser = {
-        id: Date.now().toString(),
-        name: newUser.name,
-        email: newUser.username,
-        accessLevel: newUser.accessLevel as "standard" | "admin",
-        initials: getInitials(newUser.name),
-        color: getRandomColor()
-      };
-      setSiteUsers(prev => [...prev, newSiteUser]);
-      setIsNewUserOpen(false);
-      setNewUser({ name: "", username: "", accessLevel: "" });
+    if (!newUser.name.trim()) {
+      alert("Please enter a name");
+      return;
     }
+    if (!newUser.username.trim()) {
+      alert("Please enter a username");
+      return;
+    }
+    if (!newUser.accessLevel) {
+      alert("Please select an access level");
+      return;
+    }
+    
+    const newSiteUser: SiteUser = {
+      id: Date.now().toString(),
+      name: newUser.name.trim(),
+      email: newUser.username.trim(),
+      accessLevel: newUser.accessLevel as "standard" | "admin",
+      initials: getInitials(newUser.name.trim()),
+      color: getRandomColor()
+    };
+    setSiteUsers(prev => [...prev, newSiteUser]);
+    setIsNewUserOpen(false);
+    setNewUser({ name: "", username: "", accessLevel: "" });
   };
 
   const handleUpdateUser = () => {
@@ -246,45 +257,61 @@ export default function Admin() {
                 <div></div>
               </div>
               
-              <div className="space-y-4">
-                {siteUsers.map((user) => (
-                  <div key={user.id} className="flex items-center justify-between p-4 border rounded-lg">
-                    <div className="flex items-center space-x-3">
-                      <div className={`w-8 h-8 ${user.color} rounded-full flex items-center justify-center text-white text-sm font-medium`}>
-                        {user.initials}
-                      </div>
-                      <div>
-                        <p className="font-medium">{user.name}</p>
-                        <p className="text-sm text-muted-foreground">{user.email}</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                        user.accessLevel === "admin" 
-                          ? "bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200" 
-                          : "bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200"
-                      }`}>
-                        {user.accessLevel === "admin" ? "Admin" : "Standard"}
-                      </span>
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
-                        onClick={() => handleEditUser(user)}
-                        className="h-8 w-8 p-0"
-                      >
-                        <Pencil className="w-4 h-4" />
-                      </Button>
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
-                        onClick={() => handleDeleteUser(user)}
-                        className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </div>
-                ))}
+              <div className="rounded-md border">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>User</TableHead>
+                      <TableHead>Email</TableHead>
+                      <TableHead>Access Level</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {siteUsers.map((user) => (
+                      <TableRow key={user.id}>
+                        <TableCell className="font-medium">
+                          <div className="flex items-center space-x-3">
+                            <div className={`w-8 h-8 ${user.color} rounded-full flex items-center justify-center text-white text-sm font-medium`}>
+                              {user.initials}
+                            </div>
+                            <span>{user.name}</span>
+                          </div>
+                        </TableCell>
+                        <TableCell>{user.email}</TableCell>
+                        <TableCell>
+                          <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                            user.accessLevel === "admin" 
+                              ? "bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200" 
+                              : "bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200"
+                          }`}>
+                            {user.accessLevel === "admin" ? "Admin" : "Standard"}
+                          </span>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex justify-end space-x-2">
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              onClick={() => handleEditUser(user)}
+                              className="h-8 w-8 p-0"
+                            >
+                              <Pencil className="w-4 h-4" />
+                            </Button>
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              onClick={() => handleDeleteUser(user)}
+                              className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
               </div>
             </CardContent>
           </Card>
