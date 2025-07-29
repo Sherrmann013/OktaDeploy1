@@ -2827,11 +2827,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const mappingData = insertAppMappingSchema.parse(req.body);
       
-      // Check if app name already exists
-      const existingMapping = await db.select().from(appMappings).where(eq(appMappings.appName, mappingData.appName));
-      if (existingMapping.length > 0) {
-        return res.status(400).json({ message: "App mapping with this name already exists" });
-      }
+      // Note: Removed unique constraint check to allow multiple groups per app
 
       const [newMapping] = await db.insert(appMappings).values(mappingData).returning();
       
@@ -2854,6 +2850,52 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error creating app mapping:", error);
       res.status(500).json({ message: "Failed to create app mapping" });
+    }
+  });
+
+  // Bulk create app mappings (remove unique constraint check for multiple groups per app)
+  app.post('/api/app-mappings/bulk', isAuthenticated, requireAdmin, async (req, res) => {
+    try {
+      const { mappings } = req.body;
+      
+      if (!Array.isArray(mappings) || mappings.length === 0) {
+        return res.status(400).json({ message: 'Mappings array is required' });
+      }
+
+      const validatedMappings = mappings.map(mapping => insertAppMappingSchema.parse(mapping));
+      
+      const createdMappings = await db.insert(appMappings).values(
+        validatedMappings.map(mapping => ({
+          ...mapping,
+          lastUpdated: new Date()
+        }))
+      ).returning();
+
+      // Audit log for each mapping
+      for (const mapping of createdMappings) {
+        await AuditLogger.log({
+          req,
+          action: "CREATE",
+          resourceType: "APP_MAPPING", 
+          resourceId: mapping.id.toString(),
+          resourceName: mapping.appName,
+          details: {
+            action: "Created app mapping (bulk)",
+            appName: mapping.appName,
+            oktaGroupName: mapping.oktaGroupName
+          },
+          newValues: mapping
+        });
+      }
+
+      res.status(201).json(createdMappings);
+    } catch (error) {
+      console.error('Error creating bulk app mappings:', error);
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ message: 'Validation error', errors: error.errors });
+      } else {
+        res.status(500).json({ message: 'Internal server error' });
+      }
     }
   });
 

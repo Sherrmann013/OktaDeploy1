@@ -74,7 +74,7 @@ export default function Admin() {
   const [editingUser, setEditingUser] = useState<SiteUser | null>(null);
   const [editingIntegration, setEditingIntegration] = useState<Integration | null>(null);
   const [isNewMappingOpen, setIsNewMappingOpen] = useState(false);
-  const [newMapping, setNewMapping] = useState({ appName: "", oktaGroupName: "", description: "" });
+  const [newMapping, setNewMapping] = useState({ appName: "", oktaGroups: [""], description: "" });
   const [integrationToDelete, setIntegrationToDelete] = useState<Integration | null>(null);
   const [newUser, setNewUser] = useState({
     name: "",
@@ -199,12 +199,20 @@ export default function Admin() {
 
   // App mapping mutations
   const createAppMappingMutation = useMutation({
-    mutationFn: async (mappingData: { appName: string; oktaGroupName: string; description?: string }) => {
-      const response = await fetch("/api/app-mappings", {
+    mutationFn: async (mappingData: { appName: string; oktaGroups: string[]; description?: string }) => {
+      // Create multiple mappings for each group
+      const mappings = mappingData.oktaGroups.filter(group => group.trim()).map(oktaGroupName => ({
+        appName: mappingData.appName,
+        oktaGroupName: oktaGroupName.trim(),
+        description: mappingData.description
+      }));
+      
+      // Send all mappings at once
+      const response = await fetch("/api/app-mappings/bulk", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify(mappingData)
+        body: JSON.stringify({ mappings })
       });
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
@@ -215,9 +223,33 @@ export default function Admin() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/app-mappings"] });
       setIsNewMappingOpen(false);
-      setNewMapping({ appName: "", oktaGroupName: "", description: "" });
+      setNewMapping({ appName: "", oktaGroups: [""], description: "" });
     }
   });
+
+  // Helper function to add new group input
+  const addGroupInput = () => {
+    setNewMapping(prev => ({
+      ...prev,
+      oktaGroups: [...prev.oktaGroups, ""]
+    }));
+  };
+
+  // Helper function to remove group input
+  const removeGroupInput = (index: number) => {
+    setNewMapping(prev => ({
+      ...prev,
+      oktaGroups: prev.oktaGroups.filter((_, i) => i !== index)
+    }));
+  };
+
+  // Helper function to update group input
+  const updateGroupInput = (index: number, value: string) => {
+    setNewMapping(prev => ({
+      ...prev,
+      oktaGroups: prev.oktaGroups.map((group, i) => i === index ? value : group)
+    }));
+  };
 
   const deleteAppMappingMutation = useMutation({
     mutationFn: async (id: number) => {
@@ -1427,17 +1459,45 @@ export default function Admin() {
               />
             </div>
             <div className="space-y-2">
-              <label htmlFor="oktaGroupName" className="text-sm font-medium">
-                OKTA Group Name
-              </label>
-              <input
-                id="oktaGroupName"
-                type="text"
-                placeholder="e.g., MTX-SG-ZOOM-USER"
-                value={newMapping.oktaGroupName}
-                onChange={(e) => setNewMapping({ ...newMapping, oktaGroupName: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
+              <div className="flex items-center justify-between">
+                <label className="text-sm font-medium">
+                  OKTA Group Names
+                </label>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={addGroupInput}
+                  className="text-xs px-2 py-1"
+                >
+                  <Plus className="w-3 h-3 mr-1" />
+                  Add Group
+                </Button>
+              </div>
+              <div className="space-y-2">
+                {newMapping.oktaGroups.map((group, index) => (
+                  <div key={index} className="flex items-center space-x-2">
+                    <input
+                      type="text"
+                      placeholder="e.g., MTX-SG-ZOOM-USER"
+                      value={group}
+                      onChange={(e) => updateGroupInput(index, e.target.value)}
+                      className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                    {newMapping.oktaGroups.length > 1 && (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => removeGroupInput(index)}
+                        className="px-2 py-1 text-red-600 hover:text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:text-red-300 dark:hover:bg-red-950"
+                      >
+                        <X className="w-3 h-3" />
+                      </Button>
+                    )}
+                  </div>
+                ))}
+              </div>
             </div>
             <div className="space-y-2">
               <label htmlFor="description" className="text-sm font-medium">
@@ -1458,14 +1518,14 @@ export default function Admin() {
               variant="outline" 
               onClick={() => {
                 setIsNewMappingOpen(false);
-                setNewMapping({ appName: "", oktaGroupName: "", description: "" });
+                setNewMapping({ appName: "", oktaGroups: [""], description: "" });
               }}
             >
               Cancel
             </Button>
             <Button 
               onClick={() => createAppMappingMutation.mutate(newMapping)}
-              disabled={!newMapping.appName || !newMapping.oktaGroupName || createAppMappingMutation.isPending}
+              disabled={!newMapping.appName || !newMapping.oktaGroups.some(g => g.trim()) || createAppMappingMutation.isPending}
               className="bg-blue-600 hover:bg-blue-700 text-white"
             >
               {createAppMappingMutation.isPending ? "Creating..." : "Create Mapping"}

@@ -152,13 +152,16 @@ export type AuditLog = typeof auditLogs.$inferSelect;
 // App mappings table for OKTA application-to-group relationships
 export const appMappings = pgTable('app_mappings', {
   id: serial('id').primaryKey(),
-  appName: varchar('app_name', { length: 100 }).notNull().unique(),
+  appName: varchar('app_name', { length: 100 }).notNull(),
   oktaGroupName: varchar('okta_group_name', { length: 200 }).notNull(),
   description: text('description'),
   status: varchar('status', { length: 20 }).notNull().default('active'), // active, inactive
   created: timestamp('created').defaultNow().notNull(),
   lastUpdated: timestamp('last_updated').defaultNow().notNull(),
-});
+}, (table) => [
+  // Unique constraint on combination of appName and oktaGroupName
+  index('app_group_unique').on(table.appName, table.oktaGroupName)
+]);
 
 export const insertAppMappingSchema = createInsertSchema(appMappings).omit({
   id: true,
