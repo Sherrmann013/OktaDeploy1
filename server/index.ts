@@ -31,6 +31,12 @@ if (!process.env.KNOWBE4_GRAPH_API_KEY) {
   console.log("KNOWBE4_GRAPH_API_KEY not set - using placeholder for local development");
 }
 
+// Check if we should force dev mode (can be set via environment or by creating a .dev file)
+if (!process.env.FORCE_DEV_MODE && fs.existsSync('.dev')) {
+  process.env.FORCE_DEV_MODE = "true";
+  console.log("Found .dev file - enabling live development mode");
+}
+
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -85,7 +91,7 @@ app.use((req, res, next) => {
     throw err;
   });
 
-  // Check if production build exists and serve statically if so
+  // Check if production build exists and serve it
   const publicDir = path.resolve(process.cwd(), "dist/public");
   const fallbackPublicDir = path.resolve(process.cwd(), "public");
   const hasProductionBuild = fs.existsSync(path.join(publicDir, "index.html")) || fs.existsSync(path.join(fallbackPublicDir, "index.html"));
@@ -103,12 +109,11 @@ app.use((req, res, next) => {
         res.sendFile(path.join(actualPublicDir, "index.html"));
       }
     });
-  } else if (app.get("env") === "development") {
-    log("Development mode, setting up Vite");
-    await setupVite(app, server);
   } else {
-    log("No production build found, falling back to Vite");
-    await setupVite(app, server);
+    log("No production build found, you need to run 'npm run build' first");
+    app.use("*", (req, res) => {
+      res.status(503).json({ error: "Application not built. Please run 'npm run build' to generate the frontend." });
+    });
   }
 
   // ALWAYS serve the app on port 5000
