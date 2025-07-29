@@ -75,6 +75,11 @@ function AdminComponent() {
   const [isDeleteUserOpen, setIsDeleteUserOpen] = useState(false);
   const [userToDelete, setUserToDelete] = useState<SiteUser | null>(null);
   const [isLogoUploadOpen, setIsLogoUploadOpen] = useState(false);
+
+  // Get current logo setting
+  const { data: logoSetting } = useQuery({
+    queryKey: ['/api/layout-settings/company_logo'],
+  });
   const [editingUser, setEditingUser] = useState<SiteUser | null>(null);
   const [editingIntegration, setEditingIntegration] = useState<Integration | null>(null);
   const [isNewMappingOpen, setIsNewMappingOpen] = useState(false);
@@ -1263,19 +1268,31 @@ function AdminComponent() {
                     Company Logo
                   </h4>
                   <div className="space-y-4">
-                    <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
+                    <div className="flex items-center space-x-4">
                       <div className="flex items-center space-x-3">
-                        <div className="w-8 h-8 bg-orange-500 rounded flex items-center justify-center text-white font-bold text-sm">
-                          M
+                        <div className="w-16 h-16 bg-orange-500 rounded flex items-center justify-center overflow-hidden">
+                          {logoSetting?.settingValue ? (
+                            <img 
+                              src={logoSetting.settingValue} 
+                              alt="Company Logo" 
+                              className="w-full h-full object-contain"
+                            />
+                          ) : (
+                            <div className="w-8 h-8 text-white font-bold text-sm flex items-center justify-center">
+                              M
+                            </div>
+                          )}
                         </div>
                         <div>
                           <p className="font-medium">Current Logo</p>
-                          <p className="text-sm text-gray-600 dark:text-gray-400">Default MAZE branding</p>
+                          <p className="text-sm text-gray-600 dark:text-gray-400">
+                            {logoSetting?.settingValue ? "Custom company logo" : "Default MAZE branding"}
+                          </p>
                         </div>
                       </div>
                       <Button 
                         onClick={() => setIsLogoUploadOpen(true)}
-                        className="bg-blue-600 hover:bg-blue-700 text-white"
+                        className="bg-blue-600 hover:bg-blue-700 text-white ml-auto"
                       >
                         <Settings className="w-4 h-4 mr-2" />
                         Customize Logo
