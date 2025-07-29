@@ -1194,11 +1194,6 @@ export default function Admin() {
                   {appMappingsData.map((mapping) => (
                     <div key={mapping.id} className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
                       <div className="flex items-center space-x-4">
-                        <div className="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900 flex items-center justify-center">
-                          <span className="text-sm font-semibold text-blue-600 dark:text-blue-400">
-                            {mapping.appName.charAt(0).toUpperCase()}
-                          </span>
-                        </div>
                         <div>
                           <h4 className="font-semibold">{mapping.appName}</h4>
                           <p className="text-sm text-muted-foreground">{mapping.description || 'No description'}</p>

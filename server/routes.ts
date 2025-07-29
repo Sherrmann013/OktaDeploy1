@@ -2911,14 +2911,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "App mapping not found" });
       }
 
-      // Check if app name already exists (excluding current mapping)
-      if (mappingData.appName) {
-        const duplicateMapping = await db.select().from(appMappings)
-          .where(eq(appMappings.appName, mappingData.appName));
-        if (duplicateMapping.length > 0 && duplicateMapping[0].id !== id) {
-          return res.status(400).json({ message: "App mapping with this name already exists" });
-        }
-      }
+      // Note: Multiple mappings per app are now allowed, so no unique constraint check needed
 
       const [updatedMapping] = await db.update(appMappings)
         .set({ ...mappingData, lastUpdated: new Date() })
