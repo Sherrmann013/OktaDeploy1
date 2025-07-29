@@ -5,7 +5,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+
 import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Edit, Pause, Trash2, Play, ChevronLeft, ChevronRight, ArrowUpDown, FilterIcon, Calendar, Check, ChevronsUpDown, GripVertical } from "lucide-react";
@@ -307,12 +307,7 @@ export default function UserTable({
     });
   };
 
-  // Generate user initials for avatars
-  const getUserInitials = (user: User) => {
-    const firstInitial = user.firstName?.charAt(0) || '';
-    const lastInitial = user.lastName?.charAt(0) || '';
-    return (firstInitial + lastInitial).toUpperCase() || 'U';
-  };
+
 
   // Get status badge color
   const getStatusBadgeColor = (status: string) => {
@@ -339,17 +334,8 @@ export default function UserTable({
     switch (columnId) {
       case 'name':
         return (
-          <div className="flex items-center space-x-3">
-            <Avatar className="h-8 w-8">
-              <AvatarFallback className="bg-blue-600 text-white text-xs">
-                {getUserInitials(user)}
-              </AvatarFallback>
-            </Avatar>
-            <div>
-              <div className="font-medium text-gray-900 dark:text-gray-100">
-                {user.firstName} {user.lastName}
-              </div>
-            </div>
+          <div className="font-medium text-gray-900 dark:text-gray-100">
+            {user.firstName} {user.lastName}
           </div>
         );
       case 'login':
