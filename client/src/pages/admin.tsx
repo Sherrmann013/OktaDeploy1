@@ -78,6 +78,7 @@ function AdminComponent() {
   const [layoutTab, setLayoutTab] = useState("logo");
   const [isAddDashboardCardOpen, setIsAddDashboardCardOpen] = useState(false);
   const [draggedItem, setDraggedItem] = useState<number | null>(null);
+  const [dragOverItem, setDragOverItem] = useState<number | null>(null);
   // Fetch dashboard cards from the database
   const { data: dashboardCardsData, refetch: refetchDashboardCards, error: dashboardCardsError, isLoading: dashboardCardsLoading } = useQuery({
     queryKey: ["/api/dashboard-cards"],
@@ -146,10 +147,50 @@ function AdminComponent() {
     },
   });
 
-  // Drag and drop functions
+  // Enhanced drag and drop functions with micro-interactions
   const handleDragStart = (e: React.DragEvent, index: number) => {
     setDraggedItem(index);
+    setDragOverItem(null);
     e.dataTransfer.effectAllowed = 'move';
+    
+    // Add custom drag image with reduced opacity
+    const target = e.currentTarget as HTMLElement;
+    const dragImage = target.cloneNode(true) as HTMLElement;
+    dragImage.style.opacity = '0.8';
+    dragImage.style.transform = 'rotate(2deg)';
+    dragImage.style.boxShadow = '0 8px 32px rgba(0, 0, 0, 0.3)';
+    document.body.appendChild(dragImage);
+    e.dataTransfer.setDragImage(dragImage, 0, 0);
+    
+    // Clean up the temporary drag image
+    setTimeout(() => {
+      if (document.body.contains(dragImage)) {
+        document.body.removeChild(dragImage);
+      }
+    }, 0);
+  };
+
+  const handleDragEnd = () => {
+    setDraggedItem(null);
+    setDragOverItem(null);
+  };
+
+  const handleDragEnter = (e: React.DragEvent, index: number) => {
+    e.preventDefault();
+    if (draggedItem !== null && draggedItem !== index) {
+      setDragOverItem(index);
+    }
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    // Only reset if we're leaving the entire card area
+    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+    const x = e.clientX;
+    const y = e.clientY;
+    
+    if (x < rect.left || x > rect.right || y < rect.top || y > rect.bottom) {
+      setDragOverItem(null);
+    }
   };
 
   const handleDragOver = (e: React.DragEvent) => {
@@ -182,6 +223,7 @@ function AdminComponent() {
     
     setDashboardCards(updatedCards);
     setDraggedItem(null);
+    setDragOverItem(null);
     
     // Update positions in the database
     console.log('🎯 Calling mutation with cards:', updatedCards.map(card => ({ id: card.id, position: card.position })));
@@ -1543,56 +1585,112 @@ function AdminComponent() {
                               key={card.id}
                               draggable
                               onDragStart={(e) => handleDragStart(e, index)}
+                              onDragEnd={handleDragEnd}
+                              onDragEnter={(e) => handleDragEnter(e, index)}
+                              onDragLeave={handleDragLeave}
                               onDragOver={handleDragOver}
                               onDrop={(e) => handleDrop(e, index)}
                               className={`
-                                p-4 border-2 border-dashed rounded-lg cursor-move transition-all
+                                group relative p-4 border-2 rounded-lg cursor-move 
+                                transition-all duration-200 ease-in-out
+                                transform-gpu
                                 ${draggedItem === index 
-                                  ? 'border-blue-500 bg-blue-50 dark:bg-blue-950 opacity-50' 
-                                  : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500'
+                                  ? 'border-blue-500 bg-blue-50 dark:bg-blue-950 opacity-60 scale-105 rotate-1 shadow-lg border-solid' 
+                                  : dragOverItem === index
+                                    ? 'border-blue-400 bg-blue-25 dark:bg-blue-900/20 scale-102 shadow-md border-solid'
+                                    : 'border-dashed border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500 hover:shadow-sm hover:scale-101'
                                 }
                                 bg-gray-50 dark:bg-gray-800
+                                hover:bg-gray-100 dark:hover:bg-gray-750
                               `}
                             >
                               <div className="flex items-center justify-between mb-2">
                                 <div className="flex items-center gap-2">
-                                  <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded flex items-center justify-center">
+                                  <div className={`
+                                    w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded 
+                                    flex items-center justify-center
+                                    transition-transform duration-200 ease-in-out
+                                    ${draggedItem === index ? 'scale-110' : ''}
+                                  `}>
                                     <span className="text-white text-xs font-bold">
                                       {card.name ? card.name.charAt(0) : card.type?.charAt(0)?.toUpperCase() || '?'}
                                     </span>
                                   </div>
-                                  <span className="font-medium text-sm">{card.name || `${card.type} Integration`}</span>
+                                  <span className={`
+                                    font-medium text-sm transition-all duration-200
+                                    ${draggedItem === index ? 'text-blue-600 dark:text-blue-400' : ''}
+                                  `}>
+                                    {card.name || `${card.type} Integration`}
+                                  </span>
                                 </div>
                                 <Button
                                   variant="ghost"
                                   size="sm"
                                   onClick={() => removeDashboardCard(card.id)}
-                                  className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950"
+                                  className={`
+                                    text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950
+                                    transition-all duration-200 ease-in-out
+                                    ${draggedItem === index ? 'opacity-50' : 'hover:scale-110'}
+                                  `}
                                 >
                                   <X className="w-4 h-4" />
                                 </Button>
                               </div>
-                              <div className="text-xs text-gray-500">
+                              <div className={`
+                                text-xs transition-colors duration-200
+                                ${draggedItem === index ? 'text-blue-500 dark:text-blue-400' : 'text-gray-500'}
+                              `}>
                                 {card.type === 'knowbe4' ? 'KnowBe4 phishing simulation progress' :
                                  card.type === 'sentinelone' ? 'SentinelOne device protection status' :
                                  card.type === 'device_management' ? 'Addigy/Intune managed devices' :
                                  card.type === 'jira' ? 'Jira Service Management tickets' :
                                  'Integration dashboard card'}
                               </div>
+                              
+                              {/* Drag handle indicator */}
+                              <div className={`
+                                absolute top-2 right-8 text-gray-400 transition-opacity duration-200
+                                ${draggedItem === index ? 'opacity-0' : 'opacity-0 group-hover:opacity-100'}
+                              `}>
+                                <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                  <path d="M7 2a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM7 8a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM7 14a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM13 2a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM13 8a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM13 14a2 2 0 1 0 0 4 2 2 0 0 0 0-4z"/>
+                                </svg>
+                              </div>
                             </div>
                           ))}
                           
-                          {/* Empty slots */}
-                          {Array.from({ length: 4 - dashboardCards.length }, (_, index) => (
-                            <div
-                              key={`empty-${index}`}
-                              onDragOver={handleDragOver}
-                              onDrop={(e) => handleDrop(e, dashboardCards.length + index)}
-                              className="p-4 border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-lg flex items-center justify-center min-h-[100px]"
-                            >
-                              <span className="text-gray-400 text-sm">Empty slot</span>
-                            </div>
-                          ))}
+                          {/* Enhanced empty slots with drop zone interactions */}
+                          {Array.from({ length: 4 - dashboardCards.length }, (_, index) => {
+                            const slotIndex = dashboardCards.length + index;
+                            return (
+                              <div
+                                key={`empty-${index}`}
+                                onDragEnter={(e) => handleDragEnter(e, slotIndex)}
+                                onDragLeave={handleDragLeave}
+                                onDragOver={handleDragOver}
+                                onDrop={(e) => handleDrop(e, slotIndex)}
+                                className={`
+                                  p-4 border-2 border-dashed rounded-lg 
+                                  flex items-center justify-center min-h-[100px]
+                                  transition-all duration-200 ease-in-out
+                                  ${dragOverItem === slotIndex
+                                    ? 'border-blue-400 bg-blue-50 dark:bg-blue-900/20 scale-102 border-solid'
+                                    : draggedItem !== null
+                                      ? 'border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800'
+                                      : 'border-gray-200 dark:border-gray-700'
+                                  }
+                                `}
+                              >
+                                <span className={`text-sm transition-colors duration-200 ${
+                                  dragOverItem === slotIndex 
+                                    ? 'text-blue-600 dark:text-blue-400' 
+                                    : 'text-gray-400'
+                                }`}>
+                                  {dragOverItem === slotIndex ? 'Drop here' : 'Empty slot'}
+                                </span>
+                              </div>
+                            );
+                          })}
                         </div>
                       </div>
                     )}
