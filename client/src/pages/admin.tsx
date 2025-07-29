@@ -87,7 +87,7 @@ function AdminComponent() {
   });
 
   // Initialize with empty array - only use database data
-  const [dashboardCards, setDashboardCards] = useState([]);
+  const [dashboardCards, setDashboardCards] = useState<any[]>([]);
 
   // Update local state when data changes - ALWAYS use database data
   useEffect(() => {
