@@ -44,9 +44,6 @@ export default function Dashboard() {
 
   return (
     <div className="p-6">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-foreground">Security Dashboard</h1>
-      </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* KnowBe4 Security Training */}
