@@ -1045,7 +1045,7 @@ export default function Admin() {
                 <PopoverContent className="w-full p-0 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
                   <Command>
                     <CommandInput placeholder="Search integrations..." className="bg-white dark:bg-gray-800" />
-                    <CommandList className="bg-white dark:bg-gray-800">
+                    <CommandList className="bg-white dark:bg-gray-800 max-h-[200px] overflow-y-auto">
                       <CommandEmpty>No integration found.</CommandEmpty>
                       <CommandGroup>
                         {availableIntegrations.map((integration) => (
