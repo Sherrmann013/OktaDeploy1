@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { Plus } from "lucide-react";
+import { Plus, Pencil, Trash2 } from "lucide-react";
 
 export default function Admin() {
   const [activeTab, setActiveTab] = useState("site-access");
@@ -18,6 +18,16 @@ export default function Admin() {
     description: "",
     accessLevel: ""
   });
+
+  const handleEditUser = (user: any) => {
+    console.log("Editing user:", user);
+    // TODO: Implement edit functionality
+  };
+
+  const handleDeleteUser = (user: any) => {
+    console.log("Deleting user:", user);
+    // TODO: Implement delete functionality with confirmation
+  };
 
   return (
     <div className="p-6">
@@ -119,6 +129,22 @@ export default function Admin() {
                     <span className="px-3 py-1 bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 rounded-full text-sm font-medium">
                       Admin
                     </span>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      onClick={() => handleEditUser({ name: "CW-Admin", email: "admin@mazetx.com", role: "admin" })}
+                      className="h-8 w-8 p-0"
+                    >
+                      <Pencil className="w-4 h-4" />
+                    </Button>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      onClick={() => handleDeleteUser({ name: "CW-Admin", email: "admin@mazetx.com", role: "admin" })}
+                      className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
                   </div>
                 </div>
 
@@ -136,6 +162,22 @@ export default function Admin() {
                     <span className="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded-full text-sm font-medium">
                       Standard
                     </span>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      onClick={() => handleEditUser({ name: "Emily Davis", email: "emily.davis@company.com", role: "standard" })}
+                      className="h-8 w-8 p-0"
+                    >
+                      <Pencil className="w-4 h-4" />
+                    </Button>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      onClick={() => handleDeleteUser({ name: "Emily Davis", email: "emily.davis@company.com", role: "standard" })}
+                      className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
                   </div>
                 </div>
 
@@ -153,6 +195,22 @@ export default function Admin() {
                     <span className="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded-full text-sm font-medium">
                       Standard
                     </span>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      onClick={() => handleEditUser({ name: "Michael Wilson", email: "michael.wilson@company.com", role: "standard" })}
+                      className="h-8 w-8 p-0"
+                    >
+                      <Pencil className="w-4 h-4" />
+                    </Button>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      onClick={() => handleDeleteUser({ name: "Michael Wilson", email: "michael.wilson@company.com", role: "standard" })}
+                      className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
                   </div>
                 </div>
 
@@ -170,6 +228,22 @@ export default function Admin() {
                     <span className="px-3 py-1 bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 rounded-full text-sm font-medium">
                       Admin
                     </span>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      onClick={() => handleEditUser({ name: "Sarah Smith", email: "sarah.smith@company.com", role: "admin" })}
+                      className="h-8 w-8 p-0"
+                    >
+                      <Pencil className="w-4 h-4" />
+                    </Button>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      onClick={() => handleDeleteUser({ name: "Sarah Smith", email: "sarah.smith@company.com", role: "admin" })}
+                      className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
                   </div>
                 </div>
 
@@ -187,6 +261,22 @@ export default function Admin() {
                     <span className="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded-full text-sm font-medium">
                       Standard
                     </span>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      onClick={() => handleEditUser({ name: "David Johnson", email: "david.johnson@company.com", role: "standard" })}
+                      className="h-8 w-8 p-0"
+                    >
+                      <Pencil className="w-4 h-4" />
+                    </Button>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      onClick={() => handleDeleteUser({ name: "David Johnson", email: "david.johnson@company.com", role: "standard" })}
+                      className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
                   </div>
                 </div>
               </div>
