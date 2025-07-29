@@ -3,6 +3,7 @@ import session from "express-session";
 import connectPg from "connect-pg-simple";
 import { storage } from "./storage";
 import { oktaService } from "./okta-service";
+import { AuditLogger } from "./audit";
 
 export function getSession() {
   const sessionTtl = 7 * 24 * 60 * 60 * 1000; // 1 week
@@ -78,10 +79,34 @@ export async function setupAuth(app: Express) {
       // Store user in session
       (req.session as any).user = adminUser;
       
+      // Log the authentication event
+      await AuditLogger.logAuthAction(
+        req,
+        'LOGIN',
+        { 
+          loginType: 'Local Admin', 
+          username: ADMIN_USERNAME,
+          success: true
+        }
+      );
+      
       console.log('Session created for admin user');
       res.json(adminUser);
     } else {
       console.log('Invalid credentials provided');
+      
+      // Log the failed authentication event
+      await AuditLogger.logAuthAction(
+        req,
+        'LOGIN_FAILED',
+        { 
+          loginType: 'Local Admin', 
+          username: username,
+          success: false,
+          reason: 'Invalid credentials'
+        }
+      );
+      
       res.status(401).json({ error: "Invalid credentials" });
     }
   });

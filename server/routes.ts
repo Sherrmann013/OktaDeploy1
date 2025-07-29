@@ -1,9 +1,10 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertUserSchema, updateUserSchema, insertSiteAccessUserSchema, siteAccessUsers, insertIntegrationSchema, integrations } from "@shared/schema";
+import { insertUserSchema, updateUserSchema, insertSiteAccessUserSchema, siteAccessUsers, insertIntegrationSchema, integrations, auditLogs } from "@shared/schema";
 import { db } from "./db";
-import { eq } from "drizzle-orm";
+import { eq, desc } from "drizzle-orm";
+import { AuditLogger, getAuditLogs } from "./audit";
 import { z } from "zod";
 import { oktaService } from "./okta-service";
 import { syncSpecificUser } from "./okta-sync";
@@ -715,6 +716,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         sendActivationEmail: userData.sendActivationEmail,
       });
 
+      // Log the audit trail
+      await AuditLogger.logUserAction(
+        req,
+        'CREATE',
+        user.id.toString(),
+        `${user.firstName} ${user.lastName}`,
+        { action: 'Created new user in OKTA and local database', department: user.department, employeeType: user.employeeType },
+        {},
+        { firstName: user.firstName, lastName: user.lastName, email: user.email, department: user.department, employeeType: user.employeeType, status: user.status }
+      );
+
       // Add user to groups based on employee type, department, and selected apps
       try {
         const groups = await oktaService.getGroups();
@@ -993,6 +1005,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       console.log(`Successfully deleted user from local storage: ${user.email} (ID: ${id})`);
+      
+      // Log the audit trail
+      await AuditLogger.logUserAction(
+        req,
+        'DELETE',
+        user.id.toString(),
+        `${user.firstName} ${user.lastName}`,
+        { action: 'Permanently deleted user from OKTA and local database' },
+        { firstName: user.firstName, lastName: user.lastName, email: user.email, department: user.department, status: user.status },
+        {}
+      );
       
       // Clear any cached user data to ensure the deletion is reflected immediately
       try {
@@ -2524,6 +2547,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userData = insertSiteAccessUserSchema.parse(req.body);
       const [user] = await db.insert(siteAccessUsers).values(userData).returning();
+      
+      // Log the audit trail
+      await AuditLogger.logSiteAccessAction(
+        req,
+        'CREATE',
+        user.id.toString(),
+        user.name,
+        { action: 'Created new site access user', accessLevel: user.accessLevel },
+        {},
+        { name: user.name, email: user.email, accessLevel: user.accessLevel }
+      );
+      
       res.json(user);
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -2541,6 +2576,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const id = z.coerce.number().parse(req.params.id);
       const userData = insertSiteAccessUserSchema.parse(req.body);
+      
+      // Get old values for audit log
+      const [oldUser] = await db.select().from(siteAccessUsers).where(eq(siteAccessUsers.id, id));
+      
       const [user] = await db
         .update(siteAccessUsers)
         .set({ ...userData, lastUpdated: new Date() })
@@ -2549,6 +2588,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       if (!user) {
         return res.status(404).json({ message: "Site access user not found" });
+      }
+      
+      // Log the audit trail
+      if (oldUser) {
+        await AuditLogger.logSiteAccessAction(
+          req,
+          'UPDATE',
+          user.id.toString(),
+          user.name,
+          { action: 'Updated site access user' },
+          { name: oldUser.name, email: oldUser.email, accessLevel: oldUser.accessLevel },
+          { name: user.name, email: user.email, accessLevel: user.accessLevel }
+        );
       }
       
       res.json(user);
@@ -2576,6 +2628,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Site access user not found" });
       }
       
+      // Log the audit trail
+      await AuditLogger.logSiteAccessAction(
+        req,
+        'DELETE',
+        deletedUser.id.toString(),
+        deletedUser.name,
+        { action: 'Deleted site access user' },
+        { name: deletedUser.name, email: deletedUser.email, accessLevel: deletedUser.accessLevel },
+        {}
+      );
+      
       res.status(204).send();
     } catch (error) {
       console.error("Error deleting site access user:", error);
@@ -2598,6 +2661,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const integrationData = insertIntegrationSchema.parse(req.body);
       const [integration] = await db.insert(integrations).values(integrationData).returning();
+      
+      // Log the audit trail
+      await AuditLogger.logIntegrationAction(
+        req,
+        'CREATE',
+        integration.id.toString(),
+        integration.displayName,
+        { action: 'Created new integration', status: integration.status },
+        {},
+        { name: integration.name, displayName: integration.displayName, status: integration.status }
+      );
+      
       res.json(integration);
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -2615,6 +2690,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const id = z.coerce.number().parse(req.params.id);
       const integrationData = insertIntegrationSchema.parse(req.body);
+      
+      // Get old values for audit log
+      const [oldIntegration] = await db.select().from(integrations).where(eq(integrations.id, id));
+      
       const [integration] = await db
         .update(integrations)
         .set({ ...integrationData, lastUpdated: new Date() })
@@ -2623,6 +2702,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       if (!integration) {
         return res.status(404).json({ message: "Integration not found" });
+      }
+      
+      // Log the audit trail
+      if (oldIntegration) {
+        await AuditLogger.logIntegrationAction(
+          req,
+          'UPDATE',
+          integration.id.toString(),
+          integration.displayName,
+          { action: 'Updated integration configuration' },
+          { status: oldIntegration.status, apiKeys: Object.keys(oldIntegration.apiKeys || {}) },
+          { status: integration.status, apiKeys: Object.keys(integration.apiKeys || {}) }
+        );
       }
       
       res.json(integration);
@@ -2650,10 +2742,70 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Integration not found" });
       }
       
+      // Log the audit trail
+      await AuditLogger.logIntegrationAction(
+        req,
+        'DELETE',
+        deletedIntegration.id.toString(),
+        deletedIntegration.displayName,
+        { action: 'Deleted integration' },
+        { name: deletedIntegration.name, displayName: deletedIntegration.displayName, status: deletedIntegration.status },
+        {}
+      );
+      
       res.status(204).send();
     } catch (error) {
       console.error("Error deleting integration:", error);
       res.status(500).json({ message: "Failed to delete integration" });
+    }
+  });
+
+  // Audit logs endpoint
+  app.get("/api/audit-logs", isAuthenticated, requireAdmin, async (req, res) => {
+    try {
+      const {
+        page = 1,
+        limit = 50,
+        action,
+        resourceType,
+        resourceId,
+        userId,
+        startDate,
+        endDate
+      } = req.query;
+
+      const offset = (Number(page) - 1) * Number(limit);
+      
+      const options: any = {
+        limit: Number(limit),
+        offset,
+      };
+
+      if (action) options.action = action as string;
+      if (resourceType) options.resourceType = resourceType as string;
+      if (resourceId) options.resourceId = resourceId as string;
+      if (userId) options.userId = Number(userId);
+      if (startDate) options.startDate = new Date(startDate as string);
+      if (endDate) options.endDate = new Date(endDate as string);
+
+      const logs = await getAuditLogs(options);
+      
+      // Get total count for pagination
+      const totalLogs = await db.select().from(auditLogs);
+      const total = totalLogs.length;
+      
+      res.json({
+        logs,
+        pagination: {
+          page: Number(page),
+          limit: Number(limit),
+          total,
+          pages: Math.ceil(total / Number(limit))
+        }
+      });
+    } catch (error) {
+      console.error("Error fetching audit logs:", error);
+      res.status(500).json({ message: "Failed to fetch audit logs" });
     }
   });
 

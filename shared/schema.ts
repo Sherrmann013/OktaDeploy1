@@ -116,3 +116,35 @@ export const insertIntegrationSchema = createInsertSchema(integrations).omit({
 
 export type InsertIntegration = z.infer<typeof insertIntegrationSchema>;
 export type Integration = typeof integrations.$inferSelect;
+
+// Audit logs table for tracking all system changes
+export const auditLogs = pgTable('audit_logs', {
+  id: serial('id').primaryKey(),
+  userId: integer('user_id'), // ID of the user who performed the action
+  userEmail: text('user_email').notNull(), // Email of the user who performed the action
+  action: varchar('action', { length: 100 }).notNull(), // CREATE, UPDATE, DELETE, LOGIN, etc.
+  resourceType: varchar('resource_type', { length: 50 }).notNull(), // USER, INTEGRATION, SITE_ACCESS_USER, etc.
+  resourceId: text('resource_id'), // ID of the affected resource
+  resourceName: text('resource_name'), // Name/identifier of the affected resource
+  details: jsonb('details').notNull().default('{}'), // Additional details about the change
+  oldValues: jsonb('old_values').default('{}'), // Previous values (for updates)
+  newValues: jsonb('new_values').default('{}'), // New values (for creates/updates)
+  ipAddress: text('ip_address'), // IP address of the user
+  userAgent: text('user_agent'), // User agent string
+  timestamp: timestamp('timestamp').defaultNow().notNull(),
+});
+
+export const insertAuditLogSchema = createInsertSchema(auditLogs).omit({
+  id: true,
+  timestamp: true,
+}).extend({
+  action: z.string().min(1, "Action is required"),
+  resourceType: z.string().min(1, "Resource type is required"),
+  userEmail: z.string().email("Invalid email address"),
+  details: z.record(z.any()).default({}),
+  oldValues: z.record(z.any()).default({}),
+  newValues: z.record(z.any()).default({})
+});
+
+export type InsertAuditLog = z.infer<typeof insertAuditLogSchema>;
+export type AuditLog = typeof auditLogs.$inferSelect;
