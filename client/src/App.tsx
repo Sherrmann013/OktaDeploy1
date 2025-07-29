@@ -16,6 +16,7 @@ import Groups from "@/pages/groups";
 import Applications from "@/pages/applications";
 import Security from "@/pages/security";
 import Settings from "@/pages/settings";
+import Admin from "@/pages/admin";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -52,6 +53,7 @@ function Router() {
         <Route path="/applications" component={Applications} />
         <Route path="/security" component={Security} />
         <Route path="/settings" component={Settings} />
+        <Route path="/admin" component={Admin} />
         <Route component={NotFound} />
       </Switch>
     </SSOLayout>

@@ -1,6 +1,6 @@
 import React from "react";
 import { Link, useLocation } from "wouter";
-import { Shield, Users, UsersRound, Grid3x3, Settings, RotateCcw } from "lucide-react";
+import { Shield, Users, UsersRound, Grid3x3, Settings, RotateCcw, LayoutDashboard } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { useAuth } from "@/hooks/useAuth";
@@ -11,7 +11,9 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 
 const navigation = [
+  { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard, current: false },
   { name: "Users", href: "/users", icon: Users, current: true },
+  { name: "Admin", href: "/admin", icon: Settings, current: false },
 ];
 
 export default function Sidebar() {
