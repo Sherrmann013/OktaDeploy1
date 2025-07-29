@@ -1034,25 +1034,18 @@ export default function Admin() {
                     variant="outline"
                     role="combobox"
                     aria-expanded={openIntegrationCombobox}
-                    className="w-full justify-between bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700"
+                    className="w-full justify-between bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700"
                   >
-                    {selectedIntegrationType ? (
-                      <div className="flex items-center gap-2">
-                        {getIntegrationLogo(selectedIntegrationType)}
-                        <span className="font-medium">
-                          {availableIntegrations.find(i => i.value === selectedIntegrationType)?.label}
-                        </span>
-                      </div>
-                    ) : (
-                      "Search and select an integration..."
-                    )}
+                    <span className="text-muted-foreground">
+                      Search and select an integration...
+                    </span>
                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-full p-0">
+                <PopoverContent className="w-full p-0 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
                   <Command>
-                    <CommandInput placeholder="Search integrations..." />
-                    <CommandList>
+                    <CommandInput placeholder="Search integrations..." className="bg-white dark:bg-gray-800" />
+                    <CommandList className="bg-white dark:bg-gray-800">
                       <CommandEmpty>No integration found.</CommandEmpty>
                       <CommandGroup>
                         {availableIntegrations.map((integration) => (
@@ -1063,16 +1056,12 @@ export default function Admin() {
                               setSelectedIntegrationType(integration.value);
                               setOpenIntegrationCombobox(false);
                             }}
+                            className="hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"
                           >
                             <div className="flex items-center gap-2">
                               {getIntegrationLogo(integration.value)}
                               <span className="font-medium">{integration.label}</span>
                             </div>
-                            <Check
-                              className={`ml-auto h-4 w-4 ${
-                                selectedIntegrationType === integration.value ? "opacity-100" : "opacity-0"
-                              }`}
-                            />
                           </CommandItem>
                         ))}
                       </CommandGroup>
@@ -1081,6 +1070,17 @@ export default function Admin() {
                 </PopoverContent>
               </Popover>
             </div>
+            
+            {selectedIntegrationType && (
+              <div className="mt-4 p-4 bg-muted rounded-lg">
+                <div className="flex items-center gap-3">
+                  {getIntegrationLogo(selectedIntegrationType)}
+                  <h4 className="font-medium">
+                    {availableIntegrations.find(i => i.value === selectedIntegrationType)?.label}
+                  </h4>
+                </div>
+              </div>
+            )}
           </div>
           <div className="flex justify-end space-x-2">
             <Button variant="outline" onClick={() => {
@@ -1101,6 +1101,7 @@ export default function Admin() {
                   });
                 }
               }}
+              className="bg-primary hover:bg-primary/90 text-primary-foreground"
             >
               {createIntegrationMutation.isPending ? "Adding..." : "Add Integration"}
             </Button>
