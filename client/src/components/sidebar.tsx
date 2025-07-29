@@ -86,7 +86,7 @@ export default function Sidebar() {
       <nav className="p-4 flex-1">
         <ul className="space-y-2">
           {navigation.map((item) => {
-            const isActive = location === item.href || (item.href === "/" && location.startsWith("/users"));
+            const isActive = location === item.href || (item.href === "/users" && location.startsWith("/users"));
             return (
               <li key={item.name}>
                 <Link
