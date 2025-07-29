@@ -7,7 +7,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { useRoleAccess } from "@/hooks/useRoleAccess";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect, useRef } from "react";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 
@@ -20,6 +20,11 @@ export default function Sidebar() {
   const [showUserDropdown, setShowUserDropdown] = useState(false);
   const { toast } = useToast();
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Get custom logo setting
+  const { data: logoSetting } = useQuery({
+    queryKey: ['/api/layout-settings/company_logo'],
+  });
 
   // Filter navigation based on user access level
   const navigation = [
@@ -90,16 +95,26 @@ export default function Sidebar() {
           <div className="relative inline-block mb-1">
             <div className="relative w-24 h-24 mx-auto rounded bg-purple-600 flex items-center justify-center">
               <div className="relative w-20 h-20">
-                <img 
-                  src="/maze-logo.png" 
-                  alt="MAZE Logo" 
-                  className="w-20 h-20 absolute inset-0 object-contain"
-                  style={{ filter: "invert(1)" }}
-                />
-                <div 
-                  className="w-20 h-20 absolute inset-0" 
-                  style={{ backgroundColor: "#f97316", mixBlendMode: "multiply" }}
-                />
+                {logoSetting?.settingValue ? (
+                  <img 
+                    src={logoSetting.settingValue} 
+                    alt="Company Logo" 
+                    className="w-20 h-20 absolute inset-0 object-contain"
+                  />
+                ) : (
+                  <>
+                    <img 
+                      src="/maze-logo.png" 
+                      alt="MAZE Logo" 
+                      className="w-20 h-20 absolute inset-0 object-contain"
+                      style={{ filter: "invert(1)" }}
+                    />
+                    <div 
+                      className="w-20 h-20 absolute inset-0" 
+                      style={{ backgroundColor: "#f97316", mixBlendMode: "multiply" }}
+                    />
+                  </>
+                )}
               </div>
             </div>
           </div>

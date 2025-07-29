@@ -11,7 +11,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Pencil, Trash2, Check, ChevronsUpDown, Edit, X } from "lucide-react";
+import { Plus, Pencil, Trash2, Check, ChevronsUpDown, Edit, X, Settings } from "lucide-react";
+import { LogoUploadModal } from "@/components/LogoUploadModal";
 
 interface SiteUser {
   id: number;
@@ -73,6 +74,7 @@ function AdminComponent() {
   const [isDeleteIntegrationOpen, setIsDeleteIntegrationOpen] = useState(false);
   const [isDeleteUserOpen, setIsDeleteUserOpen] = useState(false);
   const [userToDelete, setUserToDelete] = useState<SiteUser | null>(null);
+  const [isLogoUploadOpen, setIsLogoUploadOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<SiteUser | null>(null);
   const [editingIntegration, setEditingIntegration] = useState<Integration | null>(null);
   const [isNewMappingOpen, setIsNewMappingOpen] = useState(false);
@@ -1247,40 +1249,75 @@ function AdminComponent() {
         <TabsContent value="layout" className="mt-6">
           <Card>
             <CardHeader>
-              <CardTitle>Dashboard Layout & Preferences</CardTitle>
+              <CardTitle>Dashboard Layout & Customization</CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground mb-6">
-                Customize dashboard appearance, layout preferences, and administrative interface settings.
+                Customize your dashboard appearance, company branding, and layout preferences.
               </p>
-              <div className="space-y-6">
+              <div className="space-y-8">
+                {/* Company Logo Section */}
                 <div>
-                  <h4 className="font-medium mb-3">Theme Settings</h4>
-                  <div className="grid grid-cols-2 gap-4">
-                    <Card className="p-4 border-2 border-purple-200 dark:border-purple-700">
+                  <h4 className="font-medium mb-4 flex items-center">
+                    <Settings className="w-4 h-4 mr-2" />
+                    Company Logo
+                  </h4>
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
                       <div className="flex items-center space-x-3">
-                        <div className="w-4 h-4 rounded-full bg-gradient-to-r from-purple-600 to-blue-600"></div>
-                        <span className="font-medium">Dark Theme (Active)</span>
+                        <div className="w-8 h-8 bg-orange-500 rounded flex items-center justify-center text-white font-bold text-sm">
+                          M
+                        </div>
+                        <div>
+                          <p className="font-medium">Current Logo</p>
+                          <p className="text-sm text-gray-600 dark:text-gray-400">Default MAZE branding</p>
+                        </div>
                       </div>
-                    </Card>
-                    <Card className="p-4 border border-gray-200 dark:border-gray-700 opacity-60">
-                      <div className="flex items-center space-x-3">
-                        <div className="w-4 h-4 rounded-full bg-gradient-to-r from-gray-200 to-gray-400"></div>
-                        <span>Light Theme</span>
-                      </div>
-                    </Card>
+                      <Button 
+                        onClick={() => setIsLogoUploadOpen(true)}
+                        className="bg-blue-600 hover:bg-blue-700 text-white"
+                      >
+                        <Settings className="w-4 h-4 mr-2" />
+                        Customize Logo
+                      </Button>
+                    </div>
+                    <p className="text-xs text-gray-500">
+                      Upload your company logo to replace the default MAZE branding. Recommended size: 200x50px or similar aspect ratio.
+                    </p>
                   </div>
                 </div>
-                <div>
-                  <h4 className="font-medium mb-3">Sidebar Configuration</h4>
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between p-3 border rounded-lg dark:border-gray-700">
-                      <span>Purple Accent Color</span>
-                      <span className="text-sm text-green-600 dark:text-green-400">✓ Active</span>
+
+                {/* Coming Soon Sections */}
+                <div className="space-y-6 opacity-60">
+                  <div>
+                    <h4 className="font-medium mb-3 text-gray-500">Card Layout & Monitoring (Coming Soon)</h4>
+                    <div className="grid grid-cols-2 gap-4">
+                      <Card className="p-4 border border-gray-200 dark:border-gray-700">
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm">KnowBe4 Security Training</span>
+                          <span className="text-xs text-gray-500">2x2</span>
+                        </div>
+                      </Card>
+                      <Card className="p-4 border border-gray-200 dark:border-gray-700">
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm">SentinelOne Endpoints</span>
+                          <span className="text-xs text-gray-500">2x1</span>
+                        </div>
+                      </Card>
                     </div>
-                    <div className="flex items-center justify-between p-3 border rounded-lg dark:border-gray-700">
-                      <span>MAZE Branding</span>
-                      <span className="text-sm text-green-600 dark:text-green-400">✓ Enabled</span>
+                  </div>
+                  
+                  <div>
+                    <h4 className="font-medium mb-3 text-gray-500">App Configuration (Coming Soon)</h4>
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between p-3 border rounded-lg dark:border-gray-700">
+                        <span className="text-sm">Available Apps Selection</span>
+                        <span className="text-xs text-gray-500">6 active</span>
+                      </div>
+                      <div className="flex items-center justify-between p-3 border rounded-lg dark:border-gray-700">
+                        <span className="text-sm">User Creation Mappings</span>
+                        <span className="text-xs text-gray-500">Configurable</span>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -1613,6 +1650,12 @@ function AdminComponent() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Logo Upload Modal */}
+      <LogoUploadModal 
+        isOpen={isLogoUploadOpen} 
+        onClose={() => setIsLogoUploadOpen(false)} 
+      />
 
       {/* Add App Mapping Dialog */}
       <Dialog open={isNewMappingOpen} onOpenChange={setIsNewMappingOpen}>

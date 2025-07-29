@@ -175,3 +175,26 @@ export const insertAppMappingSchema = createInsertSchema(appMappings).omit({
 
 export type InsertAppMapping = z.infer<typeof insertAppMappingSchema>;
 export type AppMapping = typeof appMappings.$inferSelect;
+
+// Layout customization schema
+export const layoutSettings = pgTable('layout_settings', {
+  id: serial('id').primaryKey(),
+  settingKey: varchar('setting_key', { length: 100 }).notNull().unique(),
+  settingValue: text('setting_value'),
+  settingType: varchar('setting_type', { length: 50 }).notNull(), // 'logo', 'card_layout', 'app_config', 'user_config'
+  metadata: jsonb('metadata').default('{}'), // Additional config as JSON
+  updatedBy: integer('updated_by').references(() => siteAccessUsers.id),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
+
+export const insertLayoutSettingSchema = createInsertSchema(layoutSettings).omit({
+  id: true,
+  updatedAt: true,
+}).extend({
+  settingKey: z.string().min(1, "Setting key is required"),
+  settingType: z.enum(["logo", "card_layout", "app_config", "user_config"], { required_error: "Setting type is required" }),
+  metadata: z.record(z.any()).default({})
+});
+
+export type InsertLayoutSetting = z.infer<typeof insertLayoutSettingSchema>;
+export type LayoutSetting = typeof layoutSettings.$inferSelect;

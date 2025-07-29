@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertUserSchema, updateUserSchema, insertSiteAccessUserSchema, siteAccessUsers, insertIntegrationSchema, integrations, auditLogs, insertAppMappingSchema, appMappings } from "@shared/schema";
+import { insertUserSchema, updateUserSchema, insertSiteAccessUserSchema, siteAccessUsers, insertIntegrationSchema, integrations, auditLogs, insertAppMappingSchema, appMappings, insertLayoutSettingSchema, layoutSettings } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc } from "drizzle-orm";
 import { AuditLogger, getAuditLogs } from "./audit";
@@ -2984,6 +2984,121 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error looking up app mapping:", error);
       res.status(500).json({ message: "Failed to lookup app mapping" });
+    }
+  });
+
+  // Layout settings endpoints
+  app.get("/api/layout-settings", isAuthenticated, async (req, res) => {
+    try {
+      const settings = await db.select().from(layoutSettings).orderBy(layoutSettings.settingKey);
+      res.json(settings);
+    } catch (error) {
+      console.error("Error fetching layout settings:", error);
+      res.status(500).json({ error: "Failed to fetch layout settings" });
+    }
+  });
+
+  app.get("/api/layout-settings/:key", isAuthenticated, async (req, res) => {
+    try {
+      const { key } = req.params;
+      const setting = await db.select()
+        .from(layoutSettings)
+        .where(eq(layoutSettings.settingKey, key))
+        .limit(1);
+      
+      if (setting.length === 0) {
+        return res.status(404).json({ error: "Setting not found" });
+      }
+      
+      res.json(setting[0]);
+    } catch (error) {
+      console.error("Error fetching layout setting:", error);
+      res.status(500).json({ error: "Failed to fetch layout setting" });
+    }
+  });
+
+  app.post("/api/layout-settings", isAuthenticated, requireAdmin, async (req, res) => {
+    try {
+      const user = (req.session as any).user;
+      const validatedData = insertLayoutSettingSchema.parse(req.body);
+      
+      // Check if setting already exists
+      const existing = await db.select()
+        .from(layoutSettings)
+        .where(eq(layoutSettings.settingKey, validatedData.settingKey))
+        .limit(1);
+      
+      let result;
+      if (existing.length > 0) {
+        // Update existing setting
+        [result] = await db.update(layoutSettings)
+          .set({ 
+            ...validatedData, 
+            updatedBy: user.id,
+            updatedAt: new Date()
+          })
+          .where(eq(layoutSettings.settingKey, validatedData.settingKey))
+          .returning();
+      } else {
+        // Create new setting
+        [result] = await db.insert(layoutSettings)
+          .values({ ...validatedData, updatedBy: user.id })
+          .returning();
+      }
+      
+      // Log the change
+      await AuditLogger.log({
+        req,
+        action: existing.length > 0 ? 'UPDATE' : 'CREATE',
+        resourceType: 'LAYOUT_SETTING',
+        resourceId: result.id.toString(),
+        resourceName: result.settingKey,
+        details: { settingType: result.settingType, settingKey: result.settingKey },
+        oldValues: existing.length > 0 ? existing[0] : {},
+        newValues: result
+      });
+      
+      res.json(result);
+    } catch (error) {
+      console.error("Error saving layout setting:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: error.errors });
+      }
+      res.status(500).json({ error: "Failed to save layout setting" });
+    }
+  });
+
+  app.delete("/api/layout-settings/:key", isAuthenticated, requireAdmin, async (req, res) => {
+    try {
+      const { key } = req.params;
+      
+      const existing = await db.select()
+        .from(layoutSettings)
+        .where(eq(layoutSettings.settingKey, key))
+        .limit(1);
+      
+      if (existing.length === 0) {
+        return res.status(404).json({ error: "Setting not found" });
+      }
+      
+      await db.delete(layoutSettings)
+        .where(eq(layoutSettings.settingKey, key));
+      
+      // Log the deletion
+      await AuditLogger.log({
+        req,
+        action: 'DELETE',
+        resourceType: 'LAYOUT_SETTING',
+        resourceId: existing[0].id.toString(),
+        resourceName: existing[0].settingKey,
+        details: { settingType: existing[0].settingType, settingKey: existing[0].settingKey },
+        oldValues: existing[0]
+      });
+      
+      res.json({ message: "Layout setting deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting layout setting:", error);
+      res.status(500).json({ error: "Failed to delete layout setting" });
     }
   });
 
