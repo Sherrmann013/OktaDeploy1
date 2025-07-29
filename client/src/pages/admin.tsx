@@ -86,49 +86,12 @@ function AdminComponent() {
     refetchOnWindowFocus: false,
   });
 
-  // Initialize with actual database values immediately
-  const [dashboardCards, setDashboardCards] = useState([
-    {
-      id: 1,
-      name: "KnowBe4 Security Training",
-      type: "knowbe4",
-      position: 0,
-      enabled: true,
-      created: new Date().toISOString(),
-      updated: new Date().toISOString()
-    },
-    {
-      id: 2,
-      name: "SentinelOne",
-      type: "sentinelone", 
-      position: 1,
-      enabled: true,
-      created: new Date().toISOString(),
-      updated: new Date().toISOString()
-    },
-    {
-      id: 3,
-      name: "Device Management",
-      type: "device_management",
-      position: 2,
-      enabled: true,
-      created: new Date().toISOString(),
-      updated: new Date().toISOString()
-    },
-    {
-      id: 4,
-      name: "Jira Service Management",
-      type: "jira",
-      position: 3,
-      enabled: true,
-      created: new Date().toISOString(),
-      updated: new Date().toISOString()
-    }
-  ]);
+  // Initialize with empty array - only use database data
+  const [dashboardCards, setDashboardCards] = useState([]);
 
-  // Update local state when data changes
+  // Update local state when data changes - ALWAYS use database data
   useEffect(() => {
-    if (dashboardCardsData && dashboardCardsData.length > 0) {
+    if (dashboardCardsData) {
       console.log('🔄 Dashboard cards data received:', dashboardCardsData);
       setDashboardCards(dashboardCardsData);
     }

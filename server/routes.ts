@@ -3213,8 +3213,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Bulk update dashboard card positions (for drag and drop)
   app.patch("/api/dashboard-cards/positions", isAuthenticated, requireAdmin, async (req, res) => {
     try {
+      console.log('🔄 Raw request body:', req.body);
       const { cards } = req.body;
+      console.log('🔄 Extracted cards:', cards);
+      
       if (!Array.isArray(cards)) {
+        console.error('❌ Cards is not an array:', typeof cards, cards);
         return res.status(400).json({ error: "Cards must be an array" });
       }
 
