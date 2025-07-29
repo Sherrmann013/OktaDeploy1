@@ -84,9 +84,47 @@ function AdminComponent() {
     retry: 3,
     refetchOnMount: true,
     refetchOnWindowFocus: false,
+    enabled: layoutTab === "dashboard" || activeTab === "layout", // Only fetch when needed
   });
 
-  const [dashboardCards, setDashboardCards] = useState(dashboardCardsData || []);
+  const [dashboardCards, setDashboardCards] = useState(dashboardCardsData || [
+    {
+      id: 1,
+      name: "KnowBe4 Security Training",
+      type: "knowbe4",
+      position: 0,
+      enabled: true,
+      created: new Date().toISOString(),
+      updated: new Date().toISOString()
+    },
+    {
+      id: 2,
+      name: "SentinelOne",
+      type: "sentinelone", 
+      position: 1,
+      enabled: true,
+      created: new Date().toISOString(),
+      updated: new Date().toISOString()
+    },
+    {
+      id: 3,
+      name: "Device Management",
+      type: "device_management",
+      position: 2,
+      enabled: true,
+      created: new Date().toISOString(),
+      updated: new Date().toISOString()
+    },
+    {
+      id: 4,
+      name: "Jira Service Management",
+      type: "jira",
+      position: 3,
+      enabled: true,
+      created: new Date().toISOString(),
+      updated: new Date().toISOString()
+    }
+  ]);
 
   // Update local state when data changes
   useEffect(() => {
