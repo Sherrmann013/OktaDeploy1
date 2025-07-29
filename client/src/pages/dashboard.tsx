@@ -55,15 +55,9 @@ export default function Dashboard() {
         {/* KnowBe4 Security Training */}
         <Card className="border-2 border-blue-200 dark:border-blue-800">
           <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <Shield className="w-5 h-5 text-blue-600" />
-                <CardTitle className="text-blue-700 dark:text-blue-300">KnowBe4 Security Training</CardTitle>
-              </div>
-              <Button variant="outline" size="sm" className="h-8">
-                <RefreshCw className="w-3 h-3 mr-1" />
-                Refresh
-              </Button>
+            <div className="flex items-center space-x-2">
+              <Shield className="w-5 h-5 text-blue-600" />
+              <CardTitle className="text-blue-700 dark:text-blue-300">KnowBe4 Security Training</CardTitle>
             </div>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -78,15 +72,15 @@ export default function Dashboard() {
               </div>
             </div>
             
-            <div className="h-32">
+            <div className="h-48">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
                     data={knowBe4Data}
                     cx="50%"
                     cy="50%"
-                    innerRadius={20}
-                    outerRadius={50}
+                    innerRadius={30}
+                    outerRadius={80}
                     paddingAngle={2}
                     dataKey="value"
                   >
@@ -110,14 +104,9 @@ export default function Dashboard() {
         {/* SentinelOne */}
         <Card className="border-2 border-purple-200 dark:border-purple-800">
           <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <Shield className="w-5 h-5 text-purple-600" />
-                <CardTitle className="text-purple-700 dark:text-purple-300">SentinelOne</CardTitle>
-              </div>
-              <Button variant="outline" size="sm" className="h-8">
-                Full Scan
-              </Button>
+            <div className="flex items-center space-x-2">
+              <Shield className="w-5 h-5 text-purple-600" />
+              <CardTitle className="text-purple-700 dark:text-purple-300">SentinelOne</CardTitle>
             </div>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -134,15 +123,15 @@ export default function Dashboard() {
 
             <div>
               <p className="text-sm font-medium text-muted-foreground mb-2">Agent Status</p>
-              <div className="h-32">
+              <div className="h-48">
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
                     <Pie
                       data={sentinelData}
                       cx="50%"
                       cy="50%"
-                      innerRadius={20}
-                      outerRadius={50}
+                      innerRadius={30}
+                      outerRadius={80}
                       paddingAngle={2}
                       dataKey="value"
                     >
@@ -176,91 +165,81 @@ export default function Dashboard() {
         {/* Device Management */}
         <Card className="border-2 border-orange-200 dark:border-orange-800">
           <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <Monitor className="w-5 h-5 text-orange-600" />
-                <CardTitle className="text-orange-700 dark:text-orange-300">Device Management</CardTitle>
-              </div>
+            <div className="flex items-center space-x-2">
+              <Monitor className="w-5 h-5 text-orange-600" />
+              <CardTitle className="text-orange-700 dark:text-orange-300">Device Management</CardTitle>
             </div>
           </CardHeader>
-          <CardContent className="space-y-6">
-            {/* Addigy Section */}
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <h4 className="font-medium text-orange-600">Addigy</h4>
-                <Button variant="outline" size="sm" className="h-6 text-xs">
-                  Sync Addigy
-                </Button>
-              </div>
-              <div className="grid grid-cols-2 gap-4 mb-2">
-                <div>
-                  <p className="text-xs text-muted-foreground">Devices</p>
-                  <p className="text-lg font-bold text-green-600">7/7</p>
+          <CardContent>
+            <div className="grid grid-cols-2 gap-6">
+              {/* Addigy Section */}
+              <div>
+                <h4 className="font-medium text-orange-600 mb-3">Addigy</h4>
+                <div className="grid grid-cols-2 gap-2 mb-3">
+                  <div>
+                    <p className="text-xs text-muted-foreground">Devices</p>
+                    <p className="text-lg font-bold text-green-600">7/7</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Compliance</p>
+                    <p className="text-lg font-bold text-green-600">100%</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-xs text-muted-foreground">Compliance</p>
-                  <p className="text-lg font-bold text-green-600">100%</p>
+                <div className="h-32">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={addigyData}
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={20}
+                        outerRadius={50}
+                        paddingAngle={2}
+                        dataKey="value"
+                      >
+                        {addigyData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={entry.color} />
+                        ))}
+                      </Pie>
+                      <Tooltip content={<CustomTooltip />} />
+                    </PieChart>
+                  </ResponsiveContainer>
                 </div>
               </div>
-              <div className="h-20">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={addigyData}
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={15}
-                      outerRadius={35}
-                      paddingAngle={2}
-                      dataKey="value"
-                    >
-                      {addigyData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} />
-                      ))}
-                    </Pie>
-                    <Tooltip content={<CustomTooltip />} />
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
 
-            {/* Intune Section */}
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <h4 className="font-medium text-blue-600">Intune</h4>
-                <Button variant="outline" size="sm" className="h-6 text-xs">
-                  Sync Intune
-                </Button>
-              </div>
-              <div className="grid grid-cols-2 gap-4 mb-2">
-                <div>
-                  <p className="text-xs text-muted-foreground">Devices</p>
-                  <p className="text-lg font-bold text-orange-600">11/13</p>
+              {/* Intune Section */}
+              <div>
+                <h4 className="font-medium text-blue-600 mb-3">Intune</h4>
+                <div className="grid grid-cols-2 gap-2 mb-3">
+                  <div>
+                    <p className="text-xs text-muted-foreground">Devices</p>
+                    <p className="text-lg font-bold text-orange-600">11/13</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Compliance</p>
+                    <p className="text-lg font-bold text-orange-600">85%</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-xs text-muted-foreground">Compliance</p>
-                  <p className="text-lg font-bold text-orange-600">85%</p>
+                <div className="h-32">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={intuneData}
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={20}
+                        outerRadius={50}
+                        paddingAngle={2}
+                        dataKey="value"
+                      >
+                        {intuneData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={entry.color} />
+                        ))}
+                      </Pie>
+                      <Tooltip content={<CustomTooltip />} />
+                    </PieChart>
+                  </ResponsiveContainer>
                 </div>
-              </div>
-              <div className="h-20">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={intuneData}
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={15}
-                      outerRadius={35}
-                      paddingAngle={2}
-                      dataKey="value"
-                    >
-                      {intuneData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} />
-                      ))}
-                    </Pie>
-                    <Tooltip content={<CustomTooltip />} />
-                  </PieChart>
-                </ResponsiveContainer>
               </div>
             </div>
           </CardContent>
@@ -269,14 +248,9 @@ export default function Dashboard() {
         {/* Jira Service Management */}
         <Card className="border-2 border-blue-200 dark:border-blue-800">
           <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <Ticket className="w-5 h-5 text-blue-600" />
-                <CardTitle className="text-blue-700 dark:text-blue-300">Jira Service Management</CardTitle>
-              </div>
-              <Button variant="outline" size="sm" className="h-8">
-                Create Ticket
-              </Button>
+            <div className="flex items-center space-x-2">
+              <Ticket className="w-5 h-5 text-blue-600" />
+              <CardTitle className="text-blue-700 dark:text-blue-300">Jira Service Management</CardTitle>
             </div>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -291,39 +265,12 @@ export default function Dashboard() {
               </div>
             </div>
 
-            <div className="space-y-3">
-              <div className="flex items-center justify-between p-3 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
-                <div className="flex items-center space-x-2">
-                  <AlertTriangle className="w-4 h-4 text-red-600" />
-                  <span className="text-sm font-medium text-red-700 dark:text-red-300">SLA Violations</span>
-                </div>
-                <Badge variant="destructive">1</Badge>
+            <div className="flex items-center justify-between p-3 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
+              <div className="flex items-center space-x-2">
+                <AlertTriangle className="w-4 h-4 text-red-600" />
+                <span className="text-sm font-medium text-red-700 dark:text-red-300">SLA Violations</span>
               </div>
-
-              <div className="space-y-2">
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-muted-foreground">Recent Activity</span>
-                  <Button variant="ghost" size="sm" className="h-6 text-xs">
-                    <RefreshCw className="w-3 h-3 mr-1" />
-                    Refresh
-                  </Button>
-                </div>
-                
-                <div className="space-y-2 text-xs">
-                  <div className="flex justify-between">
-                    <span>High Priority</span>
-                    <span className="text-red-600 font-medium">1</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Medium Priority</span>
-                    <span className="text-yellow-600 font-medium">3</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Low Priority</span>
-                    <span className="text-green-600 font-medium">3</span>
-                  </div>
-                </div>
-              </div>
+              <Badge variant="destructive">1</Badge>
             </div>
           </CardContent>
         </Card>
