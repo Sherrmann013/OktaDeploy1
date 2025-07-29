@@ -36,6 +36,11 @@ A comprehensive React-based enterprise security management dashboard with robust
 ## Recent Changes
 
 ### July 29, 2025
+- **Database Migration Complete:** Successfully migrated site access users from in-memory state to PostgreSQL with persistent storage
+- **Site Access Database Schema:** Created siteAccessUsers table with proper CRUD API endpoints for permanent user management
+- **User Interface Updates:** Changed admin access level badges from red to green, removed avatar initials from user names in table format
+- **Test Data Restoration:** Populated database with 20 realistic enterprise users across departments (IT Security: 8, IT: 5, HR: 3, Legal: 2, Executive: 1) and 5 site access users
+- **API Integration:** Updated admin frontend to use database mutations instead of local state for all site access operations
 - **Application Startup Fixed:** Resolved critical startup errors by implementing lazy initialization for OKTA and KnowBe4 services
 - **Development Environment Setup:** Added default environment variables for local development without breaking production functionality
 - **Service Error Handling:** Made external API services (OKTA, KnowBe4) optional to allow app to run without credentials
