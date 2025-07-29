@@ -105,6 +105,7 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
       status: "ACTIVE",
       groups: [],
       applications: [],
+      manager: "",
     },
   });
 
@@ -180,14 +181,11 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
     );
   };
 
-  // Generate a human-readable password with words
+  // Generate a human-readable password with exactly 10 characters
   const generatePassword = () => {
     const words = [
       'blue', 'red', 'green', 'cat', 'dog', 'sun', 'moon', 'star', 'tree', 'bird',
-      'fish', 'car', 'book', 'key', 'box', 'cup', 'pen', 'hat', 'bag', 'run',
-      'jump', 'fast', 'slow', 'big', 'small', 'hot', 'cold', 'new', 'old', 'good',
-      'bad', 'easy', 'hard', 'soft', 'loud', 'quiet', 'dark', 'light', 'win', 'lose',
-      'open', 'close', 'start', 'stop', 'home', 'work', 'play', 'rest', 'love', 'hope'
+      'fish', 'car', 'book', 'key', 'box', 'cup', 'pen', 'hat', 'bag', 'run'
     ];
     
     const symbols = ['!', '@', '#', '$', '%', '^', '&', '*'];
@@ -197,9 +195,19 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
     const randomSymbol = symbols[Math.floor(Math.random() * symbols.length)];
     const randomNumber = Math.floor(Math.random() * 100);
     
-    const password = randomWord1.charAt(0).toUpperCase() + randomWord1.slice(1) +
-                     randomWord2.charAt(0).toUpperCase() + randomWord2.slice(1) +
-                     randomSymbol + randomNumber;
+    let password = randomWord1.charAt(0).toUpperCase() + randomWord1.slice(1) +
+                   randomWord2.charAt(0).toUpperCase() + randomWord2.slice(1) +
+                   randomSymbol + randomNumber;
+    
+    // Ensure exactly 10 characters
+    if (password.length > 10) {
+      password = password.substring(0, 10);
+    } else if (password.length < 10) {
+      const extraChars = '0123456789';
+      while (password.length < 10) {
+        password += extraChars[Math.floor(Math.random() * extraChars.length)];
+      }
+    }
     
     setPassword(password);
     form.setValue('password', password);
@@ -304,15 +312,7 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
                         </Button>
                       </div>
                     </FormControl>
-                    <Button 
-                      type="button" 
-                      variant="outline" 
-                      size="sm" 
-                      onClick={generatePassword}
-                      className="mt-1"
-                    >
-                      Generate
-                    </Button>
+
                     <FormMessage />
                   </FormItem>
                 )}
@@ -366,7 +366,7 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
                         <SelectTrigger>
                           <SelectValue placeholder="Human Resources" />
                         </SelectTrigger>
-                        <SelectContent>
+                        <SelectContent className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600">
                           <SelectItem value="Human Resources">Human Resources</SelectItem>
                           <SelectItem value="IT Security">IT Security</SelectItem>
                           <SelectItem value="IT">IT</SelectItem>
@@ -446,7 +446,7 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
                         <SelectTrigger>
                           <SelectValue placeholder="Employee" />
                         </SelectTrigger>
-                        <SelectContent>
+                        <SelectContent className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600">
                           <SelectItem value="EMPLOYEE">Employee</SelectItem>
                           <SelectItem value="CONTRACTOR">Contractor</SelectItem>
                           <SelectItem value="INTERN">Intern</SelectItem>
