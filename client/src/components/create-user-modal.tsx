@@ -9,12 +9,10 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { insertUserSchema, type InsertUser, type User } from "@shared/schema";
-import { X, Check, RefreshCw, Eye, EyeOff } from "lucide-react";
+import { X, Check, RefreshCw } from "lucide-react";
 
 interface CreateUserModalProps {
   open: boolean;
@@ -28,8 +26,8 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
   const [selectedApps, setSelectedApps] = useState<string[]>([]);
   const [managerSearch, setManagerSearch] = useState("");
   const [showManagerDropdown, setShowManagerDropdown] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
-  const [sendActivationEmail, setSendActivationEmail] = useState(true);
+  const [password, setPassword] = useState("");
+  const [sendActivationEmail, setSendActivationEmail] = useState(false);
 
   // Fetch existing users for manager dropdown
   const { data: usersData } = useQuery({
@@ -182,59 +180,29 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
     );
   };
 
-  // Generate a random 12-character password
+  // Generate a human-readable password with words
   const generatePassword = () => {
-    const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*';
-    let password = '';
-    for (let i = 0; i < 12; i++) {
-      password += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
+    const words = [
+      'blue', 'red', 'green', 'cat', 'dog', 'sun', 'moon', 'star', 'tree', 'bird',
+      'fish', 'car', 'book', 'key', 'box', 'cup', 'pen', 'hat', 'bag', 'run',
+      'jump', 'fast', 'slow', 'big', 'small', 'hot', 'cold', 'new', 'old', 'good',
+      'bad', 'easy', 'hard', 'soft', 'loud', 'quiet', 'dark', 'light', 'win', 'lose',
+      'open', 'close', 'start', 'stop', 'home', 'work', 'play', 'rest', 'love', 'hope'
+    ];
+    
+    const symbols = ['!', '@', '#', '$', '%', '^', '&', '*'];
+    
+    const randomWord1 = words[Math.floor(Math.random() * words.length)];
+    const randomWord2 = words[Math.floor(Math.random() * words.length)];
+    const randomSymbol = symbols[Math.floor(Math.random() * symbols.length)];
+    const randomNumber = Math.floor(Math.random() * 100);
+    
+    const password = randomWord1.charAt(0).toUpperCase() + randomWord1.slice(1) +
+                     randomWord2.charAt(0).toUpperCase() + randomWord2.slice(1) +
+                     randomSymbol + randomNumber;
+    
+    setPassword(password);
     form.setValue('password', password);
-  };
-
-  // Auto-generate login from email and link department-based automations
-  const handleEmailChange = (email: string) => {
-    form.setValue('email', email);
-    const username = email.split('@')[0];
-    form.setValue('login', username);
-  };
-
-  // Auto-assign groups and apps based on department
-  const handleDepartmentChange = (department: string) => {
-    form.setValue('department', department);
-    
-    // Auto-assign groups based on department
-    let autoGroups: string[] = [];
-    let autoApps: string[] = [];
-    
-    switch (department) {
-      case 'IT Security':
-        autoGroups = ['R&D@mazetx.com', 'finfacit@mazetx.com'];
-        autoApps = ['Microsoft', 'Slack'];
-        break;
-      case 'IT':
-        autoGroups = ['R&D@mazetx.com'];
-        autoApps = ['Microsoft', 'Slack'];
-        break;
-      case 'Human Resources':
-        autoGroups = ['HR@mazetx.com'];
-        autoApps = ['Microsoft'];
-        break;
-      case 'Legal':
-        autoGroups = ['GXP@mazetx.com'];
-        autoApps = ['Microsoft'];
-        break;
-      case 'Executive':
-        autoGroups = ['HR@mazetx.com', 'finfacit@mazetx.com'];
-        autoApps = ['Microsoft', 'Slack', 'Zoom'];
-        break;
-      default:
-        autoGroups = [];
-        autoApps = ['Microsoft'];
-    }
-    
-    setSelectedGroups(autoGroups);
-    setSelectedApps(autoApps);
   };
 
   return (
@@ -290,7 +258,12 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
                         <Input 
                           placeholder="username" 
                           value={field.value.split('@')[0] || ''}
-                          onChange={(e) => handleEmailChange(`${e.target.value}@mazetx.com`)}
+                          onChange={(e) => {
+                            const username = e.target.value;
+                            const email = `${username}@mazetx.com`;
+                            field.onChange(email);
+                            form.setValue('login', username);
+                          }}
                           className="rounded-r-none border-r-0"
                         />
                         <div className="bg-gray-100 dark:bg-gray-800 border border-l-0 rounded-r-md px-3 py-2 text-sm text-gray-600 dark:text-gray-400 flex items-center">
@@ -312,18 +285,22 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
                     <FormControl>
                       <div className="relative">
                         <Input 
-                          type={showPassword ? "text" : "password"}
+                          type="text" 
                           placeholder="Enter password" 
-                          {...field}
+                          value={password}
+                          onChange={(e) => {
+                            setPassword(e.target.value);
+                            field.onChange(e.target.value);
+                          }}
                         />
                         <Button
                           type="button"
-                          variant="ghost"
                           size="sm"
-                          className="absolute right-0 top-0 h-full px-3"
-                          onClick={() => setShowPassword(!showPassword)}
+                          variant="ghost"
+                          className="absolute right-2 top-1/2 transform -translate-y-1/2 h-6 w-6 p-0 hover:bg-gray-100 dark:hover:bg-gray-700"
+                          onClick={generatePassword}
                         >
-                          {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                          <RefreshCw className="h-4 w-4" />
                         </Button>
                       </div>
                     </FormControl>
@@ -365,10 +342,27 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
                   <FormItem>
                     <FormLabel>Department</FormLabel>
                     <FormControl>
-                      <Select onValueChange={(value) => {
-                        field.onChange(value);
-                        handleDepartmentChange(value);
-                      }} defaultValue={field.value}>
+                      <Select 
+                        onValueChange={(value) => {
+                          field.onChange(value);
+                          // Auto-check groups based on department selection
+                          let newGroups = [...selectedGroups];
+                          
+                          // Remove department-specific groups first
+                          newGroups = newGroups.filter(group => 
+                            group !== "HR@mazetx.com" && group !== "finfacit@mazetx.com"
+                          );
+                          
+                          // Add appropriate group based on selection
+                          if (value === "HR") {
+                            newGroups.push("HR@mazetx.com");
+                          } else if (value === "Finance") {
+                            newGroups.push("finfacit@mazetx.com");
+                          }
+                          
+                          setSelectedGroups(newGroups);
+                        }} 
+                        value={field.value || ""}>
                         <SelectTrigger>
                           <SelectValue placeholder="Human Resources" />
                         </SelectTrigger>
@@ -391,51 +385,55 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
 
             {/* Manager and Employee Type */}
             <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>Manager</Label>
-                <Popover open={showManagerDropdown} onOpenChange={setShowManagerDropdown}>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      role="combobox"
-                      aria-expanded={showManagerDropdown}
-                      className="w-full justify-between"
-                    >
-                      {managerSearch || "Type to search for manager..."}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-full p-0">
-                    <Command>
-                      <CommandInput 
-                        placeholder="Type to search for manager..." 
-                        value={managerSearch}
-                        onValueChange={setManagerSearch}
-                      />
-                      <CommandList>
-                        <CommandEmpty>No managers found.</CommandEmpty>
-                        <CommandGroup>
-                          {filteredManagers.map((manager) => (
-                            <CommandItem
-                              key={manager.id}
-                              value={`${manager.firstName} ${manager.lastName}`}
-                              onSelect={() => {
-                                setManagerSearch(`${manager.firstName} ${manager.lastName}`);
-                                form.setValue('managerId', manager.id);
-                                setShowManagerDropdown(false);
-                              }}
-                            >
-                              <div className="flex flex-col">
-                                <span>{manager.firstName} {manager.lastName}</span>
-                                <span className="text-sm text-gray-500">{manager.title} - {manager.department}</span>
+              <FormField
+                control={form.control}
+                name="manager"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Manager</FormLabel>
+                    <FormControl>
+                      <div className="relative">
+                        <Input 
+                          value={managerSearch}
+                          onChange={(e) => {
+                            const value = e.target.value;
+                            setManagerSearch(value);
+                            setShowManagerDropdown(value.length > 0);
+                            if (value !== field.value) {
+                              field.onChange("");
+                            }
+                          }}
+                          placeholder="Type to search for manager..."
+                        />
+                        {managerSearch && filteredManagers.length > 0 && showManagerDropdown && (
+                          <div className="absolute z-10 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md shadow-lg max-h-60 overflow-auto">
+                            {filteredManagers.map((manager: User) => (
+                              <div
+                                key={manager.id}
+                                className="px-3 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700"
+                                onClick={() => {
+                                  const fullName = `${manager.firstName} ${manager.lastName}`;
+                                  field.onChange(fullName);
+                                  setManagerSearch(fullName);
+                                  setShowManagerDropdown(false);
+                                  form.setValue('managerId', manager.id);
+                                }}
+                              >
+                                <div className="font-medium text-gray-900 dark:text-white">{manager.firstName} {manager.lastName}</div>
+                                <div className="text-sm text-gray-500 dark:text-gray-400">{manager.email}</div>
+                                {manager.title && (
+                                  <div className="text-sm text-gray-400 dark:text-gray-500">{manager.title}</div>
+                                )}
                               </div>
-                            </CommandItem>
-                          ))}
-                        </CommandGroup>
-                      </CommandList>
-                    </Command>
-                  </PopoverContent>
-                </Popover>
-              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
               <FormField
                 control={form.control}
