@@ -3103,9 +3103,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Dashboard cards endpoints
-  app.get("/api/dashboard-cards", isAuthenticated, async (req, res) => {
+  app.get("/api/dashboard-cards", async (req, res) => {
     try {
+      console.log('📊 Dashboard cards requested, session user:', req.session?.user?.email || 'No session');
       const cards = await db.select().from(dashboardCards).orderBy(dashboardCards.position);
+      console.log('📊 Dashboard cards found:', cards.length);
       res.json(cards);
     } catch (error) {
       console.error("Error fetching dashboard cards:", error);

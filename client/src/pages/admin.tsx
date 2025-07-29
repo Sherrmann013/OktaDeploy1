@@ -79,9 +79,11 @@ function AdminComponent() {
   const [isAddDashboardCardOpen, setIsAddDashboardCardOpen] = useState(false);
   const [draggedItem, setDraggedItem] = useState<number | null>(null);
   // Fetch dashboard cards from the database
-  const { data: dashboardCardsData, refetch: refetchDashboardCards, error: dashboardCardsError } = useQuery({
+  const { data: dashboardCardsData, refetch: refetchDashboardCards, error: dashboardCardsError, isLoading: dashboardCardsLoading } = useQuery({
     queryKey: ["/api/dashboard-cards"],
     retry: 3,
+    refetchOnMount: true,
+    refetchOnWindowFocus: false,
   });
 
   const [dashboardCards, setDashboardCards] = useState(dashboardCardsData || []);
@@ -97,8 +99,15 @@ function AdminComponent() {
   useEffect(() => {
     if (dashboardCardsError) {
       console.error('Dashboard cards fetch error:', dashboardCardsError);
+      // Try to refetch after a short delay if authentication failed
+      if (dashboardCardsError.message?.includes('Unauthorized')) {
+        setTimeout(() => {
+          console.log('Retrying dashboard cards fetch...');
+          refetchDashboardCards();
+        }, 2000);
+      }
     }
-  }, [dashboardCardsError]);
+  }, [dashboardCardsError, refetchDashboardCards]);
 
   // Mutation to update dashboard card positions
   const updateCardPositionsMutation = useMutation({
@@ -1488,7 +1497,12 @@ function AdminComponent() {
                         {/* Dashboard Grid Preview */}
                         {dashboardCardsError && (
                           <div className="mb-4 p-3 bg-red-100 border border-red-300 text-red-700 rounded-lg">
-                            Error loading dashboard cards. Please refresh the page.
+                            Error loading dashboard cards: {dashboardCardsError.message}. Click Refresh to try again.
+                          </div>
+                        )}
+                        {dashboardCardsLoading && (
+                          <div className="mb-4 p-3 bg-blue-100 border border-blue-300 text-blue-700 rounded-lg">
+                            Loading dashboard cards...
                           </div>
                         )}
                         <div className="grid grid-cols-2 gap-4">
