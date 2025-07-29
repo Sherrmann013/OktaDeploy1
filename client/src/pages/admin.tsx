@@ -811,7 +811,7 @@ export default function Admin() {
                         ? "border-yellow-500"
                         : "border-red-500"
                     }`}>
-                      <CardContent className="p-4">
+                      <CardContent className="p-4 bg-gray-50 dark:bg-gray-700 rounded-md">
                         <div className="flex items-center justify-between mb-3">
                           <div className="flex items-center gap-3">
                             {getIntegrationLogo(integration.name)}
