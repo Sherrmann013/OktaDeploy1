@@ -361,13 +361,13 @@ export default function UserTable({
       case 'mobilePhone':
         return <span className="text-gray-900 dark:text-gray-100">{user.mobilePhone || '—'}</span>;
       case 'lastLogin':
-        return <span className="text-gray-600 dark:text-gray-400">{formatDate(user.lastLogin)}</span>;
+        return <span className="text-gray-600 dark:text-gray-400">{formatDate(user.lastLogin ? user.lastLogin.toString() : null)}</span>;
       case 'activated':
-        return <span className="text-gray-600 dark:text-gray-400">{formatDate(user.created)}</span>;
+        return <span className="text-gray-600 dark:text-gray-400">{formatDate(user.created ? user.created.toString() : null)}</span>;
       case 'lastUpdated':
-        return <span className="text-gray-600 dark:text-gray-400">{formatDate(user.lastUpdated)}</span>;
+        return <span className="text-gray-600 dark:text-gray-400">{formatDate(user.lastUpdated ? user.lastUpdated.toString() : null)}</span>;
       case 'passwordChanged':
-        return <span className="text-gray-600 dark:text-gray-400">{formatDate(user.passwordChanged)}</span>;
+        return <span className="text-gray-600 dark:text-gray-400">{formatDate(user.passwordChanged ? user.passwordChanged.toString() : null)}</span>;
       default:
         return <span>—</span>;
     }
