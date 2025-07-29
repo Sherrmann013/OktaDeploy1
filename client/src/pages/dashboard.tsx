@@ -78,7 +78,7 @@ export default function Dashboard() {
                     cy="50%"
                     innerRadius={30}
                     outerRadius={80}
-                    paddingAngle={2}
+                    paddingAngle={0}
                     dataKey="value"
                   >
                     {knowBe4Data.map((entry, index) => (
@@ -129,7 +129,7 @@ export default function Dashboard() {
                       cy="50%"
                       innerRadius={30}
                       outerRadius={80}
-                      paddingAngle={2}
+                      paddingAngle={0}
                       dataKey="value"
                     >
                       {sentinelData.map((entry, index) => (
@@ -191,7 +191,7 @@ export default function Dashboard() {
                         cy="50%"
                         innerRadius={20}
                         outerRadius={50}
-                        paddingAngle={2}
+                        paddingAngle={0}
                         dataKey="value"
                       >
                         {addigyData.map((entry, index) => (
@@ -226,7 +226,7 @@ export default function Dashboard() {
                         cy="50%"
                         innerRadius={20}
                         outerRadius={50}
-                        paddingAngle={2}
+                        paddingAngle={0}
                         dataKey="value"
                       >
                         {intuneData.map((entry, index) => (
