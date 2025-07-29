@@ -144,6 +144,9 @@ export default function Admin() {
                   <DialogContent className="sm:max-w-[425px]">
                     <DialogHeader>
                       <DialogTitle>Assign New User</DialogTitle>
+                      <DialogDescription className="sr-only">
+                        Assign a new user to the site access list
+                      </DialogDescription>
                     </DialogHeader>
                     <div className="grid gap-4 py-4">
                       <div className="grid gap-2">
@@ -177,12 +180,12 @@ export default function Admin() {
                       <div className="grid gap-2">
                         <Label htmlFor="accessLevel">Access Level</Label>
                         <Select value={newUser.accessLevel} onValueChange={(value) => setNewUser({ ...newUser, accessLevel: value })}>
-                          <SelectTrigger className="bg-background">
+                          <SelectTrigger className="bg-gray-800 border-gray-600">
                             <SelectValue placeholder="Select access level" />
                           </SelectTrigger>
-                          <SelectContent className="z-50">
-                            <SelectItem value="standard">Standard</SelectItem>
-                            <SelectItem value="admin">Admin</SelectItem>
+                          <SelectContent className="z-50 bg-gray-800 border-gray-600">
+                            <SelectItem value="standard" className="focus:bg-gray-700">Standard</SelectItem>
+                            <SelectItem value="admin" className="focus:bg-gray-700">Admin</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
@@ -203,6 +206,9 @@ export default function Admin() {
                   <DialogContent className="sm:max-w-[425px]">
                     <DialogHeader>
                       <DialogTitle>Edit User Access</DialogTitle>
+                      <DialogDescription className="sr-only">
+                        Edit user access level and information
+                      </DialogDescription>
                     </DialogHeader>
                     <div className="grid gap-4 py-4">
                       <div className="grid gap-2">
@@ -226,12 +232,12 @@ export default function Admin() {
                       <div className="grid gap-2">
                         <Label htmlFor="editAccessLevel">Access Level</Label>
                         <Select value={editingUser?.accessLevel || ""} onValueChange={(value) => setEditingUser(prev => prev ? { ...prev, accessLevel: value as "standard" | "admin" } : null)}>
-                          <SelectTrigger className="bg-background">
+                          <SelectTrigger className="bg-gray-800 border-gray-600">
                             <SelectValue placeholder="Select access level" />
                           </SelectTrigger>
-                          <SelectContent className="z-50">
-                            <SelectItem value="standard">Standard</SelectItem>
-                            <SelectItem value="admin">Admin</SelectItem>
+                          <SelectContent className="z-50 bg-gray-800 border-gray-600">
+                            <SelectItem value="standard" className="focus:bg-gray-700">Standard</SelectItem>
+                            <SelectItem value="admin" className="focus:bg-gray-700">Admin</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
