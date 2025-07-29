@@ -1284,9 +1284,11 @@ function AdminComponent() {
                           )}
                         </div>
                         <div>
-                          <p className="text-sm text-gray-600 dark:text-gray-400">
-                            {logoSetting?.settingValue ? "Custom company logo" : "Default branding"}
-                          </p>
+                          {logoSetting?.settingValue && (
+                            <p className="text-sm text-gray-600 dark:text-gray-400">
+                              Custom company logo
+                            </p>
+                          )}
                         </div>
                       </div>
                       <Button 
