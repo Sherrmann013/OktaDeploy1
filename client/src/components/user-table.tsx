@@ -465,10 +465,10 @@ export default function UserTable({
         
         <div className="flex items-center space-x-2">
           <Select value={usersPerPage.toString()} onValueChange={(value) => onPerPageChange(parseInt(value))}>
-            <SelectTrigger className="w-[180px]">
+            <SelectTrigger className="w-[180px] bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600">
               <SelectItem value="10">10 per page</SelectItem>
               <SelectItem value="25">25 per page</SelectItem>
               <SelectItem value="50">50 per page</SelectItem>
