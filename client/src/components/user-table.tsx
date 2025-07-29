@@ -415,11 +415,19 @@ export default function UserTable({
                           <Button
                             variant="ghost"
                             size="sm"
-                            className="h-4 w-4 p-0"
-                            onClick={() => onSort(column.sortKey)}
+                            className="h-6 w-6 p-0 hover:bg-gray-100 dark:hover:bg-gray-700"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onSort(column.sortKey);
+                            }}
                           >
-                            <ArrowUpDown className="h-3 w-3" />
+                            <ArrowUpDown className="h-4 w-4" />
                           </Button>
+                        )}
+                        {sortBy === column.sortKey && (
+                          <span className="text-xs text-blue-600 dark:text-blue-400">
+                            {sortOrder === 'asc' ? '↑' : '↓'}
+                          </span>
                         )}
                       </div>
                     </TableHead>
