@@ -46,9 +46,6 @@ export default function Dashboard() {
     <div className="p-6">
       <div className="mb-6">
         <h1 className="text-3xl font-bold text-foreground">Security Dashboard</h1>
-        <p className="text-muted-foreground mt-2">
-          Comprehensive security monitoring and management overview.
-        </p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
