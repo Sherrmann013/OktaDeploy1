@@ -199,6 +199,28 @@ export default function Admin() {
     }
   });
 
+  // Delete integration mutation
+  const deleteIntegrationMutation = useMutation({
+    mutationFn: async (id: number) => {
+      const response = await fetch(`/api/integrations/${id}`, {
+        method: "DELETE",
+        credentials: "include"
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || `HTTP ${response.status}: ${response.statusText}`);
+      }
+      
+      return response.status === 204 ? null : response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/integrations"] });
+      setIsConfigureIntegrationOpen(false);
+      setEditingIntegration(null);
+    }
+  });
+
   const getRandomColor = () => {
     const colors = ["bg-blue-600", "bg-green-600", "bg-purple-600", "bg-orange-600", "bg-cyan-600", "bg-pink-600", "bg-indigo-600", "bg-teal-600"];
     return colors[Math.floor(Math.random() * colors.length)];
@@ -284,6 +306,12 @@ export default function Admin() {
       };
       
       updateIntegrationMutation.mutate({ id: editingIntegration.id, integrationData });
+    }
+  };
+
+  const handleDeleteIntegration = (integration: Integration) => {
+    if (confirm(`Are you sure you want to delete the ${integration.displayName} integration? This action cannot be undone.`)) {
+      deleteIntegrationMutation.mutate(integration.id);
     }
   };
 
@@ -952,16 +980,25 @@ export default function Admin() {
           <div className="grid gap-4 py-4">
             {renderApiKeyFields(editingIntegration)}
           </div>
-          <div className="flex justify-end space-x-2">
-            <Button variant="outline" onClick={() => setIsConfigureIntegrationOpen(false)}>
-              Cancel
-            </Button>
+          <div className="flex justify-between items-center">
             <Button 
-              onClick={handleUpdateIntegration}
-              disabled={updateIntegrationMutation.isPending}
+              variant="destructive" 
+              onClick={() => editingIntegration && handleDeleteIntegration(editingIntegration)}
+              disabled={deleteIntegrationMutation.isPending}
             >
-              {updateIntegrationMutation.isPending ? "Saving..." : "Save Configuration"}
+              {deleteIntegrationMutation.isPending ? "Deleting..." : "Delete Integration"}
             </Button>
+            <div className="flex space-x-2">
+              <Button variant="outline" onClick={() => setIsConfigureIntegrationOpen(false)}>
+                Cancel
+              </Button>
+              <Button 
+                onClick={handleUpdateIntegration}
+                disabled={updateIntegrationMutation.isPending}
+              >
+                {updateIntegrationMutation.isPending ? "Saving..." : "Save Configuration"}
+              </Button>
+            </div>
           </div>
         </DialogContent>
       </Dialog>
