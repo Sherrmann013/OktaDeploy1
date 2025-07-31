@@ -252,9 +252,15 @@ function AdminComponent() {
   const { data: logoSetting } = useQuery({
     queryKey: ['/api/layout-settings/company_logo'],
   });
+
+  // Get current logo text setting
+  const { data: logoTextSetting } = useQuery({
+    queryKey: ['/api/layout-settings/logo_text'],
+  });
   const [editingUser, setEditingUser] = useState<SiteUser | null>(null);
   const [editingIntegration, setEditingIntegration] = useState<Integration | null>(null);
   const [isNewMappingOpen, setIsNewMappingOpen] = useState(false);
+  const [logoText, setLogoText] = useState("");
   const [newMapping, setNewMapping] = useState({ appName: "", oktaGroups: [""], description: "" });
   const [integrationToDelete, setIntegrationToDelete] = useState<Integration | null>(null);
   const [mappingToDelete, setMappingToDelete] = useState<AppMapping | null>(null);
@@ -271,6 +277,41 @@ function AdminComponent() {
   const [showIntegrationDropdown, setShowIntegrationDropdown] = useState(false);
 
   const queryClient = useQueryClient();
+
+  // Update logo text when setting loads
+  useEffect(() => {
+    if (logoTextSetting?.settingValue) {
+      setLogoText(logoTextSetting.settingValue);
+    } else {
+      setLogoText("Powered by ClockWerk.it"); // Default text
+    }
+  }, [logoTextSetting]);
+
+  // Logo text update mutation
+  const updateLogoTextMutation = useMutation({
+    mutationFn: async (text: string) => {
+      const response = await apiRequest("POST", "/api/layout-settings", {
+        settingKey: "logo_text",
+        settingValue: text,
+      });
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/layout-settings/logo_text'] });
+      toast({
+        title: "Success",
+        description: "Logo text updated successfully",
+      });
+    },
+    onError: (error) => {
+      console.error("Failed to update logo text:", error);
+      toast({
+        title: "Error",
+        description: "Failed to update logo text",
+        variant: "destructive",
+      });
+    },
+  });
 
   // Fetch site access users from database
   const { data: siteUsers = [], isLoading } = useQuery<SiteUser[]>({
@@ -1501,39 +1542,70 @@ function AdminComponent() {
                   <div className="mt-6">
                     {layoutTab === "logo" && (
                       <div className="bg-white dark:bg-gray-800 rounded-lg border dark:border-gray-700 p-6">
-                        <h4 className="text-lg font-semibold mb-4">Company Logo</h4>
-                        <div className="flex items-center gap-4">
-                          <div className="flex-shrink-0">
-                            {logoSetting?.settingValue ? (
-                              <img 
-                                src={logoSetting.settingValue} 
-                                alt="Company logo" 
-                                className="max-h-12 w-auto object-contain"
-                              />
-                            ) : (
-                              <div className="w-16 h-16 bg-purple-600 rounded flex items-center justify-center overflow-hidden">
-                                <div className="relative w-14 h-14">
-                                  <img 
-                                    src="/maze-logo.png" 
-                                    alt="MAZE Logo" 
-                                    className="w-14 h-14 absolute inset-0 object-contain"
-                                    style={{ filter: "invert(1)" }}
-                                  />
-                                  <div 
-                                    className="w-14 h-14 absolute inset-0" 
-                                    style={{ backgroundColor: "#f97316", mixBlendMode: "multiply" }}
-                                  />
+                        <h4 className="text-lg font-semibold mb-4">Company Logo & Branding</h4>
+                        
+                        {/* Logo Section */}
+                        <div className="mb-6">
+                          <h5 className="text-md font-medium mb-3">Logo</h5>
+                          <div className="flex items-center gap-4">
+                            <div className="flex-shrink-0">
+                              {logoSetting?.settingValue ? (
+                                <img 
+                                  src={logoSetting.settingValue} 
+                                  alt="Company logo" 
+                                  className="max-h-12 w-auto object-contain"
+                                />
+                              ) : (
+                                <div className="w-16 h-16 bg-purple-600 rounded flex items-center justify-center overflow-hidden">
+                                  <div className="relative w-14 h-14">
+                                    <img 
+                                      src="/maze-logo.png" 
+                                      alt="MAZE Logo" 
+                                      className="w-14 h-14 absolute inset-0 object-contain"
+                                      style={{ filter: "invert(1)" }}
+                                    />
+                                    <div 
+                                      className="w-14 h-14 absolute inset-0" 
+                                      style={{ backgroundColor: "#f97316", mixBlendMode: "multiply" }}
+                                    />
+                                  </div>
                                 </div>
-                              </div>
-                            )}
+                              )}
+                            </div>
+                            <Button 
+                              onClick={() => setIsLogoUploadOpen(true)}
+                              className="bg-blue-600 hover:bg-blue-700 text-white flex items-center"
+                            >
+                              <Settings className="w-4 h-4 mr-2" />
+                              Customize Logo
+                            </Button>
                           </div>
-                          <Button 
-                            onClick={() => setIsLogoUploadOpen(true)}
-                            className="bg-blue-600 hover:bg-blue-700 text-white flex items-center"
-                          >
-                            <Settings className="w-4 h-4 mr-2" />
-                            Customize Logo
-                          </Button>
+                        </div>
+
+                        {/* Logo Text Section */}
+                        <div>
+                          <h5 className="text-md font-medium mb-3">Logo Text</h5>
+                          <div className="space-y-3">
+                            <div>
+                              <Label htmlFor="logoText" className="text-sm font-medium">
+                                Text displayed under the logo
+                              </Label>
+                              <Input
+                                id="logoText"
+                                value={logoText}
+                                onChange={(e) => setLogoText(e.target.value)}
+                                placeholder="Enter text to display under logo"
+                                className="mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700"
+                              />
+                            </div>
+                            <Button 
+                              onClick={() => updateLogoTextMutation.mutate(logoText)}
+                              disabled={updateLogoTextMutation.isPending || logoText === (logoTextSetting?.settingValue || "Powered by ClockWerk.it")}
+                              className="bg-green-600 hover:bg-green-700 text-white"
+                            >
+                              {updateLogoTextMutation.isPending ? "Updating..." : "Update Text"}
+                            </Button>
+                          </div>
                         </div>
                       </div>
                     )}

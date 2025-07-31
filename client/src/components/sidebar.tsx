@@ -26,6 +26,11 @@ export default function Sidebar() {
     queryKey: ['/api/layout-settings/company_logo'],
   });
 
+  // Get custom logo text setting
+  const { data: logoTextSetting } = useQuery({
+    queryKey: ['/api/layout-settings/logo_text'],
+  });
+
   // Filter navigation based on user access level
   const navigation = [
     { name: "Dashboard", href: "/dashboard", icon: Gauge, current: true },
@@ -119,7 +124,9 @@ export default function Sidebar() {
             </div>
           </div>
         </div>
-        <div className="text-[10px] text-white/80 leading-none mt-auto whitespace-nowrap -ml-1">Powered by ClockWerk.it</div>
+        <div className="text-[10px] text-white/80 leading-none mt-auto whitespace-nowrap -ml-1">
+          {logoTextSetting?.settingValue || "Powered by ClockWerk.it"}
+        </div>
       </div>
       
       <nav className="p-4 flex-1">
