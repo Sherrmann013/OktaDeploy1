@@ -1852,197 +1852,269 @@ function AdminComponent() {
                           Configure and preview the new user creation process. This interface allows you to test and customize how new users are added to your organization.
                         </p>
 
-                        {/* User Creation Form Preview */}
-                        <div className="border border-gray-200 dark:border-gray-600 rounded-lg p-6 bg-gray-50 dark:bg-gray-700">
-                          <h5 className="text-md font-medium mb-4">User Creation Form Preview</h5>
-                          
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            {/* Basic Information */}
-                            <div className="space-y-4">
-                              <h6 className="text-sm font-medium text-gray-700 dark:text-gray-300">Basic Information</h6>
-                              
-                              <div className="grid gap-2">
-                                <Label htmlFor="preview-firstName">First Name</Label>
-                                <Input
-                                  id="preview-firstName"
-                                  placeholder="Enter first name"
-                                  className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600"
-                                  disabled
-                                />
-                              </div>
-                              
-                              <div className="grid gap-2">
-                                <Label htmlFor="preview-lastName">Last Name</Label>
-                                <Input
-                                  id="preview-lastName"
-                                  placeholder="Enter last name"
-                                  className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600"
-                                  disabled
-                                />
-                              </div>
-                              
-                              <div className="grid gap-2">
-                                <Label htmlFor="preview-email">Email Address</Label>
-                                <Input
-                                  id="preview-email"
-                                  type="email"
-                                  placeholder="user@company.com"
-                                  className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600"
-                                  disabled
-                                />
-                              </div>
-                              
-                              <div className="grid gap-2">
-                                <Label htmlFor="preview-title">Job Title</Label>
-                                <Input
-                                  id="preview-title"
-                                  placeholder="Enter job title"
-                                  className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600"
-                                  disabled
-                                />
-                              </div>
-                            </div>
-
-                            {/* Organizational Information */}
-                            <div className="space-y-4">
-                              <h6 className="text-sm font-medium text-gray-700 dark:text-gray-300">Organizational</h6>
-                              
-                              <div className="grid gap-2">
-                                <Label htmlFor="preview-department">Department</Label>
-                                <Select disabled>
-                                  <SelectTrigger className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600">
-                                    <SelectValue placeholder="Select department" />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    <SelectItem value="it">IT</SelectItem>
-                                    <SelectItem value="security">Security</SelectItem>
-                                    <SelectItem value="hr">HR</SelectItem>
-                                    <SelectItem value="legal">Legal</SelectItem>
-                                  </SelectContent>
-                                </Select>
-                              </div>
-                              
-                              <div className="grid gap-2">
-                                <Label htmlFor="preview-employeeType">Employee Type</Label>
-                                <Select disabled>
-                                  <SelectTrigger className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600">
-                                    <SelectValue placeholder="Select type" />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    <SelectItem value="EMPLOYEE">Employee</SelectItem>
-                                    <SelectItem value="CONTRACTOR">Contractor</SelectItem>
-                                    <SelectItem value="INTERN">Intern</SelectItem>
-                                    <SelectItem value="PART_TIME">Part Time</SelectItem>
-                                  </SelectContent>
-                                </Select>
-                              </div>
-                              
-                              <div className="grid gap-2">
-                                <Label htmlFor="preview-manager">Manager</Label>
-                                <Input
-                                  id="preview-manager"
-                                  placeholder="Search for manager..."
-                                  className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600"
-                                  disabled
-                                />
-                              </div>
-                              
-                              <div className="grid gap-2">
-                                <Label htmlFor="preview-location">Location</Label>
-                                <Input
-                                  id="preview-location"
-                                  placeholder="Enter location"
-                                  className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600"
-                                  disabled
-                                />
-                              </div>
-                            </div>
-                          </div>
-
-                          {/* OKTA Groups & Application Access */}
-                          <div className="mt-6 space-y-4">
-                            <h6 className="text-sm font-medium text-gray-700 dark:text-gray-300">Access & Permissions</h6>
+                        <div className="flex gap-6">
+                          {/* User Creation Form Preview - Left Half */}
+                          <div className="flex-1 max-w-md border border-gray-200 dark:border-gray-600 rounded-lg p-6 bg-gray-50 dark:bg-gray-700">
+                            <h5 className="text-md font-medium mb-4">Create New User</h5>
                             
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                              <div className="space-y-2">
-                                <Label>OKTA Groups</Label>
-                                <div className="border border-gray-200 dark:border-gray-600 rounded-md p-3 bg-white dark:bg-gray-800 min-h-[100px]">
-                                  <div className="text-sm text-gray-500 dark:text-gray-400">
-                                    Groups will be assigned based on department and role...
+                            <div className="space-y-4">
+                              {/* First Name & Last Name Row */}
+                              <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                  <Label htmlFor="preview-firstName" className="text-sm font-medium">
+                                    First Name <span className="text-red-500">*</span>
+                                  </Label>
+                                  <Input
+                                    id="preview-firstName"
+                                    placeholder="Enter first name"
+                                    className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600"
+                                    disabled
+                                  />
+                                </div>
+                                <div className="space-y-2">
+                                  <Label htmlFor="preview-lastName" className="text-sm font-medium">
+                                    Last Name <span className="text-red-500">*</span>
+                                  </Label>
+                                  <Input
+                                    id="preview-lastName"
+                                    placeholder="Enter last name"
+                                    className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600"
+                                    disabled
+                                  />
+                                </div>
+                              </div>
+
+                              {/* Email Username & Password Row */}
+                              <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                  <Label htmlFor="preview-username" className="text-sm font-medium">
+                                    Email Username <span className="text-red-500">*</span>
+                                  </Label>
+                                  <div className="flex">
+                                    <Input
+                                      id="preview-username"
+                                      placeholder="username"
+                                      className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-r-none"
+                                      disabled
+                                    />
+                                    <div className="px-3 py-2 bg-gray-100 dark:bg-gray-600 border border-l-0 border-gray-300 dark:border-gray-600 rounded-r text-sm text-gray-600 dark:text-gray-300">
+                                      @mazetx.com
+                                    </div>
+                                  </div>
+                                </div>
+                                <div className="space-y-2">
+                                  <Label htmlFor="preview-password" className="text-sm font-medium">
+                                    Password <span className="text-red-500">*</span>
+                                  </Label>
+                                  <div className="relative">
+                                    <Input
+                                      id="preview-password"
+                                      type="password"
+                                      placeholder="Enter password"
+                                      className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 pr-10"
+                                      disabled
+                                    />
+                                    <button className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400">
+                                      <RefreshCw className="w-4 h-4" />
+                                    </button>
                                   </div>
                                 </div>
                               </div>
+
+                              {/* Job Title & Department Row */}
+                              <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                  <Label htmlFor="preview-title" className="text-sm font-medium">Job Title</Label>
+                                  <Input
+                                    id="preview-title"
+                                    placeholder="Enter job title"
+                                    className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600"
+                                    disabled
+                                  />
+                                </div>
+                                <div className="space-y-2">
+                                  <Label htmlFor="preview-department" className="text-sm font-medium">Department</Label>
+                                  <Select disabled>
+                                    <SelectTrigger className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600">
+                                      <SelectValue placeholder="Human Resources" />
+                                    </SelectTrigger>
+                                  </Select>
+                                </div>
+                              </div>
+
+                              {/* Manager & Employee Type Row */}
+                              <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                  <Label htmlFor="preview-manager" className="text-sm font-medium">Manager</Label>
+                                  <Input
+                                    id="preview-manager"
+                                    placeholder="Type to search for manager..."
+                                    className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600"
+                                    disabled
+                                  />
+                                </div>
+                                <div className="space-y-2">
+                                  <Label htmlFor="preview-employeeType" className="text-sm font-medium">Employee Type</Label>
+                                  <Select disabled>
+                                    <SelectTrigger className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600">
+                                      <SelectValue placeholder="Employee" />
+                                    </SelectTrigger>
+                                  </Select>
+                                </div>
+                              </div>
+
+                              {/* Groups & Apps Sections */}
+                              <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                  <Label className="text-sm font-medium">Groups</Label>
+                                  <div className="border border-gray-300 dark:border-gray-600 rounded p-3 bg-white dark:bg-gray-800 min-h-[120px]">
+                                    <div className="space-y-2">
+                                      <div className="flex items-center space-x-2">
+                                        <Checkbox id="preview-group1" disabled />
+                                        <Label htmlFor="preview-group1" className="text-sm">R&D@mazetx.com</Label>
+                                      </div>
+                                      <div className="flex items-center space-x-2">
+                                        <Checkbox id="preview-group2" disabled />
+                                        <Label htmlFor="preview-group2" className="text-sm">Labusers@mazetx.com</Label>
+                                      </div>
+                                      <div className="flex items-center space-x-2">
+                                        <Checkbox id="preview-group3" disabled />
+                                        <Label htmlFor="preview-group3" className="text-sm">finfacit@mazetx.com</Label>
+                                      </div>
+                                      <div className="flex items-center space-x-2">
+                                        <Checkbox id="preview-group4" disabled />
+                                        <Label htmlFor="preview-group4" className="text-sm">HR@mazetx.com</Label>
+                                      </div>
+                                      <div className="flex items-center space-x-2">
+                                        <Checkbox id="preview-group5" disabled />
+                                        <Label htmlFor="preview-group5" className="text-sm">GXP@mazetx.com</Label>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                                <div className="space-y-2">
+                                  <Label className="text-sm font-medium">Apps</Label>
+                                  <div className="border border-gray-300 dark:border-gray-600 rounded p-3 bg-white dark:bg-gray-800 min-h-[120px]">
+                                    <div className="space-y-2">
+                                      <div className="flex items-center space-x-2">
+                                        <Checkbox id="preview-app1" disabled />
+                                        <Label htmlFor="preview-app1" className="text-sm">Microsoft</Label>
+                                      </div>
+                                      <div className="flex items-center space-x-2">
+                                        <Checkbox id="preview-app2" disabled />
+                                        <Label htmlFor="preview-app2" className="text-sm">Slack</Label>
+                                      </div>
+                                      <div className="flex items-center space-x-2">
+                                        <Checkbox id="preview-app3" disabled />
+                                        <Label htmlFor="preview-app3" className="text-sm">Zoom</Label>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Send activation email checkbox */}
+                              <div className="flex items-center space-x-2">
+                                <Checkbox id="preview-activation" disabled />
+                                <Label htmlFor="preview-activation" className="text-sm">
+                                  Send activation email to manager
+                                </Label>
+                              </div>
+
+                              {/* Action Buttons */}
+                              <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200 dark:border-gray-600">
+                                <Button variant="outline" disabled>
+                                  Cancel
+                                </Button>
+                                <Button disabled className="bg-blue-600 text-white">
+                                  Create User
+                                </Button>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Customization Options - Right Half */}
+                          <div className="flex-1 space-y-6">
+                            <div>
+                              <h5 className="text-md font-medium mb-4">Form Customization</h5>
                               
-                              <div className="space-y-2">
-                                <Label>Application Access</Label>
-                                <div className="border border-gray-200 dark:border-gray-600 rounded-md p-3 bg-white dark:bg-gray-800 min-h-[100px]">
-                                  <div className="text-sm text-gray-500 dark:text-gray-400">
-                                    Applications will be assigned based on group mappings...
+                              <div className="space-y-4">
+                                <div className="space-y-3">
+                                  <h6 className="text-sm font-medium text-gray-700 dark:text-gray-300">Required Fields</h6>
+                                  
+                                  <div className="flex items-center space-x-2">
+                                    <Checkbox id="require-manager" defaultChecked />
+                                    <Label htmlFor="require-manager" className="text-sm">
+                                      Require manager selection
+                                    </Label>
+                                  </div>
+                                  
+                                  <div className="flex items-center space-x-2">
+                                    <Checkbox id="require-title" defaultChecked />
+                                    <Label htmlFor="require-title" className="text-sm">
+                                      Require job title
+                                    </Label>
+                                  </div>
+                                  
+                                  <div className="flex items-center space-x-2">
+                                    <Checkbox id="require-location" />
+                                    <Label htmlFor="require-location" className="text-sm">
+                                      Require location information
+                                    </Label>
+                                  </div>
+                                </div>
+                                
+                                <div className="space-y-3">
+                                  <h6 className="text-sm font-medium text-gray-700 dark:text-gray-300">Default Behaviors</h6>
+                                  
+                                  <div className="flex items-center space-x-2">
+                                    <Checkbox id="auto-groups" defaultChecked />
+                                    <Label htmlFor="auto-groups" className="text-sm">
+                                      Auto-assign groups based on department
+                                    </Label>
+                                  </div>
+                                  
+                                  <div className="flex items-center space-x-2">
+                                    <Checkbox id="send-email" defaultChecked />
+                                    <Label htmlFor="send-email" className="text-sm">
+                                      Send welcome email by default
+                                    </Label>
+                                  </div>
+                                  
+                                  <div className="flex items-center space-x-2">
+                                    <Checkbox id="temp-password" defaultChecked />
+                                    <Label htmlFor="temp-password" className="text-sm">
+                                      Generate temporary password
+                                    </Label>
                                   </div>
                                 </div>
                               </div>
                             </div>
-                          </div>
 
-                          {/* Action Buttons Preview */}
-                          <div className="flex justify-end space-x-3 pt-6 border-t border-gray-200 dark:border-gray-600 mt-6">
-                            <Button variant="outline" disabled>
-                              Cancel
-                            </Button>
-                            <Button disabled className="bg-blue-600 text-white">
-                              Create User
-                            </Button>
-                          </div>
-                        </div>
-
-                        {/* Customization Options */}
-                        <div className="mt-6 space-y-4">
-                          <h5 className="text-md font-medium">Customization Options</h5>
-                          
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div className="space-y-3">
-                              <div className="flex items-center space-x-2">
-                                <Checkbox id="require-manager" defaultChecked />
-                                <Label htmlFor="require-manager" className="text-sm">
-                                  Require manager selection
-                                </Label>
-                              </div>
+                            <div>
+                              <h5 className="text-md font-medium mb-4">Integration Settings</h5>
                               
-                              <div className="flex items-center space-x-2">
-                                <Checkbox id="auto-groups" defaultChecked />
-                                <Label htmlFor="auto-groups" className="text-sm">
-                                  Auto-assign groups based on department
-                                </Label>
-                              </div>
-                              
-                              <div className="flex items-center space-x-2">
-                                <Checkbox id="send-email" defaultChecked />
-                                <Label htmlFor="send-email" className="text-sm">
-                                  Send welcome email by default
-                                </Label>
-                              </div>
-                            </div>
-                            
-                            <div className="space-y-3">
-                              <div className="flex items-center space-x-2">
-                                <Checkbox id="require-title" defaultChecked />
-                                <Label htmlFor="require-title" className="text-sm">
-                                  Require job title
-                                </Label>
-                              </div>
-                              
-                              <div className="flex items-center space-x-2">
-                                <Checkbox id="require-location" />
-                                <Label htmlFor="require-location" className="text-sm">
-                                  Require location information
-                                </Label>
-                              </div>
-                              
-                              <div className="flex items-center space-x-2">
-                                <Checkbox id="temp-password" defaultChecked />
-                                <Label htmlFor="temp-password" className="text-sm">
-                                  Generate temporary password
-                                </Label>
+                              <div className="space-y-3">
+                                <div className="flex items-center space-x-2">
+                                  <Checkbox id="okta-sync" defaultChecked />
+                                  <Label htmlFor="okta-sync" className="text-sm">
+                                    Sync user to OKTA automatically
+                                  </Label>
+                                </div>
+                                
+                                <div className="flex items-center space-x-2">
+                                  <Checkbox id="knowbe4-sync" defaultChecked />
+                                  <Label htmlFor="knowbe4-sync" className="text-sm">
+                                    Add to KnowBe4 security training
+                                  </Label>
+                                </div>
+                                
+                                <div className="flex items-center space-x-2">
+                                  <Checkbox id="device-provision" />
+                                  <Label htmlFor="device-provision" className="text-sm">
+                                    Trigger device provisioning workflow
+                                  </Label>
+                                </div>
                               </div>
                             </div>
                           </div>
