@@ -39,7 +39,7 @@ The dashboard is built with a React frontend (TypeScript, Tailwind CSS, Wouter) 
 - **Visual Design:** Dark theme with purple sidebar and orange branding, consistent with provided screenshots.
 - **Component Reusability:** Employs comprehensive UI components (select, dialog, popover, command, sheet, checkbox, form) for consistent styling and functionality.
 - **Dynamic Content:** Dashboard cards now display database names and are synchronized bi-directionally with the admin layout page.
-- **Field Configuration Persistence:** Fixed Department and Employee Type field settings to properly load from and save to the database, ensuring configuration changes persist across page refreshes (resolved July 31, 2025).
+- **Field Configuration Persistence:** Fixed Department and Employee Type field settings to properly load from and save to the database. Removed conditional query enabling that prevented these settings from loading outside the Layout > New User tab. Settings now persist across page refreshes and are available to CreateUserModal (resolved July 31, 2025).
 
 ## External Dependencies
 - **OKTA:** Integrated for enterprise user authentication via OAuth2 and user/group management.
