@@ -104,14 +104,14 @@ function AdminComponent() {
     title: { required: false },
     manager: { required: false },
     department: { 
-      required: false, 
+      required: true, 
       useList: false, 
       options: [] as string[]
     },
     employeeType: { 
       required: false, 
       useList: true, 
-      options: [] as string[]
+      options: ["EMPLOYEE", "CONTRACTOR", "INTERN", "PART_TIME", "CONSULTANT", "FREELANCER"] as string[]
     }
   });
 
@@ -514,7 +514,7 @@ function AdminComponent() {
 
   const { data: departmentSettings, refetch: refetchDepartmentSettings } = useQuery({
     queryKey: ["/api/layout-settings/department"],
-    enabled: activeTab === "layout" && layoutTab === "new-user",
+    enabled: true,  // Always enabled to load department settings
     refetchOnMount: true,
     refetchOnWindowFocus: false,
   });
@@ -528,7 +528,7 @@ function AdminComponent() {
 
   const { data: employeeTypeSettings, refetch: refetchEmployeeTypeSettings } = useQuery({
     queryKey: ["/api/layout-settings/employeeType"],
-    enabled: activeTab === "layout" && layoutTab === "new-user",
+    enabled: true,  // Always enabled to load employee type settings
     refetchOnMount: true,
     refetchOnWindowFocus: false,
   });
