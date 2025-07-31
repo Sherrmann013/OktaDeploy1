@@ -2114,7 +2114,7 @@ function AdminComponent() {
                                               }
                                             }}
                                           >
-                                            {index === fieldSettings.emailUsername.domains.length - 1 && (
+                                            {index === fieldSettings.emailUsername.domains.length - 1 ? (
                                               <Button
                                                 variant="ghost"
                                                 size="sm"
@@ -2131,6 +2131,8 @@ function AdminComponent() {
                                               >
                                                 <Plus className="w-4 h-4" />
                                               </Button>
+                                            ) : (
+                                              <div className="w-6 h-6"></div>
                                             )}
                                             <Input
                                               value={domain}
