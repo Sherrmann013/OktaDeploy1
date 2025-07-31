@@ -2408,13 +2408,45 @@ function AdminComponent() {
                                           id="password-generate-button"
                                           checked={fieldSettings.password.showGenerateButton}
                                           onCheckedChange={(checked) => {
-                                            setFieldSettings(prev => ({
-                                              ...prev,
+                                            const newSettings = {
+                                              ...fieldSettings,
                                               password: {
-                                                ...prev.password,
+                                                ...fieldSettings.password,
                                                 showGenerateButton: checked
                                               }
-                                            }));
+                                            };
+                                            setFieldSettings(newSettings);
+                                            
+                                            // Auto-save the password settings when checkbox changes
+                                            const settingData = {
+                                              settingKey: 'password',
+                                              settingValue: JSON.stringify(newSettings.password),
+                                              settingType: 'user_config' as const,
+                                              metadata: {}
+                                            };
+                                            
+                                            fetch('/api/layout-settings', {
+                                              method: 'POST',
+                                              headers: { 'Content-Type': 'application/json' },
+                                              credentials: 'include',
+                                              body: JSON.stringify(settingData)
+                                            }).then(async response => {
+                                              if (response.ok) {
+                                                toast({ 
+                                                  title: "Success", 
+                                                  description: "Password generation setting saved" 
+                                                });
+                                              } else {
+                                                console.error('Auto-save failed');
+                                                toast({ 
+                                                  title: "Error", 
+                                                  description: "Failed to save setting",
+                                                  variant: "destructive"
+                                                });
+                                              }
+                                            }).catch((error) => {
+                                              console.error('Auto-save error:', error);
+                                            });
                                           }}
                                         />
                                         <Label htmlFor="password-generate-button" className="text-sm">
