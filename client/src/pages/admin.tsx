@@ -84,6 +84,9 @@ function AdminComponent() {
   const [isAddDashboardCardOpen, setIsAddDashboardCardOpen] = useState(false);
   const [draggedItem, setDraggedItem] = useState<number | null>(null);
   const [dragOverItem, setDragOverItem] = useState<number | null>(null);
+  const [openAppsSection, setOpenAppsSection] = useState<{type: 'department' | 'employeeType', index: number} | null>(null);
+  const [departmentApps, setDepartmentApps] = useState<Record<number, string[]>>({});
+  const [employeeTypeApps, setEmployeeTypeApps] = useState<Record<number, string[]>>({});
   // Fetch dashboard cards from the database
   const { data: dashboardCardsData, refetch: refetchDashboardCards, error: dashboardCardsError, isLoading: dashboardCardsLoading } = useQuery({
     queryKey: ["/api/dashboard-cards"],
@@ -601,6 +604,9 @@ function AdminComponent() {
     queryKey: ["/api/app-mappings"],
     refetchInterval: 30000
   });
+
+  // Get active apps for the dropdown
+  const activeApps = appMappingsData.filter(app => app.status === 'active');
 
   // Create site access user mutation
   const createUserMutation = useMutation({
@@ -2910,8 +2916,11 @@ function AdminComponent() {
                                                   variant="ghost"
                                                   size="sm"
                                                   onClick={() => {
-                                                    // Link functionality - placeholder for now
-                                                    console.log('Link clicked for department:', option);
+                                                    setOpenAppsSection(
+                                                      openAppsSection?.type === 'department' && openAppsSection?.index === index 
+                                                        ? null 
+                                                        : { type: 'department', index }
+                                                    );
                                                   }}
                                                   className="h-4 w-4 p-0 text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 ml-2"
                                                 >
@@ -2960,6 +2969,67 @@ function AdminComponent() {
                                               </div>
                                             )}
                                           </div>
+
+                                          {/* Applications Section for Departments */}
+                                          {openAppsSection?.type === 'department' && (
+                                            <div className="ml-8 mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-md">
+                                              <Label className="text-sm font-medium mb-3 block">Applications for "{fieldSettings.department.options[openAppsSection.index]}"</Label>
+                                              
+                                              {/* Applications Dropdown */}
+                                              <div className="mb-3">
+                                                <CustomSelect
+                                                  value=""
+                                                  onValueChange={(appName) => {
+                                                    const currentApps = departmentApps[openAppsSection.index] || [];
+                                                    if (!currentApps.includes(appName)) {
+                                                      setDepartmentApps(prev => ({
+                                                        ...prev,
+                                                        [openAppsSection.index]: [...currentApps, appName]
+                                                      }));
+                                                    }
+                                                  }}
+                                                >
+                                                  <CustomSelectTrigger className="w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600">
+                                                    <CustomSelectValue placeholder="Select an application to add" />
+                                                  </CustomSelectTrigger>
+                                                  <CustomSelectContent>
+                                                    {activeApps.map((app) => (
+                                                      <CustomSelectItem key={app.id} value={app.appName}>
+                                                        {app.appName}
+                                                      </CustomSelectItem>
+                                                    ))}
+                                                  </CustomSelectContent>
+                                                </CustomSelect>
+                                              </div>
+
+                                              {/* Selected Applications List */}
+                                              <div className="space-y-1">
+                                                {(departmentApps[openAppsSection.index] || []).map((appName, appIndex) => (
+                                                  <div key={appIndex} className="flex items-center justify-between bg-white dark:bg-gray-800 px-3 py-2 rounded border border-gray-200 dark:border-gray-700">
+                                                    <span className="text-sm">{appName}</span>
+                                                    <Button
+                                                      variant="ghost"
+                                                      size="sm"
+                                                      onClick={() => {
+                                                        setDepartmentApps(prev => ({
+                                                          ...prev,
+                                                          [openAppsSection.index]: (prev[openAppsSection.index] || []).filter((_, i) => i !== appIndex)
+                                                        }));
+                                                      }}
+                                                      className="h-4 w-4 p-0 text-red-500 hover:text-red-700"
+                                                    >
+                                                      ×
+                                                    </Button>
+                                                  </div>
+                                                ))}
+                                                {(!departmentApps[openAppsSection.index] || departmentApps[openAppsSection.index].length === 0) && (
+                                                  <div className="text-sm text-gray-500 text-center py-4">
+                                                    No applications added yet
+                                                  </div>
+                                                )}
+                                              </div>
+                                            </div>
+                                          )}
                                         </div>
                                       )}
                                     </div>
@@ -2993,8 +3063,11 @@ function AdminComponent() {
                                                 variant="ghost"
                                                 size="sm"
                                                 onClick={() => {
-                                                  // Link functionality - placeholder for now
-                                                  console.log('Link clicked for employee type:', option);
+                                                  setOpenAppsSection(
+                                                    openAppsSection?.type === 'employeeType' && openAppsSection?.index === index 
+                                                      ? null 
+                                                      : { type: 'employeeType', index }
+                                                  );
                                                 }}
                                                 className="h-4 w-4 p-0 text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 ml-2"
                                               >
@@ -3043,6 +3116,67 @@ function AdminComponent() {
                                             </div>
                                           )}
                                         </div>
+
+                                        {/* Applications Section for Employee Types */}
+                                        {openAppsSection?.type === 'employeeType' && (
+                                          <div className="ml-8 mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-md">
+                                            <Label className="text-sm font-medium mb-3 block">Applications for "{fieldSettings.employeeType.options[openAppsSection.index]}"</Label>
+                                            
+                                            {/* Applications Dropdown */}
+                                            <div className="mb-3">
+                                              <CustomSelect
+                                                value=""
+                                                onValueChange={(appName) => {
+                                                  const currentApps = employeeTypeApps[openAppsSection.index] || [];
+                                                  if (!currentApps.includes(appName)) {
+                                                    setEmployeeTypeApps(prev => ({
+                                                      ...prev,
+                                                      [openAppsSection.index]: [...currentApps, appName]
+                                                    }));
+                                                  }
+                                                }}
+                                              >
+                                                <CustomSelectTrigger className="w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600">
+                                                  <CustomSelectValue placeholder="Select an application to add" />
+                                                </CustomSelectTrigger>
+                                                <CustomSelectContent>
+                                                  {activeApps.map((app) => (
+                                                    <CustomSelectItem key={app.id} value={app.appName}>
+                                                      {app.appName}
+                                                    </CustomSelectItem>
+                                                  ))}
+                                                </CustomSelectContent>
+                                              </CustomSelect>
+                                            </div>
+
+                                            {/* Selected Applications List */}
+                                            <div className="space-y-1">
+                                              {(employeeTypeApps[openAppsSection.index] || []).map((appName, appIndex) => (
+                                                <div key={appIndex} className="flex items-center justify-between bg-white dark:bg-gray-800 px-3 py-2 rounded border border-gray-200 dark:border-gray-700">
+                                                  <span className="text-sm">{appName}</span>
+                                                  <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    onClick={() => {
+                                                      setEmployeeTypeApps(prev => ({
+                                                        ...prev,
+                                                        [openAppsSection.index]: (prev[openAppsSection.index] || []).filter((_, i) => i !== appIndex)
+                                                      }));
+                                                    }}
+                                                    className="h-4 w-4 p-0 text-red-500 hover:text-red-700"
+                                                  >
+                                                    ×
+                                                  </Button>
+                                                </div>
+                                              ))}
+                                              {(!employeeTypeApps[openAppsSection.index] || employeeTypeApps[openAppsSection.index].length === 0) && (
+                                                <div className="text-sm text-gray-500 text-center py-4">
+                                                  No applications added yet
+                                                </div>
+                                              )}
+                                            </div>
+                                          </div>
+                                        )}
                                       </div>
                                     </div>
                                   )}
