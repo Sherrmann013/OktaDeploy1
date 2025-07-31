@@ -116,8 +116,8 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
           },
           title: { required: false },
           manager: { required: false },
-          department: { required: false, useList: false, options: [] },
-          employeeType: { required: false, useList: true, options: [] }
+          department: { required: true, useList: false, options: [] },
+          employeeType: { required: true, useList: true, options: ["EMPLOYEE", "CONTRACTOR", "INTERN", "PART_TIME", "CONSULTANT", "FREELANCER"] }
         };
         
         // Parse individual setting responses
@@ -159,8 +159,8 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
           },
           title: { required: false },
           manager: { required: false },
-          department: { required: false, useList: false, options: [] },
-          employeeType: { required: false, useList: true, options: [] }
+          department: { required: true, useList: false, options: [] },
+          employeeType: { required: true, useList: true, options: ["EMPLOYEE", "CONTRACTOR", "INTERN", "PART_TIME", "CONSULTANT", "FREELANCER"] }
         };
       }
     },

@@ -512,12 +512,14 @@ function AdminComponent() {
     refetchOnWindowFocus: false,
   });
 
+  console.log('🔍 About to define department query...');
   const { data: departmentSettings, refetch: refetchDepartmentSettings } = useQuery({
     queryKey: ["/api/layout-settings/department"],
     enabled: true,  // Always enabled to load department settings
     refetchOnMount: true,
     refetchOnWindowFocus: false,
   });
+  console.log('🔍 Department query defined, result:', departmentSettings);
 
   // Debug department settings loading
   useEffect(() => {
@@ -526,12 +528,14 @@ function AdminComponent() {
     console.log('🔍 Current tabs:', { activeTab, layoutTab });
   }, [departmentSettings, activeTab, layoutTab]);
 
+  console.log('🔍 About to define employee type query...');
   const { data: employeeTypeSettings, refetch: refetchEmployeeTypeSettings } = useQuery({
     queryKey: ["/api/layout-settings/employeeType"],
     enabled: true,  // Always enabled to load employee type settings
     refetchOnMount: true,
     refetchOnWindowFocus: false,
   });
+  console.log('🔍 Employee type query defined, result:', employeeTypeSettings);
 
   // Refetch all settings when switching to New User tab
   useEffect(() => {
