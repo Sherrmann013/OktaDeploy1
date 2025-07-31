@@ -128,20 +128,7 @@ function AdminComponent() {
     refetchInterval: 30000
   });
 
-  // Department and Employee Type queries - using same pattern as emailUsername
-  const { data: departmentSettings } = useQuery({
-    queryKey: ["/api/layout-settings/department"],
-    enabled: activeTab === "layout" && layoutTab === "new-user",
-    refetchOnMount: true,
-    refetchOnWindowFocus: false,
-  });
 
-  const { data: employeeTypeSettings } = useQuery({
-    queryKey: ["/api/layout-settings/employeeType"], 
-    enabled: activeTab === "layout" && layoutTab === "new-user",
-    refetchOnMount: true,
-    refetchOnWindowFocus: false,
-  });
 
   // Debug logging for tab states and query enablement
   useEffect(() => {
@@ -567,6 +554,21 @@ function AdminComponent() {
 
   const { data: managerSettings } = useQuery({
     queryKey: ["/api/layout-settings/manager"],
+    enabled: activeTab === "layout" && layoutTab === "new-user",
+    refetchOnMount: true,
+    refetchOnWindowFocus: false,
+  });
+
+  // Department and Employee Type queries - moved here to be with the other working queries
+  const { data: departmentSettings } = useQuery({
+    queryKey: ["/api/layout-settings/department"],
+    enabled: activeTab === "layout" && layoutTab === "new-user",
+    refetchOnMount: true,
+    refetchOnWindowFocus: false,
+  });
+
+  const { data: employeeTypeSettings } = useQuery({
+    queryKey: ["/api/layout-settings/employeeType"], 
     enabled: activeTab === "layout" && layoutTab === "new-user",
     refetchOnMount: true,
     refetchOnWindowFocus: false,
