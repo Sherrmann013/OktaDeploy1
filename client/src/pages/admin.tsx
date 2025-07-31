@@ -128,39 +128,20 @@ function AdminComponent() {
     refetchInterval: 30000
   });
 
-  // Simple, direct database queries for department and employee type
-  const { data: departmentData } = useQuery({
+  // Department and Employee Type queries - using same pattern as emailUsername
+  const { data: departmentSettings } = useQuery({
     queryKey: ["/api/layout-settings/department"],
-    enabled: activeTab === "layout" && layoutTab === "new-user"
+    enabled: activeTab === "layout" && layoutTab === "new-user",
+    refetchOnMount: true,
+    refetchOnWindowFocus: false,
   });
 
-  const { data: employeeTypeData } = useQuery({
+  const { data: employeeTypeSettings } = useQuery({
     queryKey: ["/api/layout-settings/employeeType"], 
-    enabled: activeTab === "layout" && layoutTab === "new-user"
+    enabled: activeTab === "layout" && layoutTab === "new-user",
+    refetchOnMount: true,
+    refetchOnWindowFocus: false,
   });
-
-  // Update field settings when database data loads
-  useEffect(() => {
-    if (departmentData?.settingValue) {
-      const parsed = JSON.parse(departmentData.settingValue);
-      setFieldSettings(prev => ({
-        ...prev,
-        department: parsed
-      }));
-      console.log('✅ Department loaded from database:', parsed);
-    }
-  }, [departmentData]);
-
-  useEffect(() => {
-    if (employeeTypeData?.settingValue) {
-      const parsed = JSON.parse(employeeTypeData.settingValue);
-      setFieldSettings(prev => ({
-        ...prev,
-        employeeType: parsed
-      }));
-      console.log('✅ Employee type loaded from database:', parsed);
-    }
-  }, [employeeTypeData]);
 
   // Debug logging for tab states and query enablement
   useEffect(() => {
@@ -629,6 +610,66 @@ function AdminComponent() {
       console.log('🔍 No email username settings found, using defaults');
     }
   }, [emailUsernameSettings]);
+
+  // Update field settings when department settings are loaded - EXACT COPY of emailUsername pattern
+  useEffect(() => {
+    console.log('🔍 Department settings effect triggered:', departmentSettings);
+    if (departmentSettings && (departmentSettings as any).settingValue) {
+      try {
+        const parsedSettings = JSON.parse((departmentSettings as any).settingValue);
+        console.log('🔍 Parsed department settings:', parsedSettings);
+        if (parsedSettings.options && Array.isArray(parsedSettings.options)) {
+          console.log('🔍 Loading saved department options:', parsedSettings.options);
+          setFieldSettings(prev => {
+            console.log('🔍 Previous field settings:', prev);
+            const newSettings = {
+              ...prev,
+              department: {
+                ...prev.department,
+                ...parsedSettings
+              }
+            };
+            console.log('🔍 New field settings with department:', newSettings);
+            return newSettings;
+          });
+        }
+      } catch (error) {
+        console.error('🔍 Failed to parse department settings:', error);
+      }
+    } else {
+      console.log('🔍 No department settings found, using defaults');
+    }
+  }, [departmentSettings]);
+
+  // Update field settings when employee type settings are loaded - EXACT COPY of emailUsername pattern
+  useEffect(() => {
+    console.log('🔍 Employee type settings effect triggered:', employeeTypeSettings);
+    if (employeeTypeSettings && (employeeTypeSettings as any).settingValue) {
+      try {
+        const parsedSettings = JSON.parse((employeeTypeSettings as any).settingValue);
+        console.log('🔍 Parsed employee type settings:', parsedSettings);
+        if (parsedSettings.options && Array.isArray(parsedSettings.options)) {
+          console.log('🔍 Loading saved employee type options:', parsedSettings.options);
+          setFieldSettings(prev => {
+            console.log('🔍 Previous field settings:', prev);
+            const newSettings = {
+              ...prev,
+              employeeType: {
+                ...prev.employeeType,
+                ...parsedSettings
+              }
+            };
+            console.log('🔍 New field settings with employee type:', newSettings);
+            return newSettings;
+          });
+        }
+      } catch (error) {
+        console.error('🔍 Failed to parse employee type settings:', error);
+      }
+    } else {
+      console.log('🔍 No employee type settings found, using defaults');
+    }
+  }, [employeeTypeSettings]);
 
   // Update field settings when password settings are loaded
   useEffect(() => {
