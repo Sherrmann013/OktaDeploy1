@@ -2389,7 +2389,37 @@ function AdminComponent() {
                                               {fieldSettings.password.components?.map((component, index) => (
                                                 <div
                                                   key={index}
-                                                  className="flex items-center gap-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded px-3 py-2 text-sm"
+                                                  className="flex items-center gap-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded px-3 py-2 text-sm cursor-move"
+                                                  draggable
+                                                  onDragStart={(e) => {
+                                                    e.dataTransfer.setData('text/plain', index.toString());
+                                                    e.currentTarget.style.opacity = '0.5';
+                                                  }}
+                                                  onDragEnd={(e) => {
+                                                    e.currentTarget.style.opacity = '1';
+                                                  }}
+                                                  onDragOver={(e) => {
+                                                    e.preventDefault();
+                                                  }}
+                                                  onDrop={(e) => {
+                                                    e.preventDefault();
+                                                    const draggedIndex = parseInt(e.dataTransfer.getData('text/plain'));
+                                                    const dropIndex = index;
+                                                    
+                                                    if (draggedIndex !== dropIndex) {
+                                                      const newComponents = [...(fieldSettings.password.components || [])];
+                                                      const [draggedItem] = newComponents.splice(draggedIndex, 1);
+                                                      newComponents.splice(dropIndex, 0, draggedItem);
+                                                      
+                                                      setFieldSettings(prev => ({
+                                                        ...prev,
+                                                        password: {
+                                                          ...prev.password,
+                                                          components: newComponents
+                                                        }
+                                                      }));
+                                                    }
+                                                  }}
                                                 >
                                                   <GripVertical className="w-3 h-3 text-gray-400 cursor-move" />
                                                   <span className="flex items-center gap-1">
