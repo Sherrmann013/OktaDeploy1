@@ -2120,21 +2120,19 @@ function AdminComponent() {
                                     <Input
                                       id="preview-username"
                                       placeholder="username"
-                                      className={`rounded-r-none border-r-0 cursor-pointer ${
+                                      className={`rounded-r-none border-r-0 cursor-pointer pointer-events-none ${
                                         selectedField === 'emailUsername' 
                                           ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-300 dark:border-blue-600' 
                                           : 'bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600'
                                       }`}
                                       readOnly
-                                      onClick={(e) => e.stopPropagation()}
                                     />
                                     <div 
-                                      className={`px-3 py-2 border border-l-0 rounded-r text-sm cursor-pointer ${
+                                      className={`px-3 py-2 border border-l-0 rounded-r text-sm cursor-pointer pointer-events-none ${
                                         selectedField === 'emailUsername' 
                                           ? 'bg-blue-100 dark:bg-blue-800/30 border-blue-300 dark:border-blue-600 text-blue-700 dark:text-blue-300' 
                                           : 'bg-gray-100 dark:bg-gray-600 border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300'
                                       }`}
-                                      onClick={(e) => e.stopPropagation()}
                                     >
                                       {fieldSettings.emailUsername.domains[0]}
                                     </div>
