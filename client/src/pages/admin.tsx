@@ -2114,6 +2114,24 @@ function AdminComponent() {
                                               }
                                             }}
                                           >
+                                            {index === fieldSettings.emailUsername.domains.length - 1 && (
+                                              <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                onClick={() => {
+                                                  setFieldSettings(prev => ({
+                                                    ...prev,
+                                                    emailUsername: {
+                                                      ...prev.emailUsername,
+                                                      domains: [...prev.emailUsername.domains, '@company.com']
+                                                    }
+                                                  }));
+                                                }}
+                                                className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 p-1"
+                                              >
+                                                <Plus className="w-4 h-4" />
+                                              </Button>
+                                            )}
                                             <Input
                                               value={domain}
                                               className="w-40 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-sm"
@@ -2148,23 +2166,27 @@ function AdminComponent() {
                                             </Button>
                                           </div>
                                         ))}
-                                        {/* Plus button at bottom left */}
-                                        <Button
-                                          variant="ghost"
-                                          size="sm"
-                                          onClick={() => {
-                                            setFieldSettings(prev => ({
-                                              ...prev,
-                                              emailUsername: {
-                                                ...prev.emailUsername,
-                                                domains: [...prev.emailUsername.domains, '@company.com']
-                                              }
-                                            }));
-                                          }}
-                                          className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 p-1 self-start"
-                                        >
-                                          <Plus className="w-4 h-4" />
-                                        </Button>
+                                        {/* Plus button for first domain if no domains exist */}
+                                        {fieldSettings.emailUsername.domains.length === 0 && (
+                                          <div className="flex items-center gap-2">
+                                            <Button
+                                              variant="ghost"
+                                              size="sm"
+                                              onClick={() => {
+                                                setFieldSettings(prev => ({
+                                                  ...prev,
+                                                  emailUsername: {
+                                                    ...prev.emailUsername,
+                                                    domains: ['@company.com']
+                                                  }
+                                                }));
+                                              }}
+                                              className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 p-1"
+                                            >
+                                              <Plus className="w-4 h-4" />
+                                            </Button>
+                                          </div>
+                                        )}
                                       </div>
                                     </div>
                                   )}
