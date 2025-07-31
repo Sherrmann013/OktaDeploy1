@@ -333,7 +333,7 @@ function AdminComponent() {
     department: { 
       required: false, 
       useList: false, 
-      options: ['Engineering', 'Sales', 'Marketing', 'HR', 'Finance'] 
+      options: [] 
     },
     employeeType: { 
       required: false, 
