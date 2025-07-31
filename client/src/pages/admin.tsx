@@ -366,6 +366,14 @@ function AdminComponent() {
     refetchOnWindowFocus: false
   });
 
+  // Query to fetch password settings
+  const { data: passwordSettings } = useQuery({
+    queryKey: ["/api/layout-settings/password"],
+    enabled: activeTab === "layout" && layoutTab === "new-user",
+    refetchOnMount: true,
+    refetchOnWindowFocus: false,
+  });
+
   // Refetch email settings when switching to New User tab
   useEffect(() => {
     if (activeTab === "layout" && layoutTab === "new-user") {
@@ -404,6 +412,36 @@ function AdminComponent() {
       console.log('🔍 No email username settings found, using defaults');
     }
   }, [emailUsernameSettings]);
+
+  // Update field settings when password settings are loaded
+  useEffect(() => {
+    console.log('🔍 Password settings effect triggered:', passwordSettings);
+    if (passwordSettings && (passwordSettings as any).settingValue) {
+      try {
+        const parsedSettings = JSON.parse((passwordSettings as any).settingValue);
+        console.log('🔍 Parsed password settings:', parsedSettings);
+        if (parsedSettings.components && Array.isArray(parsedSettings.components)) {
+          console.log('🔍 Loading saved password components:', parsedSettings);
+          setFieldSettings(prev => {
+            console.log('🔍 Previous password field settings:', prev);
+            const newSettings = {
+              ...prev,
+              password: {
+                ...prev.password,
+                ...parsedSettings
+              }
+            };
+            console.log('🔍 New password field settings:', newSettings);
+            return newSettings;
+          });
+        }
+      } catch (error) {
+        console.error('🔍 Failed to parse password settings:', error);
+      }
+    } else {
+      console.log('🔍 No password settings found, using defaults');
+    }
+  }, [passwordSettings]);
 
   const queryClient = useQueryClient();
 
