@@ -313,13 +313,12 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
     // Adjust to target length if specified
     if (passwordConfig.targetLength && passwordConfig.targetLength > 0) {
       if (password.length > passwordConfig.targetLength) {
-        // Truncate but ensure we keep at least one of each component type
+        // Truncate to target length
         password = password.substring(0, passwordConfig.targetLength);
       } else if (password.length < passwordConfig.targetLength) {
-        // Pad with random characters from existing components to reach target length
-        const fillChars = numbers + symbols.join('');
+        // Pad with numbers only to reach target length
         while (password.length < passwordConfig.targetLength) {
-          password += fillChars[Math.floor(Math.random() * fillChars.length)];
+          password += numbers[Math.floor(Math.random() * numbers.length)];
         }
       }
     }
