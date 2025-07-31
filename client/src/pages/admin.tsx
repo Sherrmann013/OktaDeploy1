@@ -2447,7 +2447,7 @@ function AdminComponent() {
                                   {selectedField === 'emailUsername' && (
                                     <div className="space-y-3">
                                       <Label className="text-sm font-medium">Email Domains</Label>
-                                      <div className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md divide-y divide-gray-200 dark:divide-gray-600 max-w-sm">
+                                      <div className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md divide-y divide-gray-200 dark:divide-gray-600 max-w-48">
                                         {fieldSettings.emailUsername.domains.map((domain, index) => (
                                           <div key={index} className="flex items-center px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700/50">
                                             <Input
@@ -2887,7 +2887,7 @@ function AdminComponent() {
                                       {fieldSettings.department.useList && (
                                         <div className="space-y-3">
                                           <Label className="text-sm font-medium">Department Options</Label>
-                                          <div className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md divide-y divide-gray-200 dark:divide-gray-600 max-w-sm">
+                                          <div className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md divide-y divide-gray-200 dark:divide-gray-600 max-w-48">
                                             {fieldSettings.department.options.map((option, index) => (
                                               <div key={index} className="flex items-center px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700/50">
                                                 <Input
@@ -2970,7 +2970,7 @@ function AdminComponent() {
                                     <div className="space-y-4">
                                       <div className="space-y-3">
                                         <Label className="text-sm font-medium">Employee Type Options</Label>
-                                        <div className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md divide-y divide-gray-200 dark:divide-gray-600 max-w-sm">
+                                        <div className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md divide-y divide-gray-200 dark:divide-gray-600 max-w-48">
                                           {fieldSettings.employeeType.options.map((option, index) => (
                                             <div key={index} className="flex items-center px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700/50">
                                               <Input
