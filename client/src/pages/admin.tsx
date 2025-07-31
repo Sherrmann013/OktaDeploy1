@@ -2085,6 +2085,78 @@ function AdminComponent() {
                                     <div className="space-y-3">
                                       <Label className="text-sm font-medium">Email Domains</Label>
                                       <div className="space-y-2">
+                                        {fieldSettings.emailUsername.domains.map((domain, index) => (
+                                          <div
+                                            key={index}
+                                            className="flex items-center gap-2 cursor-move hover:bg-gray-50 dark:hover:bg-gray-700/20 rounded p-1"
+                                            draggable
+                                            onDragStart={(e) => {
+                                              e.dataTransfer.setData('text/plain', index.toString());
+                                            }}
+                                            onDragOver={(e) => {
+                                              e.preventDefault();
+                                            }}
+                                            onDrop={(e) => {
+                                              e.preventDefault();
+                                              const draggedIndex = parseInt(e.dataTransfer.getData('text/plain'));
+                                              if (draggedIndex !== index) {
+                                                const newDomains = [...fieldSettings.emailUsername.domains];
+                                                const draggedItem = newDomains[draggedIndex];
+                                                newDomains.splice(draggedIndex, 1);
+                                                newDomains.splice(index, 0, draggedItem);
+                                                setFieldSettings(prev => ({
+                                                  ...prev,
+                                                  emailUsername: {
+                                                    ...prev.emailUsername,
+                                                    domains: newDomains
+                                                  }
+                                                }));
+                                              }
+                                            }}
+                                          >
+                                            <div className="flex items-center gap-1 text-gray-400 dark:text-gray-500">
+                                              <div className="w-1 h-1 bg-current rounded-full"></div>
+                                              <div className="w-1 h-1 bg-current rounded-full"></div>
+                                              <div className="w-1 h-1 bg-current rounded-full"></div>
+                                              <div className="w-1 h-1 bg-current rounded-full"></div>
+                                              <div className="w-1 h-1 bg-current rounded-full"></div>
+                                              <div className="w-1 h-1 bg-current rounded-full"></div>
+                                            </div>
+                                            <Input
+                                              value={domain}
+                                              className="w-32 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-sm"
+                                              onChange={(e) => {
+                                                const newDomains = [...fieldSettings.emailUsername.domains];
+                                                newDomains[index] = e.target.value;
+                                                setFieldSettings(prev => ({
+                                                  ...prev,
+                                                  emailUsername: {
+                                                    ...prev.emailUsername,
+                                                    domains: newDomains
+                                                  }
+                                                }));
+                                              }}
+                                            />
+                                            <Button
+                                              variant="ghost"
+                                              size="sm"
+                                              onClick={() => {
+                                                const newDomains = fieldSettings.emailUsername.domains.filter((_, i) => i !== index);
+                                                setFieldSettings(prev => ({
+                                                  ...prev,
+                                                  emailUsername: {
+                                                    ...prev.emailUsername,
+                                                    domains: newDomains
+                                                  }
+                                                }));
+                                              }}
+                                              className="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 px-2"
+                                            >
+                                              ×
+                                            </Button>
+                                          </div>
+                                        ))}
+                                        {/* Plus button follows the last domain */}
                                         <div className="flex items-center gap-2">
                                           <Button
                                             variant="ghost"
@@ -2102,81 +2174,7 @@ function AdminComponent() {
                                           >
                                             <Plus className="w-4 h-4" />
                                           </Button>
-                                          {fieldSettings.emailUsername.domains.length > 0 && (
-                                            <div className="flex items-center gap-2">
-                                              <Input
-                                                value={fieldSettings.emailUsername.domains[0]}
-                                                className="w-32 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-sm"
-                                                onChange={(e) => {
-                                                  const newDomains = [...fieldSettings.emailUsername.domains];
-                                                  newDomains[0] = e.target.value;
-                                                  setFieldSettings(prev => ({
-                                                    ...prev,
-                                                    emailUsername: {
-                                                      ...prev.emailUsername,
-                                                      domains: newDomains
-                                                    }
-                                                  }));
-                                                }}
-                                              />
-                                              {fieldSettings.emailUsername.domains.length > 1 && (
-                                                <Button
-                                                  variant="ghost"
-                                                  size="sm"
-                                                  onClick={() => {
-                                                    const newDomains = fieldSettings.emailUsername.domains.filter((_, i) => i !== 0);
-                                                    setFieldSettings(prev => ({
-                                                      ...prev,
-                                                      emailUsername: {
-                                                        ...prev.emailUsername,
-                                                        domains: newDomains
-                                                      }
-                                                    }));
-                                                  }}
-                                                  className="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 px-2"
-                                                >
-                                                  ×
-                                                </Button>
-                                              )}
-                                            </div>
-                                          )}
                                         </div>
-                                        {fieldSettings.emailUsername.domains.slice(1).map((domain, index) => (
-                                          <div key={index + 1} className="flex items-center gap-2 ml-10">
-                                            <Input
-                                              value={domain}
-                                              className="w-32 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-sm"
-                                              onChange={(e) => {
-                                                const newDomains = [...fieldSettings.emailUsername.domains];
-                                                newDomains[index + 1] = e.target.value;
-                                                setFieldSettings(prev => ({
-                                                  ...prev,
-                                                  emailUsername: {
-                                                    ...prev.emailUsername,
-                                                    domains: newDomains
-                                                  }
-                                                }));
-                                              }}
-                                            />
-                                            <Button
-                                              variant="ghost"
-                                              size="sm"
-                                              onClick={() => {
-                                                const newDomains = fieldSettings.emailUsername.domains.filter((_, i) => i !== index + 1);
-                                                setFieldSettings(prev => ({
-                                                  ...prev,
-                                                  emailUsername: {
-                                                    ...prev.emailUsername,
-                                                    domains: newDomains
-                                                  }
-                                                }));
-                                              }}
-                                              className="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 px-2"
-                                            >
-                                              ×
-                                            </Button>
-                                          </div>
-                                        ))}
                                       </div>
                                     </div>
                                   )}
