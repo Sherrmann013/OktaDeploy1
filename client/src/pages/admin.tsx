@@ -2197,7 +2197,11 @@ function AdminComponent() {
                                             <Input
                                               value={domain}
                                               className="w-40 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-sm"
+                                              onFocus={() => {
+                                                console.log('🔍 Domain input focused, current value:', domain);
+                                              }}
                                               onChange={(e) => {
+                                                console.log('🔍 Domain input changed from:', domain, 'to:', e.target.value);
                                                 const newDomains = [...fieldSettings.emailUsername.domains];
                                                 newDomains[index] = e.target.value;
                                                 setFieldSettings(prev => ({
