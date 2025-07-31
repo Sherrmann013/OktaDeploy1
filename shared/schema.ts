@@ -176,6 +176,37 @@ export const insertAppMappingSchema = createInsertSchema(appMappings).omit({
 export type InsertAppMapping = z.infer<typeof insertAppMappingSchema>;
 export type AppMapping = typeof appMappings.$inferSelect;
 
+// Department Application Assignments
+export const departmentAppMappings = pgTable('department_app_mappings', {
+  id: serial('id').primaryKey(),
+  departmentName: varchar('department_name', { length: 100 }).notNull(),
+  appName: varchar('app_name', { length: 100 }).notNull(),
+  createdAt: timestamp('created_at').defaultNow()
+});
+
+// Employee Type Application Assignments
+export const employeeTypeAppMappings = pgTable('employee_type_app_mappings', {
+  id: serial('id').primaryKey(),
+  employeeType: varchar('employee_type', { length: 100 }).notNull(),
+  appName: varchar('app_name', { length: 100 }).notNull(),
+  createdAt: timestamp('created_at').defaultNow()
+});
+
+export const insertDepartmentAppMappingSchema = createInsertSchema(departmentAppMappings).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertEmployeeTypeAppMappingSchema = createInsertSchema(employeeTypeAppMappings).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertDepartmentAppMapping = z.infer<typeof insertDepartmentAppMappingSchema>;
+export type DepartmentAppMapping = typeof departmentAppMappings.$inferSelect;
+export type InsertEmployeeTypeAppMapping = z.infer<typeof insertEmployeeTypeAppMappingSchema>;
+export type EmployeeTypeAppMapping = typeof employeeTypeAppMappings.$inferSelect;
+
 // Layout customization schema
 export const layoutSettings = pgTable('layout_settings', {
   id: serial('id').primaryKey(),

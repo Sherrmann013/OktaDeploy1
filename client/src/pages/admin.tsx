@@ -87,6 +87,90 @@ function AdminComponent() {
   const [openAppsSection, setOpenAppsSection] = useState<{type: 'department' | 'employeeType', index: number} | null>(null);
   const [departmentApps, setDepartmentApps] = useState<Record<number, string[]>>({});
   const [employeeTypeApps, setEmployeeTypeApps] = useState<Record<number, string[]>>({});
+
+  // Initialize apps state from database
+  useEffect(() => {
+    if (departmentAppMappingsData.length > 0) {
+      const mappings: Record<number, string[]> = {};
+      departmentAppMappingsData.forEach((mapping: any) => {
+        const deptIndex = fieldSettings.department.options.indexOf(mapping.departmentName);
+        if (deptIndex !== -1) {
+          if (!mappings[deptIndex]) mappings[deptIndex] = [];
+          mappings[deptIndex].push(mapping.appName);
+        }
+      });
+      setDepartmentApps(mappings);
+    }
+  }, [departmentAppMappingsData, fieldSettings.department.options]);
+
+  useEffect(() => {
+    if (employeeTypeAppMappingsData.length > 0) {
+      const mappings: Record<number, string[]> = {};
+      employeeTypeAppMappingsData.forEach((mapping: any) => {
+        const typeIndex = fieldSettings.employeeType.options.indexOf(mapping.employeeType);
+        if (typeIndex !== -1) {
+          if (!mappings[typeIndex]) mappings[typeIndex] = [];
+          mappings[typeIndex].push(mapping.appName);
+        }
+      });
+      setEmployeeTypeApps(mappings);
+    }
+  }, [employeeTypeAppMappingsData, fieldSettings.employeeType.options]);
+
+  // Mutations for department app mappings
+  const addDepartmentAppMutation = useMutation({
+    mutationFn: async ({ departmentName, appName }: { departmentName: string; appName: string }) => {
+      return await apiRequest('/api/department-app-mappings', {
+        method: 'POST',
+        body: JSON.stringify({ departmentName, appName }),
+        headers: { 'Content-Type': 'application/json' }
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/department-app-mappings'] });
+    }
+  });
+
+  const removeDepartmentAppMutation = useMutation({
+    mutationFn: async ({ departmentName, appName }: { departmentName: string; appName: string }) => {
+      return await apiRequest('/api/department-app-mappings', {
+        method: 'DELETE',
+        body: JSON.stringify({ departmentName, appName }),
+        headers: { 'Content-Type': 'application/json' }
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/department-app-mappings'] });
+    }
+  });
+
+  // Mutations for employee type app mappings
+  const addEmployeeTypeAppMutation = useMutation({
+    mutationFn: async ({ employeeType, appName }: { employeeType: string; appName: string }) => {
+      return await apiRequest('/api/employee-type-app-mappings', {
+        method: 'POST',
+        body: JSON.stringify({ employeeType, appName }),
+        headers: { 'Content-Type': 'application/json' }
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/employee-type-app-mappings'] });
+    }
+  });
+
+  const removeEmployeeTypeAppMutation = useMutation({
+    mutationFn: async ({ employeeType, appName }: { employeeType: string; appName: string }) => {
+      return await apiRequest('/api/employee-type-app-mappings', {
+        method: 'DELETE',
+        body: JSON.stringify({ employeeType, appName }),
+        headers: { 'Content-Type': 'application/json' }
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/employee-type-app-mappings'] });
+    }
+  });
+
   // Fetch dashboard cards from the database
   const { data: dashboardCardsData, refetch: refetchDashboardCards, error: dashboardCardsError, isLoading: dashboardCardsLoading } = useQuery({
     queryKey: ["/api/dashboard-cards"],
@@ -607,6 +691,17 @@ function AdminComponent() {
 
   // Get active apps for the dropdown
   const activeApps = appMappingsData.filter(app => app.status === 'active');
+
+  // Fetch department and employee type app mappings
+  const { data: departmentAppMappingsData = [], isLoading: deptMappingsLoading } = useQuery<any[]>({
+    queryKey: ["/api/department-app-mappings"],
+    refetchInterval: 30000
+  });
+
+  const { data: employeeTypeAppMappingsData = [], isLoading: empTypeMappingsLoading } = useQuery<any[]>({
+    queryKey: ["/api/employee-type-app-mappings"],
+    refetchInterval: 30000
+  });
 
   // Create site access user mutation
   const createUserMutation = useMutation({
@@ -2984,6 +3079,8 @@ function AdminComponent() {
                                                     onValueChange={(appName) => {
                                                       const currentApps = departmentApps[openAppsSection.index] || [];
                                                       if (!currentApps.includes(appName)) {
+                                                        const departmentName = fieldSettings.department.options[openAppsSection.index];
+                                                        addDepartmentAppMutation.mutate({ departmentName, appName });
                                                         setDepartmentApps(prev => ({
                                                           ...prev,
                                                           [openAppsSection.index]: [...currentApps, appName]
@@ -3013,6 +3110,11 @@ function AdminComponent() {
                                                         variant="ghost"
                                                         size="sm"
                                                         onClick={() => {
+                                                          const departmentName = fieldSettings.department.options[openAppsSection.index];
+                                                          const removedAppName = departmentApps[openAppsSection.index]?.[appIndex];
+                                                          if (removedAppName) {
+                                                            removeDepartmentAppMutation.mutate({ departmentName, appName: removedAppName });
+                                                          }
                                                           setDepartmentApps(prev => ({
                                                             ...prev,
                                                             [openAppsSection.index]: (prev[openAppsSection.index] || []).filter((_, i) => i !== appIndex)
@@ -3134,6 +3236,8 @@ function AdminComponent() {
                                                   onValueChange={(appName) => {
                                                     const currentApps = employeeTypeApps[openAppsSection.index] || [];
                                                     if (!currentApps.includes(appName)) {
+                                                      const employeeType = fieldSettings.employeeType.options[openAppsSection.index];
+                                                      addEmployeeTypeAppMutation.mutate({ employeeType, appName });
                                                       setEmployeeTypeApps(prev => ({
                                                         ...prev,
                                                         [openAppsSection.index]: [...currentApps, appName]
@@ -3163,6 +3267,11 @@ function AdminComponent() {
                                                       variant="ghost"
                                                       size="sm"
                                                       onClick={() => {
+                                                        const employeeType = fieldSettings.employeeType.options[openAppsSection.index];
+                                                        const removedAppName = employeeTypeApps[openAppsSection.index]?.[appIndex];
+                                                        if (removedAppName) {
+                                                          removeEmployeeTypeAppMutation.mutate({ employeeType, appName: removedAppName });
+                                                        }
                                                         setEmployeeTypeApps(prev => ({
                                                           ...prev,
                                                           [openAppsSection.index]: (prev[openAppsSection.index] || []).filter((_, i) => i !== appIndex)
