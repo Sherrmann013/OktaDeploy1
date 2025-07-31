@@ -112,21 +112,28 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
             targetLength: 10
           },
           title: { required: false },
-          manager: { required: false }
+          manager: { required: false },
+          department: { required: false, useList: false, options: [] },
+          employeeType: { required: false, useList: true, options: ['EMPLOYEE', 'CONTRACTOR', 'INTERN', 'PART_TIME'] }
         };
         
         // Parse individual setting responses
+        const fieldNames = ['firstName', 'lastName', 'emailUsername', 'password', 'title', 'manager', 'department', 'employeeType'];
         for (let i = 0; i < responses.length; i++) {
           const response = responses[i];
-          const fieldName = ['firstName', 'lastName', 'emailUsername', 'password', 'title', 'manager'][i];
+          const fieldName = fieldNames[i];
           
           if (response.ok) {
             const data = await response.json();
             try {
-              settings[fieldName as keyof typeof settings] = JSON.parse(data.settingValue);
+              const parsedValue = JSON.parse(data.settingValue || '{}');
+              settings[fieldName as keyof typeof settings] = parsedValue;
+              console.log(`🔍 CreateUserModal - Loaded ${fieldName} config:`, parsedValue);
             } catch (e) {
               console.warn(`Failed to parse ${fieldName} settings:`, e);
             }
+          } else {
+            console.log(`🔍 CreateUserModal - No config found for ${fieldName}, using defaults`);
           }
         }
         
@@ -162,12 +169,15 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
   const emailDomains = emailDomainConfig?.domains || ['@mazetx.com'];
   const hasMultipleDomains = emailDomains.length > 1;
 
-  // Debug logging for domain configuration
+  // Debug logging for field configuration
   React.useEffect(() => {
+    console.log('🔍 CreateUserModal - Field settings loaded:', fieldSettings);
+    console.log('🔍 CreateUserModal - Department config:', fieldSettings?.department);
+    console.log('🔍 CreateUserModal - Employee Type config:', fieldSettings?.employeeType);
     console.log('🔍 CreateUserModal - Email domain config loaded:', emailDomainConfig);
     console.log('🔍 CreateUserModal - Email domains:', emailDomains);
     console.log('🔍 CreateUserModal - Has multiple domains:', hasMultipleDomains);
-  }, [emailDomainConfig, emailDomains, hasMultipleDomains]);
+  }, [fieldSettings, emailDomainConfig, emailDomains, hasMultipleDomains]);
 
   // Set default domain when modal opens or domains change
   React.useEffect(() => {
@@ -607,13 +617,21 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
                           <SelectValue placeholder="Human Resources" />
                         </SelectTrigger>
                         <SelectContent className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600">
-                          <SelectItem value="Human Resources">Human Resources</SelectItem>
-                          <SelectItem value="IT Security">IT Security</SelectItem>
-                          <SelectItem value="IT">IT</SelectItem>
-                          <SelectItem value="Legal">Legal</SelectItem>
-                          <SelectItem value="Executive">Executive</SelectItem>
-                          <SelectItem value="Finance">Finance</SelectItem>
-                          <SelectItem value="Operations">Operations</SelectItem>
+                          {fieldSettings?.department?.options?.length > 0 ? (
+                            fieldSettings.department.options.map((dept: string) => (
+                              <SelectItem key={dept} value={dept}>{dept}</SelectItem>
+                            ))
+                          ) : (
+                            <>
+                              <SelectItem value="Human Resources">Human Resources</SelectItem>
+                              <SelectItem value="IT Security">IT Security</SelectItem>
+                              <SelectItem value="IT">IT</SelectItem>
+                              <SelectItem value="Legal">Legal</SelectItem>
+                              <SelectItem value="Executive">Executive</SelectItem>
+                              <SelectItem value="Finance">Finance</SelectItem>
+                              <SelectItem value="Operations">Operations</SelectItem>
+                            </>
+                          )}
                         </SelectContent>
                       </Select>
                     </FormControl>
@@ -687,10 +705,20 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
                           <SelectValue placeholder="Employee" />
                         </SelectTrigger>
                         <SelectContent className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600">
-                          <SelectItem value="EMPLOYEE">Employee</SelectItem>
-                          <SelectItem value="CONTRACTOR">Contractor</SelectItem>
-                          <SelectItem value="INTERN">Intern</SelectItem>
-                          <SelectItem value="PART_TIME">Part Time</SelectItem>
+                          {fieldSettings?.employeeType?.options?.length > 0 ? (
+                            fieldSettings.employeeType.options.map((type: string) => (
+                              <SelectItem key={type} value={type}>
+                                {type.replace('_', ' ').toLowerCase().replace(/\b\w/g, l => l.toUpperCase())}
+                              </SelectItem>
+                            ))
+                          ) : (
+                            <>
+                              <SelectItem value="EMPLOYEE">Employee</SelectItem>
+                              <SelectItem value="CONTRACTOR">Contractor</SelectItem>
+                              <SelectItem value="INTERN">Intern</SelectItem>
+                              <SelectItem value="PART_TIME">Part Time</SelectItem>
+                            </>
+                          )}
                         </SelectContent>
                       </Select>
                     </FormControl>
