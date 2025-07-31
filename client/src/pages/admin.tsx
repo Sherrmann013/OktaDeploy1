@@ -2447,68 +2447,11 @@ function AdminComponent() {
                                   {selectedField === 'emailUsername' && (
                                     <div className="space-y-3">
                                       <Label className="text-sm font-medium">Email Domains</Label>
-                                      <div className="space-y-2">
+                                      <div className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md divide-y divide-gray-200 dark:divide-gray-600 max-w-sm">
                                         {fieldSettings.emailUsername.domains.map((domain, index) => (
-                                          <div
-                                            key={index}
-                                            className="flex items-center gap-2 cursor-move hover:bg-gray-50 dark:hover:bg-gray-700/20 rounded p-1"
-                                            draggable
-                                            onDragStart={(e) => {
-                                              e.dataTransfer.setData('text/plain', index.toString());
-                                            }}
-                                            onDragOver={(e) => {
-                                              e.preventDefault();
-                                            }}
-                                            onDrop={(e) => {
-                                              e.preventDefault();
-                                              const draggedIndex = parseInt(e.dataTransfer.getData('text/plain'));
-                                              if (draggedIndex !== index) {
-                                                const newDomains = [...fieldSettings.emailUsername.domains];
-                                                const draggedItem = newDomains[draggedIndex];
-                                                newDomains.splice(draggedIndex, 1);
-                                                newDomains.splice(index, 0, draggedItem);
-                                                setFieldSettings(prev => ({
-                                                  ...prev,
-                                                  emailUsername: {
-                                                    ...prev.emailUsername,
-                                                    domains: newDomains
-                                                  }
-                                                }));
-                                              }
-                                            }}
-                                          >
-                                            {index === fieldSettings.emailUsername.domains.length - 1 ? (
-                                              <Button
-                                                variant="ghost"
-                                                size="sm"
-                                                onClick={() => {
-                                                  console.log('🔍 Plus button clicked - adding new domain');
-                                                  console.log('🔍 Current domains before add:', fieldSettings.emailUsername.domains);
-                                                  setFieldSettings(prev => {
-                                                    const newDomains = [...prev.emailUsername.domains, '@'];
-                                                    console.log('🔍 New domains after add:', newDomains);
-                                                    return {
-                                                      ...prev,
-                                                      emailUsername: {
-                                                        ...prev.emailUsername,
-                                                        domains: newDomains
-                                                      }
-                                                    };
-                                                  });
-                                                }}
-                                                className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 p-1"
-                                              >
-                                                <Plus className="w-4 h-4" />
-                                              </Button>
-                                            ) : (
-                                              <div className="w-6 h-6"></div>
-                                            )}
+                                          <div key={index} className="flex items-center px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700/50">
                                             <Input
                                               value={domain}
-                                              className="w-40 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-sm"
-                                              onFocus={() => {
-                                                console.log('🔍 Domain input focused, current value:', domain);
-                                              }}
                                               onChange={(e) => {
                                                 console.log('🔍 Domain input changed from:', domain, 'to:', e.target.value);
                                                 const newDomains = [...fieldSettings.emailUsername.domains];
@@ -2521,6 +2464,8 @@ function AdminComponent() {
                                                   }
                                                 }));
                                               }}
+                                              placeholder="@domain.com"
+                                              className="flex-1 bg-transparent border-none text-gray-900 dark:text-gray-100 text-sm p-0 h-auto focus:ring-0 focus:border-none"
                                             />
                                             <Button
                                               variant="ghost"
@@ -2535,35 +2480,40 @@ function AdminComponent() {
                                                   }
                                                 }));
                                               }}
-                                              className="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 px-2"
+                                              className="h-4 w-4 p-0 text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 ml-2"
                                             >
                                               ×
                                             </Button>
                                           </div>
                                         ))}
-                                        {/* Plus button for first domain if no domains exist */}
+                                        <div className="flex items-center px-3 py-2 border-t border-dashed border-gray-300 dark:border-gray-600">
+                                          <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            onClick={() => {
+                                              console.log('🔍 Plus button clicked - adding new domain');
+                                              console.log('🔍 Current domains before add:', fieldSettings.emailUsername.domains);
+                                              setFieldSettings(prev => {
+                                                const newDomains = [...prev.emailUsername.domains, '@'];
+                                                console.log('🔍 New domains after add:', newDomains);
+                                                return {
+                                                  ...prev,
+                                                  emailUsername: {
+                                                    ...prev.emailUsername,
+                                                    domains: newDomains
+                                                  }
+                                                };
+                                              });
+                                            }}
+                                            className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
+                                          >
+                                            <Plus className="w-4 h-4" />
+                                            Add email domain
+                                          </Button>
+                                        </div>
                                         {fieldSettings.emailUsername.domains.length === 0 && (
-                                          <div className="flex items-center gap-2">
-                                            <Button
-                                              variant="ghost"
-                                              size="sm"
-                                              onClick={() => {
-                                                console.log('🔍 First domain plus button clicked');
-                                                setFieldSettings(prev => {
-                                                  console.log('🔍 Setting first domain to [@]');
-                                                  return {
-                                                    ...prev,
-                                                    emailUsername: {
-                                                      ...prev.emailUsername,
-                                                      domains: ['@']
-                                                    }
-                                                  };
-                                                });
-                                              }}
-                                              className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 p-1"
-                                            >
-                                              <Plus className="w-4 h-4" />
-                                            </Button>
+                                          <div className="flex items-center px-3 py-4 text-center">
+                                            <span className="text-sm text-gray-500 dark:text-gray-400 w-full">No email domains added yet</span>
                                           </div>
                                         )}
                                       </div>
