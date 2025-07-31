@@ -275,10 +275,22 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
   const generatePassword = () => {
     if (!passwordConfig) return;
     
-    // Different word lengths to help meet target length
-    const shortWords = ['cat', 'dog', 'sun', 'car', 'key', 'box', 'cup', 'pen', 'hat', 'bag', 'run', 'sky', 'fox', 'gem', 'bay', 'ice', 'joy', 'owl', 'ray', 'bee'];
-    const mediumWords = ['blue', 'red', 'green', 'moon', 'star', 'tree', 'bird', 'fish', 'book'];
-    const longWords = ['purple', 'orange', 'yellow', 'silver', 'bronze', 'copper', 'golden', 'bright', 'forest', 'ocean'];
+    // Different word lengths to help meet target length - expanded for more variety
+    const shortWords = [
+      'cat', 'dog', 'sun', 'car', 'key', 'box', 'cup', 'pen', 'hat', 'bag', 'run', 'sky', 'fox', 'gem', 'bay', 'ice', 'joy', 'owl', 'ray', 'bee',
+      'art', 'bat', 'bus', 'cab', 'dam', 'egg', 'fan', 'gas', 'hip', 'jam', 'lab', 'map', 'net', 'oak', 'pan', 'rat', 'sea', 'tap', 'van', 'web',
+      'zip', 'arm', 'bed', 'cap', 'den', 'ear', 'fog', 'gun', 'hub', 'ink', 'kit', 'log', 'mud', 'nut', 'orb', 'pad', 'rug', 'six', 'top', 'urn'
+    ];
+    const mediumWords = [
+      'blue', 'red', 'green', 'moon', 'star', 'tree', 'bird', 'fish', 'book', 'cloud', 'flame', 'grass', 'house', 'light', 'magic', 'night', 'river', 'stone', 'water', 'wind',
+      'apple', 'beach', 'chair', 'dream', 'earth', 'field', 'glass', 'heart', 'image', 'joint', 'knife', 'lemon', 'mouse', 'novel', 'ocean', 'peace', 'quiet', 'radio', 'smile', 'table',
+      'under', 'voice', 'white', 'youth', 'zebra', 'alive', 'brave', 'clean', 'dance', 'empty', 'first', 'globe', 'happy', 'index', 'judge', 'kings', 'lunch', 'music', 'north', 'other'
+    ];
+    const longWords = [
+      'purple', 'orange', 'yellow', 'silver', 'bronze', 'copper', 'golden', 'bright', 'forest', 'ocean', 'modern', 'simple', 'strong', 'winter', 'summer', 'spring', 'autumn', 'garden', 'temple', 'palace',
+      'diamond', 'emerald', 'sapphire', 'crystal', 'thunder', 'lightning', 'rainbow', 'sunshine', 'moonlight', 'starlight', 'kingdom', 'freedom', 'justice', 'harmony', 'balance', 'wisdom', 'courage', 'victory', 'triumph', 'journey',
+      'adventure', 'discovery', 'treasure', 'mystery', 'fantasy', 'reality', 'imagination', 'creation', 'innovation', 'exploration', 'celebration', 'revolution', 'evolution', 'transformation', 'inspiration', 'generation', 'foundation', 'dedication', 'meditation', 'reflection'
+    ];
     
     const symbols = ['!', '@', '#', '$', '%', '^', '&', '*', '+', '=', '?'];
     const numbers = '0123456789';
