@@ -312,6 +312,11 @@ function AdminComponent() {
   const [customCardDescription, setCustomCardDescription] = useState("");
   const [isCreateUserModalOpen, setIsCreateUserModalOpen] = useState(false);
   const [selectedField, setSelectedField] = useState<string | null>(null);
+  
+  // Debug selectedField changes
+  useEffect(() => {
+    console.log('🔍 selectedField changed to:', selectedField);
+  }, [selectedField]);
   const [fieldSettings, setFieldSettings] = useState({
     firstName: { required: true },
     lastName: { required: true },
