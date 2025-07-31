@@ -100,7 +100,7 @@ function AdminComponent() {
   });
 
   // Fetch field settings from database - using layout-settings API
-  console.log('🔍 Setting up department query...');
+  console.log('🔍 ADMIN COMPONENT LOADED - Setting up department query...');
   const { data: departmentFieldSettings, refetch: refetchDepartmentSettings, isLoading: departmentLoading, error: departmentError } = useQuery({
     queryKey: ["/api/layout-settings/department"],
     enabled: true, // Always enabled for debugging
