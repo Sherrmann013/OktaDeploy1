@@ -310,13 +310,8 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
       }
     });
     
-    // Shuffle the components to avoid predictable patterns
-    for (let i = passwordParts.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [passwordParts[i], passwordParts[j]] = [passwordParts[j], passwordParts[i]];
-    }
-    
-    // Join components
+    // Keep components in the order they appear in the configuration
+    // This maintains a predictable format: Words + Numbers + Symbols (or whatever order is configured)
     let password = passwordParts.join('');
     
     // Adjust to target length if specified
