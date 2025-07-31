@@ -1587,25 +1587,22 @@ function AdminComponent() {
                         <div>
                           <h5 className="text-md font-medium mb-3">Logo Text</h5>
                           <div className="space-y-3">
-                            <div>
-                              <Label htmlFor="logoText" className="text-sm font-medium">
-                                Text displayed under the logo
-                              </Label>
+                            <div className="flex items-center gap-3">
                               <Input
                                 id="logoText"
                                 value={logoText}
                                 onChange={(e) => setLogoText(e.target.value)}
                                 placeholder="Enter text to display under logo"
-                                className="mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700"
+                                className="w-1/4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700"
                               />
+                              <Button 
+                                onClick={() => updateLogoTextMutation.mutate(logoText)}
+                                disabled={updateLogoTextMutation.isPending || logoText === (logoTextSetting?.settingValue || "Powered by ClockWerk.it")}
+                                className="bg-green-600 hover:bg-green-700 text-white"
+                              >
+                                {updateLogoTextMutation.isPending ? "Updating..." : "Update Text"}
+                              </Button>
                             </div>
-                            <Button 
-                              onClick={() => updateLogoTextMutation.mutate(logoText)}
-                              disabled={updateLogoTextMutation.isPending || logoText === (logoTextSetting?.settingValue || "Powered by ClockWerk.it")}
-                              className="bg-green-600 hover:bg-green-700 text-white"
-                            >
-                              {updateLogoTextMutation.isPending ? "Updating..." : "Update Text"}
-                            </Button>
                           </div>
                         </div>
                       </div>
