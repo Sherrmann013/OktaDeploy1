@@ -99,13 +99,22 @@ function AdminComponent() {
     refetchInterval: 30000
   });
 
-  // Fetch field settings from database
-  const { data: departmentFieldSettings, refetch: refetchDepartmentSettings } = useQuery<{ options: string[]; required: boolean }>({
-    queryKey: ["/api/field-settings/department"],
+  // Fetch field settings from database - using layout-settings API
+  const { data: departmentFieldSettings, refetch: refetchDepartmentSettings } = useQuery({
+    queryKey: ["/api/layout-settings/department"],
     enabled: activeTab === "layout" && layoutTab === "new-user",
     refetchInterval: 30000,
     refetchOnMount: true,
     refetchOnWindowFocus: false,
+    select: (data: any) => {
+      if (!data?.settingValue) return null;
+      try {
+        return JSON.parse(data.settingValue);
+      } catch (error) {
+        console.error('Failed to parse department settings:', error);
+        return null;
+      }
+    },
     onSuccess: (data) => {
       console.log('🔍 Department field settings loaded:', data);
     },
@@ -114,12 +123,21 @@ function AdminComponent() {
     }
   });
 
-  const { data: employeeTypeFieldSettings, refetch: refetchEmployeeTypeSettings } = useQuery<{ options: string[]; required: boolean }>({
-    queryKey: ["/api/field-settings/employeeType"],
+  const { data: employeeTypeFieldSettings, refetch: refetchEmployeeTypeSettings } = useQuery({
+    queryKey: ["/api/layout-settings/employeeType"],
     enabled: activeTab === "layout" && layoutTab === "new-user",
     refetchInterval: 30000,
     refetchOnMount: true,
     refetchOnWindowFocus: false,
+    select: (data: any) => {
+      if (!data?.settingValue) return null;
+      try {
+        return JSON.parse(data.settingValue);
+      } catch (error) {
+        console.error('Failed to parse employee type settings:', error);
+        return null;
+      }
+    },
     onSuccess: (data) => {
       console.log('🔍 Employee type field settings loaded:', data);
     },
@@ -178,11 +196,17 @@ function AdminComponent() {
   const updateDepartmentOptionsMutation = useMutation({
     mutationFn: async ({ options, required }: { options: string[]; required: boolean }) => {
       console.log('🔄 Saving department options to database:', { options, required });
-      return await apiRequest('POST', '/api/field-settings/department', { options, required });
+      const settingData = {
+        settingKey: 'department',
+        settingValue: JSON.stringify({ options, required, useList: fieldSettings.department.useList }),
+        settingType: 'user_config' as const,
+        metadata: {}
+      };
+      return await apiRequest('POST', '/api/layout-settings', settingData);
     },
     onSuccess: async () => {
       console.log('✅ Department options saved successfully');
-      await queryClient.invalidateQueries({ queryKey: ['/api/field-settings/department'] });
+      await queryClient.invalidateQueries({ queryKey: ['/api/layout-settings/department'] });
       await refetchDepartmentSettings();
     },
     onError: (error) => {
@@ -193,12 +217,18 @@ function AdminComponent() {
   const updateEmployeeTypeOptionsMutation = useMutation({
     mutationFn: async ({ options, required }: { options: string[]; required: boolean }) => {
       console.log('🔄 Saving employee type options to database:', { options, required });
-      return await apiRequest('POST', '/api/field-settings/employeeType', { options, required });
+      const settingData = {
+        settingKey: 'employeeType',
+        settingValue: JSON.stringify({ options, required, useList: fieldSettings.employeeType.useList }),
+        settingType: 'user_config' as const,
+        metadata: {}
+      };
+      return await apiRequest('POST', '/api/layout-settings', settingData);
     },
     onSuccess: async () => {
       console.log('✅ Employee type options saved successfully');
-      await queryClient.invalidateQueries({ queryKey: ['/api/field-settings/employeeType'] });
-      await refetchEmployeeTypeSettings();
+      await queryClient.invalidateQueries({ queryKey: ['/api/layout-settings/employeeType'] });
+      await refetchEmployeeTypeSettings();   
     },
     onError: (error) => {
       console.error('❌ Failed to save employee type options:', error);
