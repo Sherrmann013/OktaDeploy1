@@ -92,8 +92,8 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
           fetch('/api/layout-settings/password', { credentials: 'include' }),
           fetch('/api/layout-settings/title', { credentials: 'include' }),
           fetch('/api/layout-settings/manager', { credentials: 'include' }),
-          fetch('/api/field-settings/department', { credentials: 'include' }),
-          fetch('/api/field-settings/employeeType', { credentials: 'include' })
+          fetch('/api/layout-settings/department', { credentials: 'include' }),
+          fetch('/api/layout-settings/employeeType', { credentials: 'include' })
         ];
         
         const responses = await Promise.all(settingsQueries);
@@ -114,7 +114,7 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
           title: { required: false },
           manager: { required: false },
           department: { required: false, useList: false, options: [] },
-          employeeType: { required: false, useList: true, options: ['EMPLOYEE', 'CONTRACTOR', 'INTERN', 'PART_TIME'] }
+          employeeType: { required: false, useList: true, options: [] }
         };
         
         // Parse individual setting responses
@@ -157,7 +157,7 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
           title: { required: false },
           manager: { required: false },
           department: { required: false, useList: false, options: [] },
-          employeeType: { required: false, useList: true, options: ['EMPLOYEE', 'CONTRACTOR', 'INTERN', 'PART_TIME'] }
+          employeeType: { required: false, useList: true, options: [] }
         };
       }
     },
