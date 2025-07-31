@@ -1993,7 +1993,11 @@ function AdminComponent() {
                                         ? 'ring-2 ring-blue-300 dark:ring-blue-600' 
                                         : 'hover:ring-1 hover:ring-blue-200 dark:hover:ring-blue-700'
                                     }`}
-                                    onClick={() => setSelectedField(selectedField === 'password' ? null : 'password')}
+                                    onClick={() => {
+                                      console.log('🔍 Password field clicked!', selectedField);
+                                      setSelectedField(selectedField === 'password' ? null : 'password');
+                                      console.log('🔍 Password field selection should be:', selectedField === 'password' ? null : 'password');
+                                    }}
                                   >
                                     <Input
                                       id="preview-password"
