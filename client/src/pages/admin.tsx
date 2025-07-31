@@ -2939,9 +2939,33 @@ function AdminComponent() {
                                           <Label className="text-sm font-medium">Department Options</Label>
                                           <div className="space-y-2">
                                             {fieldSettings.department.options.map((option, index) => (
-                                              <div key={index} className="flex items-center justify-between px-3 py-2 bg-gray-800 rounded border border-gray-600">
+                                              <div
+                                                key={index}
+                                                className="flex items-center gap-2 cursor-move hover:bg-gray-50 dark:hover:bg-gray-700/20 rounded p-1"
+                                              >
+                                                {index === fieldSettings.department.options.length - 1 ? (
+                                                  <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    onClick={() => {
+                                                      setFieldSettings({
+                                                        ...fieldSettings,
+                                                        department: {
+                                                          ...fieldSettings.department,
+                                                          options: [...fieldSettings.department.options, ""]
+                                                        }
+                                                      });
+                                                    }}
+                                                    className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 p-1"
+                                                  >
+                                                    <Plus className="w-4 h-4" />
+                                                  </Button>
+                                                ) : (
+                                                  <div className="w-6 h-6"></div>
+                                                )}
                                                 <Input
                                                   value={option}
+                                                  className="w-40 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-sm"
                                                   onChange={(e) => {
                                                     setFieldSettings({
                                                       ...fieldSettings,
@@ -2954,10 +2978,8 @@ function AdminComponent() {
                                                     });
                                                   }}
                                                   placeholder="Department name"
-                                                  className="flex-1 bg-transparent border-none text-white text-sm p-0 h-auto focus:ring-0 focus:border-none"
                                                 />
                                                 <Button
-                                                  type="button"
                                                   variant="ghost"
                                                   size="sm"
                                                   onClick={() => {
@@ -2969,29 +2991,34 @@ function AdminComponent() {
                                                       }
                                                     });
                                                   }}
-                                                  className="h-auto p-1 text-red-400 hover:text-red-300 hover:bg-red-900/20 ml-2"
+                                                  className="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 px-2"
                                                 >
-                                                  <X className="w-4 h-4" />
+                                                  ×
                                                 </Button>
                                               </div>
                                             ))}
-                                            <Button
-                                              type="button"
-                                              variant="ghost"
-                                              size="sm"
-                                              onClick={() => {
-                                                setFieldSettings({
-                                                  ...fieldSettings,
-                                                  department: {
-                                                    ...fieldSettings.department,
-                                                    options: [...fieldSettings.department.options, ""]
-                                                  }
-                                                });
-                                              }}
-                                              className="flex items-center justify-center w-8 h-8 rounded border border-dashed border-gray-600 text-gray-400 hover:text-white hover:border-gray-500"
-                                            >
-                                              <Plus className="w-4 h-4" />
-                                            </Button>
+                                            {/* Plus button for first department if no departments exist */}
+                                            {fieldSettings.department.options.length === 0 && (
+                                              <div className="flex items-center gap-2 cursor-move hover:bg-gray-50 dark:hover:bg-gray-700/20 rounded p-1">
+                                                <Button
+                                                  variant="ghost"
+                                                  size="sm"
+                                                  onClick={() => {
+                                                    setFieldSettings({
+                                                      ...fieldSettings,
+                                                      department: {
+                                                        ...fieldSettings.department,
+                                                        options: [""]
+                                                      }
+                                                    });
+                                                  }}
+                                                  className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 p-1"
+                                                >
+                                                  <Plus className="w-4 h-4" />
+                                                </Button>
+                                                <span className="text-sm text-gray-500 dark:text-gray-400">Add department</span>
+                                              </div>
+                                            )}
                                           </div>
                                         </div>
                                       )}
@@ -3005,9 +3032,33 @@ function AdminComponent() {
                                         <Label className="text-sm font-medium">Employee Type Options</Label>
                                         <div className="space-y-2">
                                           {fieldSettings.employeeType.options.map((option, index) => (
-                                            <div key={index} className="flex items-center justify-between px-3 py-2 bg-gray-800 rounded border border-gray-600">
+                                            <div
+                                              key={index}
+                                              className="flex items-center gap-2 cursor-move hover:bg-gray-50 dark:hover:bg-gray-700/20 rounded p-1"
+                                            >
+                                              {index === fieldSettings.employeeType.options.length - 1 ? (
+                                                <Button
+                                                  variant="ghost"
+                                                  size="sm"
+                                                  onClick={() => {
+                                                    setFieldSettings({
+                                                      ...fieldSettings,
+                                                      employeeType: {
+                                                        ...fieldSettings.employeeType,
+                                                        options: [...fieldSettings.employeeType.options, ""]
+                                                      }
+                                                    });
+                                                  }}
+                                                  className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 p-1"
+                                                >
+                                                  <Plus className="w-4 h-4" />
+                                                </Button>
+                                              ) : (
+                                                <div className="w-6 h-6"></div>
+                                              )}
                                               <Input
                                                 value={option}
+                                                className="w-40 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-sm"
                                                 onChange={(e) => {
                                                   setFieldSettings({
                                                     ...fieldSettings,
@@ -3020,10 +3071,8 @@ function AdminComponent() {
                                                   });
                                                 }}
                                                 placeholder="Employee type"
-                                                className="flex-1 bg-transparent border-none text-white text-sm p-0 h-auto focus:ring-0 focus:border-none"
                                               />
                                               <Button
-                                                type="button"
                                                 variant="ghost"
                                                 size="sm"
                                                 onClick={() => {
@@ -3035,29 +3084,34 @@ function AdminComponent() {
                                                     }
                                                   });
                                                 }}
-                                                className="h-auto p-1 text-red-400 hover:text-red-300 hover:bg-red-900/20 ml-2"
+                                                className="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 px-2"
                                               >
-                                                <X className="w-4 h-4" />
+                                                ×
                                               </Button>
                                             </div>
                                           ))}
-                                          <Button
-                                            type="button"
-                                            variant="ghost"
-                                            size="sm"
-                                            onClick={() => {
-                                              setFieldSettings({
-                                                ...fieldSettings,
-                                                employeeType: {
-                                                  ...fieldSettings.employeeType,
-                                                  options: [...fieldSettings.employeeType.options, ""]
-                                                }
-                                              });
-                                            }}
-                                            className="flex items-center justify-center w-8 h-8 rounded border border-dashed border-gray-600 text-gray-400 hover:text-white hover:border-gray-500"
-                                          >
-                                            <Plus className="w-4 h-4" />
-                                          </Button>
+                                          {/* Plus button for first employee type if no types exist */}
+                                          {fieldSettings.employeeType.options.length === 0 && (
+                                            <div className="flex items-center gap-2 cursor-move hover:bg-gray-50 dark:hover:bg-gray-700/20 rounded p-1">
+                                              <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                onClick={() => {
+                                                  setFieldSettings({
+                                                    ...fieldSettings,
+                                                    employeeType: {
+                                                      ...fieldSettings.employeeType,
+                                                      options: [""]
+                                                    }
+                                                  });
+                                                }}
+                                                className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 p-1"
+                                              >
+                                                <Plus className="w-4 h-4" />
+                                              </Button>
+                                              <span className="text-sm text-gray-500 dark:text-gray-400">Add employee type</span>
+                                            </div>
+                                          )}
                                         </div>
                                       </div>
                                     </div>
