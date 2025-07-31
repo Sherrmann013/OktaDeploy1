@@ -319,9 +319,11 @@ function AdminComponent() {
     password: { 
       required: true, 
       showGenerateButton: true,
-      wordCount: 2,
-      includeSymbol: true,
-      includeNumber: true,
+      components: [
+        { type: 'words', count: 1 },
+        { type: 'numbers', count: 2 },
+        { type: 'symbols', count: 1 }
+      ],
       targetLength: 10
     }
   });
@@ -2360,98 +2362,123 @@ function AdminComponent() {
                                       <div className="space-y-3 border-t pt-4">
                                         <Label className="text-sm font-medium">Password Generation Settings</Label>
                                         
-                                        <div className="grid grid-cols-2 gap-4">
-                                          <div className="space-y-2">
-                                            <Label className="text-xs">Word Count</Label>
-                                            <CustomSelect
-                                              value={fieldSettings.password.wordCount.toString()}
-                                              onValueChange={(value) => {
-                                                setFieldSettings(prev => ({
-                                                  ...prev,
-                                                  password: {
-                                                    ...prev.password,
-                                                    wordCount: parseInt(value)
-                                                  }
-                                                }));
-                                              }}
-                                            >
-                                              <CustomSelectTrigger className="h-8 text-xs">
-                                                <CustomSelectValue />
-                                              </CustomSelectTrigger>
-                                              <CustomSelectContent>
-                                                <CustomSelectItem value="1">1 word</CustomSelectItem>
-                                                <CustomSelectItem value="2">2 words</CustomSelectItem>
-                                                <CustomSelectItem value="3">3 words</CustomSelectItem>
-                                              </CustomSelectContent>
-                                            </CustomSelect>
+                                        <div className="space-y-2">
+                                          <Label className="text-xs">Target Length</Label>
+                                          <Input
+                                            type="number"
+                                            min="6"
+                                            max="20"
+                                            value={fieldSettings.password.targetLength}
+                                            onChange={(e) => {
+                                              setFieldSettings(prev => ({
+                                                ...prev,
+                                                password: {
+                                                  ...prev.password,
+                                                  targetLength: parseInt(e.target.value) || 10
+                                                }
+                                              }));
+                                            }}
+                                            className="h-8 text-xs bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 w-24"
+                                          />
+                                        </div>
+
+                                        <div className="space-y-3">
+                                          <Label className="text-sm font-medium">Password Components</Label>
+                                          <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded border min-h-[120px]">
+                                            <div className="flex flex-wrap gap-2 mb-3">
+                                              {fieldSettings.password.components?.map((component, index) => (
+                                                <div
+                                                  key={index}
+                                                  className="flex items-center gap-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded px-3 py-2 text-sm cursor-move"
+                                                  draggable
+                                                >
+                                                  <GripVertical className="w-3 h-3 text-gray-400" />
+                                                  <span>{component.type === 'words' ? 'Words' : component.type === 'numbers' ? 'Numbers' : 'Symbols'}</span>
+                                                  <button
+                                                    onClick={() => {
+                                                      const newComponents = [...(fieldSettings.password.components || [])];
+                                                      newComponents.splice(index, 1);
+                                                      setFieldSettings(prev => ({
+                                                        ...prev,
+                                                        password: {
+                                                          ...prev.password,
+                                                          components: newComponents
+                                                        }
+                                                      }));
+                                                    }}
+                                                    className="text-red-500 hover:text-red-700 ml-1"
+                                                  >
+                                                    <X className="w-3 h-3" />
+                                                  </button>
+                                                </div>
+                                              ))}
+                                            </div>
+                                            
+                                            {(!fieldSettings.password.components || fieldSettings.password.components.length === 0) && (
+                                              <div className="text-center py-6 text-gray-500 dark:text-gray-400 text-sm">
+                                                Drag components here to build your password structure
+                                              </div>
+                                            )}
                                           </div>
                                           
                                           <div className="space-y-2">
-                                            <Label className="text-xs">Target Length</Label>
-                                            <Input
-                                              type="number"
-                                              min="6"
-                                              max="20"
-                                              value={fieldSettings.password.targetLength}
-                                              onChange={(e) => {
-                                                setFieldSettings(prev => ({
-                                                  ...prev,
-                                                  password: {
-                                                    ...prev.password,
-                                                    targetLength: parseInt(e.target.value) || 10
-                                                  }
-                                                }));
-                                              }}
-                                              className="h-8 text-xs bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600"
-                                            />
-                                          </div>
-                                        </div>
-
-                                        <div className="flex gap-4">
-                                          <div className="flex items-center space-x-2">
-                                            <Checkbox 
-                                              id="password-include-symbol"
-                                              checked={fieldSettings.password.includeSymbol}
-                                              onCheckedChange={(checked) => {
-                                                setFieldSettings(prev => ({
-                                                  ...prev,
-                                                  password: {
-                                                    ...prev.password,
-                                                    includeSymbol: checked
-                                                  }
-                                                }));
-                                              }}
-                                            />
-                                            <Label htmlFor="password-include-symbol" className="text-xs">
-                                              Include symbol
-                                            </Label>
+                                            <Label className="text-xs font-medium">Available Components</Label>
+                                            <div className="flex flex-wrap gap-2">
+                                              <button
+                                                onClick={() => {
+                                                  const newComponents = [...(fieldSettings.password.components || []), { type: 'words', count: 1 }];
+                                                  setFieldSettings(prev => ({
+                                                    ...prev,
+                                                    password: {
+                                                      ...prev.password,
+                                                      components: newComponents
+                                                    }
+                                                  }));
+                                                }}
+                                                className="bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 px-3 py-1 rounded text-xs hover:bg-blue-200 dark:hover:bg-blue-800"
+                                              >
+                                                + Words
+                                              </button>
+                                              <button
+                                                onClick={() => {
+                                                  const newComponents = [...(fieldSettings.password.components || []), { type: 'numbers', count: 2 }];
+                                                  setFieldSettings(prev => ({
+                                                    ...prev,
+                                                    password: {
+                                                      ...prev.password,
+                                                      components: newComponents
+                                                    }
+                                                  }));
+                                                }}
+                                                className="bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300 px-3 py-1 rounded text-xs hover:bg-green-200 dark:hover:bg-green-800"
+                                              >
+                                                + Numbers
+                                              </button>
+                                              <button
+                                                onClick={() => {
+                                                  const newComponents = [...(fieldSettings.password.components || []), { type: 'symbols', count: 1 }];
+                                                  setFieldSettings(prev => ({
+                                                    ...prev,
+                                                    password: {
+                                                      ...prev.password,
+                                                      components: newComponents
+                                                    }
+                                                  }));
+                                                }}
+                                                className="bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300 px-3 py-1 rounded text-xs hover:bg-purple-200 dark:hover:bg-purple-800"
+                                              >
+                                                + Symbols
+                                              </button>
+                                            </div>
                                           </div>
                                           
-                                          <div className="flex items-center space-x-2">
-                                            <Checkbox 
-                                              id="password-include-number"
-                                              checked={fieldSettings.password.includeNumber}
-                                              onCheckedChange={(checked) => {
-                                                setFieldSettings(prev => ({
-                                                  ...prev,
-                                                  password: {
-                                                    ...prev.password,
-                                                    includeNumber: checked
-                                                  }
-                                                }));
-                                              }}
-                                            />
-                                            <Label htmlFor="password-include-number" className="text-xs">
-                                              Include number
-                                            </Label>
+                                          <div className="text-xs text-gray-600 dark:text-gray-400 bg-blue-50 dark:bg-blue-900/20 p-2 rounded">
+                                            <strong>Preview:</strong> {
+                                              fieldSettings.password.components && fieldSettings.password.components.length > 0
+                                                ? fieldSettings.password.components.map(c => `(${c.type})`).join('+')
+                                                : '(Words)+(Numbers)+(Symbols)'
+                                            }
                                           </div>
-                                        </div>
-
-                                        <div className="text-xs text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800 p-3 rounded border">
-                                          <p className="font-medium mb-1">Password Generation Logic:</p>
-                                          <p>• Uses a built-in library of common English words</p>
-                                          <p>• Combines words with numbers and symbols as configured</p>
-                                          <p>• Adjusts to reach the target length specified above</p>
                                         </div>
 
                                         {/* Save Button for Password Configuration */}
