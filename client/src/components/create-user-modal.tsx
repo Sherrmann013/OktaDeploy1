@@ -295,13 +295,9 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
             passwordParts.push(word.charAt(0).toUpperCase() + word.slice(1));
             break;
           case 'numbers':
-            // Generate a single number (1-2 digits) as one component
-            const numLength = Math.floor(Math.random() * 2) + 1;
-            let numberPart = '';
-            for (let j = 0; j < numLength; j++) {
-              numberPart += numbers[Math.floor(Math.random() * numbers.length)];
-            }
-            passwordParts.push(numberPart);
+            // Generate a single digit (0-9) as one component
+            const singleDigit = numbers[Math.floor(Math.random() * numbers.length)];
+            passwordParts.push(singleDigit);
             break;
           case 'symbols':
             passwordParts.push(symbols[Math.floor(Math.random() * symbols.length)]);
