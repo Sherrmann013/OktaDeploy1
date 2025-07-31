@@ -293,6 +293,7 @@ function AdminComponent() {
       const response = await apiRequest("POST", "/api/layout-settings", {
         settingKey: "logo_text",
         settingValue: text,
+        settingType: "logo",
       });
       return response.json();
     },
