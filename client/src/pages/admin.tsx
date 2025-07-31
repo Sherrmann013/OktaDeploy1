@@ -2422,8 +2422,9 @@ function AdminComponent() {
                                         </Label>
                                       </div>
 
-                                      <div className="space-y-3 border-t pt-4">
-                                        <Label className="text-sm font-medium">Password Generation Settings</Label>
+                                      {fieldSettings.password.showGenerateButton && (
+                                        <div className="space-y-3 border-t pt-4">
+                                          <Label className="text-sm font-medium">Password Generation Settings</Label>
                                         
                                         <div className="flex items-center gap-3">
                                           <Label className="text-xs">Password Length</Label>
@@ -2659,7 +2660,8 @@ function AdminComponent() {
                                             Save Password Configuration
                                           </Button>
                                         </div>
-                                      </div>
+                                        </div>
+                                      )}
                                     </div>
                                   )}
                                 </div>
