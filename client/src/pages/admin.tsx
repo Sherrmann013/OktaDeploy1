@@ -318,17 +318,28 @@ function AdminComponent() {
   });
 
   // Query to fetch email username settings
-  const { data: emailUsernameSettings } = useQuery({
+  const { data: emailUsernameSettings, refetch: refetchEmailSettings } = useQuery({
     queryKey: ["/api/layout-settings/emailUsername"],
-    enabled: activeTab === "layout" && layoutTab === "new-user"
+    enabled: activeTab === "layout" && layoutTab === "new-user",
+    refetchOnMount: true,
+    refetchOnWindowFocus: false
   });
+
+  // Refetch email settings when switching to New User tab
+  useEffect(() => {
+    if (activeTab === "layout" && layoutTab === "new-user") {
+      console.log('New User tab selected, refetching email settings...');
+      refetchEmailSettings();
+    }
+  }, [activeTab, layoutTab, refetchEmailSettings]);
 
   // Update field settings when email username settings are loaded
   useEffect(() => {
-    if (emailUsernameSettings?.settingValue) {
+    if (emailUsernameSettings && (emailUsernameSettings as any).settingValue) {
       try {
-        const parsedSettings = JSON.parse(emailUsernameSettings.settingValue);
+        const parsedSettings = JSON.parse((emailUsernameSettings as any).settingValue);
         if (parsedSettings.domains && Array.isArray(parsedSettings.domains)) {
+          console.log('Loading saved domains:', parsedSettings.domains);
           setFieldSettings(prev => ({
             ...prev,
             emailUsername: {
@@ -2151,7 +2162,7 @@ function AdminComponent() {
                                                     ...prev,
                                                     emailUsername: {
                                                       ...prev.emailUsername,
-                                                      domains: [...prev.emailUsername.domains, '@company.com']
+                                                      domains: [...prev.emailUsername.domains, '@']
                                                     }
                                                   }));
                                                 }}
@@ -2207,7 +2218,7 @@ function AdminComponent() {
                                                   ...prev,
                                                   emailUsername: {
                                                     ...prev.emailUsername,
-                                                    domains: ['@company.com']
+                                                    domains: ['@']
                                                   }
                                                 }));
                                               }}
@@ -2236,16 +2247,21 @@ function AdminComponent() {
                                               headers: { 'Content-Type': 'application/json' },
                                               credentials: 'include',
                                               body: JSON.stringify(settingData)
-                                            }).then(response => {
+                                            }).then(async response => {
                                               if (response.ok) {
                                                 toast({ 
                                                   title: "Success", 
                                                   description: "Email domain settings saved successfully" 
                                                 });
+                                                // Refetch the settings to confirm persistence
+                                                await refetchEmailSettings();
                                               } else {
+                                                const errorText = await response.text();
+                                                console.error('Save failed:', errorText);
                                                 throw new Error('Failed to save');
                                               }
-                                            }).catch(() => {
+                                            }).catch((error) => {
+                                              console.error('Save error:', error);
                                               toast({ 
                                                 title: "Error", 
                                                 description: "Failed to save email domain settings",
