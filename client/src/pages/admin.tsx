@@ -102,11 +102,12 @@ function AdminComponent() {
   // Fetch field settings from database - using layout-settings API
   console.log('🔍 ADMIN COMPONENT LOADED - Setting up department query...');
   const { data: departmentFieldSettings, refetch: refetchDepartmentSettings, isLoading: departmentLoading, error: departmentError } = useQuery({
-    queryKey: ["/api/layout-settings/department"],
+    queryKey: ["/api/layout-settings/department", Date.now()],
     enabled: true, // Always enabled for debugging
-    refetchInterval: 30000,
+    staleTime: 0,
+    cacheTime: 0,
     refetchOnMount: true,
-    refetchOnWindowFocus: false,
+    refetchOnWindowFocus: true,
     select: (data: any) => {
       console.log('🔍 Department select function called with:', data);
       if (!data?.settingValue) return null;
@@ -138,11 +139,12 @@ function AdminComponent() {
 
   console.log('🔍 Setting up employee type query...');
   const { data: employeeTypeFieldSettings, refetch: refetchEmployeeTypeSettings, isLoading: employeeTypeLoading, error: employeeTypeError } = useQuery({
-    queryKey: ["/api/layout-settings/employeeType"],
+    queryKey: ["/api/layout-settings/employeeType", Date.now()],
     enabled: true, // Always enabled for debugging
-    refetchInterval: 30000,
+    staleTime: 0,
+    cacheTime: 0,
     refetchOnMount: true,
-    refetchOnWindowFocus: false,
+    refetchOnWindowFocus: true,
     select: (data: any) => {
       console.log('🔍 Employee type select function called with:', data);
       if (!data?.settingValue) return null;
