@@ -2216,7 +2216,7 @@ function AdminComponent() {
                       <div className="w-6 h-6 flex-shrink-0 bg-gray-400 rounded flex items-center justify-center">
                         <Plus className="w-4 h-4 text-white" />
                       </div>
-                      Custom Integration
+                      Custom Card
                     </div>
                   </SelectItem>
                 </SelectContent>
