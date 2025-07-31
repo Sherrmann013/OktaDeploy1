@@ -130,9 +130,10 @@ function AdminComponent() {
 
   // Fetch field settings from database - using layout-settings API
   console.log('🔍 ADMIN COMPONENT LOADED - Setting up department query...');
+  console.log('🔍 Query conditions:', { activeTab, layoutTab, shouldFetch: activeTab === "layout" && layoutTab === "new-user" });
   const { data: departmentFieldSettings, refetch: refetchDepartmentSettings, isLoading: departmentLoading, error: departmentError } = useQuery({
     queryKey: ["/api/layout-settings/department", Date.now()],
-    enabled: true, // Always enabled for debugging
+    enabled: activeTab === "layout" && layoutTab === "new-user", // Only fetch when on the right tab
     staleTime: 0,
     gcTime: 0,
     refetchOnMount: true,
@@ -177,7 +178,7 @@ function AdminComponent() {
   console.log('🔍 Setting up employee type query...');
   const { data: employeeTypeFieldSettings, refetch: refetchEmployeeTypeSettings, isLoading: employeeTypeLoading, error: employeeTypeError } = useQuery({
     queryKey: ["/api/layout-settings/employeeType", Date.now()],
-    enabled: true, // Always enabled for debugging
+    enabled: activeTab === "layout" && layoutTab === "new-user", // Only fetch when on the right tab
     staleTime: 0,
     gcTime: 0,
     refetchOnMount: true,
