@@ -512,28 +512,37 @@ function AdminComponent() {
     refetchOnWindowFocus: false,
   });
 
-  const { data: departmentSettings } = useQuery({
+  const { data: departmentSettings, refetch: refetchDepartmentSettings } = useQuery({
     queryKey: ["/api/layout-settings/department"],
     enabled: activeTab === "layout" && layoutTab === "new-user",
     refetchOnMount: true,
     refetchOnWindowFocus: false,
   });
 
-  const { data: employeeTypeSettings } = useQuery({
+  // Debug department settings loading
+  useEffect(() => {
+    console.log('🔍 Department settings query result:', departmentSettings);
+    console.log('🔍 Department query enabled:', activeTab === "layout" && layoutTab === "new-user");
+    console.log('🔍 Current tabs:', { activeTab, layoutTab });
+  }, [departmentSettings, activeTab, layoutTab]);
+
+  const { data: employeeTypeSettings, refetch: refetchEmployeeTypeSettings } = useQuery({
     queryKey: ["/api/layout-settings/employeeType"],
     enabled: activeTab === "layout" && layoutTab === "new-user",
     refetchOnMount: true,
     refetchOnWindowFocus: false,
   });
 
-  // Refetch email settings when switching to New User tab
+  // Refetch all settings when switching to New User tab
   useEffect(() => {
     if (activeTab === "layout" && layoutTab === "new-user") {
-      console.log('🔍 New User tab selected, refetching email settings...');
+      console.log('🔍 New User tab selected, refetching all settings...');
       console.log('🔍 Current field settings before refetch:', fieldSettings);
       refetchEmailSettings();
+      refetchDepartmentSettings();
+      refetchEmployeeTypeSettings();
     }
-  }, [activeTab, layoutTab, refetchEmailSettings]);
+  }, [activeTab, layoutTab, refetchEmailSettings, refetchDepartmentSettings, refetchEmployeeTypeSettings]);
 
   // Update field settings when email username settings are loaded
   useEffect(() => {
