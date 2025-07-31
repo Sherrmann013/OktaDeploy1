@@ -7,7 +7,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { CustomSelect } from "@/components/ui/custom-select";
+import { 
+  CustomSelect, 
+  CustomSelectTrigger, 
+  CustomSelectValue, 
+  CustomSelectContent, 
+  CustomSelectItem 
+} from "@/components/ui/custom-select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -75,6 +81,13 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
   const availableManagers = usersData?.users || [];
   const emailDomains = emailDomainConfig?.domains || ['@mazetx.com'];
   const hasMultipleDomains = emailDomains.length > 1;
+
+  // Debug logging for domain configuration
+  React.useEffect(() => {
+    console.log('🔍 CreateUserModal - Email domain config loaded:', emailDomainConfig);
+    console.log('🔍 CreateUserModal - Email domains:', emailDomains);
+    console.log('🔍 CreateUserModal - Has multiple domains:', hasMultipleDomains);
+  }, [emailDomainConfig, emailDomains, hasMultipleDomains]);
 
   // Set default domain when modal opens or domains change
   React.useEffect(() => {
@@ -311,7 +324,7 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
                           className="rounded-r-none border-r-0"
                         />
                         {hasMultipleDomains ? (
-                          <Select
+                          <CustomSelect
                             value={selectedDomain}
                             onValueChange={(value: string) => {
                               setSelectedDomain(value);
@@ -320,17 +333,17 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
                               field.onChange(email);
                             }}
                           >
-                            <SelectTrigger className="rounded-l-none border-l-0 min-w-[140px] bg-white dark:bg-gray-800">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent className="bg-white dark:bg-gray-800">
+                            <CustomSelectTrigger className="rounded-l-none border-l-0 min-w-[140px]">
+                              <CustomSelectValue />
+                            </CustomSelectTrigger>
+                            <CustomSelectContent>
                               {emailDomains.map((domain: string) => (
-                                <SelectItem key={domain} value={domain}>
+                                <CustomSelectItem key={domain} value={domain}>
                                   {domain}
-                                </SelectItem>
+                                </CustomSelectItem>
                               ))}
-                            </SelectContent>
-                          </Select>
+                            </CustomSelectContent>
+                          </CustomSelect>
                         ) : (
                           <div className="bg-gray-100 dark:bg-gray-800 border border-l-0 rounded-r-md px-3 py-2 text-sm text-gray-600 dark:text-gray-400 flex items-center">
                             {emailDomains[0] || '@mazetx.com'}
