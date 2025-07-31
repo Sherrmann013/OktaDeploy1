@@ -708,12 +708,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         mobilePhone: oktaUser.profile.mobilePhone,
         manager: oktaUser.profile.manager,
         status: oktaUser.status,
-        created: new Date(oktaUser.created),
-        lastUpdated: new Date(oktaUser.lastUpdated),
         lastLogin: oktaUser.lastLogin ? new Date(oktaUser.lastLogin) : null,
         passwordChanged: oktaUser.passwordChanged ? new Date(oktaUser.passwordChanged) : null,
         employeeType: userData.employeeType,
-        sendActivationEmail: userData.sendActivationEmail,
       });
 
       // Log the audit trail
@@ -1328,16 +1325,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
               mobilePhone: oktaUser.profile.mobilePhone || null,
               manager: oktaUser.profile.manager || null,
               status: oktaUser.status,
-              activated: oktaUser.activated ? new Date(oktaUser.activated) : new Date(),
-              created: new Date(oktaUser.created),
-              lastUpdated: new Date(oktaUser.lastUpdated),
               lastLogin: oktaUser.lastLogin ? new Date(oktaUser.lastLogin) : null,
               passwordChanged: oktaUser.passwordChanged ? new Date(oktaUser.passwordChanged) : null,
               employeeType: null,
-              managerId: null,
-              groups: null,
-              profileUrl: null,
-              sendActivationEmail: false
             };
             
             await storage.createUser(transformedUser);
@@ -1354,7 +1344,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
               mobilePhone: oktaUser.profile.mobilePhone || null,
               manager: oktaUser.profile.manager || null,
               status: oktaUser.status,
-              lastUpdated: new Date(oktaUser.lastUpdated),
               lastLogin: oktaUser.lastLogin ? new Date(oktaUser.lastLogin) : null,
               passwordChanged: oktaUser.passwordChanged ? new Date(oktaUser.passwordChanged) : null
             };
