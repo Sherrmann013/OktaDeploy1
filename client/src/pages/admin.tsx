@@ -537,7 +537,9 @@ function AdminComponent() {
   // Update field settings when department and employee type data is loaded from database
   useEffect(() => {
     console.log('🔍 Field settings data loaded:', { departmentFieldSettings, employeeTypeFieldSettings });
+    console.log('🔍 Current tab state:', { activeTab, layoutTab });
     if (departmentFieldSettings || employeeTypeFieldSettings) {
+      console.log('🔍 Updating field settings with database data');
       setFieldSettings(prev => ({
         ...prev,
         department: {
@@ -551,8 +553,10 @@ function AdminComponent() {
           required: employeeTypeFieldSettings?.required || false,
         }
       }));
+    } else {
+      console.log('🔍 No database field settings found, using defaults');
     }
-  }, [departmentFieldSettings, employeeTypeFieldSettings]);
+  }, [departmentFieldSettings, employeeTypeFieldSettings, activeTab, layoutTab]);
 
   // Log field settings changes
   useEffect(() => {
