@@ -2114,14 +2114,6 @@ function AdminComponent() {
                                               }
                                             }}
                                           >
-                                            <div className="flex items-center gap-1 text-gray-400 dark:text-gray-500">
-                                              <div className="w-1 h-1 bg-current rounded-full"></div>
-                                              <div className="w-1 h-1 bg-current rounded-full"></div>
-                                              <div className="w-1 h-1 bg-current rounded-full"></div>
-                                              <div className="w-1 h-1 bg-current rounded-full"></div>
-                                              <div className="w-1 h-1 bg-current rounded-full"></div>
-                                              <div className="w-1 h-1 bg-current rounded-full"></div>
-                                            </div>
                                             <Input
                                               value={domain}
                                               className="w-40 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-sm"
