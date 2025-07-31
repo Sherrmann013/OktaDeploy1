@@ -1845,45 +1845,41 @@ function AdminComponent() {
                       <div className="bg-white dark:bg-gray-800 rounded-lg border dark:border-gray-700 p-6">
                         <div className="flex gap-6">
                           {/* User Creation Form Preview - Left Half */}
-                          <div className="flex-1 max-w-md border border-gray-200 dark:border-gray-600 rounded-lg p-6 bg-gray-50 dark:bg-gray-700">
+                          <div className="flex-1 max-w-lg border border-gray-200 dark:border-gray-600 rounded-lg p-6 bg-gray-50 dark:bg-gray-700">
                             <h5 className="text-md font-medium mb-4">Create New User</h5>
                             
                             <div className="space-y-4">
                               {/* First Name & Last Name Row */}
                               <div className="grid grid-cols-2 gap-4">
-                                <div 
-                                  className={`space-y-2 p-2 rounded cursor-pointer transition-colors ${
-                                    selectedField === 'firstName' 
-                                      ? 'bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700' 
-                                      : 'hover:bg-gray-50 dark:hover:bg-gray-700/50'
-                                  }`}
-                                  onClick={() => setSelectedField(selectedField === 'firstName' ? null : 'firstName')}
-                                >
+                                <div className="space-y-2">
                                   <Label htmlFor="preview-firstName" className="text-sm font-medium">
                                     First Name {fieldSettings.firstName.required && <span className="text-red-500">*</span>}
                                   </Label>
                                   <Input
                                     id="preview-firstName"
                                     placeholder="Enter first name"
-                                    className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600"
+                                    className={`cursor-pointer transition-colors ${
+                                      selectedField === 'firstName' 
+                                        ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-300 dark:border-blue-600' 
+                                        : 'bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 hover:border-blue-200 dark:hover:border-blue-700'
+                                    }`}
+                                    onClick={() => setSelectedField(selectedField === 'firstName' ? null : 'firstName')}
                                     disabled
                                   />
                                 </div>
-                                <div 
-                                  className={`space-y-2 p-2 rounded cursor-pointer transition-colors ${
-                                    selectedField === 'lastName' 
-                                      ? 'bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700' 
-                                      : 'hover:bg-gray-50 dark:hover:bg-gray-700/50'
-                                  }`}
-                                  onClick={() => setSelectedField(selectedField === 'lastName' ? null : 'lastName')}
-                                >
+                                <div className="space-y-2">
                                   <Label htmlFor="preview-lastName" className="text-sm font-medium">
                                     Last Name {fieldSettings.lastName.required && <span className="text-red-500">*</span>}
                                   </Label>
                                   <Input
                                     id="preview-lastName"
                                     placeholder="Enter last name"
-                                    className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600"
+                                    className={`cursor-pointer transition-colors ${
+                                      selectedField === 'lastName' 
+                                        ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-300 dark:border-blue-600' 
+                                        : 'bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 hover:border-blue-200 dark:hover:border-blue-700'
+                                    }`}
+                                    onClick={() => setSelectedField(selectedField === 'lastName' ? null : 'lastName')}
                                     disabled
                                   />
                                 </div>
@@ -1891,25 +1887,33 @@ function AdminComponent() {
 
                               {/* Email Username & Password Row */}
                               <div className="grid grid-cols-2 gap-4">
-                                <div 
-                                  className={`space-y-2 p-2 rounded cursor-pointer transition-colors ${
-                                    selectedField === 'emailUsername' 
-                                      ? 'bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700' 
-                                      : 'hover:bg-gray-50 dark:hover:bg-gray-700/50'
-                                  }`}
-                                  onClick={() => setSelectedField(selectedField === 'emailUsername' ? null : 'emailUsername')}
-                                >
+                                <div className="space-y-2">
                                   <Label htmlFor="preview-username" className="text-sm font-medium">
                                     Email Username {fieldSettings.emailUsername.required && <span className="text-red-500">*</span>}
                                   </Label>
-                                  <div className="flex">
+                                  <div 
+                                    className={`flex cursor-pointer transition-colors rounded ${
+                                      selectedField === 'emailUsername' 
+                                        ? 'ring-2 ring-blue-300 dark:ring-blue-600' 
+                                        : 'hover:ring-1 hover:ring-blue-200 dark:hover:ring-blue-700'
+                                    }`}
+                                    onClick={() => setSelectedField(selectedField === 'emailUsername' ? null : 'emailUsername')}
+                                  >
                                     <Input
                                       id="preview-username"
                                       placeholder="username"
-                                      className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-r-none"
+                                      className={`rounded-r-none border-r-0 ${
+                                        selectedField === 'emailUsername' 
+                                          ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-300 dark:border-blue-600' 
+                                          : 'bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600'
+                                      }`}
                                       disabled
                                     />
-                                    <div className="px-3 py-2 bg-gray-100 dark:bg-gray-600 border border-l-0 border-gray-300 dark:border-gray-600 rounded-r text-sm text-gray-600 dark:text-gray-300">
+                                    <div className={`px-3 py-2 border border-l-0 rounded-r text-sm ${
+                                      selectedField === 'emailUsername' 
+                                        ? 'bg-blue-100 dark:bg-blue-800/30 border-blue-300 dark:border-blue-600 text-blue-700 dark:text-blue-300' 
+                                        : 'bg-gray-100 dark:bg-gray-600 border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300'
+                                    }`}>
                                       {fieldSettings.emailUsername.domains[0]}
                                     </div>
                                   </div>
