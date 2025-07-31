@@ -313,10 +313,7 @@ function AdminComponent() {
   const [isCreateUserModalOpen, setIsCreateUserModalOpen] = useState(false);
   const [selectedField, setSelectedField] = useState<string | null>(null);
   
-  // Debug selectedField changes
-  useEffect(() => {
-    console.log('🔍 selectedField changed to:', selectedField);
-  }, [selectedField]);
+
   const [fieldSettings, setFieldSettings] = useState({
     firstName: { required: true },
     lastName: { required: true },
@@ -332,7 +329,17 @@ function AdminComponent() {
       targetLength: 10
     },
     title: { required: false },
-    manager: { required: false }
+    manager: { required: false },
+    department: { 
+      required: false, 
+      useList: false, 
+      options: ['Engineering', 'Sales', 'Marketing', 'HR', 'Finance'] 
+    },
+    employeeType: { 
+      required: false, 
+      useList: true, 
+      options: ['EMPLOYEE', 'CONTRACTOR', 'INTERN', 'PART_TIME'] 
+    }
   });
 
   // Function to save password settings to database
@@ -2179,7 +2186,9 @@ function AdminComponent() {
                               {/* Job Title & Department Row */}
                               <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-2">
-                                  <Label htmlFor="preview-title" className="text-sm font-medium">Job Title</Label>
+                                  <Label htmlFor="preview-title" className="text-sm font-medium">
+                                    Job Title {fieldSettings.title.required && <span className="text-red-500">*</span>}
+                                  </Label>
                                   <div
                                     className={`relative cursor-pointer transition-all duration-200 rounded-md ${
                                       selectedField === 'title' 
@@ -2193,7 +2202,7 @@ function AdminComponent() {
                                     <Input
                                       id="preview-title"
                                       placeholder="Enter job title"
-                                      className={`cursor-pointer ${
+                                      className={`cursor-pointer pointer-events-none ${
                                         selectedField === 'title' 
                                           ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-300 dark:border-blue-600' 
                                           : 'bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600'
@@ -2203,19 +2212,50 @@ function AdminComponent() {
                                   </div>
                                 </div>
                                 <div className="space-y-2">
-                                  <Label htmlFor="preview-department" className="text-sm font-medium">Department</Label>
-                                  <Select disabled>
-                                    <SelectTrigger className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600">
-                                      <SelectValue placeholder="Human Resources" />
-                                    </SelectTrigger>
-                                  </Select>
+                                  <Label htmlFor="preview-department" className="text-sm font-medium">
+                                    Department {fieldSettings.department.required && <span className="text-red-500">*</span>}
+                                  </Label>
+                                  <div
+                                    className={`cursor-pointer transition-all duration-200 rounded-md ${
+                                      selectedField === 'department' 
+                                        ? 'ring-2 ring-blue-300 dark:ring-blue-600' 
+                                        : 'hover:ring-1 hover:ring-blue-200 dark:hover:ring-blue-700'
+                                    }`}
+                                    onClick={() => {
+                                      setSelectedField(selectedField === 'department' ? null : 'department');
+                                    }}
+                                  >
+                                    {fieldSettings.department.useList ? (
+                                      <Select disabled>
+                                        <SelectTrigger className={`pointer-events-none ${
+                                          selectedField === 'department' 
+                                            ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-300 dark:border-blue-600' 
+                                            : 'bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600'
+                                        }`}>
+                                          <SelectValue placeholder="Select department" />
+                                        </SelectTrigger>
+                                      </Select>
+                                    ) : (
+                                      <Input
+                                        placeholder="Enter department"
+                                        className={`cursor-pointer pointer-events-none ${
+                                          selectedField === 'department' 
+                                            ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-300 dark:border-blue-600' 
+                                            : 'bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600'
+                                        }`}
+                                        readOnly
+                                      />
+                                    )}
+                                  </div>
                                 </div>
                               </div>
 
                               {/* Manager & Employee Type Row */}
                               <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-2">
-                                  <Label htmlFor="preview-manager" className="text-sm font-medium">Manager</Label>
+                                  <Label htmlFor="preview-manager" className="text-sm font-medium">
+                                    Manager {fieldSettings.manager.required && <span className="text-red-500">*</span>}
+                                  </Label>
                                   <div
                                     className={`relative cursor-pointer transition-all duration-200 rounded-md ${
                                       selectedField === 'manager' 
@@ -2229,7 +2269,7 @@ function AdminComponent() {
                                     <Input
                                       id="preview-manager"
                                       placeholder="Type to search for manager..."
-                                      className={`cursor-pointer ${
+                                      className={`cursor-pointer pointer-events-none ${
                                         selectedField === 'manager' 
                                           ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-300 dark:border-blue-600' 
                                           : 'bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600'
@@ -2239,12 +2279,29 @@ function AdminComponent() {
                                   </div>
                                 </div>
                                 <div className="space-y-2">
-                                  <Label htmlFor="preview-employeeType" className="text-sm font-medium">Employee Type</Label>
-                                  <Select disabled>
-                                    <SelectTrigger className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600">
-                                      <SelectValue placeholder="Employee" />
-                                    </SelectTrigger>
-                                  </Select>
+                                  <Label htmlFor="preview-employeeType" className="text-sm font-medium">
+                                    Employee Type {fieldSettings.employeeType.required && <span className="text-red-500">*</span>}
+                                  </Label>
+                                  <div
+                                    className={`cursor-pointer transition-all duration-200 rounded-md ${
+                                      selectedField === 'employeeType' 
+                                        ? 'ring-2 ring-blue-300 dark:ring-blue-600' 
+                                        : 'hover:ring-1 hover:ring-blue-200 dark:hover:ring-blue-700'
+                                    }`}
+                                    onClick={() => {
+                                      setSelectedField(selectedField === 'employeeType' ? null : 'employeeType');
+                                    }}
+                                  >
+                                    <Select disabled>
+                                      <SelectTrigger className={`pointer-events-none ${
+                                        selectedField === 'employeeType' 
+                                          ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-300 dark:border-blue-600' 
+                                          : 'bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600'
+                                      }`}>
+                                        <SelectValue placeholder="Select employee type" />
+                                      </SelectTrigger>
+                                    </Select>
+                                  </div>
                                 </div>
                               </div>
 
@@ -2329,6 +2386,8 @@ function AdminComponent() {
                                   {selectedField === 'password' && 'Password Options'}
                                   {selectedField === 'title' && 'Job Title Options'}
                                   {selectedField === 'manager' && 'Manager Options'}
+                                  {selectedField === 'department' && 'Department Options'}
+                                  {selectedField === 'employeeType' && 'Employee Type Options'}
                                 </h5>
                                 
                                 <div className="space-y-4">
@@ -2568,7 +2627,7 @@ function AdminComponent() {
                                               ...fieldSettings,
                                               password: {
                                                 ...fieldSettings.password,
-                                                showGenerateButton: checked
+                                                showGenerateButton: checked === true
                                               }
                                             };
                                             setFieldSettings(newSettings);
@@ -2850,6 +2909,161 @@ function AdminComponent() {
                                         </div>
                                         </div>
                                       )}
+                                    </div>
+                                  )}
+
+                                  {/* Department options */}
+                                  {selectedField === 'department' && (
+                                    <div className="space-y-4">
+                                      <div className="flex items-center space-x-2">
+                                        <Checkbox 
+                                          id="department-use-list"
+                                          checked={fieldSettings.department.useList}
+                                          onCheckedChange={(checked) => {
+                                            setFieldSettings({
+                                              ...fieldSettings,
+                                              department: {
+                                                ...fieldSettings.department,
+                                                useList: checked === true
+                                              }
+                                            });
+                                          }}
+                                        />
+                                        <Label htmlFor="department-use-list" className="text-sm font-medium">
+                                          Use predefined list instead of free text input
+                                        </Label>
+                                      </div>
+
+                                      {fieldSettings.department.useList && (
+                                        <div className="space-y-3">
+                                          <Label className="text-sm font-medium">Department Options</Label>
+                                          <div className="space-y-2">
+                                            {fieldSettings.department.options.map((option, index) => (
+                                              <div key={index} className="flex items-center space-x-2">
+                                                <Button
+                                                  type="button"
+                                                  variant="outline"
+                                                  size="sm"
+                                                  onClick={() => {
+                                                    setFieldSettings({
+                                                      ...fieldSettings,
+                                                      department: {
+                                                        ...fieldSettings.department,
+                                                        options: [...fieldSettings.department.options, ""]
+                                                      }
+                                                    });
+                                                  }}
+                                                  className="flex-shrink-0"
+                                                >
+                                                  <Plus className="w-4 h-4" />
+                                                </Button>
+                                                <Input
+                                                  value={option}
+                                                  onChange={(e) => {
+                                                    setFieldSettings({
+                                                      ...fieldSettings,
+                                                      department: {
+                                                        ...fieldSettings.department,
+                                                        options: fieldSettings.department.options.map((opt, i) => 
+                                                          i === index ? e.target.value : opt
+                                                        )
+                                                      }
+                                                    });
+                                                  }}
+                                                  placeholder="Department name"
+                                                  className="flex-1"
+                                                />
+                                                {fieldSettings.department.options.length > 1 && (
+                                                  <Button
+                                                    type="button"
+                                                    variant="outline"
+                                                    size="sm"
+                                                    onClick={() => {
+                                                      setFieldSettings({
+                                                        ...fieldSettings,
+                                                        department: {
+                                                          ...fieldSettings.department,
+                                                          options: fieldSettings.department.options.filter((_, i) => i !== index)
+                                                        }
+                                                      });
+                                                    }}
+                                                    className="flex-shrink-0 text-red-600 hover:text-red-700"
+                                                  >
+                                                    <X className="w-4 h-4" />
+                                                  </Button>
+                                                )}
+                                              </div>
+                                            ))}
+                                          </div>
+                                        </div>
+                                      )}
+                                    </div>
+                                  )}
+
+                                  {/* Employee Type options */}
+                                  {selectedField === 'employeeType' && (
+                                    <div className="space-y-4">
+                                      <div className="space-y-3">
+                                        <Label className="text-sm font-medium">Employee Type Options</Label>
+                                        <div className="space-y-2">
+                                          {fieldSettings.employeeType.options.map((option, index) => (
+                                            <div key={index} className="flex items-center space-x-2">
+                                              <Button
+                                                type="button"
+                                                variant="outline"
+                                                size="sm"
+                                                onClick={() => {
+                                                  setFieldSettings({
+                                                    ...fieldSettings,
+                                                    employeeType: {
+                                                      ...fieldSettings.employeeType,
+                                                      options: [...fieldSettings.employeeType.options, ""]
+                                                    }
+                                                  });
+                                                }}
+                                                className="flex-shrink-0"
+                                              >
+                                                <Plus className="w-4 h-4" />
+                                              </Button>
+                                              <Input
+                                                value={option}
+                                                onChange={(e) => {
+                                                  setFieldSettings({
+                                                    ...fieldSettings,
+                                                    employeeType: {
+                                                      ...fieldSettings.employeeType,
+                                                      options: fieldSettings.employeeType.options.map((opt, i) => 
+                                                        i === index ? e.target.value : opt
+                                                      )
+                                                    }
+                                                  });
+                                                }}
+                                                placeholder="Employee type"
+                                                className="flex-1"
+                                              />
+                                              {fieldSettings.employeeType.options.length > 1 && (
+                                                <Button
+                                                  type="button"
+                                                  variant="outline"
+                                                  size="sm"
+                                                  onClick={() => {
+                                                    setFieldSettings({
+                                                      ...fieldSettings,
+                                                      employeeType: {
+                                                        ...fieldSettings.employeeType,
+                                                        options: fieldSettings.employeeType.options.filter((_, i) => i !== index)
+                                                      }
+                                                    });
+                                                  }}
+                                                  className="flex-shrink-0 text-red-600 hover:text-red-700"
+                                                >
+                                                  <X className="w-4 h-4" />
+                                                </Button>
+                                              )}
+                                            </div>
+                                          ))}
+                                        </div>
+                                      </div>
                                     </div>
                                   )}
                                 </div>
