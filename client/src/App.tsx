@@ -16,7 +16,7 @@ import Groups from "@/pages/groups";
 import Applications from "@/pages/applications";
 import Security from "@/pages/security";
 import Settings from "@/pages/settings";
-import Admin from "@/pages/admin_old";
+import Admin from "@/pages/admin";
 import NotFound from "@/pages/not-found";
 
 function Router() {
