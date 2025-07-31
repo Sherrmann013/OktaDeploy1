@@ -102,7 +102,7 @@ function AdminComponent() {
   // Fetch field settings from database - using layout-settings API
   const { data: departmentFieldSettings, refetch: refetchDepartmentSettings } = useQuery({
     queryKey: ["/api/layout-settings/department"],
-    enabled: activeTab === "layout" && layoutTab === "new-user",
+    enabled: true, // Always enabled for debugging
     refetchInterval: 30000,
     refetchOnMount: true,
     refetchOnWindowFocus: false,
@@ -125,7 +125,7 @@ function AdminComponent() {
 
   const { data: employeeTypeFieldSettings, refetch: refetchEmployeeTypeSettings } = useQuery({
     queryKey: ["/api/layout-settings/employeeType"],
-    enabled: activeTab === "layout" && layoutTab === "new-user",
+    enabled: true, // Always enabled for debugging
     refetchInterval: 30000,
     refetchOnMount: true,
     refetchOnWindowFocus: false,
@@ -150,7 +150,14 @@ function AdminComponent() {
   useEffect(() => {
     console.log('🔍 Tab state changed:', { activeTab, layoutTab });
     console.log('🔍 Field settings queries enabled:', activeTab === "layout" && layoutTab === "new-user");
-  }, [activeTab, layoutTab]);
+    
+    // Force refetch when on the correct tab
+    if (activeTab === "layout" && layoutTab === "new-user") {
+      console.log('🔍 On New User tab - refetching field settings');
+      refetchDepartmentSettings();
+      refetchEmployeeTypeSettings();
+    }
+  }, [activeTab, layoutTab, refetchDepartmentSettings, refetchEmployeeTypeSettings]);
 
   const queryClient = useQueryClient();
 
