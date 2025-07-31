@@ -2388,7 +2388,7 @@ function AdminComponent() {
                                         <Label className="text-sm font-medium">Password Generation Settings</Label>
                                         
                                         <div className="flex items-center gap-3">
-                                          <Label className="text-xs">Password Length</Label>
+                                          <Label className="text-xs">Target Length</Label>
                                           <Input
                                             type="number"
                                             min="6"
