@@ -155,7 +155,9 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
             targetLength: 10
           },
           title: { required: false },
-          manager: { required: false }
+          manager: { required: false },
+          department: { required: false, useList: false, options: [] },
+          employeeType: { required: false, useList: true, options: ['EMPLOYEE', 'CONTRACTOR', 'INTERN', 'PART_TIME'] }
         };
       }
     },
