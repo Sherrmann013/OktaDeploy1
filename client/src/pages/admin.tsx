@@ -84,9 +84,7 @@ function AdminComponent() {
   const [isAddDashboardCardOpen, setIsAddDashboardCardOpen] = useState(false);
   const [draggedItem, setDraggedItem] = useState<number | null>(null);
   const [dragOverItem, setDragOverItem] = useState<number | null>(null);
-  const [openAppsSection, setOpenAppsSection] = useState<{type: 'department' | 'employeeType', index: number} | null>(null);
-  const [departmentApps, setDepartmentApps] = useState<Record<number, string[]>>({});
-  const [employeeTypeApps, setEmployeeTypeApps] = useState<Record<number, string[]>>({});
+  // Removed department and employee type state - starting fresh
 
   // Field settings state - moved up to avoid "used before declaration" errors
   const [fieldSettings, setFieldSettings] = useState({
@@ -117,16 +115,7 @@ function AdminComponent() {
     }
   });
 
-  // Fetch department and employee type app mappings
-  const { data: departmentAppMappingsData = [] } = useQuery<any[]>({
-    queryKey: ["/api/department-app-mappings"],
-    refetchInterval: 30000
-  });
-
-  const { data: employeeTypeAppMappingsData = [] } = useQuery<any[]>({
-    queryKey: ["/api/employee-type-app-mappings"], 
-    refetchInterval: 30000
-  });
+  // Removed department and employee type mappings - starting fresh
 
 
 
@@ -138,113 +127,11 @@ function AdminComponent() {
 
   const queryClient = useQueryClient();
 
-  // Mutations for department app mappings
-  const addDepartmentAppMutation = useMutation({
-    mutationFn: async ({ departmentName, appName }: { departmentName: string; appName: string }) => {
-      return await apiRequest('POST', '/api/department-app-mappings', { departmentName, appName });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/department-app-mappings'] });
-    }
-  });
+  // Removed department and employee type mutations - starting fresh
 
-  const removeDepartmentAppMutation = useMutation({
-    mutationFn: async ({ departmentName, appName }: { departmentName: string; appName: string }) => {
-      return await apiRequest('DELETE', '/api/department-app-mappings', { departmentName, appName });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/department-app-mappings'] });
-    }
-  });
+  // Removed department and employee type mutations - starting fresh
 
-  // Mutations for employee type app mappings
-  const addEmployeeTypeAppMutation = useMutation({
-    mutationFn: async ({ employeeType, appName }: { employeeType: string; appName: string }) => {
-      return await apiRequest('POST', '/api/employee-type-app-mappings', { employeeType, appName });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/employee-type-app-mappings'] });
-    }
-  });
-
-  const removeEmployeeTypeAppMutation = useMutation({
-    mutationFn: async ({ employeeType, appName }: { employeeType: string; appName: string }) => {
-      return await apiRequest('DELETE', '/api/employee-type-app-mappings', { employeeType, appName });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/employee-type-app-mappings'] });
-    }
-  });
-
-  // Mutations for field settings
-  const updateDepartmentOptionsMutation = useMutation({
-    mutationFn: async ({ options, required }: { options: string[]; required: boolean }) => {
-      console.log('🔄 Saving department options to database:', { options, required });
-      const settingData = {
-        settingKey: 'department',
-        settingValue: JSON.stringify({ options, required, useList: fieldSettings.department.useList }),
-        settingType: 'user_config' as const,
-        metadata: {}
-      };
-      return await apiRequest('POST', '/api/layout-settings', settingData);
-    },
-    onSuccess: async () => {
-      console.log('✅ Department options saved successfully');
-      await queryClient.invalidateQueries({ queryKey: ['/api/layout-settings/department'] });
-    },
-    onError: (error) => {
-      console.error('❌ Failed to save department options:', error);
-    }
-  });
-
-  const updateEmployeeTypeOptionsMutation = useMutation({
-    mutationFn: async ({ options, required }: { options: string[]; required: boolean }) => {
-      console.log('🔄 Saving employee type options to database:', { options, required });
-      const settingData = {
-        settingKey: 'employeeType',
-        settingValue: JSON.stringify({ options, required, useList: fieldSettings.employeeType.useList }),
-        settingType: 'user_config' as const,
-        metadata: {}
-      };
-      return await apiRequest('POST', '/api/layout-settings', settingData);
-    },
-    onSuccess: async () => {
-      console.log('✅ Employee type options saved successfully');
-      await queryClient.invalidateQueries({ queryKey: ['/api/layout-settings/employeeType'] });
-    },
-    onError: (error) => {
-      console.error('❌ Failed to save employee type options:', error);
-    }
-  });
-
-  // Initialize apps state from database
-  useEffect(() => {
-    if (departmentAppMappingsData.length > 0 && fieldSettings?.department?.options) {
-      const mappings: Record<number, string[]> = {};
-      departmentAppMappingsData.forEach((mapping: any) => {
-        const deptIndex = fieldSettings.department.options.indexOf(mapping.departmentName);
-        if (deptIndex !== -1) {
-          if (!mappings[deptIndex]) mappings[deptIndex] = [];
-          mappings[deptIndex].push(mapping.appName);
-        }
-      });
-      setDepartmentApps(mappings);
-    }
-  }, [departmentAppMappingsData, fieldSettings?.department?.options]);
-
-  useEffect(() => {
-    if (employeeTypeAppMappingsData.length > 0 && fieldSettings?.employeeType?.options) {
-      const mappings: Record<number, string[]> = {};
-      employeeTypeAppMappingsData.forEach((mapping: any) => {
-        const typeIndex = fieldSettings.employeeType.options.indexOf(mapping.employeeType);
-        if (typeIndex !== -1) {
-          if (!mappings[typeIndex]) mappings[typeIndex] = [];
-          mappings[typeIndex].push(mapping.appName);
-        }
-      });
-      setEmployeeTypeApps(mappings);
-    }
-  }, [employeeTypeAppMappingsData, fieldSettings?.employeeType?.options]);
+  // Removed department and employee type app mappings initialization - starting fresh
 
 
 
@@ -559,20 +446,7 @@ function AdminComponent() {
     refetchOnWindowFocus: false,
   });
 
-  // Department and Employee Type queries - moved here to be with the other working queries
-  const { data: departmentSettings } = useQuery({
-    queryKey: ["/api/layout-settings/department"],
-    enabled: activeTab === "layout" && layoutTab === "new-user",
-    refetchOnMount: true,
-    refetchOnWindowFocus: false,
-  });
-
-  const { data: employeeTypeSettings } = useQuery({
-    queryKey: ["/api/layout-settings/employeeType"], 
-    enabled: activeTab === "layout" && layoutTab === "new-user",
-    refetchOnMount: true,
-    refetchOnWindowFocus: false,
-  });
+  // Removed department and employee type queries - starting fresh
 
   // Refetch email settings when switching to New User tab
   useEffect(() => {
@@ -613,65 +487,7 @@ function AdminComponent() {
     }
   }, [emailUsernameSettings]);
 
-  // Update field settings when department settings are loaded - EXACT COPY of emailUsername pattern
-  useEffect(() => {
-    console.log('🔍 Department settings effect triggered:', departmentSettings);
-    if (departmentSettings && (departmentSettings as any).settingValue) {
-      try {
-        const parsedSettings = JSON.parse((departmentSettings as any).settingValue);
-        console.log('🔍 Parsed department settings:', parsedSettings);
-        if (parsedSettings.options && Array.isArray(parsedSettings.options)) {
-          console.log('🔍 Loading saved department options:', parsedSettings.options);
-          setFieldSettings(prev => {
-            console.log('🔍 Previous field settings:', prev);
-            const newSettings = {
-              ...prev,
-              department: {
-                ...prev.department,
-                ...parsedSettings
-              }
-            };
-            console.log('🔍 New field settings with department:', newSettings);
-            return newSettings;
-          });
-        }
-      } catch (error) {
-        console.error('🔍 Failed to parse department settings:', error);
-      }
-    } else {
-      console.log('🔍 No department settings found, using defaults');
-    }
-  }, [departmentSettings]);
-
-  // Update field settings when employee type settings are loaded - EXACT COPY of emailUsername pattern
-  useEffect(() => {
-    console.log('🔍 Employee type settings effect triggered:', employeeTypeSettings);
-    if (employeeTypeSettings && (employeeTypeSettings as any).settingValue) {
-      try {
-        const parsedSettings = JSON.parse((employeeTypeSettings as any).settingValue);
-        console.log('🔍 Parsed employee type settings:', parsedSettings);
-        if (parsedSettings.options && Array.isArray(parsedSettings.options)) {
-          console.log('🔍 Loading saved employee type options:', parsedSettings.options);
-          setFieldSettings(prev => {
-            console.log('🔍 Previous field settings:', prev);
-            const newSettings = {
-              ...prev,
-              employeeType: {
-                ...prev.employeeType,
-                ...parsedSettings
-              }
-            };
-            console.log('🔍 New field settings with employee type:', newSettings);
-            return newSettings;
-          });
-        }
-      } catch (error) {
-        console.error('🔍 Failed to parse employee type settings:', error);
-      }
-    } else {
-      console.log('🔍 No employee type settings found, using defaults');
-    }
-  }, [employeeTypeSettings]);
+  // Removed department and employee type useEffect hooks - starting fresh
 
   // Update field settings when password settings are loaded
   useEffect(() => {
@@ -2431,47 +2247,11 @@ function AdminComponent() {
                                     />
                                   </div>
                                 </div>
-                                <div className="space-y-2">
-                                  <Label htmlFor="preview-department" className="text-sm font-medium">
-                                    Department {fieldSettings.department.required && <span className="text-red-500">*</span>}
-                                  </Label>
-                                  <div
-                                    className={`cursor-pointer transition-all duration-200 rounded-md ${
-                                      selectedField === 'department' 
-                                        ? 'ring-2 ring-blue-300 dark:ring-blue-600' 
-                                        : 'hover:ring-1 hover:ring-blue-200 dark:hover:ring-blue-700'
-                                    }`}
-                                    onClick={() => {
-                                      setSelectedField(selectedField === 'department' ? null : 'department');
-                                    }}
-                                  >
-                                    {fieldSettings.department.useList ? (
-                                      <Select disabled>
-                                        <SelectTrigger className={`pointer-events-none ${
-                                          selectedField === 'department' 
-                                            ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-300 dark:border-blue-600' 
-                                            : 'bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600'
-                                        }`}>
-                                          <SelectValue placeholder="Select department" />
-                                        </SelectTrigger>
-                                      </Select>
-                                    ) : (
-                                      <Input
-                                        placeholder="Enter department"
-                                        className={`cursor-pointer pointer-events-none ${
-                                          selectedField === 'department' 
-                                            ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-300 dark:border-blue-600' 
-                                            : 'bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600'
-                                        }`}
-                                        readOnly
-                                      />
-                                    )}
-                                  </div>
-                                </div>
+                                {/* Removed Department preview field - starting fresh */}
                               </div>
 
-                              {/* Manager & Employee Type Row */}
-                              <div className="grid grid-cols-2 gap-4">
+                              {/* Manager Row (Employee Type removed) */}
+                              <div className="grid grid-cols-1 gap-4">
                                 <div className="space-y-2">
                                   <Label htmlFor="preview-manager" className="text-sm font-medium">
                                     Manager {fieldSettings.manager.required && <span className="text-red-500">*</span>}
@@ -2498,31 +2278,7 @@ function AdminComponent() {
                                     />
                                   </div>
                                 </div>
-                                <div className="space-y-2">
-                                  <Label htmlFor="preview-employeeType" className="text-sm font-medium">
-                                    Employee Type {fieldSettings.employeeType.required && <span className="text-red-500">*</span>}
-                                  </Label>
-                                  <div
-                                    className={`cursor-pointer transition-all duration-200 rounded-md ${
-                                      selectedField === 'employeeType' 
-                                        ? 'ring-2 ring-blue-300 dark:ring-blue-600' 
-                                        : 'hover:ring-1 hover:ring-blue-200 dark:hover:ring-blue-700'
-                                    }`}
-                                    onClick={() => {
-                                      setSelectedField(selectedField === 'employeeType' ? null : 'employeeType');
-                                    }}
-                                  >
-                                    <Select disabled>
-                                      <SelectTrigger className={`pointer-events-none ${
-                                        selectedField === 'employeeType' 
-                                          ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-300 dark:border-blue-600' 
-                                          : 'bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600'
-                                      }`}>
-                                        <SelectValue placeholder="Select employee type" />
-                                      </SelectTrigger>
-                                    </Select>
-                                  </div>
-                                </div>
+                                {/* Removed Employee Type field - starting fresh */}
                               </div>
 
                               {/* Groups & Apps Sections */}
@@ -2606,8 +2362,7 @@ function AdminComponent() {
                                   {selectedField === 'password' && 'Password Options'}
                                   {selectedField === 'title' && 'Job Title Options'}
                                   {selectedField === 'manager' && 'Manager Options'}
-                                  {selectedField === 'department' && 'Department Options'}
-                                  {selectedField === 'employeeType' && 'Employee Type Options'}
+                                  {/* Removed Department and Employee Type from title selection */}
                                 </h5>
                                 
                                 <div className="space-y-4">
@@ -3082,8 +2837,8 @@ function AdminComponent() {
                                     </div>
                                   )}
 
-                                  {/* Department options */}
-                                  {selectedField === 'department' && (
+                                  {/* Removed Department options - starting fresh */}
+                                  {false && selectedField === 'department' && (
                                     <div className="space-y-4">
                                       <div className="flex items-center space-x-2">
                                         <Checkbox 
@@ -3270,8 +3025,8 @@ function AdminComponent() {
                                     </div>
                                   )}
 
-                                  {/* Employee Type options */}
-                                  {selectedField === 'employeeType' && (
+                                  {/* Removed Employee Type options - starting fresh */}
+                                  {false && selectedField === 'employeeType' && (
                                     <div className="space-y-4">
                                       <div className="space-y-3">
                                         <Label className="text-sm font-medium">Employee Type Options</Label>
