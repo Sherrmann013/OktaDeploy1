@@ -78,6 +78,48 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
     enabled: open,
   });
 
+  // Fetch password generation settings from admin layout
+  const { data: passwordConfig } = useQuery({
+    queryKey: ["/api/layout-settings", "password"],
+    queryFn: async () => {
+      try {
+        const response = await fetch('/api/layout-settings/password', {
+          credentials: 'include'
+        });
+        
+        if (!response.ok) {
+          // Return default configuration if not found
+          return {
+            required: true,
+            showGenerateButton: true,
+            components: [
+              { type: 'words', count: 1 },
+              { type: 'numbers', count: 2 },
+              { type: 'symbols', count: 1 }
+            ],
+            targetLength: 10
+          };
+        }
+        
+        const data = await response.json();
+        return JSON.parse(data.settingValue || '{"required":true,"showGenerateButton":true,"components":[{"type":"words","count":1},{"type":"numbers","count":2},{"type":"symbols","count":1}],"targetLength":10}');
+      } catch (error) {
+        // Return default configuration on error
+        return {
+          required: true,
+          showGenerateButton: true,
+          components: [
+            { type: 'words', count: 1 },
+            { type: 'numbers', count: 2 },
+            { type: 'symbols', count: 1 }
+          ],
+          targetLength: 10
+        };
+      }
+    },
+    enabled: open,
+  });
+
   const availableManagers = usersData?.users || [];
   const emailDomains = emailDomainConfig?.domains || ['@mazetx.com'];
   const hasMultipleDomains = emailDomains.length > 1;
@@ -229,31 +271,56 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
     );
   };
 
-  // Generate a human-readable password with exactly 10 characters
+  // Generate password using admin-configured settings
   const generatePassword = () => {
+    if (!passwordConfig) return;
+    
     const words = [
       'blue', 'red', 'green', 'cat', 'dog', 'sun', 'moon', 'star', 'tree', 'bird',
-      'fish', 'car', 'book', 'key', 'box', 'cup', 'pen', 'hat', 'bag', 'run'
+      'fish', 'car', 'book', 'key', 'box', 'cup', 'pen', 'hat', 'bag', 'run',
+      'sky', 'oak', 'fox', 'gem', 'bay', 'ice', 'joy', 'owl', 'ray', 'bee'
     ];
     
-    const symbols = ['!', '@', '#', '$', '%', '^', '&', '*'];
+    const symbols = ['!', '@', '#', '$', '%', '^', '&', '*', '+', '=', '?'];
+    const numbers = '0123456789';
     
-    const randomWord1 = words[Math.floor(Math.random() * words.length)];
-    const randomWord2 = words[Math.floor(Math.random() * words.length)];
-    const randomSymbol = symbols[Math.floor(Math.random() * symbols.length)];
-    const randomNumber = Math.floor(Math.random() * 100);
+    let passwordParts: string[] = [];
     
-    let password = randomWord1.charAt(0).toUpperCase() + randomWord1.slice(1) +
-                   randomWord2.charAt(0).toUpperCase() + randomWord2.slice(1) +
-                   randomSymbol + randomNumber;
+    // Process each component according to admin configuration
+    passwordConfig.components.forEach(component => {
+      for (let i = 0; i < component.count; i++) {
+        switch (component.type) {
+          case 'words':
+            const word = words[Math.floor(Math.random() * words.length)];
+            passwordParts.push(word.charAt(0).toUpperCase() + word.slice(1));
+            break;
+          case 'numbers':
+            const numLength = Math.floor(Math.random() * 2) + 1; // 1-2 digits per number component
+            let numberPart = '';
+            for (let j = 0; j < numLength; j++) {
+              numberPart += numbers[Math.floor(Math.random() * numbers.length)];
+            }
+            passwordParts.push(numberPart);
+            break;
+          case 'symbols':
+            passwordParts.push(symbols[Math.floor(Math.random() * symbols.length)]);
+            break;
+        }
+      }
+    });
     
-    // Ensure exactly 10 characters
-    if (password.length > 10) {
-      password = password.substring(0, 10);
-    } else if (password.length < 10) {
-      const extraChars = '0123456789';
-      while (password.length < 10) {
-        password += extraChars[Math.floor(Math.random() * extraChars.length)];
+    // Join components and adjust to target length
+    let password = passwordParts.join('');
+    
+    // Adjust to target length if specified
+    if (passwordConfig.targetLength && passwordConfig.targetLength > 0) {
+      if (password.length > passwordConfig.targetLength) {
+        password = password.substring(0, passwordConfig.targetLength);
+      } else if (password.length < passwordConfig.targetLength) {
+        // Pad with numbers to reach target length
+        while (password.length < passwordConfig.targetLength) {
+          password += numbers[Math.floor(Math.random() * numbers.length)];
+        }
       }
     }
     
