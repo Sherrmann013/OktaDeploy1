@@ -15,6 +15,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Plus, Pencil, Trash2, Check, ChevronsUpDown, Edit, X, Settings, RefreshCw } from "lucide-react";
 import { LogoUploadModal } from "@/components/LogoUploadModal";
 import CreateUserModal from "@/components/create-user-modal";
+import { useToast } from "@/hooks/use-toast";
 
 interface SiteUser {
   id: number;
@@ -68,6 +69,7 @@ interface AppMapping {
 import ProtectedRoute from "@/components/ProtectedRoute";
 
 function AdminComponent() {
+  const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("site-access");
   const [isNewUserOpen, setIsNewUserOpen] = useState(false);
   const [isEditUserOpen, setIsEditUserOpen] = useState(false);
@@ -314,6 +316,32 @@ function AdminComponent() {
     lastName: { required: true },
     emailUsername: { required: true, domains: ['@mazetx.com'] }
   });
+
+  // Query to fetch email username settings
+  const { data: emailUsernameSettings } = useQuery({
+    queryKey: ["/api/layout-settings/emailUsername"],
+    enabled: activeTab === "layout" && layoutTab === "new-user"
+  });
+
+  // Update field settings when email username settings are loaded
+  useEffect(() => {
+    if (emailUsernameSettings?.settingValue) {
+      try {
+        const parsedSettings = JSON.parse(emailUsernameSettings.settingValue);
+        if (parsedSettings.domains && Array.isArray(parsedSettings.domains)) {
+          setFieldSettings(prev => ({
+            ...prev,
+            emailUsername: {
+              ...prev.emailUsername,
+              domains: parsedSettings.domains
+            }
+          }));
+        }
+      } catch (error) {
+        console.error('Failed to parse email username settings:', error);
+      }
+    }
+  }, [emailUsernameSettings]);
 
   const queryClient = useQueryClient();
 
@@ -2189,6 +2217,46 @@ function AdminComponent() {
                                             </Button>
                                           </div>
                                         )}
+                                      </div>
+                                      
+                                      {/* Save Button for Email Domains */}
+                                      <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-600">
+                                        <Button 
+                                          onClick={() => {
+                                            // Save email domain configuration
+                                            const settingData = {
+                                              settingKey: 'emailUsername',
+                                              settingValue: JSON.stringify({ domains: fieldSettings.emailUsername.domains }),
+                                              settingType: 'user_config' as const,
+                                              metadata: {}
+                                            };
+                                            
+                                            fetch('/api/layout-settings', {
+                                              method: 'POST',
+                                              headers: { 'Content-Type': 'application/json' },
+                                              credentials: 'include',
+                                              body: JSON.stringify(settingData)
+                                            }).then(response => {
+                                              if (response.ok) {
+                                                toast({ 
+                                                  title: "Success", 
+                                                  description: "Email domain settings saved successfully" 
+                                                });
+                                              } else {
+                                                throw new Error('Failed to save');
+                                              }
+                                            }).catch(() => {
+                                              toast({ 
+                                                title: "Error", 
+                                                description: "Failed to save email domain settings",
+                                                variant: "destructive"
+                                              });
+                                            });
+                                          }}
+                                          className="bg-green-600 hover:bg-green-700 text-white"
+                                        >
+                                          Save Domain Configuration
+                                        </Button>
                                       </div>
                                     </div>
                                   )}
