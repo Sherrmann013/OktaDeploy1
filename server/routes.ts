@@ -3102,6 +3102,93 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Field settings endpoints (for department and employee type options)
+  app.get("/api/field-settings/:fieldType", isAuthenticated, async (req, res) => {
+    try {
+      const { fieldType } = req.params;
+      const setting = await db.select()
+        .from(layoutSettings)
+        .where(eq(layoutSettings.settingKey, `${fieldType}_options`))
+        .limit(1);
+      
+      if (setting.length === 0) {
+        // Return default values
+        const defaultOptions = fieldType === 'department' 
+          ? []
+          : ['EMPLOYEE', 'CONTRACTOR', 'INTERN', 'PART_TIME'];
+        
+        return res.json({ 
+          options: defaultOptions,
+          required: false
+        });
+      }
+      
+      const parsedValue = JSON.parse(setting[0].settingValue);
+      res.json(parsedValue);
+    } catch (error) {
+      console.error("Error fetching field setting:", error);
+      res.status(500).json({ error: "Failed to fetch field setting" });
+    }
+  });
+
+  app.post("/api/field-settings/:fieldType", isAuthenticated, requireAdmin, async (req, res) => {
+    try {
+      const { fieldType } = req.params;
+      const { options, required } = req.body;
+      const user = (req.session as any).user;
+      
+      const settingKey = `${fieldType}_options`;
+      const settingValue = JSON.stringify({ options, required });
+      
+      // Check if setting already exists
+      const existing = await db.select()
+        .from(layoutSettings)
+        .where(eq(layoutSettings.settingKey, settingKey))
+        .limit(1);
+      
+      let result;
+      if (existing.length > 0) {
+        // Update existing setting
+        [result] = await db.update(layoutSettings)
+          .set({ 
+            settingValue,
+            settingType: 'field',
+            updatedBy: user.id,
+            updatedAt: new Date()
+          })
+          .where(eq(layoutSettings.settingKey, settingKey))
+          .returning();
+      } else {
+        // Create new setting
+        [result] = await db.insert(layoutSettings)
+          .values({ 
+            settingKey,
+            settingValue,
+            settingType: 'field',
+            updatedBy: user.id
+          })
+          .returning();
+      }
+      
+      // Log the change
+      await AuditLogger.log({
+        req,
+        action: existing.length > 0 ? 'UPDATE' : 'CREATE',
+        resourceType: 'FIELD_SETTING',
+        resourceId: result.id.toString(),
+        resourceName: result.settingKey,
+        details: { fieldType, optionsCount: options.length },
+        oldValues: existing.length > 0 ? existing[0] : {},
+        newValues: result
+      });
+      
+      res.json({ options, required });
+    } catch (error) {
+      console.error("Error saving field setting:", error);
+      res.status(500).json({ error: "Failed to save field setting" });
+    }
+  });
+
   // Dashboard cards endpoints
   app.get("/api/dashboard-cards", async (req, res) => {
     try {

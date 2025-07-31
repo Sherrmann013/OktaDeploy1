@@ -88,9 +88,90 @@ function AdminComponent() {
   const [departmentApps, setDepartmentApps] = useState<Record<number, string[]>>({});
   const [employeeTypeApps, setEmployeeTypeApps] = useState<Record<number, string[]>>({});
 
+  // Fetch department and employee type app mappings
+  const { data: departmentAppMappingsData = [] } = useQuery<any[]>({
+    queryKey: ["/api/department-app-mappings"],
+    refetchInterval: 30000
+  });
+
+  const { data: employeeTypeAppMappingsData = [] } = useQuery<any[]>({
+    queryKey: ["/api/employee-type-app-mappings"], 
+    refetchInterval: 30000
+  });
+
+  // Fetch field settings from database
+  const { data: departmentFieldSettings } = useQuery<{ options: string[]; required: boolean }>({
+    queryKey: ["/api/field-settings", "department"],
+    refetchInterval: 30000
+  });
+
+  const { data: employeeTypeFieldSettings } = useQuery<{ options: string[]; required: boolean }>({
+    queryKey: ["/api/field-settings", "employeeType"],
+    refetchInterval: 30000
+  });
+
+  const queryClient = useQueryClient();
+
+  // Mutations for department app mappings
+  const addDepartmentAppMutation = useMutation({
+    mutationFn: async ({ departmentName, appName }: { departmentName: string; appName: string }) => {
+      return await apiRequest('POST', '/api/department-app-mappings', { departmentName, appName });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/department-app-mappings'] });
+    }
+  });
+
+  const removeDepartmentAppMutation = useMutation({
+    mutationFn: async ({ departmentName, appName }: { departmentName: string; appName: string }) => {
+      return await apiRequest('DELETE', '/api/department-app-mappings', { departmentName, appName });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/department-app-mappings'] });
+    }
+  });
+
+  // Mutations for employee type app mappings
+  const addEmployeeTypeAppMutation = useMutation({
+    mutationFn: async ({ employeeType, appName }: { employeeType: string; appName: string }) => {
+      return await apiRequest('POST', '/api/employee-type-app-mappings', { employeeType, appName });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/employee-type-app-mappings'] });
+    }
+  });
+
+  const removeEmployeeTypeAppMutation = useMutation({
+    mutationFn: async ({ employeeType, appName }: { employeeType: string; appName: string }) => {
+      return await apiRequest('DELETE', '/api/employee-type-app-mappings', { employeeType, appName });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/employee-type-app-mappings'] });
+    }
+  });
+
+  // Mutations for field settings
+  const updateDepartmentOptionsMutation = useMutation({
+    mutationFn: async ({ options, required }: { options: string[]; required: boolean }) => {
+      return await apiRequest('POST', '/api/field-settings/department', { options, required });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/field-settings', 'department'] });
+    }
+  });
+
+  const updateEmployeeTypeOptionsMutation = useMutation({
+    mutationFn: async ({ options, required }: { options: string[]; required: boolean }) => {
+      return await apiRequest('POST', '/api/field-settings/employeeType', { options, required });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/field-settings', 'employeeType'] });
+    }
+  });
+
   // Initialize apps state from database
   useEffect(() => {
-    if (departmentAppMappingsData.length > 0) {
+    if (departmentAppMappingsData.length > 0 && fieldSettings?.department?.options) {
       const mappings: Record<number, string[]> = {};
       departmentAppMappingsData.forEach((mapping: any) => {
         const deptIndex = fieldSettings.department.options.indexOf(mapping.departmentName);
@@ -101,10 +182,10 @@ function AdminComponent() {
       });
       setDepartmentApps(mappings);
     }
-  }, [departmentAppMappingsData, fieldSettings.department.options]);
+  }, [departmentAppMappingsData, fieldSettings?.department?.options]);
 
   useEffect(() => {
-    if (employeeTypeAppMappingsData.length > 0) {
+    if (employeeTypeAppMappingsData.length > 0 && fieldSettings?.employeeType?.options) {
       const mappings: Record<number, string[]> = {};
       employeeTypeAppMappingsData.forEach((mapping: any) => {
         const typeIndex = fieldSettings.employeeType.options.indexOf(mapping.employeeType);
@@ -115,61 +196,30 @@ function AdminComponent() {
       });
       setEmployeeTypeApps(mappings);
     }
-  }, [employeeTypeAppMappingsData, fieldSettings.employeeType.options]);
+  }, [employeeTypeAppMappingsData, fieldSettings?.employeeType?.options]);
 
-  // Mutations for department app mappings
-  const addDepartmentAppMutation = useMutation({
-    mutationFn: async ({ departmentName, appName }: { departmentName: string; appName: string }) => {
-      return await apiRequest('/api/department-app-mappings', {
-        method: 'POST',
-        body: JSON.stringify({ departmentName, appName }),
-        headers: { 'Content-Type': 'application/json' }
-      });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/department-app-mappings'] });
+  // Initialize field settings from database
+  useEffect(() => {
+    if (departmentFieldSettings && employeeTypeFieldSettings) {
+      setFieldSettings(prev => ({
+        ...prev,
+        department: {
+          ...prev.department,
+          options: departmentFieldSettings.options,
+          required: departmentFieldSettings.required
+        },
+        employeeType: {
+          ...prev.employeeType,
+          options: employeeTypeFieldSettings.options,
+          required: employeeTypeFieldSettings.required
+        }
+      }));
     }
-  });
+  }, [departmentFieldSettings, employeeTypeFieldSettings]);
 
-  const removeDepartmentAppMutation = useMutation({
-    mutationFn: async ({ departmentName, appName }: { departmentName: string; appName: string }) => {
-      return await apiRequest('/api/department-app-mappings', {
-        method: 'DELETE',
-        body: JSON.stringify({ departmentName, appName }),
-        headers: { 'Content-Type': 'application/json' }
-      });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/department-app-mappings'] });
-    }
-  });
 
-  // Mutations for employee type app mappings
-  const addEmployeeTypeAppMutation = useMutation({
-    mutationFn: async ({ employeeType, appName }: { employeeType: string; appName: string }) => {
-      return await apiRequest('/api/employee-type-app-mappings', {
-        method: 'POST',
-        body: JSON.stringify({ employeeType, appName }),
-        headers: { 'Content-Type': 'application/json' }
-      });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/employee-type-app-mappings'] });
-    }
-  });
 
-  const removeEmployeeTypeAppMutation = useMutation({
-    mutationFn: async ({ employeeType, appName }: { employeeType: string; appName: string }) => {
-      return await apiRequest('/api/employee-type-app-mappings', {
-        method: 'DELETE',
-        body: JSON.stringify({ employeeType, appName }),
-        headers: { 'Content-Type': 'application/json' }
-      });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/employee-type-app-mappings'] });
-    }
-  });
+
 
   // Fetch dashboard cards from the database
   const { data: dashboardCardsData, refetch: refetchDashboardCards, error: dashboardCardsError, isLoading: dashboardCardsLoading } = useQuery({
@@ -626,8 +676,6 @@ function AdminComponent() {
       return newSettings;
     });
   }, [firstNameSettings, lastNameSettings, titleSettings, managerSettings]);
-
-  const queryClient = useQueryClient();
 
   // Update logo text when setting loads
   useEffect(() => {
@@ -2996,14 +3044,22 @@ function AdminComponent() {
                                                   <Input
                                                     value={option}
                                                     onChange={(e) => {
-                                                      setFieldSettings({
+                                                      const newOptions = fieldSettings.department.options.map((opt, i) => 
+                                                        i === index ? e.target.value : opt
+                                                      );
+                                                      const updatedSettings = {
                                                         ...fieldSettings,
                                                         department: {
                                                           ...fieldSettings.department,
-                                                          options: fieldSettings.department.options.map((opt, i) => 
-                                                            i === index ? e.target.value : opt
-                                                          )
+                                                          options: newOptions
                                                         }
+                                                      };
+                                                      setFieldSettings(updatedSettings);
+                                                      
+                                                      // Save to database
+                                                      updateDepartmentOptionsMutation.mutate({
+                                                        options: newOptions,
+                                                        required: updatedSettings.department.required
                                                       });
                                                     }}
                                                     placeholder="Department name"
@@ -3027,12 +3083,20 @@ function AdminComponent() {
                                                     variant="ghost"
                                                     size="sm"
                                                     onClick={() => {
-                                                      setFieldSettings({
+                                                      const newOptions = fieldSettings.department.options.filter((_, i) => i !== index);
+                                                      const updatedSettings = {
                                                         ...fieldSettings,
                                                         department: {
                                                           ...fieldSettings.department,
-                                                          options: fieldSettings.department.options.filter((_, i) => i !== index)
+                                                          options: newOptions
                                                         }
+                                                      };
+                                                      setFieldSettings(updatedSettings);
+                                                      
+                                                      // Save to database
+                                                      updateDepartmentOptionsMutation.mutate({
+                                                        options: newOptions,
+                                                        required: updatedSettings.department.required
                                                       });
                                                     }}
                                                     className="h-4 w-4 p-0 text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 ml-1"
@@ -3046,12 +3110,20 @@ function AdminComponent() {
                                                   variant="ghost"
                                                   size="sm"
                                                   onClick={() => {
-                                                    setFieldSettings({
+                                                    const newOptions = [...fieldSettings.department.options, ""];
+                                                    const updatedSettings = {
                                                       ...fieldSettings,
                                                       department: {
                                                         ...fieldSettings.department,
-                                                        options: [...fieldSettings.department.options, ""]
+                                                        options: newOptions
                                                       }
+                                                    };
+                                                    setFieldSettings(updatedSettings);
+                                                    
+                                                    // Save to database
+                                                    updateDepartmentOptionsMutation.mutate({
+                                                      options: newOptions,
+                                                      required: updatedSettings.department.required
                                                     });
                                                   }}
                                                   className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
@@ -3153,14 +3225,22 @@ function AdminComponent() {
                                                 <Input
                                                   value={option}
                                                   onChange={(e) => {
-                                                    setFieldSettings({
+                                                    const newOptions = fieldSettings.employeeType.options.map((opt, i) => 
+                                                      i === index ? e.target.value : opt
+                                                    );
+                                                    const updatedSettings = {
                                                       ...fieldSettings,
                                                       employeeType: {
                                                         ...fieldSettings.employeeType,
-                                                        options: fieldSettings.employeeType.options.map((opt, i) => 
-                                                          i === index ? e.target.value : opt
-                                                        )
+                                                        options: newOptions
                                                       }
+                                                    };
+                                                    setFieldSettings(updatedSettings);
+                                                    
+                                                    // Save to database
+                                                    updateEmployeeTypeOptionsMutation.mutate({
+                                                      options: newOptions,
+                                                      required: updatedSettings.employeeType.required
                                                     });
                                                   }}
                                                   placeholder="Employee type"
@@ -3184,12 +3264,20 @@ function AdminComponent() {
                                                   variant="ghost"
                                                   size="sm"
                                                   onClick={() => {
-                                                    setFieldSettings({
+                                                    const newOptions = fieldSettings.employeeType.options.filter((_, i) => i !== index);
+                                                    const updatedSettings = {
                                                       ...fieldSettings,
                                                       employeeType: {
                                                         ...fieldSettings.employeeType,
-                                                        options: fieldSettings.employeeType.options.filter((_, i) => i !== index)
+                                                        options: newOptions
                                                       }
+                                                    };
+                                                    setFieldSettings(updatedSettings);
+                                                    
+                                                    // Save to database
+                                                    updateEmployeeTypeOptionsMutation.mutate({
+                                                      options: newOptions,
+                                                      required: updatedSettings.employeeType.required
                                                     });
                                                   }}
                                                   className="h-4 w-4 p-0 text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 ml-1"
@@ -3203,12 +3291,20 @@ function AdminComponent() {
                                                 variant="ghost"
                                                 size="sm"
                                                 onClick={() => {
-                                                  setFieldSettings({
+                                                  const newOptions = [...fieldSettings.employeeType.options, ""];
+                                                  const updatedSettings = {
                                                     ...fieldSettings,
                                                     employeeType: {
                                                       ...fieldSettings.employeeType,
-                                                      options: [...fieldSettings.employeeType.options, ""]
+                                                      options: newOptions
                                                     }
+                                                  };
+                                                  setFieldSettings(updatedSettings);
+                                                  
+                                                  // Save to database
+                                                  updateEmployeeTypeOptionsMutation.mutate({
+                                                    options: newOptions,
+                                                    required: updatedSettings.employeeType.required
                                                   });
                                                 }}
                                                 className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
