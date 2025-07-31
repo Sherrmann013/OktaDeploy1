@@ -376,6 +376,35 @@ function AdminComponent() {
     refetchOnWindowFocus: false,
   });
 
+  // Queries to fetch individual field required settings
+  const { data: firstNameSettings } = useQuery({
+    queryKey: ["/api/layout-settings/firstName"],
+    enabled: activeTab === "layout" && layoutTab === "new-user",
+    refetchOnMount: true,
+    refetchOnWindowFocus: false,
+  });
+
+  const { data: lastNameSettings } = useQuery({
+    queryKey: ["/api/layout-settings/lastName"],
+    enabled: activeTab === "layout" && layoutTab === "new-user",
+    refetchOnMount: true,
+    refetchOnWindowFocus: false,
+  });
+
+  const { data: titleSettings } = useQuery({
+    queryKey: ["/api/layout-settings/title"],
+    enabled: activeTab === "layout" && layoutTab === "new-user",
+    refetchOnMount: true,
+    refetchOnWindowFocus: false,
+  });
+
+  const { data: managerSettings } = useQuery({
+    queryKey: ["/api/layout-settings/manager"],
+    enabled: activeTab === "layout" && layoutTab === "new-user",
+    refetchOnMount: true,
+    refetchOnWindowFocus: false,
+  });
+
   // Refetch email settings when switching to New User tab
   useEffect(() => {
     if (activeTab === "layout" && layoutTab === "new-user") {
@@ -444,6 +473,60 @@ function AdminComponent() {
       console.log('🔍 No password settings found, using defaults');
     }
   }, [passwordSettings]);
+
+  // Update field settings when individual field settings are loaded
+  useEffect(() => {
+    console.log('🔍 Field settings loaded - updating state');
+    setFieldSettings(prev => {
+      const newSettings = { ...prev };
+      
+      // Update firstName required setting
+      if (firstNameSettings && (firstNameSettings as any).settingValue) {
+        try {
+          const parsed = JSON.parse((firstNameSettings as any).settingValue);
+          newSettings.firstName = { ...newSettings.firstName, ...parsed };
+          console.log('🔍 Updated firstName setting:', parsed);
+        } catch (error) {
+          console.error('Failed to parse firstName settings:', error);
+        }
+      }
+      
+      // Update lastName required setting
+      if (lastNameSettings && (lastNameSettings as any).settingValue) {
+        try {
+          const parsed = JSON.parse((lastNameSettings as any).settingValue);
+          newSettings.lastName = { ...newSettings.lastName, ...parsed };
+          console.log('🔍 Updated lastName setting:', parsed);
+        } catch (error) {
+          console.error('Failed to parse lastName settings:', error);
+        }
+      }
+      
+      // Update title required setting
+      if (titleSettings && (titleSettings as any).settingValue) {
+        try {
+          const parsed = JSON.parse((titleSettings as any).settingValue);
+          newSettings.title = { ...newSettings.title, ...parsed };
+          console.log('🔍 Updated title setting:', parsed);
+        } catch (error) {
+          console.error('Failed to parse title settings:', error);
+        }
+      }
+      
+      // Update manager required setting
+      if (managerSettings && (managerSettings as any).settingValue) {
+        try {
+          const parsed = JSON.parse((managerSettings as any).settingValue);
+          newSettings.manager = { ...newSettings.manager, ...parsed };
+          console.log('🔍 Updated manager setting:', parsed);
+        } catch (error) {
+          console.error('Failed to parse manager settings:', error);
+        }
+      }
+      
+      return newSettings;
+    });
+  }, [firstNameSettings, lastNameSettings, titleSettings, managerSettings]);
 
   const queryClient = useQueryClient();
 
