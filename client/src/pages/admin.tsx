@@ -128,110 +128,45 @@ function AdminComponent() {
     refetchInterval: 30000
   });
 
-  // Fetch field settings from database - using layout-settings API
-  console.log('🔍 ADMIN COMPONENT LOADED - Setting up department query...');
-  console.log('🔍 Query conditions:', { activeTab, layoutTab, shouldFetch: activeTab === "layout" && layoutTab === "new-user" });
-  const { data: departmentFieldSettings, refetch: refetchDepartmentSettings, isLoading: departmentLoading, error: departmentError } = useQuery({
-    queryKey: ["/api/layout-settings/department", Date.now()],
-    enabled: activeTab === "layout" && layoutTab === "new-user", // Only fetch when on the right tab
-    staleTime: 0,
-    gcTime: 0,
-    refetchOnMount: true,
-    refetchOnWindowFocus: true,
-    select: (data: any) => {
-      console.log('🔍 Department select function called with:', data);
-      if (!data?.settingValue) return null;
-      try {
-        const parsed = JSON.parse(data.settingValue);
-        console.log('🔍 Department parsed data:', parsed);
-        return parsed;
-      } catch (error) {
-        console.error('Failed to parse department settings:', error);
-        return null;
-      }
-    }
+  // Simple, direct database queries for department and employee type
+  const { data: departmentData } = useQuery({
+    queryKey: ["/api/layout-settings/department"],
+    enabled: activeTab === "layout" && layoutTab === "new-user"
   });
-  
-  console.log('🔍 Department query state:', { departmentFieldSettings, departmentLoading, departmentError });
 
-  // React Query v5 uses useEffect instead of onSuccess/onError
-  useEffect(() => {
-    if (departmentFieldSettings) {
-      console.log('🔍 Department field settings loaded:', departmentFieldSettings);
-      // Update the fieldSettings state with the loaded department settings
-      setFieldSettings(prevSettings => ({
-        ...prevSettings,
-        department: {
-          ...prevSettings.department,
-          ...departmentFieldSettings
-        }
-      }));
-    }
-  }, [departmentFieldSettings]);
-
-  useEffect(() => {
-    if (departmentError) {
-      console.error('❌ Failed to load department field settings:', departmentError);
-    }
-  }, [departmentError]);
-
-  console.log('🔍 Setting up employee type query...');
-  const { data: employeeTypeFieldSettings, refetch: refetchEmployeeTypeSettings, isLoading: employeeTypeLoading, error: employeeTypeError } = useQuery({
-    queryKey: ["/api/layout-settings/employeeType", Date.now()],
-    enabled: activeTab === "layout" && layoutTab === "new-user", // Only fetch when on the right tab
-    staleTime: 0,
-    gcTime: 0,
-    refetchOnMount: true,
-    refetchOnWindowFocus: true,
-    select: (data: any) => {
-      console.log('🔍 Employee type select function called with:', data);
-      if (!data?.settingValue) return null;
-      try {
-        const parsed = JSON.parse(data.settingValue);
-        console.log('🔍 Employee type parsed data:', parsed);
-        return parsed;
-      } catch (error) {
-        console.error('Failed to parse employee type settings:', error);
-        return null;
-      }
-    }
+  const { data: employeeTypeData } = useQuery({
+    queryKey: ["/api/layout-settings/employeeType"], 
+    enabled: activeTab === "layout" && layoutTab === "new-user"
   });
-  
-  console.log('🔍 Employee type query state:', { employeeTypeFieldSettings, employeeTypeLoading, employeeTypeError });
 
-  // React Query v5 uses useEffect instead of onSuccess/onError
+  // Update field settings when database data loads
   useEffect(() => {
-    if (employeeTypeFieldSettings) {
-      console.log('🔍 Employee type field settings loaded:', employeeTypeFieldSettings);
-      // Update the fieldSettings state with the loaded employee type settings
-      setFieldSettings(prevSettings => ({
-        ...prevSettings,
-        employeeType: {
-          ...prevSettings.employeeType,
-          ...employeeTypeFieldSettings
-        }
+    if (departmentData?.settingValue) {
+      const parsed = JSON.parse(departmentData.settingValue);
+      setFieldSettings(prev => ({
+        ...prev,
+        department: parsed
       }));
+      console.log('✅ Department loaded from database:', parsed);
     }
-  }, [employeeTypeFieldSettings]);
+  }, [departmentData]);
 
   useEffect(() => {
-    if (employeeTypeError) {
-      console.error('❌ Failed to load employee type field settings:', employeeTypeError);
+    if (employeeTypeData?.settingValue) {
+      const parsed = JSON.parse(employeeTypeData.settingValue);
+      setFieldSettings(prev => ({
+        ...prev,
+        employeeType: parsed
+      }));
+      console.log('✅ Employee type loaded from database:', parsed);
     }
-  }, [employeeTypeError]);
+  }, [employeeTypeData]);
 
   // Debug logging for tab states and query enablement
   useEffect(() => {
     console.log('🔍 Tab state changed:', { activeTab, layoutTab });
     console.log('🔍 Field settings queries enabled:', activeTab === "layout" && layoutTab === "new-user");
-    
-    // Force refetch when on the correct tab
-    if (activeTab === "layout" && layoutTab === "new-user") {
-      console.log('🔍 On New User tab - refetching field settings');
-      refetchDepartmentSettings();
-      refetchEmployeeTypeSettings();
-    }
-  }, [activeTab, layoutTab, refetchDepartmentSettings, refetchEmployeeTypeSettings]);
+  }, [activeTab, layoutTab]);
 
   const queryClient = useQueryClient();
 
@@ -288,7 +223,6 @@ function AdminComponent() {
     onSuccess: async () => {
       console.log('✅ Department options saved successfully');
       await queryClient.invalidateQueries({ queryKey: ['/api/layout-settings/department'] });
-      await refetchDepartmentSettings();
     },
     onError: (error) => {
       console.error('❌ Failed to save department options:', error);
@@ -309,7 +243,6 @@ function AdminComponent() {
     onSuccess: async () => {
       console.log('✅ Employee type options saved successfully');
       await queryClient.invalidateQueries({ queryKey: ['/api/layout-settings/employeeType'] });
-      await refetchEmployeeTypeSettings();   
     },
     onError: (error) => {
       console.error('❌ Failed to save employee type options:', error);
@@ -345,24 +278,7 @@ function AdminComponent() {
     }
   }, [employeeTypeAppMappingsData, fieldSettings?.employeeType?.options]);
 
-  // Initialize field settings from database
-  useEffect(() => {
-    if (departmentFieldSettings && employeeTypeFieldSettings) {
-      setFieldSettings(prev => ({
-        ...prev,
-        department: {
-          ...prev.department,
-          options: departmentFieldSettings.options,
-          required: departmentFieldSettings.required
-        },
-        employeeType: {
-          ...prev.employeeType,
-          options: employeeTypeFieldSettings.options,
-          required: employeeTypeFieldSettings.required
-        }
-      }));
-    }
-  }, [departmentFieldSettings, employeeTypeFieldSettings]);
+
 
 
 
