@@ -93,11 +93,10 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
           fetch('/api/layout-settings/password', { credentials: 'include' }),
           fetch('/api/layout-settings/title', { credentials: 'include' }),
           fetch('/api/layout-settings/manager', { credentials: 'include' }),
-          fetch('/api/layout-settings/department', { credentials: 'include' }),
-          fetch('/api/layout-settings/employeeType', { credentials: 'include' })
+          fetch('/api/layout-settings/department', { credentials: 'include' })
         ];
         
-        console.log('🔍 CreateUserModal - About to call department and employeeType endpoints');
+        console.log('🔍 CreateUserModal - About to call department endpoint');
         
         const responses = await Promise.all(settingsQueries);
         const settings = {
@@ -116,12 +115,11 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
           },
           title: { required: false },
           manager: { required: false },
-          department: { required: true, useList: false, options: [] },
-          employeeType: { required: true, useList: true, options: ["EMPLOYEE", "CONTRACTOR", "INTERN", "PART_TIME", "CONSULTANT", "FREELANCER"] }
+          department: { required: true, useList: false, options: [] }
         };
         
         // Parse individual setting responses
-        const fieldNames = ['firstName', 'lastName', 'emailUsername', 'password', 'title', 'manager', 'department', 'employeeType'];
+        const fieldNames = ['firstName', 'lastName', 'emailUsername', 'password', 'title', 'manager', 'department'];
         for (let i = 0; i < responses.length; i++) {
           const response = responses[i];
           const fieldName = fieldNames[i];
@@ -159,8 +157,7 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
           },
           title: { required: false },
           manager: { required: false },
-          department: { required: true, useList: false, options: [] },
-          employeeType: { required: true, useList: true, options: ["EMPLOYEE", "CONTRACTOR", "INTERN", "PART_TIME", "CONSULTANT", "FREELANCER"] }
+          department: { required: true, useList: false, options: [] }
         };
       }
     },
@@ -178,7 +175,7 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
   React.useEffect(() => {
     console.log('🔍 CreateUserModal - Field settings loaded:', fieldSettings);
     console.log('🔍 CreateUserModal - Department config:', fieldSettings?.department);
-    console.log('🔍 CreateUserModal - Employee Type config:', fieldSettings?.employeeType);
+
     console.log('🔍 CreateUserModal - Email domain config loaded:', emailDomainConfig);
     console.log('🔍 CreateUserModal - Email domains:', emailDomains);
     console.log('🔍 CreateUserModal - Has multiple domains:', hasMultipleDomains);
@@ -269,7 +266,7 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
       password: "",
       department: "",
       title: "",
-      employeeType: "EMPLOYEE",
+
       managerId: undefined,
       status: "ACTIVE",
       groups: [],
@@ -698,39 +695,7 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
                 )}
               />
 
-              <FormField
-                control={form.control}
-                name="employeeType"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Employee Type</FormLabel>
-                    <FormControl>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Employee" />
-                        </SelectTrigger>
-                        <SelectContent className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600">
-                          {fieldSettings?.employeeType?.options?.length > 0 ? (
-                            fieldSettings.employeeType.options.map((type: string) => (
-                              <SelectItem key={type} value={type}>
-                                {type.replace('_', ' ').toLowerCase().replace(/\b\w/g, l => l.toUpperCase())}
-                              </SelectItem>
-                            ))
-                          ) : (
-                            <>
-                              <SelectItem value="EMPLOYEE">Employee</SelectItem>
-                              <SelectItem value="CONTRACTOR">Contractor</SelectItem>
-                              <SelectItem value="INTERN">Intern</SelectItem>
-                              <SelectItem value="PART_TIME">Part Time</SelectItem>
-                            </>
-                          )}
-                        </SelectContent>
-                      </Select>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+
             </div>
 
             {/* Groups and Apps */}

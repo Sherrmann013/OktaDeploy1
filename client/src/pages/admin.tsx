@@ -518,11 +518,7 @@ function AdminComponent() {
     refetchOnWindowFocus: false,
   });
 
-  const { data: employeeTypeSettings, refetch: refetchEmployeeTypeSettings } = useQuery({
-    queryKey: ["/api/layout-settings/employeeType"],
-    refetchOnMount: true,
-    refetchOnWindowFocus: false,
-  });
+
 
   // Refetch all settings when switching to New User tab
   useEffect(() => {
@@ -531,9 +527,9 @@ function AdminComponent() {
       console.log('🔍 Current field settings before refetch:', fieldSettings);
       refetchEmailSettings();
       refetchDepartmentSettings();
-      refetchEmployeeTypeSettings();
+
     }
-  }, [activeTab, layoutTab, refetchEmailSettings, refetchDepartmentSettings, refetchEmployeeTypeSettings]);
+  }, [activeTab, layoutTab, refetchEmailSettings, refetchDepartmentSettings]);
 
   // Update field settings when email username settings are loaded
   useEffect(() => {
@@ -658,20 +654,11 @@ function AdminComponent() {
         }
       }
       
-      // Update employee type required setting
-      if (employeeTypeSettings && (employeeTypeSettings as any).settingValue) {
-        try {
-          const parsed = JSON.parse((employeeTypeSettings as any).settingValue);
-          newSettings.employeeType = { ...newSettings.employeeType, ...parsed };
-          console.log('🔍 Updated employee type setting:', parsed);
-        } catch (error) {
-          console.error('Failed to parse employee type settings:', error);
-        }
-      }
+
       
       return newSettings;
     });
-  }, [firstNameSettings, lastNameSettings, titleSettings, managerSettings, departmentSettings, employeeTypeSettings]);
+  }, [firstNameSettings, lastNameSettings, titleSettings, managerSettings, departmentSettings]);
 
   // Update logo text when setting loads
   useEffect(() => {
