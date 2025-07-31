@@ -476,15 +476,17 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
                             field.onChange(e.target.value);
                           }}
                         />
-                        <Button
-                          type="button"
-                          size="sm"
-                          variant="ghost"
-                          className="absolute right-2 top-1/2 transform -translate-y-1/2 h-6 w-6 p-0 hover:bg-gray-100 dark:hover:bg-gray-700"
-                          onClick={generatePassword}
-                        >
-                          <RefreshCw className="h-4 w-4" />
-                        </Button>
+                        {passwordConfig?.showGenerateButton && (
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant="ghost"
+                            className="absolute right-2 top-1/2 transform -translate-y-1/2 h-6 w-6 p-0 hover:bg-gray-100 dark:hover:bg-gray-700"
+                            onClick={generatePassword}
+                          >
+                            <RefreshCw className="h-4 w-4" />
+                          </Button>
+                        )}
                       </div>
                     </FormControl>
 
