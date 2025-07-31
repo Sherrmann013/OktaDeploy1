@@ -3134,20 +3134,7 @@ function AdminComponent() {
                                                     placeholder="Department name"
                                                     className="flex-1 bg-transparent border-none text-gray-900 dark:text-gray-100 text-sm p-0 h-auto focus:ring-0 focus:border-none"
                                                   />
-                                                  <Button
-                                                    variant="ghost"
-                                                    size="sm"
-                                                    onClick={() => {
-                                                      setOpenAppsSection(
-                                                        openAppsSection?.type === 'department' && openAppsSection?.index === index 
-                                                          ? null 
-                                                          : { type: 'department', index }
-                                                      );
-                                                    }}
-                                                    className="h-4 w-4 p-0 text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 ml-2"
-                                                  >
-                                                    🔗
-                                                  </Button>
+
                                                   <Button
                                                     variant="ghost"
                                                     size="sm"
@@ -3315,20 +3302,7 @@ function AdminComponent() {
                                                   placeholder="Employee type"
                                                   className="flex-1 bg-transparent border-none text-gray-900 dark:text-gray-100 text-sm p-0 h-auto focus:ring-0 focus:border-none"
                                                 />
-                                                <Button
-                                                  variant="ghost"
-                                                  size="sm"
-                                                  onClick={() => {
-                                                    setOpenAppsSection(
-                                                      openAppsSection?.type === 'employeeType' && openAppsSection?.index === index 
-                                                        ? null 
-                                                        : { type: 'employeeType', index }
-                                                    );
-                                                  }}
-                                                  className="h-4 w-4 p-0 text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 ml-2"
-                                                >
-                                                  🔗
-                                                </Button>
+
                                                 <Button
                                                   variant="ghost"
                                                   size="sm"
