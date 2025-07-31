@@ -275,24 +275,48 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
   const generatePassword = () => {
     if (!passwordConfig) return;
     
-    const words = [
-      'blue', 'red', 'green', 'cat', 'dog', 'sun', 'moon', 'star', 'tree', 'bird',
-      'fish', 'car', 'book', 'key', 'box', 'cup', 'pen', 'hat', 'bag', 'run',
-      'sky', 'oak', 'fox', 'gem', 'bay', 'ice', 'joy', 'owl', 'ray', 'bee'
-    ];
+    // Different word lengths to help meet target length
+    const shortWords = ['cat', 'dog', 'sun', 'car', 'key', 'box', 'cup', 'pen', 'hat', 'bag', 'run', 'sky', 'fox', 'gem', 'bay', 'ice', 'joy', 'owl', 'ray', 'bee'];
+    const mediumWords = ['blue', 'red', 'green', 'moon', 'star', 'tree', 'bird', 'fish', 'book'];
+    const longWords = ['purple', 'orange', 'yellow', 'silver', 'bronze', 'copper', 'golden', 'bright', 'forest', 'ocean'];
     
     const symbols = ['!', '@', '#', '$', '%', '^', '&', '*', '+', '=', '?'];
     const numbers = '0123456789';
     
     let passwordParts: string[] = [];
     
+    // Calculate how much space we need for non-word components
+    let nonWordLength = 0;
+    passwordConfig.components.forEach(component => {
+      if (component.type === 'numbers') {
+        nonWordLength += component.count; // Each number is 1 digit
+      } else if (component.type === 'symbols') {
+        nonWordLength += component.count; // Each symbol is 1 character
+      }
+    });
+    
+    // Available space for words
+    const availableWordSpace = passwordConfig.targetLength - nonWordLength;
+    
     // Process each component according to admin configuration
     passwordConfig.components.forEach(component => {
       for (let i = 0; i < component.count; i++) {
         switch (component.type) {
           case 'words':
-            const word = words[Math.floor(Math.random() * words.length)];
-            passwordParts.push(word.charAt(0).toUpperCase() + word.slice(1));
+            // Select word based on available space
+            let selectedWord;
+            const remainingWordCount = passwordConfig.components.find(c => c.type === 'words')?.count || 1;
+            const targetWordLength = Math.floor(availableWordSpace / remainingWordCount);
+            
+            if (targetWordLength <= 3) {
+              selectedWord = shortWords[Math.floor(Math.random() * shortWords.length)];
+            } else if (targetWordLength <= 5) {
+              selectedWord = mediumWords[Math.floor(Math.random() * mediumWords.length)];
+            } else {
+              selectedWord = longWords[Math.floor(Math.random() * longWords.length)];
+            }
+            
+            passwordParts.push(selectedWord.charAt(0).toUpperCase() + selectedWord.slice(1));
             break;
           case 'numbers':
             // Generate a single digit (0-9) as one component
@@ -307,25 +331,17 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
     });
     
     // Keep components in the order they appear in the configuration
-    // This maintains a predictable format: Words + Numbers + Symbols (or whatever order is configured)
     let password = passwordParts.join('');
     
-    // Adjust to target length if specified
-    if (passwordConfig.targetLength && passwordConfig.targetLength > 0) {
-      if (password.length > passwordConfig.targetLength) {
-        // Truncate to target length
-        password = password.substring(0, passwordConfig.targetLength);
-      } else if (password.length < passwordConfig.targetLength) {
-        // Pad with numbers only to reach target length
-        while (password.length < passwordConfig.targetLength) {
-          password += numbers[Math.floor(Math.random() * numbers.length)];
-        }
-      }
+    // Trim to exact target length if needed (no padding)
+    if (passwordConfig.targetLength && password.length > passwordConfig.targetLength) {
+      password = password.substring(0, passwordConfig.targetLength);
     }
     
     console.log('🔑 Generated password with components:', {
       components: passwordConfig.components,
       targetLength: passwordConfig.targetLength,
+      availableWordSpace,
       generatedParts: passwordParts,
       finalPassword: password,
       finalLength: password.length
