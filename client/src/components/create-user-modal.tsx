@@ -89,7 +89,9 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
           fetch('/api/layout-settings/firstName', { credentials: 'include' }),
           fetch('/api/layout-settings/lastName', { credentials: 'include' }),
           fetch('/api/layout-settings/emailUsername', { credentials: 'include' }),
-          fetch('/api/layout-settings/password', { credentials: 'include' })
+          fetch('/api/layout-settings/password', { credentials: 'include' }),
+          fetch('/api/layout-settings/title', { credentials: 'include' }),
+          fetch('/api/layout-settings/manager', { credentials: 'include' })
         ];
         
         const responses = await Promise.all(settingsQueries);
@@ -106,13 +108,15 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
               { type: 'symbols', count: 1 }
             ],
             targetLength: 10
-          }
+          },
+          title: { required: false },
+          manager: { required: false }
         };
         
         // Parse individual setting responses
         for (let i = 0; i < responses.length; i++) {
           const response = responses[i];
-          const fieldName = ['firstName', 'lastName', 'emailUsername', 'password'][i];
+          const fieldName = ['firstName', 'lastName', 'emailUsername', 'password', 'title', 'manager'][i];
           
           if (response.ok) {
             const data = await response.json();
@@ -140,7 +144,9 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
               { type: 'symbols', count: 1 }
             ],
             targetLength: 10
-          }
+          },
+          title: { required: false },
+          manager: { required: false }
         };
       }
     },
@@ -226,6 +232,12 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
         : z.string().email("Invalid email format").optional().or(z.literal("")),
       password: fieldSettings.password?.required 
         ? z.string().min(1, "Password is required")
+        : z.string().optional(),
+      title: fieldSettings.title?.required 
+        ? z.string().min(1, "Job title is required")
+        : z.string().optional(),
+      manager: fieldSettings.manager?.required 
+        ? z.string().min(1, "Manager is required")
         : z.string().optional(),
     });
   }, [fieldSettings]);
@@ -552,7 +564,7 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
                 name="title"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Job Title</FormLabel>
+                    <FormLabel>Job Title {fieldSettings?.title?.required ? '*' : ''}</FormLabel>
                     <FormControl>
                       <Input placeholder="Enter job title" {...field} />
                     </FormControl>
@@ -616,7 +628,7 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
                 name="manager"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Manager</FormLabel>
+                    <FormLabel>Manager {fieldSettings?.manager?.required ? '*' : ''}</FormLabel>
                     <FormControl>
                       <div className="relative">
                         <Input 

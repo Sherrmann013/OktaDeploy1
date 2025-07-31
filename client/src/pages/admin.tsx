@@ -325,7 +325,9 @@ function AdminComponent() {
         { type: 'symbols', count: 1 }
       ],
       targetLength: 10
-    }
+    },
+    title: { required: false },
+    manager: { required: false }
   });
 
   // Function to save password settings to database
@@ -2088,12 +2090,27 @@ function AdminComponent() {
                               <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-2">
                                   <Label htmlFor="preview-title" className="text-sm font-medium">Job Title</Label>
-                                  <Input
-                                    id="preview-title"
-                                    placeholder="Enter job title"
-                                    className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600"
-                                    disabled
-                                  />
+                                  <div
+                                    className={`relative cursor-pointer transition-all duration-200 rounded-md ${
+                                      selectedField === 'title' 
+                                        ? 'ring-2 ring-blue-300 dark:ring-blue-600' 
+                                        : 'hover:ring-1 hover:ring-blue-200 dark:hover:ring-blue-700'
+                                    }`}
+                                    onClick={() => {
+                                      setSelectedField(selectedField === 'title' ? null : 'title');
+                                    }}
+                                  >
+                                    <Input
+                                      id="preview-title"
+                                      placeholder="Enter job title"
+                                      className={`cursor-pointer ${
+                                        selectedField === 'title' 
+                                          ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-300 dark:border-blue-600' 
+                                          : 'bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600'
+                                      }`}
+                                      readOnly
+                                    />
+                                  </div>
                                 </div>
                                 <div className="space-y-2">
                                   <Label htmlFor="preview-department" className="text-sm font-medium">Department</Label>
@@ -2109,12 +2126,27 @@ function AdminComponent() {
                               <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-2">
                                   <Label htmlFor="preview-manager" className="text-sm font-medium">Manager</Label>
-                                  <Input
-                                    id="preview-manager"
-                                    placeholder="Type to search for manager..."
-                                    className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600"
-                                    disabled
-                                  />
+                                  <div
+                                    className={`relative cursor-pointer transition-all duration-200 rounded-md ${
+                                      selectedField === 'manager' 
+                                        ? 'ring-2 ring-blue-300 dark:ring-blue-600' 
+                                        : 'hover:ring-1 hover:ring-blue-200 dark:hover:ring-blue-700'
+                                    }`}
+                                    onClick={() => {
+                                      setSelectedField(selectedField === 'manager' ? null : 'manager');
+                                    }}
+                                  >
+                                    <Input
+                                      id="preview-manager"
+                                      placeholder="Type to search for manager..."
+                                      className={`cursor-pointer ${
+                                        selectedField === 'manager' 
+                                          ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-300 dark:border-blue-600' 
+                                          : 'bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600'
+                                      }`}
+                                      readOnly
+                                    />
+                                  </div>
                                 </div>
                                 <div className="space-y-2">
                                   <Label htmlFor="preview-employeeType" className="text-sm font-medium">Employee Type</Label>
@@ -2205,6 +2237,8 @@ function AdminComponent() {
                                   {selectedField === 'lastName' && 'Last Name Options'}
                                   {selectedField === 'emailUsername' && 'Email Username Options'}
                                   {selectedField === 'password' && 'Password Options'}
+                                  {selectedField === 'title' && 'Job Title Options'}
+                                  {selectedField === 'manager' && 'Manager Options'}
                                 </h5>
                                 
                                 <div className="space-y-4">
