@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { CustomSelect } from "@/components/ui/custom-select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -28,6 +29,7 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
   const [showManagerDropdown, setShowManagerDropdown] = useState(false);
   const [password, setPassword] = useState("");
   const [sendActivationEmail, setSendActivationEmail] = useState(false);
+  const [selectedDomain, setSelectedDomain] = useState<string>("");
 
   // Fetch existing users for manager dropdown
   const { data: usersData } = useQuery({
@@ -46,7 +48,40 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
     enabled: open,
   });
 
+  // Fetch email domain configuration from New User Layout settings
+  const { data: emailDomainConfig } = useQuery({
+    queryKey: ["/api/layout-settings", "emailUsername"],
+    queryFn: async () => {
+      try {
+        const response = await fetch('/api/layout-settings/emailUsername', {
+          credentials: 'include'
+        });
+        
+        if (!response.ok) {
+          // Return default configuration if not found
+          return { domains: ['@mazetx.com'] };
+        }
+        
+        const data = await response.json();
+        return JSON.parse(data.settingValue || '{"domains":["@mazetx.com"]}');
+      } catch (error) {
+        // Return default configuration on error
+        return { domains: ['@mazetx.com'] };
+      }
+    },
+    enabled: open,
+  });
+
   const availableManagers = usersData?.users || [];
+  const emailDomains = emailDomainConfig?.domains || ['@mazetx.com'];
+  const hasMultipleDomains = emailDomains.length > 1;
+
+  // Set default domain when modal opens or domains change
+  useMemo(() => {
+    if (emailDomains.length > 0 && !selectedDomain) {
+      setSelectedDomain(emailDomains[0]);
+    }
+  }, [emailDomains, selectedDomain]);
 
   // Filter managers based on search input
   const filteredManagers = useMemo(() => {
@@ -265,18 +300,38 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
                       <div className="flex">
                         <Input 
                           placeholder="username" 
-                          value={field.value.split('@')[0] || ''}
+                          value={String(field.value || '').split('@')[0] || ''}
                           onChange={(e) => {
                             const username = e.target.value;
-                            const email = `${username}@mazetx.com`;
+                            const domain = selectedDomain || emailDomains[0] || '@mazetx.com';
+                            const email = `${username}${domain}`;
                             field.onChange(email);
                             form.setValue('login', username);
                           }}
                           className="rounded-r-none border-r-0"
                         />
-                        <div className="bg-gray-100 dark:bg-gray-800 border border-l-0 rounded-r-md px-3 py-2 text-sm text-gray-600 dark:text-gray-400 flex items-center">
-                          @mazetx.com
-                        </div>
+                        {hasMultipleDomains ? (
+                          <CustomSelect
+                            value={selectedDomain}
+                            onValueChange={(value: string) => {
+                              setSelectedDomain(value);
+                              const username = String(field.value || '').split('@')[0] || '';
+                              const email = `${username}${value}`;
+                              field.onChange(email);
+                            }}
+                            className="rounded-l-none border-l-0 min-w-[140px]"
+                          >
+                            {emailDomains.map((domain: string) => (
+                              <option key={domain} value={domain}>
+                                {domain}
+                              </option>
+                            ))}
+                          </CustomSelect>
+                        ) : (
+                          <div className="bg-gray-100 dark:bg-gray-800 border border-l-0 rounded-r-md px-3 py-2 text-sm text-gray-600 dark:text-gray-400 flex items-center">
+                            {emailDomains[0] || '@mazetx.com'}
+                          </div>
+                        )}
                       </div>
                     </FormControl>
                     <FormMessage />
