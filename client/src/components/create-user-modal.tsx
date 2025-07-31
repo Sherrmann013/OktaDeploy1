@@ -295,7 +295,8 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
             passwordParts.push(word.charAt(0).toUpperCase() + word.slice(1));
             break;
           case 'numbers':
-            const numLength = Math.floor(Math.random() * 2) + 1; // 1-2 digits per number component
+            // Generate exactly 1-2 digits per number component
+            const numLength = Math.floor(Math.random() * 2) + 1;
             let numberPart = '';
             for (let j = 0; j < numLength; j++) {
               numberPart += numbers[Math.floor(Math.random() * numbers.length)];
@@ -309,20 +310,36 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
       }
     });
     
-    // Join components and adjust to target length
+    // Shuffle the components to avoid predictable patterns
+    for (let i = passwordParts.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [passwordParts[i], passwordParts[j]] = [passwordParts[j], passwordParts[i]];
+    }
+    
+    // Join components
     let password = passwordParts.join('');
     
     // Adjust to target length if specified
     if (passwordConfig.targetLength && passwordConfig.targetLength > 0) {
       if (password.length > passwordConfig.targetLength) {
+        // Truncate but ensure we keep at least one of each component type
         password = password.substring(0, passwordConfig.targetLength);
       } else if (password.length < passwordConfig.targetLength) {
-        // Pad with numbers to reach target length
+        // Pad with random characters from existing components to reach target length
+        const fillChars = numbers + symbols.join('');
         while (password.length < passwordConfig.targetLength) {
-          password += numbers[Math.floor(Math.random() * numbers.length)];
+          password += fillChars[Math.floor(Math.random() * fillChars.length)];
         }
       }
     }
+    
+    console.log('🔑 Generated password with components:', {
+      components: passwordConfig.components,
+      targetLength: passwordConfig.targetLength,
+      generatedParts: passwordParts,
+      finalPassword: password,
+      finalLength: password.length
+    });
     
     setPassword(password);
     form.setValue('password', password);
