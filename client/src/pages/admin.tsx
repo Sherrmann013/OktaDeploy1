@@ -12,10 +12,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Pencil, Trash2, Check, ChevronsUpDown, Edit, X, Settings, RefreshCw } from "lucide-react";
+import { Plus, Pencil, Trash2, Check, ChevronsUpDown, Edit, X, Settings, RefreshCw, Mail, Lock } from "lucide-react";
 import { LogoUploadModal } from "@/components/LogoUploadModal";
 import CreateUserModal from "@/components/create-user-modal";
 import { useToast } from "@/hooks/use-toast";
+import { CustomSelect, CustomSelectContent, CustomSelectItem, CustomSelectTrigger, CustomSelectValue } from "@/components/ui/custom-select";
 
 interface SiteUser {
   id: number;
@@ -314,7 +315,17 @@ function AdminComponent() {
   const [fieldSettings, setFieldSettings] = useState({
     firstName: { required: true },
     lastName: { required: true },
-    emailUsername: { required: true, domains: ['@mazetx.com'] }
+    emailUsername: { required: true, domains: ['@mazetx.com'] },
+    password: { 
+      required: true, 
+      showGenerateButton: true,
+      wordCount: 2,
+      includeSymbol: true,
+      includeNumber: true,
+      targetLength: 10,
+      wordList: ['blue', 'red', 'green', 'cat', 'dog', 'sun', 'moon', 'star', 'tree', 'bird', 'fish', 'car', 'book', 'key', 'box', 'cup', 'pen', 'hat', 'bag', 'run'],
+      symbolList: ['!', '@', '#', '$', '%', '^', '&', '*']
+    }
   });
 
   // Log field settings changes
@@ -1974,19 +1985,36 @@ function AdminComponent() {
                                 </div>
                                 <div className="space-y-2">
                                   <Label htmlFor="preview-password" className="text-sm font-medium">
-                                    Password <span className="text-red-500">*</span>
+                                    Password {fieldSettings.password.required && <span className="text-red-500">*</span>}
                                   </Label>
-                                  <div className="relative">
+                                  <div 
+                                    className={`relative cursor-pointer transition-colors rounded ${
+                                      selectedField === 'password' 
+                                        ? 'ring-2 ring-blue-300 dark:ring-blue-600' 
+                                        : 'hover:ring-1 hover:ring-blue-200 dark:hover:ring-blue-700'
+                                    }`}
+                                    onClick={() => setSelectedField(selectedField === 'password' ? null : 'password')}
+                                  >
                                     <Input
                                       id="preview-password"
                                       type="password"
                                       placeholder="Enter password"
-                                      className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 pr-10"
-                                      disabled
+                                      className={`pr-10 cursor-pointer ${
+                                        selectedField === 'password' 
+                                          ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-300 dark:border-blue-600' 
+                                          : 'bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600'
+                                      }`}
+                                      readOnly
                                     />
-                                    <button className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400">
-                                      <RefreshCw className="w-4 h-4" />
-                                    </button>
+                                    {fieldSettings.password.showGenerateButton && (
+                                      <button className={`absolute right-2 top-1/2 transform -translate-y-1/2 ${
+                                        selectedField === 'password' 
+                                          ? 'text-blue-500 dark:text-blue-400' 
+                                          : 'text-gray-400'
+                                      }`}>
+                                        <RefreshCw className="w-4 h-4" />
+                                      </button>
+                                    )}
                                   </div>
                                 </div>
                               </div>
@@ -2111,6 +2139,7 @@ function AdminComponent() {
                                   {selectedField === 'firstName' && 'First Name Options'}
                                   {selectedField === 'lastName' && 'Last Name Options'}
                                   {selectedField === 'emailUsername' && 'Email Username Options'}
+                                  {selectedField === 'password' && 'Password Options'}
                                 </h5>
                                 
                                 <div className="space-y-4">
@@ -2302,6 +2331,202 @@ function AdminComponent() {
                                         >
                                           Save Domain Configuration
                                         </Button>
+                                      </div>
+                                    </div>
+                                  )}
+
+                                  {/* Password generation options */}
+                                  {selectedField === 'password' && (
+                                    <div className="space-y-4">
+                                      <div className="flex items-center space-x-2">
+                                        <Checkbox 
+                                          id="password-generate-button"
+                                          checked={fieldSettings.password.showGenerateButton}
+                                          onCheckedChange={(checked) => {
+                                            setFieldSettings(prev => ({
+                                              ...prev,
+                                              password: {
+                                                ...prev.password,
+                                                showGenerateButton: checked
+                                              }
+                                            }));
+                                          }}
+                                        />
+                                        <Label htmlFor="password-generate-button" className="text-sm">
+                                          Show password generation button
+                                        </Label>
+                                      </div>
+
+                                      <div className="space-y-3 border-t pt-4">
+                                        <Label className="text-sm font-medium">Password Generation Settings</Label>
+                                        
+                                        <div className="grid grid-cols-2 gap-4">
+                                          <div className="space-y-2">
+                                            <Label className="text-xs">Word Count</Label>
+                                            <CustomSelect
+                                              value={fieldSettings.password.wordCount.toString()}
+                                              onValueChange={(value) => {
+                                                setFieldSettings(prev => ({
+                                                  ...prev,
+                                                  password: {
+                                                    ...prev.password,
+                                                    wordCount: parseInt(value)
+                                                  }
+                                                }));
+                                              }}
+                                            >
+                                              <CustomSelectTrigger className="h-8 text-xs">
+                                                <CustomSelectValue />
+                                              </CustomSelectTrigger>
+                                              <CustomSelectContent>
+                                                <CustomSelectItem value="1">1 word</CustomSelectItem>
+                                                <CustomSelectItem value="2">2 words</CustomSelectItem>
+                                                <CustomSelectItem value="3">3 words</CustomSelectItem>
+                                              </CustomSelectContent>
+                                            </CustomSelect>
+                                          </div>
+                                          
+                                          <div className="space-y-2">
+                                            <Label className="text-xs">Target Length</Label>
+                                            <Input
+                                              type="number"
+                                              min="6"
+                                              max="20"
+                                              value={fieldSettings.password.targetLength}
+                                              onChange={(e) => {
+                                                setFieldSettings(prev => ({
+                                                  ...prev,
+                                                  password: {
+                                                    ...prev.password,
+                                                    targetLength: parseInt(e.target.value) || 10
+                                                  }
+                                                }));
+                                              }}
+                                              className="h-8 text-xs bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600"
+                                            />
+                                          </div>
+                                        </div>
+
+                                        <div className="flex gap-4">
+                                          <div className="flex items-center space-x-2">
+                                            <Checkbox 
+                                              id="password-include-symbol"
+                                              checked={fieldSettings.password.includeSymbol}
+                                              onCheckedChange={(checked) => {
+                                                setFieldSettings(prev => ({
+                                                  ...prev,
+                                                  password: {
+                                                    ...prev.password,
+                                                    includeSymbol: checked
+                                                  }
+                                                }));
+                                              }}
+                                            />
+                                            <Label htmlFor="password-include-symbol" className="text-xs">
+                                              Include symbol
+                                            </Label>
+                                          </div>
+                                          
+                                          <div className="flex items-center space-x-2">
+                                            <Checkbox 
+                                              id="password-include-number"
+                                              checked={fieldSettings.password.includeNumber}
+                                              onCheckedChange={(checked) => {
+                                                setFieldSettings(prev => ({
+                                                  ...prev,
+                                                  password: {
+                                                    ...prev.password,
+                                                    includeNumber: checked
+                                                  }
+                                                }));
+                                              }}
+                                            />
+                                            <Label htmlFor="password-include-number" className="text-xs">
+                                              Include number
+                                            </Label>
+                                          </div>
+                                        </div>
+
+                                        <div className="space-y-2">
+                                          <Label className="text-xs">Available Symbols</Label>
+                                          <Input
+                                            value={fieldSettings.password.symbolList.join('')}
+                                            onChange={(e) => {
+                                              const symbols = e.target.value.split('').filter(char => !char.match(/[a-zA-Z0-9\s]/));
+                                              setFieldSettings(prev => ({
+                                                ...prev,
+                                                password: {
+                                                  ...prev.password,
+                                                  symbolList: symbols
+                                                }
+                                              }));
+                                            }}
+                                            className="text-xs font-mono bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600"
+                                            placeholder="!@#$%^&*"
+                                          />
+                                        </div>
+
+                                        <div className="space-y-2">
+                                          <Label className="text-xs">Word List (comma-separated)</Label>
+                                          <textarea
+                                            value={fieldSettings.password.wordList.join(', ')}
+                                            onChange={(e) => {
+                                              const words = e.target.value.split(',').map(w => w.trim()).filter(w => w.length > 0);
+                                              setFieldSettings(prev => ({
+                                                ...prev,
+                                                password: {
+                                                  ...prev.password,
+                                                  wordList: words
+                                                }
+                                              }));
+                                            }}
+                                            className="w-full h-20 text-xs p-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded resize-none"
+                                            placeholder="blue, red, green, cat, dog..."
+                                          />
+                                        </div>
+
+                                        {/* Save Button for Password Configuration */}
+                                        <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-600">
+                                          <Button 
+                                            onClick={() => {
+                                              // Save password configuration
+                                              const settingData = {
+                                                settingKey: 'password',
+                                                settingValue: JSON.stringify(fieldSettings.password),
+                                                settingType: 'user_config' as const,
+                                                metadata: {}
+                                              };
+                                              
+                                              fetch('/api/layout-settings', {
+                                                method: 'POST',
+                                                headers: { 'Content-Type': 'application/json' },
+                                                credentials: 'include',
+                                                body: JSON.stringify(settingData)
+                                              }).then(async response => {
+                                                if (response.ok) {
+                                                  toast({ 
+                                                    title: "Success", 
+                                                    description: "Password generation settings saved successfully" 
+                                                  });
+                                                } else {
+                                                  const errorText = await response.text();
+                                                  console.error('Save failed:', errorText);
+                                                  throw new Error('Failed to save');
+                                                }
+                                              }).catch((error) => {
+                                                console.error('Save error:', error);
+                                                toast({ 
+                                                  title: "Error", 
+                                                  description: "Failed to save password generation settings",
+                                                  variant: "destructive"
+                                                });
+                                              });
+                                            }}
+                                            className="bg-green-600 hover:bg-green-700 text-white"
+                                          >
+                                            Save Password Configuration
+                                          </Button>
+                                        </div>
                                       </div>
                                     </div>
                                   )}
