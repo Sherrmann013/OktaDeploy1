@@ -2520,62 +2520,63 @@ function AdminComponent() {
                                                 Drag components here to build your password structure
                                               </div>
                                             )}
-                                          </div>
-                                          
-                                          <div className="space-y-2">
-                                            <Label className="text-xs font-medium">Available Components</Label>
-                                            <div className="flex flex-wrap gap-2">
-                                              <button
-                                                onClick={() => {
-                                                  const newComponents = [...(fieldSettings.password.components || []), { type: 'words', count: 1 }];
-                                                  const newSettings = {
-                                                    ...fieldSettings,
-                                                    password: {
-                                                      ...fieldSettings.password,
-                                                      components: newComponents
-                                                    }
-                                                  };
-                                                  setFieldSettings(newSettings);
-                                                  savePasswordSettings(newSettings.password);
-                                                }}
-                                                className="bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 px-3 py-1 rounded text-xs hover:bg-blue-200 dark:hover:bg-blue-800"
-                                              >
-                                                + Words
-                                              </button>
-                                              <button
-                                                onClick={() => {
-                                                  const newComponents = [...(fieldSettings.password.components || []), { type: 'numbers', count: 2 }];
-                                                  const newSettings = {
-                                                    ...fieldSettings,
-                                                    password: {
-                                                      ...fieldSettings.password,
-                                                      components: newComponents
-                                                    }
-                                                  };
-                                                  setFieldSettings(newSettings);
-                                                  savePasswordSettings(newSettings.password);
-                                                }}
-                                                className="bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300 px-3 py-1 rounded text-xs hover:bg-green-200 dark:hover:bg-green-800"
-                                              >
-                                                + Numbers
-                                              </button>
-                                              <button
-                                                onClick={() => {
-                                                  const newComponents = [...(fieldSettings.password.components || []), { type: 'symbols', count: 1 }];
-                                                  const newSettings = {
-                                                    ...fieldSettings,
-                                                    password: {
-                                                      ...fieldSettings.password,
-                                                      components: newComponents
-                                                    }
-                                                  };
-                                                  setFieldSettings(newSettings);
-                                                  savePasswordSettings(newSettings.password);
-                                                }}
-                                                className="bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300 px-3 py-1 rounded text-xs hover:bg-purple-200 dark:hover:bg-purple-800"
-                                              >
-                                                + Symbols
-                                              </button>
+                                            
+                                            {/* Available Components positioned immediately after Password Components */}
+                                            <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-600">
+                                              <Label className="text-xs font-medium">Available Components</Label>
+                                              <div className="flex flex-wrap gap-2 mt-2">
+                                                <button
+                                                  onClick={() => {
+                                                    const newComponents = [...(fieldSettings.password.components || []), { type: 'words', count: 1 }];
+                                                    const newSettings = {
+                                                      ...fieldSettings,
+                                                      password: {
+                                                        ...fieldSettings.password,
+                                                        components: newComponents
+                                                      }
+                                                    };
+                                                    setFieldSettings(newSettings);
+                                                    savePasswordSettings(newSettings.password);
+                                                  }}
+                                                  className="bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 px-3 py-1 rounded text-xs hover:bg-blue-200 dark:hover:bg-blue-800"
+                                                >
+                                                  + Words
+                                                </button>
+                                                <button
+                                                  onClick={() => {
+                                                    const newComponents = [...(fieldSettings.password.components || []), { type: 'numbers', count: 2 }];
+                                                    const newSettings = {
+                                                      ...fieldSettings,
+                                                      password: {
+                                                        ...fieldSettings.password,
+                                                        components: newComponents
+                                                      }
+                                                    };
+                                                    setFieldSettings(newSettings);
+                                                    savePasswordSettings(newSettings.password);
+                                                  }}
+                                                  className="bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300 px-3 py-1 rounded text-xs hover:bg-green-200 dark:hover:bg-green-800"
+                                                >
+                                                  + Numbers
+                                                </button>
+                                                <button
+                                                  onClick={() => {
+                                                    const newComponents = [...(fieldSettings.password.components || []), { type: 'symbols', count: 1 }];
+                                                    const newSettings = {
+                                                      ...fieldSettings,
+                                                      password: {
+                                                        ...fieldSettings.password,
+                                                        components: newComponents
+                                                      }
+                                                    };
+                                                    setFieldSettings(newSettings);
+                                                    savePasswordSettings(newSettings.password);
+                                                  }}
+                                                  className="bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300 px-3 py-1 rounded text-xs hover:bg-purple-200 dark:hover:bg-purple-800"
+                                                >
+                                                  + Symbols
+                                                </button>
+                                              </div>
                                             </div>
                                           </div>
                                           
