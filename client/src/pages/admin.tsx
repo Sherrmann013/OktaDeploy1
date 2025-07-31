@@ -1864,7 +1864,7 @@ function AdminComponent() {
                                         : 'bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 hover:border-blue-200 dark:hover:border-blue-700'
                                     }`}
                                     onClick={() => setSelectedField(selectedField === 'firstName' ? null : 'firstName')}
-                                    disabled
+                                    readOnly
                                   />
                                 </div>
                                 <div className="space-y-2">
@@ -1880,7 +1880,7 @@ function AdminComponent() {
                                         : 'bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 hover:border-blue-200 dark:hover:border-blue-700'
                                     }`}
                                     onClick={() => setSelectedField(selectedField === 'lastName' ? null : 'lastName')}
-                                    disabled
+                                    readOnly
                                   />
                                 </div>
                               </div>
@@ -1902,12 +1902,12 @@ function AdminComponent() {
                                     <Input
                                       id="preview-username"
                                       placeholder="username"
-                                      className={`rounded-r-none border-r-0 ${
+                                      className={`rounded-r-none border-r-0 cursor-pointer ${
                                         selectedField === 'emailUsername' 
                                           ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-300 dark:border-blue-600' 
                                           : 'bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600'
                                       }`}
-                                      disabled
+                                      readOnly
                                     />
                                     <div className={`px-3 py-2 border border-l-0 rounded-r text-sm ${
                                       selectedField === 'emailUsername' 
