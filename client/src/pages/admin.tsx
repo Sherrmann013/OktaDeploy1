@@ -88,6 +88,35 @@ function AdminComponent() {
   const [departmentApps, setDepartmentApps] = useState<Record<number, string[]>>({});
   const [employeeTypeApps, setEmployeeTypeApps] = useState<Record<number, string[]>>({});
 
+  // Field settings state - moved up to avoid "used before declaration" errors
+  const [fieldSettings, setFieldSettings] = useState({
+    firstName: { required: true },
+    lastName: { required: true },
+    emailUsername: { required: true, domains: ['@mazetx.com'] },
+    password: { 
+      required: true, 
+      showGenerateButton: true,
+      components: [
+        { type: 'words', count: 1 },
+        { type: 'numbers', count: 2 },
+        { type: 'symbols', count: 1 }
+      ],
+      targetLength: 10
+    },
+    title: { required: false },
+    manager: { required: false },
+    department: { 
+      required: false, 
+      useList: false, 
+      options: [] as string[]
+    },
+    employeeType: { 
+      required: false, 
+      useList: true, 
+      options: [] as string[]
+    }
+  });
+
   // Fetch department and employee type app mappings
   const { data: departmentAppMappingsData = [] } = useQuery<any[]>({
     queryKey: ["/api/department-app-mappings"],
@@ -105,7 +134,7 @@ function AdminComponent() {
     queryKey: ["/api/layout-settings/department", Date.now()],
     enabled: true, // Always enabled for debugging
     staleTime: 0,
-    cacheTime: 0,
+    gcTime: 0,
     refetchOnMount: true,
     refetchOnWindowFocus: true,
     select: (data: any) => {
@@ -128,6 +157,14 @@ function AdminComponent() {
   useEffect(() => {
     if (departmentFieldSettings) {
       console.log('🔍 Department field settings loaded:', departmentFieldSettings);
+      // Update the fieldSettings state with the loaded department settings
+      setFieldSettings(prevSettings => ({
+        ...prevSettings,
+        department: {
+          ...prevSettings.department,
+          ...departmentFieldSettings
+        }
+      }));
     }
   }, [departmentFieldSettings]);
 
@@ -142,7 +179,7 @@ function AdminComponent() {
     queryKey: ["/api/layout-settings/employeeType", Date.now()],
     enabled: true, // Always enabled for debugging
     staleTime: 0,
-    cacheTime: 0,
+    gcTime: 0,
     refetchOnMount: true,
     refetchOnWindowFocus: true,
     select: (data: any) => {
@@ -165,6 +202,14 @@ function AdminComponent() {
   useEffect(() => {
     if (employeeTypeFieldSettings) {
       console.log('🔍 Employee type field settings loaded:', employeeTypeFieldSettings);
+      // Update the fieldSettings state with the loaded employee type settings
+      setFieldSettings(prevSettings => ({
+        ...prevSettings,
+        employeeType: {
+          ...prevSettings.employeeType,
+          ...employeeTypeFieldSettings
+        }
+      }));
     }
   }, [employeeTypeFieldSettings]);
 
@@ -552,34 +597,6 @@ function AdminComponent() {
   const [selectedField, setSelectedField] = useState<string | null>(null);
   
 
-  const [fieldSettings, setFieldSettings] = useState({
-    firstName: { required: true },
-    lastName: { required: true },
-    emailUsername: { required: true, domains: ['@mazetx.com'] },
-    password: { 
-      required: true, 
-      showGenerateButton: true,
-      components: [
-        { type: 'words', count: 1 },
-        { type: 'numbers', count: 2 },
-        { type: 'symbols', count: 1 }
-      ],
-      targetLength: 10
-    },
-    title: { required: false },
-    manager: { required: false },
-    department: { 
-      required: false, 
-      useList: false, 
-      options: [] as string[]
-    },
-    employeeType: { 
-      required: false, 
-      useList: true, 
-      options: ['EMPLOYEE', 'CONTRACTOR', 'INTERN', 'PART_TIME'] as string[]
-    }
-  });
-
   // Function to save password settings to database
   const savePasswordSettings = async (passwordSettings: any) => {
     try {
@@ -605,29 +622,7 @@ function AdminComponent() {
     }
   };
 
-  // Update field settings when department and employee type data is loaded from database
-  useEffect(() => {
-    console.log('🔍 Field settings data loaded:', { departmentFieldSettings, employeeTypeFieldSettings });
-    console.log('🔍 Current tab state:', { activeTab, layoutTab });
-    if (departmentFieldSettings || employeeTypeFieldSettings) {
-      console.log('🔍 Updating field settings with database data');
-      setFieldSettings(prev => ({
-        ...prev,
-        department: {
-          ...prev.department,
-          options: departmentFieldSettings?.options || [],
-          required: departmentFieldSettings?.required || false,
-        },
-        employeeType: {
-          ...prev.employeeType,
-          options: employeeTypeFieldSettings?.options || ['EMPLOYEE', 'CONTRACTOR', 'INTERN', 'PART_TIME'],
-          required: employeeTypeFieldSettings?.required || false,
-        }
-      }));
-    } else {
-      console.log('🔍 No database field settings found, using defaults');
-    }
-  }, [departmentFieldSettings, employeeTypeFieldSettings, activeTab, layoutTab]);
+
 
   // Log field settings changes
   useEffect(() => {
