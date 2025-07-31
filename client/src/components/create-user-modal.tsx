@@ -91,7 +91,9 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
           fetch('/api/layout-settings/emailUsername', { credentials: 'include' }),
           fetch('/api/layout-settings/password', { credentials: 'include' }),
           fetch('/api/layout-settings/title', { credentials: 'include' }),
-          fetch('/api/layout-settings/manager', { credentials: 'include' })
+          fetch('/api/layout-settings/manager', { credentials: 'include' }),
+          fetch('/api/field-settings/department', { credentials: 'include' }),
+          fetch('/api/field-settings/employeeType', { credentials: 'include' })
         ];
         
         const responses = await Promise.all(settingsQueries);
