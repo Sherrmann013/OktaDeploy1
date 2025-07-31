@@ -77,8 +77,8 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
   const hasMultipleDomains = emailDomains.length > 1;
 
   // Set default domain when modal opens or domains change
-  useMemo(() => {
-    if (emailDomains.length > 0 && !selectedDomain) {
+  React.useEffect(() => {
+    if (emailDomains.length > 0 && (!selectedDomain || !emailDomains.includes(selectedDomain))) {
       setSelectedDomain(emailDomains[0]);
     }
   }, [emailDomains, selectedDomain]);
@@ -311,7 +311,7 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
                           className="rounded-r-none border-r-0"
                         />
                         {hasMultipleDomains ? (
-                          <CustomSelect
+                          <Select
                             value={selectedDomain}
                             onValueChange={(value: string) => {
                               setSelectedDomain(value);
@@ -319,14 +319,18 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
                               const email = `${username}${value}`;
                               field.onChange(email);
                             }}
-                            className="rounded-l-none border-l-0 min-w-[140px]"
                           >
-                            {emailDomains.map((domain: string) => (
-                              <option key={domain} value={domain}>
-                                {domain}
-                              </option>
-                            ))}
-                          </CustomSelect>
+                            <SelectTrigger className="rounded-l-none border-l-0 min-w-[140px] bg-white dark:bg-gray-800">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent className="bg-white dark:bg-gray-800">
+                              {emailDomains.map((domain: string) => (
+                                <SelectItem key={domain} value={domain}>
+                                  {domain}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
                         ) : (
                           <div className="bg-gray-100 dark:bg-gray-800 border border-l-0 rounded-r-md px-3 py-2 text-sm text-gray-600 dark:text-gray-400 flex items-center">
                             {emailDomains[0] || '@mazetx.com'}
