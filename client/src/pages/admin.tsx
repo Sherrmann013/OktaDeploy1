@@ -2214,13 +2214,45 @@ function AdminComponent() {
                                       id={`${selectedField}-required`}
                                       checked={fieldSettings[selectedField as keyof typeof fieldSettings]?.required}
                                       onCheckedChange={(checked) => {
-                                        setFieldSettings(prev => ({
-                                          ...prev,
+                                        const newSettings = {
+                                          ...fieldSettings,
                                           [selectedField]: {
-                                            ...prev[selectedField as keyof typeof prev],
+                                            ...fieldSettings[selectedField as keyof typeof fieldSettings],
                                             required: checked
                                           }
-                                        }));
+                                        };
+                                        setFieldSettings(newSettings);
+                                        
+                                        // Auto-save the field requirement setting
+                                        const settingData = {
+                                          settingKey: selectedField,
+                                          settingValue: JSON.stringify(newSettings[selectedField as keyof typeof newSettings]),
+                                          settingType: 'user_config' as const,
+                                          metadata: {}
+                                        };
+                                        
+                                        fetch('/api/layout-settings', {
+                                          method: 'POST',
+                                          headers: { 'Content-Type': 'application/json' },
+                                          credentials: 'include',
+                                          body: JSON.stringify(settingData)
+                                        }).then(async response => {
+                                          if (response.ok) {
+                                            toast({ 
+                                              title: "Success", 
+                                              description: `${selectedField} requirement setting saved` 
+                                            });
+                                          } else {
+                                            console.error('Auto-save failed');
+                                            toast({ 
+                                              title: "Error", 
+                                              description: "Failed to save setting",
+                                              variant: "destructive"
+                                            });
+                                          }
+                                        }).catch((error) => {
+                                          console.error('Auto-save error:', error);
+                                        });
                                       }}
                                     />
                                     <Label htmlFor={`${selectedField}-required`} className="text-sm">

@@ -19,6 +19,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { insertUserSchema, type InsertUser, type User } from "@shared/schema";
+import { z } from "zod";
 import { X, Check, RefreshCw } from "lucide-react";
 import { generate } from "random-words";
 
@@ -79,19 +80,25 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
     enabled: open,
   });
 
-  // Fetch password generation settings from admin layout
-  const { data: passwordConfig } = useQuery({
-    queryKey: ["/api/layout-settings", "password"],
+  // Fetch all field settings from admin layout
+  const { data: fieldSettings } = useQuery({
+    queryKey: ["/api/layout-settings", "all-fields"],
     queryFn: async () => {
       try {
-        const response = await fetch('/api/layout-settings/password', {
-          credentials: 'include'
-        });
+        const settingsQueries = [
+          fetch('/api/layout-settings/firstName', { credentials: 'include' }),
+          fetch('/api/layout-settings/lastName', { credentials: 'include' }),
+          fetch('/api/layout-settings/emailUsername', { credentials: 'include' }),
+          fetch('/api/layout-settings/password', { credentials: 'include' })
+        ];
         
-        if (!response.ok) {
-          // Return default configuration if not found
-          return {
-            required: true,
+        const responses = await Promise.all(settingsQueries);
+        const settings = {
+          firstName: { required: true },
+          lastName: { required: true },
+          emailUsername: { required: true, domains: ['@mazetx.com'] },
+          password: { 
+            required: true, 
             showGenerateButton: true,
             components: [
               { type: 'words', count: 1 },
@@ -99,27 +106,49 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
               { type: 'symbols', count: 1 }
             ],
             targetLength: 10
-          };
+          }
+        };
+        
+        // Parse individual setting responses
+        for (let i = 0; i < responses.length; i++) {
+          const response = responses[i];
+          const fieldName = ['firstName', 'lastName', 'emailUsername', 'password'][i];
+          
+          if (response.ok) {
+            const data = await response.json();
+            try {
+              settings[fieldName as keyof typeof settings] = JSON.parse(data.settingValue);
+            } catch (e) {
+              console.warn(`Failed to parse ${fieldName} settings:`, e);
+            }
+          }
         }
         
-        const data = await response.json();
-        return JSON.parse(data.settingValue || '{"required":true,"showGenerateButton":true,"components":[{"type":"words","count":1},{"type":"numbers","count":2},{"type":"symbols","count":1}],"targetLength":10}');
+        return settings;
       } catch (error) {
-        // Return default configuration on error
+        console.error('Error fetching field settings:', error);
         return {
-          required: true,
-          showGenerateButton: true,
-          components: [
-            { type: 'words', count: 1 },
-            { type: 'numbers', count: 2 },
-            { type: 'symbols', count: 1 }
-          ],
-          targetLength: 10
+          firstName: { required: true },
+          lastName: { required: true },
+          emailUsername: { required: true, domains: ['@mazetx.com'] },
+          password: { 
+            required: true, 
+            showGenerateButton: true,
+            components: [
+              { type: 'words', count: 1 },
+              { type: 'numbers', count: 2 },
+              { type: 'symbols', count: 1 }
+            ],
+            targetLength: 10
+          }
         };
       }
     },
     enabled: open,
   });
+
+  // Extract password config for backward compatibility
+  const passwordConfig = fieldSettings?.password;
 
   const availableManagers = usersData?.users || [];
   const emailDomains = emailDomainConfig?.domains || ['@mazetx.com'];
@@ -181,8 +210,28 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
       .slice(0, 15);
   }, [availableManagers, managerSearch]);
 
+  // Create dynamic validation schema based on admin settings
+  const validationSchema = useMemo(() => {
+    if (!fieldSettings) return insertUserSchema;
+    
+    return insertUserSchema.extend({
+      firstName: fieldSettings.firstName?.required 
+        ? z.string().min(1, "First name is required")
+        : z.string().optional(),
+      lastName: fieldSettings.lastName?.required 
+        ? z.string().min(1, "Last name is required") 
+        : z.string().optional(),
+      email: fieldSettings.emailUsername?.required 
+        ? z.string().min(1, "Email is required").email("Invalid email format")
+        : z.string().email("Invalid email format").optional().or(z.literal("")),
+      password: fieldSettings.password?.required 
+        ? z.string().min(1, "Password is required")
+        : z.string().optional(),
+    });
+  }, [fieldSettings]);
+
   const form = useForm<InsertUser>({
-    resolver: zodResolver(insertUserSchema),
+    resolver: zodResolver(validationSchema),
     defaultValues: {
       firstName: "",
       lastName: "",
@@ -380,7 +429,7 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
                 name="firstName"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>First Name *</FormLabel>
+                    <FormLabel>First Name {fieldSettings?.firstName?.required ? '*' : ''}</FormLabel>
                     <FormControl>
                       <Input placeholder="Enter first name" {...field} />
                     </FormControl>
@@ -394,7 +443,7 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
                 name="lastName"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Last Name *</FormLabel>
+                    <FormLabel>Last Name {fieldSettings?.lastName?.required ? '*' : ''}</FormLabel>
                     <FormControl>
                       <Input placeholder="Enter last name" {...field} />
                     </FormControl>
@@ -411,7 +460,7 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
                 name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Email Username *</FormLabel>
+                    <FormLabel>Email Username {fieldSettings?.emailUsername?.required ? '*' : ''}</FormLabel>
                     <FormControl>
                       <div className="flex">
                         <Input 
@@ -464,7 +513,7 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
                 name="password"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Password *</FormLabel>
+                    <FormLabel>Password {fieldSettings?.password?.required ? '*' : ''}</FormLabel>
                     <FormControl>
                       <div className="relative">
                         <Input 
