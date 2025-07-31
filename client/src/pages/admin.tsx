@@ -2937,88 +2937,70 @@ function AdminComponent() {
                                       {fieldSettings.department.useList && (
                                         <div className="space-y-3">
                                           <Label className="text-sm font-medium">Department Options</Label>
-                                          <div className="space-y-2">
-                                            {fieldSettings.department.options.map((option, index) => (
-                                              <div
-                                                key={index}
-                                                className="flex items-center gap-2 cursor-move hover:bg-gray-50 dark:hover:bg-gray-700/20 rounded p-1"
+                                          <div className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md p-3 min-h-[60px]">
+                                            <div className="flex flex-wrap items-center gap-2">
+                                              {fieldSettings.department.options.map((option, index) => (
+                                                <div key={index} className="flex items-center">
+                                                  <div className="bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 px-2 py-1 rounded text-sm flex items-center gap-1">
+                                                    <Input
+                                                      value={option}
+                                                      onChange={(e) => {
+                                                        setFieldSettings({
+                                                          ...fieldSettings,
+                                                          department: {
+                                                            ...fieldSettings.department,
+                                                            options: fieldSettings.department.options.map((opt, i) => 
+                                                              i === index ? e.target.value : opt
+                                                            )
+                                                          }
+                                                        });
+                                                      }}
+                                                      placeholder="Department"
+                                                      className="bg-transparent border-none text-blue-800 dark:text-blue-200 text-sm p-0 h-auto focus:ring-0 focus:border-none min-w-[80px] w-auto"
+                                                      style={{ width: `${Math.max(80, option.length * 8 + 20)}px` }}
+                                                    />
+                                                    <Button
+                                                      variant="ghost"
+                                                      size="sm"
+                                                      onClick={() => {
+                                                        setFieldSettings({
+                                                          ...fieldSettings,
+                                                          department: {
+                                                            ...fieldSettings.department,
+                                                            options: fieldSettings.department.options.filter((_, i) => i !== index)
+                                                          }
+                                                        });
+                                                      }}
+                                                      className="h-4 w-4 p-0 text-blue-600 hover:text-blue-800 dark:text-blue-300 dark:hover:text-blue-100"
+                                                    >
+                                                      ×
+                                                    </Button>
+                                                  </div>
+                                                  {index < fieldSettings.department.options.length - 1 && (
+                                                    <div className="h-4 w-px bg-gray-300 dark:bg-gray-600 mx-2"></div>
+                                                  )}
+                                                </div>
+                                              ))}
+                                              <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                onClick={() => {
+                                                  setFieldSettings({
+                                                    ...fieldSettings,
+                                                    department: {
+                                                      ...fieldSettings.department,
+                                                      options: [...fieldSettings.department.options, ""]
+                                                    }
+                                                  });
+                                                }}
+                                                className="h-8 w-8 p-0 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 border border-dashed border-gray-300 dark:border-gray-600 rounded"
                                               >
-                                                {index === fieldSettings.department.options.length - 1 ? (
-                                                  <Button
-                                                    variant="ghost"
-                                                    size="sm"
-                                                    onClick={() => {
-                                                      setFieldSettings({
-                                                        ...fieldSettings,
-                                                        department: {
-                                                          ...fieldSettings.department,
-                                                          options: [...fieldSettings.department.options, ""]
-                                                        }
-                                                      });
-                                                    }}
-                                                    className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 p-1"
-                                                  >
-                                                    <Plus className="w-4 h-4" />
-                                                  </Button>
-                                                ) : (
-                                                  <div className="w-6 h-6"></div>
-                                                )}
-                                                <Input
-                                                  value={option}
-                                                  className="w-40 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-sm"
-                                                  onChange={(e) => {
-                                                    setFieldSettings({
-                                                      ...fieldSettings,
-                                                      department: {
-                                                        ...fieldSettings.department,
-                                                        options: fieldSettings.department.options.map((opt, i) => 
-                                                          i === index ? e.target.value : opt
-                                                        )
-                                                      }
-                                                    });
-                                                  }}
-                                                  placeholder="Department name"
-                                                />
-                                                <Button
-                                                  variant="ghost"
-                                                  size="sm"
-                                                  onClick={() => {
-                                                    setFieldSettings({
-                                                      ...fieldSettings,
-                                                      department: {
-                                                        ...fieldSettings.department,
-                                                        options: fieldSettings.department.options.filter((_, i) => i !== index)
-                                                      }
-                                                    });
-                                                  }}
-                                                  className="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 px-2"
-                                                >
-                                                  ×
-                                                </Button>
-                                              </div>
-                                            ))}
-                                            {/* Plus button for first department if no departments exist */}
-                                            {fieldSettings.department.options.length === 0 && (
-                                              <div className="flex items-center gap-2 cursor-move hover:bg-gray-50 dark:hover:bg-gray-700/20 rounded p-1">
-                                                <Button
-                                                  variant="ghost"
-                                                  size="sm"
-                                                  onClick={() => {
-                                                    setFieldSettings({
-                                                      ...fieldSettings,
-                                                      department: {
-                                                        ...fieldSettings.department,
-                                                        options: [""]
-                                                      }
-                                                    });
-                                                  }}
-                                                  className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 p-1"
-                                                >
-                                                  <Plus className="w-4 h-4" />
-                                                </Button>
-                                                <span className="text-sm text-gray-500 dark:text-gray-400">Add department</span>
-                                              </div>
-                                            )}
+                                                <Plus className="w-4 h-4" />
+                                              </Button>
+                                              {fieldSettings.department.options.length === 0 && (
+                                                <span className="text-sm text-gray-500 dark:text-gray-400">Click + to add departments</span>
+                                              )}
+                                            </div>
                                           </div>
                                         </div>
                                       )}
@@ -3030,88 +3012,70 @@ function AdminComponent() {
                                     <div className="space-y-4">
                                       <div className="space-y-3">
                                         <Label className="text-sm font-medium">Employee Type Options</Label>
-                                        <div className="space-y-2">
-                                          {fieldSettings.employeeType.options.map((option, index) => (
-                                            <div
-                                              key={index}
-                                              className="flex items-center gap-2 cursor-move hover:bg-gray-50 dark:hover:bg-gray-700/20 rounded p-1"
+                                        <div className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md p-3 min-h-[60px]">
+                                          <div className="flex flex-wrap items-center gap-2">
+                                            {fieldSettings.employeeType.options.map((option, index) => (
+                                              <div key={index} className="flex items-center">
+                                                <div className="bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200 px-2 py-1 rounded text-sm flex items-center gap-1">
+                                                  <Input
+                                                    value={option}
+                                                    onChange={(e) => {
+                                                      setFieldSettings({
+                                                        ...fieldSettings,
+                                                        employeeType: {
+                                                          ...fieldSettings.employeeType,
+                                                          options: fieldSettings.employeeType.options.map((opt, i) => 
+                                                            i === index ? e.target.value : opt
+                                                          )
+                                                        }
+                                                      });
+                                                    }}
+                                                    placeholder="Type"
+                                                    className="bg-transparent border-none text-green-800 dark:text-green-200 text-sm p-0 h-auto focus:ring-0 focus:border-none min-w-[60px] w-auto"
+                                                    style={{ width: `${Math.max(60, option.length * 8 + 20)}px` }}
+                                                  />
+                                                  <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    onClick={() => {
+                                                      setFieldSettings({
+                                                        ...fieldSettings,
+                                                        employeeType: {
+                                                          ...fieldSettings.employeeType,
+                                                          options: fieldSettings.employeeType.options.filter((_, i) => i !== index)
+                                                        }
+                                                      });
+                                                    }}
+                                                    className="h-4 w-4 p-0 text-green-600 hover:text-green-800 dark:text-green-300 dark:hover:text-green-100"
+                                                  >
+                                                    ×
+                                                  </Button>
+                                                </div>
+                                                {index < fieldSettings.employeeType.options.length - 1 && (
+                                                  <div className="h-4 w-px bg-gray-300 dark:bg-gray-600 mx-2"></div>
+                                                )}
+                                              </div>
+                                            ))}
+                                            <Button
+                                              variant="ghost"
+                                              size="sm"
+                                              onClick={() => {
+                                                setFieldSettings({
+                                                  ...fieldSettings,
+                                                  employeeType: {
+                                                    ...fieldSettings.employeeType,
+                                                    options: [...fieldSettings.employeeType.options, ""]
+                                                  }
+                                                });
+                                              }}
+                                              className="h-8 w-8 p-0 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 border border-dashed border-gray-300 dark:border-gray-600 rounded"
                                             >
-                                              {index === fieldSettings.employeeType.options.length - 1 ? (
-                                                <Button
-                                                  variant="ghost"
-                                                  size="sm"
-                                                  onClick={() => {
-                                                    setFieldSettings({
-                                                      ...fieldSettings,
-                                                      employeeType: {
-                                                        ...fieldSettings.employeeType,
-                                                        options: [...fieldSettings.employeeType.options, ""]
-                                                      }
-                                                    });
-                                                  }}
-                                                  className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 p-1"
-                                                >
-                                                  <Plus className="w-4 h-4" />
-                                                </Button>
-                                              ) : (
-                                                <div className="w-6 h-6"></div>
-                                              )}
-                                              <Input
-                                                value={option}
-                                                className="w-40 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-sm"
-                                                onChange={(e) => {
-                                                  setFieldSettings({
-                                                    ...fieldSettings,
-                                                    employeeType: {
-                                                      ...fieldSettings.employeeType,
-                                                      options: fieldSettings.employeeType.options.map((opt, i) => 
-                                                        i === index ? e.target.value : opt
-                                                      )
-                                                    }
-                                                  });
-                                                }}
-                                                placeholder="Employee type"
-                                              />
-                                              <Button
-                                                variant="ghost"
-                                                size="sm"
-                                                onClick={() => {
-                                                  setFieldSettings({
-                                                    ...fieldSettings,
-                                                    employeeType: {
-                                                      ...fieldSettings.employeeType,
-                                                      options: fieldSettings.employeeType.options.filter((_, i) => i !== index)
-                                                    }
-                                                  });
-                                                }}
-                                                className="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 px-2"
-                                              >
-                                                ×
-                                              </Button>
-                                            </div>
-                                          ))}
-                                          {/* Plus button for first employee type if no types exist */}
-                                          {fieldSettings.employeeType.options.length === 0 && (
-                                            <div className="flex items-center gap-2 cursor-move hover:bg-gray-50 dark:hover:bg-gray-700/20 rounded p-1">
-                                              <Button
-                                                variant="ghost"
-                                                size="sm"
-                                                onClick={() => {
-                                                  setFieldSettings({
-                                                    ...fieldSettings,
-                                                    employeeType: {
-                                                      ...fieldSettings.employeeType,
-                                                      options: [""]
-                                                    }
-                                                  });
-                                                }}
-                                                className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 p-1"
-                                              >
-                                                <Plus className="w-4 h-4" />
-                                              </Button>
-                                              <span className="text-sm text-gray-500 dark:text-gray-400">Add employee type</span>
-                                            </div>
-                                          )}
+                                              <Plus className="w-4 h-4" />
+                                            </Button>
+                                            {fieldSettings.employeeType.options.length === 0 && (
+                                              <span className="text-sm text-gray-500 dark:text-gray-400">Click + to add employee types</span>
+                                            )}
+                                          </div>
                                         </div>
                                       </div>
                                     </div>
