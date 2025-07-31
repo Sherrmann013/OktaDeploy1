@@ -2083,24 +2083,61 @@ function AdminComponent() {
                                   {/* Domain options for Email Username */}
                                   {selectedField === 'emailUsername' && (
                                     <div className="space-y-3">
-                                      <Label className="text-sm font-medium">Available Domains</Label>
+                                      <Label className="text-sm font-medium">Email Domains</Label>
                                       <div className="space-y-2">
-                                        <div className="flex items-center justify-between p-2 border border-gray-200 dark:border-gray-600 rounded">
-                                          <span className="text-sm">@mazetx.com</span>
-                                          <Button variant="outline" size="sm" className="text-xs">
-                                            Primary
-                                          </Button>
-                                        </div>
-                                        <Button 
-                                          variant="outline" 
-                                          size="sm" 
-                                          className="w-full text-sm"
+                                        {fieldSettings.emailUsername.domains.map((domain, index) => (
+                                          <div key={index} className="flex items-center gap-2">
+                                            <Input
+                                              value={domain}
+                                              className="flex-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600"
+                                              onChange={(e) => {
+                                                const newDomains = [...fieldSettings.emailUsername.domains];
+                                                newDomains[index] = e.target.value;
+                                                setFieldSettings(prev => ({
+                                                  ...prev,
+                                                  emailUsername: {
+                                                    ...prev.emailUsername,
+                                                    domains: newDomains
+                                                  }
+                                                }));
+                                              }}
+                                            />
+                                            {fieldSettings.emailUsername.domains.length > 1 && (
+                                              <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                onClick={() => {
+                                                  const newDomains = fieldSettings.emailUsername.domains.filter((_, i) => i !== index);
+                                                  setFieldSettings(prev => ({
+                                                    ...prev,
+                                                    emailUsername: {
+                                                      ...prev.emailUsername,
+                                                      domains: newDomains
+                                                    }
+                                                  }));
+                                                }}
+                                                className="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
+                                              >
+                                                ×
+                                              </Button>
+                                            )}
+                                          </div>
+                                        ))}
+                                        <Button
+                                          variant="ghost"
+                                          size="sm"
                                           onClick={() => {
-                                            // Add domain functionality would go here
+                                            setFieldSettings(prev => ({
+                                              ...prev,
+                                              emailUsername: {
+                                                ...prev.emailUsername,
+                                                domains: [...prev.emailUsername.domains, '@company.com']
+                                              }
+                                            }));
                                           }}
+                                          className="w-full justify-start text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
                                         >
-                                          <Plus className="w-3 h-3 mr-2" />
-                                          Add Domain
+                                          <Plus className="w-4 h-4 mr-2" />
                                         </Button>
                                       </div>
                                     </div>
