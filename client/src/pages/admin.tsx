@@ -118,16 +118,23 @@ function AdminComponent() {
         console.error('Failed to parse department settings:', error);
         return null;
       }
-    },
-    onSuccess: (data) => {
-      console.log('🔍 Department field settings loaded:', data);
-    },
-    onError: (error) => {
-      console.error('❌ Failed to load department field settings:', error);
     }
   });
   
   console.log('🔍 Department query state:', { departmentFieldSettings, departmentLoading, departmentError });
+
+  // React Query v5 uses useEffect instead of onSuccess/onError
+  useEffect(() => {
+    if (departmentFieldSettings) {
+      console.log('🔍 Department field settings loaded:', departmentFieldSettings);
+    }
+  }, [departmentFieldSettings]);
+
+  useEffect(() => {
+    if (departmentError) {
+      console.error('❌ Failed to load department field settings:', departmentError);
+    }
+  }, [departmentError]);
 
   console.log('🔍 Setting up employee type query...');
   const { data: employeeTypeFieldSettings, refetch: refetchEmployeeTypeSettings, isLoading: employeeTypeLoading, error: employeeTypeError } = useQuery({
@@ -147,16 +154,23 @@ function AdminComponent() {
         console.error('Failed to parse employee type settings:', error);
         return null;
       }
-    },
-    onSuccess: (data) => {
-      console.log('🔍 Employee type field settings loaded:', data);
-    },
-    onError: (error) => {
-      console.error('❌ Failed to load employee type field settings:', error);
     }
   });
   
   console.log('🔍 Employee type query state:', { employeeTypeFieldSettings, employeeTypeLoading, employeeTypeError });
+
+  // React Query v5 uses useEffect instead of onSuccess/onError
+  useEffect(() => {
+    if (employeeTypeFieldSettings) {
+      console.log('🔍 Employee type field settings loaded:', employeeTypeFieldSettings);
+    }
+  }, [employeeTypeFieldSettings]);
+
+  useEffect(() => {
+    if (employeeTypeError) {
+      console.error('❌ Failed to load employee type field settings:', employeeTypeError);
+    }
+  }, [employeeTypeError]);
 
   // Debug logging for tab states and query enablement
   useEffect(() => {
