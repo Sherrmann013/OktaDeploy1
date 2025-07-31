@@ -128,6 +128,12 @@ function AdminComponent() {
     }
   });
 
+  // Debug logging for tab states and query enablement
+  useEffect(() => {
+    console.log('🔍 Tab state changed:', { activeTab, layoutTab });
+    console.log('🔍 Field settings queries enabled:', activeTab === "layout" && layoutTab === "new-user");
+  }, [activeTab, layoutTab]);
+
   const queryClient = useQueryClient();
 
   // Mutations for department app mappings
