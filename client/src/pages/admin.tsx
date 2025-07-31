@@ -308,6 +308,12 @@ function AdminComponent() {
   const [customCardName, setCustomCardName] = useState("");
   const [customCardDescription, setCustomCardDescription] = useState("");
   const [isCreateUserModalOpen, setIsCreateUserModalOpen] = useState(false);
+  const [selectedField, setSelectedField] = useState<string | null>(null);
+  const [fieldSettings, setFieldSettings] = useState({
+    firstName: { required: true },
+    lastName: { required: true },
+    emailUsername: { required: true, domains: ['@mazetx.com'] }
+  });
 
   const queryClient = useQueryClient();
 
@@ -1845,9 +1851,16 @@ function AdminComponent() {
                             <div className="space-y-4">
                               {/* First Name & Last Name Row */}
                               <div className="grid grid-cols-2 gap-4">
-                                <div className="space-y-2">
+                                <div 
+                                  className={`space-y-2 p-2 rounded cursor-pointer transition-colors ${
+                                    selectedField === 'firstName' 
+                                      ? 'bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700' 
+                                      : 'hover:bg-gray-50 dark:hover:bg-gray-700/50'
+                                  }`}
+                                  onClick={() => setSelectedField(selectedField === 'firstName' ? null : 'firstName')}
+                                >
                                   <Label htmlFor="preview-firstName" className="text-sm font-medium">
-                                    First Name <span className="text-red-500">*</span>
+                                    First Name {fieldSettings.firstName.required && <span className="text-red-500">*</span>}
                                   </Label>
                                   <Input
                                     id="preview-firstName"
@@ -1856,9 +1869,16 @@ function AdminComponent() {
                                     disabled
                                   />
                                 </div>
-                                <div className="space-y-2">
+                                <div 
+                                  className={`space-y-2 p-2 rounded cursor-pointer transition-colors ${
+                                    selectedField === 'lastName' 
+                                      ? 'bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700' 
+                                      : 'hover:bg-gray-50 dark:hover:bg-gray-700/50'
+                                  }`}
+                                  onClick={() => setSelectedField(selectedField === 'lastName' ? null : 'lastName')}
+                                >
                                   <Label htmlFor="preview-lastName" className="text-sm font-medium">
-                                    Last Name <span className="text-red-500">*</span>
+                                    Last Name {fieldSettings.lastName.required && <span className="text-red-500">*</span>}
                                   </Label>
                                   <Input
                                     id="preview-lastName"
@@ -1871,9 +1891,16 @@ function AdminComponent() {
 
                               {/* Email Username & Password Row */}
                               <div className="grid grid-cols-2 gap-4">
-                                <div className="space-y-2">
+                                <div 
+                                  className={`space-y-2 p-2 rounded cursor-pointer transition-colors ${
+                                    selectedField === 'emailUsername' 
+                                      ? 'bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700' 
+                                      : 'hover:bg-gray-50 dark:hover:bg-gray-700/50'
+                                  }`}
+                                  onClick={() => setSelectedField(selectedField === 'emailUsername' ? null : 'emailUsername')}
+                                >
                                   <Label htmlFor="preview-username" className="text-sm font-medium">
-                                    Email Username <span className="text-red-500">*</span>
+                                    Email Username {fieldSettings.emailUsername.required && <span className="text-red-500">*</span>}
                                   </Label>
                                   <div className="flex">
                                     <Input
@@ -1883,7 +1910,7 @@ function AdminComponent() {
                                       disabled
                                     />
                                     <div className="px-3 py-2 bg-gray-100 dark:bg-gray-600 border border-l-0 border-gray-300 dark:border-gray-600 rounded-r text-sm text-gray-600 dark:text-gray-300">
-                                      @mazetx.com
+                                      {fieldSettings.emailUsername.domains[0]}
                                     </div>
                                   </div>
                                 </div>
@@ -2018,90 +2045,133 @@ function AdminComponent() {
                             </div>
                           </div>
 
-                          {/* Customization Options - Right Half */}
+                          {/* Dynamic Field Options - Right Half */}
                           <div className="flex-1 space-y-6">
-                            <div>
-                              <h5 className="text-md font-medium mb-4">Form Customization</h5>
-                              
-                              <div className="space-y-4">
-                                <div className="space-y-3">
-                                  <h6 className="text-sm font-medium text-gray-700 dark:text-gray-300">Required Fields</h6>
-                                  
-                                  <div className="flex items-center space-x-2">
-                                    <Checkbox id="require-manager" defaultChecked />
-                                    <Label htmlFor="require-manager" className="text-sm">
-                                      Require manager selection
-                                    </Label>
-                                  </div>
-                                  
-                                  <div className="flex items-center space-x-2">
-                                    <Checkbox id="require-title" defaultChecked />
-                                    <Label htmlFor="require-title" className="text-sm">
-                                      Require job title
-                                    </Label>
-                                  </div>
-                                  
-                                  <div className="flex items-center space-x-2">
-                                    <Checkbox id="require-location" />
-                                    <Label htmlFor="require-location" className="text-sm">
-                                      Require location information
-                                    </Label>
-                                  </div>
-                                </div>
+                            {selectedField ? (
+                              <div>
+                                <h5 className="text-md font-medium mb-4 capitalize">
+                                  {selectedField === 'firstName' && 'First Name Options'}
+                                  {selectedField === 'lastName' && 'Last Name Options'}
+                                  {selectedField === 'emailUsername' && 'Email Username Options'}
+                                </h5>
                                 
-                                <div className="space-y-3">
-                                  <h6 className="text-sm font-medium text-gray-700 dark:text-gray-300">Default Behaviors</h6>
-                                  
+                                <div className="space-y-4">
+                                  {/* Required Checkbox for all fields */}
                                   <div className="flex items-center space-x-2">
-                                    <Checkbox id="auto-groups" defaultChecked />
-                                    <Label htmlFor="auto-groups" className="text-sm">
-                                      Auto-assign groups based on department
+                                    <Checkbox 
+                                      id={`${selectedField}-required`}
+                                      checked={fieldSettings[selectedField as keyof typeof fieldSettings]?.required}
+                                      onCheckedChange={(checked) => {
+                                        setFieldSettings(prev => ({
+                                          ...prev,
+                                          [selectedField]: {
+                                            ...prev[selectedField as keyof typeof prev],
+                                            required: checked
+                                          }
+                                        }));
+                                      }}
+                                    />
+                                    <Label htmlFor={`${selectedField}-required`} className="text-sm">
+                                      Required field
                                     </Label>
                                   </div>
-                                  
-                                  <div className="flex items-center space-x-2">
-                                    <Checkbox id="send-email" defaultChecked />
-                                    <Label htmlFor="send-email" className="text-sm">
-                                      Send welcome email by default
-                                    </Label>
-                                  </div>
-                                  
-                                  <div className="flex items-center space-x-2">
-                                    <Checkbox id="temp-password" defaultChecked />
-                                    <Label htmlFor="temp-password" className="text-sm">
-                                      Generate temporary password
-                                    </Label>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
 
-                            <div>
-                              <h5 className="text-md font-medium mb-4">Integration Settings</h5>
-                              
-                              <div className="space-y-3">
-                                <div className="flex items-center space-x-2">
-                                  <Checkbox id="okta-sync" defaultChecked />
-                                  <Label htmlFor="okta-sync" className="text-sm">
-                                    Sync user to OKTA automatically
-                                  </Label>
-                                </div>
-                                
-                                <div className="flex items-center space-x-2">
-                                  <Checkbox id="knowbe4-sync" defaultChecked />
-                                  <Label htmlFor="knowbe4-sync" className="text-sm">
-                                    Add to KnowBe4 security training
-                                  </Label>
-                                </div>
-                                
-                                <div className="flex items-center space-x-2">
-                                  <Checkbox id="device-provision" />
-                                  <Label htmlFor="device-provision" className="text-sm">
-                                    Trigger device provisioning workflow
-                                  </Label>
+                                  {/* Domain options for Email Username */}
+                                  {selectedField === 'emailUsername' && (
+                                    <div className="space-y-3">
+                                      <Label className="text-sm font-medium">Available Domains</Label>
+                                      <div className="space-y-2">
+                                        <div className="flex items-center justify-between p-2 border border-gray-200 dark:border-gray-600 rounded">
+                                          <span className="text-sm">@mazetx.com</span>
+                                          <Button variant="outline" size="sm" className="text-xs">
+                                            Primary
+                                          </Button>
+                                        </div>
+                                        <Button 
+                                          variant="outline" 
+                                          size="sm" 
+                                          className="w-full text-sm"
+                                          onClick={() => {
+                                            // Add domain functionality would go here
+                                          }}
+                                        >
+                                          <Plus className="w-3 h-3 mr-2" />
+                                          Add Domain
+                                        </Button>
+                                      </div>
+                                    </div>
+                                  )}
                                 </div>
                               </div>
-                            </div>
+                            ) : (
+                              <div className="text-center py-12">
+                                <div className="text-gray-400 mb-2">
+                                  <Settings className="w-8 h-8 mx-auto" />
+                                </div>
+                                <p className="text-sm text-gray-500 dark:text-gray-400">
+                                  Click on a field to customize its options
+                                </p>
+                              </div>
+                            )}
+
+                            {/* General Settings when no field is selected */}
+                            {!selectedField && (
+                              <div className="space-y-6">
+                                <div>
+                                  <h5 className="text-md font-medium mb-4">General Form Settings</h5>
+                                  
+                                  <div className="space-y-3">
+                                    <div className="flex items-center space-x-2">
+                                      <Checkbox id="auto-groups" defaultChecked />
+                                      <Label htmlFor="auto-groups" className="text-sm">
+                                        Auto-assign groups based on department
+                                      </Label>
+                                    </div>
+                                    
+                                    <div className="flex items-center space-x-2">
+                                      <Checkbox id="send-email" defaultChecked />
+                                      <Label htmlFor="send-email" className="text-sm">
+                                        Send welcome email by default
+                                      </Label>
+                                    </div>
+                                    
+                                    <div className="flex items-center space-x-2">
+                                      <Checkbox id="temp-password" defaultChecked />
+                                      <Label htmlFor="temp-password" className="text-sm">
+                                        Generate temporary password
+                                      </Label>
+                                    </div>
+                                  </div>
+                                </div>
+
+                                <div>
+                                  <h5 className="text-md font-medium mb-4">Integration Settings</h5>
+                                  
+                                  <div className="space-y-3">
+                                    <div className="flex items-center space-x-2">
+                                      <Checkbox id="okta-sync" defaultChecked />
+                                      <Label htmlFor="okta-sync" className="text-sm">
+                                        Sync user to OKTA automatically
+                                      </Label>
+                                    </div>
+                                    
+                                    <div className="flex items-center space-x-2">
+                                      <Checkbox id="knowbe4-sync" defaultChecked />
+                                      <Label htmlFor="knowbe4-sync" className="text-sm">
+                                        Add to KnowBe4 security training
+                                      </Label>
+                                    </div>
+                                    
+                                    <div className="flex items-center space-x-2">
+                                      <Checkbox id="device-provision" />
+                                      <Label htmlFor="device-provision" className="text-sm">
+                                        Trigger device provisioning workflow
+                                      </Label>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            )}
                           </div>
                         </div>
                       </div>
