@@ -2086,7 +2086,34 @@ function AdminComponent() {
                                       <Label className="text-sm font-medium">Email Domains</Label>
                                       <div className="space-y-2">
                                         {fieldSettings.emailUsername.domains.map((domain, index) => (
-                                          <div key={index} className="flex items-center gap-2">
+                                          <div
+                                            key={index}
+                                            className="flex items-center gap-2 cursor-move hover:bg-gray-50 dark:hover:bg-gray-700/20 rounded p-1"
+                                            draggable
+                                            onDragStart={(e) => {
+                                              e.dataTransfer.setData('text/plain', index.toString());
+                                            }}
+                                            onDragOver={(e) => {
+                                              e.preventDefault();
+                                            }}
+                                            onDrop={(e) => {
+                                              e.preventDefault();
+                                              const draggedIndex = parseInt(e.dataTransfer.getData('text/plain'));
+                                              if (draggedIndex !== index) {
+                                                const newDomains = [...fieldSettings.emailUsername.domains];
+                                                const draggedItem = newDomains[draggedIndex];
+                                                newDomains.splice(draggedIndex, 1);
+                                                newDomains.splice(index, 0, draggedItem);
+                                                setFieldSettings(prev => ({
+                                                  ...prev,
+                                                  emailUsername: {
+                                                    ...prev.emailUsername,
+                                                    domains: newDomains
+                                                  }
+                                                }));
+                                              }
+                                            }}
+                                          >
                                             <div className="flex items-center gap-1 text-gray-400 dark:text-gray-500">
                                               <div className="w-1 h-1 bg-current rounded-full"></div>
                                               <div className="w-1 h-1 bg-current rounded-full"></div>
@@ -2129,7 +2156,7 @@ function AdminComponent() {
                                             </Button>
                                           </div>
                                         ))}
-                                        {/* Plus button */}
+                                        {/* Plus button on left side */}
                                         <div className="flex items-center gap-2">
                                           <Button
                                             variant="ghost"
@@ -2143,7 +2170,7 @@ function AdminComponent() {
                                                 }
                                               }));
                                             }}
-                                            className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 px-2"
+                                            className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 p-1"
                                           >
                                             <Plus className="w-4 h-4" />
                                           </Button>
