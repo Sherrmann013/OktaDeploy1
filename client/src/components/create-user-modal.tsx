@@ -20,6 +20,7 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { insertUserSchema, type InsertUser, type User } from "@shared/schema";
 import { X, Check, RefreshCw } from "lucide-react";
+import { generate } from "random-words";
 
 interface CreateUserModalProps {
   open: boolean;
@@ -275,22 +276,27 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
   const generatePassword = () => {
     if (!passwordConfig) return;
     
-    // Different word lengths to help meet target length - expanded for more variety
-    const shortWords = [
-      'cat', 'dog', 'sun', 'car', 'key', 'box', 'cup', 'pen', 'hat', 'bag', 'run', 'sky', 'fox', 'gem', 'bay', 'ice', 'joy', 'owl', 'ray', 'bee',
-      'art', 'bat', 'bus', 'cab', 'dam', 'egg', 'fan', 'gas', 'hip', 'jam', 'lab', 'map', 'net', 'oak', 'pan', 'rat', 'sea', 'tap', 'van', 'web',
-      'zip', 'arm', 'bed', 'cap', 'den', 'ear', 'fog', 'gun', 'hub', 'ink', 'kit', 'log', 'mud', 'nut', 'orb', 'pad', 'rug', 'six', 'top', 'urn'
-    ];
-    const mediumWords = [
-      'blue', 'red', 'green', 'moon', 'star', 'tree', 'bird', 'fish', 'book', 'cloud', 'flame', 'grass', 'house', 'light', 'magic', 'night', 'river', 'stone', 'water', 'wind',
-      'apple', 'beach', 'chair', 'dream', 'earth', 'field', 'glass', 'heart', 'image', 'joint', 'knife', 'lemon', 'mouse', 'novel', 'ocean', 'peace', 'quiet', 'radio', 'smile', 'table',
-      'under', 'voice', 'white', 'youth', 'zebra', 'alive', 'brave', 'clean', 'dance', 'empty', 'first', 'globe', 'happy', 'index', 'judge', 'kings', 'lunch', 'music', 'north', 'other'
-    ];
-    const longWords = [
-      'purple', 'orange', 'yellow', 'silver', 'bronze', 'copper', 'golden', 'bright', 'forest', 'ocean', 'modern', 'simple', 'strong', 'winter', 'summer', 'spring', 'autumn', 'garden', 'temple', 'palace',
-      'diamond', 'emerald', 'sapphire', 'crystal', 'thunder', 'lightning', 'rainbow', 'sunshine', 'moonlight', 'starlight', 'kingdom', 'freedom', 'justice', 'harmony', 'balance', 'wisdom', 'courage', 'victory', 'triumph', 'journey',
-      'adventure', 'discovery', 'treasure', 'mystery', 'fantasy', 'reality', 'imagination', 'creation', 'innovation', 'exploration', 'celebration', 'revolution', 'evolution', 'transformation', 'inspiration', 'generation', 'foundation', 'dedication', 'meditation', 'reflection'
-    ];
+    // Generate words dynamically using random-words library with length constraints
+    const getWordsByLength = (targetLength: number, count: number = 10) => {
+      try {
+        const words = generate({ 
+          min: Math.max(1, targetLength - 1), 
+          max: targetLength + 1,
+          exactly: count * 3 // Generate more to filter better matches
+        }) as string[];
+        
+        // Filter to exact length preference and capitalize
+        return words
+          .filter(word => word.length >= targetLength - 1 && word.length <= targetLength + 1)
+          .slice(0, count)
+          .map(word => word.charAt(0).toUpperCase() + word.slice(1));
+      } catch (error) {
+        console.warn('Random words generation failed, using fallback');
+        // Fallback to a small set if library fails
+        const fallback = ['Blue', 'Red', 'Green', 'Star', 'Moon', 'Tree', 'Bird', 'Fish', 'Book', 'Light'];
+        return fallback.slice(0, count);
+      }
+    };
     
     const symbols = ['!', '@', '#', '$', '%', '^', '&', '*', '+', '=', '?'];
     const numbers = '0123456789';
@@ -315,20 +321,15 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
       for (let i = 0; i < component.count; i++) {
         switch (component.type) {
           case 'words':
-            // Select word based on available space
-            let selectedWord;
+            // Calculate target word length based on available space
             const remainingWordCount = passwordConfig.components.find(c => c.type === 'words')?.count || 1;
             const targetWordLength = Math.floor(availableWordSpace / remainingWordCount);
             
-            if (targetWordLength <= 3) {
-              selectedWord = shortWords[Math.floor(Math.random() * shortWords.length)];
-            } else if (targetWordLength <= 5) {
-              selectedWord = mediumWords[Math.floor(Math.random() * mediumWords.length)];
-            } else {
-              selectedWord = longWords[Math.floor(Math.random() * longWords.length)];
-            }
+            // Generate words dynamically with appropriate length
+            const candidateWords = getWordsByLength(targetWordLength, 5);
+            const selectedWord = candidateWords[Math.floor(Math.random() * candidateWords.length)];
             
-            passwordParts.push(selectedWord.charAt(0).toUpperCase() + selectedWord.slice(1));
+            passwordParts.push(selectedWord);
             break;
           case 'numbers':
             // Generate a single digit (0-9) as one component
