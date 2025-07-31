@@ -100,14 +100,32 @@ function AdminComponent() {
   });
 
   // Fetch field settings from database
-  const { data: departmentFieldSettings } = useQuery<{ options: string[]; required: boolean }>({
+  const { data: departmentFieldSettings, refetch: refetchDepartmentSettings } = useQuery<{ options: string[]; required: boolean }>({
     queryKey: ["/api/field-settings/department"],
-    refetchInterval: 30000
+    enabled: activeTab === "layout" && layoutTab === "new-user",
+    refetchInterval: 30000,
+    refetchOnMount: true,
+    refetchOnWindowFocus: false,
+    onSuccess: (data) => {
+      console.log('🔍 Department field settings loaded:', data);
+    },
+    onError: (error) => {
+      console.error('❌ Failed to load department field settings:', error);
+    }
   });
 
-  const { data: employeeTypeFieldSettings } = useQuery<{ options: string[]; required: boolean }>({
+  const { data: employeeTypeFieldSettings, refetch: refetchEmployeeTypeSettings } = useQuery<{ options: string[]; required: boolean }>({
     queryKey: ["/api/field-settings/employeeType"],
-    refetchInterval: 30000
+    enabled: activeTab === "layout" && layoutTab === "new-user",
+    refetchInterval: 30000,
+    refetchOnMount: true,
+    refetchOnWindowFocus: false,
+    onSuccess: (data) => {
+      console.log('🔍 Employee type field settings loaded:', data);
+    },
+    onError: (error) => {
+      console.error('❌ Failed to load employee type field settings:', error);
+    }
   });
 
   const queryClient = useQueryClient();
@@ -153,19 +171,31 @@ function AdminComponent() {
   // Mutations for field settings
   const updateDepartmentOptionsMutation = useMutation({
     mutationFn: async ({ options, required }: { options: string[]; required: boolean }) => {
+      console.log('🔄 Saving department options to database:', { options, required });
       return await apiRequest('POST', '/api/field-settings/department', { options, required });
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/field-settings/department'] });
+    onSuccess: async () => {
+      console.log('✅ Department options saved successfully');
+      await queryClient.invalidateQueries({ queryKey: ['/api/field-settings/department'] });
+      await refetchDepartmentSettings();
+    },
+    onError: (error) => {
+      console.error('❌ Failed to save department options:', error);
     }
   });
 
   const updateEmployeeTypeOptionsMutation = useMutation({
     mutationFn: async ({ options, required }: { options: string[]; required: boolean }) => {
+      console.log('🔄 Saving employee type options to database:', { options, required });
       return await apiRequest('POST', '/api/field-settings/employeeType', { options, required });
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/field-settings/employeeType'] });
+    onSuccess: async () => {
+      console.log('✅ Employee type options saved successfully');
+      await queryClient.invalidateQueries({ queryKey: ['/api/field-settings/employeeType'] });
+      await refetchEmployeeTypeSettings();
+    },
+    onError: (error) => {
+      console.error('❌ Failed to save employee type options:', error);
     }
   });
 
@@ -506,6 +536,7 @@ function AdminComponent() {
 
   // Update field settings when department and employee type data is loaded from database
   useEffect(() => {
+    console.log('🔍 Field settings data loaded:', { departmentFieldSettings, employeeTypeFieldSettings });
     if (departmentFieldSettings || employeeTypeFieldSettings) {
       setFieldSettings(prev => ({
         ...prev,
