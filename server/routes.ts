@@ -164,8 +164,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       };
       
       for (const user of users) {
-        if (user.employeeType && counts.hasOwnProperty(user.employeeType)) {
-          counts[user.employeeType]++;
+        if (user.employeeType && user.employeeType in counts) {
+          (counts as any)[user.employeeType]++;
         }
       }
       
@@ -708,8 +708,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         mobilePhone: oktaUser.profile.mobilePhone,
         manager: oktaUser.profile.manager,
         status: oktaUser.status,
-        lastLogin: oktaUser.lastLogin ? new Date(oktaUser.lastLogin) : null,
-        passwordChanged: oktaUser.passwordChanged ? new Date(oktaUser.passwordChanged) : null,
         employeeType: userData.employeeType,
       });
 
@@ -730,7 +728,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         // Employee type group mapping
         if (userData.employeeType) {
-          const employeeTypeMapping = {
+          const employeeTypeMapping: Record<string, string> = {
             'Employee': 'MTXCW-ET-EMPLOYEE',
             'Contractor': 'MTXCW-ET-CONTRACTOR'
           };
@@ -749,7 +747,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         // Department group mapping
         if (userData.department) {
-          const departmentMapping = {
+          const departmentMapping: Record<string, string> = {
             'Finance': 'finfacit@mazetx.com',
             'HR': 'HR@mazetx.com'
           };
@@ -1180,8 +1178,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
               title: oktaUser.profile.title || null,
               manager: oktaUser.profile.manager || null,
               status: oktaUser.status,
-              created: new Date(oktaUser.created),
-              lastUpdated: new Date(oktaUser.lastUpdated),
               lastLogin: oktaUser.lastLogin ? new Date(oktaUser.lastLogin) : null,
               passwordChanged: oktaUser.passwordChanged ? new Date(oktaUser.passwordChanged) : null
             });
@@ -1258,7 +1254,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
               title: oktaUser.profile.title || null,
               manager: oktaUser.profile.manager || null,
               status: oktaUser.status,
-              lastUpdated: new Date(oktaUser.lastUpdated),
               lastLogin: oktaUser.lastLogin ? new Date(oktaUser.lastLogin) : null,
               passwordChanged: oktaUser.passwordChanged ? new Date(oktaUser.passwordChanged) : null
             });
@@ -1556,7 +1551,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log('MANAGER-RELATED KEYS:', managerKeys);
       
       // Check all profile fields for "Susan" or "Limb"
-      const susanFields = {};
+      const susanFields: Record<string, any> = {};
       for (const [key, value] of Object.entries(profile)) {
         if (value && typeof value === 'string' && 
             (value.toLowerCase().includes('susan') || value.toLowerCase().includes('limb'))) {
@@ -1645,7 +1640,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
           mobilePhone: transformedUser.mobilePhone,
           manager: transformedUser.manager,
           status: transformedUser.status,
-          lastUpdated: transformedUser.lastUpdated,
           lastLogin: transformedUser.lastLogin,
           passwordChanged: transformedUser.passwordChanged
         });
@@ -1805,7 +1799,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           ipAddress: log.client?.ipAddress,
           geographicalContext: log.client?.geographicalContext
         },
-        target: log.target?.map(t => ({
+        target: log.target?.map((t: any) => ({
           id: t.id,
           type: t.type,
           displayName: t.displayName
@@ -1962,8 +1956,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             // Only update if OKTA has different (newer) data
             if (!localLastLogin || oktaLastLogin.getTime() !== localLastLogin.getTime()) {
               await storage.updateUser(localUser.id, {
-                lastLogin: oktaLastLogin,
-                lastUpdated: new Date()
+                lastLogin: oktaLastLogin
               });
               
               updates.push({
@@ -2961,15 +2954,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/app-mappings/lookup/:appName", isAuthenticated, async (req, res) => {
     try {
       const appName = req.params.appName;
-      const [mapping] = await db.select().from(appMappings)
-        .where(eq(appMappings.appName, appName))
-        .where(eq(appMappings.status, "active"));
+      const mapping = await db.select().from(appMappings)
+        .where(eq(appMappings.appName, appName));
       
-      if (!mapping) {
+      const activeMapping = mapping.find(m => m.status === "active");
+      
+      if (!activeMapping) {
         return res.status(404).json({ message: "App mapping not found" });
       }
 
-      res.json({ oktaGroupName: mapping.oktaGroupName });
+      res.json({ oktaGroupName: activeMapping.oktaGroupName });
     } catch (error) {
       console.error("Error looking up app mapping:", error);
       res.status(500).json({ message: "Failed to lookup app mapping" });
@@ -3112,7 +3106,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
-      const parsedValue = JSON.parse(setting[0].settingValue);
+      const parsedValue = JSON.parse(setting[0].settingValue || '{}');
       res.json(parsedValue);
     } catch (error) {
       console.error("Error fetching field setting:", error);
@@ -3181,7 +3175,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Dashboard cards endpoints
   app.get("/api/dashboard-cards", async (req, res) => {
     try {
-      console.log('📊 Dashboard cards requested, session user:', req.session?.user?.email || 'No session');
+      console.log('📊 Dashboard cards requested, session user:', (req.session as any)?.user?.email || 'No session');
       const cards = await db.select().from(dashboardCards).orderBy(dashboardCards.position);
       console.log('📊 Dashboard cards found:', cards.length);
       res.json(cards);
@@ -3220,8 +3214,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.patch("/api/dashboard-cards/positions", isAuthenticated, requireAdmin, async (req, res) => {
     try {
       console.log('🔄 BULK UPDATE ENDPOINT HIT - Raw request body:', req.body);
-      console.log('🔄 Session user:', req.session?.user?.email);
-      console.log('🔄 User role:', req.session?.user?.role);
+      console.log('🔄 Session user:', (req.session as any)?.user?.email);
+      console.log('🔄 User role:', (req.session as any)?.user?.role);
       
       const { cards } = req.body;
       console.log('🔄 Extracted cards:', cards);

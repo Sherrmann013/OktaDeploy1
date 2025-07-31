@@ -57,7 +57,8 @@ export const insertUserSchema = createInsertSchema(users).omit({
 export const updateUserSchema = createInsertSchema(users).partial().omit({
   id: true,
   oktaId: true,
-  sendActivationEmail: true,
+  created: true,
+  lastUpdated: true,
 });
 
 export type InsertUser = z.infer<typeof insertUserSchema>;
