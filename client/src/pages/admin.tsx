@@ -1837,21 +1837,6 @@ function AdminComponent() {
 
                     {layoutTab === "new-user" && (
                       <div className="bg-white dark:bg-gray-800 rounded-lg border dark:border-gray-700 p-6">
-                        <div className="flex items-center justify-between mb-6">
-                          <h4 className="text-lg font-semibold">New User Creation</h4>
-                          <Button 
-                            onClick={() => setIsCreateUserModalOpen(true)}
-                            className="bg-blue-600 hover:bg-blue-700 text-white flex items-center"
-                          >
-                            <Plus className="w-4 h-4 mr-2" />
-                            Create User
-                          </Button>
-                        </div>
-                        
-                        <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
-                          Configure and preview the new user creation process. This interface allows you to test and customize how new users are added to your organization.
-                        </p>
-
                         <div className="flex gap-6">
                           {/* User Creation Form Preview - Left Half */}
                           <div className="flex-1 max-w-md border border-gray-200 dark:border-gray-600 rounded-lg p-6 bg-gray-50 dark:bg-gray-700">
