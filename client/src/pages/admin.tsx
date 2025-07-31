@@ -317,6 +317,11 @@ function AdminComponent() {
     emailUsername: { required: true, domains: ['@mazetx.com'] }
   });
 
+  // Log field settings changes
+  useEffect(() => {
+    console.log('🔍 Field settings updated:', fieldSettings);
+  }, [fieldSettings]);
+
   // Query to fetch email username settings
   const { data: emailUsernameSettings, refetch: refetchEmailSettings } = useQuery({
     queryKey: ["/api/layout-settings/emailUsername"],
@@ -328,29 +333,39 @@ function AdminComponent() {
   // Refetch email settings when switching to New User tab
   useEffect(() => {
     if (activeTab === "layout" && layoutTab === "new-user") {
-      console.log('New User tab selected, refetching email settings...');
+      console.log('🔍 New User tab selected, refetching email settings...');
+      console.log('🔍 Current field settings before refetch:', fieldSettings);
       refetchEmailSettings();
     }
   }, [activeTab, layoutTab, refetchEmailSettings]);
 
   // Update field settings when email username settings are loaded
   useEffect(() => {
+    console.log('🔍 Email username settings effect triggered:', emailUsernameSettings);
     if (emailUsernameSettings && (emailUsernameSettings as any).settingValue) {
       try {
         const parsedSettings = JSON.parse((emailUsernameSettings as any).settingValue);
+        console.log('🔍 Parsed email settings:', parsedSettings);
         if (parsedSettings.domains && Array.isArray(parsedSettings.domains)) {
-          console.log('Loading saved domains:', parsedSettings.domains);
-          setFieldSettings(prev => ({
-            ...prev,
-            emailUsername: {
-              ...prev.emailUsername,
-              domains: parsedSettings.domains
-            }
-          }));
+          console.log('🔍 Loading saved domains:', parsedSettings.domains);
+          setFieldSettings(prev => {
+            console.log('🔍 Previous field settings:', prev);
+            const newSettings = {
+              ...prev,
+              emailUsername: {
+                ...prev.emailUsername,
+                domains: parsedSettings.domains
+              }
+            };
+            console.log('🔍 New field settings:', newSettings);
+            return newSettings;
+          });
         }
       } catch (error) {
-        console.error('Failed to parse email username settings:', error);
+        console.error('🔍 Failed to parse email username settings:', error);
       }
+    } else {
+      console.log('🔍 No email username settings found, using defaults');
     }
   }, [emailUsernameSettings]);
 
@@ -2158,13 +2173,19 @@ function AdminComponent() {
                                                 variant="ghost"
                                                 size="sm"
                                                 onClick={() => {
-                                                  setFieldSettings(prev => ({
-                                                    ...prev,
-                                                    emailUsername: {
-                                                      ...prev.emailUsername,
-                                                      domains: [...prev.emailUsername.domains, '@']
-                                                    }
-                                                  }));
+                                                  console.log('🔍 Plus button clicked - adding new domain');
+                                                  console.log('🔍 Current domains before add:', fieldSettings.emailUsername.domains);
+                                                  setFieldSettings(prev => {
+                                                    const newDomains = [...prev.emailUsername.domains, '@'];
+                                                    console.log('🔍 New domains after add:', newDomains);
+                                                    return {
+                                                      ...prev,
+                                                      emailUsername: {
+                                                        ...prev.emailUsername,
+                                                        domains: newDomains
+                                                      }
+                                                    };
+                                                  });
                                                 }}
                                                 className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 p-1"
                                               >
@@ -2214,13 +2235,17 @@ function AdminComponent() {
                                               variant="ghost"
                                               size="sm"
                                               onClick={() => {
-                                                setFieldSettings(prev => ({
-                                                  ...prev,
-                                                  emailUsername: {
-                                                    ...prev.emailUsername,
-                                                    domains: ['@']
-                                                  }
-                                                }));
+                                                console.log('🔍 First domain plus button clicked');
+                                                setFieldSettings(prev => {
+                                                  console.log('🔍 Setting first domain to [@]');
+                                                  return {
+                                                    ...prev,
+                                                    emailUsername: {
+                                                      ...prev.emailUsername,
+                                                      domains: ['@']
+                                                    }
+                                                  };
+                                                });
                                               }}
                                               className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 p-1"
                                             >
