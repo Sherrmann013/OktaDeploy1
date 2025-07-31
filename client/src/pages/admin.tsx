@@ -2937,7 +2937,7 @@ function AdminComponent() {
                                       {fieldSettings.department.useList && (
                                         <div className="space-y-3">
                                           <Label className="text-sm font-medium">Department Options</Label>
-                                          <div className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md divide-y divide-gray-200 dark:divide-gray-600">
+                                          <div className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md divide-y divide-gray-200 dark:divide-gray-600 max-w-sm">
                                             {fieldSettings.department.options.map((option, index) => (
                                               <div key={index} className="flex items-center px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700/50">
                                                 <Input
@@ -2960,6 +2960,17 @@ function AdminComponent() {
                                                   variant="ghost"
                                                   size="sm"
                                                   onClick={() => {
+                                                    // Link functionality - placeholder for now
+                                                    console.log('Link clicked for department:', option);
+                                                  }}
+                                                  className="h-4 w-4 p-0 text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 ml-2"
+                                                >
+                                                  🔗
+                                                </Button>
+                                                <Button
+                                                  variant="ghost"
+                                                  size="sm"
+                                                  onClick={() => {
                                                     setFieldSettings({
                                                       ...fieldSettings,
                                                       department: {
@@ -2968,7 +2979,7 @@ function AdminComponent() {
                                                       }
                                                     });
                                                   }}
-                                                  className="h-4 w-4 p-0 text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 ml-2"
+                                                  className="h-4 w-4 p-0 text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 ml-1"
                                                 >
                                                   ×
                                                 </Button>
@@ -3009,7 +3020,7 @@ function AdminComponent() {
                                     <div className="space-y-4">
                                       <div className="space-y-3">
                                         <Label className="text-sm font-medium">Employee Type Options</Label>
-                                        <div className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md divide-y divide-gray-200 dark:divide-gray-600">
+                                        <div className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md divide-y divide-gray-200 dark:divide-gray-600 max-w-sm">
                                           {fieldSettings.employeeType.options.map((option, index) => (
                                             <div key={index} className="flex items-center px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700/50">
                                               <Input
@@ -3032,6 +3043,17 @@ function AdminComponent() {
                                                 variant="ghost"
                                                 size="sm"
                                                 onClick={() => {
+                                                  // Link functionality - placeholder for now
+                                                  console.log('Link clicked for employee type:', option);
+                                                }}
+                                                className="h-4 w-4 p-0 text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 ml-2"
+                                              >
+                                                🔗
+                                              </Button>
+                                              <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                onClick={() => {
                                                   setFieldSettings({
                                                     ...fieldSettings,
                                                     employeeType: {
@@ -3040,7 +3062,7 @@ function AdminComponent() {
                                                     }
                                                   });
                                                 }}
-                                                className="h-4 w-4 p-0 text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 ml-2"
+                                                className="h-4 w-4 p-0 text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 ml-1"
                                               >
                                                 ×
                                               </Button>
