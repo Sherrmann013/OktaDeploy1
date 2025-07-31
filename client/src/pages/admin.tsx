@@ -237,13 +237,41 @@ function AdminComponent() {
   };
 
   const addDashboardCard = (cardName: string, cardDescription: string) => {
-    const newCard = {
-      id: Date.now(),
-      name: cardName,
-      description: cardDescription
+    // For existing integrations, use their type. For custom cards, use 'custom' as type
+    const integration = integrationsData?.find(i => i.displayName === cardName);
+    const cardType = integration ? integration.name : 'custom';
+    
+    // Create dashboard card via API instead of local state
+    const createDashboardCard = async () => {
+      try {
+        const response = await apiRequest("POST", "/api/dashboard-cards", {
+          name: cardName,
+          type: cardType,
+          enabled: true,
+          position: dashboardCards.length // Add at the end
+        });
+        
+        if (response.ok) {
+          // Refresh the dashboard cards list
+          refetchDashboardCards();
+          toast({
+            title: "Success",
+            description: `Dashboard card "${cardName}" added successfully`,
+          });
+        } else {
+          throw new Error('Failed to create dashboard card');
+        }
+      } catch (error) {
+        console.error('Failed to add dashboard card:', error);
+        toast({
+          title: "Error",
+          description: "Failed to add dashboard card",
+          variant: "destructive",
+        });
+      }
     };
-    setDashboardCards(cards => [...cards, newCard]);
-    setIsAddDashboardCardOpen(false);
+    
+    createDashboardCard();
   };
 
 
@@ -275,6 +303,8 @@ function AdminComponent() {
   const [selectedIntegrationType, setSelectedIntegrationType] = useState("");
   const [integrationSearchTerm, setIntegrationSearchTerm] = useState("");
   const [showIntegrationDropdown, setShowIntegrationDropdown] = useState(false);
+  const [customCardName, setCustomCardName] = useState("");
+  const [customCardDescription, setCustomCardDescription] = useState("");
 
   const queryClient = useQueryClient();
 
@@ -899,6 +929,15 @@ function AdminComponent() {
               <rect width="24" height="24" rx="4" fill="#EA580C"/>
               <path d="M12 4l6 4v8l-6 4-6-4V8l6-4z" fill="white"/>
               <path d="M12 7l4 3v6l-4 3-4-3v-6l4-3z" fill="#EA580C"/>
+            </svg>
+          </div>
+        );
+      case 'custom':
+        return (
+          <div className={logoClass}>
+            <svg viewBox="0 0 24 24" className="w-full h-full">
+              <rect width="24" height="24" rx="4" fill="#8B5CF6"/>
+              <path d="M12 8v8m-4-4h8" stroke="white" strokeWidth="2" strokeLinecap="round"/>
             </svg>
           </div>
         );
@@ -2142,9 +2181,14 @@ function AdminComponent() {
             <div className="grid gap-2">
               <Label htmlFor="cardName">Integration Name</Label>
               <Select onValueChange={(value) => {
-                const integration = integrationsData?.find(i => i.displayName === value);
-                if (integration) {
-                  addDashboardCard(integration.displayName, integration.description || 'Integration dashboard card');
+                if (value === "custom") {
+                  setSelectedIntegrationType("custom");
+                } else {
+                  const integration = integrationsData?.find(i => i.displayName === value);
+                  if (integration) {
+                    addDashboardCard(integration.displayName, integration.description || 'Integration dashboard card');
+                    setIsAddDashboardCardOpen(false);
+                  }
                 }
               }}>
                 <SelectTrigger>
@@ -2163,14 +2207,74 @@ function AdminComponent() {
                       </div>
                     </SelectItem>
                   ))}
+                  {/* Custom option at the bottom */}
+                  <SelectItem 
+                    value="custom"
+                    className="bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 border-t border-gray-200 dark:border-gray-600"
+                  >
+                    <div className="flex items-center gap-2">
+                      <div className="w-6 h-6 flex-shrink-0 bg-gray-400 rounded flex items-center justify-center">
+                        <Plus className="w-4 h-4 text-white" />
+                      </div>
+                      Custom Integration
+                    </div>
+                  </SelectItem>
                 </SelectContent>
               </Select>
             </div>
+            
+            {/* Custom card creation form */}
+            {selectedIntegrationType === "custom" && (
+              <div className="space-y-4 pt-4 border-t border-gray-200 dark:border-gray-600">
+                <div className="grid gap-2">
+                  <Label htmlFor="customCardName">Custom Card Name</Label>
+                  <Input
+                    id="customCardName"
+                    value={customCardName}
+                    onChange={(e) => setCustomCardName(e.target.value)}
+                    placeholder="Enter custom integration name"
+                    className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700"
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="customCardDescription">Description (optional)</Label>
+                  <Input
+                    id="customCardDescription"
+                    value={customCardDescription}
+                    onChange={(e) => setCustomCardDescription(e.target.value)}
+                    placeholder="Enter card description"
+                    className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700"
+                  />
+                </div>
+              </div>
+            )}
           </div>
           <div className="flex justify-end space-x-2">
-            <Button variant="outline" onClick={() => setIsAddDashboardCardOpen(false)}>
+            <Button variant="outline" onClick={() => {
+              setIsAddDashboardCardOpen(false);
+              setSelectedIntegrationType("");
+              setCustomCardName("");
+              setCustomCardDescription("");
+            }}>
               Cancel
             </Button>
+            {selectedIntegrationType === "custom" && (
+              <Button 
+                onClick={() => {
+                  if (customCardName.trim()) {
+                    addDashboardCard(customCardName, customCardDescription || 'Custom integration card');
+                    setIsAddDashboardCardOpen(false);
+                    setSelectedIntegrationType("");
+                    setCustomCardName("");
+                    setCustomCardDescription("");
+                  }
+                }}
+                disabled={!customCardName.trim()}
+                className="bg-blue-600 hover:bg-blue-700 text-white"
+              >
+                Add Custom Card
+              </Button>
+            )}
           </div>
         </DialogContent>
       </Dialog>
