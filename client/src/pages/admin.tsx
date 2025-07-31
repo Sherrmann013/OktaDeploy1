@@ -2085,24 +2085,6 @@ function AdminComponent() {
                                     <div className="space-y-3">
                                       <Label className="text-sm font-medium">Email Domains</Label>
                                       <div className="space-y-2">
-                                        <div className="flex items-center gap-2 mb-2">
-                                          <Button
-                                            variant="ghost"
-                                            size="sm"
-                                            onClick={() => {
-                                              setFieldSettings(prev => ({
-                                                ...prev,
-                                                emailUsername: {
-                                                  ...prev.emailUsername,
-                                                  domains: [...prev.emailUsername.domains, '@company.com']
-                                                }
-                                              }));
-                                            }}
-                                            className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 p-1"
-                                          >
-                                            <Plus className="w-4 h-4" />
-                                          </Button>
-                                        </div>
                                         {fieldSettings.emailUsername.domains.map((domain, index) => (
                                           <div
                                             key={index}
@@ -2166,6 +2148,23 @@ function AdminComponent() {
                                             </Button>
                                           </div>
                                         ))}
+                                        {/* Plus button at bottom left */}
+                                        <Button
+                                          variant="ghost"
+                                          size="sm"
+                                          onClick={() => {
+                                            setFieldSettings(prev => ({
+                                              ...prev,
+                                              emailUsername: {
+                                                ...prev.emailUsername,
+                                                domains: [...prev.emailUsername.domains, '@company.com']
+                                              }
+                                            }));
+                                          }}
+                                          className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 p-1 self-start"
+                                        >
+                                          <Plus className="w-4 h-4" />
+                                        </Button>
                                       </div>
                                     </div>
                                   )}
