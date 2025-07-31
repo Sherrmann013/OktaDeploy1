@@ -745,6 +745,17 @@ function AdminComponent() {
     { value: "hexnode", label: "Hexnode" }
   ];
 
+  // Map dashboard card types to integration types
+  const mapCardTypeToIntegrationType = (cardType: string) => {
+    const mapping: Record<string, string> = {
+      'device_management': 'addigy', // Map device_management to addigy logo
+      'knowbe4': 'knowbe4',
+      'sentinelone': 'sentinelone', 
+      'jira': 'jira'
+    };
+    return mapping[cardType] || cardType;
+  };
+
   // Get integration logo component
   const getIntegrationLogo = (name: string) => {
     const logoClass = "w-6 h-6 flex-shrink-0";
@@ -1677,14 +1688,10 @@ function AdminComponent() {
                               <div className="flex items-center justify-between mb-2">
                                 <div className="flex items-center gap-2">
                                   <div className={`
-                                    w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded 
-                                    flex items-center justify-center
                                     transition-transform duration-200 ease-in-out
                                     ${draggedItem === index ? 'scale-110' : ''}
                                   `}>
-                                    <span className="text-white text-xs font-bold">
-                                      {card.name ? card.name.charAt(0) : card.type?.charAt(0)?.toUpperCase() || '?'}
-                                    </span>
+                                    {getIntegrationLogo(mapCardTypeToIntegrationType(card.type))}
                                   </div>
                                   <span className={`
                                     font-medium text-sm transition-all duration-200
@@ -1693,18 +1700,39 @@ function AdminComponent() {
                                     {card.name || `${card.type} Integration`}
                                   </span>
                                 </div>
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => removeDashboardCard(card.id)}
-                                  className={`
-                                    text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950
-                                    transition-all duration-200 ease-in-out
-                                    ${draggedItem === index ? 'opacity-50' : 'hover:scale-110'}
-                                  `}
-                                >
-                                  <X className="w-4 h-4" />
-                                </Button>
+                                <div className="flex items-center gap-1">
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => {
+                                      // Find matching integration and open configure dialog
+                                      const integration = integrationsData.find(i => i.name === card.type);
+                                      if (integration) {
+                                        setEditingIntegration(integration);
+                                        setIsConfigureIntegrationOpen(true);
+                                      }
+                                    }}
+                                    className={`
+                                      text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-950
+                                      transition-all duration-200 ease-in-out
+                                      ${draggedItem === index ? 'opacity-50' : 'hover:scale-110'}
+                                    `}
+                                  >
+                                    <Edit className="w-4 h-4" />
+                                  </Button>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => removeDashboardCard(card.id)}
+                                    className={`
+                                      text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950
+                                      transition-all duration-200 ease-in-out
+                                      ${draggedItem === index ? 'opacity-50' : 'hover:scale-110'}
+                                    `}
+                                  >
+                                    <X className="w-4 h-4" />
+                                  </Button>
+                                </div>
                               </div>
                               <div className={`
                                 text-xs transition-colors duration-200
