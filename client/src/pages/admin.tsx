@@ -2893,23 +2893,175 @@ function AdminComponent() {
                                       {fieldSettings.department.useList && (
                                         <div className="space-y-3">
                                           <Label className="text-sm font-medium">Department Options</Label>
+                                          <div className="flex gap-4">
+                                            {/* Department List Column */}
+                                            <div className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md divide-y divide-gray-200 dark:divide-gray-600 max-w-48">
+                                              {fieldSettings.department.options.map((option, index) => (
+                                                <div key={index} className="flex items-center px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                                                  <Input
+                                                    value={option}
+                                                    onChange={(e) => {
+                                                      setFieldSettings({
+                                                        ...fieldSettings,
+                                                        department: {
+                                                          ...fieldSettings.department,
+                                                          options: fieldSettings.department.options.map((opt, i) => 
+                                                            i === index ? e.target.value : opt
+                                                          )
+                                                        }
+                                                      });
+                                                    }}
+                                                    placeholder="Department name"
+                                                    className="flex-1 bg-transparent border-none text-gray-900 dark:text-gray-100 text-sm p-0 h-auto focus:ring-0 focus:border-none"
+                                                  />
+                                                  <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    onClick={() => {
+                                                      setOpenAppsSection(
+                                                        openAppsSection?.type === 'department' && openAppsSection?.index === index 
+                                                          ? null 
+                                                          : { type: 'department', index }
+                                                      );
+                                                    }}
+                                                    className="h-4 w-4 p-0 text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 ml-2"
+                                                  >
+                                                    🔗
+                                                  </Button>
+                                                  <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    onClick={() => {
+                                                      setFieldSettings({
+                                                        ...fieldSettings,
+                                                        department: {
+                                                          ...fieldSettings.department,
+                                                          options: fieldSettings.department.options.filter((_, i) => i !== index)
+                                                        }
+                                                      });
+                                                    }}
+                                                    className="h-4 w-4 p-0 text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 ml-1"
+                                                  >
+                                                    ×
+                                                  </Button>
+                                                </div>
+                                              ))}
+                                              <div className="flex items-center px-3 py-2 border-t border-dashed border-gray-300 dark:border-gray-600">
+                                                <Button
+                                                  variant="ghost"
+                                                  size="sm"
+                                                  onClick={() => {
+                                                    setFieldSettings({
+                                                      ...fieldSettings,
+                                                      department: {
+                                                        ...fieldSettings.department,
+                                                        options: [...fieldSettings.department.options, ""]
+                                                      }
+                                                    });
+                                                  }}
+                                                  className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
+                                                >
+                                                  <Plus className="w-4 h-4" />
+                                                  Add department
+                                                </Button>
+                                              </div>
+                                              {fieldSettings.department.options.length === 0 && (
+                                                <div className="flex items-center px-3 py-4 text-center">
+                                                  <span className="text-sm text-gray-500 dark:text-gray-400 w-full">No departments added yet</span>
+                                                </div>
+                                              )}
+                                            </div>
+
+                                            {/* Applications Column - appears when link is clicked */}
+                                            {openAppsSection?.type === 'department' && (
+                                              <div className="space-y-3">
+                                                <Label className="text-sm font-medium">Applications for "{fieldSettings.department.options[openAppsSection.index]}"</Label>
+                                                
+                                                {/* Applications Dropdown */}
+                                                <div className="mb-3">
+                                                  <CustomSelect
+                                                    value=""
+                                                    onValueChange={(appName) => {
+                                                      const currentApps = departmentApps[openAppsSection.index] || [];
+                                                      if (!currentApps.includes(appName)) {
+                                                        setDepartmentApps(prev => ({
+                                                          ...prev,
+                                                          [openAppsSection.index]: [...currentApps, appName]
+                                                        }));
+                                                      }
+                                                    }}
+                                                  >
+                                                    <CustomSelectTrigger className="max-w-48 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600">
+                                                      <CustomSelectValue placeholder="Select an application to add" />
+                                                    </CustomSelectTrigger>
+                                                    <CustomSelectContent>
+                                                      {activeApps.map((app) => (
+                                                        <CustomSelectItem key={app.id} value={app.appName}>
+                                                          {app.appName}
+                                                        </CustomSelectItem>
+                                                      ))}
+                                                    </CustomSelectContent>
+                                                  </CustomSelect>
+                                                </div>
+
+                                                {/* Selected Applications List - Same format as department list */}
+                                                <div className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md divide-y divide-gray-200 dark:divide-gray-600 max-w-48">
+                                                  {(departmentApps[openAppsSection.index] || []).map((appName, appIndex) => (
+                                                    <div key={appIndex} className="flex items-center px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                                                      <span className="text-sm flex-1">{appName}</span>
+                                                      <Button
+                                                        variant="ghost"
+                                                        size="sm"
+                                                        onClick={() => {
+                                                          setDepartmentApps(prev => ({
+                                                            ...prev,
+                                                            [openAppsSection.index]: (prev[openAppsSection.index] || []).filter((_, i) => i !== appIndex)
+                                                          }));
+                                                        }}
+                                                        className="h-4 w-4 p-0 text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 ml-2"
+                                                      >
+                                                        ×
+                                                      </Button>
+                                                    </div>
+                                                  ))}
+                                                  {(!departmentApps[openAppsSection.index] || departmentApps[openAppsSection.index].length === 0) && (
+                                                    <div className="flex items-center px-3 py-4 text-center">
+                                                      <span className="text-sm text-gray-500 dark:text-gray-400 w-full">No applications added yet</span>
+                                                    </div>
+                                                  )}
+                                                </div>
+                                              </div>
+                                            )}
+                                          </div>
+                                        </div>
+                                      )}
+                                    </div>
+                                  )}
+
+                                  {/* Employee Type options */}
+                                  {selectedField === 'employeeType' && (
+                                    <div className="space-y-4">
+                                      <div className="space-y-3">
+                                        <Label className="text-sm font-medium">Employee Type Options</Label>
+                                        <div className="flex gap-4">
+                                          {/* Employee Type List Column */}
                                           <div className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md divide-y divide-gray-200 dark:divide-gray-600 max-w-48">
-                                            {fieldSettings.department.options.map((option, index) => (
+                                            {fieldSettings.employeeType.options.map((option, index) => (
                                               <div key={index} className="flex items-center px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700/50">
                                                 <Input
                                                   value={option}
                                                   onChange={(e) => {
                                                     setFieldSettings({
                                                       ...fieldSettings,
-                                                      department: {
-                                                        ...fieldSettings.department,
-                                                        options: fieldSettings.department.options.map((opt, i) => 
+                                                      employeeType: {
+                                                        ...fieldSettings.employeeType,
+                                                        options: fieldSettings.employeeType.options.map((opt, i) => 
                                                           i === index ? e.target.value : opt
                                                         )
                                                       }
                                                     });
                                                   }}
-                                                  placeholder="Department name"
+                                                  placeholder="Employee type"
                                                   className="flex-1 bg-transparent border-none text-gray-900 dark:text-gray-100 text-sm p-0 h-auto focus:ring-0 focus:border-none"
                                                 />
                                                 <Button
@@ -2917,9 +3069,9 @@ function AdminComponent() {
                                                   size="sm"
                                                   onClick={() => {
                                                     setOpenAppsSection(
-                                                      openAppsSection?.type === 'department' && openAppsSection?.index === index 
+                                                      openAppsSection?.type === 'employeeType' && openAppsSection?.index === index 
                                                         ? null 
-                                                        : { type: 'department', index }
+                                                        : { type: 'employeeType', index }
                                                     );
                                                   }}
                                                   className="h-4 w-4 p-0 text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 ml-2"
@@ -2932,9 +3084,9 @@ function AdminComponent() {
                                                   onClick={() => {
                                                     setFieldSettings({
                                                       ...fieldSettings,
-                                                      department: {
-                                                        ...fieldSettings.department,
-                                                        options: fieldSettings.department.options.filter((_, i) => i !== index)
+                                                      employeeType: {
+                                                        ...fieldSettings.employeeType,
+                                                        options: fieldSettings.employeeType.options.filter((_, i) => i !== index)
                                                       }
                                                     });
                                                   }}
@@ -2951,45 +3103,45 @@ function AdminComponent() {
                                                 onClick={() => {
                                                   setFieldSettings({
                                                     ...fieldSettings,
-                                                    department: {
-                                                      ...fieldSettings.department,
-                                                      options: [...fieldSettings.department.options, ""]
+                                                    employeeType: {
+                                                      ...fieldSettings.employeeType,
+                                                      options: [...fieldSettings.employeeType.options, ""]
                                                     }
                                                   });
                                                 }}
                                                 className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
                                               >
                                                 <Plus className="w-4 h-4" />
-                                                Add department
+                                                Add employee type
                                               </Button>
                                             </div>
-                                            {fieldSettings.department.options.length === 0 && (
+                                            {fieldSettings.employeeType.options.length === 0 && (
                                               <div className="flex items-center px-3 py-4 text-center">
-                                                <span className="text-sm text-gray-500 dark:text-gray-400 w-full">No departments added yet</span>
+                                                <span className="text-sm text-gray-500 dark:text-gray-400 w-full">No employee types added yet</span>
                                               </div>
                                             )}
                                           </div>
 
-                                          {/* Applications Section for Departments */}
-                                          {openAppsSection?.type === 'department' && (
-                                            <div className="ml-8 mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-md">
-                                              <Label className="text-sm font-medium mb-3 block">Applications for "{fieldSettings.department.options[openAppsSection.index]}"</Label>
+                                          {/* Applications Column - appears when link is clicked */}
+                                          {openAppsSection?.type === 'employeeType' && (
+                                            <div className="space-y-3">
+                                              <Label className="text-sm font-medium">Applications for "{fieldSettings.employeeType.options[openAppsSection.index]}"</Label>
                                               
                                               {/* Applications Dropdown */}
                                               <div className="mb-3">
                                                 <CustomSelect
                                                   value=""
                                                   onValueChange={(appName) => {
-                                                    const currentApps = departmentApps[openAppsSection.index] || [];
+                                                    const currentApps = employeeTypeApps[openAppsSection.index] || [];
                                                     if (!currentApps.includes(appName)) {
-                                                      setDepartmentApps(prev => ({
+                                                      setEmployeeTypeApps(prev => ({
                                                         ...prev,
                                                         [openAppsSection.index]: [...currentApps, appName]
                                                       }));
                                                     }
                                                   }}
                                                 >
-                                                  <CustomSelectTrigger className="w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600">
+                                                  <CustomSelectTrigger className="max-w-48 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600">
                                                     <CustomSelectValue placeholder="Select an application to add" />
                                                   </CustomSelectTrigger>
                                                   <CustomSelectContent>
@@ -3002,181 +3154,35 @@ function AdminComponent() {
                                                 </CustomSelect>
                                               </div>
 
-                                              {/* Selected Applications List */}
-                                              <div className="space-y-1">
-                                                {(departmentApps[openAppsSection.index] || []).map((appName, appIndex) => (
-                                                  <div key={appIndex} className="flex items-center justify-between bg-white dark:bg-gray-800 px-3 py-2 rounded border border-gray-200 dark:border-gray-700">
-                                                    <span className="text-sm">{appName}</span>
+                                              {/* Selected Applications List - Same format as employee type list */}
+                                              <div className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md divide-y divide-gray-200 dark:divide-gray-600 max-w-48">
+                                                {(employeeTypeApps[openAppsSection.index] || []).map((appName, appIndex) => (
+                                                  <div key={appIndex} className="flex items-center px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                                                    <span className="text-sm flex-1">{appName}</span>
                                                     <Button
                                                       variant="ghost"
                                                       size="sm"
                                                       onClick={() => {
-                                                        setDepartmentApps(prev => ({
+                                                        setEmployeeTypeApps(prev => ({
                                                           ...prev,
                                                           [openAppsSection.index]: (prev[openAppsSection.index] || []).filter((_, i) => i !== appIndex)
                                                         }));
                                                       }}
-                                                      className="h-4 w-4 p-0 text-red-500 hover:text-red-700"
+                                                      className="h-4 w-4 p-0 text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 ml-2"
                                                     >
                                                       ×
                                                     </Button>
                                                   </div>
                                                 ))}
-                                                {(!departmentApps[openAppsSection.index] || departmentApps[openAppsSection.index].length === 0) && (
-                                                  <div className="text-sm text-gray-500 text-center py-4">
-                                                    No applications added yet
+                                                {(!employeeTypeApps[openAppsSection.index] || employeeTypeApps[openAppsSection.index].length === 0) && (
+                                                  <div className="flex items-center px-3 py-4 text-center">
+                                                    <span className="text-sm text-gray-500 dark:text-gray-400 w-full">No applications added yet</span>
                                                   </div>
                                                 )}
                                               </div>
                                             </div>
                                           )}
                                         </div>
-                                      )}
-                                    </div>
-                                  )}
-
-                                  {/* Employee Type options */}
-                                  {selectedField === 'employeeType' && (
-                                    <div className="space-y-4">
-                                      <div className="space-y-3">
-                                        <Label className="text-sm font-medium">Employee Type Options</Label>
-                                        <div className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md divide-y divide-gray-200 dark:divide-gray-600 max-w-48">
-                                          {fieldSettings.employeeType.options.map((option, index) => (
-                                            <div key={index} className="flex items-center px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700/50">
-                                              <Input
-                                                value={option}
-                                                onChange={(e) => {
-                                                  setFieldSettings({
-                                                    ...fieldSettings,
-                                                    employeeType: {
-                                                      ...fieldSettings.employeeType,
-                                                      options: fieldSettings.employeeType.options.map((opt, i) => 
-                                                        i === index ? e.target.value : opt
-                                                      )
-                                                    }
-                                                  });
-                                                }}
-                                                placeholder="Employee type"
-                                                className="flex-1 bg-transparent border-none text-gray-900 dark:text-gray-100 text-sm p-0 h-auto focus:ring-0 focus:border-none"
-                                              />
-                                              <Button
-                                                variant="ghost"
-                                                size="sm"
-                                                onClick={() => {
-                                                  setOpenAppsSection(
-                                                    openAppsSection?.type === 'employeeType' && openAppsSection?.index === index 
-                                                      ? null 
-                                                      : { type: 'employeeType', index }
-                                                  );
-                                                }}
-                                                className="h-4 w-4 p-0 text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 ml-2"
-                                              >
-                                                🔗
-                                              </Button>
-                                              <Button
-                                                variant="ghost"
-                                                size="sm"
-                                                onClick={() => {
-                                                  setFieldSettings({
-                                                    ...fieldSettings,
-                                                    employeeType: {
-                                                      ...fieldSettings.employeeType,
-                                                      options: fieldSettings.employeeType.options.filter((_, i) => i !== index)
-                                                    }
-                                                  });
-                                                }}
-                                                className="h-4 w-4 p-0 text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 ml-1"
-                                              >
-                                                ×
-                                              </Button>
-                                            </div>
-                                          ))}
-                                          <div className="flex items-center px-3 py-2 border-t border-dashed border-gray-300 dark:border-gray-600">
-                                            <Button
-                                              variant="ghost"
-                                              size="sm"
-                                              onClick={() => {
-                                                setFieldSettings({
-                                                  ...fieldSettings,
-                                                  employeeType: {
-                                                    ...fieldSettings.employeeType,
-                                                    options: [...fieldSettings.employeeType.options, ""]
-                                                  }
-                                                });
-                                              }}
-                                              className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
-                                            >
-                                              <Plus className="w-4 h-4" />
-                                              Add employee type
-                                            </Button>
-                                          </div>
-                                          {fieldSettings.employeeType.options.length === 0 && (
-                                            <div className="flex items-center px-3 py-4 text-center">
-                                              <span className="text-sm text-gray-500 dark:text-gray-400 w-full">No employee types added yet</span>
-                                            </div>
-                                          )}
-                                        </div>
-
-                                        {/* Applications Section for Employee Types */}
-                                        {openAppsSection?.type === 'employeeType' && (
-                                          <div className="ml-8 mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-md">
-                                            <Label className="text-sm font-medium mb-3 block">Applications for "{fieldSettings.employeeType.options[openAppsSection.index]}"</Label>
-                                            
-                                            {/* Applications Dropdown */}
-                                            <div className="mb-3">
-                                              <CustomSelect
-                                                value=""
-                                                onValueChange={(appName) => {
-                                                  const currentApps = employeeTypeApps[openAppsSection.index] || [];
-                                                  if (!currentApps.includes(appName)) {
-                                                    setEmployeeTypeApps(prev => ({
-                                                      ...prev,
-                                                      [openAppsSection.index]: [...currentApps, appName]
-                                                    }));
-                                                  }
-                                                }}
-                                              >
-                                                <CustomSelectTrigger className="w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600">
-                                                  <CustomSelectValue placeholder="Select an application to add" />
-                                                </CustomSelectTrigger>
-                                                <CustomSelectContent>
-                                                  {activeApps.map((app) => (
-                                                    <CustomSelectItem key={app.id} value={app.appName}>
-                                                      {app.appName}
-                                                    </CustomSelectItem>
-                                                  ))}
-                                                </CustomSelectContent>
-                                              </CustomSelect>
-                                            </div>
-
-                                            {/* Selected Applications List */}
-                                            <div className="space-y-1">
-                                              {(employeeTypeApps[openAppsSection.index] || []).map((appName, appIndex) => (
-                                                <div key={appIndex} className="flex items-center justify-between bg-white dark:bg-gray-800 px-3 py-2 rounded border border-gray-200 dark:border-gray-700">
-                                                  <span className="text-sm">{appName}</span>
-                                                  <Button
-                                                    variant="ghost"
-                                                    size="sm"
-                                                    onClick={() => {
-                                                      setEmployeeTypeApps(prev => ({
-                                                        ...prev,
-                                                        [openAppsSection.index]: (prev[openAppsSection.index] || []).filter((_, i) => i !== appIndex)
-                                                      }));
-                                                    }}
-                                                    className="h-4 w-4 p-0 text-red-500 hover:text-red-700"
-                                                  >
-                                                    ×
-                                                  </Button>
-                                                </div>
-                                              ))}
-                                              {(!employeeTypeApps[openAppsSection.index] || employeeTypeApps[openAppsSection.index].length === 0) && (
-                                                <div className="text-sm text-gray-500 text-center py-4">
-                                                  No applications added yet
-                                                </div>
-                                              )}
-                                            </div>
-                                          </div>
-                                        )}
                                       </div>
                                     </div>
                                   )}
