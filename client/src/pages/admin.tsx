@@ -328,6 +328,31 @@ function AdminComponent() {
     }
   });
 
+  // Function to save password settings to database
+  const savePasswordSettings = async (passwordSettings: any) => {
+    try {
+      const settingData = {
+        settingKey: 'password',
+        settingValue: JSON.stringify(passwordSettings),
+        settingType: 'user_config' as const,
+        metadata: {}
+      };
+      
+      const response = await fetch('/api/layout-settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(settingData)
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to save password settings');
+      }
+    } catch (error) {
+      console.error('Failed to save password settings:', error);
+    }
+  };
+
   // Log field settings changes
   useEffect(() => {
     console.log('🔍 Field settings updated:', fieldSettings);
@@ -2412,13 +2437,15 @@ function AdminComponent() {
                                                         const [draggedItem] = newComponents.splice(draggedIndex, 1);
                                                         newComponents.splice(dropIndex, 0, draggedItem);
                                                         
-                                                        setFieldSettings(prev => ({
-                                                          ...prev,
+                                                        const newSettings = {
+                                                          ...fieldSettings,
                                                           password: {
-                                                            ...prev.password,
+                                                            ...fieldSettings.password,
                                                             components: newComponents
                                                           }
-                                                        }));
+                                                        };
+                                                        setFieldSettings(newSettings);
+                                                        savePasswordSettings(newSettings.password);
                                                       }
                                                     }}
                                                   >
@@ -2429,13 +2456,15 @@ function AdminComponent() {
                                                         onValueChange={(value) => {
                                                           const newComponents = [...(fieldSettings.password.components || [])];
                                                           newComponents[index] = { ...component, count: parseInt(value) };
-                                                          setFieldSettings(prev => ({
-                                                            ...prev,
+                                                          const newSettings = {
+                                                            ...fieldSettings,
                                                             password: {
-                                                              ...prev.password,
+                                                              ...fieldSettings.password,
                                                               components: newComponents
                                                             }
-                                                          }));
+                                                          };
+                                                          setFieldSettings(newSettings);
+                                                          savePasswordSettings(newSettings.password);
                                                         }}
                                                       >
                                                         <CustomSelectTrigger className="h-6 w-8 text-xs border-none bg-transparent p-0">
@@ -2464,13 +2493,15 @@ function AdminComponent() {
                                                       onClick={() => {
                                                         const newComponents = [...(fieldSettings.password.components || [])];
                                                         newComponents.splice(index, 1);
-                                                        setFieldSettings(prev => ({
-                                                          ...prev,
+                                                        const newSettings = {
+                                                          ...fieldSettings,
                                                           password: {
-                                                            ...prev.password,
+                                                            ...fieldSettings.password,
                                                             components: newComponents
                                                           }
-                                                        }));
+                                                        };
+                                                        setFieldSettings(newSettings);
+                                                        savePasswordSettings(newSettings.password);
                                                       }}
                                                       className="text-red-500 hover:text-red-700 ml-1"
                                                     >
@@ -2497,13 +2528,15 @@ function AdminComponent() {
                                               <button
                                                 onClick={() => {
                                                   const newComponents = [...(fieldSettings.password.components || []), { type: 'words', count: 1 }];
-                                                  setFieldSettings(prev => ({
-                                                    ...prev,
+                                                  const newSettings = {
+                                                    ...fieldSettings,
                                                     password: {
-                                                      ...prev.password,
+                                                      ...fieldSettings.password,
                                                       components: newComponents
                                                     }
-                                                  }));
+                                                  };
+                                                  setFieldSettings(newSettings);
+                                                  savePasswordSettings(newSettings.password);
                                                 }}
                                                 className="bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 px-3 py-1 rounded text-xs hover:bg-blue-200 dark:hover:bg-blue-800"
                                               >
@@ -2512,13 +2545,15 @@ function AdminComponent() {
                                               <button
                                                 onClick={() => {
                                                   const newComponents = [...(fieldSettings.password.components || []), { type: 'numbers', count: 2 }];
-                                                  setFieldSettings(prev => ({
-                                                    ...prev,
+                                                  const newSettings = {
+                                                    ...fieldSettings,
                                                     password: {
-                                                      ...prev.password,
+                                                      ...fieldSettings.password,
                                                       components: newComponents
                                                     }
-                                                  }));
+                                                  };
+                                                  setFieldSettings(newSettings);
+                                                  savePasswordSettings(newSettings.password);
                                                 }}
                                                 className="bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300 px-3 py-1 rounded text-xs hover:bg-green-200 dark:hover:bg-green-800"
                                               >
@@ -2527,13 +2562,15 @@ function AdminComponent() {
                                               <button
                                                 onClick={() => {
                                                   const newComponents = [...(fieldSettings.password.components || []), { type: 'symbols', count: 1 }];
-                                                  setFieldSettings(prev => ({
-                                                    ...prev,
+                                                  const newSettings = {
+                                                    ...fieldSettings,
                                                     password: {
-                                                      ...prev.password,
+                                                      ...fieldSettings.password,
                                                       components: newComponents
                                                     }
-                                                  }));
+                                                  };
+                                                  setFieldSettings(newSettings);
+                                                  savePasswordSettings(newSettings.password);
                                                 }}
                                                 className="bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300 px-3 py-1 rounded text-xs hover:bg-purple-200 dark:hover:bg-purple-800"
                                               >
