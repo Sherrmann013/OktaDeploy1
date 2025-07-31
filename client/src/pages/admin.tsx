@@ -322,9 +322,7 @@ function AdminComponent() {
       wordCount: 2,
       includeSymbol: true,
       includeNumber: true,
-      targetLength: 10,
-      wordList: ['blue', 'red', 'green', 'cat', 'dog', 'sun', 'moon', 'star', 'tree', 'bird', 'fish', 'car', 'book', 'key', 'box', 'cup', 'pen', 'hat', 'bag', 'run'],
-      symbolList: ['!', '@', '#', '$', '%', '^', '&', '*']
+      targetLength: 10
     }
   });
 
@@ -1994,9 +1992,7 @@ function AdminComponent() {
                                         : 'hover:ring-1 hover:ring-blue-200 dark:hover:ring-blue-700'
                                     }`}
                                     onClick={() => {
-                                      console.log('🔍 Password field clicked!', selectedField);
                                       setSelectedField(selectedField === 'password' ? null : 'password');
-                                      console.log('🔍 Password field selection should be:', selectedField === 'password' ? null : 'password');
                                     }}
                                   >
                                     <Input
@@ -2451,42 +2447,11 @@ function AdminComponent() {
                                           </div>
                                         </div>
 
-                                        <div className="space-y-2">
-                                          <Label className="text-xs">Available Symbols</Label>
-                                          <Input
-                                            value={fieldSettings.password.symbolList.join('')}
-                                            onChange={(e) => {
-                                              const symbols = e.target.value.split('').filter(char => !char.match(/[a-zA-Z0-9\s]/));
-                                              setFieldSettings(prev => ({
-                                                ...prev,
-                                                password: {
-                                                  ...prev.password,
-                                                  symbolList: symbols
-                                                }
-                                              }));
-                                            }}
-                                            className="text-xs font-mono bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600"
-                                            placeholder="!@#$%^&*"
-                                          />
-                                        </div>
-
-                                        <div className="space-y-2">
-                                          <Label className="text-xs">Word List (comma-separated)</Label>
-                                          <textarea
-                                            value={fieldSettings.password.wordList.join(', ')}
-                                            onChange={(e) => {
-                                              const words = e.target.value.split(',').map(w => w.trim()).filter(w => w.length > 0);
-                                              setFieldSettings(prev => ({
-                                                ...prev,
-                                                password: {
-                                                  ...prev.password,
-                                                  wordList: words
-                                                }
-                                              }));
-                                            }}
-                                            className="w-full h-20 text-xs p-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded resize-none"
-                                            placeholder="blue, red, green, cat, dog..."
-                                          />
+                                        <div className="text-xs text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800 p-3 rounded border">
+                                          <p className="font-medium mb-1">Password Generation Logic:</p>
+                                          <p>• Uses a built-in library of common English words</p>
+                                          <p>• Combines words with numbers and symbols as configured</p>
+                                          <p>• Adjusts to reach the target length specified above</p>
                                         </div>
 
                                         {/* Save Button for Password Configuration */}
