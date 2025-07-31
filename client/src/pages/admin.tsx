@@ -2937,9 +2937,9 @@ function AdminComponent() {
                                       {fieldSettings.department.useList && (
                                         <div className="space-y-3">
                                           <Label className="text-sm font-medium">Department Options</Label>
-                                          <div className="space-y-3">
+                                          <div className="space-y-2">
                                             {fieldSettings.department.options.map((option, index) => (
-                                              <div key={index} className="flex items-center justify-between p-3 bg-gray-700 rounded-lg border border-gray-600">
+                                              <div key={index} className="flex items-center justify-between px-3 py-2 bg-gray-800 rounded border border-gray-600">
                                                 <Input
                                                   value={option}
                                                   onChange={(e) => {
@@ -2969,7 +2969,7 @@ function AdminComponent() {
                                                       }
                                                     });
                                                   }}
-                                                  className="h-auto p-1 text-red-400 hover:text-red-300 hover:bg-red-900/20"
+                                                  className="h-auto p-1 text-red-400 hover:text-red-300 hover:bg-red-900/20 ml-2"
                                                 >
                                                   <X className="w-4 h-4" />
                                                 </Button>
@@ -2977,7 +2977,7 @@ function AdminComponent() {
                                             ))}
                                             <Button
                                               type="button"
-                                              variant="outline"
+                                              variant="ghost"
                                               size="sm"
                                               onClick={() => {
                                                 setFieldSettings({
@@ -2988,10 +2988,9 @@ function AdminComponent() {
                                                   }
                                                 });
                                               }}
-                                              className="w-full border-dashed border-gray-600 text-gray-400 hover:text-white hover:border-gray-500"
+                                              className="flex items-center justify-center w-8 h-8 rounded border border-dashed border-gray-600 text-gray-400 hover:text-white hover:border-gray-500"
                                             >
-                                              <Plus className="w-4 h-4 mr-2" />
-                                              Add Department
+                                              <Plus className="w-4 h-4" />
                                             </Button>
                                           </div>
                                         </div>
@@ -3004,9 +3003,9 @@ function AdminComponent() {
                                     <div className="space-y-4">
                                       <div className="space-y-3">
                                         <Label className="text-sm font-medium">Employee Type Options</Label>
-                                        <div className="space-y-3">
+                                        <div className="space-y-2">
                                           {fieldSettings.employeeType.options.map((option, index) => (
-                                            <div key={index} className="flex items-center justify-between p-3 bg-gray-700 rounded-lg border border-gray-600">
+                                            <div key={index} className="flex items-center justify-between px-3 py-2 bg-gray-800 rounded border border-gray-600">
                                               <Input
                                                 value={option}
                                                 onChange={(e) => {
@@ -3036,7 +3035,7 @@ function AdminComponent() {
                                                     }
                                                   });
                                                 }}
-                                                className="h-auto p-1 text-red-400 hover:text-red-300 hover:bg-red-900/20"
+                                                className="h-auto p-1 text-red-400 hover:text-red-300 hover:bg-red-900/20 ml-2"
                                               >
                                                 <X className="w-4 h-4" />
                                               </Button>
@@ -3044,7 +3043,7 @@ function AdminComponent() {
                                           ))}
                                           <Button
                                             type="button"
-                                            variant="outline"
+                                            variant="ghost"
                                             size="sm"
                                             onClick={() => {
                                               setFieldSettings({
@@ -3055,10 +3054,9 @@ function AdminComponent() {
                                                 }
                                               });
                                             }}
-                                            className="w-full border-dashed border-gray-600 text-gray-400 hover:text-white hover:border-gray-500"
+                                            className="flex items-center justify-center w-8 h-8 rounded border border-dashed border-gray-600 text-gray-400 hover:text-white hover:border-gray-500"
                                           >
-                                            <Plus className="w-4 h-4 mr-2" />
-                                            Add Employee Type
+                                            <Plus className="w-4 h-4" />
                                           </Button>
                                         </div>
                                       </div>
