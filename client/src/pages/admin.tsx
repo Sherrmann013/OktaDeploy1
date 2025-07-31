@@ -100,16 +100,20 @@ function AdminComponent() {
   });
 
   // Fetch field settings from database - using layout-settings API
-  const { data: departmentFieldSettings, refetch: refetchDepartmentSettings } = useQuery({
+  console.log('🔍 Setting up department query...');
+  const { data: departmentFieldSettings, refetch: refetchDepartmentSettings, isLoading: departmentLoading, error: departmentError } = useQuery({
     queryKey: ["/api/layout-settings/department"],
     enabled: true, // Always enabled for debugging
     refetchInterval: 30000,
     refetchOnMount: true,
     refetchOnWindowFocus: false,
     select: (data: any) => {
+      console.log('🔍 Department select function called with:', data);
       if (!data?.settingValue) return null;
       try {
-        return JSON.parse(data.settingValue);
+        const parsed = JSON.parse(data.settingValue);
+        console.log('🔍 Department parsed data:', parsed);
+        return parsed;
       } catch (error) {
         console.error('Failed to parse department settings:', error);
         return null;
@@ -122,17 +126,23 @@ function AdminComponent() {
       console.error('❌ Failed to load department field settings:', error);
     }
   });
+  
+  console.log('🔍 Department query state:', { departmentFieldSettings, departmentLoading, departmentError });
 
-  const { data: employeeTypeFieldSettings, refetch: refetchEmployeeTypeSettings } = useQuery({
+  console.log('🔍 Setting up employee type query...');
+  const { data: employeeTypeFieldSettings, refetch: refetchEmployeeTypeSettings, isLoading: employeeTypeLoading, error: employeeTypeError } = useQuery({
     queryKey: ["/api/layout-settings/employeeType"],
     enabled: true, // Always enabled for debugging
     refetchInterval: 30000,
     refetchOnMount: true,
     refetchOnWindowFocus: false,
     select: (data: any) => {
+      console.log('🔍 Employee type select function called with:', data);
       if (!data?.settingValue) return null;
       try {
-        return JSON.parse(data.settingValue);
+        const parsed = JSON.parse(data.settingValue);
+        console.log('🔍 Employee type parsed data:', parsed);
+        return parsed;
       } catch (error) {
         console.error('Failed to parse employee type settings:', error);
         return null;
@@ -145,6 +155,8 @@ function AdminComponent() {
       console.error('❌ Failed to load employee type field settings:', error);
     }
   });
+  
+  console.log('🔍 Employee type query state:', { employeeTypeFieldSettings, employeeTypeLoading, employeeTypeError });
 
   // Debug logging for tab states and query enablement
   useEffect(() => {
