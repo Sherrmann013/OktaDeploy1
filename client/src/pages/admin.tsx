@@ -101,12 +101,12 @@ function AdminComponent() {
 
   // Fetch field settings from database
   const { data: departmentFieldSettings } = useQuery<{ options: string[]; required: boolean }>({
-    queryKey: ["/api/field-settings", "department"],
+    queryKey: ["/api/field-settings/department"],
     refetchInterval: 30000
   });
 
   const { data: employeeTypeFieldSettings } = useQuery<{ options: string[]; required: boolean }>({
-    queryKey: ["/api/field-settings", "employeeType"],
+    queryKey: ["/api/field-settings/employeeType"],
     refetchInterval: 30000
   });
 
@@ -156,7 +156,7 @@ function AdminComponent() {
       return await apiRequest('POST', '/api/field-settings/department', { options, required });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/field-settings', 'department'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/field-settings/department'] });
     }
   });
 
@@ -165,7 +165,7 @@ function AdminComponent() {
       return await apiRequest('POST', '/api/field-settings/employeeType', { options, required });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/field-settings', 'employeeType'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/field-settings/employeeType'] });
     }
   });
 
@@ -470,12 +470,12 @@ function AdminComponent() {
     department: { 
       required: false, 
       useList: false, 
-      options: [] 
+      options: [] as string[]
     },
     employeeType: { 
       required: false, 
       useList: true, 
-      options: ['EMPLOYEE', 'CONTRACTOR', 'INTERN', 'PART_TIME'] 
+      options: ['EMPLOYEE', 'CONTRACTOR', 'INTERN', 'PART_TIME'] as string[]
     }
   });
 
@@ -503,6 +503,25 @@ function AdminComponent() {
       console.error('Failed to save password settings:', error);
     }
   };
+
+  // Update field settings when department and employee type data is loaded from database
+  useEffect(() => {
+    if (departmentFieldSettings || employeeTypeFieldSettings) {
+      setFieldSettings(prev => ({
+        ...prev,
+        department: {
+          ...prev.department,
+          options: departmentFieldSettings?.options || [],
+          required: departmentFieldSettings?.required || false,
+        },
+        employeeType: {
+          ...prev.employeeType,
+          options: employeeTypeFieldSettings?.options || ['EMPLOYEE', 'CONTRACTOR', 'INTERN', 'PART_TIME'],
+          required: employeeTypeFieldSettings?.required || false,
+        }
+      }));
+    }
+  }, [departmentFieldSettings, employeeTypeFieldSettings]);
 
   // Log field settings changes
   useEffect(() => {
@@ -740,16 +759,7 @@ function AdminComponent() {
   // Get active apps for the dropdown
   const activeApps = appMappingsData.filter(app => app.status === 'active');
 
-  // Fetch department and employee type app mappings
-  const { data: departmentAppMappingsData = [], isLoading: deptMappingsLoading } = useQuery<any[]>({
-    queryKey: ["/api/department-app-mappings"],
-    refetchInterval: 30000
-  });
-
-  const { data: employeeTypeAppMappingsData = [], isLoading: empTypeMappingsLoading } = useQuery<any[]>({
-    queryKey: ["/api/employee-type-app-mappings"],
-    refetchInterval: 30000
-  });
+  // Note: department and employee type app mappings are already declared above
 
   // Create site access user mutation
   const createUserMutation = useMutation({
