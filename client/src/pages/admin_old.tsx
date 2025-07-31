@@ -127,9 +127,75 @@ function AdminComponent() {
 
   const queryClient = useQueryClient();
 
-  // Removed department and employee type mutations - starting fresh
+  // Department options mutation
+  const updateDepartmentOptionsMutation = useMutation({
+    mutationFn: async (data: { options: string[], required: boolean }) => {
+      const response = await fetch("/api/layout-settings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          settingKey: "department",
+          settingValue: JSON.stringify(data),
+          settingType: "user_config",
+        }),
+      });
+      if (!response.ok) {
+        throw new Error("Failed to update department settings");
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/layout-settings/department"] });
+      toast({
+        title: "Success",
+        description: "Department settings saved successfully",
+      });
+    },
+    onError: (error) => {
+      console.error("Failed to update department settings:", error);
+      toast({
+        title: "Error",
+        description: "Failed to save department settings",
+        variant: "destructive",
+      });
+    },
+  });
 
-  // Removed department and employee type mutations - starting fresh
+  // Employee type options mutation
+  const updateEmployeeTypeOptionsMutation = useMutation({
+    mutationFn: async (data: { options: string[], required: boolean }) => {
+      const response = await fetch("/api/layout-settings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          settingKey: "employeeType",
+          settingValue: JSON.stringify(data),
+          settingType: "user_config",
+        }),
+      });
+      if (!response.ok) {
+        throw new Error("Failed to update employee type settings");
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/layout-settings/employeeType"] });
+      toast({
+        title: "Success",
+        description: "Employee type settings saved successfully",
+      });
+    },
+    onError: (error) => {
+      console.error("Failed to update employee type settings:", error);
+      toast({
+        title: "Error",
+        description: "Failed to save employee type settings",
+        variant: "destructive",
+      });
+    },
+  });
 
   // Removed department and employee type app mappings initialization - starting fresh
 
@@ -446,7 +512,19 @@ function AdminComponent() {
     refetchOnWindowFocus: false,
   });
 
-  // Removed department and employee type queries - starting fresh
+  const { data: departmentSettings } = useQuery({
+    queryKey: ["/api/layout-settings/department"],
+    enabled: activeTab === "layout" && layoutTab === "new-user",
+    refetchOnMount: true,
+    refetchOnWindowFocus: false,
+  });
+
+  const { data: employeeTypeSettings } = useQuery({
+    queryKey: ["/api/layout-settings/employeeType"],
+    enabled: activeTab === "layout" && layoutTab === "new-user",
+    refetchOnMount: true,
+    refetchOnWindowFocus: false,
+  });
 
   // Refetch email settings when switching to New User tab
   useEffect(() => {
@@ -569,9 +647,31 @@ function AdminComponent() {
         }
       }
       
+      // Update department required setting
+      if (departmentSettings && (departmentSettings as any).settingValue) {
+        try {
+          const parsed = JSON.parse((departmentSettings as any).settingValue);
+          newSettings.department = { ...newSettings.department, ...parsed };
+          console.log('🔍 Updated department setting:', parsed);
+        } catch (error) {
+          console.error('Failed to parse department settings:', error);
+        }
+      }
+      
+      // Update employee type required setting
+      if (employeeTypeSettings && (employeeTypeSettings as any).settingValue) {
+        try {
+          const parsed = JSON.parse((employeeTypeSettings as any).settingValue);
+          newSettings.employeeType = { ...newSettings.employeeType, ...parsed };
+          console.log('🔍 Updated employee type setting:', parsed);
+        } catch (error) {
+          console.error('Failed to parse employee type settings:', error);
+        }
+      }
+      
       return newSettings;
     });
-  }, [firstNameSettings, lastNameSettings, titleSettings, managerSettings]);
+  }, [firstNameSettings, lastNameSettings, titleSettings, managerSettings, departmentSettings, employeeTypeSettings]);
 
   // Update logo text when setting loads
   useEffect(() => {
