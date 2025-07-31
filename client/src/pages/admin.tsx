@@ -13,6 +13,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Plus, Pencil, Trash2, Check, ChevronsUpDown, Edit, X, Settings, RefreshCw } from "lucide-react";
 import { LogoUploadModal } from "@/components/LogoUploadModal";
+import CreateUserModal from "@/components/create-user-modal";
 
 interface SiteUser {
   id: number;
@@ -305,6 +306,7 @@ function AdminComponent() {
   const [showIntegrationDropdown, setShowIntegrationDropdown] = useState(false);
   const [customCardName, setCustomCardName] = useState("");
   const [customCardDescription, setCustomCardDescription] = useState("");
+  const [isCreateUserModalOpen, setIsCreateUserModalOpen] = useState(false);
 
   const queryClient = useQueryClient();
 
@@ -1831,6 +1833,221 @@ function AdminComponent() {
                         </div>
                       </div>
                     )}
+
+                    {layoutTab === "new-user" && (
+                      <div className="bg-white dark:bg-gray-800 rounded-lg border dark:border-gray-700 p-6">
+                        <div className="flex items-center justify-between mb-6">
+                          <h4 className="text-lg font-semibold">New User Creation</h4>
+                          <Button 
+                            onClick={() => setIsCreateUserModalOpen(true)}
+                            className="bg-blue-600 hover:bg-blue-700 text-white flex items-center"
+                          >
+                            <Plus className="w-4 h-4 mr-2" />
+                            Create User
+                          </Button>
+                        </div>
+                        
+                        <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
+                          Configure and preview the new user creation process. This interface allows you to test and customize how new users are added to your organization.
+                        </p>
+
+                        {/* User Creation Form Preview */}
+                        <div className="border border-gray-200 dark:border-gray-600 rounded-lg p-6 bg-gray-50 dark:bg-gray-700">
+                          <h5 className="text-md font-medium mb-4">User Creation Form Preview</h5>
+                          
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {/* Basic Information */}
+                            <div className="space-y-4">
+                              <h6 className="text-sm font-medium text-gray-700 dark:text-gray-300">Basic Information</h6>
+                              
+                              <div className="grid gap-2">
+                                <Label htmlFor="preview-firstName">First Name</Label>
+                                <Input
+                                  id="preview-firstName"
+                                  placeholder="Enter first name"
+                                  className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600"
+                                  disabled
+                                />
+                              </div>
+                              
+                              <div className="grid gap-2">
+                                <Label htmlFor="preview-lastName">Last Name</Label>
+                                <Input
+                                  id="preview-lastName"
+                                  placeholder="Enter last name"
+                                  className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600"
+                                  disabled
+                                />
+                              </div>
+                              
+                              <div className="grid gap-2">
+                                <Label htmlFor="preview-email">Email Address</Label>
+                                <Input
+                                  id="preview-email"
+                                  type="email"
+                                  placeholder="user@company.com"
+                                  className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600"
+                                  disabled
+                                />
+                              </div>
+                              
+                              <div className="grid gap-2">
+                                <Label htmlFor="preview-title">Job Title</Label>
+                                <Input
+                                  id="preview-title"
+                                  placeholder="Enter job title"
+                                  className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600"
+                                  disabled
+                                />
+                              </div>
+                            </div>
+
+                            {/* Organizational Information */}
+                            <div className="space-y-4">
+                              <h6 className="text-sm font-medium text-gray-700 dark:text-gray-300">Organizational</h6>
+                              
+                              <div className="grid gap-2">
+                                <Label htmlFor="preview-department">Department</Label>
+                                <Select disabled>
+                                  <SelectTrigger className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600">
+                                    <SelectValue placeholder="Select department" />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="it">IT</SelectItem>
+                                    <SelectItem value="security">Security</SelectItem>
+                                    <SelectItem value="hr">HR</SelectItem>
+                                    <SelectItem value="legal">Legal</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                              
+                              <div className="grid gap-2">
+                                <Label htmlFor="preview-employeeType">Employee Type</Label>
+                                <Select disabled>
+                                  <SelectTrigger className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600">
+                                    <SelectValue placeholder="Select type" />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="EMPLOYEE">Employee</SelectItem>
+                                    <SelectItem value="CONTRACTOR">Contractor</SelectItem>
+                                    <SelectItem value="INTERN">Intern</SelectItem>
+                                    <SelectItem value="PART_TIME">Part Time</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                              
+                              <div className="grid gap-2">
+                                <Label htmlFor="preview-manager">Manager</Label>
+                                <Input
+                                  id="preview-manager"
+                                  placeholder="Search for manager..."
+                                  className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600"
+                                  disabled
+                                />
+                              </div>
+                              
+                              <div className="grid gap-2">
+                                <Label htmlFor="preview-location">Location</Label>
+                                <Input
+                                  id="preview-location"
+                                  placeholder="Enter location"
+                                  className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600"
+                                  disabled
+                                />
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* OKTA Groups & Application Access */}
+                          <div className="mt-6 space-y-4">
+                            <h6 className="text-sm font-medium text-gray-700 dark:text-gray-300">Access & Permissions</h6>
+                            
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              <div className="space-y-2">
+                                <Label>OKTA Groups</Label>
+                                <div className="border border-gray-200 dark:border-gray-600 rounded-md p-3 bg-white dark:bg-gray-800 min-h-[100px]">
+                                  <div className="text-sm text-gray-500 dark:text-gray-400">
+                                    Groups will be assigned based on department and role...
+                                  </div>
+                                </div>
+                              </div>
+                              
+                              <div className="space-y-2">
+                                <Label>Application Access</Label>
+                                <div className="border border-gray-200 dark:border-gray-600 rounded-md p-3 bg-white dark:bg-gray-800 min-h-[100px]">
+                                  <div className="text-sm text-gray-500 dark:text-gray-400">
+                                    Applications will be assigned based on group mappings...
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Action Buttons Preview */}
+                          <div className="flex justify-end space-x-3 pt-6 border-t border-gray-200 dark:border-gray-600 mt-6">
+                            <Button variant="outline" disabled>
+                              Cancel
+                            </Button>
+                            <Button disabled className="bg-blue-600 text-white">
+                              Create User
+                            </Button>
+                          </div>
+                        </div>
+
+                        {/* Customization Options */}
+                        <div className="mt-6 space-y-4">
+                          <h5 className="text-md font-medium">Customization Options</h5>
+                          
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="space-y-3">
+                              <div className="flex items-center space-x-2">
+                                <Checkbox id="require-manager" defaultChecked />
+                                <Label htmlFor="require-manager" className="text-sm">
+                                  Require manager selection
+                                </Label>
+                              </div>
+                              
+                              <div className="flex items-center space-x-2">
+                                <Checkbox id="auto-groups" defaultChecked />
+                                <Label htmlFor="auto-groups" className="text-sm">
+                                  Auto-assign groups based on department
+                                </Label>
+                              </div>
+                              
+                              <div className="flex items-center space-x-2">
+                                <Checkbox id="send-email" defaultChecked />
+                                <Label htmlFor="send-email" className="text-sm">
+                                  Send welcome email by default
+                                </Label>
+                              </div>
+                            </div>
+                            
+                            <div className="space-y-3">
+                              <div className="flex items-center space-x-2">
+                                <Checkbox id="require-title" defaultChecked />
+                                <Label htmlFor="require-title" className="text-sm">
+                                  Require job title
+                                </Label>
+                              </div>
+                              
+                              <div className="flex items-center space-x-2">
+                                <Checkbox id="require-location" />
+                                <Label htmlFor="require-location" className="text-sm">
+                                  Require location information
+                                </Label>
+                              </div>
+                              
+                              <div className="flex items-center space-x-2">
+                                <Checkbox id="temp-password" defaultChecked />
+                                <Label htmlFor="temp-password" className="text-sm">
+                                  Generate temporary password
+                                </Label>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -2372,6 +2589,16 @@ function AdminComponent() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Create User Modal */}
+      <CreateUserModal 
+        open={isCreateUserModalOpen}
+        onClose={() => setIsCreateUserModalOpen(false)}
+        onSuccess={() => {
+          setIsCreateUserModalOpen(false);
+          // Could add success notification here
+        }}
+      />
     </div>
   );
 }
