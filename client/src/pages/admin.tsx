@@ -765,11 +765,19 @@ function AdminComponent() {
   // Fetch department app mappings from database
   const { data: departmentAppMappingsData = [], refetch: refetchDepartmentAppMappings } = useQuery<DepartmentAppMapping[]>({
     queryKey: ["/api/department-app-mappings"],
-    refetchInterval: 30000
+    refetchInterval: 30000,
+    onSuccess: (data) => {
+      console.log('🔍 Department app mappings loaded:', data);
+    },
+    onError: (error) => {
+      console.error('❌ Failed to load department app mappings:', error);
+    }
   });
 
-  // Get active apps for the dropdown
-  const activeApps = appMappingsData.filter(app => app.status === 'active');
+  // Get active apps for the dropdown - matching UserModal logic
+  const availableApps = appMappingsData
+    .filter(app => app.status === 'active')
+    .map(app => app.appName);
 
   // Note: department and employee type app mappings are already declared above
 
@@ -3274,14 +3282,14 @@ function AdminComponent() {
                                                 <SelectValue placeholder="Select an application to link..." />
                                               </SelectTrigger>
                                               <SelectContent className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600">
-                                                {(appMappingsData || [])
-                                                  .filter((mapping: AppMapping) => {
+                                                {availableApps
+                                                  .filter((appName: string) => {
                                                     const currentApps = departmentApps[selectedDepartment || ''] || [];
-                                                    return !currentApps.includes(mapping.appName);
+                                                    return !currentApps.includes(appName);
                                                   })
-                                                  .map((mapping: AppMapping) => (
-                                                    <SelectItem key={mapping.id} value={mapping.appName} className="bg-white dark:bg-gray-800">
-                                                      {mapping.appName}
+                                                  .map((appName: string) => (
+                                                    <SelectItem key={appName} value={appName} className="bg-white dark:bg-gray-800">
+                                                      {appName}
                                                     </SelectItem>
                                                   ))}
                                               </SelectContent>
