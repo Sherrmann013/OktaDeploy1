@@ -220,7 +220,7 @@ function AdminComponent() {
   useEffect(() => {
     if (dashboardCardsData) {
       console.log('🔄 Dashboard cards data received:', dashboardCardsData);
-      setDashboardCards(dashboardCardsData);
+      setDashboardCards(dashboardCardsData as any[]);
     }
   }, [dashboardCardsData]);
 
@@ -663,8 +663,8 @@ function AdminComponent() {
 
   // Update logo text when setting loads
   useEffect(() => {
-    if (logoTextSetting?.settingValue) {
-      setLogoText(logoTextSetting.settingValue);
+    if ((logoTextSetting as any)?.settingValue) {
+      setLogoText((logoTextSetting as any).settingValue);
     } else {
       setLogoText("Powered by ClockWerk.it"); // Default text
     }
@@ -1958,9 +1958,9 @@ function AdminComponent() {
                           <h5 className="text-md font-medium mb-3">Logo</h5>
                           <div className="flex items-center gap-4">
                             <div className="flex-shrink-0">
-                              {logoSetting?.settingValue ? (
+                              {(logoSetting as any)?.settingValue ? (
                                 <img 
-                                  src={logoSetting.settingValue} 
+                                  src={(logoSetting as any).settingValue} 
                                   alt="Company logo" 
                                   className="max-h-12 w-auto object-contain"
                                 />
@@ -2005,7 +2005,7 @@ function AdminComponent() {
                               />
                               <Button 
                                 onClick={() => updateLogoTextMutation.mutate(logoText)}
-                                disabled={updateLogoTextMutation.isPending || logoText === (logoTextSetting?.settingValue || "Powered by ClockWerk.it")}
+                                disabled={updateLogoTextMutation.isPending || logoText === ((logoTextSetting as any)?.settingValue || "Powered by ClockWerk.it")}
                                 className="bg-green-600 hover:bg-green-700 text-white"
                               >
                                 {updateLogoTextMutation.isPending ? "Updating..." : "Update Text"}
@@ -3173,48 +3173,15 @@ function AdminComponent() {
                                       <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-600">
                                         <Button 
                                           onClick={() => {
-                                            // Save employee type configuration
-                                            const settingData = {
-                                              settingKey: 'employeeType',
-                                              settingValue: JSON.stringify({ 
-                                                required: fieldSettings.employeeType.required,
-                                                useList: fieldSettings.employeeType.useList,
-                                                options: fieldSettings.employeeType.options
-                                              }),
-                                              settingType: 'user_config' as const,
-                                              metadata: {}
-                                            };
-                                            
-                                            fetch('/api/layout-settings', {
-                                              method: 'POST',
-                                              headers: { 'Content-Type': 'application/json' },
-                                              credentials: 'include',
-                                              body: JSON.stringify(settingData)
-                                            }).then(async response => {
-                                              if (response.ok) {
-                                                toast({ 
-                                                  title: "Success", 
-                                                  description: "Employee Type settings saved successfully" 
-                                                });
-                                                // Refetch the settings to confirm persistence
-                                                await refetchEmployeeTypeSettings();
-                                              } else {
-                                                const errorText = await response.text();
-                                                console.error('Save failed:', errorText);
-                                                throw new Error('Failed to save');
-                                              }
-                                            }).catch((error) => {
-                                              console.error('Save error:', error);
-                                              toast({ 
-                                                title: "Error", 
-                                                description: "Failed to save employee type settings",
-                                                variant: "destructive"
-                                              });
+                                            updateEmployeeTypeOptionsMutation.mutate({
+                                              options: fieldSettings.employeeType.options,
+                                              required: fieldSettings.employeeType.required
                                             });
                                           }}
+                                          disabled={updateEmployeeTypeOptionsMutation.isPending}
                                           className="bg-green-600 hover:bg-green-700 text-white"
                                         >
-                                          Save Employee Type Configuration
+                                          {updateEmployeeTypeOptionsMutation.isPending ? 'Saving...' : 'Save Employee Type Configuration'}
                                         </Button>
                                       </div>
                                     </div>
@@ -3313,73 +3280,7 @@ function AdminComponent() {
                                             )}
                                           </div>
 
-                                          {/* Applications Column - appears when link is clicked */}
-                                          {openAppsSection?.type === 'employeeType' && (
-                                            <div className="space-y-3">
-                                              <Label className="text-sm font-medium">Applications for "{fieldSettings.employeeType.options[openAppsSection.index]}"</Label>
-                                              
-                                              {/* Applications Dropdown */}
-                                              <div className="mb-3">
-                                                <CustomSelect
-                                                  value=""
-                                                  onValueChange={(appName) => {
-                                                    const currentApps = employeeTypeApps[openAppsSection.index] || [];
-                                                    if (!currentApps.includes(appName)) {
-                                                      const employeeType = fieldSettings.employeeType.options[openAppsSection.index];
-                                                      addEmployeeTypeAppMutation.mutate({ employeeType, appName });
-                                                      setEmployeeTypeApps(prev => ({
-                                                        ...prev,
-                                                        [openAppsSection.index]: [...currentApps, appName]
-                                                      }));
-                                                    }
-                                                  }}
-                                                >
-                                                  <CustomSelectTrigger className="max-w-48 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600">
-                                                    <CustomSelectValue placeholder="Select an application to add" />
-                                                  </CustomSelectTrigger>
-                                                  <CustomSelectContent>
-                                                    {activeApps.map((app) => (
-                                                      <CustomSelectItem key={app.id} value={app.appName}>
-                                                        {app.appName}
-                                                      </CustomSelectItem>
-                                                    ))}
-                                                  </CustomSelectContent>
-                                                </CustomSelect>
-                                              </div>
 
-                                              {/* Selected Applications List - Same format as employee type list */}
-                                              <div className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md divide-y divide-gray-200 dark:divide-gray-600 max-w-48">
-                                                {(employeeTypeApps[openAppsSection.index] || []).map((appName, appIndex) => (
-                                                  <div key={appIndex} className="flex items-center px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700/50">
-                                                    <span className="text-sm flex-1">{appName}</span>
-                                                    <Button
-                                                      variant="ghost"
-                                                      size="sm"
-                                                      onClick={() => {
-                                                        const employeeType = fieldSettings.employeeType.options[openAppsSection.index];
-                                                        const removedAppName = employeeTypeApps[openAppsSection.index]?.[appIndex];
-                                                        if (removedAppName) {
-                                                          removeEmployeeTypeAppMutation.mutate({ employeeType, appName: removedAppName });
-                                                        }
-                                                        setEmployeeTypeApps(prev => ({
-                                                          ...prev,
-                                                          [openAppsSection.index]: (prev[openAppsSection.index] || []).filter((_, i) => i !== appIndex)
-                                                        }));
-                                                      }}
-                                                      className="h-4 w-4 p-0 text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 ml-2"
-                                                    >
-                                                      {'×'}
-                                                    </Button>
-                                                  </div>
-                                                ))}
-                                                {(!employeeTypeApps[openAppsSection.index] || employeeTypeApps[openAppsSection.index].length === 0) && (
-                                                  <div className="flex items-center px-3 py-4 text-center">
-                                                    <span className="text-sm text-gray-500 dark:text-gray-400 w-full">No applications added yet</span>
-                                                  </div>
-                                                )}
-                                              </div>
-                                            </div>
-                                          )}
                                         </div>
                                       </div>
                                     </div>
