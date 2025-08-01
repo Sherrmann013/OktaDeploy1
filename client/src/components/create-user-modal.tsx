@@ -244,28 +244,28 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
     
     return insertUserSchema.extend({
       firstName: fieldSettings.firstName?.required 
-        ? z.string().min(1, "First name is required")
+        ? z.string().min(1)
         : z.string().optional(),
       lastName: fieldSettings.lastName?.required 
-        ? z.string().min(1, "Last name is required") 
+        ? z.string().min(1) 
         : z.string().optional(),
       email: fieldSettings.emailUsername?.required 
-        ? z.string().min(1, "Email is required").email("Invalid email format")
-        : z.string().email("Invalid email format").optional().or(z.literal("")),
+        ? z.string().min(1).email()
+        : z.string().email().optional().or(z.literal("")),
       password: fieldSettings.password?.required 
-        ? z.string().min(1, "Password is required")
+        ? z.string().min(1)
         : z.string().optional(),
       title: fieldSettings.title?.required 
-        ? z.string().min(1, "Job title is required")
+        ? z.string().min(1)
         : z.string().optional(),
       manager: fieldSettings.manager?.required 
-        ? z.string().min(1, "Manager is required")
+        ? z.string().min(1)
         : z.string().optional(),
       department: fieldSettings.department?.required 
-        ? z.string().min(1, "Department is required")
+        ? z.string().min(1)
         : z.string().optional(),
       employeeType: fieldSettings.employeeType?.required 
-        ? z.string().min(1, "Employee type is required")
+        ? z.string().min(1)
         : z.string().optional(),
     });
   }, [fieldSettings]);
@@ -471,7 +471,6 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
                     <FormControl>
                       <Input placeholder="Enter first name" {...field} />
                     </FormControl>
-                    <FormMessage />
                   </FormItem>
                 )}
               />
@@ -485,7 +484,6 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
                     <FormControl>
                       <Input placeholder="Enter last name" {...field} />
                     </FormControl>
-                    <FormMessage />
                   </FormItem>
                 )}
               />
@@ -541,7 +539,6 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
                         )}
                       </div>
                     </FormControl>
-                    <FormMessage />
                   </FormItem>
                 )}
               />
@@ -576,8 +573,6 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
                         )}
                       </div>
                     </FormControl>
-
-                    <FormMessage />
                   </FormItem>
                 )}
               />
@@ -594,7 +589,6 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
                     <FormControl>
                       <Input placeholder="Enter job title" {...field} value={field.value || ""} />
                     </FormControl>
-                    <FormMessage />
                   </FormItem>
                 )}
               />
@@ -632,7 +626,6 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
                         );
                       })()}
                     </FormControl>
-                    <FormMessage />
                   </FormItem>
                 )}
               />
@@ -685,7 +678,6 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
                         )}
                       </div>
                     </FormControl>
-                    <FormMessage />
                   </FormItem>
                 )}
               />
@@ -713,7 +705,6 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
                         </SelectContent>
                       </Select>
                     </FormControl>
-                    <FormMessage />
                   </FormItem>
                 )}
               />
