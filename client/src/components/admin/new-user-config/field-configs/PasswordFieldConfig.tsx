@@ -97,17 +97,16 @@ export function PasswordFieldConfig({ config, onUpdate }: PasswordFieldConfigPro
           <div className="space-y-3">
             <Label className="text-sm font-medium">Password Components</Label>
             
-            {/* Add Component Buttons - Directly under title */}
+            {/* Add Component Buttons - Always visible, styled based on Capture 57 */}
             <div className="flex gap-2">
               {(['words', 'numbers', 'symbols'] as const).map((type) => {
                 const hasComponent = config.components.some(c => c.type === type);
-                if (hasComponent) return null;
                 
                 const getButtonColor = (componentType: string) => {
                   switch (componentType) {
-                    case 'words': return 'bg-blue-600 hover:bg-blue-700 text-white';
-                    case 'numbers': return 'bg-green-600 hover:bg-green-700 text-white';
-                    case 'symbols': return 'bg-purple-600 hover:bg-purple-700 text-white';
+                    case 'words': return hasComponent ? 'bg-blue-400 text-white cursor-default' : 'bg-blue-600 hover:bg-blue-700 text-white cursor-pointer';
+                    case 'numbers': return hasComponent ? 'bg-green-400 text-white cursor-default' : 'bg-green-600 hover:bg-green-700 text-white cursor-pointer';
+                    case 'symbols': return hasComponent ? 'bg-purple-400 text-white cursor-default' : 'bg-purple-600 hover:bg-purple-700 text-white cursor-pointer';
                     default: return 'bg-gray-600 hover:bg-gray-700 text-white';
                   }
                 };
@@ -117,7 +116,8 @@ export function PasswordFieldConfig({ config, onUpdate }: PasswordFieldConfigPro
                     key={type}
                     type="button"
                     size="sm"
-                    onClick={() => addComponent(type)}
+                    onClick={() => !hasComponent && addComponent(type)}
+                    disabled={hasComponent}
                     className={`text-xs ${getButtonColor(type)} border-0`}
                   >
                     + {getComponentLabel(type)}
