@@ -182,6 +182,7 @@ function AdminComponent() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/layout-settings/employeeType"] });
+      refetchEmployeeTypeSettings();
       toast({
         title: "Success",
         description: "Employee type settings saved successfully",
@@ -519,6 +520,13 @@ function AdminComponent() {
     refetchOnWindowFocus: false,
   });
 
+  const { data: employeeTypeSettings, refetch: refetchEmployeeTypeSettings } = useQuery({
+    queryKey: ["/api/layout-settings/employeeType"],
+    enabled: activeTab === "layout" && layoutTab === "new-user",
+    refetchOnMount: true,
+    refetchOnWindowFocus: false,
+  });
+
 
 
   // Refetch all settings when switching to New User tab
@@ -655,11 +663,20 @@ function AdminComponent() {
         }
       }
       
-
+      // Update employee type required setting and options
+      if (employeeTypeSettings && (employeeTypeSettings as any).settingValue) {
+        try {
+          const parsed = JSON.parse((employeeTypeSettings as any).settingValue);
+          newSettings.employeeType = { ...newSettings.employeeType, ...parsed };
+          console.log('🔍 Updated employee type setting:', parsed);
+        } catch (error) {
+          console.error('Failed to parse employee type settings:', error);
+        }
+      }
       
       return newSettings;
     });
-  }, [firstNameSettings, lastNameSettings, titleSettings, managerSettings, departmentSettings]);
+  }, [firstNameSettings, lastNameSettings, titleSettings, managerSettings, departmentSettings, employeeTypeSettings]);
 
   // Update logo text when setting loads
   useEffect(() => {
