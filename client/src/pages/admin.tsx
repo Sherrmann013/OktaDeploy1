@@ -2159,7 +2159,7 @@ function AdminComponent() {
                     {layoutTab === "profile" && (
                       <div className="bg-white dark:bg-gray-800 rounded-lg border dark:border-gray-700 p-6">
                         <h4 className="text-lg font-semibold mb-4">Profile Settings</h4>
-                        <p className="text-gray-600 dark:text-gray-400 mb-6">Hello there</p>
+                        <p className="text-blue-600 dark:text-blue-400 mb-6">Hello there</p>
                         <p className="text-sm text-muted-foreground">
                           Configure profile-related settings and preferences.
                         </p>
