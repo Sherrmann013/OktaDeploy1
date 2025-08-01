@@ -2164,12 +2164,18 @@ function AdminComponent() {
                           Configure profile-related settings and preferences.
                         </p>
                       </div>
-                    )}                      </div>
+                    )}
+
+                    {layoutTab === "monitoring" && (
+                      <div className="bg-white dark:bg-gray-800 rounded-lg border dark:border-gray-700 p-6">
+                        <h4 className="text-lg font-semibold mb-4">Monitoring Settings</h4>
+                        <p className="text-sm text-muted-foreground">
+                          Configure monitoring and alerting preferences.
+                        </p>
+                      </div>
                     )}
                   </div>
                 </div>
-
-
               </div>
             </CardContent>
           </Card>
