@@ -39,6 +39,12 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
   const [sendActivationEmail, setSendActivationEmail] = useState(false);
   const [selectedDomain, setSelectedDomain] = useState<string>("");
 
+  // Fetch app mappings for dynamic app dropdown
+  const { data: appMappingsData = [] } = useQuery({
+    queryKey: ['/api/app-mappings'],
+    enabled: open,
+  });
+
   // Fetch existing users for manager dropdown
   const { data: usersData } = useQuery({
     queryKey: ["/api/users", "all"],
@@ -85,14 +91,16 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
     queryKey: ["/api/layout-settings", "all-fields"],
     queryFn: async () => {
       try {
-        console.log('🔍 CreateUserModal - DEPARTMENT REMOVED - Starting field settings fetch');
+        console.log('🔍 CreateUserModal - Starting field settings fetch including Department and Employee Type');
         const settingsQueries = [
           fetch('/api/layout-settings/firstName', { credentials: 'include' }),
           fetch('/api/layout-settings/lastName', { credentials: 'include' }),
           fetch('/api/layout-settings/emailUsername', { credentials: 'include' }),
           fetch('/api/layout-settings/password', { credentials: 'include' }),
           fetch('/api/layout-settings/title', { credentials: 'include' }),
-          fetch('/api/layout-settings/manager', { credentials: 'include' })
+          fetch('/api/layout-settings/manager', { credentials: 'include' }),
+          fetch('/api/layout-settings/department', { credentials: 'include' }),
+          fetch('/api/layout-settings/employeeType', { credentials: 'include' })
         ];
         
 
@@ -113,11 +121,13 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
             targetLength: 10
           },
           title: { required: false },
-          manager: { required: false }
+          manager: { required: false },
+          department: { required: false, useList: false, options: [] },
+          employeeType: { required: false, useList: true, options: [] }
         };
         
         // Parse individual setting responses
-        const fieldNames = ['firstName', 'lastName', 'emailUsername', 'password', 'title', 'manager'];
+        const fieldNames = ['firstName', 'lastName', 'emailUsername', 'password', 'title', 'manager', 'department', 'employeeType'];
         for (let i = 0; i < responses.length; i++) {
           const response = responses[i];
           const fieldName = fieldNames[i];
@@ -154,7 +164,9 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
             targetLength: 10
           },
           title: { required: false },
-          manager: { required: false }
+          manager: { required: false },
+          department: { required: false, useList: false, options: [] },
+          employeeType: { required: false, useList: true, options: [] }
         };
       }
     },
@@ -249,6 +261,12 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
       manager: fieldSettings.manager?.required 
         ? z.string().min(1, "Manager is required")
         : z.string().optional(),
+      department: fieldSettings.department?.required 
+        ? z.string().min(1, "Department is required")
+        : z.string().optional(),
+      employeeType: fieldSettings.employeeType?.required 
+        ? z.string().min(1, "Employee type is required")
+        : z.string().optional(),
     });
   }, [fieldSettings]);
 
@@ -262,7 +280,8 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
       password: "",
 
       title: "",
-
+      department: "",
+      employeeType: "",
       managerId: undefined,
       status: "ACTIVE",
       groups: [],
@@ -321,11 +340,8 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
     "GXP@mazetx.com"
   ];
 
-  const availableApps = [
-    "Microsoft",
-    "Slack", 
-    "Zoom"
-  ];
+  // Dynamic apps from database
+  const availableApps = appMappingsData.map((app: any) => app.appName);
 
   const handleGroupToggle = (group: string) => {
     setSelectedGroups(prev => 
@@ -568,7 +584,7 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
             </div>
 
             {/* Job Information */}
-            <div className="grid grid-cols-1 gap-4">
+            <div className="grid grid-cols-2 gap-4">
               <FormField
                 control={form.control}
                 name="title"
@@ -577,6 +593,38 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
                     <FormLabel>Job Title {fieldSettings?.title?.required ? '*' : ''}</FormLabel>
                     <FormControl>
                       <Input placeholder="Enter job title" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="department"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Department {fieldSettings?.department?.required ? '*' : ''}</FormLabel>
+                    <FormControl>
+                      {fieldSettings?.department?.useList ? (
+                        <Select
+                          value={field.value || ""}
+                          onValueChange={field.onChange}
+                        >
+                          <SelectTrigger className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600">
+                            <SelectValue placeholder="Select department" />
+                          </SelectTrigger>
+                          <SelectContent className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600">
+                            {fieldSettings?.department?.options?.map((option: string) => (
+                              <SelectItem key={option} value={option} className="bg-white dark:bg-gray-800">
+                                {option}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      ) : (
+                        <Input placeholder="Enter department" {...field} />
+                      )}
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -636,6 +684,33 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
                 )}
               />
 
+              <FormField
+                control={form.control}
+                name="employeeType"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Employee Type {fieldSettings?.employeeType?.required ? '*' : ''}</FormLabel>
+                    <FormControl>
+                      <Select
+                        value={field.value || ""}
+                        onValueChange={field.onChange}
+                      >
+                        <SelectTrigger className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600">
+                          <SelectValue placeholder="Select employee type" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600">
+                          {fieldSettings?.employeeType?.options?.map((option: string) => (
+                            <SelectItem key={option} value={option} className="bg-white dark:bg-gray-800">
+                              {option}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
             </div>
 
@@ -661,19 +736,55 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
 
               <div className="space-y-2">
                 <Label>Apps</Label>
-                <div className="space-y-2">
-                  {availableApps.map((app) => (
-                    <div key={app} className="flex items-center space-x-2">
-                      <Checkbox
-                        id={app}
-                        checked={selectedApps.includes(app)}
-                        onCheckedChange={() => handleAppToggle(app)}
-                      />
-                      <Label htmlFor={app} className="text-sm font-normal">
-                        {app}
-                      </Label>
+                <div className="border border-gray-300 dark:border-gray-600 rounded p-3 bg-white dark:bg-gray-800 min-h-[120px]">
+                  <div className="space-y-3">
+                    {/* Dropdown for adding apps */}
+                    <Select
+                      value=""
+                      onValueChange={(value) => {
+                        if (value && !selectedApps.includes(value)) {
+                          setSelectedApps([...selectedApps, value]);
+                        }
+                      }}
+                    >
+                      <SelectTrigger className="w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600">
+                        <SelectValue placeholder="Select an app to add..." />
+                      </SelectTrigger>
+                      <SelectContent className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600">
+                        {availableApps
+                          .filter(app => !selectedApps.includes(app))
+                          .map((app) => (
+                            <SelectItem key={app} value={app} className="bg-white dark:bg-gray-800">
+                              {app}
+                            </SelectItem>
+                          ))}
+                      </SelectContent>
+                    </Select>
+                    
+                    {/* Selected apps display */}
+                    <div className="space-y-2">
+                      {selectedApps.map((appName, index) => (
+                        <div key={index} className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-700 rounded border">
+                          <span className="text-sm font-medium">{appName}</span>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              setSelectedApps(selectedApps.filter(app => app !== appName));
+                            }}
+                            className="h-6 w-6 p-0 text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
+                          >
+                            ×
+                          </Button>
+                        </div>
+                      ))}
+                      {selectedApps.length === 0 && (
+                        <div className="text-center py-4">
+                          <span className="text-sm text-gray-500 dark:text-gray-400">No apps selected</span>
+                        </div>
+                      )}
                     </div>
-                  ))}
+                  </div>
                 </div>
               </div>
             </div>
