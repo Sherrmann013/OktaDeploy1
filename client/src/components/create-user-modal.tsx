@@ -85,15 +85,14 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
     queryKey: ["/api/layout-settings", "all-fields"],
     queryFn: async () => {
       try {
-        console.log('🔍 CreateUserModal - UPDATED CODE LOADED - Starting field settings fetch');
+        console.log('🔍 CreateUserModal - DEPARTMENT REMOVED - Starting field settings fetch');
         const settingsQueries = [
           fetch('/api/layout-settings/firstName', { credentials: 'include' }),
           fetch('/api/layout-settings/lastName', { credentials: 'include' }),
           fetch('/api/layout-settings/emailUsername', { credentials: 'include' }),
           fetch('/api/layout-settings/password', { credentials: 'include' }),
           fetch('/api/layout-settings/title', { credentials: 'include' }),
-          fetch('/api/layout-settings/manager', { credentials: 'include' }),
-
+          fetch('/api/layout-settings/manager', { credentials: 'include' })
         ];
         
 
