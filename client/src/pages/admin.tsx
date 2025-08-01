@@ -2925,92 +2925,7 @@ function AdminComponent() {
                                     </div>
                                   )}
 
-                                  {/* Department options completely removed - will rebuild from scratch */}
-                                                <div key={index} className="flex items-center px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700/50">
-                                                  <Input
-                                                    value={option}
-                                                    onChange={(e) => {
-                                                      const newOptions = fieldSettings.department.options.map((opt, i) => 
-                                                        i === index ? e.target.value : opt
-                                                      );
-                                                      const updatedSettings = {
-                                                        ...fieldSettings,
-                                                        department: {
-                                                          ...fieldSettings.department,
-                                                          options: newOptions
-                                                        }
-                                                      };
-                                                      setFieldSettings(updatedSettings);
-                                                      
-                                                      // Save to database
-                                                      updateDepartmentOptionsMutation.mutate({
-                                                        options: newOptions,
-                                                        required: updatedSettings.department.required
-                                                      });
-                                                    }}
-                                                    placeholder="Department name"
-                                                    className="flex-1 bg-transparent border-none text-gray-900 dark:text-gray-100 text-sm p-0 h-auto focus:ring-0 focus:border-none"
-                                                  />
-
-                                                  <Button
-                                                    variant="ghost"
-                                                    size="sm"
-                                                    onClick={() => {
-                                                      const newOptions = fieldSettings.department.options.filter((_, i) => i !== index);
-                                                      const updatedSettings = {
-                                                        ...fieldSettings,
-                                                        department: {
-                                                          ...fieldSettings.department,
-                                                          options: newOptions
-                                                        }
-                                                      };
-                                                      setFieldSettings(updatedSettings);
-                                                      
-                                                      // Save to database
-                                                      updateDepartmentOptionsMutation.mutate({
-                                                        options: newOptions,
-                                                        required: updatedSettings.department.required
-                                                      });
-                                                    }}
-                                                    className="h-4 w-4 p-0 text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 ml-1"
-                                                  >
-                                                    ×
-                                                  </Button>
-                                                </div>
-                                              ))}
-                                              <div className="flex items-center px-3 py-2 border-t border-dashed border-gray-300 dark:border-gray-600">
-                                                <Button
-                                                  variant="ghost"
-                                                  size="sm"
-                                                  onClick={() => {
-                                                    const newOptions = [...fieldSettings.department.options, ""];
-                                                    const updatedSettings = {
-                                                      ...fieldSettings,
-                                                      department: {
-                                                        ...fieldSettings.department,
-                                                        options: newOptions
-                                                      }
-                                                    };
-                                                    setFieldSettings(updatedSettings);
-                                                    
-                                                    // Save to database
-                                                    updateDepartmentOptionsMutation.mutate({
-                                                      options: newOptions,
-                                                      required: updatedSettings.department.required
-                                                    });
-                                                  }}
-                                                  className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
-                                                >
-                                                  <Plus className="w-4 h-4" />
-                                                  Add department
-                                                </Button>
-                                              </div>
-                                              {fieldSettings.department.options.length === 0 && (
-                                                <div className="flex items-center px-3 py-4 text-center">
-                                                  <span className="text-sm text-gray-500 dark:text-gray-400 w-full">No departments added yet</span>
-                                                </div>
-                                              )}
-                                            </div>
+                                  {/* Department options section removed temporarily for testing */}
 
                                             {/* Applications Column - appears when link is clicked */}
                                             {openAppsSection?.type === 'department' && (
@@ -3067,7 +2982,7 @@ function AdminComponent() {
                                                         }}
                                                         className="h-4 w-4 p-0 text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 ml-2"
                                                       >
-                                                        ×
+                                                        {'×'}
                                                       </Button>
                                                     </div>
                                                   ))}
