@@ -93,10 +93,10 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
           fetch('/api/layout-settings/password', { credentials: 'include' }),
           fetch('/api/layout-settings/title', { credentials: 'include' }),
           fetch('/api/layout-settings/manager', { credentials: 'include' }),
-          fetch('/api/layout-settings/department', { credentials: 'include' })
+
         ];
         
-        console.log('🔍 CreateUserModal - About to call department endpoint');
+
         
         const responses = await Promise.all(settingsQueries);
         const settings = {
@@ -114,12 +114,11 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
             targetLength: 10
           },
           title: { required: false },
-          manager: { required: false },
-          department: { required: true, useList: false, options: [] }
+          manager: { required: false }
         };
         
         // Parse individual setting responses
-        const fieldNames = ['firstName', 'lastName', 'emailUsername', 'password', 'title', 'manager', 'department'];
+        const fieldNames = ['firstName', 'lastName', 'emailUsername', 'password', 'title', 'manager'];
         for (let i = 0; i < responses.length; i++) {
           const response = responses[i];
           const fieldName = fieldNames[i];
@@ -156,8 +155,7 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
             targetLength: 10
           },
           title: { required: false },
-          manager: { required: false },
-          department: { required: true, useList: false, options: [] }
+          manager: { required: false }
         };
       }
     },
@@ -174,7 +172,6 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
   // Debug logging for field configuration
   React.useEffect(() => {
     console.log('🔍 CreateUserModal - Field settings loaded:', fieldSettings);
-    console.log('🔍 CreateUserModal - Department config:', fieldSettings?.department);
 
     console.log('🔍 CreateUserModal - Email domain config loaded:', emailDomainConfig);
     console.log('🔍 CreateUserModal - Email domains:', emailDomains);
@@ -264,7 +261,7 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
       email: "",
       login: "",
       password: "",
-      department: "",
+
       title: "",
 
       managerId: undefined,
@@ -572,7 +569,7 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
             </div>
 
             {/* Job Information */}
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4">
               <FormField
                 control={form.control}
                 name="title"
@@ -587,60 +584,7 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
                 )}
               />
               
-              <FormField
-                control={form.control}
-                name="department"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Department</FormLabel>
-                    <FormControl>
-                      <Select 
-                        onValueChange={(value) => {
-                          field.onChange(value);
-                          // Auto-check groups based on department selection
-                          let newGroups = [...selectedGroups];
-                          
-                          // Remove department-specific groups first
-                          newGroups = newGroups.filter(group => 
-                            group !== "HR@mazetx.com" && group !== "finfacit@mazetx.com"
-                          );
-                          
-                          // Add appropriate group based on selection
-                          if (value === "HR") {
-                            newGroups.push("HR@mazetx.com");
-                          } else if (value === "Finance") {
-                            newGroups.push("finfacit@mazetx.com");
-                          }
-                          
-                          setSelectedGroups(newGroups);
-                        }} 
-                        value={field.value || ""}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Human Resources" />
-                        </SelectTrigger>
-                        <SelectContent className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600">
-                          {fieldSettings?.department?.options?.length > 0 ? (
-                            fieldSettings.department.options.map((dept: string) => (
-                              <SelectItem key={dept} value={dept}>{dept}</SelectItem>
-                            ))
-                          ) : (
-                            <>
-                              <SelectItem value="Human Resources">Human Resources</SelectItem>
-                              <SelectItem value="IT Security">IT Security</SelectItem>
-                              <SelectItem value="IT">IT</SelectItem>
-                              <SelectItem value="Legal">Legal</SelectItem>
-                              <SelectItem value="Executive">Executive</SelectItem>
-                              <SelectItem value="Finance">Finance</SelectItem>
-                              <SelectItem value="Operations">Operations</SelectItem>
-                            </>
-                          )}
-                        </SelectContent>
-                      </Select>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+
             </div>
 
             {/* Manager and Employee Type */}
