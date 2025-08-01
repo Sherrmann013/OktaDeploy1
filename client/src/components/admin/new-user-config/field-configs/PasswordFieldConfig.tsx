@@ -97,33 +97,32 @@ export function PasswordFieldConfig({ config, onUpdate }: PasswordFieldConfigPro
           <div className="space-y-3">
             <Label className="text-sm font-medium">Password Components</Label>
             
-            {/* Add Component Buttons - Always visible, styled based on Capture 57 */}
+            {/* Add Component Buttons - Always visible */}
             <div className="flex gap-2">
-              {(['words', 'numbers', 'symbols'] as const).map((type) => {
-                const hasComponent = config.components.some(c => c.type === type);
-                
-                const getButtonColor = (componentType: string) => {
-                  switch (componentType) {
-                    case 'words': return hasComponent ? 'bg-blue-400 text-white cursor-default' : 'bg-blue-600 hover:bg-blue-700 text-white cursor-pointer';
-                    case 'numbers': return hasComponent ? 'bg-green-400 text-white cursor-default' : 'bg-green-600 hover:bg-green-700 text-white cursor-pointer';
-                    case 'symbols': return hasComponent ? 'bg-purple-400 text-white cursor-default' : 'bg-purple-600 hover:bg-purple-700 text-white cursor-pointer';
-                    default: return 'bg-gray-600 hover:bg-gray-700 text-white';
-                  }
-                };
-                
-                return (
-                  <Button
-                    key={type}
-                    type="button"
-                    size="sm"
-                    onClick={() => !hasComponent && addComponent(type)}
-                    disabled={hasComponent}
-                    className={`text-xs ${getButtonColor(type)} border-0`}
-                  >
-                    + {getComponentLabel(type)}
-                  </Button>
-                );
-              })}
+              <Button
+                type="button"
+                size="sm"
+                onClick={() => addComponent('words')}
+                className="text-xs bg-blue-600 hover:bg-blue-700 text-white border-0"
+              >
+                + Words
+              </Button>
+              <Button
+                type="button"
+                size="sm"
+                onClick={() => addComponent('numbers')}
+                className="text-xs bg-green-600 hover:bg-green-700 text-white border-0"
+              >
+                + Numbers
+              </Button>
+              <Button
+                type="button"
+                size="sm"
+                onClick={() => addComponent('symbols')}
+                className="text-xs bg-purple-600 hover:bg-purple-700 text-white border-0"
+              >
+                + Symbols
+              </Button>
             </div>
             
             {/* Components Container */}
