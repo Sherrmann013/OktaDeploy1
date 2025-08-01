@@ -445,19 +445,7 @@ function AdminComponent() {
   const [selectedDepartment, setSelectedDepartment] = useState<string | null>(null);
   const [departmentApps, setDepartmentApps] = useState<Record<string, string[]>>({});
 
-  // Initialize department apps from database mappings
-  useEffect(() => {
-    if (departmentAppMappingsData && departmentAppMappingsData.length > 0) {
-      const mappingsByDepartment: Record<string, string[]> = {};
-      departmentAppMappingsData.forEach((mapping) => {
-        if (!mappingsByDepartment[mapping.departmentName]) {
-          mappingsByDepartment[mapping.departmentName] = [];
-        }
-        mappingsByDepartment[mapping.departmentName].push(mapping.appName);
-      });
-      setDepartmentApps(mappingsByDepartment);
-    }
-  }, [departmentAppMappingsData]);
+  // Note: Temporarily removed database persistence to fix core functionality first
   
 
   // Function to save password settings to database
@@ -762,22 +750,13 @@ function AdminComponent() {
     refetchInterval: 30000
   });
 
-  // Fetch department app mappings from database
-  const { data: departmentAppMappingsData = [], refetch: refetchDepartmentAppMappings } = useQuery<DepartmentAppMapping[]>({
-    queryKey: ["/api/department-app-mappings"],
-    refetchInterval: 30000,
-    onSuccess: (data) => {
-      console.log('🔍 Department app mappings loaded:', data);
-    },
-    onError: (error) => {
-      console.error('❌ Failed to load department app mappings:', error);
-    }
-  });
-
   // Get active apps for the dropdown - matching UserModal logic
   const availableApps = appMappingsData
     .filter(app => app.status === 'active')
     .map(app => app.appName);
+
+  console.log('🔍 Available apps for dropdown:', availableApps);
+  console.log('🔍 Current department apps state:', departmentApps);
 
   // Note: department and employee type app mappings are already declared above
 
@@ -3250,30 +3229,19 @@ function AdminComponent() {
                                           <div className="space-y-2">
                                             <Select
                                               value=""
-                                              onValueChange={async (value) => {
+                                              onValueChange={(value) => {
+                                                console.log('🔍 Selected app:', value, 'for department:', selectedDepartment);
                                                 if (value && selectedDepartment) {
                                                   const currentApps = departmentApps[selectedDepartment] || [];
+                                                  console.log('🔍 Current apps for department:', currentApps);
                                                   if (!currentApps.includes(value)) {
-                                                    // Update local state
+                                                    console.log('🔍 Adding app to department');
                                                     setDepartmentApps({
                                                       ...departmentApps,
                                                       [selectedDepartment]: [...currentApps, value]
                                                     });
-                                                    
-                                                    // Persist to database
-                                                    try {
-                                                      await createDepartmentAppMappingMutation.mutateAsync({
-                                                        departmentName: selectedDepartment,
-                                                        appName: value
-                                                      });
-                                                    } catch (error) {
-                                                      console.error('Failed to create department app mapping:', error);
-                                                      // Revert local state on error
-                                                      setDepartmentApps({
-                                                        ...departmentApps,
-                                                        [selectedDepartment]: currentApps
-                                                      });
-                                                    }
+                                                  } else {
+                                                    console.log('🔍 App already exists for department');
                                                   }
                                                 }
                                               }}
@@ -3307,28 +3275,13 @@ function AdminComponent() {
                                                   <Button
                                                     variant="ghost"
                                                     size="sm"
-                                                    onClick={async () => {
+                                                    onClick={() => {
+                                                      console.log('🔍 Removing app:', app, 'from department:', selectedDepartment);
                                                       const updatedApps = departmentApps[selectedDepartment].filter((_, i) => i !== index);
-                                                      // Update local state
                                                       setDepartmentApps({
                                                         ...departmentApps,
                                                         [selectedDepartment]: updatedApps
                                                       });
-                                                      
-                                                      // Persist to database
-                                                      try {
-                                                        await deleteDepartmentAppMappingMutation.mutateAsync({
-                                                          departmentName: selectedDepartment,
-                                                          appName: app
-                                                        });
-                                                      } catch (error) {
-                                                        console.error('Failed to delete department app mapping:', error);
-                                                        // Revert local state on error
-                                                        setDepartmentApps({
-                                                          ...departmentApps,
-                                                          [selectedDepartment]: departmentApps[selectedDepartment]
-                                                        });
-                                                      }
                                                     }}
                                                     className="h-4 w-4 p-0 text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 ml-1"
                                                   >
