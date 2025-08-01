@@ -3,6 +3,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Plus, Minus } from "lucide-react";
 import { PasswordConfig, PasswordComponent } from "../types";
 
@@ -125,77 +126,48 @@ export function PasswordFieldConfig({ config, onUpdate }: PasswordFieldConfigPro
               </Button>
             </div>
             
-            {/* Components Container */}
+            {/* Components Container with + signs between */}
             <div className="p-4 bg-gray-600 dark:bg-gray-700 rounded-lg border border-gray-500 dark:border-gray-600">
-              <div className="flex flex-wrap gap-3">
+              <div className="flex flex-wrap items-center gap-3">
                 {config.components.map((component, index) => (
-                  <div key={index} className="flex items-center space-x-2 bg-gray-500 dark:bg-gray-600 rounded-md px-3 py-2">
-                    <span className="text-sm font-medium text-white">
-                      {component.count}
-                    </span>
-                    <span className="text-sm text-gray-200">
-                      {getComponentLabel(component.type)}
-                    </span>
-                    
-                    {config.components.length > 1 && (
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => removeComponent(index)}
-                        className="h-5 w-5 p-0 text-red-400 hover:text-red-300 hover:bg-red-500/20"
-                      >
-                        ×
-                      </Button>
+                  <React.Fragment key={index}>
+                    {index > 0 && (
+                      <span className="text-white text-sm font-medium">+</span>
                     )}
-                  </div>
+                    <div className="flex items-center space-x-2 bg-gray-500 dark:bg-gray-600 rounded-md px-3 py-2">
+                      <Select
+                        value={component.count.toString()}
+                        onValueChange={(value) => handleComponentCountChange(index, parseInt(value))}
+                      >
+                        <SelectTrigger className="w-12 h-6 text-xs bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600">
+                          <SelectItem value="1">1</SelectItem>
+                          <SelectItem value="2">2</SelectItem>
+                          <SelectItem value="3">3</SelectItem>
+                          <SelectItem value="4">4</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <span className="text-sm text-gray-200">
+                        {getComponentLabel(component.type)}
+                      </span>
+                      
+                      {config.components.length > 1 && (
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => removeComponent(index)}
+                          className="h-5 w-5 p-0 text-red-400 hover:text-red-300 hover:bg-red-500/20"
+                        >
+                          ×
+                        </Button>
+                      )}
+                    </div>
+                  </React.Fragment>
                 ))}
               </div>
-            </div>
-
-            {/* Component Count Controls */}
-            <div className="space-y-2">
-              {config.components.map((component, index) => (
-                <div key={index} className="flex items-center justify-between">
-                  <span className="text-sm font-medium">{getComponentLabel(component.type)}</span>
-                  
-                  <div className="flex items-center space-x-2">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleComponentCountChange(index, component.count - 1)}
-                      disabled={component.count <= 1}
-                      className="h-7 w-7 p-0 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600"
-                    >
-                      <Minus className="w-3 h-3" />
-                    </Button>
-                    
-                    <span className="w-8 text-center text-sm font-medium">
-                      {component.count}
-                    </span>
-                    
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleComponentCountChange(index, component.count + 1)}
-                      disabled={component.count >= 10}
-                      className="h-7 w-7 p-0 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600"
-                    >
-                      <Plus className="w-3 h-3" />
-                    </Button>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* Preview */}
-            <div className="pt-3 border-t border-gray-300 dark:border-gray-600">
-              <Label className="text-sm font-medium">Preview:</Label>
-              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                ({config.components.map(c => `${c.count} ${c.type}`).join(') + (')})
-              </p>
             </div>
           </div>
         </>
