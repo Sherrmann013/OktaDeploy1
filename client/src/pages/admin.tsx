@@ -3236,10 +3236,12 @@ function AdminComponent() {
                                                   console.log('🔍 Current apps for department:', currentApps);
                                                   if (!currentApps.includes(value)) {
                                                     console.log('🔍 Adding app to department');
-                                                    setDepartmentApps({
+                                                    const newDepartmentApps = {
                                                       ...departmentApps,
                                                       [selectedDepartment]: [...currentApps, value]
-                                                    });
+                                                    };
+                                                    console.log('🔍 New department apps state:', newDepartmentApps);
+                                                    setDepartmentApps(newDepartmentApps);
                                                   } else {
                                                     console.log('🔍 App already exists for department');
                                                   }
@@ -3253,7 +3255,9 @@ function AdminComponent() {
                                                 {availableApps
                                                   .filter((appName: string) => {
                                                     const currentApps = departmentApps[selectedDepartment || ''] || [];
-                                                    return !currentApps.includes(appName);
+                                                    const isFiltered = !currentApps.includes(appName);
+                                                    console.log(`🔍 Filtering ${appName}: currentApps=`, currentApps, 'isFiltered=', isFiltered);
+                                                    return isFiltered;
                                                   })
                                                   .map((appName: string) => (
                                                     <SelectItem key={appName} value={appName} className="bg-white dark:bg-gray-800">
