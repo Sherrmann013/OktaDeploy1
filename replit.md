@@ -40,6 +40,7 @@ The dashboard is built with a React frontend (TypeScript, Tailwind CSS, Wouter) 
 - **Component Reusability:** Employs comprehensive UI components (select, dialog, popover, command, sheet, checkbox, form) for consistent styling and functionality.
 - **Dynamic Content:** Dashboard cards now display database names and are synchronized bi-directionally with the admin layout page.
 - **Field Configuration Persistence:** Fixed Department and Employee Type field settings to properly load from and save to the database. Removed conditional query enabling that prevented these settings from loading outside the Layout > New User tab. Settings now persist across page refreshes and are available to CreateUserModal (resolved July 31, 2025).
+- **Department Field Removal:** Completely removed the Department field from the CreateUserModal form, including form validation, API queries, and grid layout adjustments. The Job Information section now displays only the Title field in a single-column layout (completed August 1, 2025).
 
 ## External Dependencies
 - **OKTA:** Integrated for enterprise user authentication via OAuth2 and user/group management.
