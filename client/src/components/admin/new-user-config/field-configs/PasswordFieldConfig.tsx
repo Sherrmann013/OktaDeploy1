@@ -97,35 +97,7 @@ export function PasswordFieldConfig({ config, onUpdate }: PasswordFieldConfigPro
           <div className="space-y-3">
             <Label className="text-sm font-medium">Password Components</Label>
             
-            {/* Components Container */}
-            <div className="p-4 bg-gray-600 dark:bg-gray-700 rounded-lg border border-gray-500 dark:border-gray-600">
-              <div className="flex flex-wrap gap-3">
-                {config.components.map((component, index) => (
-                  <div key={index} className="flex items-center space-x-2 bg-gray-500 dark:bg-gray-600 rounded-md px-3 py-2">
-                    <span className="text-sm font-medium text-white">
-                      {component.count}
-                    </span>
-                    <span className="text-sm text-gray-200">
-                      {getComponentLabel(component.type)}
-                    </span>
-                    
-                    {config.components.length > 1 && (
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => removeComponent(index)}
-                        className="h-5 w-5 p-0 text-red-400 hover:text-red-300 hover:bg-red-500/20"
-                      >
-                        ×
-                      </Button>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Add Component Buttons */}
+            {/* Add Component Buttons - Directly under title */}
             <div className="flex gap-2">
               {(['words', 'numbers', 'symbols'] as const).map((type) => {
                 const hasComponent = config.components.some(c => c.type === type);
@@ -152,6 +124,34 @@ export function PasswordFieldConfig({ config, onUpdate }: PasswordFieldConfigPro
                   </Button>
                 );
               })}
+            </div>
+            
+            {/* Components Container */}
+            <div className="p-4 bg-gray-600 dark:bg-gray-700 rounded-lg border border-gray-500 dark:border-gray-600">
+              <div className="flex flex-wrap gap-3">
+                {config.components.map((component, index) => (
+                  <div key={index} className="flex items-center space-x-2 bg-gray-500 dark:bg-gray-600 rounded-md px-3 py-2">
+                    <span className="text-sm font-medium text-white">
+                      {component.count}
+                    </span>
+                    <span className="text-sm text-gray-200">
+                      {getComponentLabel(component.type)}
+                    </span>
+                    
+                    {config.components.length > 1 && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => removeComponent(index)}
+                        className="h-5 w-5 p-0 text-red-400 hover:text-red-300 hover:bg-red-500/20"
+                      >
+                        ×
+                      </Button>
+                    )}
+                  </div>
+                ))}
+              </div>
             </div>
 
             {/* Component Count Controls */}
