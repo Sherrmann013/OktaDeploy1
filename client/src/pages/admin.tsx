@@ -3032,8 +3032,9 @@ function AdminComponent() {
 
                                   {/* Department options */}
                                   {selectedField === 'department' && (
-                                    <div className="space-y-3">
-                                      <Label className="text-sm font-medium">Department List</Label>
+                                    <div className="flex gap-6">
+                                      <div className="space-y-3">
+                                        <Label className="text-sm font-medium">Department List</Label>
                                       <div className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md divide-y divide-gray-200 dark:divide-gray-600 max-w-48">
                                         {fieldSettings.department.options.map((dept, index) => (
                                           <div key={index} className="flex items-center px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700/50">
@@ -3159,14 +3160,15 @@ function AdminComponent() {
                                           Save Department Configuration
                                         </Button>
                                       </div>
-                                    
-                                    {/* Applications Panel */}
-                                    {selectedDepartment && (
+                                      </div>
+
+                                      {/* Applications Panel */}
+                                      {selectedDepartment && (
                                         <div className="space-y-3">
                                           <Label className="text-sm font-medium">Applications for "{selectedDepartment}"</Label>
                                           
                                           {/* Add app dropdown */}
-                                          <div>
+                                          <div className="space-y-2">
                                             <Select
                                               value=""
                                               onValueChange={(value) => {
@@ -3185,23 +3187,18 @@ function AdminComponent() {
                                                 <SelectValue placeholder="Select an application to link..." />
                                               </SelectTrigger>
                                               <SelectContent className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600">
-                                                {(appMappingsData || [])
-                                                  .filter((mapping: AppMapping) => {
-                                                    const currentApps = departmentApps[selectedDepartment] || [];
-                                                    return !currentApps.includes(mapping.appName);
-                                                  })
-                                                  .map((mapping: AppMapping) => (
-                                                    <SelectItem key={mapping.id} value={mapping.appName} className="bg-white dark:bg-gray-800">
-                                                      {mapping.appName}
-                                                    </SelectItem>
-                                                  ))}
+                                                {(appMappingsData || []).map((mapping: AppMapping) => (
+                                                  <SelectItem key={mapping.id} value={mapping.appName} className="bg-white dark:bg-gray-800">
+                                                    {mapping.appName}
+                                                  </SelectItem>
+                                                ))}
                                               </SelectContent>
                                             </Select>
                                           </div>
 
                                           {/* Show linked apps */}
                                           {departmentApps[selectedDepartment] && departmentApps[selectedDepartment].length > 0 ? (
-                                            <div className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md divide-y divide-gray-200 dark:divide-gray-600 max-w-48 mt-2">
+                                            <div className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md divide-y divide-gray-200 dark:divide-gray-600 max-w-48">
                                               {departmentApps[selectedDepartment].map((app, index) => (
                                                 <div key={index} className="flex items-center px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700/50">
                                                   <span className="flex-1 text-gray-900 dark:text-gray-100 text-sm uppercase">
@@ -3232,7 +3229,9 @@ function AdminComponent() {
                                             </div>
                                           )}
                                         </div>
-                                    )}
+                                      )}
+                                    </div>
+                                  )}
 
                                   {/* Employee Type options */}
                                   {selectedField === 'employeeType' && (
