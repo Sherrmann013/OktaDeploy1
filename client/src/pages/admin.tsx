@@ -96,8 +96,19 @@ function AdminComponent() {
 
   // Apps state for new user creation form
   const [selectedApps, setSelectedApps] = useState<string[]>([]);
-
-
+  
+  // Add missing state variables
+  const [fieldSettings, setFieldSettings] = useState<any>({
+    firstName: { required: true },
+    lastName: { required: true },
+    emailUsername: { required: true, domains: ["@mazetx.com"] },
+    password: { required: true, showGenerateButton: true, components: [{ type: "words", count: 1 }, { type: "numbers", count: 2 }, { type: "symbols", count: 1 }], targetLength: 10 },
+    title: { required: false },
+    manager: { required: false },
+    department: { required: true, useList: false, options: [] },
+    employeeType: { required: false, useList: true, options: [] }
+  });
+  const [departmentApps, setDepartmentApps] = useState<Record<string, string[]>>({});
 
   const queryClient = useQueryClient();
 
@@ -417,7 +428,7 @@ function AdminComponent() {
         console.log('🔍 Parsed email settings:', parsedSettings);
         if (parsedSettings.domains && Array.isArray(parsedSettings.domains)) {
           console.log('🔍 Loading saved domains:', parsedSettings.domains);
-          setFieldSettings(prev => {
+          setFieldSettings((prev: any) => {
             console.log('🔍 Previous field settings:', prev);
             const newSettings = {
               ...prev,
@@ -449,7 +460,7 @@ function AdminComponent() {
         console.log('🔍 Parsed password settings:', parsedSettings);
         if (parsedSettings.components && Array.isArray(parsedSettings.components)) {
           console.log('🔍 Loading saved password components:', parsedSettings);
-          setFieldSettings(prev => {
+          setFieldSettings((prev: any) => {
             console.log('🔍 Previous password field settings:', prev);
             const newSettings = {
               ...prev,
@@ -473,7 +484,7 @@ function AdminComponent() {
   // Update field settings when individual field settings are loaded
   useEffect(() => {
     console.log('🔍 Field settings loaded - updating state');
-    setFieldSettings(prev => {
+    setFieldSettings((prev: any) => {
       const newSettings = { ...prev };
       
       // Update firstName required setting
@@ -609,26 +620,24 @@ function AdminComponent() {
   // Fetch department app mappings from database
   const { data: departmentAppMappingsData = [] } = useQuery<DepartmentAppMapping[]>({
     queryKey: ["/api/department-app-mappings"],
-    refetchInterval: 30000,
-    onSuccess: (data) => {
-      console.log('🔍 Department app mappings loaded:', data);
-      // Initialize departmentApps state from database
-      if (data && data.length > 0) {
-        const mappingsByDepartment: Record<string, string[]> = {};
-        data.forEach((mapping) => {
-          if (!mappingsByDepartment[mapping.departmentName]) {
-            mappingsByDepartment[mapping.departmentName] = [];
-          }
-          mappingsByDepartment[mapping.departmentName].push(mapping.appName);
-        });
-        setDepartmentApps(mappingsByDepartment);
-        console.log('🔍 Initialized department apps from database:', mappingsByDepartment);
-      }
-    },
-    onError: (error) => {
-      console.error('❌ Failed to load department app mappings:', error);
-    }
+    refetchInterval: 30000
   });
+
+  // Handle department app mappings data changes
+  useEffect(() => {
+    if (departmentAppMappingsData && departmentAppMappingsData.length > 0) {
+      console.log('🔍 Department app mappings loaded:', departmentAppMappingsData);
+      const mappingsByDepartment: Record<string, string[]> = {};
+      departmentAppMappingsData.forEach((mapping: DepartmentAppMapping) => {
+        if (!mappingsByDepartment[mapping.departmentName]) {
+          mappingsByDepartment[mapping.departmentName] = [];
+        }
+        mappingsByDepartment[mapping.departmentName].push(mapping.appName);
+      });
+      setDepartmentApps(mappingsByDepartment);
+      console.log('🔍 Initialized department apps from database:', mappingsByDepartment);
+    }
+  }, [departmentAppMappingsData]);
 
   // Get active apps for the dropdown - matching UserModal logic
   const availableApps = appMappingsData
