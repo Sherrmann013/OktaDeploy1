@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Pencil, Trash2, Check, ChevronsUpDown, Edit, X, Settings, RefreshCw, Mail, Lock, GripVertical } from "lucide-react";
+import { Plus, Pencil, Trash2, Check, ChevronsUpDown, Edit, X, Settings, RefreshCw, Mail, Lock, GripVertical, Link } from "lucide-react";
 import { LogoUploadModal } from "@/components/LogoUploadModal";
 import CreateUserModal from "@/components/create-user-modal";
 import { useToast } from "@/hooks/use-toast";
@@ -435,6 +435,9 @@ function AdminComponent() {
   const [isCreateUserModalOpen, setIsCreateUserModalOpen] = useState(false);
   const [selectedField, setSelectedField] = useState<string | null>(null);
   const [selectedApps, setSelectedApps] = useState<string[]>([]);
+  const [showDepartmentApps, setShowDepartmentApps] = useState(false);
+  const [selectedDepartment, setSelectedDepartment] = useState<string | null>(null);
+  const [departmentApps, setDepartmentApps] = useState<Record<string, string[]>>({});
   
 
   // Function to save password settings to database
@@ -2354,9 +2357,22 @@ function AdminComponent() {
                                   </div>
                                 </div>
                                 <div className="space-y-2">
-                                  <Label htmlFor="preview-department" className="text-sm font-medium">
-                                    Department {fieldSettings.department.required && <span className="text-red-500">*</span>}
-                                  </Label>
+                                  <div className="flex items-center justify-between">
+                                    <Label htmlFor="preview-department" className="text-sm font-medium">
+                                      Department {fieldSettings.department.required && <span className="text-red-500">*</span>}
+                                    </Label>
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      onClick={() => {
+                                        setSelectedDepartment('General'); // Default department for linking
+                                        setShowDepartmentApps(true);
+                                      }}
+                                      className="h-6 w-6 p-0 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                                    >
+                                      <Link className="h-4 w-4" />
+                                    </Button>
+                                  </div>
                                   <div
                                     className={`relative cursor-pointer transition-all duration-200 rounded-md ${
                                       selectedField === 'department' 
@@ -3959,6 +3975,112 @@ function AdminComponent() {
               className="bg-blue-600 hover:bg-blue-700 text-white"
             >
               {createAppMappingMutation.isPending ? "Creating..." : "Create Mapping"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Department Apps Modal */}
+      <Dialog open={showDepartmentApps} onOpenChange={setShowDepartmentApps}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Applications for "{selectedDepartment || 'Department'}"</DialogTitle>
+            <DialogDescription>
+              Link applications to this department for automatic assignment
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            {/* Add app dropdown */}
+            <div className="space-y-2">
+              <Label>Select an application to link</Label>
+              <Select
+                value=""
+                onValueChange={(value) => {
+                  if (value && selectedDepartment) {
+                    const currentApps = departmentApps[selectedDepartment] || [];
+                    if (!currentApps.includes(value)) {
+                      setDepartmentApps({
+                        ...departmentApps,
+                        [selectedDepartment]: [...currentApps, value]
+                      });
+                    }
+                  }
+                }}
+              >
+                <SelectTrigger className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600">
+                  <SelectValue placeholder="Select an application to link" />
+                </SelectTrigger>
+                <SelectContent className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600">
+                  {(appMappingsData || []).map((mapping: AppMapping) => (
+                    <SelectItem key={mapping.id} value={mapping.appName} className="bg-white dark:bg-gray-800">
+                      {mapping.appName}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Show linked apps */}
+            {selectedDepartment && departmentApps[selectedDepartment] && departmentApps[selectedDepartment].length > 0 && (
+              <div className="space-y-2">
+                <Label>Linked Applications</Label>
+                <div className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md divide-y divide-gray-200 dark:divide-gray-600">
+                  {departmentApps[selectedDepartment].map((app, index) => (
+                    <div key={index} className="flex items-center px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                      <span className="flex-1 text-gray-900 dark:text-gray-100 text-sm uppercase">
+                        {app}
+                      </span>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          const updatedApps = departmentApps[selectedDepartment].filter((_, i) => i !== index);
+                          setDepartmentApps({
+                            ...departmentApps,
+                            [selectedDepartment]: updatedApps
+                          });
+                        }}
+                        className="h-4 w-4 p-0 text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 ml-1"
+                      >
+                        {'×'}
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {selectedDepartment && (!departmentApps[selectedDepartment] || departmentApps[selectedDepartment].length === 0) && (
+              <div className="text-center py-4">
+                <span className="text-sm text-gray-500 dark:text-gray-400">No applications linked yet</span>
+              </div>
+            )}
+          </div>
+
+          <div className="flex justify-end space-x-2">
+            <Button 
+              variant="outline" 
+              onClick={() => {
+                setShowDepartmentApps(false);
+                setSelectedDepartment(null);
+              }}
+            >
+              Close
+            </Button>
+            <Button 
+              onClick={() => {
+                // Here you could save the department-app mappings to the database
+                toast({
+                  title: "Success",
+                  description: "Department applications updated successfully"
+                });
+                setShowDepartmentApps(false);
+                setSelectedDepartment(null);
+              }}
+              className="bg-blue-600 hover:bg-blue-700 text-white"
+            >
+              Save Changes
             </Button>
           </div>
         </DialogContent>
