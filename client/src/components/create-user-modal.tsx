@@ -92,7 +92,8 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
           fetch('/api/layout-settings/emailUsername', { credentials: 'include' }),
           fetch('/api/layout-settings/password', { credentials: 'include' }),
           fetch('/api/layout-settings/title', { credentials: 'include' }),
-          fetch('/api/layout-settings/manager', { credentials: 'include' })
+          fetch('/api/layout-settings/manager', { credentials: 'include' }),
+          fetch('/api/layout-settings/department', { credentials: 'include' })
         ];
         
 
@@ -117,7 +118,7 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
         };
         
         // Parse individual setting responses
-        const fieldNames = ['firstName', 'lastName', 'emailUsername', 'password', 'title', 'manager'];
+        const fieldNames = ['firstName', 'lastName', 'emailUsername', 'password', 'title', 'manager', 'department'];
         for (let i = 0; i < responses.length; i++) {
           const response = responses[i];
           const fieldName = fieldNames[i];
@@ -568,7 +569,7 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
             </div>
 
             {/* Job Information */}
-            <div className="grid grid-cols-1 gap-4">
+            <div className="grid grid-cols-2 gap-4">
               <FormField
                 control={form.control}
                 name="title"
@@ -582,8 +583,41 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
                   </FormItem>
                 )}
               />
-              
 
+              <FormField
+                control={form.control}
+                name="department"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Department {fieldSettings?.department?.required ? '*' : ''}</FormLabel>
+                    <FormControl>
+                      <Select onValueChange={field.onChange} value={field.value || ""}>
+                        <SelectTrigger className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600">
+                          <SelectValue placeholder="Select department" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600">
+                          {fieldSettings?.department?.options?.length > 0 ? (
+                            fieldSettings.department.options.map((dept: string) => (
+                              <SelectItem key={dept} value={dept}>{dept}</SelectItem>
+                            ))
+                          ) : (
+                            <>
+                              <SelectItem value="Human Resources">Human Resources</SelectItem>
+                              <SelectItem value="IT Security">IT Security</SelectItem>
+                              <SelectItem value="IT">IT</SelectItem>
+                              <SelectItem value="Legal">Legal</SelectItem>
+                              <SelectItem value="Executive">Executive</SelectItem>
+                              <SelectItem value="Finance">Finance</SelectItem>
+                              <SelectItem value="Operations">Operations</SelectItem>
+                            </>
+                          )}
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             </div>
 
             {/* Manager and Employee Type */}
