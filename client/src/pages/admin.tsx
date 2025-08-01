@@ -750,6 +750,30 @@ function AdminComponent() {
     refetchInterval: 30000
   });
 
+  // Fetch department app mappings from database
+  const { data: departmentAppMappingsData = [] } = useQuery<DepartmentAppMapping[]>({
+    queryKey: ["/api/department-app-mappings"],
+    refetchInterval: 30000,
+    onSuccess: (data) => {
+      console.log('🔍 Department app mappings loaded:', data);
+      // Initialize departmentApps state from database
+      if (data && data.length > 0) {
+        const mappingsByDepartment: Record<string, string[]> = {};
+        data.forEach((mapping) => {
+          if (!mappingsByDepartment[mapping.departmentName]) {
+            mappingsByDepartment[mapping.departmentName] = [];
+          }
+          mappingsByDepartment[mapping.departmentName].push(mapping.appName);
+        });
+        setDepartmentApps(mappingsByDepartment);
+        console.log('🔍 Initialized department apps from database:', mappingsByDepartment);
+      }
+    },
+    onError: (error) => {
+      console.error('❌ Failed to load department app mappings:', error);
+    }
+  });
+
   // Get active apps for the dropdown - matching UserModal logic
   const availableApps = appMappingsData
     .filter(app => app.status === 'active')
@@ -3228,8 +3252,9 @@ function AdminComponent() {
                                           {/* Add app dropdown */}
                                           <div className="space-y-2">
                                             <Select
+                                              key={`${selectedDepartment}-${JSON.stringify(departmentApps[selectedDepartment || ''])}`}
                                               value=""
-                                              onValueChange={(value) => {
+                                              onValueChange={async (value) => {
                                                 console.log('🔍 Selected app:', value, 'for department:', selectedDepartment);
                                                 if (value && selectedDepartment) {
                                                   const currentApps = departmentApps[selectedDepartment] || [];
@@ -3242,6 +3267,23 @@ function AdminComponent() {
                                                     };
                                                     console.log('🔍 New department apps state:', newDepartmentApps);
                                                     setDepartmentApps(newDepartmentApps);
+
+                                                    // Persist to database
+                                                    try {
+                                                      console.log('🔍 Saving to database:', { departmentName: selectedDepartment, appName: value });
+                                                      await createDepartmentAppMappingMutation.mutateAsync({
+                                                        departmentName: selectedDepartment,
+                                                        appName: value
+                                                      });
+                                                      console.log('✅ Successfully saved to database');
+                                                    } catch (error) {
+                                                      console.error('❌ Failed to save to database:', error);
+                                                      // Revert local state on error
+                                                      setDepartmentApps({
+                                                        ...departmentApps,
+                                                        [selectedDepartment]: currentApps
+                                                      });
+                                                    }
                                                   } else {
                                                     console.log('🔍 App already exists for department');
                                                   }
@@ -3279,13 +3321,30 @@ function AdminComponent() {
                                                   <Button
                                                     variant="ghost"
                                                     size="sm"
-                                                    onClick={() => {
+                                                    onClick={async () => {
                                                       console.log('🔍 Removing app:', app, 'from department:', selectedDepartment);
                                                       const updatedApps = departmentApps[selectedDepartment].filter((_, i) => i !== index);
                                                       setDepartmentApps({
                                                         ...departmentApps,
                                                         [selectedDepartment]: updatedApps
                                                       });
+
+                                                      // Persist to database
+                                                      try {
+                                                        console.log('🔍 Removing from database:', { departmentName: selectedDepartment, appName: app });
+                                                        await deleteDepartmentAppMappingMutation.mutateAsync({
+                                                          departmentName: selectedDepartment,
+                                                          appName: app
+                                                        });
+                                                        console.log('✅ Successfully removed from database');
+                                                      } catch (error) {
+                                                        console.error('❌ Failed to remove from database:', error);
+                                                        // Revert local state on error
+                                                        setDepartmentApps({
+                                                          ...departmentApps,
+                                                          [selectedDepartment]: departmentApps[selectedDepartment]
+                                                        });
+                                                      }
                                                     }}
                                                     className="h-4 w-4 p-0 text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 ml-1"
                                                   >
