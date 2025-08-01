@@ -769,32 +769,30 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
                   </SelectContent>
                 </Select>
 
-                {/* Selected apps display matching the Employee Type format */}
-                <div className="space-y-2">
+                {/* Selected apps using exact Employee Type format */}
+                <div className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md divide-y divide-gray-200 dark:divide-gray-600 max-w-48">
                   {selectedApps.map((appName, index) => (
-                    <div key={index} className="flex items-center justify-between px-3 py-2 bg-gray-600 dark:bg-gray-600 rounded border border-gray-500">
-                      <span className="text-sm font-medium text-white uppercase">{appName}</span>
-                      <div className="flex items-center space-x-1">
-                        <button
-                          type="button"
-                          className="text-gray-400 hover:text-gray-300 p-1"
-                        >
-                          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
-                          </svg>
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setSelectedApps(selectedApps.filter(app => app !== appName));
-                          }}
-                          className="text-red-400 hover:text-red-300 text-sm font-bold leading-none p-1"
-                        >
-                          ×
-                        </button>
-                      </div>
+                    <div key={index} className="flex items-center px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                      <span className="flex-1 text-gray-900 dark:text-gray-100 text-sm uppercase">
+                        {appName}
+                      </span>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          setSelectedApps(selectedApps.filter(app => app !== appName));
+                        }}
+                        className="h-4 w-4 p-0 text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 ml-1"
+                      >
+                        {'×'}
+                      </Button>
                     </div>
                   ))}
+                  {selectedApps.length === 0 && (
+                    <div className="flex items-center px-3 py-4 text-center">
+                      <span className="text-sm text-gray-500 dark:text-gray-400 w-full">No apps selected</span>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
