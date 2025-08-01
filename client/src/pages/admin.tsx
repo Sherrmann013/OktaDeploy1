@@ -434,6 +434,7 @@ function AdminComponent() {
   const [customCardDescription, setCustomCardDescription] = useState("");
   const [isCreateUserModalOpen, setIsCreateUserModalOpen] = useState(false);
   const [selectedField, setSelectedField] = useState<string | null>(null);
+  const [selectedApps, setSelectedApps] = useState<string[]>([]);
   
 
   // Function to save password settings to database
@@ -2468,18 +2469,52 @@ function AdminComponent() {
                                 <div className="space-y-2">
                                   <Label className="text-sm font-medium">Apps</Label>
                                   <div className="border border-gray-300 dark:border-gray-600 rounded p-3 bg-white dark:bg-gray-800 min-h-[120px]">
-                                    <div className="space-y-2">
-                                      <div className="flex items-center space-x-2">
-                                        <Checkbox id="preview-app1" disabled />
-                                        <Label htmlFor="preview-app1" className="text-sm">Microsoft</Label>
-                                      </div>
-                                      <div className="flex items-center space-x-2">
-                                        <Checkbox id="preview-app2" disabled />
-                                        <Label htmlFor="preview-app2" className="text-sm">Slack</Label>
-                                      </div>
-                                      <div className="flex items-center space-x-2">
-                                        <Checkbox id="preview-app3" disabled />
-                                        <Label htmlFor="preview-app3" className="text-sm">Zoom</Label>
+                                    <div className="space-y-3">
+                                      {/* Dropdown for adding apps */}
+                                      <Select
+                                        value=""
+                                        onValueChange={(value) => {
+                                          if (value && !selectedApps.includes(value)) {
+                                            setSelectedApps([...selectedApps, value]);
+                                          }
+                                        }}
+                                      >
+                                        <SelectTrigger className="w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600">
+                                          <SelectValue placeholder="Select an app to add..." />
+                                        </SelectTrigger>
+                                        <SelectContent className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600">
+                                          {appMappingsData
+                                            .filter(app => !selectedApps.includes(app.appName))
+                                            .map((app) => (
+                                              <SelectItem key={app.id} value={app.appName} className="bg-white dark:bg-gray-800">
+                                                {app.appName}
+                                              </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                      </Select>
+                                      
+                                      {/* Selected apps display */}
+                                      <div className="space-y-2">
+                                        {selectedApps.map((appName, index) => (
+                                          <div key={index} className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-700 rounded border">
+                                            <span className="text-sm font-medium">{appName}</span>
+                                            <Button
+                                              variant="ghost"
+                                              size="sm"
+                                              onClick={() => {
+                                                setSelectedApps(selectedApps.filter(app => app !== appName));
+                                              }}
+                                              className="h-6 w-6 p-0 text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
+                                            >
+                                              ×
+                                            </Button>
+                                          </div>
+                                        ))}
+                                        {selectedApps.length === 0 && (
+                                          <div className="text-center py-4">
+                                            <span className="text-sm text-gray-500 dark:text-gray-400">No apps selected</span>
+                                          </div>
+                                        )}
                                       </div>
                                     </div>
                                   </div>
