@@ -435,7 +435,6 @@ function AdminComponent() {
   const [isCreateUserModalOpen, setIsCreateUserModalOpen] = useState(false);
   const [selectedField, setSelectedField] = useState<string | null>(null);
   const [selectedApps, setSelectedApps] = useState<string[]>([]);
-  const [showDepartmentApps, setShowDepartmentApps] = useState(false);
   const [selectedDepartment, setSelectedDepartment] = useState<string | null>(null);
   const [departmentApps, setDepartmentApps] = useState<Record<string, string[]>>({});
   
@@ -3033,8 +3032,9 @@ function AdminComponent() {
 
                                   {/* Department options */}
                                   {selectedField === 'department' && (
-                                    <div className="space-y-3">
-                                      <Label className="text-sm font-medium">Department List</Label>
+                                    <div className="flex gap-6">
+                                      <div className="space-y-3">
+                                        <Label className="text-sm font-medium">Department List</Label>
                                       <div className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md divide-y divide-gray-200 dark:divide-gray-600 max-w-48">
                                         {fieldSettings.department.options.map((dept, index) => (
                                           <div key={index} className="flex items-center px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700/50">
@@ -3061,7 +3061,6 @@ function AdminComponent() {
                                               size="sm"
                                               onClick={() => {
                                                 setSelectedDepartment(dept);
-                                                setShowDepartmentApps(true);
                                               }}
                                               className="h-4 w-4 p-0 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 ml-1"
                                             >
@@ -3161,6 +3160,76 @@ function AdminComponent() {
                                           Save Department Configuration
                                         </Button>
                                       </div>
+                                      </div>
+
+                                      {/* Applications Panel */}
+                                      {selectedDepartment && (
+                                        <div className="space-y-3">
+                                          <Label className="text-sm font-medium">Applications for "{selectedDepartment}"</Label>
+                                          
+                                          {/* Add app dropdown */}
+                                          <div className="space-y-2">
+                                            <Select
+                                              value=""
+                                              onValueChange={(value) => {
+                                                if (value && selectedDepartment) {
+                                                  const currentApps = departmentApps[selectedDepartment] || [];
+                                                  if (!currentApps.includes(value)) {
+                                                    setDepartmentApps({
+                                                      ...departmentApps,
+                                                      [selectedDepartment]: [...currentApps, value]
+                                                    });
+                                                  }
+                                                }
+                                              }}
+                                            >
+                                              <SelectTrigger className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 max-w-48">
+                                                <SelectValue placeholder="Select an application to link..." />
+                                              </SelectTrigger>
+                                              <SelectContent className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600">
+                                                {(appMappingsData || []).map((mapping: AppMapping) => (
+                                                  <SelectItem key={mapping.id} value={mapping.appName} className="bg-white dark:bg-gray-800">
+                                                    {mapping.appName}
+                                                  </SelectItem>
+                                                ))}
+                                              </SelectContent>
+                                            </Select>
+                                          </div>
+
+                                          {/* Show linked apps */}
+                                          {departmentApps[selectedDepartment] && departmentApps[selectedDepartment].length > 0 ? (
+                                            <div className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md divide-y divide-gray-200 dark:divide-gray-600 max-w-48">
+                                              {departmentApps[selectedDepartment].map((app, index) => (
+                                                <div key={index} className="flex items-center px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                                                  <span className="flex-1 text-gray-900 dark:text-gray-100 text-sm uppercase">
+                                                    {app}
+                                                  </span>
+                                                  <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    onClick={() => {
+                                                      const updatedApps = departmentApps[selectedDepartment].filter((_, i) => i !== index);
+                                                      setDepartmentApps({
+                                                        ...departmentApps,
+                                                        [selectedDepartment]: updatedApps
+                                                      });
+                                                    }}
+                                                    className="h-4 w-4 p-0 text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 ml-1"
+                                                  >
+                                                    {'×'}
+                                                  </Button>
+                                                </div>
+                                              ))}
+                                            </div>
+                                          ) : (
+                                            <div className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md py-4 max-w-48">
+                                              <div className="text-center">
+                                                <span className="text-sm text-gray-500 dark:text-gray-400">No apps selected</span>
+                                              </div>
+                                            </div>
+                                          )}
+                                        </div>
+                                      )}
                                     </div>
                                   )}
 
@@ -3978,111 +4047,7 @@ function AdminComponent() {
         </DialogContent>
       </Dialog>
 
-      {/* Department Apps Modal */}
-      <Dialog open={showDepartmentApps} onOpenChange={setShowDepartmentApps}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>Applications for "{selectedDepartment || 'Department'}"</DialogTitle>
-            <DialogDescription>
-              Link applications to this department for automatic assignment
-            </DialogDescription>
-          </DialogHeader>
-          
-          <div className="space-y-4">
-            {/* Add app dropdown */}
-            <div className="space-y-2">
-              <Label>Select an application to link</Label>
-              <Select
-                value=""
-                onValueChange={(value) => {
-                  if (value && selectedDepartment) {
-                    const currentApps = departmentApps[selectedDepartment] || [];
-                    if (!currentApps.includes(value)) {
-                      setDepartmentApps({
-                        ...departmentApps,
-                        [selectedDepartment]: [...currentApps, value]
-                      });
-                    }
-                  }
-                }}
-              >
-                <SelectTrigger className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600">
-                  <SelectValue placeholder="Select an application to link" />
-                </SelectTrigger>
-                <SelectContent className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600">
-                  {(appMappingsData || []).map((mapping: AppMapping) => (
-                    <SelectItem key={mapping.id} value={mapping.appName} className="bg-white dark:bg-gray-800">
-                      {mapping.appName}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
 
-            {/* Show linked apps */}
-            {selectedDepartment && departmentApps[selectedDepartment] && departmentApps[selectedDepartment].length > 0 && (
-              <div className="space-y-2">
-                <Label>Linked Applications</Label>
-                <div className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md divide-y divide-gray-200 dark:divide-gray-600">
-                  {departmentApps[selectedDepartment].map((app, index) => (
-                    <div key={index} className="flex items-center px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700/50">
-                      <span className="flex-1 text-gray-900 dark:text-gray-100 text-sm uppercase">
-                        {app}
-                      </span>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => {
-                          const updatedApps = departmentApps[selectedDepartment].filter((_, i) => i !== index);
-                          setDepartmentApps({
-                            ...departmentApps,
-                            [selectedDepartment]: updatedApps
-                          });
-                        }}
-                        className="h-4 w-4 p-0 text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 ml-1"
-                      >
-                        {'×'}
-                      </Button>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {selectedDepartment && (!departmentApps[selectedDepartment] || departmentApps[selectedDepartment].length === 0) && (
-              <div className="text-center py-4">
-                <span className="text-sm text-gray-500 dark:text-gray-400">No applications linked yet</span>
-              </div>
-            )}
-          </div>
-
-          <div className="flex justify-end space-x-2">
-            <Button 
-              variant="outline" 
-              onClick={() => {
-                setShowDepartmentApps(false);
-                setSelectedDepartment(null);
-              }}
-            >
-              Close
-            </Button>
-            <Button 
-              onClick={() => {
-                // Here you could save the department-app mappings to the database
-                toast({
-                  title: "Success",
-                  description: "Department applications updated successfully"
-                });
-                setShowDepartmentApps(false);
-                setSelectedDepartment(null);
-              }}
-              className="bg-blue-600 hover:bg-blue-700 text-white"
-            >
-              Save Changes
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
 
       {/* Create User Modal */}
       <CreateUserModal 
