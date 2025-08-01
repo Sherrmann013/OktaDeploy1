@@ -3167,8 +3167,8 @@ function AdminComponent() {
                                         <div className="space-y-3">
                                           <Label className="text-sm font-medium">Applications for "{selectedDepartment}"</Label>
                                           
-                                          {/* Add app dropdown */}
-                                          <div className="space-y-2">
+                                          {/* Add app dropdown - moved up to align with first department */}
+                                          <div className="space-y-2 -mt-1">
                                             <Select
                                               value=""
                                               onValueChange={(value) => {
@@ -3187,11 +3187,16 @@ function AdminComponent() {
                                                 <SelectValue placeholder="Select an application to link..." />
                                               </SelectTrigger>
                                               <SelectContent className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600">
-                                                {(appMappingsData || []).map((mapping: AppMapping) => (
-                                                  <SelectItem key={mapping.id} value={mapping.appName} className="bg-white dark:bg-gray-800">
-                                                    {mapping.appName}
-                                                  </SelectItem>
-                                                ))}
+                                                {(appMappingsData || [])
+                                                  .filter((mapping: AppMapping) => {
+                                                    const currentApps = departmentApps[selectedDepartment] || [];
+                                                    return !currentApps.includes(mapping.appName);
+                                                  })
+                                                  .map((mapping: AppMapping) => (
+                                                    <SelectItem key={mapping.id} value={mapping.appName} className="bg-white dark:bg-gray-800">
+                                                      {mapping.appName}
+                                                    </SelectItem>
+                                                  ))}
                                               </SelectContent>
                                             </Select>
                                           </div>
