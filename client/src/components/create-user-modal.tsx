@@ -606,25 +606,32 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
                   <FormItem>
                     <FormLabel>Department {fieldSettings?.department?.required ? '*' : ''}</FormLabel>
                     <FormControl>
-                      {fieldSettings?.department?.options?.length > 0 ? (
-                        <Select
-                          value={field.value || ""}
-                          onValueChange={field.onChange}
-                        >
-                          <SelectTrigger className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600">
-                            <SelectValue placeholder="Select department" />
-                          </SelectTrigger>
-                          <SelectContent className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600">
-                            {fieldSettings?.department?.options?.map((option: string) => (
-                              <SelectItem key={option} value={option} className="bg-white dark:bg-gray-800">
-                                {option}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      ) : (
-                        <Input placeholder="Enter department" {...field} />
-                      )}
+                      {(() => {
+                        const hasOptions = fieldSettings?.department?.options && 
+                                         Array.isArray(fieldSettings.department.options) && 
+                                         fieldSettings.department.options.length > 0;
+                        console.log('🔍 Department field - hasOptions:', hasOptions, 'options:', fieldSettings?.department?.options);
+                        
+                        return hasOptions ? (
+                          <Select
+                            value={field.value || ""}
+                            onValueChange={field.onChange}
+                          >
+                            <SelectTrigger className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600">
+                              <SelectValue placeholder="Select department" />
+                            </SelectTrigger>
+                            <SelectContent className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600">
+                              {fieldSettings.department.options.map((option: string) => (
+                                <SelectItem key={option} value={option} className="bg-white dark:bg-gray-800">
+                                  {option}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        ) : (
+                          <Input placeholder="Enter department" {...field} />
+                        );
+                      })()}
                     </FormControl>
                     <FormMessage />
                   </FormItem>
