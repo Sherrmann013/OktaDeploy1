@@ -606,7 +606,7 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
                   <FormItem>
                     <FormLabel>Department {fieldSettings?.department?.required ? '*' : ''}</FormLabel>
                     <FormControl>
-                      {fieldSettings?.department?.useList ? (
+                      {fieldSettings?.department?.options?.length > 0 ? (
                         <Select
                           value={field.value || ""}
                           onValueChange={field.onChange}
