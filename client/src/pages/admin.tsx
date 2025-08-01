@@ -3233,7 +3233,6 @@ function AdminComponent() {
                                           )}
                                         </div>
                                     )}
-                                  )}
 
                                   {/* Employee Type options */}
                                   {selectedField === 'employeeType' && (
