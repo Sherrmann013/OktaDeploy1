@@ -3033,9 +3033,10 @@ function AdminComponent() {
                                   {/* Department options */}
                                   {selectedField === 'department' && (
                                     <div className="flex gap-6">
-                                      <div className="space-y-3">
+                                      {/* Left Panel - Department List */}
+                                      <div className="flex-1 space-y-3">
                                         <Label className="text-sm font-medium">Department List</Label>
-                                      <div className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md divide-y divide-gray-200 dark:divide-gray-600 max-w-48">
+                                        <div className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md divide-y divide-gray-200 dark:divide-gray-600">
                                         {fieldSettings.department.options.map((dept, index) => (
                                           <div key={index} className="flex items-center px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700/50">
                                             <Input
@@ -3159,16 +3160,16 @@ function AdminComponent() {
                                         >
                                           Save Department Configuration
                                         </Button>
-                                      </div>
+                                        </div>
                                       </div>
 
-                                      {/* Applications Panel */}
+                                      {/* Right Panel - Applications Panel */}
                                       {selectedDepartment && (
-                                        <div>
-                                          <Label className="text-sm font-medium mb-3 block">Applications for "{selectedDepartment}"</Label>
+                                        <div className="flex-1 space-y-3">
+                                          <Label className="text-sm font-medium">Applications for "{selectedDepartment}"</Label>
                                           
-                                          {/* Add app dropdown - positioned to align with first department */}
-                                          <div style={{ marginTop: '4px' }}>
+                                          {/* Add app dropdown */}
+                                          <div>
                                             <Select
                                               value=""
                                               onValueChange={(value) => {
@@ -3183,7 +3184,7 @@ function AdminComponent() {
                                                 }
                                               }}
                                             >
-                                              <SelectTrigger className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 max-w-48">
+                                              <SelectTrigger className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600">
                                                 <SelectValue placeholder="Select an application to link..." />
                                               </SelectTrigger>
                                               <SelectContent className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600">
@@ -3203,7 +3204,7 @@ function AdminComponent() {
 
                                           {/* Show linked apps */}
                                           {departmentApps[selectedDepartment] && departmentApps[selectedDepartment].length > 0 ? (
-                                            <div className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md divide-y divide-gray-200 dark:divide-gray-600 max-w-48 mt-2">
+                                            <div className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md divide-y divide-gray-200 dark:divide-gray-600 mt-2">
                                               {departmentApps[selectedDepartment].map((app, index) => (
                                                 <div key={index} className="flex items-center px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700/50">
                                                   <span className="flex-1 text-gray-900 dark:text-gray-100 text-sm uppercase">
@@ -3227,7 +3228,7 @@ function AdminComponent() {
                                               ))}
                                             </div>
                                           ) : (
-                                            <div className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md py-4 max-w-48">
+                                            <div className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md py-4">
                                               <div className="text-center">
                                                 <span className="text-sm text-gray-500 dark:text-gray-400">No apps selected</span>
                                               </div>
