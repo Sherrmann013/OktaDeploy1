@@ -41,6 +41,13 @@ interface Integration {
   lastUpdated: string;
 }
 
+interface DepartmentAppMapping {
+  id: number;
+  departmentName: string;
+  appName: string;
+  createdAt: string;
+}
+
 interface AuditLog {
   id: number;
   userId: number | null;
@@ -437,6 +444,20 @@ function AdminComponent() {
   const [selectedApps, setSelectedApps] = useState<string[]>([]);
   const [selectedDepartment, setSelectedDepartment] = useState<string | null>(null);
   const [departmentApps, setDepartmentApps] = useState<Record<string, string[]>>({});
+
+  // Initialize department apps from database mappings
+  useEffect(() => {
+    if (departmentAppMappingsData && departmentAppMappingsData.length > 0) {
+      const mappingsByDepartment: Record<string, string[]> = {};
+      departmentAppMappingsData.forEach((mapping) => {
+        if (!mappingsByDepartment[mapping.departmentName]) {
+          mappingsByDepartment[mapping.departmentName] = [];
+        }
+        mappingsByDepartment[mapping.departmentName].push(mapping.appName);
+      });
+      setDepartmentApps(mappingsByDepartment);
+    }
+  }, [departmentAppMappingsData]);
   
 
   // Function to save password settings to database
@@ -741,6 +762,12 @@ function AdminComponent() {
     refetchInterval: 30000
   });
 
+  // Fetch department app mappings from database
+  const { data: departmentAppMappingsData = [], refetch: refetchDepartmentAppMappings } = useQuery<DepartmentAppMapping[]>({
+    queryKey: ["/api/department-app-mappings"],
+    refetchInterval: 30000
+  });
+
   // Get active apps for the dropdown
   const activeApps = appMappingsData.filter(app => app.status === 'active');
 
@@ -1032,6 +1059,50 @@ function AdminComponent() {
       queryClient.invalidateQueries({ queryKey: ["/api/integrations"] });
       setIsConfigureIntegrationOpen(false);
       setEditingIntegration(null);
+    }
+  });
+
+  // Create department app mapping mutation
+  const createDepartmentAppMappingMutation = useMutation({
+    mutationFn: async (data: { departmentName: string; appName: string }) => {
+      const response = await fetch('/api/department-app-mappings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(data)
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || `HTTP ${response.status}: ${response.statusText}`);
+      }
+      
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/department-app-mappings"] });
+    }
+  });
+
+  // Delete department app mapping mutation
+  const deleteDepartmentAppMappingMutation = useMutation({
+    mutationFn: async (data: { departmentName: string; appName: string }) => {
+      const response = await fetch('/api/department-app-mappings', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(data)
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || `HTTP ${response.status}: ${response.statusText}`);
+      }
+      
+      return response.status === 204 ? null : response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/department-app-mappings"] });
     }
   });
 
@@ -3171,14 +3242,30 @@ function AdminComponent() {
                                           <div className="space-y-2">
                                             <Select
                                               value=""
-                                              onValueChange={(value) => {
+                                              onValueChange={async (value) => {
                                                 if (value && selectedDepartment) {
                                                   const currentApps = departmentApps[selectedDepartment] || [];
                                                   if (!currentApps.includes(value)) {
+                                                    // Update local state
                                                     setDepartmentApps({
                                                       ...departmentApps,
                                                       [selectedDepartment]: [...currentApps, value]
                                                     });
+                                                    
+                                                    // Persist to database
+                                                    try {
+                                                      await createDepartmentAppMappingMutation.mutateAsync({
+                                                        departmentName: selectedDepartment,
+                                                        appName: value
+                                                      });
+                                                    } catch (error) {
+                                                      console.error('Failed to create department app mapping:', error);
+                                                      // Revert local state on error
+                                                      setDepartmentApps({
+                                                        ...departmentApps,
+                                                        [selectedDepartment]: currentApps
+                                                      });
+                                                    }
                                                   }
                                                 }
                                               }}
@@ -3187,11 +3274,16 @@ function AdminComponent() {
                                                 <SelectValue placeholder="Select an application to link..." />
                                               </SelectTrigger>
                                               <SelectContent className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600">
-                                                {(appMappingsData || []).map((mapping: AppMapping) => (
-                                                  <SelectItem key={mapping.id} value={mapping.appName} className="bg-white dark:bg-gray-800">
-                                                    {mapping.appName}
-                                                  </SelectItem>
-                                                ))}
+                                                {(appMappingsData || [])
+                                                  .filter((mapping: AppMapping) => {
+                                                    const currentApps = departmentApps[selectedDepartment || ''] || [];
+                                                    return !currentApps.includes(mapping.appName);
+                                                  })
+                                                  .map((mapping: AppMapping) => (
+                                                    <SelectItem key={mapping.id} value={mapping.appName} className="bg-white dark:bg-gray-800">
+                                                      {mapping.appName}
+                                                    </SelectItem>
+                                                  ))}
                                               </SelectContent>
                                             </Select>
                                           </div>
@@ -3207,12 +3299,28 @@ function AdminComponent() {
                                                   <Button
                                                     variant="ghost"
                                                     size="sm"
-                                                    onClick={() => {
+                                                    onClick={async () => {
                                                       const updatedApps = departmentApps[selectedDepartment].filter((_, i) => i !== index);
+                                                      // Update local state
                                                       setDepartmentApps({
                                                         ...departmentApps,
                                                         [selectedDepartment]: updatedApps
                                                       });
+                                                      
+                                                      // Persist to database
+                                                      try {
+                                                        await deleteDepartmentAppMappingMutation.mutateAsync({
+                                                          departmentName: selectedDepartment,
+                                                          appName: app
+                                                        });
+                                                      } catch (error) {
+                                                        console.error('Failed to delete department app mapping:', error);
+                                                        // Revert local state on error
+                                                        setDepartmentApps({
+                                                          ...departmentApps,
+                                                          [selectedDepartment]: departmentApps[selectedDepartment]
+                                                        });
+                                                      }
                                                     }}
                                                     className="h-4 w-4 p-0 text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 ml-1"
                                                   >
