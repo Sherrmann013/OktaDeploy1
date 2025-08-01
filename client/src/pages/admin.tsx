@@ -514,6 +514,7 @@ function AdminComponent() {
 
   const { data: departmentSettings, refetch: refetchDepartmentSettings } = useQuery({
     queryKey: ["/api/layout-settings/department"],
+    enabled: activeTab === "layout" && layoutTab === "new-user",
     refetchOnMount: true,
     refetchOnWindowFocus: false,
   });
@@ -3323,6 +3324,16 @@ function AdminComponent() {
                             )}
                           </div>
                         </div>
+                      </div>
+                    )}
+
+                    {layoutTab === "profile" && (
+                      <div className="bg-white dark:bg-gray-800 rounded-lg border dark:border-gray-700 p-6">
+                        <h4 className="text-lg font-semibold mb-4">Profile Settings</h4>
+                        <p className="text-gray-600 dark:text-gray-400 mb-6">Hello there</p>
+                        <p className="text-sm text-muted-foreground">
+                          Configure profile-related settings and preferences.
+                        </p>
                       </div>
                     )}
                   </div>
