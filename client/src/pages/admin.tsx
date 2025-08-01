@@ -111,7 +111,7 @@ function AdminComponent() {
     employeeType: { 
       required: false, 
       useList: true, 
-      options: ["EMPLOYEE", "CONTRACTOR", "INTERN", "PART_TIME", "CONSULTANT", "FREELANCER"] as string[]
+      options: [] as string[]
     }
   });
 
@@ -2363,8 +2363,8 @@ function AdminComponent() {
                                 </div>
                               </div>
 
-                              {/* Manager Row (Employee Type removed) */}
-                              <div className="grid grid-cols-1 gap-4">
+                              {/* Manager & Employee Type Row */}
+                              <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-2">
                                   <Label htmlFor="preview-manager" className="text-sm font-medium">
                                     Manager {fieldSettings.manager.required && <span className="text-red-500">*</span>}
@@ -2391,7 +2391,32 @@ function AdminComponent() {
                                     />
                                   </div>
                                 </div>
-                                {/* Removed Employee Type field - starting fresh */}
+                                <div className="space-y-2">
+                                  <Label htmlFor="preview-employeeType" className="text-sm font-medium">
+                                    Employee Type {fieldSettings.employeeType.required && <span className="text-red-500">*</span>}
+                                  </Label>
+                                  <div
+                                    className={`relative cursor-pointer transition-all duration-200 rounded-md ${
+                                      selectedField === 'employeeType' 
+                                        ? 'ring-2 ring-blue-300 dark:ring-blue-600' 
+                                        : 'hover:ring-1 hover:ring-blue-200 dark:hover:ring-blue-700'
+                                    }`}
+                                    onClick={() => {
+                                      setSelectedField(selectedField === 'employeeType' ? null : 'employeeType');
+                                    }}
+                                  >
+                                    <Input
+                                      id="preview-employeeType"
+                                      placeholder="Select employee type"
+                                      className={`cursor-pointer pointer-events-none ${
+                                        selectedField === 'employeeType' 
+                                          ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-300 dark:border-blue-600' 
+                                          : 'bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600'
+                                      }`}
+                                      readOnly
+                                    />
+                                  </div>
+                                </div>
                               </div>
 
                               {/* Groups & Apps Sections */}
@@ -2476,6 +2501,7 @@ function AdminComponent() {
                                   {selectedField === 'title' && 'Job Title Options'}
                                   {selectedField === 'manager' && 'Manager Options'}
                                   {selectedField === 'department' && 'Department Options'}
+                                  {selectedField === 'employeeType' && 'Employee Type Options'}
                                 </h5>
                                 
                                 <div className="space-y-4">
@@ -3072,7 +3098,127 @@ function AdminComponent() {
                                     </div>
                                   )}
 
-                                  {/* Removed Employee Type options - starting fresh */}
+                                  {/* Employee Type options */}
+                                  {selectedField === 'employeeType' && (
+                                    <div className="space-y-3">
+                                      <Label className="text-sm font-medium">Employee Type List</Label>
+                                      <div className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md divide-y divide-gray-200 dark:divide-gray-600 max-w-48">
+                                        {fieldSettings.employeeType.options.map((type, index) => (
+                                          <div key={index} className="flex items-center px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                                            <Input
+                                              value={type}
+                                              onChange={(e) => {
+                                                console.log('🔍 Employee Type input changed from:', type, 'to:', e.target.value);
+                                                const newTypes = [...fieldSettings.employeeType.options];
+                                                newTypes[index] = e.target.value;
+                                                setFieldSettings(prev => ({
+                                                  ...prev,
+                                                  employeeType: {
+                                                    ...prev.employeeType,
+                                                    options: newTypes
+                                                  }
+                                                }));
+                                              }}
+                                              placeholder="Employee type"
+                                              className="flex-1 bg-transparent border-none text-gray-900 dark:text-gray-100 text-sm p-0 h-auto focus:ring-0 focus:border-none"
+                                            />
+
+                                            <Button
+                                              variant="ghost"
+                                              size="sm"
+                                              onClick={() => {
+                                                const newTypes = fieldSettings.employeeType.options.filter((_, i) => i !== index);
+                                                setFieldSettings(prev => ({
+                                                  ...prev,
+                                                  employeeType: {
+                                                    ...prev.employeeType,
+                                                    options: newTypes
+                                                  }
+                                                }));
+                                              }}
+                                              className="h-4 w-4 p-0 text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 ml-1"
+                                            >
+                                              {'×'}
+                                            </Button>
+                                          </div>
+                                        ))}
+                                        <div className="flex items-center px-3 py-2 border-t border-dashed border-gray-300 dark:border-gray-600">
+                                          <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            onClick={() => {
+                                              const newTypes = [...fieldSettings.employeeType.options, ""];
+                                              setFieldSettings(prev => ({
+                                                ...prev,
+                                                employeeType: {
+                                                  ...prev.employeeType,
+                                                  options: newTypes
+                                                }
+                                              }));
+                                            }}
+                                            className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
+                                          >
+                                            <Plus className="w-4 h-4" />
+                                            Add employee type
+                                          </Button>
+                                        </div>
+                                        {fieldSettings.employeeType.options.length === 0 && (
+                                          <div className="flex items-center px-3 py-4 text-center">
+                                            <span className="text-sm text-gray-500 dark:text-gray-400 w-full">No employee types added yet</span>
+                                          </div>
+                                        )}
+                                      </div>
+                                      
+                                      {/* Save Button for Employee Type List */}
+                                      <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-600">
+                                        <Button 
+                                          onClick={() => {
+                                            // Save employee type configuration
+                                            const settingData = {
+                                              settingKey: 'employeeType',
+                                              settingValue: JSON.stringify({ 
+                                                required: fieldSettings.employeeType.required,
+                                                useList: fieldSettings.employeeType.useList,
+                                                options: fieldSettings.employeeType.options
+                                              }),
+                                              settingType: 'user_config' as const,
+                                              metadata: {}
+                                            };
+                                            
+                                            fetch('/api/layout-settings', {
+                                              method: 'POST',
+                                              headers: { 'Content-Type': 'application/json' },
+                                              credentials: 'include',
+                                              body: JSON.stringify(settingData)
+                                            }).then(async response => {
+                                              if (response.ok) {
+                                                toast({ 
+                                                  title: "Success", 
+                                                  description: "Employee Type settings saved successfully" 
+                                                });
+                                                // Refetch the settings to confirm persistence
+                                                await refetchEmployeeTypeSettings();
+                                              } else {
+                                                const errorText = await response.text();
+                                                console.error('Save failed:', errorText);
+                                                throw new Error('Failed to save');
+                                              }
+                                            }).catch((error) => {
+                                              console.error('Save error:', error);
+                                              toast({ 
+                                                title: "Error", 
+                                                description: "Failed to save employee type settings",
+                                                variant: "destructive"
+                                              });
+                                            });
+                                          }}
+                                          className="bg-green-600 hover:bg-green-700 text-white"
+                                        >
+                                          Save Employee Type Configuration
+                                        </Button>
+                                      </div>
+                                    </div>
+                                  )}
                                   {false && selectedField === 'employeeType' && (
                                     <div className="space-y-4">
                                       <div className="space-y-3">
