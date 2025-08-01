@@ -3328,12 +3328,9 @@ function AdminComponent() {
                     )}
 
                     {layoutTab === "profile" && (
-                      <div className="bg-white dark:bg-gray-800 rounded-lg border dark:border-gray-700 p-6">
-                        <h4 className="text-lg font-semibold mb-4">Profile Settings</h4>
-                        <p className="text-gray-600 dark:text-gray-400 mb-6">Hello there</p>
-                        <p className="text-sm text-muted-foreground">
-                          Configure profile-related settings and preferences.
-                        </p>
+                      <div className="bg-red-100 border-2 border-red-500 p-8 rounded-lg">
+                        <h1 className="text-3xl font-bold text-red-800">HELLO THERE - PROFILE TAB TEST</h1>
+                        <p className="text-xl text-red-600 mt-4">This is a test to see if Profile tab content renders</p>
                       </div>
                     )}
                   </div>
