@@ -3164,11 +3164,11 @@ function AdminComponent() {
 
                                       {/* Applications Panel */}
                                       {selectedDepartment && (
-                                        <div className="space-y-3">
-                                          <Label className="text-sm font-medium">Applications for "{selectedDepartment}"</Label>
+                                        <div>
+                                          <Label className="text-sm font-medium mb-3 block">Applications for "{selectedDepartment}"</Label>
                                           
-                                          {/* Add app dropdown - moved up to align with first department */}
-                                          <div className="space-y-2 -mt-1">
+                                          {/* Add app dropdown - positioned to align with first department */}
+                                          <div style={{ marginTop: '4px' }}>
                                             <Select
                                               value=""
                                               onValueChange={(value) => {
@@ -3203,7 +3203,7 @@ function AdminComponent() {
 
                                           {/* Show linked apps */}
                                           {departmentApps[selectedDepartment] && departmentApps[selectedDepartment].length > 0 ? (
-                                            <div className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md divide-y divide-gray-200 dark:divide-gray-600 max-w-48">
+                                            <div className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md divide-y divide-gray-200 dark:divide-gray-600 max-w-48 mt-2">
                                               {departmentApps[selectedDepartment].map((app, index) => (
                                                 <div key={index} className="flex items-center px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700/50">
                                                   <span className="flex-1 text-gray-900 dark:text-gray-100 text-sm uppercase">
