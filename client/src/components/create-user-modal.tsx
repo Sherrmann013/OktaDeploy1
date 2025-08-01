@@ -772,14 +772,14 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
                 {/* Selected apps display matching the Employee Type format */}
                 <div className="space-y-2">
                   {selectedApps.map((appName, index) => (
-                    <div key={index} className="flex items-center justify-between px-3 py-3 bg-gray-700 dark:bg-gray-700 rounded-md border border-gray-600">
-                      <span className="text-sm font-medium text-white uppercase tracking-wide">{appName}</span>
-                      <div className="flex items-center space-x-2">
+                    <div key={index} className="flex items-center justify-between px-3 py-2 bg-gray-600 dark:bg-gray-600 rounded border border-gray-500">
+                      <span className="text-sm font-medium text-white uppercase">{appName}</span>
+                      <div className="flex items-center space-x-1">
                         <button
                           type="button"
-                          className="text-gray-400 hover:text-gray-300"
+                          className="text-gray-400 hover:text-gray-300 p-1"
                         >
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
                           </svg>
                         </button>
@@ -788,7 +788,7 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
                           onClick={() => {
                             setSelectedApps(selectedApps.filter(app => app !== appName));
                           }}
-                          className="text-red-400 hover:text-red-300 font-bold text-lg leading-none"
+                          className="text-red-400 hover:text-red-300 text-sm font-bold leading-none p-1"
                         >
                           ×
                         </button>
