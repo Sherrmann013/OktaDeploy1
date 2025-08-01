@@ -84,7 +84,7 @@ export function UserFormPreview({
               Email Username {fieldSettings.emailUsername.required && <span className="text-red-500">*</span>}
             </Label>
             <div 
-              className={getWrapperClassName('emailUsername')}
+              className={`flex ${getWrapperClassName('emailUsername')}`}
               onClick={() => handleFieldClick('emailUsername')}
             >
               <Input
@@ -94,7 +94,7 @@ export function UserFormPreview({
                 readOnly
               />
               <div 
-                className={`px-3 py-2 border border-l-0 rounded-r text-sm cursor-pointer pointer-events-none ${
+                className={`px-3 py-2 border border-l-0 rounded-r text-sm cursor-pointer pointer-events-none flex items-center ${
                   selectedField === 'emailUsername' 
                     ? 'bg-blue-100 dark:bg-blue-800/30 border-blue-300 dark:border-blue-600 text-blue-700 dark:text-blue-300' 
                     : 'bg-gray-100 dark:bg-gray-600 border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300'
