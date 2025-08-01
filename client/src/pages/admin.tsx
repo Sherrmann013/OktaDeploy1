@@ -2925,80 +2925,7 @@ function AdminComponent() {
                                     </div>
                                   )}
 
-                                  {/* Department options section removed temporarily for testing */}
-
-                                            {/* Applications Column - appears when link is clicked */}
-                                            {openAppsSection?.type === 'department' && (
-                                              <div className="space-y-3">
-                                                <Label className="text-sm font-medium">Applications for "{fieldSettings.department.options[openAppsSection.index]}"</Label>
-                                                
-                                                {/* Applications Dropdown */}
-                                                <div className="mb-3">
-                                                  <CustomSelect
-                                                    value=""
-                                                    onValueChange={(appName) => {
-                                                      const currentApps = departmentApps[openAppsSection.index] || [];
-                                                      if (!currentApps.includes(appName)) {
-                                                        const departmentName = fieldSettings.department.options[openAppsSection.index];
-                                                        addDepartmentAppMutation.mutate({ departmentName, appName });
-                                                        setDepartmentApps(prev => ({
-                                                          ...prev,
-                                                          [openAppsSection.index]: [...currentApps, appName]
-                                                        }));
-                                                      }
-                                                    }}
-                                                  >
-                                                    <CustomSelectTrigger className="max-w-48 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600">
-                                                      <CustomSelectValue placeholder="Select an application to add" />
-                                                    </CustomSelectTrigger>
-                                                    <CustomSelectContent>
-                                                      {activeApps.map((app) => (
-                                                        <CustomSelectItem key={app.id} value={app.appName}>
-                                                          {app.appName}
-                                                        </CustomSelectItem>
-                                                      ))}
-                                                    </CustomSelectContent>
-                                                  </CustomSelect>
-                                                </div>
-
-                                                {/* Selected Applications List - Same format as department list */}
-                                                <div className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md divide-y divide-gray-200 dark:divide-gray-600 max-w-48">
-                                                  {(departmentApps[openAppsSection.index] || []).map((appName, appIndex) => (
-                                                    <div key={appIndex} className="flex items-center px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700/50">
-                                                      <span className="text-sm flex-1">{appName}</span>
-                                                      <Button
-                                                        variant="ghost"
-                                                        size="sm"
-                                                        onClick={() => {
-                                                          const departmentName = fieldSettings.department.options[openAppsSection.index];
-                                                          const removedAppName = departmentApps[openAppsSection.index]?.[appIndex];
-                                                          if (removedAppName) {
-                                                            removeDepartmentAppMutation.mutate({ departmentName, appName: removedAppName });
-                                                          }
-                                                          setDepartmentApps(prev => ({
-                                                            ...prev,
-                                                            [openAppsSection.index]: (prev[openAppsSection.index] || []).filter((_, i) => i !== appIndex)
-                                                          }));
-                                                        }}
-                                                        className="h-4 w-4 p-0 text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 ml-2"
-                                                      >
-                                                        {'×'}
-                                                      </Button>
-                                                    </div>
-                                                  ))}
-                                                  {(!departmentApps[openAppsSection.index] || departmentApps[openAppsSection.index].length === 0) && (
-                                                    <div className="flex items-center px-3 py-4 text-center">
-                                                      <span className="text-sm text-gray-500 dark:text-gray-400 w-full">No applications added yet</span>
-                                                    </div>
-                                                  )}
-                                                </div>
-                                              </div>
-                                            )}
-                                          </div>
-                                        </div>
-                                      )}
-                                    </div>
-                                  )}
+                                  {/* Broken section temporarily removed for fixing syntax errors */}
 
                                   {/* Removed Employee Type options - starting fresh */}
                                   {false && selectedField === 'employeeType' && (
@@ -3057,7 +2984,7 @@ function AdminComponent() {
                                                   }}
                                                   className="h-4 w-4 p-0 text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 ml-1"
                                                 >
-                                                  ×
+                                                  {'×'}
                                                 </Button>
                                               </div>
                                             ))}
@@ -3150,7 +3077,7 @@ function AdminComponent() {
                                                       }}
                                                       className="h-4 w-4 p-0 text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 ml-2"
                                                     >
-                                                      ×
+                                                      {'×'}
                                                     </Button>
                                                   </div>
                                                 ))}
