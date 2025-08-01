@@ -2335,7 +2335,32 @@ function AdminComponent() {
                                     />
                                   </div>
                                 </div>
-                                {/* Removed Department preview field - starting fresh */}
+                                <div className="space-y-2">
+                                  <Label htmlFor="preview-department" className="text-sm font-medium">
+                                    Department {fieldSettings.department.required && <span className="text-red-500">*</span>}
+                                  </Label>
+                                  <div
+                                    className={`relative cursor-pointer transition-all duration-200 rounded-md ${
+                                      selectedField === 'department' 
+                                        ? 'ring-2 ring-blue-300 dark:ring-blue-600' 
+                                        : 'hover:ring-1 hover:ring-blue-200 dark:hover:ring-blue-700'
+                                    }`}
+                                    onClick={() => {
+                                      setSelectedField(selectedField === 'department' ? null : 'department');
+                                    }}
+                                  >
+                                    <Input
+                                      id="preview-department"
+                                      placeholder="Select department"
+                                      className={`cursor-pointer pointer-events-none ${
+                                        selectedField === 'department' 
+                                          ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-300 dark:border-blue-600' 
+                                          : 'bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600'
+                                      }`}
+                                      readOnly
+                                    />
+                                  </div>
+                                </div>
                               </div>
 
                               {/* Manager Row (Employee Type removed) */}
@@ -2450,7 +2475,7 @@ function AdminComponent() {
                                   {selectedField === 'password' && 'Password Options'}
                                   {selectedField === 'title' && 'Job Title Options'}
                                   {selectedField === 'manager' && 'Manager Options'}
-                                  {/* Removed Department and Employee Type from title selection */}
+                                  {selectedField === 'department' && 'Department Options'}
                                 </h5>
                                 
                                 <div className="space-y-4">
@@ -2925,7 +2950,127 @@ function AdminComponent() {
                                     </div>
                                   )}
 
-                                  {/* Broken section temporarily removed for fixing syntax errors */}
+                                  {/* Department options */}
+                                  {selectedField === 'department' && (
+                                    <div className="space-y-3">
+                                      <Label className="text-sm font-medium">Department List</Label>
+                                      <div className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md divide-y divide-gray-200 dark:divide-gray-600 max-w-48">
+                                        {fieldSettings.department.options.map((dept, index) => (
+                                          <div key={index} className="flex items-center px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                                            <Input
+                                              value={dept}
+                                              onChange={(e) => {
+                                                console.log('🔍 Department input changed from:', dept, 'to:', e.target.value);
+                                                const newDepts = [...fieldSettings.department.options];
+                                                newDepts[index] = e.target.value;
+                                                setFieldSettings(prev => ({
+                                                  ...prev,
+                                                  department: {
+                                                    ...prev.department,
+                                                    options: newDepts
+                                                  }
+                                                }));
+                                              }}
+                                              placeholder="Department name"
+                                              className="flex-1 bg-transparent border-none text-gray-900 dark:text-gray-100 text-sm p-0 h-auto focus:ring-0 focus:border-none"
+                                            />
+
+                                            <Button
+                                              variant="ghost"
+                                              size="sm"
+                                              onClick={() => {
+                                                const newDepts = fieldSettings.department.options.filter((_, i) => i !== index);
+                                                setFieldSettings(prev => ({
+                                                  ...prev,
+                                                  department: {
+                                                    ...prev.department,
+                                                    options: newDepts
+                                                  }
+                                                }));
+                                              }}
+                                              className="h-4 w-4 p-0 text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 ml-1"
+                                            >
+                                              {'×'}
+                                            </Button>
+                                          </div>
+                                        ))}
+                                        <div className="flex items-center px-3 py-2 border-t border-dashed border-gray-300 dark:border-gray-600">
+                                          <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            onClick={() => {
+                                              const newDepts = [...fieldSettings.department.options, ""];
+                                              setFieldSettings(prev => ({
+                                                ...prev,
+                                                department: {
+                                                  ...prev.department,
+                                                  options: newDepts
+                                                }
+                                              }));
+                                            }}
+                                            className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
+                                          >
+                                            <Plus className="w-4 h-4" />
+                                            Add department
+                                          </Button>
+                                        </div>
+                                        {fieldSettings.department.options.length === 0 && (
+                                          <div className="flex items-center px-3 py-4 text-center">
+                                            <span className="text-sm text-gray-500 dark:text-gray-400 w-full">No departments added yet</span>
+                                          </div>
+                                        )}
+                                      </div>
+                                      
+                                      {/* Save Button for Department List */}
+                                      <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-600">
+                                        <Button 
+                                          onClick={() => {
+                                            // Save department configuration
+                                            const settingData = {
+                                              settingKey: 'department',
+                                              settingValue: JSON.stringify({ 
+                                                required: fieldSettings.department.required,
+                                                useList: fieldSettings.department.useList,
+                                                options: fieldSettings.department.options
+                                              }),
+                                              settingType: 'user_config' as const,
+                                              metadata: {}
+                                            };
+                                            
+                                            fetch('/api/layout-settings', {
+                                              method: 'POST',
+                                              headers: { 'Content-Type': 'application/json' },
+                                              credentials: 'include',
+                                              body: JSON.stringify(settingData)
+                                            }).then(async response => {
+                                              if (response.ok) {
+                                                toast({ 
+                                                  title: "Success", 
+                                                  description: "Department settings saved successfully" 
+                                                });
+                                                // Refetch the settings to confirm persistence
+                                                await refetchDepartmentSettings();
+                                              } else {
+                                                const errorText = await response.text();
+                                                console.error('Save failed:', errorText);
+                                                throw new Error('Failed to save');
+                                              }
+                                            }).catch((error) => {
+                                              console.error('Save error:', error);
+                                              toast({ 
+                                                title: "Error", 
+                                                description: "Failed to save department settings",
+                                                variant: "destructive"
+                                              });
+                                            });
+                                          }}
+                                          className="bg-green-600 hover:bg-green-700 text-white"
+                                        >
+                                          Save Department Configuration
+                                        </Button>
+                                      </div>
+                                    </div>
+                                  )}
 
                                   {/* Removed Employee Type options - starting fresh */}
                                   {false && selectedField === 'employeeType' && (
