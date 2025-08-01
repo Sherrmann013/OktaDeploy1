@@ -2357,22 +2357,9 @@ function AdminComponent() {
                                   </div>
                                 </div>
                                 <div className="space-y-2">
-                                  <div className="flex items-center justify-between">
-                                    <Label htmlFor="preview-department" className="text-sm font-medium">
-                                      Department {fieldSettings.department.required && <span className="text-red-500">*</span>}
-                                    </Label>
-                                    <Button
-                                      variant="ghost"
-                                      size="sm"
-                                      onClick={() => {
-                                        setSelectedDepartment('General'); // Default department for linking
-                                        setShowDepartmentApps(true);
-                                      }}
-                                      className="h-6 w-6 p-0 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-                                    >
-                                      <Link className="h-4 w-4" />
-                                    </Button>
-                                  </div>
+                                  <Label htmlFor="preview-department" className="text-sm font-medium">
+                                    Department {fieldSettings.department.required && <span className="text-red-500">*</span>}
+                                  </Label>
                                   <div
                                     className={`relative cursor-pointer transition-all duration-200 rounded-md ${
                                       selectedField === 'department' 
@@ -3069,6 +3056,17 @@ function AdminComponent() {
                                               className="flex-1 bg-transparent border-none text-gray-900 dark:text-gray-100 text-sm p-0 h-auto focus:ring-0 focus:border-none"
                                             />
 
+                                            <Button
+                                              variant="ghost"
+                                              size="sm"
+                                              onClick={() => {
+                                                setSelectedDepartment(dept);
+                                                setShowDepartmentApps(true);
+                                              }}
+                                              className="h-4 w-4 p-0 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 ml-1"
+                                            >
+                                              <Link className="h-3 w-3" />
+                                            </Button>
                                             <Button
                                               variant="ghost"
                                               size="sm"
