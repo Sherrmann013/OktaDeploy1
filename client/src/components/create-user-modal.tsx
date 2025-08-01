@@ -341,7 +341,7 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
   ];
 
   // Dynamic apps from database
-  const availableApps = appMappingsData.map((app: any) => app.appName);
+  const availableApps = (appMappingsData as any[]).map((app: any) => app.appName);
 
   const handleGroupToggle = (group: string) => {
     setSelectedGroups(prev => 
@@ -592,7 +592,7 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
                   <FormItem>
                     <FormLabel>Job Title {fieldSettings?.title?.required ? '*' : ''}</FormLabel>
                     <FormControl>
-                      <Input placeholder="Enter job title" {...field} />
+                      <Input placeholder="Enter job title" {...field} value={field.value || ""} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -629,7 +629,7 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
                             </SelectContent>
                           </Select>
                         ) : (
-                          <Input placeholder="Enter department" {...field} />
+                          <Input placeholder="Enter department" {...field} value={field.value || ""} />
                         );
                       })()}
                     </FormControl>
@@ -741,58 +741,52 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
                 </div>
               </div>
 
-              <div className="space-y-2">
+              <div className="space-y-3">
                 <Label>Apps</Label>
-                <div className="border border-gray-300 dark:border-gray-600 rounded p-3 bg-white dark:bg-gray-800 min-h-[120px]">
-                  <div className="space-y-3">
-                    {/* Dropdown for adding apps */}
-                    <Select
-                      value=""
-                      onValueChange={(value) => {
-                        if (value && !selectedApps.includes(value)) {
-                          setSelectedApps([...selectedApps, value]);
-                        }
-                      }}
-                    >
-                      <SelectTrigger className="w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600">
-                        <SelectValue placeholder="Select an app to add..." />
-                      </SelectTrigger>
-                      <SelectContent className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600">
-                        {availableApps
-                          .filter(app => !selectedApps.includes(app))
-                          .map((app) => (
-                            <SelectItem key={app} value={app} className="bg-white dark:bg-gray-800">
-                              {app}
-                            </SelectItem>
-                          ))}
-                      </SelectContent>
-                    </Select>
-                    
-                    {/* Selected apps display */}
-                    <div className="space-y-2">
-                      {selectedApps.map((appName, index) => (
-                        <div key={index} className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-700 rounded border">
-                          <span className="text-sm font-medium">{appName}</span>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => {
-                              setSelectedApps(selectedApps.filter(app => app !== appName));
-                            }}
-                            className="h-6 w-6 p-0 text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
-                          >
-                            ×
-                          </Button>
-                        </div>
-                      ))}
-                      {selectedApps.length === 0 && (
-                        <div className="text-center py-4">
-                          <span className="text-sm text-gray-500 dark:text-gray-400">No apps selected</span>
-                        </div>
-                      )}
+                
+                {/* Selected apps display as badges */}
+                <div className="space-y-2">
+                  {selectedApps.map((appName, index) => (
+                    <div key={index} className="flex items-center justify-between px-3 py-2 bg-gray-100 dark:bg-gray-700 rounded-md border border-gray-200 dark:border-gray-600">
+                      <span className="text-sm font-medium text-gray-900 dark:text-white">{appName}</span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSelectedApps(selectedApps.filter(app => app !== appName));
+                        }}
+                        className="ml-2 text-gray-500 hover:text-red-500 dark:text-gray-400 dark:hover:text-red-400 transition-colors"
+                      >
+                        ×
+                      </button>
                     </div>
-                  </div>
+                  ))}
                 </div>
+
+                {/* Add app dropdown */}
+                <Select
+                  value=""
+                  onValueChange={(value) => {
+                    if (value && !selectedApps.includes(value)) {
+                      setSelectedApps([...selectedApps, value]);
+                    }
+                  }}
+                >
+                  <SelectTrigger className="w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600">
+                    <div className="flex items-center">
+                      <span className="text-blue-500 mr-2">+</span>
+                      <SelectValue placeholder="Add app" />
+                    </div>
+                  </SelectTrigger>
+                  <SelectContent className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600">
+                    {availableApps
+                      .filter((app: string) => !selectedApps.includes(app))
+                      .map((app: string) => (
+                        <SelectItem key={app} value={app} className="bg-white dark:bg-gray-800">
+                          {app}
+                        </SelectItem>
+                      ))}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
 
@@ -801,7 +795,7 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
               <Checkbox
                 id="sendActivationEmail"
                 checked={sendActivationEmail}
-                onCheckedChange={setSendActivationEmail}
+                onCheckedChange={(checked) => setSendActivationEmail(checked === true)}
               />
               <Label htmlFor="sendActivationEmail" className="text-sm font-normal">
                 Send activation email to manager
