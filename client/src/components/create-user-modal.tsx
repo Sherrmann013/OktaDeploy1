@@ -610,7 +610,6 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
                         const hasOptions = fieldSettings?.department?.options && 
                                          Array.isArray(fieldSettings.department.options) && 
                                          fieldSettings.department.options.length > 0;
-                        console.log('🔍 Department field - hasOptions:', hasOptions, 'options:', fieldSettings?.department?.options);
                         
                         return hasOptions ? (
                           <Select
@@ -744,25 +743,7 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
               <div className="space-y-3">
                 <Label>Apps</Label>
                 
-                {/* Selected apps display as badges */}
-                <div className="space-y-2">
-                  {selectedApps.map((appName, index) => (
-                    <div key={index} className="flex items-center justify-between px-3 py-2 bg-gray-100 dark:bg-gray-700 rounded-md border border-gray-200 dark:border-gray-600">
-                      <span className="text-sm font-medium text-gray-900 dark:text-white">{appName}</span>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setSelectedApps(selectedApps.filter(app => app !== appName));
-                        }}
-                        className="ml-2 text-gray-500 hover:text-red-500 dark:text-gray-400 dark:hover:text-red-400 transition-colors"
-                      >
-                        ×
-                      </button>
-                    </div>
-                  ))}
-                </div>
-
-                {/* Add app dropdown */}
+                {/* Add app dropdown at top */}
                 <Select
                   value=""
                   onValueChange={(value) => {
@@ -787,6 +768,34 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
                       ))}
                   </SelectContent>
                 </Select>
+
+                {/* Selected apps display matching the Employee Type format */}
+                <div className="space-y-2">
+                  {selectedApps.map((appName, index) => (
+                    <div key={index} className="flex items-center justify-between px-3 py-3 bg-gray-700 dark:bg-gray-700 rounded-md border border-gray-600">
+                      <span className="text-sm font-medium text-white uppercase tracking-wide">{appName}</span>
+                      <div className="flex items-center space-x-2">
+                        <button
+                          type="button"
+                          className="text-gray-400 hover:text-gray-300"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                          </svg>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setSelectedApps(selectedApps.filter(app => app !== appName));
+                          }}
+                          className="text-red-400 hover:text-red-300 font-bold text-lg leading-none"
+                        >
+                          ×
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
 
