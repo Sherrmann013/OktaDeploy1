@@ -97,12 +97,68 @@ export function PasswordFieldConfig({ config, onUpdate }: PasswordFieldConfigPro
           <div className="space-y-3">
             <Label className="text-sm font-medium">Password Components</Label>
             
+            {/* Components Container */}
+            <div className="p-4 bg-gray-600 dark:bg-gray-700 rounded-lg border border-gray-500 dark:border-gray-600">
+              <div className="flex flex-wrap gap-3">
+                {config.components.map((component, index) => (
+                  <div key={index} className="flex items-center space-x-2 bg-gray-500 dark:bg-gray-600 rounded-md px-3 py-2">
+                    <span className="text-sm font-medium text-white">
+                      {component.count}
+                    </span>
+                    <span className="text-sm text-gray-200">
+                      {getComponentLabel(component.type)}
+                    </span>
+                    
+                    {config.components.length > 1 && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => removeComponent(index)}
+                        className="h-5 w-5 p-0 text-red-400 hover:text-red-300 hover:bg-red-500/20"
+                      >
+                        ×
+                      </Button>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Add Component Buttons */}
+            <div className="flex gap-2">
+              {(['words', 'numbers', 'symbols'] as const).map((type) => {
+                const hasComponent = config.components.some(c => c.type === type);
+                if (hasComponent) return null;
+                
+                const getButtonColor = (componentType: string) => {
+                  switch (componentType) {
+                    case 'words': return 'bg-blue-600 hover:bg-blue-700 text-white';
+                    case 'numbers': return 'bg-green-600 hover:bg-green-700 text-white';
+                    case 'symbols': return 'bg-purple-600 hover:bg-purple-700 text-white';
+                    default: return 'bg-gray-600 hover:bg-gray-700 text-white';
+                  }
+                };
+                
+                return (
+                  <Button
+                    key={type}
+                    type="button"
+                    size="sm"
+                    onClick={() => addComponent(type)}
+                    className={`text-xs ${getButtonColor(type)} border-0`}
+                  >
+                    + {getComponentLabel(type)}
+                  </Button>
+                );
+              })}
+            </div>
+
+            {/* Component Count Controls */}
             <div className="space-y-2">
               {config.components.map((component, index) => (
-                <div key={index} className="flex items-center space-x-3 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                  <div className="flex-1">
-                    <span className="text-sm font-medium">{getComponentLabel(component.type)}</span>
-                  </div>
+                <div key={index} className="flex items-center justify-between">
+                  <span className="text-sm font-medium">{getComponentLabel(component.type)}</span>
                   
                   <div className="flex items-center space-x-2">
                     <Button
@@ -111,7 +167,7 @@ export function PasswordFieldConfig({ config, onUpdate }: PasswordFieldConfigPro
                       size="sm"
                       onClick={() => handleComponentCountChange(index, component.count - 1)}
                       disabled={component.count <= 1}
-                      className="h-7 w-7 p-0"
+                      className="h-7 w-7 p-0 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600"
                     >
                       <Minus className="w-3 h-3" />
                     </Button>
@@ -126,47 +182,21 @@ export function PasswordFieldConfig({ config, onUpdate }: PasswordFieldConfigPro
                       size="sm"
                       onClick={() => handleComponentCountChange(index, component.count + 1)}
                       disabled={component.count >= 10}
-                      className="h-7 w-7 p-0"
+                      className="h-7 w-7 p-0 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600"
                     >
                       <Plus className="w-3 h-3" />
                     </Button>
                   </div>
-
-                  {config.components.length > 1 && (
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => removeComponent(index)}
-                      className="h-7 w-7 p-0 text-red-500 hover:text-red-700"
-                    >
-                      ×
-                    </Button>
-                  )}
                 </div>
               ))}
             </div>
 
-            {/* Add Component Buttons */}
-            <div className="flex gap-2">
-              {(['words', 'numbers', 'symbols'] as const).map((type) => {
-                const hasComponent = config.components.some(c => c.type === type);
-                if (hasComponent) return null;
-                
-                return (
-                  <Button
-                    key={type}
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => addComponent(type)}
-                    className="text-xs"
-                  >
-                    <Plus className="w-3 h-3 mr-1" />
-                    Add {getComponentLabel(type)}
-                  </Button>
-                );
-              })}
+            {/* Preview */}
+            <div className="pt-3 border-t border-gray-300 dark:border-gray-600">
+              <Label className="text-sm font-medium">Preview:</Label>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                ({config.components.map(c => `${c.count} ${c.type}`).join(') + (')})
+              </p>
             </div>
           </div>
         </>
