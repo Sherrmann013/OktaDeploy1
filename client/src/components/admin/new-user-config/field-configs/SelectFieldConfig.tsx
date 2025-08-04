@@ -269,91 +269,96 @@ export function SelectFieldConfig({ config, onUpdate, fieldType }: SelectFieldCo
 
           {config.linkApps && config.useList && config.options.length > 0 && (
             <div className="space-y-4">
-              {/* Department Selection Dropdown */}
-              <div className="space-y-2">
-                <Label className="text-sm font-medium">Select Department to Configure</Label>
-                <Select value={selectedDepartment} onValueChange={setSelectedDepartment}>
-                  <SelectTrigger className="w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600">
-                    <SelectValue placeholder="Choose a department..." />
-                  </SelectTrigger>
-                  <SelectContent className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600">
-                    {config.options.map((department) => (
-                      <SelectItem key={department} value={department} className="bg-white dark:bg-gray-800">
-                        <div className="flex items-center justify-between w-full">
-                          <span>{department}</span>
-                          <span className="text-xs text-gray-500 ml-2">
-                            {departmentAppMappings[department]?.length || 0} apps
-                          </span>
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Selected Department App Management */}
-              {selectedDepartment && (
-                <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 space-y-3">
-                  <div className="flex items-center justify-between">
-                    <Label className="text-sm font-medium">{selectedDepartment}</Label>
-                    <div className="flex items-center space-x-2">
-                      <Link className="h-4 w-4 text-purple-500" />
-                      <span className="text-xs text-gray-500">
-                        {departmentAppMappings[selectedDepartment]?.length || 0} apps linked
-                      </span>
-                    </div>
-                  </div>
-                  
-                  {/* Linked Apps */}
-                  {departmentAppMappings[selectedDepartment] && departmentAppMappings[selectedDepartment].length > 0 && (
-                    <div className="flex flex-wrap gap-2">
-                      {departmentAppMappings[selectedDepartment].map((appName) => (
-                        <div key={appName} className="flex items-center bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded px-2 py-1">
-                          <span className="text-xs text-gray-700 dark:text-gray-300">{appName}</span>
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleUnlinkApp(selectedDepartment, appName)}
-                            className="h-4 w-4 p-0 ml-1 text-red-500 hover:text-red-700"
-                            disabled={deleteMappingMutation.isPending}
-                          >
-                            <X className="w-3 h-3" />
-                          </Button>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                  
-                  {/* Add App Dropdown */}
-                  <Select
-                    value=""
-                    onValueChange={(appName) => handleLinkApp(selectedDepartment, appName)}
-                    disabled={createMappingMutation.isPending}
-                  >
-                    <SelectTrigger className="w-full bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600">
-                      <div className="flex items-center">
-                        <Plus className="h-4 w-4 text-green-500 mr-2" />
-                        <SelectValue placeholder="Link an app" />
-                      </div>
+              {/* Two-column layout: Department Selection + App Selection */}
+              <div className="grid grid-cols-2 gap-4">
+                {/* Left Column: Department Selection */}
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium">Select Department to Configure</Label>
+                  <Select value={selectedDepartment} onValueChange={setSelectedDepartment}>
+                    <SelectTrigger className="w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600">
+                      <SelectValue placeholder="Choose a department..." />
                     </SelectTrigger>
                     <SelectContent className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600">
-                      {availableApps
-                        .filter((app: string) => !departmentAppMappings[selectedDepartment]?.includes(app))
-                        .map((app: string) => (
-                          <SelectItem key={app} value={app} className="bg-white dark:bg-gray-800">
-                            {app}
-                          </SelectItem>
-                        ))}
-                      {availableApps.filter((app: string) => !departmentAppMappings[selectedDepartment]?.includes(app)).length === 0 && (
-                        <SelectItem value="no-apps" disabled className="text-gray-500">
-                          All apps already linked
+                      {config.options.map((department) => (
+                        <SelectItem key={department} value={department} className="bg-white dark:bg-gray-800">
+                          <div className="flex items-center justify-between w-full">
+                            <span>{department}</span>
+                            <span className="text-xs text-gray-500 ml-2">
+                              {departmentAppMappings[department]?.length || 0} apps
+                            </span>
+                          </div>
                         </SelectItem>
-                      )}
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
-              )}
+
+                {/* Right Column: App Selection (CreateUserModal style) */}
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium">Apps</Label>
+                  {selectedDepartment ? (
+                    <>
+                      {/* Add app dropdown at top */}
+                      <Select
+                        value=""
+                        onValueChange={(appName) => handleLinkApp(selectedDepartment, appName)}
+                        disabled={createMappingMutation.isPending}
+                      >
+                        <SelectTrigger className="w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600">
+                          <div className="flex items-center">
+                            <span className="text-blue-500 mr-2">+</span>
+                            <SelectValue placeholder="Add app" />
+                          </div>
+                        </SelectTrigger>
+                        <SelectContent className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600">
+                          {availableApps
+                            .filter((app: string) => !departmentAppMappings[selectedDepartment]?.includes(app))
+                            .map((app: string) => (
+                              <SelectItem key={app} value={app} className="bg-white dark:bg-gray-800">
+                                {app}
+                              </SelectItem>
+                            ))}
+                          {availableApps.filter((app: string) => !departmentAppMappings[selectedDepartment]?.includes(app)).length === 0 && (
+                            <SelectItem value="no-apps" disabled className="text-gray-500">
+                              All apps already linked
+                            </SelectItem>
+                          )}
+                        </SelectContent>
+                      </Select>
+
+                      {/* Selected apps using exact CreateUserModal format */}
+                      <div className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md divide-y divide-gray-200 dark:divide-gray-600 max-w-48">
+                        {departmentAppMappings[selectedDepartment] && departmentAppMappings[selectedDepartment].length > 0 ? (
+                          departmentAppMappings[selectedDepartment].map((appName, index) => (
+                            <div key={index} className="flex items-center px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                              <span className="flex-1 text-gray-900 dark:text-gray-100 text-sm uppercase">
+                                {appName}
+                              </span>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleUnlinkApp(selectedDepartment, appName)}
+                                className="h-4 w-4 p-0 text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 ml-1"
+                                disabled={deleteMappingMutation.isPending}
+                              >
+                                {'×'}
+                              </Button>
+                            </div>
+                          ))
+                        ) : (
+                          <div className="flex items-center px-3 py-4 text-center">
+                            <span className="text-sm text-gray-500 dark:text-gray-400 w-full">No apps linked</span>
+                          </div>
+                        )}
+                      </div>
+                    </>
+                  ) : (
+                    <div className="text-sm text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800 rounded-lg p-3 border border-gray-200 dark:border-gray-600">
+                      Select a department to configure apps
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
           )}
 
