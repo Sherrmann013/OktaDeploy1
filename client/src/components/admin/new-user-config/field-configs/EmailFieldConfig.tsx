@@ -23,7 +23,7 @@ export function EmailFieldConfig({ config, onUpdate }: EmailFieldConfigProps) {
   const addDomain = () => {
     onUpdate({
       ...config,
-      domains: [...config.domains, "@company.com"]
+      domains: [...config.domains, ""]
     });
   };
 
@@ -39,19 +39,7 @@ export function EmailFieldConfig({ config, onUpdate }: EmailFieldConfigProps) {
 
   return (
     <div className="space-y-3">
-      <div className="flex items-center justify-between">
-        <Label className="text-sm font-medium">Email Domains</Label>
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          onClick={addDomain}
-          className="h-7 px-2"
-        >
-          <Plus className="w-3 h-3 mr-1" />
-          Add Domain
-        </Button>
-      </div>
+      <Label className="text-sm font-medium">Email Domains</Label>
       
       <div className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md divide-y divide-gray-200 dark:divide-gray-600 max-w-64">
         {config.domains.map((domain, index) => (
@@ -75,6 +63,20 @@ export function EmailFieldConfig({ config, onUpdate }: EmailFieldConfigProps) {
             )}
           </div>
         ))}
+        <div className="flex items-center px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700/50">
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={addDomain}
+            className="h-6 w-6 p-0 mr-2 text-green-500 hover:text-green-700 hover:bg-green-50 dark:hover:bg-green-900/20"
+          >
+            <Plus className="w-3 h-3" />
+          </Button>
+          <span className="text-sm text-gray-500 dark:text-gray-400">
+            Add domain
+          </span>
+        </div>
       </div>
     </div>
   );
