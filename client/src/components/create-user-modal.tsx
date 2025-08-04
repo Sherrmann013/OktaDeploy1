@@ -177,7 +177,7 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
   const passwordConfig = fieldSettings?.password;
 
   const availableManagers = usersData?.users || [];
-  const emailDomains = emailDomainConfig?.domains || ['@mazetx.com'];
+  const emailDomains = (emailDomainConfig?.domains || ['@mazetx.com']).filter((domain: string) => domain && domain.trim() !== '');
   const hasMultipleDomains = emailDomains.length > 1;
 
   // Debug logging for field configuration
@@ -542,7 +542,7 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
                               <CustomSelectValue />
                             </CustomSelectTrigger>
                             <CustomSelectContent>
-                              {emailDomains.map((domain: string) => (
+                              {emailDomains.filter((domain: string) => domain && domain.trim() !== '').map((domain: string) => (
                                 <CustomSelectItem key={domain} value={domain}>
                                   {domain}
                                 </CustomSelectItem>
