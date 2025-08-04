@@ -735,34 +735,28 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
             </div>
 
             {/* Groups and Apps */}
-            <div className={`grid gap-4 ${
-              (!fieldSettings?.groups?.hideField && !fieldSettings?.apps?.hideField) ? 'grid-cols-2' :
-              (!fieldSettings?.groups?.hideField || !fieldSettings?.apps?.hideField) ? 'grid-cols-1' :
-              'hidden'
-            }`}>
-              {!fieldSettings?.groups?.hideField && (
+            <div className="grid grid-cols-2 gap-4">
+              <div className={`space-y-2 ${fieldSettings?.groups?.hideField ? 'invisible' : ''}`}>
+                <Label>Groups {fieldSettings?.groups?.required ? '*' : ''}</Label>
                 <div className="space-y-2">
-                  <Label>Groups {fieldSettings?.groups?.required ? '*' : ''}</Label>
-                  <div className="space-y-2">
-                    {availableGroups.map((group) => (
-                      <div key={group} className="flex items-center space-x-2">
-                        <Checkbox
-                          id={group}
-                          checked={selectedGroups.includes(group)}
-                          onCheckedChange={() => handleGroupToggle(group)}
-                        />
-                        <Label htmlFor={group} className="text-sm font-normal">
-                          {group}
-                        </Label>
-                      </div>
-                    ))}
-                  </div>
+                  {availableGroups.map((group) => (
+                    <div key={group} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={group}
+                        checked={selectedGroups.includes(group)}
+                        onCheckedChange={() => handleGroupToggle(group)}
+                        disabled={fieldSettings?.groups?.hideField}
+                      />
+                      <Label htmlFor={group} className="text-sm font-normal">
+                        {group}
+                      </Label>
+                    </div>
+                  ))}
                 </div>
-              )}
+              </div>
 
-              {!fieldSettings?.apps?.hideField && (
-                <div className="space-y-3">
-                  <Label>Apps {fieldSettings?.apps?.required ? '*' : ''}</Label>
+              <div className={`space-y-3 ${fieldSettings?.apps?.hideField ? 'invisible' : ''}`}>
+                <Label>Apps {fieldSettings?.apps?.required ? '*' : ''}</Label>
                 
                 {/* Add app dropdown at top */}
                 <Select
@@ -772,6 +766,7 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
                       setSelectedApps([...selectedApps, value]);
                     }
                   }}
+                  disabled={fieldSettings?.apps?.hideField}
                 >
                   <SelectTrigger className="w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600">
                     <div className="flex items-center">
@@ -804,6 +799,7 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
                           setSelectedApps(selectedApps.filter(app => app !== appName));
                         }}
                         className="h-4 w-4 p-0 text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 ml-1"
+                        disabled={fieldSettings?.apps?.hideField}
                       >
                         {'×'}
                       </Button>
@@ -815,8 +811,7 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
                     </div>
                   )}
                 </div>
-                </div>
-              )}
+              </div>
             </div>
 
             {/* Send Activation Email */}
