@@ -386,19 +386,6 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
     
     let passwordParts: string[] = [];
     
-    // Calculate how much space we need for non-word components
-    let nonWordLength = 0;
-    passwordConfig.components.forEach(component => {
-      if (component.type === 'numbers') {
-        nonWordLength += component.count; // Each number is 1 digit
-      } else if (component.type === 'symbols') {
-        nonWordLength += component.count; // Each symbol is 1 character
-      }
-    });
-    
-    // Available space for words
-    const availableWordSpace = passwordConfig.targetLength - nonWordLength;
-    
     // Process each component according to admin configuration
     passwordConfig.components.forEach(component => {
       for (let i = 0; i < component.count; i++) {
@@ -425,15 +412,9 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
     // Keep components in the order they appear in the configuration
     let password = passwordParts.join('');
     
-    // Trim to exact target length if needed (no padding)
-    if (passwordConfig.targetLength && password.length > passwordConfig.targetLength) {
-      password = password.substring(0, passwordConfig.targetLength);
-    }
-    
     console.log('🔑 Generated password with components:', {
       components: passwordConfig.components,
       targetLength: passwordConfig.targetLength,
-      availableWordSpace,
       generatedParts: passwordParts,
       finalPassword: password,
       finalLength: password.length
