@@ -32,6 +32,7 @@ export interface SelectConfig {
   required: boolean;
   useList: boolean;
   options: string[];
+  linkApps?: boolean; // For department field - enables app linking
 }
 
 export interface GroupsConfig {

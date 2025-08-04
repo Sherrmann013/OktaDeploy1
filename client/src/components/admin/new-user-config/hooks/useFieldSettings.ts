@@ -19,7 +19,7 @@ const DEFAULT_FIELD_SETTINGS: FieldSettings = {
   },
   title: { required: false },
   manager: { required: false },
-  department: { required: false, useList: false, options: [] },
+  department: { required: false, useList: false, options: [], linkApps: false },
   employeeType: { required: false, useList: true, options: [] },
   apps: { required: false, hideField: false },
   groups: { required: false, useList: true, options: [], hideField: false },

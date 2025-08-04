@@ -45,6 +45,12 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
     enabled: open,
   });
 
+  // Fetch department app mappings for automatic app assignment
+  const { data: departmentAppMappingsData = [] } = useQuery({
+    queryKey: ['/api/department-app-mappings'],
+    enabled: open && fieldSettings?.department?.linkApps,
+  });
+
   // Fetch existing users for manager dropdown
   const { data: usersData } = useQuery({
     queryKey: ["/api/users", "all"],
@@ -349,6 +355,38 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
   // Dynamic apps from database
   const availableApps = (appMappingsData as any[]).map((app: any) => app.appName);
 
+  // Process department app mappings
+  const departmentAppMappings: Record<string, string[]> = {};
+  if (departmentAppMappingsData && departmentAppMappingsData.length > 0) {
+    departmentAppMappingsData.forEach((mapping: any) => {
+      if (!departmentAppMappings[mapping.departmentName]) {
+        departmentAppMappings[mapping.departmentName] = [];
+      }
+      departmentAppMappings[mapping.departmentName].push(mapping.appName);
+    });
+  }
+
+  // Handle department selection and auto-populate linked apps
+  const handleDepartmentChange = (department: string, fieldOnChange: (value: string) => void) => {
+    fieldOnChange(department);
+    
+    // Auto-populate linked apps if department linking is enabled
+    if (fieldSettings?.department?.linkApps && departmentAppMappings[department]) {
+      const linkedApps = departmentAppMappings[department];
+      // Add linked apps to current selection (avoiding duplicates)
+      const currentApps = selectedApps;
+      const newApps = [...currentApps];
+      
+      linkedApps.forEach(app => {
+        if (!newApps.includes(app)) {
+          newApps.push(app);
+        }
+      });
+      
+      setSelectedApps(newApps);
+    }
+  };
+
   const handleGroupToggle = (group: string) => {
     setSelectedGroups(prev => 
       prev.includes(group)
@@ -631,7 +669,7 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
                         return hasOptions ? (
                           <Select
                             value={field.value || ""}
-                            onValueChange={field.onChange}
+                            onValueChange={(value) => handleDepartmentChange(value, field.onChange)}
                           >
                             <SelectTrigger className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600">
                               <SelectValue placeholder="Select department" />
