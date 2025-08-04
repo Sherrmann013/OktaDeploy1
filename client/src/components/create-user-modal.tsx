@@ -363,24 +363,20 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
   const generatePassword = () => {
     if (!passwordConfig) return;
     
-    // Generate words dynamically using random-words library with length constraints
-    const getWordsByLength = (targetLength: number, count: number = 10) => {
+    // Generate words using the random-words library
+    const getRandomWords = (count: number = 5) => {
       try {
-        const words = generate({ 
-          min: Math.max(1, targetLength - 1), 
-          max: targetLength + 1,
-          exactly: count * 3 // Generate more to filter better matches
-        }) as string[];
+        // Use the random-words library to generate words
+        const words = generate(count) as string[];
         
-        // Filter to exact length preference and capitalize
-        return words
-          .filter(word => word.length >= targetLength - 1 && word.length <= targetLength + 1)
-          .slice(0, count)
-          .map(word => word.charAt(0).toUpperCase() + word.slice(1));
+        // Capitalize each word
+        return words.map(word => 
+          word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+        );
       } catch (error) {
-        console.warn('Random words generation failed, using fallback');
-        // Fallback to a small set if library fails
-        const fallback = ['Blue', 'Red', 'Green', 'Star', 'Moon', 'Tree', 'Bird', 'Fish', 'Book', 'Light'];
+        console.error('Random words generation failed:', error);
+        // Only use fallback if the library completely fails
+        const fallback = ['Blue', 'Red', 'Green', 'Star', 'Moon'];
         return fallback.slice(0, count);
       }
     };
@@ -408,14 +404,9 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
       for (let i = 0; i < component.count; i++) {
         switch (component.type) {
           case 'words':
-            // Calculate target word length based on available space
-            const remainingWordCount = passwordConfig.components.find(c => c.type === 'words')?.count || 1;
-            const targetWordLength = Math.floor(availableWordSpace / remainingWordCount);
-            
-            // Generate words dynamically with appropriate length
-            const candidateWords = getWordsByLength(targetWordLength, 5);
-            const selectedWord = candidateWords[Math.floor(Math.random() * candidateWords.length)];
-            
+            // Generate random words using the library
+            const words = getRandomWords(10); // Get 10 words to choose from
+            const selectedWord = words[Math.floor(Math.random() * words.length)];
             passwordParts.push(selectedWord);
             break;
           case 'numbers':
@@ -424,7 +415,8 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
             passwordParts.push(singleDigit);
             break;
           case 'symbols':
-            passwordParts.push(symbols[Math.floor(Math.random() * symbols.length)]);
+            const selectedSymbol = symbols[Math.floor(Math.random() * symbols.length)];
+            passwordParts.push(selectedSymbol);
             break;
         }
       }
