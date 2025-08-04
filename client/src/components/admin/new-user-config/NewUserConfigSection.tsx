@@ -51,7 +51,7 @@ export function NewUserConfigSection({
           appMappingsData={appMappingsData}
         />
         
-        <div className="flex-1 overflow-y-auto">
+        <div className="flex-1">
           <FieldConfigPanel
             selectedField={selectedField}
             fieldSettings={fieldSettings}
