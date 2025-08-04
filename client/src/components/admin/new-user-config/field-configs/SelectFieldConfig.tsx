@@ -19,6 +19,7 @@ export function SelectFieldConfig({ config, onUpdate, fieldType }: SelectFieldCo
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [departmentAppMappings, setDepartmentAppMappings] = useState<Record<string, string[]>>({});
+  const [selectedDepartment, setSelectedDepartment] = useState<string>('');
 
   // Fetch available apps
   const { data: appMappingsData = [] } = useQuery({
@@ -268,29 +269,52 @@ export function SelectFieldConfig({ config, onUpdate, fieldType }: SelectFieldCo
 
           {config.linkApps && config.useList && config.options.length > 0 && (
             <div className="space-y-4">
-              {config.options.map((department) => (
-                <div key={department} className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 space-y-3">
+              {/* Department Selection Dropdown */}
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">Select Department to Configure</Label>
+                <Select value={selectedDepartment} onValueChange={setSelectedDepartment}>
+                  <SelectTrigger className="w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600">
+                    <SelectValue placeholder="Choose a department..." />
+                  </SelectTrigger>
+                  <SelectContent className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600">
+                    {config.options.map((department) => (
+                      <SelectItem key={department} value={department} className="bg-white dark:bg-gray-800">
+                        <div className="flex items-center justify-between w-full">
+                          <span>{department}</span>
+                          <span className="text-xs text-gray-500 ml-2">
+                            {departmentAppMappings[department]?.length || 0} apps
+                          </span>
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Selected Department App Management */}
+              {selectedDepartment && (
+                <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 space-y-3">
                   <div className="flex items-center justify-between">
-                    <Label className="text-sm font-medium">{department}</Label>
+                    <Label className="text-sm font-medium">{selectedDepartment}</Label>
                     <div className="flex items-center space-x-2">
                       <Link className="h-4 w-4 text-purple-500" />
                       <span className="text-xs text-gray-500">
-                        {departmentAppMappings[department]?.length || 0} apps linked
+                        {departmentAppMappings[selectedDepartment]?.length || 0} apps linked
                       </span>
                     </div>
                   </div>
                   
                   {/* Linked Apps */}
-                  {departmentAppMappings[department] && departmentAppMappings[department].length > 0 && (
+                  {departmentAppMappings[selectedDepartment] && departmentAppMappings[selectedDepartment].length > 0 && (
                     <div className="flex flex-wrap gap-2">
-                      {departmentAppMappings[department].map((appName) => (
+                      {departmentAppMappings[selectedDepartment].map((appName) => (
                         <div key={appName} className="flex items-center bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded px-2 py-1">
                           <span className="text-xs text-gray-700 dark:text-gray-300">{appName}</span>
                           <Button
                             type="button"
                             variant="ghost"
                             size="sm"
-                            onClick={() => handleUnlinkApp(department, appName)}
+                            onClick={() => handleUnlinkApp(selectedDepartment, appName)}
                             className="h-4 w-4 p-0 ml-1 text-red-500 hover:text-red-700"
                             disabled={deleteMappingMutation.isPending}
                           >
@@ -304,7 +328,7 @@ export function SelectFieldConfig({ config, onUpdate, fieldType }: SelectFieldCo
                   {/* Add App Dropdown */}
                   <Select
                     value=""
-                    onValueChange={(appName) => handleLinkApp(department, appName)}
+                    onValueChange={(appName) => handleLinkApp(selectedDepartment, appName)}
                     disabled={createMappingMutation.isPending}
                   >
                     <SelectTrigger className="w-full bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600">
@@ -315,13 +339,13 @@ export function SelectFieldConfig({ config, onUpdate, fieldType }: SelectFieldCo
                     </SelectTrigger>
                     <SelectContent className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600">
                       {availableApps
-                        .filter((app: string) => !departmentAppMappings[department]?.includes(app))
+                        .filter((app: string) => !departmentAppMappings[selectedDepartment]?.includes(app))
                         .map((app: string) => (
                           <SelectItem key={app} value={app} className="bg-white dark:bg-gray-800">
                             {app}
                           </SelectItem>
                         ))}
-                      {availableApps.filter((app: string) => !departmentAppMappings[department]?.includes(app)).length === 0 && (
+                      {availableApps.filter((app: string) => !departmentAppMappings[selectedDepartment]?.includes(app)).length === 0 && (
                         <SelectItem value="no-apps" disabled className="text-gray-500">
                           All apps already linked
                         </SelectItem>
@@ -329,7 +353,7 @@ export function SelectFieldConfig({ config, onUpdate, fieldType }: SelectFieldCo
                     </SelectContent>
                   </Select>
                 </div>
-              ))}
+              )}
             </div>
           )}
 
