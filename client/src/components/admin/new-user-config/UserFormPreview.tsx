@@ -209,7 +209,7 @@ export function UserFormPreview({
           </div>
           <div className="space-y-2">
             <Label htmlFor="preview-apps" className="text-sm font-medium">
-              Apps {fieldSettings.apps.required && <span className="text-red-500">*</span>}
+              Apps {fieldSettings.apps?.required && <span className="text-red-500">*</span>}
             </Label>
             <div className={getWrapperClassName('apps')} onClick={() => handleFieldClick('apps')}>
               <div className="border border-gray-300 dark:border-gray-600 rounded p-3 bg-white dark:bg-gray-800 min-h-[120px] cursor-pointer">
