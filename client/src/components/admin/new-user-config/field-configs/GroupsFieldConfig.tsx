@@ -97,15 +97,7 @@ export function GroupsFieldConfig({ config, onUpdate }: GroupsFieldConfigProps) 
                 className="border-0 shadow-none p-0 h-auto bg-transparent text-sm focus-visible:ring-0 placeholder:text-gray-500 dark:placeholder:text-gray-400"
               />
             </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={addGroup}
-              disabled={!newGroup.trim() || config.options.includes(newGroup.trim())}
-              className="h-6 px-2 text-green-600 hover:text-green-700 dark:text-green-400 dark:hover:text-green-300 text-xs"
-            >
-              Add
-            </Button>
+
           </div>
         </div>
       </div>
