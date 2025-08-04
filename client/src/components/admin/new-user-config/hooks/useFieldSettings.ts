@@ -156,17 +156,9 @@ export function useFieldSettings() {
         allSuccessful = allSuccessful && employeeTypeAppResult;
       }
 
-      // Save department group mappings if function is available
-      if (departmentGroupSaveFunction) {
-        const departmentGroupResult = await departmentGroupSaveFunction();
-        allSuccessful = allSuccessful && departmentGroupResult;
-      }
-
-      // Save employee type group mappings if function is available
-      if (employeeTypeGroupSaveFunction) {
-        const employeeTypeGroupResult = await employeeTypeGroupSaveFunction();
-        allSuccessful = allSuccessful && employeeTypeGroupResult;
-      }
+      // Note: Group mappings are NOT auto-saved with global "Save Changes"
+      // They require manual save using their individual Save buttons
+      // This maintains manual save control as requested by the user
       
       if (allSuccessful) {
         toast({ 

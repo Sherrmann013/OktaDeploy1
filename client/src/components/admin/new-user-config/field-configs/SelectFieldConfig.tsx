@@ -375,8 +375,11 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
           
           if (!response.ok) {
             const errorData = await response.json();
-            console.error('Department group mapping creation failed:', errorData);
-            throw new Error(`Failed to create department group mapping: ${response.status} ${response.statusText}`);
+            if (errorData.error !== "Mapping already exists") {
+              console.error('Department group mapping creation failed:', errorData);
+              throw new Error(`Failed to create department group mapping: ${response.status} ${response.statusText}`);
+            }
+            // If mapping already exists, just continue (avoid throwing error)
           }
         }
         
@@ -433,8 +436,11 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
           
           if (!response.ok) {
             const errorData = await response.json();
-            console.error('Employee type group mapping creation failed:', errorData);
-            throw new Error(`Failed to create employee type group mapping: ${response.status} ${response.statusText}`);
+            if (errorData.error !== "Mapping already exists") {
+              console.error('Employee type group mapping creation failed:', errorData);
+              throw new Error(`Failed to create employee type group mapping: ${response.status} ${response.statusText}`);
+            }
+            // If mapping already exists, just continue (avoid throwing error)
           }
         }
         
