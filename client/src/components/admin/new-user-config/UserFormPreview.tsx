@@ -45,7 +45,7 @@ export function UserFormPreview({
   };
 
   return (
-    <div className="w-96 flex-shrink-0 border border-gray-200 dark:border-gray-600 rounded-lg p-6 bg-gray-50 dark:bg-gray-700">
+    <div className="flex-1 max-w-lg border border-gray-200 dark:border-gray-600 rounded-lg p-6 bg-gray-50 dark:bg-gray-700 overflow-y-auto">
       <h5 className="text-md font-medium mb-4">Create New User</h5>
       
       <div className="space-y-4">

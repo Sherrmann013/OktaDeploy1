@@ -41,7 +41,7 @@ export function NewUserConfigSection({
 
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg border dark:border-gray-700 p-6">
-      <div className="flex gap-6 overflow-hidden">
+      <div className="flex gap-6 h-[600px]">
         <UserFormPreview
           fieldSettings={fieldSettings}
           selectedField={selectedField}
@@ -51,7 +51,7 @@ export function NewUserConfigSection({
           appMappingsData={appMappingsData}
         />
         
-        <div className="flex-1 min-w-0 overflow-hidden">
+        <div className="flex-1 overflow-y-auto">
           <FieldConfigPanel
             selectedField={selectedField}
             fieldSettings={fieldSettings}
