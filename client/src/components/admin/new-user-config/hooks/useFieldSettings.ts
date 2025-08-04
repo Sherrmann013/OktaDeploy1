@@ -30,6 +30,7 @@ export function useFieldSettings() {
   const { toast } = useToast();
   const [fieldSettings, setFieldSettings] = useState<FieldSettings>(DEFAULT_FIELD_SETTINGS);
   const [departmentAppSaveFunction, setDepartmentAppSaveFunction] = useState<(() => Promise<boolean>) | null>(null);
+  const [employeeTypeAppSaveFunction, setEmployeeTypeAppSaveFunction] = useState<(() => Promise<boolean>) | null>(null);
 
   // Fetch all field settings
   const { data: fetchedSettings, isLoading, error } = useQuery({
@@ -141,6 +142,12 @@ export function useFieldSettings() {
         const departmentAppResult = await departmentAppSaveFunction();
         allSuccessful = allSuccessful && departmentAppResult;
       }
+
+      // Save employee type app mappings if function is available
+      if (employeeTypeAppSaveFunction) {
+        const employeeTypeAppResult = await employeeTypeAppSaveFunction();
+        allSuccessful = allSuccessful && employeeTypeAppResult;
+      }
       
       if (allSuccessful) {
         toast({ 
@@ -167,6 +174,7 @@ export function useFieldSettings() {
     saveFieldSetting,
     saveAllSettings,
     setDepartmentAppSaveFunction,
+    setEmployeeTypeAppSaveFunction,
     isLoading,
     error
   };

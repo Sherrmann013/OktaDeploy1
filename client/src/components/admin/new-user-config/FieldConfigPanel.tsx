@@ -15,13 +15,15 @@ interface FieldConfigPanelProps {
   fieldSettings: FieldSettings;
   onUpdateField: (fieldKey: FieldKey, newConfig: any) => void;
   setDepartmentAppSaveFunction?: (fn: (() => Promise<boolean>) | null) => void;
+  setEmployeeTypeAppSaveFunction?: (fn: (() => Promise<boolean>) | null) => void;
 }
 
 export function FieldConfigPanel({
   selectedField,
   fieldSettings,
   onUpdateField,
-  setDepartmentAppSaveFunction
+  setDepartmentAppSaveFunction,
+  setEmployeeTypeAppSaveFunction
 }: FieldConfigPanelProps) {
   if (!selectedField) {
     return (
@@ -86,7 +88,8 @@ export function FieldConfigPanel({
             config={currentConfig as any}
             onUpdate={(newConfig) => onUpdateField(selectedField, newConfig)}
             fieldType={selectedField}
-            setDepartmentAppSaveFunction={selectedField === 'department' ? setDepartmentAppSaveFunction : undefined}
+            setDepartmentAppSaveFunction={setDepartmentAppSaveFunction}
+            setEmployeeTypeAppSaveFunction={setEmployeeTypeAppSaveFunction}
           />
         );
       case 'groups':

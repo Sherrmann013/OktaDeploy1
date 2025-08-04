@@ -17,7 +17,14 @@ export function NewUserConfigSection({
   appMappingsData 
 }: NewUserConfigSectionProps) {
   const [selectedField, setSelectedField] = useState<FieldKey | null>(null);
-  const { fieldSettings, updateFieldSetting, saveAllSettings, setDepartmentAppSaveFunction, isLoading } = useFieldSettings();
+  const { 
+    fieldSettings, 
+    updateFieldSetting, 
+    saveAllSettings, 
+    setDepartmentAppSaveFunction, 
+    setEmployeeTypeAppSaveFunction,
+    isLoading 
+  } = useFieldSettings();
 
   if (isLoading || !fieldSettings) {
     return (
@@ -46,6 +53,7 @@ export function NewUserConfigSection({
           fieldSettings={fieldSettings}
           onUpdateField={updateFieldSetting}
           setDepartmentAppSaveFunction={setDepartmentAppSaveFunction}
+          setEmployeeTypeAppSaveFunction={setEmployeeTypeAppSaveFunction}
         />
       </div>
       

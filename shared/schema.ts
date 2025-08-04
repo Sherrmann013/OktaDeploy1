@@ -185,10 +185,9 @@ export const departmentAppMappings = pgTable('department_app_mappings', {
   createdAt: timestamp('created_at').defaultNow()
 });
 
-// Employee Type Application Assignments
 export const employeeTypeAppMappings = pgTable('employee_type_app_mappings', {
   id: serial('id').primaryKey(),
-  employeeType: varchar('employee_type', { length: 100 }).notNull(),
+  employeeTypeName: varchar('employee_type_name', { length: 100 }).notNull(),
   appName: varchar('app_name', { length: 100 }).notNull(),
   createdAt: timestamp('created_at').defaultNow()
 });

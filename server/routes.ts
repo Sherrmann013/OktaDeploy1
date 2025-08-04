@@ -3435,6 +3435,102 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Employee Type App Mappings API Routes
+  app.get("/api/employee-type-app-mappings", isAuthenticated, async (req, res) => {
+    try {
+      const mappings = await db.select().from(employeeTypeAppMappings);
+      res.json(mappings);
+    } catch (error) {
+      console.error("Error fetching employee type app mappings:", error);
+      res.status(500).json({ error: "Failed to fetch employee type app mappings" });
+    }
+  });
+
+  app.post("/api/employee-type-app-mappings", isAuthenticated, requireAdmin, async (req, res) => {
+    try {
+      const { employeeTypeName, appName } = insertEmployeeTypeAppMappingSchema.parse(req.body);
+      
+      // Check if mapping already exists
+      const existing = await db.select()
+        .from(employeeTypeAppMappings)
+        .where(and(
+          eq(employeeTypeAppMappings.employeeTypeName, employeeTypeName),
+          eq(employeeTypeAppMappings.appName, appName)
+        ))
+        .limit(1);
+      
+      if (existing.length > 0) {
+        return res.status(400).json({ error: "Mapping already exists" });
+      }
+      
+      const [result] = await db.insert(employeeTypeAppMappings)
+        .values({ employeeTypeName, appName })
+        .returning();
+      
+      await AuditLogger.log({
+        req,
+        action: 'CREATE',
+        resourceType: 'EMPLOYEE_TYPE_APP_MAPPING',
+        resourceId: result.id.toString(),
+        resourceName: `${employeeTypeName} - ${appName}`,
+        details: { employeeTypeName, appName }
+      });
+      
+      res.json(result);
+    } catch (error) {
+      console.error("Error creating employee type app mapping:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: error.errors });
+      }
+      res.status(500).json({ error: "Failed to create employee type app mapping" });
+    }
+  });
+
+  app.delete("/api/employee-type-app-mappings", isAuthenticated, requireAdmin, async (req, res) => {
+    try {
+      const { employeeTypeName, appName } = z.object({
+        employeeTypeName: z.string(),
+        appName: z.string()
+      }).parse(req.body);
+      
+      const existing = await db.select()
+        .from(employeeTypeAppMappings)
+        .where(and(
+          eq(employeeTypeAppMappings.employeeTypeName, employeeTypeName),
+          eq(employeeTypeAppMappings.appName, appName)
+        ))
+        .limit(1);
+      
+      if (existing.length === 0) {
+        return res.status(404).json({ error: "Mapping not found" });
+      }
+      
+      await db.delete(employeeTypeAppMappings)
+        .where(and(
+          eq(employeeTypeAppMappings.employeeTypeName, employeeTypeName),
+          eq(employeeTypeAppMappings.appName, appName)
+        ));
+      
+      await AuditLogger.log({
+        req,
+        action: 'DELETE',
+        resourceType: 'EMPLOYEE_TYPE_APP_MAPPING',
+        resourceId: existing[0].id.toString(),
+        resourceName: `${employeeTypeName} - ${appName}`,
+        details: { employeeTypeName, appName },
+        oldValues: existing[0]
+      });
+      
+      res.json({ message: "Employee type app mapping deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting employee type app mapping:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: error.errors });
+      }
+      res.status(500).json({ error: "Failed to delete employee type app mapping" });
+    }
+  });
+
   // Employee Type Application Mappings API
   app.get("/api/employee-type-app-mappings", isAuthenticated, async (req, res) => {
     try {
