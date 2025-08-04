@@ -86,7 +86,7 @@ export function SelectFieldConfig({ config, onUpdate, fieldType }: SelectFieldCo
 
   // Process department app mappings data
   useEffect(() => {
-    if (departmentAppMappingsData && departmentAppMappingsData.length > 0) {
+    if (Array.isArray(departmentAppMappingsData) && departmentAppMappingsData.length > 0) {
       const mappingsByDepartment: Record<string, string[]> = {};
       departmentAppMappingsData.forEach((mapping: any) => {
         if (!mappingsByDepartment[mapping.departmentName]) {
@@ -99,9 +99,10 @@ export function SelectFieldConfig({ config, onUpdate, fieldType }: SelectFieldCo
   }, [departmentAppMappingsData]);
 
   // Get available apps
-  const availableApps = appMappingsData
-    .filter((app: any) => app.status === 'active')
-    .map((app: any) => app.appName);
+  const availableApps = Array.isArray(appMappingsData) ? 
+    appMappingsData
+      .filter((app: any) => app.status === 'active')
+      .map((app: any) => app.appName) : [];
   const handleUseListChange = (checked: boolean) => {
     onUpdate({
       ...config,
