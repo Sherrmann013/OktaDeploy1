@@ -45,54 +45,7 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
     enabled: open,
   });
 
-  // Fetch department app mappings for automatic app assignment
-  const { data: departmentAppMappingsData = [] } = useQuery({
-    queryKey: ['/api/department-app-mappings'],
-    enabled: open && fieldSettings?.department?.linkApps,
-  });
-
-  // Fetch existing users for manager dropdown
-  const { data: usersData } = useQuery({
-    queryKey: ["/api/users", "all"],
-    queryFn: async () => {
-      const response = await fetch('/api/users?limit=1000', {
-        credentials: 'include'
-      });
-      
-      if (!response.ok) {
-        throw new Error('Failed to fetch users for manager selection');
-      }
-      
-      return response.json();
-    },
-    enabled: open,
-  });
-
-  // Fetch email domain configuration from New User Layout settings
-  const { data: emailDomainConfig } = useQuery({
-    queryKey: ["/api/layout-settings", "emailUsername"],
-    queryFn: async () => {
-      try {
-        const response = await fetch('/api/layout-settings/emailUsername', {
-          credentials: 'include'
-        });
-        
-        if (!response.ok) {
-          // Return default configuration if not found
-          return { domains: ['@mazetx.com'] };
-        }
-        
-        const data = await response.json();
-        return JSON.parse(data.settingValue || '{"domains":["@mazetx.com"]}');
-      } catch (error) {
-        // Return default configuration on error
-        return { domains: ['@mazetx.com'] };
-      }
-    },
-    enabled: open,
-  });
-
-  // Fetch all field settings from admin layout
+  // Fetch all field settings from admin layout - MUST BE DECLARED FIRST
   const { data: fieldSettings } = useQuery({
     queryKey: ["/api/layout-settings", "all-fields"],
     queryFn: async () => {
@@ -184,6 +137,55 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
     },
     enabled: open,
   });
+
+  // Fetch department app mappings for automatic app assignment
+  const { data: departmentAppMappingsData = [] } = useQuery({
+    queryKey: ['/api/department-app-mappings'],
+    enabled: open && fieldSettings?.department?.linkApps,
+  });
+
+  // Fetch existing users for manager dropdown
+  const { data: usersData } = useQuery({
+    queryKey: ["/api/users", "all"],
+    queryFn: async () => {
+      const response = await fetch('/api/users?limit=1000', {
+        credentials: 'include'
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch users for manager selection');
+      }
+      
+      return response.json();
+    },
+    enabled: open,
+  });
+
+  // Fetch email domain configuration from New User Layout settings
+  const { data: emailDomainConfig } = useQuery({
+    queryKey: ["/api/layout-settings", "emailUsername"],
+    queryFn: async () => {
+      try {
+        const response = await fetch('/api/layout-settings/emailUsername', {
+          credentials: 'include'
+        });
+        
+        if (!response.ok) {
+          // Return default configuration if not found
+          return { domains: ['@mazetx.com'] };
+        }
+        
+        const data = await response.json();
+        return JSON.parse(data.settingValue || '{"domains":["@mazetx.com"]}');
+      } catch (error) {
+        // Return default configuration on error
+        return { domains: ['@mazetx.com'] };
+      }
+    },
+    enabled: open,
+  });
+
+
 
   // Extract password config for backward compatibility
   const passwordConfig = fieldSettings?.password;
