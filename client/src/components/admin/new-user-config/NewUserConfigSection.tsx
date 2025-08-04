@@ -41,7 +41,7 @@ export function NewUserConfigSection({
 
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg border dark:border-gray-700 p-6">
-      <div className="flex gap-6 h-[600px]">
+      <div className="flex gap-6 min-h-[600px]">
         <UserFormPreview
           fieldSettings={fieldSettings}
           selectedField={selectedField}
