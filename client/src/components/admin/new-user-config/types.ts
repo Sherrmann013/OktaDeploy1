@@ -6,7 +6,8 @@ export type FieldKey =
   | 'title' 
   | 'manager' 
   | 'department' 
-  | 'employeeType';
+  | 'employeeType'
+  | 'apps';
 
 export interface PasswordComponent {
   type: 'words' | 'numbers' | 'symbols';
@@ -44,4 +45,5 @@ export interface FieldSettings {
   manager: BasicFieldConfig;
   department: SelectConfig;
   employeeType: SelectConfig;
+  apps: BasicFieldConfig;
 }

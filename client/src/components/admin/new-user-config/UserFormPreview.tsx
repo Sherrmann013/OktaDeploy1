@@ -208,52 +208,13 @@ export function UserFormPreview({
             </div>
           </div>
           <div className="space-y-2">
-            <Label className="text-sm font-medium">Apps</Label>
-            <div className="border border-gray-300 dark:border-gray-600 rounded p-3 bg-white dark:bg-gray-800 min-h-[120px]">
-              <div className="space-y-3">
-                <Select
-                  value=""
-                  onValueChange={(value) => {
-                    if (value && !selectedApps.includes(value)) {
-                      setSelectedApps([...selectedApps, value]);
-                    }
-                  }}
-                >
-                  <SelectTrigger className="w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600">
-                    <SelectValue placeholder="Select an app to add..." />
-                  </SelectTrigger>
-                  <SelectContent className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600">
-                    {appMappingsData
-                      .filter(app => !selectedApps.includes(app.appName))
-                      .map((app) => (
-                        <SelectItem key={app.id} value={app.appName} className="bg-white dark:bg-gray-800">
-                          {app.appName}
-                        </SelectItem>
-                      ))}
-                  </SelectContent>
-                </Select>
-                
-                <div className="space-y-2">
-                  {selectedApps.map((appName, index) => (
-                    <div key={index} className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-700 rounded border">
-                      <span className="text-sm font-medium">{appName}</span>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => {
-                          setSelectedApps(selectedApps.filter(app => app !== appName));
-                        }}
-                        className="h-6 w-6 p-0 text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
-                      >
-                        ×
-                      </Button>
-                    </div>
-                  ))}
-                  {selectedApps.length === 0 && (
-                    <div className="text-center py-4">
-                      <span className="text-sm text-gray-500 dark:text-gray-400">No apps selected</span>
-                    </div>
-                  )}
+            <Label htmlFor="preview-apps" className="text-sm font-medium">
+              Apps {fieldSettings.apps.required && <span className="text-red-500">*</span>}
+            </Label>
+            <div className={getWrapperClassName('apps')} onClick={() => handleFieldClick('apps')}>
+              <div className="border border-gray-300 dark:border-gray-600 rounded p-3 bg-white dark:bg-gray-800 min-h-[120px] cursor-pointer">
+                <div className="text-center py-8">
+                  <span className="text-sm text-gray-500 dark:text-gray-400">Apps will be configured based on department</span>
                 </div>
               </div>
             </div>

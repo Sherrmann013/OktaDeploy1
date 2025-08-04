@@ -20,7 +20,8 @@ const DEFAULT_FIELD_SETTINGS: FieldSettings = {
   title: { required: false },
   manager: { required: false },
   department: { required: false, useList: false, options: [] },
-  employeeType: { required: false, useList: true, options: [] }
+  employeeType: { required: false, useList: true, options: [] },
+  apps: { required: false }
 };
 
 export function useFieldSettings() {
@@ -39,7 +40,8 @@ export function useFieldSettings() {
         fetch('/api/layout-settings/title', { credentials: 'include' }),
         fetch('/api/layout-settings/manager', { credentials: 'include' }),
         fetch('/api/layout-settings/department', { credentials: 'include' }),
-        fetch('/api/layout-settings/employeeType', { credentials: 'include' })
+        fetch('/api/layout-settings/employeeType', { credentials: 'include' }),
+        fetch('/api/layout-settings/apps', { credentials: 'include' })
       ];
 
       const responses = await Promise.all(settingsQueries);
@@ -47,7 +49,7 @@ export function useFieldSettings() {
       
       const fieldNames: FieldKey[] = [
         'firstName', 'lastName', 'emailUsername', 'password', 
-        'title', 'manager', 'department', 'employeeType'
+        'title', 'manager', 'department', 'employeeType', 'apps'
       ];
       
       for (let i = 0; i < responses.length; i++) {

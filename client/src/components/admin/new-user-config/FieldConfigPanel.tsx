@@ -40,7 +40,8 @@ export function FieldConfigPanel({
       title: 'Job Title Options',
       manager: 'Manager Options',
       department: 'Department Options',
-      employeeType: 'Employee Type Options'
+      employeeType: 'Employee Type Options',
+      apps: 'Apps Options'
     };
     return titles[field];
   };
