@@ -227,7 +227,7 @@ export function UserFormPreview({
             <div className={getWrapperClassName('apps')} onClick={() => handleFieldClick('apps')}>
               <div className="border border-gray-300 dark:border-gray-600 rounded p-3 bg-white dark:bg-gray-800 min-h-[120px] cursor-pointer">
                 <div className="text-center py-8">
-                  <span className="text-sm text-gray-500 dark:text-gray-400">Apps will be configured based on department</span>
+                  <span className="text-sm text-gray-500 dark:text-gray-400">No specific app configuration yet</span>
                 </div>
               </div>
             </div>

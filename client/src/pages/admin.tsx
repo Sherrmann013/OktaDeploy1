@@ -42,12 +42,7 @@ interface Integration {
   lastUpdated: string;
 }
 
-interface DepartmentAppMapping {
-  id: number;
-  departmentName: string;
-  appName: string;
-  createdAt: string;
-}
+
 
 interface AuditLog {
   id: number;
@@ -108,7 +103,7 @@ function AdminComponent() {
     department: { required: true, useList: false, options: [] },
     employeeType: { required: false, useList: true, options: [] }
   });
-  const [departmentApps, setDepartmentApps] = useState<Record<string, string[]>>({});
+
 
   const queryClient = useQueryClient();
 
@@ -617,27 +612,9 @@ function AdminComponent() {
     refetchInterval: 30000
   });
 
-  // Fetch department app mappings from database
-  const { data: departmentAppMappingsData = [] } = useQuery<DepartmentAppMapping[]>({
-    queryKey: ["/api/department-app-mappings"],
-    refetchInterval: 30000
-  });
 
-  // Handle department app mappings data changes
-  useEffect(() => {
-    if (departmentAppMappingsData && departmentAppMappingsData.length > 0) {
-      console.log('🔍 Department app mappings loaded:', departmentAppMappingsData);
-      const mappingsByDepartment: Record<string, string[]> = {};
-      departmentAppMappingsData.forEach((mapping: DepartmentAppMapping) => {
-        if (!mappingsByDepartment[mapping.departmentName]) {
-          mappingsByDepartment[mapping.departmentName] = [];
-        }
-        mappingsByDepartment[mapping.departmentName].push(mapping.appName);
-      });
-      setDepartmentApps(mappingsByDepartment);
-      console.log('🔍 Initialized department apps from database:', mappingsByDepartment);
-    }
-  }, [departmentAppMappingsData]);
+
+
 
   // Get active apps for the dropdown - matching UserModal logic
   const availableApps = appMappingsData
@@ -645,7 +622,6 @@ function AdminComponent() {
     .map(app => app.appName);
 
   console.log('🔍 Available apps for dropdown:', availableApps);
-  console.log('🔍 Current department apps state:', departmentApps);
 
   // Note: department and employee type app mappings are already declared above
 
@@ -938,49 +914,7 @@ function AdminComponent() {
     }
   });
 
-  // Create department app mapping mutation
-  const createDepartmentAppMappingMutation = useMutation({
-    mutationFn: async (data: { departmentName: string; appName: string }) => {
-      const response = await fetch('/api/department-app-mappings', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify(data)
-      });
-      
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || `HTTP ${response.status}: ${response.statusText}`);
-      }
-      
-      return response.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/department-app-mappings"] });
-    }
-  });
 
-  // Delete department app mapping mutation
-  const deleteDepartmentAppMappingMutation = useMutation({
-    mutationFn: async (data: { departmentName: string; appName: string }) => {
-      const response = await fetch('/api/department-app-mappings', {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify(data)
-      });
-      
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || `HTTP ${response.status}: ${response.statusText}`);
-      }
-      
-      return response.status === 204 ? null : response.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/department-app-mappings"] });
-    }
-  });
 
   const getRandomColor = () => {
     const colors = ["bg-blue-600", "bg-green-600", "bg-purple-600", "bg-orange-600", "bg-cyan-600", "bg-pink-600", "bg-indigo-600", "bg-teal-600"];

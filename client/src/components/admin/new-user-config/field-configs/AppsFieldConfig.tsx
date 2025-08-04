@@ -50,8 +50,7 @@ export function AppsFieldConfig({ config, onUpdate }: AppsFieldConfigProps) {
       </div>
       
       <div className="text-sm text-gray-600 dark:text-gray-400">
-        When enabled, the Apps field will not appear in the Create User modal. 
-        Apps will still be configured automatically based on the user's department.
+        When enabled, the Apps field will not appear in the Create User modal.
       </div>
     </div>
   );
