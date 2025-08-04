@@ -45,6 +45,26 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
     enabled: open,
   });
 
+  const { data: departmentAppMappingsData = [] } = useQuery({
+    queryKey: ["/api/department-app-mappings"],
+    enabled: open,
+  });
+
+  const { data: employeeTypeAppMappingsData = [] } = useQuery({
+    queryKey: ["/api/employee-type-app-mappings"],
+    enabled: open,
+  });
+
+  const { data: departmentGroupMappingsData = [] } = useQuery({
+    queryKey: ["/api/department-group-mappings"],
+    enabled: open,
+  });
+
+  const { data: employeeTypeGroupMappingsData = [] } = useQuery({
+    queryKey: ["/api/employee-type-group-mappings"],
+    enabled: open,
+  });
+
   // Fetch all field settings from admin layout - MUST BE DECLARED FIRST
   const { data: fieldSettings } = useQuery({
     queryKey: ["/api/layout-settings", "all-fields"],
@@ -61,7 +81,8 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
           fetch('/api/layout-settings/department', { credentials: 'include' }),
           fetch('/api/layout-settings/employeeType', { credentials: 'include' }),
           fetch('/api/layout-settings/apps', { credentials: 'include' }),
-          fetch('/api/layout-settings/groups', { credentials: 'include' })
+          fetch('/api/layout-settings/groups', { credentials: 'include' }),
+          fetch('/api/layout-settings/sendActivationEmail', { credentials: 'include' })
         ];
         
 
@@ -83,14 +104,15 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
           },
           title: { required: false },
           manager: { required: false },
-          department: { required: false, useList: false, options: [] },
-          employeeType: { required: false, useList: true, options: [] },
+          department: { required: false, useList: false, options: [], linkApps: false, linkGroups: false },
+          employeeType: { required: false, useList: true, options: [], linkApps: false, linkGroups: false },
           apps: { required: false, hideField: false },
-          groups: { required: false, useList: true, options: [] }
+          groups: { required: false, useList: true, options: [], hideField: false },
+          sendActivationEmail: { required: false, hideField: false }
         };
         
         // Parse individual setting responses
-        const fieldNames = ['firstName', 'lastName', 'emailUsername', 'password', 'title', 'manager', 'department', 'employeeType', 'apps', 'groups'];
+        const fieldNames = ['firstName', 'lastName', 'emailUsername', 'password', 'title', 'manager', 'department', 'employeeType', 'apps', 'groups', 'sendActivationEmail'];
         for (let i = 0; i < responses.length; i++) {
           const response = responses[i];
           const fieldName = fieldNames[i];
@@ -128,21 +150,18 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
           },
           title: { required: false },
           manager: { required: false },
-          department: { required: false, useList: false, options: [] },
-          employeeType: { required: false, useList: true, options: [] },
+          department: { required: false, useList: false, options: [], linkApps: false, linkGroups: false },
+          employeeType: { required: false, useList: true, options: [], linkApps: false, linkGroups: false },
           apps: { required: false, hideField: false },
-          groups: { required: false, useList: true, options: [] }
+          groups: { required: false, useList: true, options: [], hideField: false },
+          sendActivationEmail: { required: false, hideField: false }
         };
       }
     },
     enabled: open,
   });
 
-  // Fetch department app mappings for automatic app assignment
-  const { data: departmentAppMappingsData = [] } = useQuery({
-    queryKey: ['/api/department-app-mappings'],
-    enabled: open && fieldSettings?.department?.linkApps,
-  });
+  // Remove duplicate query since it's already defined above
 
   // Fetch existing users for manager dropdown
   const { data: usersData } = useQuery({
@@ -359,7 +378,7 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
 
   // Process department app mappings
   const departmentAppMappings: Record<string, string[]> = {};
-  if (departmentAppMappingsData && departmentAppMappingsData.length > 0) {
+  if (Array.isArray(departmentAppMappingsData) && departmentAppMappingsData.length > 0) {
     departmentAppMappingsData.forEach((mapping: any) => {
       if (!departmentAppMappings[mapping.departmentName]) {
         departmentAppMappings[mapping.departmentName] = [];
@@ -368,41 +387,121 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
     });
   }
 
-  // Handle department selection and auto-populate linked apps
+  // Process employee type app mappings
+  const employeeTypeAppMappings: Record<string, string[]> = {};
+  if (Array.isArray(employeeTypeAppMappingsData) && employeeTypeAppMappingsData.length > 0) {
+    employeeTypeAppMappingsData.forEach((mapping: any) => {
+      if (!employeeTypeAppMappings[mapping.employeeType]) {
+        employeeTypeAppMappings[mapping.employeeType] = [];
+      }
+      employeeTypeAppMappings[mapping.employeeType].push(mapping.appName);
+    });
+  }
+
+  // Process department group mappings
+  const departmentGroupMappings: Record<string, string[]> = {};
+  if (Array.isArray(departmentGroupMappingsData) && departmentGroupMappingsData.length > 0) {
+    departmentGroupMappingsData.forEach((mapping: any) => {
+      if (!departmentGroupMappings[mapping.departmentName]) {
+        departmentGroupMappings[mapping.departmentName] = [];
+      }
+      departmentGroupMappings[mapping.departmentName].push(mapping.groupName);
+    });
+  }
+
+  // Process employee type group mappings
+  const employeeTypeGroupMappings: Record<string, string[]> = {};
+  if (Array.isArray(employeeTypeGroupMappingsData) && employeeTypeGroupMappingsData.length > 0) {
+    employeeTypeGroupMappingsData.forEach((mapping: any) => {
+      if (!employeeTypeGroupMappings[mapping.employeeType]) {
+        employeeTypeGroupMappings[mapping.employeeType] = [];
+      }
+      employeeTypeGroupMappings[mapping.employeeType].push(mapping.groupName);
+    });
+  }
+
+  // Track manually selected apps and groups (excluding those from department/employee type linking)
+  const [manuallySelectedApps, setManuallySelectedApps] = useState<string[]>([]);
+  const [manuallySelectedGroups, setManuallySelectedGroups] = useState<string[]>([]);
+
+  // Handle department selection and auto-populate linked apps/groups
   const handleDepartmentChange = (department: string, fieldOnChange: (value: string) => void) => {
     fieldOnChange(department);
     
-    // Auto-populate linked apps if department linking is enabled
-    if (fieldSettings?.department?.linkApps && departmentAppMappings[department]) {
-      const linkedApps = departmentAppMappings[department];
-      // Add linked apps to current selection (avoiding duplicates)
-      const currentApps = selectedApps;
-      const newApps = [...currentApps];
-      
-      linkedApps.forEach(app => {
-        if (!newApps.includes(app)) {
-          newApps.push(app);
-        }
-      });
-      
-      setSelectedApps(newApps);
-    }
+    // Get current employee type
+    const currentEmployeeType = form.getValues("employeeType");
+    
+    // Calculate new linked apps and groups
+    const departmentLinkedApps = fieldSettings?.department?.linkApps && departmentAppMappings[department] ? departmentAppMappings[department] : [];
+    const employeeTypeLinkedApps = fieldSettings?.employeeType?.linkApps && currentEmployeeType && employeeTypeAppMappings[currentEmployeeType] ? employeeTypeAppMappings[currentEmployeeType] : [];
+    const departmentLinkedGroups = fieldSettings?.department?.linkGroups && departmentGroupMappings[department] ? departmentGroupMappings[department] : [];
+    const employeeTypeLinkedGroups = fieldSettings?.employeeType?.linkGroups && currentEmployeeType && employeeTypeGroupMappings[currentEmployeeType] ? employeeTypeGroupMappings[currentEmployeeType] : [];
+    
+    // Combine manually selected with newly linked apps/groups (replace department-linked, keep employee type and manual)
+    const newApps = Array.from(new Set([...manuallySelectedApps, ...employeeTypeLinkedApps, ...departmentLinkedApps]));
+    const newGroups = Array.from(new Set([...manuallySelectedGroups, ...employeeTypeLinkedGroups, ...departmentLinkedGroups]));
+    
+    setSelectedApps(newApps);
+    setSelectedGroups(newGroups);
+  };
+
+  // Handle employee type selection and auto-populate linked apps/groups
+  const handleEmployeeTypeChange = (employeeType: string, fieldOnChange: (value: string) => void) => {
+    fieldOnChange(employeeType);
+    
+    // Get current department
+    const currentDepartment = form.getValues("department");
+    
+    // Calculate new linked apps and groups
+    const departmentLinkedApps = fieldSettings?.department?.linkApps && currentDepartment && departmentAppMappings[currentDepartment] ? departmentAppMappings[currentDepartment] : [];
+    const employeeTypeLinkedApps = fieldSettings?.employeeType?.linkApps && employeeTypeAppMappings[employeeType] ? employeeTypeAppMappings[employeeType] : [];
+    const departmentLinkedGroups = fieldSettings?.department?.linkGroups && currentDepartment && departmentGroupMappings[currentDepartment] ? departmentGroupMappings[currentDepartment] : [];
+    const employeeTypeLinkedGroups = fieldSettings?.employeeType?.linkGroups && employeeTypeGroupMappings[employeeType] ? employeeTypeGroupMappings[employeeType] : [];
+    
+    // Combine manually selected with newly linked apps/groups (replace employee type-linked, keep department and manual)
+    const newApps = Array.from(new Set([...manuallySelectedApps, ...departmentLinkedApps, ...employeeTypeLinkedApps]));
+    const newGroups = Array.from(new Set([...manuallySelectedGroups, ...departmentLinkedGroups, ...employeeTypeLinkedGroups]));
+    
+    setSelectedApps(newApps);
+    setSelectedGroups(newGroups);
   };
 
   const handleGroupToggle = (group: string) => {
-    setSelectedGroups(prev => 
-      prev.includes(group)
+    setSelectedGroups(prev => {
+      const newGroups = prev.includes(group)
         ? prev.filter(g => g !== group)
-        : [...prev, group]
-    );
+        : [...prev, group];
+      
+      // Update manually selected groups list
+      const currentDepartment = form.getValues("department");
+      const currentEmployeeType = form.getValues("employeeType");
+      const departmentLinkedGroups = fieldSettings?.department?.linkGroups && currentDepartment && departmentGroupMappings[currentDepartment] ? departmentGroupMappings[currentDepartment] : [];
+      const employeeTypeLinkedGroups = fieldSettings?.employeeType?.linkGroups && currentEmployeeType && employeeTypeGroupMappings[currentEmployeeType] ? employeeTypeGroupMappings[currentEmployeeType] : [];
+      const linkedGroups = [...departmentLinkedGroups, ...employeeTypeLinkedGroups];
+      
+      setManuallySelectedGroups(newGroups.filter(g => !linkedGroups.includes(g)));
+      
+      return newGroups;
+    });
   };
 
   const handleAppToggle = (app: string) => {
-    setSelectedApps(prev => 
-      prev.includes(app)
+    setSelectedApps(prev => {
+      const newApps = prev.includes(app)
         ? prev.filter(a => a !== app)
-        : [...prev, app]
-    );
+        : [...prev, app];
+      
+      // Update manually selected apps list
+      const currentDepartment = form.getValues("department");
+      const currentEmployeeType = form.getValues("employeeType");
+      const departmentLinkedApps = fieldSettings?.department?.linkApps && currentDepartment && departmentAppMappings[currentDepartment] ? departmentAppMappings[currentDepartment] : [];
+      const employeeTypeLinkedApps = fieldSettings?.employeeType?.linkApps && currentEmployeeType && employeeTypeAppMappings[currentEmployeeType] ? employeeTypeAppMappings[currentEmployeeType] : [];
+      const linkedApps = [...departmentLinkedApps, ...employeeTypeLinkedApps];
+      
+      setManuallySelectedApps(newApps.filter(a => !linkedApps.includes(a)));
+      
+      return newApps;
+    });
   };
 
   // Generate password using admin-configured settings
@@ -754,7 +853,7 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
                     <FormControl>
                       <Select
                         value={field.value || ""}
-                        onValueChange={field.onChange}
+                        onValueChange={(value) => handleEmployeeTypeChange(value, field.onChange)}
                       >
                         <SelectTrigger className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600">
                           <SelectValue placeholder="Select employee type" />
