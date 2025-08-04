@@ -116,17 +116,19 @@ export function FieldConfigPanel({
         </h5>
         
         <div className="space-y-4">
-          {/* Required Checkbox - Universal for all fields */}
-          <div className="flex items-center space-x-2">
-            <Checkbox 
-              id={`${selectedField}-required`}
-              checked={fieldSettings[selectedField]?.required}
-              onCheckedChange={handleRequiredChange}
-            />
-            <Label htmlFor={`${selectedField}-required`} className="text-sm">
-              Required field
-            </Label>
-          </div>
+          {/* Required Checkbox - Universal for all fields except those with custom configs */}
+          {!['groups', 'apps'].includes(selectedField) && (
+            <div className="flex items-center space-x-2">
+              <Checkbox 
+                id={`${selectedField}-required`}
+                checked={fieldSettings[selectedField]?.required}
+                onCheckedChange={handleRequiredChange}
+              />
+              <Label htmlFor={`${selectedField}-required`} className="text-sm">
+                Required field
+              </Label>
+            </div>
+          )}
 
           {/* Field-specific configuration */}
           {renderFieldSpecificConfig()}

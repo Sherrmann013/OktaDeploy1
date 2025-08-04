@@ -86,7 +86,7 @@ export function GroupsFieldConfig({ config, onUpdate }: GroupsFieldConfigProps) 
           ))}
           
           {/* Add new group row */}
-          <div className="flex items-center px-3 py-2 bg-green-50 dark:bg-green-900/20 border-t border-green-200 dark:border-green-800">
+          <div className="flex items-center px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700/50">
             <div className="flex items-center space-x-2 flex-1">
               <Plus className="h-4 w-4 text-green-600 dark:text-green-400" />
               <Input
@@ -94,7 +94,7 @@ export function GroupsFieldConfig({ config, onUpdate }: GroupsFieldConfigProps) 
                 value={newGroup}
                 onChange={(e) => setNewGroup(e.target.value)}
                 onKeyPress={handleKeyPress}
-                className="border-0 shadow-none p-0 h-auto bg-transparent text-sm focus-visible:ring-0 placeholder:text-green-600/70 dark:placeholder:text-green-400/70"
+                className="border-0 shadow-none p-0 h-auto bg-transparent text-sm focus-visible:ring-0 placeholder:text-gray-500 dark:placeholder:text-gray-400"
               />
             </div>
             <Button
