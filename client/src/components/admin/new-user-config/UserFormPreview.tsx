@@ -193,7 +193,7 @@ export function UserFormPreview({
         </div>
 
         {/* Groups & Apps Sections */}
-        <div className={`grid gap-4 ${!fieldSettings.apps?.hideField ? 'grid-cols-2' : 'grid-cols-1'}`}>
+        <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label htmlFor="preview-groups" className="text-sm font-medium">
               Groups {fieldSettings.groups?.required && <span className="text-red-500">*</span>}
@@ -218,20 +218,19 @@ export function UserFormPreview({
             </div>
           </div>
           
-          {!fieldSettings.apps?.hideField && (
-            <div className="space-y-2">
-              <Label htmlFor="preview-apps" className="text-sm font-medium">
-                Apps {fieldSettings.apps?.required && <span className="text-red-500">*</span>}
-              </Label>
-              <div className={getWrapperClassName('apps')} onClick={() => handleFieldClick('apps')}>
-                <div className="border border-gray-300 dark:border-gray-600 rounded p-3 bg-white dark:bg-gray-800 min-h-[120px] cursor-pointer">
-                  <div className="text-center py-8">
-                    <span className="text-sm text-gray-500 dark:text-gray-400">Apps will be configured based on department</span>
-                  </div>
+          <div className="space-y-2">
+            <Label htmlFor="preview-apps" className="text-sm font-medium">
+              Apps {fieldSettings.apps?.required && <span className="text-red-500">*</span>}
+              {fieldSettings.apps?.hideField && <span className="text-xs text-orange-500 ml-2">(Hidden in user form)</span>}
+            </Label>
+            <div className={getWrapperClassName('apps')} onClick={() => handleFieldClick('apps')}>
+              <div className="border border-gray-300 dark:border-gray-600 rounded p-3 bg-white dark:bg-gray-800 min-h-[120px] cursor-pointer">
+                <div className="text-center py-8">
+                  <span className="text-sm text-gray-500 dark:text-gray-400">Apps will be configured based on department</span>
                 </div>
               </div>
             </div>
-          )}
+          </div>
         </div>
 
         {/* Send activation email checkbox */}
