@@ -26,7 +26,8 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
   const [employeeTypeAppMappings, setEmployeeTypeAppMappings] = useState<Record<string, string[]>>({});
   const [localEmployeeTypeAppMappings, setLocalEmployeeTypeAppMappings] = useState<Record<string, string[]>>({});
   const [selectedEmployeeType, setSelectedEmployeeType] = useState<string>('');
-  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [hasDepartmentUnsavedChanges, setHasDepartmentUnsavedChanges] = useState(false);
+  const [hasEmployeeTypeUnsavedChanges, setHasEmployeeTypeUnsavedChanges] = useState(false);
 
   // Fetch available apps
   const { data: appMappingsData = [] } = useQuery({
@@ -58,7 +59,7 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
       }
       return updated;
     });
-    setHasUnsavedChanges(true);
+    setHasDepartmentUnsavedChanges(true);
   };
 
   const handleUnlinkApp = (department: string, appName: string) => {
@@ -72,7 +73,7 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
       }
       return updated;
     });
-    setHasUnsavedChanges(true);
+    setHasDepartmentUnsavedChanges(true);
   };
 
   // Local functions for managing employee type-app mappings (no auto-save)
@@ -87,7 +88,7 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
       }
       return updated;
     });
-    setHasUnsavedChanges(true);
+    setHasEmployeeTypeUnsavedChanges(true);
   };
 
   const handleUnlinkEmployeeTypeApp = (employeeType: string, appName: string) => {
@@ -101,7 +102,7 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
       }
       return updated;
     });
-    setHasUnsavedChanges(true);
+    setHasEmployeeTypeUnsavedChanges(true);
   };
 
   // Save department app mappings to database
@@ -125,23 +126,31 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
         }
       }
       
-      // Add new mappings
+      // Add new mappings (with duplicate prevention)
       for (const department in newMappings) {
         for (const app of newMappings[department]) {
           if (!currentMappings[department]?.includes(app)) {
-            await fetch('/api/department-app-mappings', {
+            const response = await fetch('/api/department-app-mappings', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               credentials: 'include',
               body: JSON.stringify({ departmentName: department, appName: app })
             });
+            
+            if (!response.ok) {
+              const errorData = await response.json();
+              if (errorData.error !== "Mapping already exists") {
+                throw new Error(`Failed to add mapping: ${errorData.error}`);
+              }
+              // If mapping already exists, just continue (avoid throwing error)
+            }
           }
         }
       }
       
       // Update saved state and clear unsaved changes
       setDepartmentAppMappings(localDepartmentAppMappings);
-      setHasUnsavedChanges(false);
+      setHasDepartmentUnsavedChanges(false);
       queryClient.invalidateQueries({ queryKey: ["/api/department-app-mappings"] });
       
       return true;
@@ -172,23 +181,31 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
         }
       }
       
-      // Add new mappings
+      // Add new mappings (with duplicate prevention)
       for (const employeeType in newMappings) {
         for (const app of newMappings[employeeType]) {
           if (!currentMappings[employeeType]?.includes(app)) {
-            await fetch('/api/employee-type-app-mappings', {
+            const response = await fetch('/api/employee-type-app-mappings', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               credentials: 'include',
               body: JSON.stringify({ employeeTypeName: employeeType, appName: app })
             });
+            
+            if (!response.ok) {
+              const errorData = await response.json();
+              if (errorData.error !== "Mapping already exists") {
+                throw new Error(`Failed to add mapping: ${errorData.error}`);
+              }
+              // If mapping already exists, just continue (avoid throwing error)
+            }
           }
         }
       }
       
       // Update saved state and clear unsaved changes
       setEmployeeTypeAppMappings(localEmployeeTypeAppMappings);
-      setHasUnsavedChanges(false);
+      setHasEmployeeTypeUnsavedChanges(false);
       queryClient.invalidateQueries({ queryKey: ["/api/employee-type-app-mappings"] });
       
       return true;
@@ -201,19 +218,23 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
   // Register save function with parent when there are unsaved changes
   useEffect(() => {
     if (fieldType === 'department' && setDepartmentAppSaveFunction) {
-      if (hasUnsavedChanges) {
+      if (hasDepartmentUnsavedChanges) {
         setDepartmentAppSaveFunction(saveDepartmentAppMappings);
       } else {
         setDepartmentAppSaveFunction(null);
       }
-    } else if (fieldType === 'employeeType' && setEmployeeTypeAppSaveFunction) {
-      if (hasUnsavedChanges) {
+    }
+  }, [hasDepartmentUnsavedChanges, saveDepartmentAppMappings, fieldType, setDepartmentAppSaveFunction]);
+
+  useEffect(() => {
+    if (fieldType === 'employeeType' && setEmployeeTypeAppSaveFunction) {
+      if (hasEmployeeTypeUnsavedChanges) {
         setEmployeeTypeAppSaveFunction(saveEmployeeTypeAppMappings);
       } else {
         setEmployeeTypeAppSaveFunction(null);
       }
     }
-  }, [hasUnsavedChanges, saveDepartmentAppMappings, saveEmployeeTypeAppMappings, fieldType, setDepartmentAppSaveFunction, setEmployeeTypeAppSaveFunction]);
+  }, [hasEmployeeTypeUnsavedChanges, saveEmployeeTypeAppMappings, fieldType, setEmployeeTypeAppSaveFunction]);
 
   // Process department app mappings data - set both saved and local state
   useEffect(() => {
@@ -227,7 +248,7 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
       });
       setDepartmentAppMappings(mappingsByDepartment);
       setLocalDepartmentAppMappings(mappingsByDepartment);
-      setHasUnsavedChanges(false);
+      setHasDepartmentUnsavedChanges(false);
     }
   }, [departmentAppMappingsData]);
 
@@ -243,7 +264,7 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
       });
       setEmployeeTypeAppMappings(mappingsByEmployeeType);
       setLocalEmployeeTypeAppMappings(mappingsByEmployeeType);
-      setHasUnsavedChanges(false);
+      setHasEmployeeTypeUnsavedChanges(false);
     }
   }, [employeeTypeAppMappingsData]);
 
