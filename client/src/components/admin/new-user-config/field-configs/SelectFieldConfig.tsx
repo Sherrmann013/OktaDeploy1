@@ -94,36 +94,39 @@ export function SelectFieldConfig({ config, onUpdate, fieldType }: SelectFieldCo
           </div>
           
           {config.options.length > 0 ? (
-            <div className="flex items-start gap-2">
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={addOption}
-                className="h-6 w-6 p-0 mt-2 text-blue-500 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-900/20"
-              >
-                <Plus className="w-3 h-3" />
-              </Button>
-              <div className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md divide-y divide-gray-200 dark:divide-gray-600 max-w-64 flex-1">
-                {config.options.map((option, index) => (
-                  <div key={index} className="flex items-center px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700/50">
-                    <Input
-                      value={option}
-                      onChange={(e) => handleOptionChange(index, e.target.value)}
-                      className="flex-1 text-sm border-0 bg-transparent focus:ring-0 p-0"
-                      placeholder={fieldType === 'department' ? 'Department name' : 'Employee type'}
-                    />
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => removeOption(index)}
-                      className="h-6 w-6 p-0 ml-2 text-gray-400 hover:text-red-500"
-                    >
-                      <X className="w-3 h-3" />
-                    </Button>
-                  </div>
-                ))}
+            <div className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md divide-y divide-gray-200 dark:divide-gray-600 max-w-64">
+              {config.options.map((option, index) => (
+                <div key={index} className="flex items-center px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                  <Input
+                    value={option}
+                    onChange={(e) => handleOptionChange(index, e.target.value)}
+                    className="flex-1 text-sm border-0 bg-transparent focus:ring-0 p-0"
+                    placeholder={fieldType === 'department' ? 'Department name' : 'Employee type'}
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => removeOption(index)}
+                    className="h-6 w-6 p-0 ml-2 text-gray-400 hover:text-red-500"
+                  >
+                    <X className="w-3 h-3" />
+                  </Button>
+                </div>
+              ))}
+              <div className="flex items-center px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={addOption}
+                  className="h-6 w-6 p-0 mr-2 text-green-500 hover:text-green-700 hover:bg-green-50 dark:hover:bg-green-900/20"
+                >
+                  <Plus className="w-3 h-3" />
+                </Button>
+                <span className="text-sm text-gray-500 dark:text-gray-400">
+                  Add {fieldType === 'department' ? 'department' : 'employee type'}
+                </span>
               </div>
             </div>
           ) : (
