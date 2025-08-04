@@ -7,7 +7,8 @@ export type FieldKey =
   | 'manager' 
   | 'department' 
   | 'employeeType'
-  | 'apps';
+  | 'apps'
+  | 'groups';
 
 export interface PasswordComponent {
   type: 'words' | 'numbers' | 'symbols';
@@ -36,6 +37,11 @@ export interface BasicFieldConfig {
   required: boolean;
 }
 
+export interface AppsConfig {
+  required: boolean;
+  hideField: boolean;
+}
+
 export interface FieldSettings {
   firstName: BasicFieldConfig;
   lastName: BasicFieldConfig;
@@ -45,5 +51,6 @@ export interface FieldSettings {
   manager: BasicFieldConfig;
   department: SelectConfig;
   employeeType: SelectConfig;
-  apps: BasicFieldConfig;
+  apps: AppsConfig;
+  groups: SelectConfig;
 }

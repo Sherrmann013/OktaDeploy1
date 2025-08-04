@@ -5,6 +5,7 @@ import { BasicFieldConfig } from "./field-configs/BasicFieldConfig";
 import { EmailFieldConfig } from "./field-configs/EmailFieldConfig";
 import { PasswordFieldConfig } from "./field-configs/PasswordFieldConfig";
 import { SelectFieldConfig } from "./field-configs/SelectFieldConfig";
+import { AppsFieldConfig } from "./field-configs/AppsFieldConfig";
 import { FieldSettings, FieldKey } from "./types";
 
 interface FieldConfigPanelProps {
@@ -41,7 +42,8 @@ export function FieldConfigPanel({
       manager: 'Manager Options',
       department: 'Department Options',
       employeeType: 'Employee Type Options',
-      apps: 'Apps Options'
+      apps: 'Apps Options',
+      groups: 'Groups Options'
     };
     return titles[field];
   };
@@ -74,11 +76,19 @@ export function FieldConfigPanel({
         );
       case 'department':
       case 'employeeType':
+      case 'groups':
         return (
           <SelectFieldConfig
             config={currentConfig as any}
             onUpdate={(newConfig) => onUpdateField(selectedField, newConfig)}
             fieldType={selectedField}
+          />
+        );
+      case 'apps':
+        return (
+          <AppsFieldConfig
+            config={currentConfig as any}
+            onUpdate={(newConfig) => onUpdateField(selectedField, newConfig)}
           />
         );
       default:

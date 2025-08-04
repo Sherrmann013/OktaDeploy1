@@ -193,32 +193,45 @@ export function UserFormPreview({
         </div>
 
         {/* Groups & Apps Sections */}
-        <div className="grid grid-cols-2 gap-4">
+        <div className={`grid gap-4 ${!fieldSettings.apps?.hideField ? 'grid-cols-2' : 'grid-cols-1'}`}>
           <div className="space-y-2">
-            <Label className="text-sm font-medium">Groups</Label>
-            <div className="border border-gray-300 dark:border-gray-600 rounded p-3 bg-white dark:bg-gray-800 min-h-[120px]">
-              <div className="space-y-2">
-                {["R&D@mazetx.com", "Labusers@mazetx.com", "finfacit@mazetx.com", "HR@mazetx.com", "GXP@mazetx.com"].map((group, index) => (
-                  <div key={index} className="flex items-center space-x-2">
-                    <Checkbox id={`preview-group${index + 1}`} disabled />
-                    <Label htmlFor={`preview-group${index + 1}`} className="text-sm">{group}</Label>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="preview-apps" className="text-sm font-medium">
-              Apps {fieldSettings.apps?.required && <span className="text-red-500">*</span>}
+            <Label htmlFor="preview-groups" className="text-sm font-medium">
+              Groups {fieldSettings.groups?.required && <span className="text-red-500">*</span>}
             </Label>
-            <div className={getWrapperClassName('apps')} onClick={() => handleFieldClick('apps')}>
+            <div className={getWrapperClassName('groups')} onClick={() => handleFieldClick('groups')}>
               <div className="border border-gray-300 dark:border-gray-600 rounded p-3 bg-white dark:bg-gray-800 min-h-[120px] cursor-pointer">
-                <div className="text-center py-8">
-                  <span className="text-sm text-gray-500 dark:text-gray-400">Apps will be configured based on department</span>
+                <div className="space-y-2">
+                  {fieldSettings.groups?.options && fieldSettings.groups.options.length > 0 ? (
+                    fieldSettings.groups.options.map((group, index) => (
+                      <div key={index} className="flex items-center space-x-2">
+                        <Checkbox id={`preview-group${index + 1}`} disabled />
+                        <Label htmlFor={`preview-group${index + 1}`} className="text-sm">{group}</Label>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="text-center py-8">
+                      <span className="text-sm text-gray-500 dark:text-gray-400">No groups configured</span>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
           </div>
+          
+          {!fieldSettings.apps?.hideField && (
+            <div className="space-y-2">
+              <Label htmlFor="preview-apps" className="text-sm font-medium">
+                Apps {fieldSettings.apps?.required && <span className="text-red-500">*</span>}
+              </Label>
+              <div className={getWrapperClassName('apps')} onClick={() => handleFieldClick('apps')}>
+                <div className="border border-gray-300 dark:border-gray-600 rounded p-3 bg-white dark:bg-gray-800 min-h-[120px] cursor-pointer">
+                  <div className="text-center py-8">
+                    <span className="text-sm text-gray-500 dark:text-gray-400">Apps will be configured based on department</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Send activation email checkbox */}

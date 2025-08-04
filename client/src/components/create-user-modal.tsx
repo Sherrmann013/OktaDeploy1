@@ -100,7 +100,9 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
           fetch('/api/layout-settings/title', { credentials: 'include' }),
           fetch('/api/layout-settings/manager', { credentials: 'include' }),
           fetch('/api/layout-settings/department', { credentials: 'include' }),
-          fetch('/api/layout-settings/employeeType', { credentials: 'include' })
+          fetch('/api/layout-settings/employeeType', { credentials: 'include' }),
+          fetch('/api/layout-settings/apps', { credentials: 'include' }),
+          fetch('/api/layout-settings/groups', { credentials: 'include' })
         ];
         
 
@@ -123,11 +125,13 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
           title: { required: false },
           manager: { required: false },
           department: { required: false, useList: false, options: [] },
-          employeeType: { required: false, useList: true, options: [] }
+          employeeType: { required: false, useList: true, options: [] },
+          apps: { required: false, hideField: false },
+          groups: { required: false, useList: true, options: [] }
         };
         
         // Parse individual setting responses
-        const fieldNames = ['firstName', 'lastName', 'emailUsername', 'password', 'title', 'manager', 'department', 'employeeType'];
+        const fieldNames = ['firstName', 'lastName', 'emailUsername', 'password', 'title', 'manager', 'department', 'employeeType', 'apps', 'groups'];
         for (let i = 0; i < responses.length; i++) {
           const response = responses[i];
           const fieldName = fieldNames[i];
@@ -166,7 +170,9 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
           title: { required: false },
           manager: { required: false },
           department: { required: false, useList: false, options: [] },
-          employeeType: { required: false, useList: true, options: [] }
+          employeeType: { required: false, useList: true, options: [] },
+          apps: { required: false, hideField: false },
+          groups: { required: false, useList: true, options: [] }
         };
       }
     },
@@ -332,7 +338,7 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
     createUserMutation.mutate(data);
   };
 
-  const availableGroups = [
+  const availableGroups = fieldSettings?.groups?.options || [
     "R&D@mazetx.com",
     "Labusers@mazetx.com", 
     "finfacit@mazetx.com",
@@ -729,9 +735,9 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
             </div>
 
             {/* Groups and Apps */}
-            <div className="grid grid-cols-2 gap-4">
+            <div className={`grid gap-4 ${!fieldSettings?.apps?.hideField ? 'grid-cols-2' : 'grid-cols-1'}`}>
               <div className="space-y-2">
-                <Label>Groups</Label>
+                <Label>Groups {fieldSettings?.groups?.required ? '*' : ''}</Label>
                 <div className="space-y-2">
                   {availableGroups.map((group) => (
                     <div key={group} className="flex items-center space-x-2">
@@ -748,8 +754,9 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
                 </div>
               </div>
 
-              <div className="space-y-3">
-                <Label>Apps</Label>
+              {!fieldSettings?.apps?.hideField && (
+                <div className="space-y-3">
+                  <Label>Apps {fieldSettings?.apps?.required ? '*' : ''}</Label>
                 
                 {/* Add app dropdown at top */}
                 <Select
@@ -802,7 +809,8 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
                     </div>
                   )}
                 </div>
-              </div>
+                </div>
+              )}
             </div>
 
             {/* Send Activation Email */}
