@@ -185,7 +185,7 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
               method: 'DELETE',
               headers: { 'Content-Type': 'application/json' },
               credentials: 'include',
-              body: JSON.stringify({ employeeTypeName: employeeType, appName: app })
+              body: JSON.stringify({ employeeType: employeeType, appName: app })
             });
           }
         }
@@ -199,7 +199,7 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               credentials: 'include',
-              body: JSON.stringify({ employeeTypeName: employeeType, appName: app })
+              body: JSON.stringify({ employeeType: employeeType, appName: app })
             });
             
             if (!response.ok) {
@@ -269,10 +269,10 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
     if (Array.isArray(employeeTypeAppMappingsData) && employeeTypeAppMappingsData.length > 0) {
       const mappingsByEmployeeType: Record<string, string[]> = {};
       employeeTypeAppMappingsData.forEach((mapping: any) => {
-        if (!mappingsByEmployeeType[mapping.employeeTypeName]) {
-          mappingsByEmployeeType[mapping.employeeTypeName] = [];
+        if (!mappingsByEmployeeType[mapping.employeeType]) {
+          mappingsByEmployeeType[mapping.employeeType] = [];
         }
-        mappingsByEmployeeType[mapping.employeeTypeName].push(mapping.appName);
+        mappingsByEmployeeType[mapping.employeeType].push(mapping.appName);
       });
       setEmployeeTypeAppMappings(mappingsByEmployeeType);
       setLocalEmployeeTypeAppMappings(mappingsByEmployeeType);

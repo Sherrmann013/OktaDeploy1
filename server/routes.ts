@@ -3448,13 +3448,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/employee-type-app-mappings", isAuthenticated, requireAdmin, async (req, res) => {
     try {
-      const { employeeTypeName, appName } = insertEmployeeTypeAppMappingSchema.parse(req.body);
+      const { employeeType, appName } = insertEmployeeTypeAppMappingSchema.parse(req.body);
       
       // Check if mapping already exists
       const existing = await db.select()
         .from(employeeTypeAppMappings)
         .where(and(
-          eq(employeeTypeAppMappings.employeeTypeName, employeeTypeName),
+          eq(employeeTypeAppMappings.employeeType, employeeType),
           eq(employeeTypeAppMappings.appName, appName)
         ))
         .limit(1);
@@ -3464,7 +3464,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       const [result] = await db.insert(employeeTypeAppMappings)
-        .values({ employeeTypeName, appName })
+        .values({ employeeType, appName })
         .returning();
       
       await AuditLogger.log({
@@ -3472,8 +3472,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         action: 'CREATE',
         resourceType: 'EMPLOYEE_TYPE_APP_MAPPING',
         resourceId: result.id.toString(),
-        resourceName: `${employeeTypeName} - ${appName}`,
-        details: { employeeTypeName, appName }
+        resourceName: `${employeeType} - ${appName}`,
+        details: { employeeType, appName }
       });
       
       res.json(result);
@@ -3488,15 +3488,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.delete("/api/employee-type-app-mappings", isAuthenticated, requireAdmin, async (req, res) => {
     try {
-      const { employeeTypeName, appName } = z.object({
-        employeeTypeName: z.string(),
+      const { employeeType, appName } = z.object({
+        employeeType: z.string(),
         appName: z.string()
       }).parse(req.body);
       
       const existing = await db.select()
         .from(employeeTypeAppMappings)
         .where(and(
-          eq(employeeTypeAppMappings.employeeTypeName, employeeTypeName),
+          eq(employeeTypeAppMappings.employeeType, employeeType),
           eq(employeeTypeAppMappings.appName, appName)
         ))
         .limit(1);
@@ -3507,7 +3507,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       await db.delete(employeeTypeAppMappings)
         .where(and(
-          eq(employeeTypeAppMappings.employeeTypeName, employeeTypeName),
+          eq(employeeTypeAppMappings.employeeType, employeeType),
           eq(employeeTypeAppMappings.appName, appName)
         ));
       
@@ -3516,8 +3516,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         action: 'DELETE',
         resourceType: 'EMPLOYEE_TYPE_APP_MAPPING',
         resourceId: existing[0].id.toString(),
-        resourceName: `${employeeTypeName} - ${appName}`,
-        details: { employeeTypeName, appName },
+        resourceName: `${employeeType} - ${appName}`,
+        details: { employeeType, appName },
         oldValues: existing[0]
       });
       

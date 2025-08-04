@@ -31,6 +31,7 @@ export function useFieldSettings() {
   const [fieldSettings, setFieldSettings] = useState<FieldSettings>(DEFAULT_FIELD_SETTINGS);
   const [departmentAppSaveFunction, setDepartmentAppSaveFunction] = useState<(() => Promise<boolean>) | null>(null);
   const [employeeTypeAppSaveFunction, setEmployeeTypeAppSaveFunction] = useState<(() => Promise<boolean>) | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
 
   // Fetch all field settings
   const { data: fetchedSettings, isLoading, error } = useQuery({
@@ -128,6 +129,10 @@ export function useFieldSettings() {
   };
 
   const saveAllSettings = async () => {
+    if (isSaving) return;
+    
+    setIsSaving(true);
+    
     try {
       // Save field settings
       const savePromises = Object.entries(fieldSettings).map(([fieldKey, config]) => 
@@ -165,6 +170,8 @@ export function useFieldSettings() {
         variant: "destructive" 
       });
       return false;
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -176,6 +183,7 @@ export function useFieldSettings() {
     setDepartmentAppSaveFunction,
     setEmployeeTypeAppSaveFunction,
     isLoading,
+    isSaving,
     error
   };
 }

@@ -23,7 +23,8 @@ export function NewUserConfigSection({
     saveAllSettings, 
     setDepartmentAppSaveFunction, 
     setEmployeeTypeAppSaveFunction,
-    isLoading 
+    isLoading,
+    isSaving 
   } = useFieldSettings();
 
   if (isLoading || !fieldSettings) {
@@ -60,9 +61,10 @@ export function NewUserConfigSection({
       <div className="mt-6 flex justify-end">
         <Button 
           onClick={saveAllSettings}
-          className="bg-blue-600 hover:bg-blue-700 text-white"
+          disabled={isSaving}
+          className="bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-50"
         >
-          Save Changes
+          {isSaving ? "Saving Changes..." : "Save Changes"}
         </Button>
       </div>
     </div>
