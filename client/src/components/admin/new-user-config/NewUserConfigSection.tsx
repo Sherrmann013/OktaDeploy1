@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Button } from "@/components/ui/button";
 import { UserFormPreview } from "./UserFormPreview";
 import { FieldConfigPanel } from "./FieldConfigPanel";
 import { useFieldSettings } from "./hooks/useFieldSettings";
@@ -16,7 +17,7 @@ export function NewUserConfigSection({
   appMappingsData 
 }: NewUserConfigSectionProps) {
   const [selectedField, setSelectedField] = useState<FieldKey | null>(null);
-  const { fieldSettings, updateFieldSetting, isLoading } = useFieldSettings();
+  const { fieldSettings, updateFieldSetting, saveAllSettings, isLoading } = useFieldSettings();
 
   if (isLoading || !fieldSettings) {
     return (
@@ -45,6 +46,15 @@ export function NewUserConfigSection({
           fieldSettings={fieldSettings}
           onUpdateField={updateFieldSetting}
         />
+      </div>
+      
+      <div className="mt-6 flex justify-end">
+        <Button 
+          onClick={saveAllSettings}
+          className="bg-blue-600 hover:bg-blue-700 text-white"
+        >
+          Save Changes
+        </Button>
       </div>
     </div>
   );

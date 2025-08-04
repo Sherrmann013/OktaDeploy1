@@ -4,7 +4,11 @@ import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Minus } from "lucide-react";
+import { Plus, Minus, GripVertical } from "lucide-react";
+import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
+import { arrayMove, SortableContext, sortableKeyboardCoordinates, horizontalListSortingStrategy } from '@dnd-kit/sortable';
+import { useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import { PasswordConfig, PasswordComponent } from "../types";
 
 interface PasswordFieldConfigProps {
@@ -12,7 +16,91 @@ interface PasswordFieldConfigProps {
   onUpdate: (newConfig: PasswordConfig) => void;
 }
 
+// Sortable Component for drag/drop
+function SortablePasswordComponent({ 
+  component, 
+  index, 
+  onCountChange, 
+  onRemove, 
+  canRemove,
+  getComponentLabel 
+}: {
+  component: PasswordComponent;
+  index: number;
+  onCountChange: (index: number, count: number) => void;
+  onRemove: (index: number) => void;
+  canRemove: boolean;
+  getComponentLabel: (type: PasswordComponent["type"]) => string;
+}) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: `component-${index}` });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className="flex items-center space-x-2 bg-gray-500 dark:bg-gray-600 rounded-md px-3 py-2"
+    >
+      <div
+        {...attributes}
+        {...listeners}
+        className="cursor-grab active:cursor-grabbing text-gray-300 hover:text-white"
+      >
+        <GripVertical className="w-4 h-4" />
+      </div>
+      <Select
+        value={component.count.toString()}
+        onValueChange={(value) => onCountChange(index, parseInt(value))}
+      >
+        <SelectTrigger className="w-12 h-6 text-xs bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600">
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600">
+          <SelectItem value="1">1</SelectItem>
+          <SelectItem value="2">2</SelectItem>
+          <SelectItem value="3">3</SelectItem>
+          <SelectItem value="4">4</SelectItem>
+        </SelectContent>
+      </Select>
+      <span className="text-sm text-gray-200">
+        {getComponentLabel(component.type)}
+      </span>
+      
+      {canRemove && (
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={() => onRemove(index)}
+          className="h-5 w-5 p-0 text-red-400 hover:text-red-300 hover:bg-red-500/20"
+        >
+          ×
+        </Button>
+      )}
+    </div>
+  );
+}
+
 export function PasswordFieldConfig({ config, onUpdate }: PasswordFieldConfigProps) {
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
   const handleShowGenerateButtonChange = (checked: boolean) => {
     onUpdate({
       ...config,
@@ -31,12 +119,27 @@ export function PasswordFieldConfig({ config, onUpdate }: PasswordFieldConfigPro
     const newComponents = [...config.components];
     newComponents[index] = {
       ...newComponents[index],
-      count: Math.max(1, Math.min(10, newCount))
+      count: Math.max(1, Math.min(4, newCount))
     };
     onUpdate({
       ...config,
       components: newComponents
     });
+  };
+
+  const handleDragEnd = (event: any) => {
+    const { active, over } = event;
+
+    if (active.id !== over.id) {
+      const oldIndex = parseInt(active.id.split('-')[1]);
+      const newIndex = parseInt(over.id.split('-')[1]);
+      
+      const newComponents = arrayMove(config.components, oldIndex, newIndex);
+      onUpdate({
+        ...config,
+        components: newComponents
+      });
+    }
   };
 
   const addComponent = (type: PasswordComponent['type']) => {
@@ -126,48 +229,36 @@ export function PasswordFieldConfig({ config, onUpdate }: PasswordFieldConfigPro
               </Button>
             </div>
             
-            {/* Components Container with + signs between */}
+            {/* Drag/Drop Components Container */}
             <div className="p-4 bg-gray-600 dark:bg-gray-700 rounded-lg border border-gray-500 dark:border-gray-600">
-              <div className="flex flex-wrap items-center gap-3">
-                {config.components.map((component, index) => (
-                  <React.Fragment key={index}>
-                    {index > 0 && (
-                      <span className="text-white text-sm font-medium">+</span>
-                    )}
-                    <div className="flex items-center space-x-2 bg-gray-500 dark:bg-gray-600 rounded-md px-3 py-2">
-                      <Select
-                        value={component.count.toString()}
-                        onValueChange={(value) => handleComponentCountChange(index, parseInt(value))}
-                      >
-                        <SelectTrigger className="w-12 h-6 text-xs bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600">
-                          <SelectItem value="1">1</SelectItem>
-                          <SelectItem value="2">2</SelectItem>
-                          <SelectItem value="3">3</SelectItem>
-                          <SelectItem value="4">4</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <span className="text-sm text-gray-200">
-                        {getComponentLabel(component.type)}
-                      </span>
-                      
-                      {config.components.length > 1 && (
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => removeComponent(index)}
-                          className="h-5 w-5 p-0 text-red-400 hover:text-red-300 hover:bg-red-500/20"
-                        >
-                          ×
-                        </Button>
-                      )}
-                    </div>
-                  </React.Fragment>
-                ))}
-              </div>
+              <DndContext 
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                onDragEnd={handleDragEnd}
+              >
+                <SortableContext 
+                  items={config.components.map((_, index) => `component-${index}`)}
+                  strategy={horizontalListSortingStrategy}
+                >
+                  <div className="flex flex-wrap items-center gap-3">
+                    {config.components.map((component, index) => (
+                      <React.Fragment key={`component-${index}`}>
+                        {index > 0 && (
+                          <span className="text-white text-sm font-medium">+</span>
+                        )}
+                        <SortablePasswordComponent
+                          component={component}
+                          index={index}
+                          onCountChange={handleComponentCountChange}
+                          onRemove={removeComponent}
+                          canRemove={config.components.length > 1}
+                          getComponentLabel={getComponentLabel}
+                        />
+                      </React.Fragment>
+                    ))}
+                  </div>
+                </SortableContext>
+              </DndContext>
             </div>
           </div>
         </>

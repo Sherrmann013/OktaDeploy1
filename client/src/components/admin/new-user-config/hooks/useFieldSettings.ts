@@ -76,15 +76,16 @@ export function useFieldSettings() {
     }
   }, [fetchedSettings]);
 
-  const updateFieldSetting = async (fieldKey: FieldKey, newConfig: any) => {
+  const updateFieldSetting = (fieldKey: FieldKey, newConfig: any) => {
     const newSettings = {
       ...fieldSettings,
       [fieldKey]: newConfig
     };
     
     setFieldSettings(newSettings);
+  };
 
-    // Auto-save to backend
+  const saveFieldSetting = async (fieldKey: FieldKey, config: any) => {
     try {
       const response = await fetch('/api/layout-settings', {
         method: 'POST',
@@ -92,7 +93,7 @@ export function useFieldSettings() {
         credentials: 'include',
         body: JSON.stringify({
           settingKey: fieldKey,
-          settingValue: JSON.stringify(newConfig),
+          settingValue: JSON.stringify(config),
           settingType: 'user_config' as const,
           metadata: {}
         })
@@ -103,25 +104,54 @@ export function useFieldSettings() {
           title: "Success", 
           description: `${fieldKey} setting saved` 
         });
+        return true;
       } else {
         throw new Error('Save failed');
       }
     } catch (error) {
-      console.error('Auto-save error:', error);
+      console.error('Save error:', error);
       toast({ 
         title: "Error", 
-        description: "Failed to save setting",
-        variant: "destructive"
+        description: "Failed to save settings", 
+        variant: "destructive" 
       });
+      return false;
+    }
+  };
+
+  const saveAllSettings = async () => {
+    try {
+      const savePromises = Object.entries(fieldSettings).map(([fieldKey, config]) => 
+        saveFieldSetting(fieldKey as FieldKey, config)
+      );
       
-      // Revert on error
-      setFieldSettings(fieldSettings);
+      const results = await Promise.all(savePromises);
+      const allSuccessful = results.every(result => result === true);
+      
+      if (allSuccessful) {
+        toast({ 
+          title: "Success", 
+          description: "All settings saved successfully" 
+        });
+      }
+      
+      return allSuccessful;
+    } catch (error) {
+      console.error('Save all error:', error);
+      toast({ 
+        title: "Error", 
+        description: "Failed to save some settings", 
+        variant: "destructive" 
+      });
+      return false;
     }
   };
 
   return {
     fieldSettings,
     updateFieldSetting,
+    saveFieldSetting,
+    saveAllSettings,
     isLoading,
     error
   };
