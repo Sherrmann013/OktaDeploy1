@@ -388,42 +388,45 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
         switch (component.type) {
           case 'words':
             try {
-              // Generate words with exact length requirement
+              // Generate words with exact length using random-words library
               const words = generate({
                 min: minWordLength,
                 max: minWordLength,
-                exactly: 10
+                exactly: 50 // Generate many words to find ones with exact length
               }) as string[];
               
-              const validWords = words.filter(word => word.length === minWordLength);
-              let selectedWord;
+              // Filter to get words of exact length
+              const exactLengthWords = words.filter(word => word.length === minWordLength);
               
-              if (validWords.length > 0) {
-                selectedWord = validWords[Math.floor(Math.random() * validWords.length)];
+              if (exactLengthWords.length > 0) {
+                const selectedWord = exactLengthWords[Math.floor(Math.random() * exactLengthWords.length)];
+                passwordParts.push(selectedWord.charAt(0).toUpperCase() + selectedWord.slice(1).toLowerCase());
               } else {
-                // Fallback: create word of exact length
-                const fallbackWords = ['word', 'text', 'pass', 'code', 'auth', 'blue', 'star', 'moon'];
-                let baseWord = fallbackWords[Math.floor(Math.random() * fallbackWords.length)];
+                // If no exact length words found, try generating with broader range and pick best fit
+                const broaderWords = generate({
+                  min: Math.max(3, minWordLength - 1),
+                  max: minWordLength + 1,
+                  exactly: 100
+                }) as string[];
                 
-                // Pad or truncate to exact length
-                if (baseWord.length < minWordLength) {
-                  baseWord = baseWord + 'x'.repeat(minWordLength - baseWord.length);
-                } else if (baseWord.length > minWordLength) {
-                  baseWord = baseWord.substring(0, minWordLength);
+                const bestFit = broaderWords.find(word => word.length === minWordLength);
+                if (bestFit) {
+                  passwordParts.push(bestFit.charAt(0).toUpperCase() + bestFit.slice(1).toLowerCase());
+                } else {
+                  // Last resort: truncate a longer word to exact length
+                  const longerWords = broaderWords.filter(word => word.length > minWordLength);
+                  if (longerWords.length > 0) {
+                    const selectedWord = longerWords[Math.floor(Math.random() * longerWords.length)]
+                      .substring(0, minWordLength);
+                    passwordParts.push(selectedWord.charAt(0).toUpperCase() + selectedWord.slice(1).toLowerCase());
+                  } else {
+                    passwordParts.push('Word'.substring(0, minWordLength));
+                  }
                 }
-                selectedWord = baseWord;
               }
-              
-              passwordParts.push(selectedWord.charAt(0).toUpperCase() + selectedWord.slice(1).toLowerCase());
             } catch (error) {
-              // Fallback word generation
-              let fallbackWord = 'Word';
-              if (fallbackWord.length < minWordLength) {
-                fallbackWord = fallbackWord + 'x'.repeat(minWordLength - fallbackWord.length);
-              } else if (fallbackWord.length > minWordLength) {
-                fallbackWord = fallbackWord.substring(0, minWordLength);
-              }
-              passwordParts.push(fallbackWord);
+              console.error('Word generation failed:', error);
+              passwordParts.push('Word'.substring(0, minWordLength));
             }
             break;
           case 'numbers':
