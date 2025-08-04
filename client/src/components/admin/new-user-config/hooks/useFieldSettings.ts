@@ -29,6 +29,7 @@ const DEFAULT_FIELD_SETTINGS: FieldSettings = {
 export function useFieldSettings() {
   const { toast } = useToast();
   const [fieldSettings, setFieldSettings] = useState<FieldSettings>(DEFAULT_FIELD_SETTINGS);
+  const [unsavedChanges, setUnsavedChanges] = useState<Partial<FieldSettings>>({});
   const [departmentAppSaveFunction, setDepartmentAppSaveFunction] = useState<(() => Promise<boolean>) | null>(null);
   const [employeeTypeAppSaveFunction, setEmployeeTypeAppSaveFunction] = useState<(() => Promise<boolean>) | null>(null);
   const [departmentGroupSaveFunction, setDepartmentGroupSaveFunction] = useState<(() => Promise<boolean>) | null>(null);
@@ -88,12 +89,91 @@ export function useFieldSettings() {
   }, [fetchedSettings]);
 
   const updateFieldSetting = (fieldKey: FieldKey, newConfig: any) => {
-    const newSettings = {
-      ...fieldSettings,
+    // Update only in unsaved changes, not in the main settings
+    setUnsavedChanges(prev => ({
+      ...prev,
       [fieldKey]: newConfig
-    };
+    }));
+  };
+
+  // Get the current state for a field (including unsaved changes)
+  const getCurrentFieldConfig = (fieldKey: FieldKey) => {
+    return unsavedChanges[fieldKey] || fieldSettings[fieldKey];
+  };
+
+  // Discard unsaved changes for a field
+  const discardFieldChanges = (fieldKey: FieldKey) => {
+    setUnsavedChanges(prev => {
+      const newChanges = { ...prev };
+      delete newChanges[fieldKey];
+      return newChanges;
+    });
+  };
+
+  // Save only the current field's changes
+  const saveCurrentFieldChanges = async (fieldKey: FieldKey) => {
+    if (!unsavedChanges[fieldKey]) {
+      toast({ 
+        title: "No Changes", 
+        description: "No unsaved changes to save for this field" 
+      });
+      return true;
+    }
+
+    setIsSaving(true);
     
-    setFieldSettings(newSettings);
+    try {
+      const success = await saveFieldSetting(fieldKey, unsavedChanges[fieldKey]);
+      if (success) {
+        // Move unsaved changes to saved settings
+        setFieldSettings(prev => ({
+          ...prev,
+          [fieldKey]: unsavedChanges[fieldKey]
+        }));
+        
+        // Clear unsaved changes for this field
+        discardFieldChanges(fieldKey);
+        
+        toast({ 
+          title: "Success", 
+          description: `${getFieldDisplayName(fieldKey)} settings saved` 
+        });
+      }
+      return success;
+    } catch (error) {
+      console.error('Save error:', error);
+      toast({ 
+        title: "Error", 
+        description: "Failed to save settings", 
+        variant: "destructive" 
+      });
+      return false;
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  // Helper function to get display name for fields
+  const getFieldDisplayName = (fieldKey: FieldKey): string => {
+    const displayNames: Record<FieldKey, string> = {
+      firstName: 'First Name',
+      lastName: 'Last Name',
+      emailUsername: 'Email Username',
+      password: 'Password',
+      title: 'Job Title',
+      manager: 'Manager',
+      department: 'Department',
+      employeeType: 'Employee Type',
+      apps: 'Apps',
+      groups: 'Groups',
+      sendActivationEmail: 'Send Activation Email'
+    };
+    return displayNames[fieldKey];
+  };
+
+  // Check if a field has unsaved changes
+  const hasUnsavedChanges = (fieldKey: FieldKey) => {
+    return fieldKey in unsavedChanges;
   };
 
   const saveFieldSetting = async (fieldKey: FieldKey, config: any) => {
@@ -182,8 +262,12 @@ export function useFieldSettings() {
   };
 
   return {
-    fieldSettings,
+    fieldSettings: fieldSettings,
+    getCurrentFieldConfig,
     updateFieldSetting,
+    saveCurrentFieldChanges,
+    discardFieldChanges,
+    hasUnsavedChanges,
     saveFieldSetting,
     saveAllSettings,
     setDepartmentAppSaveFunction,

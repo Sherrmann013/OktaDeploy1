@@ -18,8 +18,12 @@ export function NewUserConfigSection({
 }: NewUserConfigSectionProps) {
   const [selectedField, setSelectedField] = useState<FieldKey | null>(null);
   const { 
-    fieldSettings, 
-    updateFieldSetting, 
+    fieldSettings,
+    getCurrentFieldConfig,
+    updateFieldSetting,
+    saveCurrentFieldChanges,
+    discardFieldChanges,
+    hasUnsavedChanges,
     saveAllSettings, 
     setDepartmentAppSaveFunction, 
     setEmployeeTypeAppSaveFunction,
@@ -28,6 +32,15 @@ export function NewUserConfigSection({
     isLoading,
     isSaving 
   } = useFieldSettings();
+
+  // Handle field selection and discard unsaved changes when switching
+  const handleFieldSelect = (fieldKey: FieldKey | null) => {
+    // If we're switching away from a field with unsaved changes, discard them
+    if (selectedField && selectedField !== fieldKey && hasUnsavedChanges(selectedField)) {
+      discardFieldChanges(selectedField);
+    }
+    setSelectedField(fieldKey);
+  };
 
   if (isLoading || !fieldSettings) {
     return (
@@ -44,8 +57,9 @@ export function NewUserConfigSection({
       <div className="flex gap-6">
         <UserFormPreview
           fieldSettings={fieldSettings}
+          getCurrentFieldConfig={getCurrentFieldConfig}
           selectedField={selectedField}
-          onFieldSelect={setSelectedField}
+          onFieldSelect={handleFieldSelect}
           selectedApps={selectedApps}
           setSelectedApps={setSelectedApps}
           appMappingsData={appMappingsData}
@@ -55,7 +69,10 @@ export function NewUserConfigSection({
           <FieldConfigPanel
             selectedField={selectedField}
             fieldSettings={fieldSettings}
+            getCurrentFieldConfig={getCurrentFieldConfig}
             onUpdateField={updateFieldSetting}
+            saveCurrentFieldChanges={saveCurrentFieldChanges}
+            hasUnsavedChanges={hasUnsavedChanges}
             setDepartmentAppSaveFunction={setDepartmentAppSaveFunction}
             setEmployeeTypeAppSaveFunction={setEmployeeTypeAppSaveFunction}
             setDepartmentGroupSaveFunction={setDepartmentGroupSaveFunction}

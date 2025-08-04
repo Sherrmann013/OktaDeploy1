@@ -1,6 +1,7 @@
 import React from "react";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Button } from "@/components/ui/button";
 import { BasicFieldConfig } from "./field-configs/BasicFieldConfig";
 import { EmailFieldConfig } from "./field-configs/EmailFieldConfig";
 import { PasswordFieldConfig } from "./field-configs/PasswordFieldConfig";
@@ -13,7 +14,10 @@ import { FieldSettings, FieldKey } from "./types";
 interface FieldConfigPanelProps {
   selectedField: FieldKey | null;
   fieldSettings: FieldSettings;
+  getCurrentFieldConfig: (fieldKey: FieldKey) => any;
   onUpdateField: (fieldKey: FieldKey, newConfig: any) => void;
+  saveCurrentFieldChanges: (fieldKey: FieldKey) => Promise<boolean>;
+  hasUnsavedChanges: (fieldKey: FieldKey) => boolean;
   setDepartmentAppSaveFunction?: (fn: (() => Promise<boolean>) | null) => void;
   setEmployeeTypeAppSaveFunction?: (fn: (() => Promise<boolean>) | null) => void;
   setDepartmentGroupSaveFunction?: (fn: (() => Promise<boolean>) | null) => void;
@@ -23,7 +27,10 @@ interface FieldConfigPanelProps {
 export function FieldConfigPanel({
   selectedField,
   fieldSettings,
+  getCurrentFieldConfig,
   onUpdateField,
+  saveCurrentFieldChanges,
+  hasUnsavedChanges,
   setDepartmentAppSaveFunction,
   setEmployeeTypeAppSaveFunction,
   setDepartmentGroupSaveFunction,
@@ -60,7 +67,7 @@ export function FieldConfigPanel({
   };
 
   const handleRequiredChange = (checked: boolean) => {
-    const currentConfig = fieldSettings[selectedField];
+    const currentConfig = getCurrentFieldConfig(selectedField);
     onUpdateField(selectedField, {
       ...currentConfig,
       required: checked
@@ -68,7 +75,7 @@ export function FieldConfigPanel({
   };
 
   const renderFieldSpecificConfig = () => {
-    const currentConfig = fieldSettings[selectedField];
+    const currentConfig = getCurrentFieldConfig(selectedField);
 
     switch (selectedField) {
       case 'emailUsername':
@@ -143,7 +150,7 @@ export function FieldConfigPanel({
             <div className="flex items-center space-x-2">
               <Checkbox 
                 id={`${selectedField}-required`}
-                checked={fieldSettings[selectedField]?.required}
+                checked={getCurrentFieldConfig(selectedField)?.required}
                 onCheckedChange={handleRequiredChange}
               />
               <Label htmlFor={`${selectedField}-required`} className="text-sm">
@@ -154,6 +161,27 @@ export function FieldConfigPanel({
 
           {/* Field-specific configuration */}
           {renderFieldSpecificConfig()}
+          
+          {/* Save button for current field */}
+          <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
+            <div className="flex justify-between items-center">
+              <div className="text-xs text-gray-500 dark:text-gray-400">
+                {hasUnsavedChanges(selectedField) ? (
+                  <span className="text-orange-600 dark:text-orange-400">● Unsaved changes</span>
+                ) : (
+                  <span className="text-green-600 dark:text-green-400">✓ All changes saved</span>
+                )}
+              </div>
+              <Button 
+                onClick={() => saveCurrentFieldChanges(selectedField)}
+                disabled={!hasUnsavedChanges(selectedField)}
+                size="sm"
+                className="bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-50"
+              >
+                Save {getFieldTitle(selectedField).replace(' Options', '')}
+              </Button>
+            </div>
+          </div>
         </div>
       </div>
     </div>

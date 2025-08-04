@@ -9,6 +9,7 @@ import { FieldSettings, FieldKey } from "./types";
 
 interface UserFormPreviewProps {
   fieldSettings: FieldSettings;
+  getCurrentFieldConfig: (fieldKey: FieldKey) => any;
   selectedField: FieldKey | null;
   onFieldSelect: (field: FieldKey | null) => void;
   selectedApps: string[];
@@ -18,6 +19,7 @@ interface UserFormPreviewProps {
 
 export function UserFormPreview({
   fieldSettings,
+  getCurrentFieldConfig,
   selectedField,
   onFieldSelect,
   selectedApps,
