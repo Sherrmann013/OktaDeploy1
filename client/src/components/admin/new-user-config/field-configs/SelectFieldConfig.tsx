@@ -17,9 +17,10 @@ interface SelectFieldConfigProps {
   setEmployeeTypeAppSaveFunction?: (fn: (() => Promise<boolean>) | null) => void;
   setDepartmentGroupSaveFunction?: (fn: (() => Promise<boolean>) | null) => void;
   setEmployeeTypeGroupSaveFunction?: (fn: (() => Promise<boolean>) | null) => void;
+  groupsFieldConfig?: any; // Groups field configuration to access group options
 }
 
-export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAppSaveFunction, setEmployeeTypeAppSaveFunction, setDepartmentGroupSaveFunction, setEmployeeTypeGroupSaveFunction }: SelectFieldConfigProps) {
+export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAppSaveFunction, setEmployeeTypeAppSaveFunction, setDepartmentGroupSaveFunction, setEmployeeTypeGroupSaveFunction, groupsFieldConfig }: SelectFieldConfigProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [departmentAppMappings, setDepartmentAppMappings] = useState<Record<string, string[]>>({});
@@ -509,8 +510,8 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
       .filter((app: any) => app.status === 'active')
       .map((app: any) => app.appName) : [];
 
-  // Get available groups from config.options as the groups list
-  const availableGroups = config.options || [];
+  // Get available groups from the Groups field configuration, not from current field config
+  const availableGroups = groupsFieldConfig?.options || [];
   const handleUseListChange = (checked: boolean) => {
     onUpdate({
       ...config,

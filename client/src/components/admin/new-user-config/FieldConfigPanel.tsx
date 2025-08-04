@@ -96,6 +96,7 @@ export function FieldConfigPanel({
             setEmployeeTypeAppSaveFunction={setEmployeeTypeAppSaveFunction}
             setDepartmentGroupSaveFunction={setDepartmentGroupSaveFunction}
             setEmployeeTypeGroupSaveFunction={setEmployeeTypeGroupSaveFunction}
+            groupsFieldConfig={fieldSettings.groups}
           />
         );
       case 'groups':
