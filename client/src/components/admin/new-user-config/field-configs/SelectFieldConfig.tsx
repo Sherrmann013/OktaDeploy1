@@ -303,18 +303,6 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
 
           {config.linkApps && config.useList && config.options.length > 0 && (
             <div className="space-y-4">
-              {/* Unsaved changes indicator */}
-              {hasUnsavedChanges && (
-                <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded-lg p-3">
-                  <div className="flex items-center gap-2 text-yellow-800 dark:text-yellow-200">
-                    <div className="w-2 h-2 bg-yellow-500 rounded-full animate-pulse"></div>
-                    <span className="text-sm font-medium">
-                      You have unsaved department-app changes. Click "Save Changes" to persist them.
-                    </span>
-                  </div>
-                </div>
-              )}
-              
               {/* Two-column layout: Department Selection + App Selection */}
               <div className="grid grid-cols-2 gap-4">
                 {/* Left Column: Department Selection */}
