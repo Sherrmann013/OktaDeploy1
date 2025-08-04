@@ -13,13 +13,16 @@ interface SelectFieldConfigProps {
   config: SelectConfig;
   onUpdate: (newConfig: SelectConfig) => void;
   fieldType: FieldKey;
+  setDepartmentAppSaveFunction?: (fn: (() => Promise<boolean>) | null) => void;
 }
 
-export function SelectFieldConfig({ config, onUpdate, fieldType }: SelectFieldConfigProps) {
+export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAppSaveFunction }: SelectFieldConfigProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [departmentAppMappings, setDepartmentAppMappings] = useState<Record<string, string[]>>({});
+  const [localDepartmentAppMappings, setLocalDepartmentAppMappings] = useState<Record<string, string[]>>({});
   const [selectedDepartment, setSelectedDepartment] = useState<string>('');
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
   // Fetch available apps
   const { data: appMappingsData = [] } = useQuery({
@@ -33,59 +36,94 @@ export function SelectFieldConfig({ config, onUpdate, fieldType }: SelectFieldCo
     enabled: fieldType === 'department' && config.linkApps,
   });
 
-  // Create department app mapping mutation
-  const createMappingMutation = useMutation({
-    mutationFn: async (data: { departmentName: string; appName: string }) => {
-      const response = await fetch('/api/department-app-mappings', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify(data)
-      });
+  // Local functions for managing department-app mappings (no auto-save)
+  const handleLinkApp = (department: string, appName: string) => {
+    setLocalDepartmentAppMappings(prev => {
+      const updated = { ...prev };
+      if (!updated[department]) {
+        updated[department] = [];
+      }
+      if (!updated[department].includes(appName)) {
+        updated[department] = [...updated[department], appName];
+      }
+      return updated;
+    });
+    setHasUnsavedChanges(true);
+  };
+
+  const handleUnlinkApp = (department: string, appName: string) => {
+    setLocalDepartmentAppMappings(prev => {
+      const updated = { ...prev };
+      if (updated[department]) {
+        updated[department] = updated[department].filter(app => app !== appName);
+        if (updated[department].length === 0) {
+          delete updated[department];
+        }
+      }
+      return updated;
+    });
+    setHasUnsavedChanges(true);
+  };
+
+  // Save department app mappings to database
+  const saveDepartmentAppMappings = async () => {
+    try {
+      // Calculate changes needed
+      const currentMappings = departmentAppMappings;
+      const newMappings = localDepartmentAppMappings;
       
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || `HTTP ${response.status}: ${response.statusText}`);
+      // Remove mappings that no longer exist
+      for (const department in currentMappings) {
+        for (const app of currentMappings[department]) {
+          if (!newMappings[department]?.includes(app)) {
+            await fetch('/api/department-app-mappings', {
+              method: 'DELETE',
+              headers: { 'Content-Type': 'application/json' },
+              credentials: 'include',
+              body: JSON.stringify({ departmentName: department, appName: app })
+            });
+          }
+        }
       }
       
-      return response.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/department-app-mappings"] });
-      toast({ title: "App linked to department successfully" });
-    },
-    onError: (error: Error) => {
-      toast({ title: "Failed to link app", description: error.message, variant: "destructive" });
-    }
-  });
-
-  // Delete department app mapping mutation
-  const deleteMappingMutation = useMutation({
-    mutationFn: async (data: { departmentName: string; appName: string }) => {
-      const response = await fetch('/api/department-app-mappings', {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify(data)
-      });
-      
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || `HTTP ${response.status}: ${response.statusText}`);
+      // Add new mappings
+      for (const department in newMappings) {
+        for (const app of newMappings[department]) {
+          if (!currentMappings[department]?.includes(app)) {
+            await fetch('/api/department-app-mappings', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              credentials: 'include',
+              body: JSON.stringify({ departmentName: department, appName: app })
+            });
+          }
+        }
       }
       
-      return response.status === 204 ? null : response.json();
-    },
-    onSuccess: () => {
+      // Update saved state and clear unsaved changes
+      setDepartmentAppMappings(localDepartmentAppMappings);
+      setHasUnsavedChanges(false);
       queryClient.invalidateQueries({ queryKey: ["/api/department-app-mappings"] });
-      toast({ title: "App unlinked from department successfully" });
-    },
-    onError: (error: Error) => {
-      toast({ title: "Failed to unlink app", description: error.message, variant: "destructive" });
+      
+      return true;
+    } catch (error) {
+      console.error('Failed to save department app mappings:', error);
+      return false;
     }
-  });
+  };
 
-  // Process department app mappings data
+  // Register save function with parent when there are unsaved changes
+  useEffect(() => {
+    if (fieldType === 'department' && setDepartmentAppSaveFunction) {
+      if (hasUnsavedChanges) {
+        setDepartmentAppSaveFunction(saveDepartmentAppMappings);
+      } else {
+        setDepartmentAppSaveFunction(null);
+      }
+    }
+  }, [hasUnsavedChanges, saveDepartmentAppMappings, fieldType, setDepartmentAppSaveFunction]);
+
+  // Process department app mappings data - set both saved and local state
   useEffect(() => {
     if (Array.isArray(departmentAppMappingsData) && departmentAppMappingsData.length > 0) {
       const mappingsByDepartment: Record<string, string[]> = {};
@@ -96,6 +134,8 @@ export function SelectFieldConfig({ config, onUpdate, fieldType }: SelectFieldCo
         mappingsByDepartment[mapping.departmentName].push(mapping.appName);
       });
       setDepartmentAppMappings(mappingsByDepartment);
+      setLocalDepartmentAppMappings(mappingsByDepartment);
+      setHasUnsavedChanges(false);
     }
   }, [departmentAppMappingsData]);
 
@@ -118,13 +158,7 @@ export function SelectFieldConfig({ config, onUpdate, fieldType }: SelectFieldCo
     });
   };
 
-  const handleLinkApp = (departmentName: string, appName: string) => {
-    createMappingMutation.mutate({ departmentName, appName });
-  };
 
-  const handleUnlinkApp = (departmentName: string, appName: string) => {
-    deleteMappingMutation.mutate({ departmentName, appName });
-  };
 
   const handleOptionChange = (index: number, newValue: string) => {
     const newOptions = [...config.options];
@@ -269,6 +303,18 @@ export function SelectFieldConfig({ config, onUpdate, fieldType }: SelectFieldCo
 
           {config.linkApps && config.useList && config.options.length > 0 && (
             <div className="space-y-4">
+              {/* Unsaved changes indicator */}
+              {hasUnsavedChanges && (
+                <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded-lg p-3">
+                  <div className="flex items-center gap-2 text-yellow-800 dark:text-yellow-200">
+                    <div className="w-2 h-2 bg-yellow-500 rounded-full animate-pulse"></div>
+                    <span className="text-sm font-medium">
+                      You have unsaved department-app changes. Click "Save Changes" to persist them.
+                    </span>
+                  </div>
+                </div>
+              )}
+              
               {/* Two-column layout: Department Selection + App Selection */}
               <div className="grid grid-cols-2 gap-4">
                 {/* Left Column: Department Selection */}
@@ -284,7 +330,7 @@ export function SelectFieldConfig({ config, onUpdate, fieldType }: SelectFieldCo
                           <div className="flex items-center justify-between w-full">
                             <span>{department}</span>
                             <span className="text-xs text-gray-500 ml-2">
-                              {departmentAppMappings[department]?.length || 0} apps
+                              {localDepartmentAppMappings[department]?.length || 0} apps
                             </span>
                           </div>
                         </SelectItem>
@@ -302,7 +348,6 @@ export function SelectFieldConfig({ config, onUpdate, fieldType }: SelectFieldCo
                       <Select
                         value=""
                         onValueChange={(appName) => handleLinkApp(selectedDepartment, appName)}
-                        disabled={createMappingMutation.isPending}
                       >
                         <SelectTrigger className="w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600">
                           <div className="flex items-center">
@@ -312,13 +357,13 @@ export function SelectFieldConfig({ config, onUpdate, fieldType }: SelectFieldCo
                         </SelectTrigger>
                         <SelectContent className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600">
                           {availableApps
-                            .filter((app: string) => !departmentAppMappings[selectedDepartment]?.includes(app))
+                            .filter((app: string) => !localDepartmentAppMappings[selectedDepartment]?.includes(app))
                             .map((app: string) => (
                               <SelectItem key={app} value={app} className="bg-white dark:bg-gray-800">
                                 {app}
                               </SelectItem>
                             ))}
-                          {availableApps.filter((app: string) => !departmentAppMappings[selectedDepartment]?.includes(app)).length === 0 && (
+                          {availableApps.filter((app: string) => !localDepartmentAppMappings[selectedDepartment]?.includes(app)).length === 0 && (
                             <SelectItem value="no-apps" disabled className="text-gray-500">
                               All apps already linked
                             </SelectItem>
@@ -328,8 +373,8 @@ export function SelectFieldConfig({ config, onUpdate, fieldType }: SelectFieldCo
 
                       {/* Selected apps using exact CreateUserModal format */}
                       <div className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md divide-y divide-gray-200 dark:divide-gray-600 max-w-48">
-                        {departmentAppMappings[selectedDepartment] && departmentAppMappings[selectedDepartment].length > 0 ? (
-                          departmentAppMappings[selectedDepartment].map((appName, index) => (
+                        {localDepartmentAppMappings[selectedDepartment] && localDepartmentAppMappings[selectedDepartment].length > 0 ? (
+                          localDepartmentAppMappings[selectedDepartment].map((appName, index) => (
                             <div key={index} className="flex items-center px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700/50">
                               <span className="flex-1 text-gray-900 dark:text-gray-100 text-sm uppercase">
                                 {appName}
@@ -339,7 +384,6 @@ export function SelectFieldConfig({ config, onUpdate, fieldType }: SelectFieldCo
                                 size="sm"
                                 onClick={() => handleUnlinkApp(selectedDepartment, appName)}
                                 className="h-4 w-4 p-0 text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 ml-1"
-                                disabled={deleteMappingMutation.isPending}
                               >
                                 {'×'}
                               </Button>

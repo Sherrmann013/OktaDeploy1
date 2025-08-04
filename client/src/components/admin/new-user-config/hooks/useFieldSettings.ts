@@ -29,6 +29,7 @@ const DEFAULT_FIELD_SETTINGS: FieldSettings = {
 export function useFieldSettings() {
   const { toast } = useToast();
   const [fieldSettings, setFieldSettings] = useState<FieldSettings>(DEFAULT_FIELD_SETTINGS);
+  const [departmentAppSaveFunction, setDepartmentAppSaveFunction] = useState<(() => Promise<boolean>) | null>(null);
 
   // Fetch all field settings
   const { data: fetchedSettings, isLoading, error } = useQuery({
@@ -127,12 +128,19 @@ export function useFieldSettings() {
 
   const saveAllSettings = async () => {
     try {
+      // Save field settings
       const savePromises = Object.entries(fieldSettings).map(([fieldKey, config]) => 
         saveFieldSetting(fieldKey as FieldKey, config)
       );
       
       const results = await Promise.all(savePromises);
-      const allSuccessful = results.every(result => result === true);
+      let allSuccessful = results.every(result => result === true);
+      
+      // Save department app mappings if function is available
+      if (departmentAppSaveFunction) {
+        const departmentAppResult = await departmentAppSaveFunction();
+        allSuccessful = allSuccessful && departmentAppResult;
+      }
       
       if (allSuccessful) {
         toast({ 
@@ -158,6 +166,7 @@ export function useFieldSettings() {
     updateFieldSetting,
     saveFieldSetting,
     saveAllSettings,
+    setDepartmentAppSaveFunction,
     isLoading,
     error
   };
