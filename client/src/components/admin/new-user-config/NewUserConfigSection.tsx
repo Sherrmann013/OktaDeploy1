@@ -41,7 +41,7 @@ export function NewUserConfigSection({
 
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg border dark:border-gray-700 p-6">
-      <div className="flex gap-6">
+      <div className="flex gap-6 overflow-hidden">
         <UserFormPreview
           fieldSettings={fieldSettings}
           selectedField={selectedField}
@@ -51,15 +51,17 @@ export function NewUserConfigSection({
           appMappingsData={appMappingsData}
         />
         
-        <FieldConfigPanel
-          selectedField={selectedField}
-          fieldSettings={fieldSettings}
-          onUpdateField={updateFieldSetting}
-          setDepartmentAppSaveFunction={setDepartmentAppSaveFunction}
-          setEmployeeTypeAppSaveFunction={setEmployeeTypeAppSaveFunction}
-          setDepartmentGroupSaveFunction={setDepartmentGroupSaveFunction}
-          setEmployeeTypeGroupSaveFunction={setEmployeeTypeGroupSaveFunction}
-        />
+        <div className="flex-1 min-w-0 overflow-hidden">
+          <FieldConfigPanel
+            selectedField={selectedField}
+            fieldSettings={fieldSettings}
+            onUpdateField={updateFieldSetting}
+            setDepartmentAppSaveFunction={setDepartmentAppSaveFunction}
+            setEmployeeTypeAppSaveFunction={setEmployeeTypeAppSaveFunction}
+            setDepartmentGroupSaveFunction={setDepartmentGroupSaveFunction}
+            setEmployeeTypeGroupSaveFunction={setEmployeeTypeGroupSaveFunction}
+          />
+        </div>
       </div>
       
       <div className="mt-6 flex justify-end">
