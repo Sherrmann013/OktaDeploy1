@@ -8,6 +8,7 @@ This project is a comprehensive React-based enterprise security management dashb
 - **Realistic Test Data:** Preference for authentic enterprise structure over generic placeholders
 - **Complete Solutions:** User prefers comprehensive implementations over incremental changes
 - **Dropdown Styling:** All Select/dropdown components must have explicit background colors (bg-white dark:bg-gray-800) and borders to prevent transparency issues
+- **Development Process:** When changes aren't visible, always check if development server is serving production build from /dist. Solution: run `npm run build` and restart workflow to rebuild with latest changes.
 
 ## System Architecture
 The dashboard is built with a React frontend (TypeScript, Tailwind CSS, Wouter) and an Express.js backend (TypeScript, PostgreSQL).
