@@ -325,6 +325,7 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
           await fetch('/api/department-group-mappings', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
             body: JSON.stringify({ departmentName, groupName })
           });
         }
@@ -333,6 +334,7 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
           await fetch('/api/department-group-mappings', {
             method: 'DELETE',
             headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
             body: JSON.stringify({ departmentName, groupName })
           });
         }
@@ -369,6 +371,7 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
           await fetch('/api/employee-type-group-mappings', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
             body: JSON.stringify({ employeeType, groupName })
           });
         }
@@ -377,6 +380,7 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
           await fetch('/api/employee-type-group-mappings', {
             method: 'DELETE',
             headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
             body: JSON.stringify({ employeeType, groupName })
           });
         }
