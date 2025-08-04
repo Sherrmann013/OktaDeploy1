@@ -363,21 +363,38 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
   const generatePassword = () => {
     if (!passwordConfig) return;
     
-    // Generate words using the random-words library
-    const getRandomWords = (count: number = 5) => {
+    // Generate words using the random-words library with length constraints
+    const getRandomWordsForTargetLength = (targetLength: number) => {
       try {
-        // Use the random-words library to generate words
-        const words = generate(count) as string[];
+        // Calculate space needed for non-word components
+        const nonWordSpace = passwordConfig.components
+          .filter(c => c.type !== 'words')
+          .reduce((sum, c) => sum + c.count, 0);
         
-        // Capitalize each word
-        return words.map(word => 
-          word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
-        );
+        // Available space for all words
+        const totalWordCount = passwordConfig.components
+          .filter(c => c.type === 'words')
+          .reduce((sum, c) => sum + c.count, 0);
+        
+        const availableWordSpace = Math.max(3, targetLength - nonWordSpace);
+        const targetWordLength = Math.floor(availableWordSpace / totalWordCount);
+        
+        // Generate words with appropriate length constraints
+        const words = generate({
+          min: Math.max(3, targetWordLength - 2),
+          max: Math.max(5, targetWordLength + 2),
+          exactly: 20 // Generate many to filter from
+        }) as string[];
+        
+        // Filter words to target length and capitalize
+        const filteredWords = words
+          .filter(word => word.length >= 3 && word.length <= targetWordLength + 2)
+          .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase());
+        
+        return filteredWords.length > 0 ? filteredWords : ['Blue', 'Green', 'Star'];
       } catch (error) {
         console.error('Random words generation failed:', error);
-        // Only use fallback if the library completely fails
-        const fallback = ['Blue', 'Red', 'Green', 'Star', 'Moon'];
-        return fallback.slice(0, count);
+        return ['Blue', 'Green', 'Star'];
       }
     };
     
@@ -391,8 +408,8 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
       for (let i = 0; i < component.count; i++) {
         switch (component.type) {
           case 'words':
-            // Generate random words using the library
-            const words = getRandomWords(10); // Get 10 words to choose from
+            // Generate words that fit the target length
+            const words = getRandomWordsForTargetLength(passwordConfig.targetLength);
             const selectedWord = words[Math.floor(Math.random() * words.length)];
             passwordParts.push(selectedWord);
             break;
