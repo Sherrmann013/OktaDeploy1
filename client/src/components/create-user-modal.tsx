@@ -815,14 +815,15 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
             </div>
 
             {/* Send Activation Email */}
-            <div className="flex items-center space-x-2">
+            <div className={`flex items-center space-x-2 ${fieldSettings?.sendActivationEmail?.hideField ? 'invisible' : ''}`}>
               <Checkbox
                 id="sendActivationEmail"
                 checked={sendActivationEmail}
                 onCheckedChange={(checked) => setSendActivationEmail(checked === true)}
+                disabled={fieldSettings?.sendActivationEmail?.hideField}
               />
               <Label htmlFor="sendActivationEmail" className="text-sm font-normal">
-                Send activation email to manager
+                Send activation email to manager {fieldSettings?.sendActivationEmail?.required ? '*' : ''}
               </Label>
             </div>
 

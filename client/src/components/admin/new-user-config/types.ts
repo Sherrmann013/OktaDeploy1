@@ -8,7 +8,8 @@ export type FieldKey =
   | 'department' 
   | 'employeeType'
   | 'apps'
-  | 'groups';
+  | 'groups'
+  | 'sendActivationEmail';
 
 export interface PasswordComponent {
   type: 'words' | 'numbers' | 'symbols';
@@ -49,6 +50,11 @@ export interface AppsConfig {
   hideField: boolean;
 }
 
+export interface SendActivationEmailConfig {
+  required: boolean;
+  hideField: boolean;
+}
+
 export interface FieldSettings {
   firstName: BasicFieldConfig;
   lastName: BasicFieldConfig;
@@ -60,4 +66,5 @@ export interface FieldSettings {
   employeeType: SelectConfig;
   apps: AppsConfig;
   groups: GroupsConfig;
+  sendActivationEmail: SendActivationEmailConfig;
 }

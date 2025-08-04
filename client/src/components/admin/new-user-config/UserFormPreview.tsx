@@ -235,10 +235,16 @@ export function UserFormPreview({
         </div>
 
         {/* Send activation email checkbox */}
-        <div className="flex items-center space-x-2">
+        <div 
+          className={`flex items-center space-x-2 cursor-pointer border-2 border-transparent hover:border-purple-300 dark:hover:border-purple-600 rounded-lg p-3 transition-colors ${
+            selectedField === 'sendActivationEmail' ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20' : ''
+          }`}
+          onClick={() => handleFieldClick('sendActivationEmail')}
+        >
           <Checkbox id="preview-activation" disabled />
           <Label htmlFor="preview-activation" className="text-sm">
-            Send activation email to manager
+            Send activation email to manager {fieldSettings.sendActivationEmail?.required && <span className="text-red-500">*</span>}
+            {fieldSettings.sendActivationEmail?.hideField && <span className="text-xs text-orange-500 ml-2">(Hidden in user form)</span>}
           </Label>
         </div>
 

@@ -7,6 +7,7 @@ import { PasswordFieldConfig } from "./field-configs/PasswordFieldConfig";
 import { SelectFieldConfig } from "./field-configs/SelectFieldConfig";
 import { AppsFieldConfig } from "./field-configs/AppsFieldConfig";
 import { GroupsFieldConfig } from "./field-configs/GroupsFieldConfig";
+import { SendActivationEmailFieldConfig } from "./field-configs/SendActivationEmailFieldConfig";
 import { FieldSettings, FieldKey } from "./types";
 
 interface FieldConfigPanelProps {
@@ -44,7 +45,8 @@ export function FieldConfigPanel({
       department: 'Department Options',
       employeeType: 'Employee Type Options',
       apps: 'Apps Options',
-      groups: 'Groups Options'
+      groups: 'Groups Options',
+      sendActivationEmail: 'Send Activation Email Options'
     };
     return titles[field];
   };
@@ -98,6 +100,13 @@ export function FieldConfigPanel({
             onUpdate={(newConfig) => onUpdateField(selectedField, newConfig)}
           />
         );
+      case 'sendActivationEmail':
+        return (
+          <SendActivationEmailFieldConfig
+            config={currentConfig as any}
+            onUpdate={(newConfig) => onUpdateField(selectedField, newConfig)}
+          />
+        );
       default:
         return (
           <BasicFieldConfig
@@ -117,7 +126,7 @@ export function FieldConfigPanel({
         
         <div className="space-y-4">
           {/* Required Checkbox - Universal for all fields except those with custom configs */}
-          {!['groups', 'apps'].includes(selectedField) && (
+          {!['groups', 'apps', 'sendActivationEmail'].includes(selectedField) && (
             <div className="flex items-center space-x-2">
               <Checkbox 
                 id={`${selectedField}-required`}
