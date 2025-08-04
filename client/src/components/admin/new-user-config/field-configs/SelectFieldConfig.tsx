@@ -94,8 +94,17 @@ export function SelectFieldConfig({ config, onUpdate, fieldType }: SelectFieldCo
           </div>
           
           {config.options.length > 0 ? (
-            <div className="space-y-2">
-              <div className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md divide-y divide-gray-200 dark:divide-gray-600 max-w-64">
+            <div className="flex items-start gap-2">
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={addOption}
+                className="h-6 w-6 p-0 mt-2 text-blue-500 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-900/20"
+              >
+                <Plus className="w-3 h-3" />
+              </Button>
+              <div className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md divide-y divide-gray-200 dark:divide-gray-600 max-w-64 flex-1">
                 {config.options.map((option, index) => (
                   <div key={index} className="flex items-center px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700/50">
                     <Input
@@ -116,16 +125,6 @@ export function SelectFieldConfig({ config, onUpdate, fieldType }: SelectFieldCo
                   </div>
                 ))}
               </div>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={addOption}
-                className="h-7 px-2"
-              >
-                <Plus className="w-3 h-3 mr-1" />
-                Add Option
-              </Button>
             </div>
           ) : (
             <div className="text-center py-6 text-sm text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-700 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600">
