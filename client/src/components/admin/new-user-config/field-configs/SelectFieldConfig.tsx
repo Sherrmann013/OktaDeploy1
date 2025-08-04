@@ -28,6 +28,8 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
   const [selectedEmployeeType, setSelectedEmployeeType] = useState<string>('');
   const [hasDepartmentUnsavedChanges, setHasDepartmentUnsavedChanges] = useState(false);
   const [hasEmployeeTypeUnsavedChanges, setHasEmployeeTypeUnsavedChanges] = useState(false);
+  const [departmentSaveInProgress, setDepartmentSaveInProgress] = useState(false);
+  const [employeeTypeSaveInProgress, setEmployeeTypeSaveInProgress] = useState(false);
 
   // Fetch available apps
   const { data: appMappingsData = [] } = useQuery({
@@ -107,6 +109,9 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
 
   // Save department app mappings to database
   const saveDepartmentAppMappings = async () => {
+    if (departmentSaveInProgress) return false;
+    setDepartmentSaveInProgress(true);
+    
     try {
       // Calculate changes needed
       const currentMappings = departmentAppMappings;
@@ -157,11 +162,16 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
     } catch (error) {
       console.error('Failed to save department app mappings:', error);
       return false;
+    } finally {
+      setDepartmentSaveInProgress(false);
     }
   };
 
   // Save employee type app mappings to database
   const saveEmployeeTypeAppMappings = async () => {
+    if (employeeTypeSaveInProgress) return false;
+    setEmployeeTypeSaveInProgress(true);
+    
     try {
       // Calculate changes needed
       const currentMappings = employeeTypeAppMappings;
@@ -212,6 +222,8 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
     } catch (error) {
       console.error('Failed to save employee type app mappings:', error);
       return false;
+    } finally {
+      setEmployeeTypeSaveInProgress(false);
     }
   };
 
