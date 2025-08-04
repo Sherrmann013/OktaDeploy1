@@ -363,58 +363,70 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
   const generatePassword = () => {
     if (!passwordConfig) return;
     
-    // Generate words using the random-words library with length constraints
-    const getRandomWordsForTargetLength = (targetLength: number) => {
-      try {
-        // Calculate space needed for non-word components
-        const nonWordSpace = passwordConfig.components
-          .filter(c => c.type !== 'words')
-          .reduce((sum, c) => sum + c.count, 0);
-        
-        // Available space for all words
-        const totalWordCount = passwordConfig.components
-          .filter(c => c.type === 'words')
-          .reduce((sum, c) => sum + c.count, 0);
-        
-        const availableWordSpace = Math.max(3, targetLength - nonWordSpace);
-        const targetWordLength = Math.floor(availableWordSpace / totalWordCount);
-        
-        // Generate words with appropriate length constraints
-        const words = generate({
-          min: Math.max(3, targetWordLength - 2),
-          max: Math.max(5, targetWordLength + 2),
-          exactly: 20 // Generate many to filter from
-        }) as string[];
-        
-        // Filter words to target length and capitalize
-        const filteredWords = words
-          .filter(word => word.length >= 3 && word.length <= targetWordLength + 2)
-          .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase());
-        
-        return filteredWords.length > 0 ? filteredWords : ['Blue', 'Green', 'Star'];
-      } catch (error) {
-        console.error('Random words generation failed:', error);
-        return ['Blue', 'Green', 'Star'];
-      }
-    };
-    
     const symbols = ['!', '@', '#', '$', '%', '^', '&', '*', '+', '=', '?'];
     const numbers = '0123456789';
     
+    // Calculate exact space allocation
+    const targetLength = passwordConfig.targetLength;
+    const totalNumbers = passwordConfig.components.filter(c => c.type === 'numbers').reduce((sum, c) => sum + c.count, 0);
+    const totalSymbols = passwordConfig.components.filter(c => c.type === 'symbols').reduce((sum, c) => sum + c.count, 0);
+    const totalWords = passwordConfig.components.filter(c => c.type === 'words').reduce((sum, c) => sum + c.count, 0);
+    
+    // Calculate exact space available for words
+    const spaceForWords = targetLength - totalNumbers - totalSymbols;
+    const charsPerWord = totalWords > 0 ? Math.floor(spaceForWords / totalWords) : 0;
+    
+    // If we can't fit the components, adjust word length
+    const minWordLength = Math.max(3, charsPerWord);
+    
     let passwordParts: string[] = [];
+    let currentWordIndex = 0;
     
     // Process each component according to admin configuration
     passwordConfig.components.forEach(component => {
       for (let i = 0; i < component.count; i++) {
         switch (component.type) {
           case 'words':
-            // Generate words that fit the target length
-            const words = getRandomWordsForTargetLength(passwordConfig.targetLength);
-            const selectedWord = words[Math.floor(Math.random() * words.length)];
-            passwordParts.push(selectedWord);
+            try {
+              // Generate words with exact length requirement
+              const words = generate({
+                min: minWordLength,
+                max: minWordLength,
+                exactly: 10
+              }) as string[];
+              
+              const validWords = words.filter(word => word.length === minWordLength);
+              let selectedWord;
+              
+              if (validWords.length > 0) {
+                selectedWord = validWords[Math.floor(Math.random() * validWords.length)];
+              } else {
+                // Fallback: create word of exact length
+                const fallbackWords = ['word', 'text', 'pass', 'code', 'auth', 'blue', 'star', 'moon'];
+                let baseWord = fallbackWords[Math.floor(Math.random() * fallbackWords.length)];
+                
+                // Pad or truncate to exact length
+                if (baseWord.length < minWordLength) {
+                  baseWord = baseWord + 'x'.repeat(minWordLength - baseWord.length);
+                } else if (baseWord.length > minWordLength) {
+                  baseWord = baseWord.substring(0, minWordLength);
+                }
+                selectedWord = baseWord;
+              }
+              
+              passwordParts.push(selectedWord.charAt(0).toUpperCase() + selectedWord.slice(1).toLowerCase());
+            } catch (error) {
+              // Fallback word generation
+              let fallbackWord = 'Word';
+              if (fallbackWord.length < minWordLength) {
+                fallbackWord = fallbackWord + 'x'.repeat(minWordLength - fallbackWord.length);
+              } else if (fallbackWord.length > minWordLength) {
+                fallbackWord = fallbackWord.substring(0, minWordLength);
+              }
+              passwordParts.push(fallbackWord);
+            }
             break;
           case 'numbers':
-            // Generate a single digit (0-9) as one component
             const singleDigit = numbers[Math.floor(Math.random() * numbers.length)];
             passwordParts.push(singleDigit);
             break;
@@ -426,15 +438,27 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
       }
     });
     
-    // Keep components in the order they appear in the configuration
+    // Join all parts
     let password = passwordParts.join('');
+    
+    // CRITICAL: Ensure exact target length compliance
+    if (password.length > targetLength) {
+      password = password.substring(0, targetLength);
+    } else if (password.length < targetLength) {
+      // Pad with random numbers to reach exact target length
+      const deficit = targetLength - password.length;
+      for (let i = 0; i < deficit; i++) {
+        password += numbers[Math.floor(Math.random() * numbers.length)];
+      }
+    }
     
     console.log('🔑 Generated password with components:', {
       components: passwordConfig.components,
       targetLength: passwordConfig.targetLength,
       generatedParts: passwordParts,
       finalPassword: password,
-      finalLength: password.length
+      finalLength: password.length,
+      exactMatch: password.length === targetLength
     });
     
     setPassword(password);
