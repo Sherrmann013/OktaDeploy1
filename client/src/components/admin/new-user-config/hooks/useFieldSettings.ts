@@ -22,7 +22,7 @@ const DEFAULT_FIELD_SETTINGS: FieldSettings = {
   department: { required: false, useList: false, options: [] },
   employeeType: { required: false, useList: true, options: [] },
   apps: { required: false, hideField: false },
-  groups: { required: false, useList: true, options: [] }
+  groups: { required: false, useList: true, options: [], hideField: false }
 };
 
 export function useFieldSettings() {

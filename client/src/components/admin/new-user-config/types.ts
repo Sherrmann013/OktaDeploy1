@@ -33,6 +33,13 @@ export interface SelectConfig {
   options: string[];
 }
 
+export interface GroupsConfig {
+  required: boolean;
+  useList: boolean;
+  options: string[];
+  hideField: boolean;
+}
+
 export interface BasicFieldConfig {
   required: boolean;
 }
@@ -52,5 +59,5 @@ export interface FieldSettings {
   department: SelectConfig;
   employeeType: SelectConfig;
   apps: AppsConfig;
-  groups: SelectConfig;
+  groups: GroupsConfig;
 }

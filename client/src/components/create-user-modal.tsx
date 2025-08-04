@@ -735,24 +735,30 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
             </div>
 
             {/* Groups and Apps */}
-            <div className={`grid gap-4 ${!fieldSettings?.apps?.hideField ? 'grid-cols-2' : 'grid-cols-1'}`}>
-              <div className="space-y-2">
-                <Label>Groups {fieldSettings?.groups?.required ? '*' : ''}</Label>
+            <div className={`grid gap-4 ${
+              (!fieldSettings?.groups?.hideField && !fieldSettings?.apps?.hideField) ? 'grid-cols-2' :
+              (!fieldSettings?.groups?.hideField || !fieldSettings?.apps?.hideField) ? 'grid-cols-1' :
+              'hidden'
+            }`}>
+              {!fieldSettings?.groups?.hideField && (
                 <div className="space-y-2">
-                  {availableGroups.map((group) => (
-                    <div key={group} className="flex items-center space-x-2">
-                      <Checkbox
-                        id={group}
-                        checked={selectedGroups.includes(group)}
-                        onCheckedChange={() => handleGroupToggle(group)}
-                      />
-                      <Label htmlFor={group} className="text-sm font-normal">
-                        {group}
-                      </Label>
-                    </div>
-                  ))}
+                  <Label>Groups {fieldSettings?.groups?.required ? '*' : ''}</Label>
+                  <div className="space-y-2">
+                    {availableGroups.map((group) => (
+                      <div key={group} className="flex items-center space-x-2">
+                        <Checkbox
+                          id={group}
+                          checked={selectedGroups.includes(group)}
+                          onCheckedChange={() => handleGroupToggle(group)}
+                        />
+                        <Label htmlFor={group} className="text-sm font-normal">
+                          {group}
+                        </Label>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              </div>
+              )}
 
               {!fieldSettings?.apps?.hideField && (
                 <div className="space-y-3">

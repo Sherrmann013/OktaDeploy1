@@ -197,6 +197,7 @@ export function UserFormPreview({
           <div className="space-y-2">
             <Label htmlFor="preview-groups" className="text-sm font-medium">
               Groups {fieldSettings.groups?.required && <span className="text-red-500">*</span>}
+              {fieldSettings.groups?.hideField && <span className="text-xs text-orange-500 ml-2">(Hidden in user form)</span>}
             </Label>
             <div className={getWrapperClassName('groups')} onClick={() => handleFieldClick('groups')}>
               <div className="border border-gray-300 dark:border-gray-600 rounded p-3 bg-white dark:bg-gray-800 min-h-[120px] cursor-pointer">
