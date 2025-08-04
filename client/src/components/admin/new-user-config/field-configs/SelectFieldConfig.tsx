@@ -310,6 +310,50 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
     }
   };
 
+  // Helper function to calculate differences for department mappings
+  const calculateDifferences = (currentMappings: Record<string, string[]>, newMappings: Record<string, string[]>) => {
+    const differences: { departmentName: string; added: string[]; removed: string[] }[] = [];
+    
+    // Get all unique department names
+    const allDepartments = [...new Set([...Object.keys(currentMappings), ...Object.keys(newMappings)])];
+    
+    for (const departmentName of allDepartments) {
+      const current = currentMappings[departmentName] || [];
+      const updated = newMappings[departmentName] || [];
+      
+      const added = updated.filter(group => !current.includes(group));
+      const removed = current.filter(group => !updated.includes(group));
+      
+      if (added.length > 0 || removed.length > 0) {
+        differences.push({ departmentName, added, removed });
+      }
+    }
+    
+    return differences;
+  };
+
+  // Helper function to calculate differences for employee type mappings
+  const calculateEmployeeTypeDifferences = (currentMappings: Record<string, string[]>, newMappings: Record<string, string[]>) => {
+    const differences: { employeeType: string; added: string[]; removed: string[] }[] = [];
+    
+    // Get all unique employee types
+    const allEmployeeTypes = [...new Set([...Object.keys(currentMappings), ...Object.keys(newMappings)])];
+    
+    for (const employeeType of allEmployeeTypes) {
+      const current = currentMappings[employeeType] || [];
+      const updated = newMappings[employeeType] || [];
+      
+      const added = updated.filter(group => !current.includes(group));
+      const removed = current.filter(group => !updated.includes(group));
+      
+      if (added.length > 0 || removed.length > 0) {
+        differences.push({ employeeType, added, removed });
+      }
+    }
+    
+    return differences;
+  };
+
   // Department group save function
   const saveDepartmentGroupMappings = async (): Promise<boolean> => {
     if (!hasDepartmentGroupUnsavedChanges) return true;
@@ -322,21 +366,33 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
       // Apply changes
       for (const { departmentName, added, removed } of differences) {
         for (const groupName of added) {
-          await fetch('/api/department-group-mappings', {
+          const response = await fetch('/api/department-group-mappings', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             credentials: 'include',
             body: JSON.stringify({ departmentName, groupName })
           });
+          
+          if (!response.ok) {
+            const errorData = await response.json();
+            console.error('Department group mapping creation failed:', errorData);
+            throw new Error(`Failed to create department group mapping: ${response.status} ${response.statusText}`);
+          }
         }
         
         for (const groupName of removed) {
-          await fetch('/api/department-group-mappings', {
+          const response = await fetch('/api/department-group-mappings', {
             method: 'DELETE',
             headers: { 'Content-Type': 'application/json' },
             credentials: 'include',
             body: JSON.stringify({ departmentName, groupName })
           });
+          
+          if (!response.ok) {
+            const errorData = await response.json();
+            console.error('Department group mapping deletion failed:', errorData);
+            throw new Error(`Failed to delete department group mapping: ${response.status} ${response.statusText}`);
+          }
         }
       }
       
@@ -368,21 +424,33 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
       // Apply changes
       for (const { employeeType, added, removed } of differences) {
         for (const groupName of added) {
-          await fetch('/api/employee-type-group-mappings', {
+          const response = await fetch('/api/employee-type-group-mappings', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             credentials: 'include',
             body: JSON.stringify({ employeeType, groupName })
           });
+          
+          if (!response.ok) {
+            const errorData = await response.json();
+            console.error('Employee type group mapping creation failed:', errorData);
+            throw new Error(`Failed to create employee type group mapping: ${response.status} ${response.statusText}`);
+          }
         }
         
         for (const groupName of removed) {
-          await fetch('/api/employee-type-group-mappings', {
+          const response = await fetch('/api/employee-type-group-mappings', {
             method: 'DELETE',
             headers: { 'Content-Type': 'application/json' },
             credentials: 'include',
             body: JSON.stringify({ employeeType, groupName })
           });
+          
+          if (!response.ok) {
+            const errorData = await response.json();
+            console.error('Employee type group mapping deletion failed:', errorData);
+            throw new Error(`Failed to delete employee type group mapping: ${response.status} ${response.statusText}`);
+          }
         }
       }
       
