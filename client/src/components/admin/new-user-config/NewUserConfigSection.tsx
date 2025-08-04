@@ -23,6 +23,8 @@ export function NewUserConfigSection({
     saveAllSettings, 
     setDepartmentAppSaveFunction, 
     setEmployeeTypeAppSaveFunction,
+    setDepartmentGroupSaveFunction,
+    setEmployeeTypeGroupSaveFunction,
     isLoading,
     isSaving 
   } = useFieldSettings();
@@ -55,6 +57,8 @@ export function NewUserConfigSection({
           onUpdateField={updateFieldSetting}
           setDepartmentAppSaveFunction={setDepartmentAppSaveFunction}
           setEmployeeTypeAppSaveFunction={setEmployeeTypeAppSaveFunction}
+          setDepartmentGroupSaveFunction={setDepartmentGroupSaveFunction}
+          setEmployeeTypeGroupSaveFunction={setEmployeeTypeGroupSaveFunction}
         />
       </div>
       

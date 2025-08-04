@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertUserSchema, updateUserSchema, insertSiteAccessUserSchema, siteAccessUsers, insertIntegrationSchema, integrations, auditLogs, insertAppMappingSchema, appMappings, departmentAppMappings, insertDepartmentAppMappingSchema, employeeTypeAppMappings, insertEmployeeTypeAppMappingSchema, insertLayoutSettingSchema, layoutSettings, dashboardCards, insertDashboardCardSchema, updateDashboardCardSchema } from "@shared/schema";
+import { insertUserSchema, updateUserSchema, insertSiteAccessUserSchema, siteAccessUsers, insertIntegrationSchema, integrations, auditLogs, insertAppMappingSchema, appMappings, departmentAppMappings, insertDepartmentAppMappingSchema, employeeTypeAppMappings, insertEmployeeTypeAppMappingSchema, departmentGroupMappings, insertDepartmentGroupMappingSchema, employeeTypeGroupMappings, insertEmployeeTypeGroupMappingSchema, insertLayoutSettingSchema, layoutSettings, dashboardCards, insertDashboardCardSchema, updateDashboardCardSchema } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and } from "drizzle-orm";
 import { AuditLogger, getAuditLogs } from "./audit";
@@ -3624,6 +3624,198 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: error.errors });
       }
       res.status(500).json({ error: "Failed to delete employee type app mapping" });
+    }
+  });
+
+  // Department Group Mappings API
+  app.get("/api/department-group-mappings", isAuthenticated, async (req, res) => {
+    try {
+      const mappings = await db.select().from(departmentGroupMappings);
+      res.json(mappings);
+    } catch (error) {
+      console.error("Error fetching department group mappings:", error);
+      res.status(500).json({ error: "Failed to fetch department group mappings" });
+    }
+  });
+
+  app.post("/api/department-group-mappings", isAuthenticated, requireAdmin, async (req, res) => {
+    try {
+      const { departmentName, groupName } = insertDepartmentGroupMappingSchema.parse(req.body);
+      
+      // Check if mapping already exists
+      const existing = await db.select()
+        .from(departmentGroupMappings)
+        .where(and(
+          eq(departmentGroupMappings.departmentName, departmentName),
+          eq(departmentGroupMappings.groupName, groupName)
+        ))
+        .limit(1);
+      
+      if (existing.length > 0) {
+        return res.status(400).json({ error: "Mapping already exists" });
+      }
+      
+      const [result] = await db.insert(departmentGroupMappings)
+        .values({ departmentName, groupName })
+        .returning();
+      
+      await AuditLogger.log({
+        req,
+        action: 'CREATE',
+        resourceType: 'DEPARTMENT_GROUP_MAPPING',
+        resourceId: result.id.toString(),
+        resourceName: `${departmentName} - ${groupName}`,
+        details: { departmentName, groupName }
+      });
+      
+      res.json(result);
+    } catch (error) {
+      console.error("Error creating department group mapping:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: error.errors });
+      }
+      res.status(500).json({ error: "Failed to create department group mapping" });
+    }
+  });
+
+  app.delete("/api/department-group-mappings", isAuthenticated, requireAdmin, async (req, res) => {
+    try {
+      const { departmentName, groupName } = z.object({
+        departmentName: z.string(),
+        groupName: z.string()
+      }).parse(req.body);
+      
+      const existing = await db.select()
+        .from(departmentGroupMappings)
+        .where(and(
+          eq(departmentGroupMappings.departmentName, departmentName),
+          eq(departmentGroupMappings.groupName, groupName)
+        ))
+        .limit(1);
+      
+      if (existing.length === 0) {
+        return res.status(404).json({ error: "Mapping not found" });
+      }
+      
+      await db.delete(departmentGroupMappings)
+        .where(and(
+          eq(departmentGroupMappings.departmentName, departmentName),
+          eq(departmentGroupMappings.groupName, groupName)
+        ));
+      
+      await AuditLogger.log({
+        req,
+        action: 'DELETE',
+        resourceType: 'DEPARTMENT_GROUP_MAPPING',
+        resourceId: existing[0].id.toString(),
+        resourceName: `${departmentName} - ${groupName}`,
+        details: { departmentName, groupName },
+        oldValues: existing[0]
+      });
+      
+      res.json({ message: "Department group mapping deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting department group mapping:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: error.errors });
+      }
+      res.status(500).json({ error: "Failed to delete department group mapping" });
+    }
+  });
+
+  // Employee Type Group Mappings API
+  app.get("/api/employee-type-group-mappings", isAuthenticated, async (req, res) => {
+    try {
+      const mappings = await db.select().from(employeeTypeGroupMappings);
+      res.json(mappings);
+    } catch (error) {
+      console.error("Error fetching employee type group mappings:", error);
+      res.status(500).json({ error: "Failed to fetch employee type group mappings" });
+    }
+  });
+
+  app.post("/api/employee-type-group-mappings", isAuthenticated, requireAdmin, async (req, res) => {
+    try {
+      const { employeeType, groupName } = insertEmployeeTypeGroupMappingSchema.parse(req.body);
+      
+      // Check if mapping already exists
+      const existing = await db.select()
+        .from(employeeTypeGroupMappings)
+        .where(and(
+          eq(employeeTypeGroupMappings.employeeType, employeeType),
+          eq(employeeTypeGroupMappings.groupName, groupName)
+        ))
+        .limit(1);
+      
+      if (existing.length > 0) {
+        return res.status(400).json({ error: "Mapping already exists" });
+      }
+      
+      const [result] = await db.insert(employeeTypeGroupMappings)
+        .values({ employeeType, groupName })
+        .returning();
+      
+      await AuditLogger.log({
+        req,
+        action: 'CREATE',
+        resourceType: 'EMPLOYEE_TYPE_GROUP_MAPPING',
+        resourceId: result.id.toString(),
+        resourceName: `${employeeType} - ${groupName}`,
+        details: { employeeType, groupName }
+      });
+      
+      res.json(result);
+    } catch (error) {
+      console.error("Error creating employee type group mapping:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: error.errors });
+      }
+      res.status(500).json({ error: "Failed to create employee type group mapping" });
+    }
+  });
+
+  app.delete("/api/employee-type-group-mappings", isAuthenticated, requireAdmin, async (req, res) => {
+    try {
+      const { employeeType, groupName } = z.object({
+        employeeType: z.string(),
+        groupName: z.string()
+      }).parse(req.body);
+      
+      const existing = await db.select()
+        .from(employeeTypeGroupMappings)
+        .where(and(
+          eq(employeeTypeGroupMappings.employeeType, employeeType),
+          eq(employeeTypeGroupMappings.groupName, groupName)
+        ))
+        .limit(1);
+      
+      if (existing.length === 0) {
+        return res.status(404).json({ error: "Mapping not found" });
+      }
+      
+      await db.delete(employeeTypeGroupMappings)
+        .where(and(
+          eq(employeeTypeGroupMappings.employeeType, employeeType),
+          eq(employeeTypeGroupMappings.groupName, groupName)
+        ));
+      
+      await AuditLogger.log({
+        req,
+        action: 'DELETE',
+        resourceType: 'EMPLOYEE_TYPE_GROUP_MAPPING',
+        resourceId: existing[0].id.toString(),
+        resourceName: `${employeeType} - ${groupName}`,
+        details: { employeeType, groupName },
+        oldValues: existing[0]
+      });
+      
+      res.json({ message: "Employee type group mapping deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting employee type group mapping:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: error.errors });
+      }
+      res.status(500).json({ error: "Failed to delete employee type group mapping" });
     }
   });
 

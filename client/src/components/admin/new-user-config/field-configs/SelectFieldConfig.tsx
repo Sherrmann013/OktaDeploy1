@@ -15,9 +15,11 @@ interface SelectFieldConfigProps {
   fieldType: FieldKey;
   setDepartmentAppSaveFunction?: (fn: (() => Promise<boolean>) | null) => void;
   setEmployeeTypeAppSaveFunction?: (fn: (() => Promise<boolean>) | null) => void;
+  setDepartmentGroupSaveFunction?: (fn: (() => Promise<boolean>) | null) => void;
+  setEmployeeTypeGroupSaveFunction?: (fn: (() => Promise<boolean>) | null) => void;
 }
 
-export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAppSaveFunction, setEmployeeTypeAppSaveFunction }: SelectFieldConfigProps) {
+export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAppSaveFunction, setEmployeeTypeAppSaveFunction, setDepartmentGroupSaveFunction, setEmployeeTypeGroupSaveFunction }: SelectFieldConfigProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [departmentAppMappings, setDepartmentAppMappings] = useState<Record<string, string[]>>({});
@@ -30,6 +32,16 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
   const [hasEmployeeTypeUnsavedChanges, setHasEmployeeTypeUnsavedChanges] = useState(false);
   const [departmentSaveInProgress, setDepartmentSaveInProgress] = useState(false);
   const [employeeTypeSaveInProgress, setEmployeeTypeSaveInProgress] = useState(false);
+
+  // Group mapping state
+  const [departmentGroupMappings, setDepartmentGroupMappings] = useState<Record<string, string[]>>({});
+  const [localDepartmentGroupMappings, setLocalDepartmentGroupMappings] = useState<Record<string, string[]>>({});
+  const [employeeTypeGroupMappings, setEmployeeTypeGroupMappings] = useState<Record<string, string[]>>({});
+  const [localEmployeeTypeGroupMappings, setLocalEmployeeTypeGroupMappings] = useState<Record<string, string[]>>({});
+  const [hasDepartmentGroupUnsavedChanges, setHasDepartmentGroupUnsavedChanges] = useState(false);
+  const [hasEmployeeTypeGroupUnsavedChanges, setHasEmployeeTypeGroupUnsavedChanges] = useState(false);
+  const [departmentGroupSaveInProgress, setDepartmentGroupSaveInProgress] = useState(false);
+  const [employeeTypeGroupSaveInProgress, setEmployeeTypeGroupSaveInProgress] = useState(false);
 
   // Fetch available apps
   const { data: appMappingsData = [] } = useQuery({
@@ -47,6 +59,18 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
   const { data: employeeTypeAppMappingsData = [] } = useQuery({
     queryKey: ["/api/employee-type-app-mappings"],
     enabled: fieldType === 'employeeType' && config.linkApps,
+  });
+
+  // Fetch department group mappings
+  const { data: departmentGroupMappingsData = [] } = useQuery({
+    queryKey: ["/api/department-group-mappings"],
+    enabled: fieldType === 'department' && config.linkGroups,
+  });
+
+  // Fetch employee type group mappings
+  const { data: employeeTypeGroupMappingsData = [] } = useQuery({
+    queryKey: ["/api/employee-type-group-mappings"],
+    enabled: fieldType === 'employeeType' && config.linkGroups,
   });
 
   // Local functions for managing department-app mappings (no auto-save)
@@ -105,6 +129,64 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
       return updated;
     });
     setHasEmployeeTypeUnsavedChanges(true);
+  };
+
+  // Department group management functions
+  const handleLinkDepartmentGroup = (department: string, groupName: string) => {
+    setLocalDepartmentGroupMappings(prev => {
+      const updated = { ...prev };
+      if (!updated[department]) {
+        updated[department] = [];
+      }
+      if (!updated[department].includes(groupName)) {
+        updated[department] = [...updated[department], groupName];
+      }
+      return updated;
+    });
+    setHasDepartmentGroupUnsavedChanges(true);
+  };
+
+  const handleUnlinkDepartmentGroup = (department: string, groupName: string) => {
+    setLocalDepartmentGroupMappings(prev => {
+      const updated = { ...prev };
+      if (updated[department]) {
+        updated[department] = updated[department].filter(group => group !== groupName);
+        if (updated[department].length === 0) {
+          delete updated[department];
+        }
+      }
+      return updated;
+    });
+    setHasDepartmentGroupUnsavedChanges(true);
+  };
+
+  // Employee type group management functions
+  const handleLinkEmployeeTypeGroup = (employeeType: string, groupName: string) => {
+    setLocalEmployeeTypeGroupMappings(prev => {
+      const updated = { ...prev };
+      if (!updated[employeeType]) {
+        updated[employeeType] = [];
+      }
+      if (!updated[employeeType].includes(groupName)) {
+        updated[employeeType] = [...updated[employeeType], groupName];
+      }
+      return updated;
+    });
+    setHasEmployeeTypeGroupUnsavedChanges(true);
+  };
+
+  const handleUnlinkEmployeeTypeGroup = (employeeType: string, groupName: string) => {
+    setLocalEmployeeTypeGroupMappings(prev => {
+      const updated = { ...prev };
+      if (updated[employeeType]) {
+        updated[employeeType] = updated[employeeType].filter(group => group !== groupName);
+        if (updated[employeeType].length === 0) {
+          delete updated[employeeType];
+        }
+      }
+      return updated;
+    });
+    setHasEmployeeTypeGroupUnsavedChanges(true);
   };
 
   // Save department app mappings to database
@@ -227,6 +309,94 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
     }
   };
 
+  // Department group save function
+  const saveDepartmentGroupMappings = async (): Promise<boolean> => {
+    if (!hasDepartmentGroupUnsavedChanges) return true;
+    
+    setDepartmentGroupSaveInProgress(true);
+    try {
+      // Calculate differences
+      const differences = calculateDifferences(departmentGroupMappings, localDepartmentGroupMappings);
+      
+      // Apply changes
+      for (const { departmentName, added, removed } of differences) {
+        for (const groupName of added) {
+          await fetch('/api/department-group-mappings', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ departmentName, groupName })
+          });
+        }
+        
+        for (const groupName of removed) {
+          await fetch('/api/department-group-mappings', {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ departmentName, groupName })
+          });
+        }
+      }
+      
+      setDepartmentGroupMappings(localDepartmentGroupMappings);
+      setHasDepartmentGroupUnsavedChanges(false);
+      await queryClient.invalidateQueries({ queryKey: ['/api/department-group-mappings'] });
+      return true;
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to save department group mappings",
+        variant: "destructive"
+      });
+      return false;
+    } finally {
+      setDepartmentGroupSaveInProgress(false);
+    }
+  };
+
+  // Employee type group save function
+  const saveEmployeeTypeGroupMappings = async (): Promise<boolean> => {
+    if (!hasEmployeeTypeGroupUnsavedChanges) return true;
+    
+    setEmployeeTypeGroupSaveInProgress(true);
+    try {
+      // Calculate differences
+      const differences = calculateEmployeeTypeDifferences(employeeTypeGroupMappings, localEmployeeTypeGroupMappings);
+      
+      // Apply changes
+      for (const { employeeType, added, removed } of differences) {
+        for (const groupName of added) {
+          await fetch('/api/employee-type-group-mappings', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ employeeType, groupName })
+          });
+        }
+        
+        for (const groupName of removed) {
+          await fetch('/api/employee-type-group-mappings', {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ employeeType, groupName })
+          });
+        }
+      }
+      
+      setEmployeeTypeGroupMappings(localEmployeeTypeGroupMappings);
+      setHasEmployeeTypeGroupUnsavedChanges(false);
+      await queryClient.invalidateQueries({ queryKey: ['/api/employee-type-group-mappings'] });
+      return true;
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to save employee type group mappings",
+        variant: "destructive"
+      });
+      return false;
+    } finally {
+      setEmployeeTypeGroupSaveInProgress(false);
+    }
+  };
+
   // Register save function with parent when there are unsaved changes
   useEffect(() => {
     if (fieldType === 'department' && setDepartmentAppSaveFunction) {
@@ -247,6 +417,27 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
       }
     }
   }, [hasEmployeeTypeUnsavedChanges, saveEmployeeTypeAppMappings, fieldType, setEmployeeTypeAppSaveFunction]);
+
+  // Hook save functions for group mappings
+  useEffect(() => {
+    if (fieldType === 'department' && setDepartmentGroupSaveFunction) {
+      if (hasDepartmentGroupUnsavedChanges) {
+        setDepartmentGroupSaveFunction(saveDepartmentGroupMappings);
+      } else {
+        setDepartmentGroupSaveFunction(null);
+      }
+    }
+  }, [hasDepartmentGroupUnsavedChanges, saveDepartmentGroupMappings, fieldType, setDepartmentGroupSaveFunction]);
+
+  useEffect(() => {
+    if (fieldType === 'employeeType' && setEmployeeTypeGroupSaveFunction) {
+      if (hasEmployeeTypeGroupUnsavedChanges) {
+        setEmployeeTypeGroupSaveFunction(saveEmployeeTypeGroupMappings);
+      } else {
+        setEmployeeTypeGroupSaveFunction(null);
+      }
+    }
+  }, [hasEmployeeTypeGroupUnsavedChanges, saveEmployeeTypeGroupMappings, fieldType, setEmployeeTypeGroupSaveFunction]);
 
   // Process department app mappings data - set both saved and local state
   useEffect(() => {
@@ -280,11 +471,46 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
     }
   }, [employeeTypeAppMappingsData]);
 
+  // Process department group mappings data - set both saved and local state
+  useEffect(() => {
+    if (Array.isArray(departmentGroupMappingsData) && departmentGroupMappingsData.length > 0) {
+      const mappingsByDepartment: Record<string, string[]> = {};
+      departmentGroupMappingsData.forEach((mapping: any) => {
+        if (!mappingsByDepartment[mapping.departmentName]) {
+          mappingsByDepartment[mapping.departmentName] = [];
+        }
+        mappingsByDepartment[mapping.departmentName].push(mapping.groupName);
+      });
+      setDepartmentGroupMappings(mappingsByDepartment);
+      setLocalDepartmentGroupMappings(mappingsByDepartment);
+      setHasDepartmentGroupUnsavedChanges(false);
+    }
+  }, [departmentGroupMappingsData]);
+
+  // Process employee type group mappings data - set both saved and local state
+  useEffect(() => {
+    if (Array.isArray(employeeTypeGroupMappingsData) && employeeTypeGroupMappingsData.length > 0) {
+      const mappingsByEmployeeType: Record<string, string[]> = {};
+      employeeTypeGroupMappingsData.forEach((mapping: any) => {
+        if (!mappingsByEmployeeType[mapping.employeeType]) {
+          mappingsByEmployeeType[mapping.employeeType] = [];
+        }
+        mappingsByEmployeeType[mapping.employeeType].push(mapping.groupName);
+      });
+      setEmployeeTypeGroupMappings(mappingsByEmployeeType);
+      setLocalEmployeeTypeGroupMappings(mappingsByEmployeeType);
+      setHasEmployeeTypeGroupUnsavedChanges(false);
+    }
+  }, [employeeTypeGroupMappingsData]);
+
   // Get available apps
   const availableApps = Array.isArray(appMappingsData) ? 
     appMappingsData
       .filter((app: any) => app.status === 'active')
       .map((app: any) => app.appName) : [];
+
+  // Get available groups from config.options as the groups list
+  const availableGroups = config.options || [];
   const handleUseListChange = (checked: boolean) => {
     onUpdate({
       ...config,
@@ -296,6 +522,13 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
     onUpdate({
       ...config,
       linkApps: checked
+    });
+  };
+
+  const handleLinkGroupsChange = (checked: boolean) => {
+    onUpdate({
+      ...config,
+      linkGroups: checked
     });
   };
 
@@ -580,6 +813,167 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
               {fieldType === 'department' 
                 ? 'Enable "Use predefined list" and add department options to configure app linking.'
                 : 'Enable "Use predefined list" and add employee type options to configure app linking.'}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Link Groups Section - Only for Department and Employee Type fields */}
+      {(fieldType === 'department' || fieldType === 'employeeType') && (
+        <div className="space-y-4 border-t border-gray-200 dark:border-gray-700 pt-4">
+          <div className="flex items-center space-x-2">
+            <Checkbox 
+              id="link-groups"
+              checked={config.linkGroups || false}
+              onCheckedChange={handleLinkGroupsChange}
+            />
+            <Label htmlFor="link-groups" className="text-sm font-medium">
+              {fieldType === 'department' ? 'Link Groups to Departments' : 'Link Groups to Employee Types'}
+            </Label>
+          </div>
+          
+          <div className="text-sm text-gray-600 dark:text-gray-400">
+            {fieldType === 'department' 
+              ? 'When enabled, specific groups will be automatically assigned when a department is selected.'
+              : 'When enabled, specific groups will be automatically assigned when an employee type is selected.'}
+          </div>
+
+          {config.linkGroups && config.useList && config.options.length > 0 && (
+            <div className="space-y-4">
+              {/* Two-column layout: Department/EmployeeType Selection + Group Selection */}
+              <div className="grid grid-cols-2 gap-4">
+                {/* Left Column: Selection */}
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium">
+                    {fieldType === 'department' ? 'Select Department to Configure' : 'Select Employee Type to Configure'}
+                  </Label>
+                  <Select 
+                    value={fieldType === 'department' ? selectedDepartment : selectedEmployeeType} 
+                    onValueChange={fieldType === 'department' ? setSelectedDepartment : setSelectedEmployeeType}
+                  >
+                    <SelectTrigger className="w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600">
+                      <SelectValue placeholder={fieldType === 'department' ? 'Choose a department...' : 'Choose an employee type...'} />
+                    </SelectTrigger>
+                    <SelectContent className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600">
+                      {config.options.map((option) => (
+                        <SelectItem key={option} value={option} className="bg-white dark:bg-gray-800">
+                          <div className="flex items-center justify-between w-full">
+                            <span>{option}</span>
+                            <span className="text-xs text-gray-500 ml-2">
+                              {fieldType === 'department' 
+                                ? (localDepartmentGroupMappings[option]?.length || 0) 
+                                : (localEmployeeTypeGroupMappings[option]?.length || 0)} groups
+                            </span>
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Right Column: Group Selection (CreateUserModal style) */}
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium">Groups</Label>
+                  {(fieldType === 'department' ? selectedDepartment : selectedEmployeeType) ? (
+                    <>
+                      {/* Add group dropdown at top */}
+                      <Select
+                        value=""
+                        onValueChange={(groupName) => {
+                          if (fieldType === 'department') {
+                            handleLinkDepartmentGroup(selectedDepartment, groupName);
+                          } else {
+                            handleLinkEmployeeTypeGroup(selectedEmployeeType, groupName);
+                          }
+                        }}
+                      >
+                        <SelectTrigger className="w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600">
+                          <div className="flex items-center">
+                            <span className="text-blue-500 mr-2">+</span>
+                            <SelectValue placeholder="Add group" />
+                          </div>
+                        </SelectTrigger>
+                        <SelectContent className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600">
+                          {availableGroups
+                            .filter((group: string) => {
+                              if (fieldType === 'department') {
+                                return !localDepartmentGroupMappings[selectedDepartment]?.includes(group);
+                              } else {
+                                return !localEmployeeTypeGroupMappings[selectedEmployeeType]?.includes(group);
+                              }
+                            })
+                            .map((group: string) => (
+                              <SelectItem key={group} value={group} className="bg-white dark:bg-gray-800">
+                                {group}
+                              </SelectItem>
+                            ))}
+                          {availableGroups.filter((group: string) => {
+                            if (fieldType === 'department') {
+                              return !localDepartmentGroupMappings[selectedDepartment]?.includes(group);
+                            } else {
+                              return !localEmployeeTypeGroupMappings[selectedEmployeeType]?.includes(group);
+                            }
+                          }).length === 0 && (
+                            <SelectItem value="no-groups" disabled className="text-gray-500">
+                              All groups already linked
+                            </SelectItem>
+                          )}
+                        </SelectContent>
+                      </Select>
+
+                      {/* Selected groups using exact CreateUserModal format */}
+                      <div className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md divide-y divide-gray-200 dark:divide-gray-600 max-w-48">
+                        {(() => {
+                          const currentSelection = fieldType === 'department' ? selectedDepartment : selectedEmployeeType;
+                          const currentMappings = fieldType === 'department' 
+                            ? localDepartmentGroupMappings[currentSelection] 
+                            : localEmployeeTypeGroupMappings[currentSelection];
+                          
+                          return currentMappings && currentMappings.length > 0 ? (
+                            currentMappings.map((groupName, index) => (
+                              <div key={index} className="flex items-center px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                                <span className="flex-1 text-gray-900 dark:text-gray-100 text-sm uppercase">
+                                  {groupName}
+                                </span>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => {
+                                    if (fieldType === 'department') {
+                                      handleUnlinkDepartmentGroup(selectedDepartment, groupName);
+                                    } else {
+                                      handleUnlinkEmployeeTypeGroup(selectedEmployeeType, groupName);
+                                    }
+                                  }}
+                                  className="h-4 w-4 p-0 text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 ml-1"
+                                >
+                                  {'×'}
+                                </Button>
+                              </div>
+                            ))
+                          ) : (
+                            <div className="flex items-center px-3 py-4 text-center">
+                              <span className="text-sm text-gray-500 dark:text-gray-400 w-full">No groups linked</span>
+                            </div>
+                          );
+                        })()}
+                      </div>
+                    </>
+                  ) : (
+                    <div className="text-sm text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800 rounded-lg p-3 border border-gray-200 dark:border-gray-600">
+                      {fieldType === 'department' ? 'Select a department to configure groups' : 'Select an employee type to configure groups'}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {config.linkGroups && (!config.useList || config.options.length === 0) && (
+            <div className="text-sm text-gray-500 dark:text-gray-400 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded-lg p-3">
+              {fieldType === 'department' 
+                ? 'Enable "Use predefined list" and add department options to configure group linking.'
+                : 'Enable "Use predefined list" and add employee type options to configure group linking.'}
             </div>
           )}
         </div>

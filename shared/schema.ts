@@ -1,4 +1,4 @@
-import { pgTable, text, serial, timestamp, boolean, integer, varchar, jsonb, index } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, timestamp, boolean, integer, varchar, jsonb, index, unique } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -206,6 +206,44 @@ export type InsertDepartmentAppMapping = z.infer<typeof insertDepartmentAppMappi
 export type DepartmentAppMapping = typeof departmentAppMappings.$inferSelect;
 export type InsertEmployeeTypeAppMapping = z.infer<typeof insertEmployeeTypeAppMappingSchema>;
 export type EmployeeTypeAppMapping = typeof employeeTypeAppMappings.$inferSelect;
+
+// Department Group Assignments
+export const departmentGroupMappings = pgTable('department_group_mappings', {
+  id: serial('id').primaryKey(),
+  departmentName: varchar('department_name', { length: 100 }).notNull(),
+  groupName: varchar('group_name', { length: 100 }).notNull(),
+  createdAt: timestamp('created_at').defaultNow()
+}, (table) => {
+  return {
+    uniqueDepartmentGroup: unique().on(table.departmentName, table.groupName),
+  };
+});
+
+export const employeeTypeGroupMappings = pgTable('employee_type_group_mappings', {
+  id: serial('id').primaryKey(),
+  employeeType: varchar('employee_type', { length: 100 }).notNull(),
+  groupName: varchar('group_name', { length: 100 }).notNull(),
+  createdAt: timestamp('created_at').defaultNow()
+}, (table) => {
+  return {
+    uniqueEmployeeTypeGroup: unique().on(table.employeeType, table.groupName),
+  };
+});
+
+export const insertDepartmentGroupMappingSchema = createInsertSchema(departmentGroupMappings).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertEmployeeTypeGroupMappingSchema = createInsertSchema(employeeTypeGroupMappings).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertDepartmentGroupMapping = z.infer<typeof insertDepartmentGroupMappingSchema>;
+export type DepartmentGroupMapping = typeof departmentGroupMappings.$inferSelect;
+export type InsertEmployeeTypeGroupMapping = z.infer<typeof insertEmployeeTypeGroupMappingSchema>;
+export type EmployeeTypeGroupMapping = typeof employeeTypeGroupMappings.$inferSelect;
 
 // Layout customization schema
 export const layoutSettings = pgTable('layout_settings', {

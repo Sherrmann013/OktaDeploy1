@@ -31,6 +31,8 @@ export function useFieldSettings() {
   const [fieldSettings, setFieldSettings] = useState<FieldSettings>(DEFAULT_FIELD_SETTINGS);
   const [departmentAppSaveFunction, setDepartmentAppSaveFunction] = useState<(() => Promise<boolean>) | null>(null);
   const [employeeTypeAppSaveFunction, setEmployeeTypeAppSaveFunction] = useState<(() => Promise<boolean>) | null>(null);
+  const [departmentGroupSaveFunction, setDepartmentGroupSaveFunction] = useState<(() => Promise<boolean>) | null>(null);
+  const [employeeTypeGroupSaveFunction, setEmployeeTypeGroupSaveFunction] = useState<(() => Promise<boolean>) | null>(null);
   const [isSaving, setIsSaving] = useState(false);
 
   // Fetch all field settings
@@ -153,6 +155,18 @@ export function useFieldSettings() {
         const employeeTypeAppResult = await employeeTypeAppSaveFunction();
         allSuccessful = allSuccessful && employeeTypeAppResult;
       }
+
+      // Save department group mappings if function is available
+      if (departmentGroupSaveFunction) {
+        const departmentGroupResult = await departmentGroupSaveFunction();
+        allSuccessful = allSuccessful && departmentGroupResult;
+      }
+
+      // Save employee type group mappings if function is available
+      if (employeeTypeGroupSaveFunction) {
+        const employeeTypeGroupResult = await employeeTypeGroupSaveFunction();
+        allSuccessful = allSuccessful && employeeTypeGroupResult;
+      }
       
       if (allSuccessful) {
         toast({ 
@@ -182,6 +196,8 @@ export function useFieldSettings() {
     saveAllSettings,
     setDepartmentAppSaveFunction,
     setEmployeeTypeAppSaveFunction,
+    setDepartmentGroupSaveFunction,
+    setEmployeeTypeGroupSaveFunction,
     isLoading,
     isSaving,
     error
