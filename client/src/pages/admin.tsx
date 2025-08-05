@@ -1389,7 +1389,7 @@ function AdminComponent() {
                   <DialogTrigger asChild>
                     <Button className="bg-blue-600 hover:bg-blue-700 text-white">
                       <Plus className="w-4 h-4 mr-2" />
-                      New User
+                      New Admin
                     </Button>
                   </DialogTrigger>
                   <DialogContent className="sm:max-w-[425px]">
