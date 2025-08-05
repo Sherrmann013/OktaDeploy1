@@ -40,33 +40,28 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
   const [selectedDomain, setSelectedDomain] = useState<string>("");
 
   // Fetch app mappings for dynamic app dropdown
-  const { data: appMappingsData = [] } = useQuery({
+  const { data: appMappingsData = [], isLoading: appMappingsLoading } = useQuery({
     queryKey: ['/api/app-mappings'],
-    enabled: open,
     staleTime: 10 * 60 * 1000, // Cache for 10 minutes
   });
 
-  const { data: departmentAppMappingsData = [] } = useQuery({
+  const { data: departmentAppMappingsData = [], isLoading: deptAppMappingsLoading } = useQuery({
     queryKey: ["/api/department-app-mappings"],
-    enabled: open,
     staleTime: 10 * 60 * 1000, // Cache for 10 minutes
   });
 
-  const { data: employeeTypeAppMappingsData = [] } = useQuery({
+  const { data: employeeTypeAppMappingsData = [], isLoading: empTypeAppMappingsLoading } = useQuery({
     queryKey: ["/api/employee-type-app-mappings"],
-    enabled: open,
     staleTime: 10 * 60 * 1000, // Cache for 10 minutes
   });
 
   const { data: departmentGroupMappingsData = [] } = useQuery({
     queryKey: ["/api/department-group-mappings"],
-    enabled: open,
     staleTime: 10 * 60 * 1000, // Cache for 10 minutes
   });
 
   const { data: employeeTypeGroupMappingsData = [] } = useQuery({
     queryKey: ["/api/employee-type-group-mappings"],
-    enabled: open,
     staleTime: 10 * 60 * 1000, // Cache for 10 minutes
   });
 
