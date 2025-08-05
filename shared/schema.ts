@@ -293,3 +293,29 @@ export const updateDashboardCardSchema = createInsertSchema(dashboardCards).part
 export type InsertDashboardCard = z.infer<typeof insertDashboardCardSchema>;
 export type UpdateDashboardCard = z.infer<typeof updateDashboardCardSchema>;
 export type DashboardCard = typeof dashboardCards.$inferSelect;
+
+// Monitoring cards table for the monitoring/security page layout
+export const monitoringCards = pgTable("monitoring_cards", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  type: text("type").notNull(), // security_metrics, events, policies, reports
+  position: integer("position").notNull(), // 0, 1, 2, 3 for 2x2 grid
+  enabled: boolean("enabled").notNull().default(true),
+  created: timestamp("created").defaultNow(),
+  updated: timestamp("updated").defaultNow(),
+});
+
+export const insertMonitoringCardSchema = createInsertSchema(monitoringCards).omit({
+  id: true,
+  created: true,
+  updated: true,
+});
+
+export const updateMonitoringCardSchema = createInsertSchema(monitoringCards).partial().omit({
+  id: true,
+  created: true,
+});
+
+export type InsertMonitoringCard = z.infer<typeof insertMonitoringCardSchema>;
+export type UpdateMonitoringCard = z.infer<typeof updateMonitoringCardSchema>;
+export type MonitoringCard = typeof monitoringCards.$inferSelect;

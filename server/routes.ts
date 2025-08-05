@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertUserSchema, updateUserSchema, insertSiteAccessUserSchema, siteAccessUsers, insertIntegrationSchema, integrations, auditLogs, insertAppMappingSchema, appMappings, departmentAppMappings, insertDepartmentAppMappingSchema, employeeTypeAppMappings, insertEmployeeTypeAppMappingSchema, departmentGroupMappings, insertDepartmentGroupMappingSchema, employeeTypeGroupMappings, insertEmployeeTypeGroupMappingSchema, insertLayoutSettingSchema, layoutSettings, dashboardCards, insertDashboardCardSchema, updateDashboardCardSchema } from "@shared/schema";
+import { insertUserSchema, updateUserSchema, insertSiteAccessUserSchema, siteAccessUsers, insertIntegrationSchema, integrations, auditLogs, insertAppMappingSchema, appMappings, departmentAppMappings, insertDepartmentAppMappingSchema, employeeTypeAppMappings, insertEmployeeTypeAppMappingSchema, departmentGroupMappings, insertDepartmentGroupMappingSchema, employeeTypeGroupMappings, insertEmployeeTypeGroupMappingSchema, insertLayoutSettingSchema, layoutSettings, dashboardCards, insertDashboardCardSchema, updateDashboardCardSchema, monitoringCards, insertMonitoringCardSchema, updateMonitoringCardSchema } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and } from "drizzle-orm";
 import { AuditLogger, getAuditLogs } from "./audit";
@@ -3336,6 +3336,164 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error deleting dashboard card:", error);
       res.status(500).json({ error: "Failed to delete dashboard card" });
+    }
+  });
+
+  // Monitoring cards endpoints
+  app.get("/api/monitoring-cards", async (req, res) => {
+    try {
+      console.log('📊 Monitoring cards requested, session user:', (req.session as any)?.user?.email || 'No session');
+      const cards = await db.select().from(monitoringCards).orderBy(monitoringCards.position);
+      console.log('📊 Monitoring cards found:', cards.length);
+      res.json(cards);
+    } catch (error) {
+      console.error("Error fetching monitoring cards:", error);
+      res.status(500).json({ error: "Failed to fetch monitoring cards" });
+    }
+  });
+
+  app.post("/api/monitoring-cards", isAuthenticated, requireAdmin, async (req, res) => {
+    try {
+      const validatedData = insertMonitoringCardSchema.parse(req.body);
+      const [result] = await db.insert(monitoringCards).values(validatedData).returning();
+      
+      await AuditLogger.log({
+        req,
+        action: 'CREATE',
+        resourceType: 'MONITORING_CARD',
+        resourceId: result.id.toString(),
+        resourceName: result.name,
+        details: { type: result.type, position: result.position },
+        newValues: result
+      });
+      
+      res.json(result);
+    } catch (error) {
+      console.error("Error creating monitoring card:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: error.errors });
+      }
+      res.status(500).json({ error: "Failed to create monitoring card" });
+    }
+  });
+
+  // Bulk update monitoring card positions (for drag and drop)
+  app.patch("/api/monitoring-cards/positions", isAuthenticated, requireAdmin, async (req, res) => {
+    try {
+      console.log('🔄 MONITORING BULK UPDATE ENDPOINT HIT - Raw request body:', req.body);
+      console.log('🔄 Session user:', (req.session as any)?.user?.email);
+      
+      const { cards } = req.body;
+      console.log('🔄 Extracted monitoring cards:', cards);
+      
+      if (!Array.isArray(cards)) {
+        console.error('❌ Cards is not an array:', typeof cards, cards);
+        return res.status(400).json({ error: "Cards must be an array" });
+      }
+
+      // Update positions in bulk
+      const updates = await Promise.all(
+        cards.map(async (card: any) => {
+          const id = typeof card.id === 'number' ? card.id : parseInt(String(card.id));
+          const position = typeof card.position === 'number' ? card.position : parseInt(String(card.position));
+          
+          if (isNaN(id) || isNaN(position)) {
+            throw new Error(`Invalid monitoring card data: id=${card.id}, position=${card.position}`);
+          }
+          
+          const [result] = await db.update(monitoringCards)
+            .set({ position, updated: new Date() })
+            .where(eq(monitoringCards.id, id))
+            .returning();
+          
+          return result;
+        })
+      );
+
+      await AuditLogger.log({
+        req,
+        action: 'UPDATE',
+        resourceType: 'MONITORING_LAYOUT',
+        resourceId: 'bulk_position_update',
+        resourceName: 'Monitoring Card Positions',
+        details: { cardCount: cards.length },
+        newValues: { positions: cards }
+      });
+
+      res.json(updates);
+    } catch (error) {
+      console.error("Error updating monitoring card positions:", error);
+      res.status(500).json({ error: "Failed to update monitoring card positions" });
+    }
+  });
+
+  app.patch("/api/monitoring-cards/:id", isAuthenticated, requireAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ error: "Invalid card ID" });
+      }
+      const updates = updateMonitoringCardSchema.parse(req.body);
+      
+      const existing = await db.select().from(monitoringCards).where(eq(monitoringCards.id, id)).limit(1);
+      if (existing.length === 0) {
+        return res.status(404).json({ error: "Monitoring card not found" });
+      }
+      
+      const [result] = await db.update(monitoringCards)
+        .set({ ...updates, updated: new Date() })
+        .where(eq(monitoringCards.id, id))
+        .returning();
+      
+      await AuditLogger.log({
+        req,
+        action: 'UPDATE',
+        resourceType: 'MONITORING_CARD',
+        resourceId: result.id.toString(),
+        resourceName: result.name,
+        details: { type: result.type, position: result.position },
+        oldValues: existing[0],
+        newValues: result
+      });
+      
+      res.json(result);
+    } catch (error) {
+      console.error("Error updating monitoring card:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: error.errors });
+      }
+      res.status(500).json({ error: "Failed to update monitoring card" });
+    }
+  });
+
+  app.delete("/api/monitoring-cards/:id", isAuthenticated, requireAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ error: "Invalid card ID" });
+      }
+      
+      const existing = await db.select().from(monitoringCards).where(eq(monitoringCards.id, id)).limit(1);
+      if (existing.length === 0) {
+        return res.status(404).json({ error: "Monitoring card not found" });
+      }
+      
+      await db.delete(monitoringCards).where(eq(monitoringCards.id, id));
+      
+      await AuditLogger.log({
+        req,
+        action: 'DELETE',
+        resourceType: 'MONITORING_CARD',
+        resourceId: existing[0].id.toString(),
+        resourceName: existing[0].name,
+        details: { type: existing[0].type, position: existing[0].position },
+        oldValues: existing[0]
+      });
+      
+      res.json({ message: "Monitoring card deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting monitoring card:", error);
+      res.status(500).json({ error: "Failed to delete monitoring card" });
     }
   });
 

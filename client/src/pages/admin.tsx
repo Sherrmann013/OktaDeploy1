@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Pencil, Trash2, Check, ChevronsUpDown, Edit, X, Settings, RefreshCw, Mail, Lock, GripVertical, Link } from "lucide-react";
+import { Plus, Pencil, Trash2, Check, ChevronsUpDown, Edit, X, Settings, RefreshCw, Mail, Lock, GripVertical, Link, Eye, EyeOff } from "lucide-react";
 import { LogoUploadModal } from "@/components/LogoUploadModal";
 import CreateUserModal from "@/components/create-user-modal";
 import { useToast } from "@/hooks/use-toast";
@@ -85,8 +85,11 @@ function AdminComponent() {
   const [isLogoUploadOpen, setIsLogoUploadOpen] = useState(false);
   const [layoutTab, setLayoutTab] = useState("logo");
   const [isAddDashboardCardOpen, setIsAddDashboardCardOpen] = useState(false);
+  const [isAddMonitoringCardOpen, setIsAddMonitoringCardOpen] = useState(false);
   const [draggedItem, setDraggedItem] = useState<number | null>(null);
   const [dragOverItem, setDragOverItem] = useState<number | null>(null);
+  const [draggedMonitoringItem, setDraggedMonitoringItem] = useState<number | null>(null);
+  const [dragOverMonitoringItem, setDragOverMonitoringItem] = useState<number | null>(null);
   // Removed department and employee type state - starting fresh
 
   // Apps state for new user creation form
@@ -121,8 +124,17 @@ function AdminComponent() {
     refetchOnWindowFocus: false,
   });
 
-  // Initialize with empty array - only use database data
+  // Fetch monitoring cards from the database
+  const { data: monitoringCardsData, refetch: refetchMonitoringCards, error: monitoringCardsError, isLoading: monitoringCardsLoading } = useQuery({
+    queryKey: ["/api/monitoring-cards"],
+    retry: 3,
+    refetchOnMount: true,
+    refetchOnWindowFocus: false,
+  });
+
+  // Initialize with empty arrays - only use database data
   const [dashboardCards, setDashboardCards] = useState<any[]>([]);
+  const [monitoringCards, setMonitoringCards] = useState<any[]>([]);
 
   // Update local state when data changes - ALWAYS use database data
   useEffect(() => {
@@ -131,6 +143,13 @@ function AdminComponent() {
       setDashboardCards(dashboardCardsData as any[]);
     }
   }, [dashboardCardsData]);
+
+  useEffect(() => {
+    if (monitoringCardsData) {
+      console.log('🔄 Monitoring cards data received:', monitoringCardsData);
+      setMonitoringCards(monitoringCardsData as any[]);
+    }
+  }, [monitoringCardsData]);
 
   // Debug authentication issues
   useEffect(() => {
@@ -146,6 +165,19 @@ function AdminComponent() {
     }
   }, [dashboardCardsError, refetchDashboardCards]);
 
+  useEffect(() => {
+    if (monitoringCardsError) {
+      console.error('Monitoring cards fetch error:', monitoringCardsError);
+      // Try to refetch after a short delay if authentication failed
+      if (monitoringCardsError.message?.includes('Unauthorized')) {
+        setTimeout(() => {
+          console.log('Retrying monitoring cards fetch...');
+          refetchMonitoringCards();
+        }, 2000);
+      }
+    }
+  }, [monitoringCardsError, refetchMonitoringCards]);
+
   // Trigger fetch when dashboard tab is selected
   useEffect(() => {
     if (layoutTab === "dashboard") {
@@ -153,6 +185,14 @@ function AdminComponent() {
       refetchDashboardCards();
     }
   }, [layoutTab, refetchDashboardCards]);
+
+  // Trigger fetch when monitoring tab is selected
+  useEffect(() => {
+    if (layoutTab === "monitoring") {
+      console.log('Monitoring tab selected, fetching cards...');
+      refetchMonitoringCards();
+    }
+  }, [layoutTab, refetchMonitoringCards]);
 
   // Mutation to update dashboard card positions
   const updateCardPositionsMutation = useMutation({
@@ -178,6 +218,33 @@ function AdminComponent() {
     },
     onError: (error) => {
       console.error('❌ Mutation error:', error);
+    },
+  });
+
+  // Mutation to update monitoring card positions
+  const updateMonitoringCardPositionsMutation = useMutation({
+    mutationFn: async (cards: any[]) => {
+      console.log('🔄 Updating monitoring card positions:', cards);
+      const response = await fetch("/api/monitoring-cards/positions", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ cards }),
+      });
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('❌ Failed to update monitoring positions:', response.status, errorText);
+        throw new Error(`Failed to update monitoring card positions: ${response.status} ${errorText}`);
+      }
+      const result = await response.json();
+      console.log('✅ Monitoring card positions updated successfully:', result);
+      return result;
+    },
+    onSuccess: () => {
+      console.log('🔄 Refetching monitoring cards after position update...');
+      refetchMonitoringCards();
+    },
+    onError: (error) => {
+      console.error('❌ Monitoring mutation error:', error);
     },
   });
 
@@ -308,7 +375,115 @@ function AdminComponent() {
     createDashboardCard();
   };
 
+  // Monitoring drag and drop handlers
+  const handleMonitoringDragStart = (e: React.DragEvent, index: number) => {
+    setDraggedMonitoringItem(index);
+    setDragOverMonitoringItem(null);
+    e.dataTransfer.effectAllowed = 'move';
+    
+    // Add custom drag image with reduced opacity
+    const target = e.currentTarget as HTMLElement;
+    const dragImage = target.cloneNode(true) as HTMLElement;
+    dragImage.style.opacity = '0.8';
+    dragImage.style.transform = 'rotate(2deg)';
+    dragImage.style.boxShadow = '0 8px 32px rgba(0, 0, 0, 0.3)';
+    document.body.appendChild(dragImage);
+    e.dataTransfer.setDragImage(dragImage, 0, 0);
+    
+    // Clean up the temporary drag image
+    setTimeout(() => {
+      if (document.body.contains(dragImage)) {
+        document.body.removeChild(dragImage);
+      }
+    }, 0);
+  };
 
+  const handleMonitoringDragEnd = () => {
+    setDraggedMonitoringItem(null);
+    setDragOverMonitoringItem(null);
+  };
+
+  const handleMonitoringDragEnter = (e: React.DragEvent, index: number) => {
+    e.preventDefault();
+    if (draggedMonitoringItem !== null && draggedMonitoringItem !== index) {
+      setDragOverMonitoringItem(index);
+    }
+  };
+
+  const handleMonitoringDragLeave = (e: React.DragEvent) => {
+    // Only reset if we're leaving the entire card area
+    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+    const x = e.clientX;
+    const y = e.clientY;
+    
+    if (x < rect.left || x > rect.right || y < rect.top || y > rect.bottom) {
+      setDragOverMonitoringItem(null);
+    }
+  };
+
+  const handleMonitoringDrop = (e: React.DragEvent, dropIndex: number) => {
+    e.preventDefault();
+    if (draggedMonitoringItem === null) return;
+
+    const newCards = [...monitoringCards];
+    const draggedCard = newCards[draggedMonitoringItem];
+    
+    // Remove the dragged item
+    newCards.splice(draggedMonitoringItem, 1);
+    
+    // Insert at new position
+    if (dropIndex >= newCards.length) {
+      newCards.push(draggedCard);
+    } else {
+      newCards.splice(dropIndex, 0, draggedCard);
+    }
+    
+    // Update positions in the new array
+    const updatedCards = newCards.map((card, index) => ({
+      ...card,
+      position: index
+    }));
+    
+    setMonitoringCards(updatedCards);
+    setDraggedMonitoringItem(null);
+    setDragOverMonitoringItem(null);
+    
+    // Update positions in the database
+    console.log('🎯 Calling monitoring mutation with cards:', updatedCards.map(card => ({ id: card.id, position: card.position })));
+    updateMonitoringCardPositionsMutation.mutate(
+      updatedCards.map(card => ({ id: card.id, position: card.position }))
+    );
+  };
+
+  const handleToggleMonitoringCard = async (card: any) => {
+    try {
+      const response = await fetch(`/api/monitoring-cards/${card.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ enabled: !card.enabled }),
+      });
+      if (response.ok) {
+        refetchMonitoringCards();
+      }
+    } catch (error) {
+      console.error('Failed to toggle monitoring card:', error);
+    }
+  };
+
+  const handleDeleteMonitoringCard = async (card: any) => {
+    if (confirm(`Are you sure you want to delete the "${card.name}" monitoring card?`)) {
+      try {
+        const response = await fetch(`/api/monitoring-cards/${card.id}`, {
+          method: "DELETE",
+        });
+        if (response.ok) {
+          refetchMonitoringCards();
+        }
+      } catch (error) {
+        console.error('Failed to delete monitoring card:', error);
+      }
+    }
+  };
 
   // Get current logo setting
   const { data: logoSetting } = useQuery({
@@ -1831,7 +2006,14 @@ function AdminComponent() {
                       Profile
                     </button>
                     <button 
-                      onClick={() => setLayoutTab("monitoring")}
+                      onClick={() => {
+                        console.log('📊 Monitoring tab clicked');
+                        setLayoutTab("monitoring");
+                        setTimeout(() => {
+                          console.log('🔄 Triggering monitoring cards fetch...');
+                          refetchMonitoringCards();
+                        }, 100);
+                      }}
                       className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
                         layoutTab === "monitoring" 
                           ? "bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm" 
@@ -2105,10 +2287,126 @@ function AdminComponent() {
 
                     {layoutTab === "monitoring" && (
                       <div className="bg-white dark:bg-gray-800 rounded-lg border dark:border-gray-700 p-6">
-                        <h4 className="text-lg font-semibold mb-4">Monitoring Settings</h4>
-                        <p className="text-sm text-muted-foreground">
-                          Configure monitoring and alerting preferences.
-                        </p>
+                        <div className="flex justify-between items-center mb-6">
+                          <div>
+                            <h4 className="text-lg font-semibold">Monitoring Dashboard Cards</h4>
+                            <p className="text-sm text-muted-foreground">
+                              Arrange monitoring dashboard cards. Changes are saved automatically when you drag and drop.
+                            </p>
+                          </div>
+                          <Button 
+                            onClick={() => setIsAddMonitoringCardOpen(true)}
+                            className="bg-orange-600 hover:bg-orange-700 text-white"
+                          >
+                            <Plus className="w-4 h-4 mr-2" />
+                            Add Card
+                          </Button>
+                        </div>
+
+                        {monitoringCardsLoading ? (
+                          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                            {[1, 2, 3, 4].map((i) => (
+                              <div key={i} className="animate-pulse">
+                                <div className="bg-gray-200 dark:bg-gray-700 h-32 rounded-lg"></div>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <div>
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
+                              {monitoringCards
+                                .sort((a, b) => a.position - b.position)
+                                .map((card, index) => (
+                                <div
+                                  key={card.id}
+                                  draggable
+                                  onDragStart={(e) => handleMonitoringDragStart(e, index)}
+                                  onDragEnd={handleMonitoringDragEnd}
+                                  onDragEnter={(e) => handleMonitoringDragEnter(e, index)}
+                                  onDragOver={(e) => e.preventDefault()}
+                                  onDragLeave={handleMonitoringDragLeave}
+                                  onDrop={(e) => handleMonitoringDrop(e, index)}
+                                  className={`bg-gray-50 dark:bg-gray-700 rounded-lg p-4 border-2 cursor-move transition-all duration-200 ${
+                                    draggedMonitoringItem === index 
+                                      ? 'opacity-50 scale-95 border-blue-400' 
+                                      : dragOverMonitoringItem === index 
+                                        ? 'border-blue-400 dark:border-blue-500 bg-blue-50 dark:bg-blue-900/20' 
+                                        : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'
+                                  }`}
+                                >
+                                  <div className="flex justify-between items-start">
+                                    <div className="flex-1">
+                                      <h5 className="font-medium text-gray-900 dark:text-gray-100 mb-1">{card.name}</h5>
+                                      <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">Type: {card.type}</p>
+                                      <div className="flex items-center gap-2">
+                                        <span className="text-xs text-gray-500 dark:text-gray-400">Position: {card.position}</span>
+                                        <span className={`text-xs px-2 py-1 rounded-full ${
+                                          card.enabled 
+                                            ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300' 
+                                            : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'
+                                        }`}>
+                                          {card.enabled ? 'Enabled' : 'Disabled'}
+                                        </span>
+                                      </div>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                      <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() => handleToggleMonitoringCard(card)}
+                                        className="h-8 w-8 p-0"
+                                      >
+                                        {card.enabled ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                      </Button>
+                                      <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() => handleDeleteMonitoringCard(card)}
+                                        className="h-8 w-8 p-0 text-red-500 hover:text-red-700"
+                                      >
+                                        <Trash2 className="w-4 h-4" />
+                                      </Button>
+                                    </div>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+
+                            {/* Empty slots for visual feedback */}
+                            {monitoringCards.length < 6 && (
+                              <div className="mt-4">
+                                <h6 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Available Slots</h6>
+                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                                  {Array.from({ length: 6 - monitoringCards.length }, (_, i) => {
+                                    const slotIndex = monitoringCards.length + i;
+                                    return (
+                                      <div
+                                        key={`empty-${slotIndex}`}
+                                        className={`border-2 border-dashed rounded-lg p-4 h-32 flex items-center justify-center transition-colors duration-200 ${
+                                          dragOverMonitoringItem === slotIndex 
+                                            ? 'border-blue-400 dark:border-blue-500 bg-blue-50 dark:bg-blue-900/20' 
+                                            : 'border-gray-300 dark:border-gray-600'
+                                        }`}
+                                        onDragEnter={(e) => handleMonitoringDragEnter(e, slotIndex)}
+                                        onDragOver={(e) => e.preventDefault()}
+                                        onDragLeave={handleMonitoringDragLeave}
+                                        onDrop={(e) => handleMonitoringDrop(e, slotIndex)}
+                                      >
+                                        <span className={`text-sm transition-colors duration-200 ${
+                                          dragOverMonitoringItem === slotIndex 
+                                            ? 'text-blue-600 dark:text-blue-400' 
+                                            : 'text-gray-400'
+                                        }`}>
+                                          {dragOverMonitoringItem === slotIndex ? 'Drop here' : 'Empty slot'}
+                                        </span>
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>
