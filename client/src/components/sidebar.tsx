@@ -36,6 +36,11 @@ export default function Sidebar() {
   React.useEffect(() => {
     console.log('🖼️ Sidebar - Active logo data:', activeLogo);
     console.log('📝 Sidebar - Logo text data:', logoTextSetting);
+    if (activeLogo) {
+      console.log('🖼️ Sidebar - Logo data type:', typeof (activeLogo as any)?.logoData);
+      console.log('🖼️ Sidebar - Logo data length:', (activeLogo as any)?.logoData?.length);
+      console.log('🖼️ Sidebar - Logo data preview:', (activeLogo as any)?.logoData?.substring(0, 50));
+    }
   }, [activeLogo, logoTextSetting]);
 
   // Filter navigation based on user access level
