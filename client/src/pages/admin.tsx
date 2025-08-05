@@ -2107,19 +2107,8 @@ function AdminComponent() {
                                   className="max-h-12 w-auto object-contain"
                                 />
                               ) : (
-                                <div className="w-16 h-16 bg-purple-600 rounded flex items-center justify-center overflow-hidden">
-                                  <div className="relative w-14 h-14">
-                                    <img 
-                                      src="/maze-logo.png" 
-                                      alt="MAZE Logo" 
-                                      className="w-14 h-14 absolute inset-0 object-contain"
-                                      style={{ filter: "invert(1)" }}
-                                    />
-                                    <div 
-                                      className="w-14 h-14 absolute inset-0" 
-                                      style={{ backgroundColor: "#f97316", mixBlendMode: "multiply" }}
-                                    />
-                                  </div>
+                                <div className="w-16 h-16 bg-gray-200 dark:bg-gray-700 rounded flex items-center justify-center">
+                                  <span className="text-gray-400 dark:text-gray-500 text-xs">No Logo</span>
                                 </div>
                               )}
                             </div>

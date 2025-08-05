@@ -108,18 +108,9 @@ export default function Sidebar() {
                     className="w-20 h-20 absolute inset-0 object-contain"
                   />
                 ) : (
-                  <>
-                    <img 
-                      src="/maze-logo.png" 
-                      alt="MAZE Logo" 
-                      className="w-20 h-20 absolute inset-0 object-contain"
-                      style={{ filter: "invert(1)" }}
-                    />
-                    <div 
-                      className="w-20 h-20 absolute inset-0" 
-                      style={{ backgroundColor: "#f97316", mixBlendMode: "multiply" }}
-                    />
-                  </>
+                  <div className="w-20 h-20 flex items-center justify-center text-gray-400 dark:text-gray-500 text-xs text-center">
+                    No Logo
+                  </div>
                 )}
               </div>
             </div>
