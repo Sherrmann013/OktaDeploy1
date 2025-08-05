@@ -485,6 +485,54 @@ function AdminComponent() {
     }
   };
 
+  const handleAddMonitoringCard = async () => {
+    const getCardName = (type: string, customName?: string) => {
+      if (type === "custom") return customName || "Custom Monitor";
+      const names = {
+        users: "User Activity Monitor",
+        security: "Security Events",
+        devices: "Device Status", 
+        alerts: "Active Alerts",
+        performance: "System Performance"
+      };
+      return names[type as keyof typeof names] || type;
+    };
+
+    try {
+      const response = await fetch("/api/monitoring-cards", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          name: getCardName(selectedMonitoringCardType, customMonitoringCardName),
+          type: selectedMonitoringCardType,
+          enabled: true,
+          position: monitoringCards.length
+        }),
+      });
+
+      if (response.ok) {
+        refetchMonitoringCards();
+        toast({
+          title: "Success",
+          description: "Monitoring card added successfully",
+        });
+        setIsAddMonitoringCardOpen(false);
+        setSelectedMonitoringCardType("");
+        setCustomMonitoringCardName("");
+      } else {
+        throw new Error('Failed to create monitoring card');
+      }
+    } catch (error) {
+      console.error('Failed to add monitoring card:', error);
+      toast({
+        title: "Error", 
+        description: "Failed to add monitoring card",
+        variant: "destructive",
+      });
+    }
+  };
+
   // Get current logo setting
   const { data: logoSetting } = useQuery({
     queryKey: ['/api/layout-settings/company_logo'],
@@ -514,6 +562,8 @@ function AdminComponent() {
   const [showIntegrationDropdown, setShowIntegrationDropdown] = useState(false);
   const [customCardName, setCustomCardName] = useState("");
   const [customCardDescription, setCustomCardDescription] = useState("");
+  const [selectedMonitoringCardType, setSelectedMonitoringCardType] = useState("");
+  const [customMonitoringCardName, setCustomMonitoringCardName] = useState("");
   const [isCreateUserModalOpen, setIsCreateUserModalOpen] = useState(false);
   // State moved to NewUserConfigSection component
 
@@ -2851,6 +2901,83 @@ function AdminComponent() {
                 Add Custom Card
               </Button>
             )}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Monitoring Card Dialog */}
+      <Dialog open={isAddMonitoringCardOpen} onOpenChange={setIsAddMonitoringCardOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Add Monitoring Card</DialogTitle>
+            <p className="text-sm text-muted-foreground">
+              Add a new card to the monitoring dashboard
+            </p>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="monitoringCardType">Card Type</Label>
+              <Select 
+                value={selectedMonitoringCardType} 
+                onValueChange={setSelectedMonitoringCardType}
+              >
+                <SelectTrigger className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+                  <SelectValue placeholder="Select monitoring card type" />
+                </SelectTrigger>
+                <SelectContent className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+                  <SelectItem value="users" className="bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700">
+                    User Activity Monitor
+                  </SelectItem>
+                  <SelectItem value="security" className="bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700">
+                    Security Events
+                  </SelectItem>
+                  <SelectItem value="devices" className="bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700">
+                    Device Status
+                  </SelectItem>
+                  <SelectItem value="alerts" className="bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700">
+                    Active Alerts
+                  </SelectItem>
+                  <SelectItem value="performance" className="bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700">
+                    System Performance
+                  </SelectItem>
+                  <SelectItem value="custom" className="bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700">
+                    Custom Monitor
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            {/* Custom card creation form */}
+            {selectedMonitoringCardType === "custom" && (
+              <div className="space-y-4 pt-4 border-t border-gray-200 dark:border-gray-600">
+                <div className="grid gap-2">
+                  <Label htmlFor="customMonitoringCardName">Custom Card Name</Label>
+                  <Input
+                    id="customMonitoringCardName"
+                    value={customMonitoringCardName}
+                    onChange={(e) => setCustomMonitoringCardName(e.target.value)}
+                    placeholder="Enter custom monitoring card name"
+                    className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700"
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+          <div className="flex justify-end space-x-2">
+            <Button variant="outline" onClick={() => {
+              setIsAddMonitoringCardOpen(false);
+              setSelectedMonitoringCardType("");
+              setCustomMonitoringCardName("");
+            }}>
+              Cancel
+            </Button>
+            <Button 
+              onClick={handleAddMonitoringCard}
+              disabled={!selectedMonitoringCardType || (selectedMonitoringCardType === "custom" && !customMonitoringCardName.trim())}
+              className="bg-orange-600 hover:bg-orange-700 text-white"
+            >
+              Add Card
+            </Button>
           </div>
         </DialogContent>
       </Dialog>
