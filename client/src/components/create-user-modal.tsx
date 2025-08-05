@@ -826,7 +826,7 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
                         
                         return hasOptions ? (
                           <Select
-                            value={field.value || ""}
+                            value={field.value || undefined}
                             onValueChange={(value) => handleDepartmentChange(value, field.onChange)}
                           >
                             <SelectTrigger className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600">
@@ -916,7 +916,7 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
                     <FormLabel>Employee Type {fieldSettings?.employeeType?.required ? '*' : ''}</FormLabel>
                     <FormControl>
                       <Select
-                        value={field.value || ""}
+                        value={field.value || undefined}
                         onValueChange={(value) => handleEmployeeTypeChange(value, field.onChange)}
                       >
                         <SelectTrigger className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600">
@@ -970,7 +970,6 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
                 
                 {/* Add app dropdown at top */}
                 <Select
-                  value={undefined}
                   onValueChange={(value) => {
                     if (value && !selectedApps.includes(value)) {
                       setSelectedApps([...selectedApps, value]);
