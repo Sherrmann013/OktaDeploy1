@@ -812,44 +812,42 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
                 )}
               />
 
-              <div className="space-y-2">
-                <Label>Department {fieldSettings?.department?.required ? '*' : ''}</Label>
-                {(() => {
-                  const hasOptions = fieldSettings?.department?.options && 
-                                   Array.isArray(fieldSettings.department.options) && 
-                                   fieldSettings.department.options.length > 0;
-                  
-                  return hasOptions ? (
-                    <div className="space-y-2">
-                      {fieldSettings.department.options.filter((option: string) => option && option.trim() !== '').map((option: string) => (
-                        <div key={option} className="flex items-center space-x-2">
-                          <Checkbox
-                            id={`dept-${option}`}
-                            checked={form.getValues("department") === option}
-                            onCheckedChange={(checked) => {
-                              if (checked) {
-                                form.setValue("department", option);
-                                handleDepartmentChange(option, (value: string) => form.setValue("department", value));
-                              } else {
-                                form.setValue("department", "");
-                              }
-                            }}
-                          />
-                          <Label htmlFor={`dept-${option}`} className="text-sm font-normal">
-                            {option}
-                          </Label>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <Input 
-                      placeholder="Enter department" 
-                      value={form.getValues("department") || ""} 
-                      onChange={(e) => form.setValue("department", e.target.value)}
-                    />
-                  );
-                })()}
-              </div>
+              <FormField
+                control={form.control}
+                name="department"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Department {fieldSettings?.department?.required ? '*' : ''}</FormLabel>
+                    <FormControl>
+                      {(() => {
+                        const hasOptions = fieldSettings?.department?.options && 
+                                         Array.isArray(fieldSettings.department.options) && 
+                                         fieldSettings.department.options.length > 0;
+                        
+                        return hasOptions ? (
+                          <Select
+                            value={field.value || undefined}
+                            onValueChange={(value) => handleDepartmentChange(value, field.onChange)}
+                          >
+                            <SelectTrigger className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600">
+                              <SelectValue placeholder="Select department" />
+                            </SelectTrigger>
+                            <SelectContent className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600">
+                              {fieldSettings.department.options.filter((option: string) => option && option.trim() !== '').map((option: string) => (
+                                <SelectItem key={option} value={option} className="bg-white dark:bg-gray-800">
+                                  {option}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        ) : (
+                          <Input placeholder="Enter department" {...field} value={field.value || ""} />
+                        );
+                      })()}
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
             </div>
 
             {/* Manager and Employee Type */}
@@ -903,30 +901,32 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
                 )}
               />
 
-              <div className="space-y-2">
-                <Label>Employee Type {fieldSettings?.employeeType?.required ? '*' : ''}</Label>
-                <div className="space-y-2">
-                  {fieldSettings?.employeeType?.options?.filter((option: string) => option && option.trim() !== '').map((option: string) => (
-                    <div key={option} className="flex items-center space-x-2">
-                      <Checkbox
-                        id={`emp-${option}`}
-                        checked={form.getValues("employeeType") === option}
-                        onCheckedChange={(checked) => {
-                          if (checked) {
-                            form.setValue("employeeType", option);
-                            handleEmployeeTypeChange(option, (value: string) => form.setValue("employeeType", value));
-                          } else {
-                            form.setValue("employeeType", "");
-                          }
-                        }}
-                      />
-                      <Label htmlFor={`emp-${option}`} className="text-sm font-normal">
-                        {option}
-                      </Label>
-                    </div>
-                  )) || []}
-                </div>
-              </div>
+              <FormField
+                control={form.control}
+                name="employeeType"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Employee Type {fieldSettings?.employeeType?.required ? '*' : ''}</FormLabel>
+                    <FormControl>
+                      <Select
+                        value={field.value || undefined}
+                        onValueChange={(value) => handleEmployeeTypeChange(value, field.onChange)}
+                      >
+                        <SelectTrigger className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600">
+                          <SelectValue placeholder="Select employee type" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600">
+                          {fieldSettings?.employeeType?.options?.filter((option: string) => option && option.trim() !== '').map((option: string) => (
+                            <SelectItem key={option} value={option} className="bg-white dark:bg-gray-800">
+                              {option}
+                            </SelectItem>
+                          )) || []}
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
 
             </div>
 
