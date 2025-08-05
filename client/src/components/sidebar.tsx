@@ -37,6 +37,11 @@ export default function Sidebar() {
     queryKey: ['/api/layout-settings/logo_background_color'],
   });
 
+  // Get logo text visibility setting
+  const { data: logoTextVisibilitySetting } = useQuery({
+    queryKey: ['/api/layout-settings/logo_text_visible'],
+  });
+
   // Logo data loaded silently
 
   // Filter navigation based on user access level
@@ -127,9 +132,12 @@ export default function Sidebar() {
             </div>
           </div>
         </div>
-        <div className="text-[10px] text-white/80 leading-none mt-auto whitespace-nowrap -ml-1">
-          {(logoTextSetting as any)?.settingValue || "Powered by ClockWerk.it"}
-        </div>
+        {/* Only show logo text if visibility setting is true (default: true) */}
+        {((logoTextVisibilitySetting as any)?.settingValue !== 'false') && (
+          <div className="text-[10px] text-white/80 leading-none mt-auto whitespace-nowrap -ml-1">
+            {(logoTextSetting as any)?.settingValue || "Powered by ClockWerk.it"}
+          </div>
+        )}
       </div>
       
       <nav className="p-4 flex-1">

@@ -50,6 +50,7 @@ The dashboard is built with a React frontend (TypeScript, Tailwind CSS, Wouter) 
 - **Dynamic Content:** Dashboard cards now display database names and are synchronized bi-directionally with the admin layout page.
 - **Field Configuration Persistence:** Fixed Department and Employee Type field settings to properly load from and save to the database. Removed conditional query enabling that prevented these settings from loading outside the Layout > New User tab. Settings now persist across page refreshes and are available to CreateUserModal (resolved July 31, 2025).
 - **Department and Employee Type Integration:** Successfully integrated Department, Employee Type, and dynamic Apps system from Admin interface into CreateUserModal. Department appears right of Job Title, Employee Type right of Manager in 2-column layouts. Apps replaced with dynamic dropdown system linked to database. All field configurations now sync between Admin and CreateUserModal (completed August 1, 2025).
+- **Logo Customization Enhancement (August 5, 2025):** Added comprehensive logo background color control in Admin > Layout > Logo section with color picker interface, hex input field, real-time preview, and sidebar integration. Also implemented logo text visibility toggle allowing users to show/hide the text below the logo. Both settings persist in database with proper audit logging.
 
 ## External Dependencies
 - **OKTA:** Integrated for enterprise user authentication via OAuth2 and user/group management.

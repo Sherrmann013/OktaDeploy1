@@ -779,6 +779,24 @@ function AdminComponent() {
     }
   }, [logoBackgroundSetting]);
 
+  // Logo text visibility state and queries
+  const [showLogoText, setShowLogoText] = useState(true); // Default to show
+  
+  // Fetch logo text visibility setting
+  const { data: logoTextVisibilitySetting } = useQuery({
+    queryKey: ['/api/layout-settings/logo_text_visible'],
+    enabled: activeTab === "layout" && layoutTab === "logo",
+    staleTime: 15 * 60 * 1000, // 15 minutes - settings rarely change
+    refetchOnWindowFocus: false,
+  });
+
+  // Update logo text visibility when setting loads
+  useEffect(() => {
+    if ((logoTextVisibilitySetting as any)?.settingValue !== undefined) {
+      setShowLogoText((logoTextVisibilitySetting as any).settingValue === 'true');
+    }
+  }, [logoTextVisibilitySetting]);
+
   // Logo text update mutation
   const updateLogoTextMutation = useMutation({
     mutationFn: async (text: string) => {
@@ -826,6 +844,32 @@ function AdminComponent() {
       toast({
         title: "Error",
         description: "Failed to update logo background color",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Logo text visibility update mutation
+  const updateLogoTextVisibilityMutation = useMutation({
+    mutationFn: async (visible: boolean) => {
+      const response = await apiRequest("POST", "/api/layout-settings", {
+        settingKey: "logo_text_visible",
+        settingValue: visible.toString(),
+        settingType: "logo",
+      });
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/layout-settings/logo_text_visible'] });
+      toast({
+        title: "Success",
+        description: "Logo text visibility updated successfully",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: "Failed to update logo text visibility",
         variant: "destructive",
       });
     },
@@ -2163,22 +2207,44 @@ function AdminComponent() {
                         <div>
                           <h5 className="text-md font-medium mb-3">Logo Text</h5>
                           <div className="space-y-3">
+                            {/* Show/Hide Toggle */}
                             <div className="flex items-center gap-3">
-                              <Input
-                                id="logoText"
-                                value={logoText}
-                                onChange={(e) => setLogoText(e.target.value)}
-                                placeholder="Enter text to display under logo"
-                                className="w-1/4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700"
-                              />
-                              <Button 
-                                onClick={() => updateLogoTextMutation.mutate(logoText)}
-                                disabled={updateLogoTextMutation.isPending || logoText === ((logoTextSetting as any)?.settingValue || "Powered by ClockWerk.it")}
-                                className="bg-green-600 hover:bg-green-700 text-white"
-                              >
-                                {updateLogoTextMutation.isPending ? "Updating..." : "Update Text"}
-                              </Button>
+                              <label className="flex items-center gap-2 cursor-pointer">
+                                <input
+                                  type="checkbox"
+                                  checked={showLogoText}
+                                  onChange={(e) => {
+                                    const newValue = e.target.checked;
+                                    setShowLogoText(newValue);
+                                    updateLogoTextVisibilityMutation.mutate(newValue);
+                                  }}
+                                  className="w-4 h-4 text-blue-600 rounded border border-gray-300 dark:border-gray-600 focus:ring-blue-500"
+                                />
+                                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                                  Show logo text in sidebar
+                                </span>
+                              </label>
                             </div>
+                            
+                            {/* Text Input - only show when text is enabled */}
+                            {showLogoText && (
+                              <div className="flex items-center gap-3">
+                                <Input
+                                  id="logoText"
+                                  value={logoText}
+                                  onChange={(e) => setLogoText(e.target.value)}
+                                  placeholder="Enter text to display under logo"
+                                  className="w-1/4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700"
+                                />
+                                <Button 
+                                  onClick={() => updateLogoTextMutation.mutate(logoText)}
+                                  disabled={updateLogoTextMutation.isPending || logoText === ((logoTextSetting as any)?.settingValue || "Powered by ClockWerk.it")}
+                                  className="bg-green-600 hover:bg-green-700 text-white"
+                                >
+                                  {updateLogoTextMutation.isPending ? "Updating..." : "Update Text"}
+                                </Button>
+                              </div>
+                            )}
                           </div>
                         </div>
                       </div>
