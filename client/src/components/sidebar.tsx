@@ -32,16 +32,7 @@ export default function Sidebar() {
     queryKey: ['/api/layout-settings/logo_text'],
   });
 
-  // Debug: Log the logo data
-  React.useEffect(() => {
-    console.log('🖼️ Sidebar - Active logo data:', activeLogo);
-    console.log('📝 Sidebar - Logo text data:', logoTextSetting);
-    if (activeLogo) {
-      console.log('🖼️ Sidebar - Logo data type:', typeof (activeLogo as any)?.logoData);
-      console.log('🖼️ Sidebar - Logo data length:', (activeLogo as any)?.logoData?.length);
-      console.log('🖼️ Sidebar - Logo data preview:', (activeLogo as any)?.logoData?.substring(0, 50));
-    }
-  }, [activeLogo, logoTextSetting]);
+  // Logo data loaded silently
 
   // Filter navigation based on user access level
   const navigation = [
@@ -117,13 +108,6 @@ export default function Sidebar() {
                     src={(activeLogo as any).logoData} 
                     alt="Company Logo" 
                     className="w-20 h-20 absolute inset-0 object-contain"
-                    onError={(e) => {
-                      console.error('Logo failed to load:', e);
-                      console.log('Logo data:', (activeLogo as any)?.logoData?.substring(0, 100));
-                    }}
-                    onLoad={() => {
-                      console.log('Logo loaded successfully');
-                    }}
                   />
                 ) : (
                   <div className="w-20 h-20 flex items-center justify-center text-gray-400 dark:text-gray-500 text-xs text-center">

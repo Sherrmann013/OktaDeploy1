@@ -215,14 +215,7 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
   const emailDomains = (emailDomainConfig?.domains || ['@mazetx.com']).filter((domain: string) => domain && domain.trim() !== '');
   const hasMultipleDomains = emailDomains.length > 1;
 
-  // Debug logging for field configuration
-  React.useEffect(() => {
-    console.log('🔍 CreateUserModal - Field settings loaded:', fieldSettings);
-
-    console.log('🔍 CreateUserModal - Email domain config loaded:', emailDomainConfig);
-    console.log('🔍 CreateUserModal - Email domains:', emailDomains);
-    console.log('🔍 CreateUserModal - Has multiple domains:', hasMultipleDomains);
-  }, [fieldSettings, emailDomainConfig, emailDomains, hasMultipleDomains]);
+  // Field configuration loaded silently
 
   // Set default domain when modal opens or domains change
   React.useEffect(() => {

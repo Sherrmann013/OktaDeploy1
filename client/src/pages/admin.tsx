@@ -638,8 +638,8 @@ function AdminComponent() {
   // Refetch all settings when switching to New User tab
   useEffect(() => {
     if (activeTab === "layout" && layoutTab === "new-user") {
-      console.log('🔍 New User tab selected, refetching all settings...');
-      console.log('🔍 Current field settings before refetch:', fieldSettings);
+      
+      
       refetchEmailSettings();
       refetchDepartmentSettings();
 
@@ -648,15 +648,15 @@ function AdminComponent() {
 
   // Update field settings when email username settings are loaded
   useEffect(() => {
-    console.log('🔍 Email username settings effect triggered:', emailUsernameSettings);
+    
     if (emailUsernameSettings && (emailUsernameSettings as any).settingValue) {
       try {
         const parsedSettings = JSON.parse((emailUsernameSettings as any).settingValue);
-        console.log('🔍 Parsed email settings:', parsedSettings);
+        
         if (parsedSettings.domains && Array.isArray(parsedSettings.domains)) {
-          console.log('🔍 Loading saved domains:', parsedSettings.domains);
+          
           setFieldSettings((prev: any) => {
-            console.log('🔍 Previous field settings:', prev);
+            
             const newSettings = {
               ...prev,
               emailUsername: {
@@ -664,7 +664,7 @@ function AdminComponent() {
                 domains: parsedSettings.domains
               }
             };
-            console.log('🔍 New field settings:', newSettings);
+            
             return newSettings;
           });
         }
@@ -672,7 +672,7 @@ function AdminComponent() {
         console.error('🔍 Failed to parse email username settings:', error);
       }
     } else {
-      console.log('🔍 No email username settings found, using defaults');
+      
     }
   }, [emailUsernameSettings]);
 
@@ -680,15 +680,15 @@ function AdminComponent() {
 
   // Update field settings when password settings are loaded
   useEffect(() => {
-    console.log('🔍 Password settings effect triggered:', passwordSettings);
+    
     if (passwordSettings && (passwordSettings as any).settingValue) {
       try {
         const parsedSettings = JSON.parse((passwordSettings as any).settingValue);
-        console.log('🔍 Parsed password settings:', parsedSettings);
+        
         if (parsedSettings.components && Array.isArray(parsedSettings.components)) {
-          console.log('🔍 Loading saved password components:', parsedSettings);
+          
           setFieldSettings((prev: any) => {
-            console.log('🔍 Previous password field settings:', prev);
+            
             const newSettings = {
               ...prev,
               password: {
@@ -696,7 +696,7 @@ function AdminComponent() {
                 ...parsedSettings
               }
             };
-            console.log('🔍 New password field settings:', newSettings);
+            
             return newSettings;
           });
         }
@@ -704,13 +704,13 @@ function AdminComponent() {
         console.error('🔍 Failed to parse password settings:', error);
       }
     } else {
-      console.log('🔍 No password settings found, using defaults');
+      
     }
   }, [passwordSettings]);
 
   // Update field settings when individual field settings are loaded
   useEffect(() => {
-    console.log('🔍 Field settings loaded - updating state');
+    
     setFieldSettings((prev: any) => {
       const newSettings = { ...prev };
       
@@ -719,7 +719,7 @@ function AdminComponent() {
         try {
           const parsed = JSON.parse((firstNameSettings as any).settingValue);
           newSettings.firstName = { ...newSettings.firstName, ...parsed };
-          console.log('🔍 Updated firstName setting:', parsed);
+          
         } catch (error) {
           console.error('Failed to parse firstName settings:', error);
         }
@@ -730,7 +730,7 @@ function AdminComponent() {
         try {
           const parsed = JSON.parse((lastNameSettings as any).settingValue);
           newSettings.lastName = { ...newSettings.lastName, ...parsed };
-          console.log('🔍 Updated lastName setting:', parsed);
+          
         } catch (error) {
           console.error('Failed to parse lastName settings:', error);
         }
@@ -741,7 +741,7 @@ function AdminComponent() {
         try {
           const parsed = JSON.parse((titleSettings as any).settingValue);
           newSettings.title = { ...newSettings.title, ...parsed };
-          console.log('🔍 Updated title setting:', parsed);
+          
         } catch (error) {
           console.error('Failed to parse title settings:', error);
         }
@@ -752,7 +752,7 @@ function AdminComponent() {
         try {
           const parsed = JSON.parse((managerSettings as any).settingValue);
           newSettings.manager = { ...newSettings.manager, ...parsed };
-          console.log('🔍 Updated manager setting:', parsed);
+          
         } catch (error) {
           console.error('Failed to parse manager settings:', error);
         }
@@ -763,7 +763,7 @@ function AdminComponent() {
         try {
           const parsed = JSON.parse((departmentSettings as any).settingValue);
           newSettings.department = { ...newSettings.department, ...parsed };
-          console.log('🔍 Updated department setting:', parsed);
+          
         } catch (error) {
           console.error('Failed to parse department settings:', error);
         }
@@ -774,7 +774,7 @@ function AdminComponent() {
         try {
           const parsed = JSON.parse((employeeTypeSettings as any).settingValue);
           newSettings.employeeType = { ...newSettings.employeeType, ...parsed };
-          console.log('🔍 Updated employee type setting:', parsed);
+          
         } catch (error) {
           console.error('Failed to parse employee type settings:', error);
         }
@@ -861,7 +861,7 @@ function AdminComponent() {
     .filter(app => app.status === 'active')
     .map(app => app.appName);
 
-  console.log('🔍 Available apps for dropdown:', availableApps);
+  
 
   // Note: department and employee type app mappings are already declared above
 
