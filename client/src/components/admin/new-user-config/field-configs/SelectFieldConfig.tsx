@@ -315,7 +315,7 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
     const differences: { departmentName: string; added: string[]; removed: string[] }[] = [];
     
     // Get all unique department names
-    const allDepartments = [...new Set([...Object.keys(currentMappings), ...Object.keys(newMappings)])];
+    const allDepartments = Array.from(new Set([...Object.keys(currentMappings), ...Object.keys(newMappings)]));
     
     for (const departmentName of allDepartments) {
       const current = currentMappings[departmentName] || [];
@@ -337,7 +337,7 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
     const differences: { employeeType: string; added: string[]; removed: string[] }[] = [];
     
     // Get all unique employee types
-    const allEmployeeTypes = [...new Set([...Object.keys(currentMappings), ...Object.keys(newMappings)])];
+    const allEmployeeTypes = Array.from(new Set([...Object.keys(currentMappings), ...Object.keys(newMappings)]));
     
     for (const employeeType of allEmployeeTypes) {
       const current = currentMappings[employeeType] || [];
@@ -797,7 +797,6 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
                     <>
                       {/* Add app dropdown at top */}
                       <Select
-                        value=""
                         onValueChange={(appName) => {
                           if (fieldType === 'department') {
                             handleLinkApp(selectedDepartment, appName);
@@ -936,7 +935,7 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
                       <SelectValue placeholder={fieldType === 'department' ? 'Choose a department...' : 'Choose an employee type...'} />
                     </SelectTrigger>
                     <SelectContent className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600">
-                      {config.options.map((option) => (
+                      {config.options.filter(option => option && option.trim() !== '').map((option) => (
                         <SelectItem key={option} value={option} className="bg-white dark:bg-gray-800">
                           <div className="flex items-center justify-between w-full">
                             <span>{option}</span>
@@ -959,7 +958,6 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
                     <>
                       {/* Add group dropdown at top */}
                       <Select
-                        value=""
                         onValueChange={(groupName) => {
                           if (fieldType === 'department') {
                             handleLinkDepartmentGroup(selectedDepartment, groupName);
