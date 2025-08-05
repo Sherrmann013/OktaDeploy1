@@ -412,10 +412,19 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
     "GXP@mazetx.com"
   ];
 
-  // Dynamic apps from database
+  // Dynamic apps from database with debug logging
   const availableApps = Array.isArray(appMappingsData) 
-    ? appMappingsData.map((app: any) => app.appName).filter((name: string) => name && name.trim() !== '')
+    ? appMappingsData.map((app: any) => {
+        console.log('🔍 App mapping item:', app);
+        return app.appName;
+      }).filter((name: string) => {
+        const isValid = name && name.trim() !== '';
+        console.log('🔍 App name validation:', { name, isValid });
+        return isValid;
+      })
     : [];
+  
+  console.log('🔍 Final availableApps:', availableApps);
 
   // Process department app mappings
   const departmentAppMappings: Record<string, string[]> = {};
@@ -817,11 +826,18 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
                               <SelectValue placeholder="Select department" />
                             </SelectTrigger>
                             <SelectContent className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600">
-                              {fieldSettings.department.options.filter((option: string) => option && option.trim() !== '').map((option: string) => (
-                                <SelectItem key={option} value={option} className="bg-white dark:bg-gray-800">
-                                  {option}
-                                </SelectItem>
-                              ))}
+                              {fieldSettings.department.options.filter((option: string) => {
+                                const isValid = option && option.trim() !== '';
+                                console.log('🔍 Department option validation:', { option, isValid });
+                                return isValid;
+                              }).map((option: string) => {
+                                console.log('🔍 Creating SelectItem for department:', option);
+                                return (
+                                  <SelectItem key={option} value={option} className="bg-white dark:bg-gray-800">
+                                    {option}
+                                  </SelectItem>
+                                );
+                              })}
                             </SelectContent>
                           </Select>
                         ) : (
@@ -900,11 +916,18 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
                           <SelectValue placeholder="Select employee type" />
                         </SelectTrigger>
                         <SelectContent className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600">
-                          {fieldSettings?.employeeType?.options?.filter((option: string) => option && option.trim() !== '').map((option: string) => (
-                            <SelectItem key={option} value={option} className="bg-white dark:bg-gray-800">
-                              {option}
-                            </SelectItem>
-                          ))}
+                          {fieldSettings?.employeeType?.options?.filter((option: string) => {
+                            const isValid = option && option.trim() !== '';
+                            console.log('🔍 Employee Type option validation:', { option, isValid });
+                            return isValid;
+                          }).map((option: string) => {
+                            console.log('🔍 Creating SelectItem for employee type:', option);
+                            return (
+                              <SelectItem key={option} value={option} className="bg-white dark:bg-gray-800">
+                                {option}
+                              </SelectItem>
+                            );
+                          })}
                         </SelectContent>
                       </Select>
                     </FormControl>
@@ -956,12 +979,19 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
                   </SelectTrigger>
                   <SelectContent className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600">
                     {availableApps
-                      .filter((app: string) => app && app.trim() !== '' && !selectedApps.includes(app))
-                      .map((app: string) => (
-                        <SelectItem key={app} value={app} className="bg-white dark:bg-gray-800">
-                          {app}
-                        </SelectItem>
-                      ))}
+                      .filter((app: string) => {
+                        const isValid = app && app.trim() !== '' && !selectedApps.includes(app);
+                        console.log('🔍 Available app filter:', { app, isValid });
+                        return isValid;
+                      })
+                      .map((app: string) => {
+                        console.log('🔍 Creating SelectItem for app:', app);
+                        return (
+                          <SelectItem key={app} value={app} className="bg-white dark:bg-gray-800">
+                            {app}
+                          </SelectItem>
+                        );
+                      })}
                   </SelectContent>
                 </Select>
 
