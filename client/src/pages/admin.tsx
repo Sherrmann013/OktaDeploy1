@@ -537,10 +537,11 @@ function AdminComponent() {
     }
   };
 
-  // Get current logo setting - ONLY when Layout > Logo tab is active
-  const { data: logoSetting } = useQuery({
-    queryKey: ['/api/layout-settings/company_logo'],
+  // Get active company logo - ONLY when Layout > Logo tab is active
+  const { data: activeLogo } = useQuery({
+    queryKey: ['/api/company-logos/active'],
     enabled: activeTab === "layout" && layoutTab === "logo", // Only load when logo tab is active
+    retry: false,
   });
 
   // Get current logo text setting - ONLY when Layout > Logo tab is active
@@ -2099,9 +2100,9 @@ function AdminComponent() {
                           <h5 className="text-md font-medium mb-3">Logo</h5>
                           <div className="flex items-center gap-4">
                             <div className="flex-shrink-0">
-                              {(logoSetting as any)?.settingValue ? (
+                              {activeLogo?.logoData ? (
                                 <img 
-                                  src={(logoSetting as any).settingValue} 
+                                  src={activeLogo.logoData} 
                                   alt="Company logo" 
                                   className="max-h-12 w-auto object-contain"
                                 />
@@ -2127,7 +2128,7 @@ function AdminComponent() {
                               className="bg-blue-600 hover:bg-blue-700 text-white flex items-center"
                             >
                               <Settings className="w-4 h-4 mr-2" />
-                              Customize Logo
+                              Manage Logos
                             </Button>
                           </div>
                         </div>
