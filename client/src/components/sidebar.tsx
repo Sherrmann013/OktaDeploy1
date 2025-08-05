@@ -32,6 +32,12 @@ export default function Sidebar() {
     queryKey: ['/api/layout-settings/logo_text'],
   });
 
+  // Debug: Log the logo data
+  React.useEffect(() => {
+    console.log('🖼️ Sidebar - Active logo data:', activeLogo);
+    console.log('📝 Sidebar - Logo text data:', logoTextSetting);
+  }, [activeLogo, logoTextSetting]);
+
   // Filter navigation based on user access level
   const navigation = [
     { name: "Dashboard", href: "/dashboard", icon: Gauge, current: true },
@@ -101,11 +107,18 @@ export default function Sidebar() {
           <div className="relative inline-block mb-1">
             <div className="relative w-24 h-24 mx-auto rounded bg-purple-600 flex items-center justify-center">
               <div className="relative w-20 h-20">
-                {activeLogo?.logoData ? (
+                {(activeLogo as any)?.logoData ? (
                   <img 
-                    src={activeLogo.logoData} 
+                    src={(activeLogo as any).logoData} 
                     alt="Company Logo" 
                     className="w-20 h-20 absolute inset-0 object-contain"
+                    onError={(e) => {
+                      console.error('Logo failed to load:', e);
+                      console.log('Logo data:', (activeLogo as any)?.logoData?.substring(0, 100));
+                    }}
+                    onLoad={() => {
+                      console.log('Logo loaded successfully');
+                    }}
                   />
                 ) : (
                   <div className="w-20 h-20 flex items-center justify-center text-gray-400 dark:text-gray-500 text-xs text-center">
@@ -117,7 +130,7 @@ export default function Sidebar() {
           </div>
         </div>
         <div className="text-[10px] text-white/80 leading-none mt-auto whitespace-nowrap -ml-1">
-          {logoTextSetting?.settingValue || "Powered by ClockWerk.it"}
+          {(logoTextSetting as any)?.settingValue || "Powered by ClockWerk.it"}
         </div>
       </div>
       
