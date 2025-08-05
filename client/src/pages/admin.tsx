@@ -1776,13 +1776,7 @@ function AdminComponent() {
 
         <TabsContent value="layout" className="mt-6">
           <Card>
-            <CardHeader>
-              <CardTitle>Dashboard Layout & Customization</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground mb-6">
-                Customize your dashboard appearance, company branding, and layout preferences.
-              </p>
+            <CardContent className="pt-6">
               <div className="space-y-8">
 
 
