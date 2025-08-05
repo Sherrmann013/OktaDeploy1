@@ -9,7 +9,13 @@ This project is a comprehensive React-based enterprise security management dashb
 - **Complete Solutions:** User prefers comprehensive implementations over incremental changes
 - **Dropdown Styling:** All Select/dropdown components must have explicit background colors (bg-white dark:bg-gray-800) and borders to prevent transparency issues
 - **Development Process:** When changes aren't visible, always check if development server is serving production build from /dist. Solution: run `npm run build` and restart workflow to rebuild with latest changes.
-- **Performance Optimization:** Implemented comprehensive query caching and polling optimizations (August 5, 2025) to reduce CPU usage from 15-80% to minimal levels by removing aggressive refetch intervals, setting appropriate stale times (2-15 minutes based on data volatility), and disabling window focus refetching.
+- **Performance Optimization:** Implemented comprehensive query caching and polling optimizations (August 5, 2025) to reduce CPU usage from 15-80% to minimal levels by:
+  • Removing aggressive refetch intervals (was polling every 5-10 seconds)
+  • Setting intelligent cache durations (2-15 minutes based on data volatility)
+  • Disabling window focus refetching across all queries
+  • Implementing conditional query loading based on active tabs
+  • Adding React.lazy() for heavy components (CreateUserModal, NewUserConfigSection)
+  • Adding Suspense fallbacks to reduce initial bundle size
 
 ## System Architecture
 The dashboard is built with a React frontend (TypeScript, Tailwind CSS, Wouter) and an Express.js backend (TypeScript, PostgreSQL).
