@@ -2146,7 +2146,12 @@ function AdminComponent() {
                             <div className="flex-shrink-0">
                               <div 
                                 className="p-3 rounded-lg flex items-center justify-center"
-                                style={{ backgroundColor: logoBackgroundColor }}
+                                style={{ 
+                                  backgroundColor: logoBackgroundColor === "transparent" ? "transparent" : logoBackgroundColor,
+                                  backgroundImage: logoBackgroundColor === "transparent" ? "linear-gradient(45deg, #f0f0f0 25%, transparent 25%), linear-gradient(-45deg, #f0f0f0 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #f0f0f0 75%), linear-gradient(-45deg, transparent 75%, #f0f0f0 75%)" : "none",
+                                  backgroundSize: logoBackgroundColor === "transparent" ? "8px 8px" : "auto",
+                                  backgroundPosition: logoBackgroundColor === "transparent" ? "0 0, 0 4px, 4px -4px, -4px 0px" : "auto"
+                                }}
                               >
                                 {activeLogo?.logoData ? (
                                   <img 
@@ -2171,33 +2176,72 @@ function AdminComponent() {
                               </Button>
                               
                               {/* Background Color Section */}
-                              <div className="flex items-center gap-3">
-                                <label htmlFor="logoBackgroundColor" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                              <div className="space-y-2">
+                                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
                                   Background Color:
                                 </label>
-                                <div className="flex items-center gap-2">
-                                  <input
-                                    type="color"
-                                    id="logoBackgroundColor"
-                                    value={logoBackgroundColor}
-                                    onChange={(e) => setLogoBackgroundColor(e.target.value)}
-                                    className="w-8 h-8 rounded border border-gray-300 dark:border-gray-600 cursor-pointer"
-                                  />
-                                  <Input
-                                    value={logoBackgroundColor}
-                                    onChange={(e) => setLogoBackgroundColor(e.target.value)}
-                                    placeholder="#7c3aed"
-                                    className="w-24 text-xs bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700"
-                                  />
-                                  <Button 
-                                    onClick={() => updateLogoBackgroundColorMutation.mutate(logoBackgroundColor)}
-                                    disabled={updateLogoBackgroundColorMutation.isPending || logoBackgroundColor === ((logoBackgroundSetting as any)?.settingValue || "#7c3aed")}
-                                    size="sm"
-                                    className="bg-green-600 hover:bg-green-700 text-white"
-                                  >
-                                    {updateLogoBackgroundColorMutation.isPending ? "Updating..." : "Update"}
-                                  </Button>
+                                
+                                {/* Option Selection */}
+                                <div className="flex items-center gap-4">
+                                  <label className="flex items-center gap-2 cursor-pointer">
+                                    <input
+                                      type="radio"
+                                      name="logoBackground"
+                                      checked={logoBackgroundColor === "transparent"}
+                                      onChange={() => setLogoBackgroundColor("transparent")}
+                                      className="w-4 h-4 text-blue-600"
+                                    />
+                                    <span className="text-sm text-gray-700 dark:text-gray-300">
+                                      None/Transparent
+                                    </span>
+                                  </label>
+                                  
+                                  <label className="flex items-center gap-2 cursor-pointer">
+                                    <input
+                                      type="radio"
+                                      name="logoBackground"
+                                      checked={logoBackgroundColor !== "transparent"}
+                                      onChange={() => {
+                                        if (logoBackgroundColor === "transparent") {
+                                          setLogoBackgroundColor("#7c3aed");
+                                        }
+                                      }}
+                                      className="w-4 h-4 text-blue-600"
+                                    />
+                                    <span className="text-sm text-gray-700 dark:text-gray-300">
+                                      Custom Color
+                                    </span>
+                                  </label>
                                 </div>
+                                
+                                {/* Color Controls - only show when not transparent */}
+                                {logoBackgroundColor !== "transparent" && (
+                                  <div className="flex items-center gap-2">
+                                    <input
+                                      type="color"
+                                      id="logoBackgroundColor"
+                                      value={logoBackgroundColor}
+                                      onChange={(e) => setLogoBackgroundColor(e.target.value)}
+                                      className="w-8 h-8 rounded border border-gray-300 dark:border-gray-600 cursor-pointer"
+                                    />
+                                    <Input
+                                      value={logoBackgroundColor}
+                                      onChange={(e) => setLogoBackgroundColor(e.target.value)}
+                                      placeholder="#7c3aed"
+                                      className="w-24 text-xs bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700"
+                                    />
+                                  </div>
+                                )}
+                                
+                                {/* Update Button */}
+                                <Button 
+                                  onClick={() => updateLogoBackgroundColorMutation.mutate(logoBackgroundColor)}
+                                  disabled={updateLogoBackgroundColorMutation.isPending || logoBackgroundColor === ((logoBackgroundSetting as any)?.settingValue || "#7c3aed")}
+                                  size="sm"
+                                  className="bg-green-600 hover:bg-green-700 text-white"
+                                >
+                                  {updateLogoBackgroundColorMutation.isPending ? "Updating..." : "Update Background"}
+                                </Button>
                               </div>
                             </div>
                           </div>

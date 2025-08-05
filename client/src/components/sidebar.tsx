@@ -113,7 +113,7 @@ export default function Sidebar() {
             <div 
               className="relative w-24 h-24 mx-auto rounded flex items-center justify-center"
               style={{ 
-                backgroundColor: (logoBackgroundSetting as any)?.settingValue || "#7c3aed" 
+                backgroundColor: (logoBackgroundSetting as any)?.settingValue === "transparent" ? "transparent" : ((logoBackgroundSetting as any)?.settingValue || "#7c3aed")
               }}
             >
               <div className="relative w-20 h-20">
