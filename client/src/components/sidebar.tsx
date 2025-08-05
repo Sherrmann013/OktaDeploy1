@@ -32,6 +32,11 @@ export default function Sidebar() {
     queryKey: ['/api/layout-settings/logo_text'],
   });
 
+  // Get logo background color setting
+  const { data: logoBackgroundSetting } = useQuery({
+    queryKey: ['/api/layout-settings/logo_background_color'],
+  });
+
   // Logo data loaded silently
 
   // Filter navigation based on user access level
@@ -100,7 +105,12 @@ export default function Sidebar() {
       <div className="p-3 border-b border-gray-200 dark:border-gray-700 sidebar-purple flex flex-col rounded-br-lg">
         <div className="text-center flex-1">
           <div className="relative inline-block mb-1">
-            <div className="relative w-24 h-24 mx-auto rounded bg-purple-600 flex items-center justify-center">
+            <div 
+              className="relative w-24 h-24 mx-auto rounded flex items-center justify-center"
+              style={{ 
+                backgroundColor: (logoBackgroundSetting as any)?.settingValue || "#7c3aed" 
+              }}
+            >
               <div className="relative w-20 h-20">
                 {(activeLogo as any)?.logoData ? (
                   <img 

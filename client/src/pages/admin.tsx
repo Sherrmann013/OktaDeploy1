@@ -761,6 +761,24 @@ function AdminComponent() {
     }
   }, [logoTextSetting]);
 
+  // Logo background color state and queries
+  const [logoBackgroundColor, setLogoBackgroundColor] = useState("#7c3aed"); // Default purple
+  
+  // Fetch logo background color setting
+  const { data: logoBackgroundSetting } = useQuery({
+    queryKey: ['/api/layout-settings/logo_background_color'],
+    enabled: activeTab === "layout" && layoutTab === "logo",
+    staleTime: 15 * 60 * 1000, // 15 minutes - settings rarely change
+    refetchOnWindowFocus: false,
+  });
+
+  // Update logo background color when setting loads
+  useEffect(() => {
+    if ((logoBackgroundSetting as any)?.settingValue) {
+      setLogoBackgroundColor((logoBackgroundSetting as any).settingValue);
+    }
+  }, [logoBackgroundSetting]);
+
   // Logo text update mutation
   const updateLogoTextMutation = useMutation({
     mutationFn: async (text: string) => {
@@ -782,6 +800,32 @@ function AdminComponent() {
       toast({
         title: "Error",
         description: "Failed to update logo text",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Logo background color update mutation
+  const updateLogoBackgroundColorMutation = useMutation({
+    mutationFn: async (color: string) => {
+      const response = await apiRequest("POST", "/api/layout-settings", {
+        settingKey: "logo_background_color",
+        settingValue: color,
+        settingType: "logo",
+      });
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/layout-settings/logo_background_color'] });
+      toast({
+        title: "Success",
+        description: "Logo background color updated successfully",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: "Failed to update logo background color",
         variant: "destructive",
       });
     },
@@ -2054,27 +2098,64 @@ function AdminComponent() {
                         {/* Logo Section */}
                         <div className="mb-6">
                           <h5 className="text-md font-medium mb-3">Logo</h5>
-                          <div className="flex items-center gap-4">
+                          <div className="flex items-start gap-4">
                             <div className="flex-shrink-0">
-                              {activeLogo?.logoData ? (
-                                <img 
-                                  src={activeLogo.logoData} 
-                                  alt="Company logo" 
-                                  className="max-h-12 w-auto object-contain"
-                                />
-                              ) : (
-                                <div className="w-16 h-16 bg-gray-200 dark:bg-gray-700 rounded flex items-center justify-center">
-                                  <span className="text-gray-400 dark:text-gray-500 text-xs">No Logo</span>
-                                </div>
-                              )}
+                              <div 
+                                className="p-3 rounded-lg flex items-center justify-center"
+                                style={{ backgroundColor: logoBackgroundColor }}
+                              >
+                                {activeLogo?.logoData ? (
+                                  <img 
+                                    src={activeLogo.logoData} 
+                                    alt="Company logo" 
+                                    className="max-h-12 w-auto object-contain"
+                                  />
+                                ) : (
+                                  <div className="w-10 h-10 bg-white/20 rounded flex items-center justify-center">
+                                    <span className="text-white text-xs">No Logo</span>
+                                  </div>
+                                )}
+                              </div>
                             </div>
-                            <Button 
-                              onClick={() => setIsLogoUploadOpen(true)}
-                              className="bg-blue-600 hover:bg-blue-700 text-white flex items-center"
-                            >
-                              <Settings className="w-4 h-4 mr-2" />
-                              Manage Logos
-                            </Button>
+                            <div className="flex flex-col gap-3">
+                              <Button 
+                                onClick={() => setIsLogoUploadOpen(true)}
+                                className="bg-blue-600 hover:bg-blue-700 text-white flex items-center"
+                              >
+                                <Settings className="w-4 h-4 mr-2" />
+                                Manage Logos
+                              </Button>
+                              
+                              {/* Background Color Section */}
+                              <div className="flex items-center gap-3">
+                                <label htmlFor="logoBackgroundColor" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                                  Background Color:
+                                </label>
+                                <div className="flex items-center gap-2">
+                                  <input
+                                    type="color"
+                                    id="logoBackgroundColor"
+                                    value={logoBackgroundColor}
+                                    onChange={(e) => setLogoBackgroundColor(e.target.value)}
+                                    className="w-8 h-8 rounded border border-gray-300 dark:border-gray-600 cursor-pointer"
+                                  />
+                                  <Input
+                                    value={logoBackgroundColor}
+                                    onChange={(e) => setLogoBackgroundColor(e.target.value)}
+                                    placeholder="#7c3aed"
+                                    className="w-24 text-xs bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700"
+                                  />
+                                  <Button 
+                                    onClick={() => updateLogoBackgroundColorMutation.mutate(logoBackgroundColor)}
+                                    disabled={updateLogoBackgroundColorMutation.isPending || logoBackgroundColor === ((logoBackgroundSetting as any)?.settingValue || "#7c3aed")}
+                                    size="sm"
+                                    className="bg-green-600 hover:bg-green-700 text-white"
+                                  >
+                                    {updateLogoBackgroundColorMutation.isPending ? "Updating..." : "Update"}
+                                  </Button>
+                                </div>
+                              </div>
+                            </div>
                           </div>
                         </div>
 
