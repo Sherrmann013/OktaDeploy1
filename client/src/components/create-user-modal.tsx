@@ -43,34 +43,40 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
   const { data: appMappingsData = [] } = useQuery({
     queryKey: ['/api/app-mappings'],
     enabled: open,
+    staleTime: 10 * 60 * 1000, // Cache for 10 minutes
   });
 
   const { data: departmentAppMappingsData = [] } = useQuery({
     queryKey: ["/api/department-app-mappings"],
     enabled: open,
+    staleTime: 10 * 60 * 1000, // Cache for 10 minutes
   });
 
   const { data: employeeTypeAppMappingsData = [] } = useQuery({
     queryKey: ["/api/employee-type-app-mappings"],
     enabled: open,
+    staleTime: 10 * 60 * 1000, // Cache for 10 minutes
   });
 
   const { data: departmentGroupMappingsData = [] } = useQuery({
     queryKey: ["/api/department-group-mappings"],
     enabled: open,
+    staleTime: 10 * 60 * 1000, // Cache for 10 minutes
   });
 
   const { data: employeeTypeGroupMappingsData = [] } = useQuery({
     queryKey: ["/api/employee-type-group-mappings"],
     enabled: open,
+    staleTime: 10 * 60 * 1000, // Cache for 10 minutes
   });
 
   // Fetch all field settings from admin layout - MUST BE DECLARED FIRST
   const { data: fieldSettings } = useQuery({
     queryKey: ["/api/layout-settings", "all-fields"],
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
     queryFn: async () => {
       try {
-        console.log('🔍 CreateUserModal - Starting field settings fetch including Department and Employee Type');
+        // Removed excessive console logging for performance
         const settingsQueries = [
           fetch('/api/layout-settings/firstName', { credentials: 'include' }),
           fetch('/api/layout-settings/lastName', { credentials: 'include' }),
@@ -163,7 +169,7 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
 
   // Remove duplicate query since it's already defined above
 
-  // Fetch existing users for manager dropdown
+  // Fetch existing users for manager dropdown - only when manager search is active
   const { data: usersData } = useQuery({
     queryKey: ["/api/users", "all"],
     queryFn: async () => {
@@ -177,7 +183,8 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
       
       return response.json();
     },
-    enabled: open,
+    enabled: open && managerSearch.length > 0,
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
   });
 
   // Fetch email domain configuration from New User Layout settings
