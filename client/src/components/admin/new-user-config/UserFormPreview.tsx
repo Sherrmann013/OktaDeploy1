@@ -203,20 +203,6 @@ export function UserFormPreview({
             </Label>
             <div className={getWrapperClassName('groups')} onClick={() => handleFieldClick('groups')}>
               <div className="border border-gray-300 dark:border-gray-600 rounded p-3 bg-white dark:bg-gray-800 min-h-[120px] cursor-pointer">
-                <div className="space-y-2">
-                  {fieldSettings.groups?.options && fieldSettings.groups.options.length > 0 ? (
-                    fieldSettings.groups.options.map((group, index) => (
-                      <div key={index} className="flex items-center space-x-2">
-                        <Checkbox id={`preview-group${index + 1}`} disabled />
-                        <Label htmlFor={`preview-group${index + 1}`} className="text-sm">{group}</Label>
-                      </div>
-                    ))
-                  ) : (
-                    <div className="text-center py-8">
-                      <span className="text-sm text-gray-500 dark:text-gray-400">No groups configured</span>
-                    </div>
-                  )}
-                </div>
               </div>
             </div>
           </div>
@@ -228,9 +214,6 @@ export function UserFormPreview({
             </Label>
             <div className={getWrapperClassName('apps')} onClick={() => handleFieldClick('apps')}>
               <div className="border border-gray-300 dark:border-gray-600 rounded p-3 bg-white dark:bg-gray-800 min-h-[120px] cursor-pointer">
-                <div className="text-center py-8">
-                  <span className="text-sm text-gray-500 dark:text-gray-400">No specific app configuration yet</span>
-                </div>
               </div>
             </div>
           </div>
