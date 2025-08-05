@@ -80,16 +80,6 @@ export function NewUserConfigSection({
           />
         </div>
       </div>
-      
-      <div className="mt-6 flex justify-end">
-        <Button 
-          onClick={saveAllSettings}
-          disabled={isSaving}
-          className="bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-50"
-        >
-          {isSaving ? "Saving Changes..." : "Save Changes"}
-        </Button>
-      </div>
     </div>
   );
 }
