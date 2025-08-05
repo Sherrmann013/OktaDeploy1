@@ -820,7 +820,7 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
                               <SelectValue placeholder="Select department" />
                             </SelectTrigger>
                             <SelectContent className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600">
-                              {fieldSettings.department.options.map((option: string) => (
+                              {fieldSettings.department.options.filter((option: string) => option && option.trim() !== '').map((option: string) => (
                                 <SelectItem key={option} value={option} className="bg-white dark:bg-gray-800">
                                   {option}
                                 </SelectItem>
