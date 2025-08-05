@@ -53,6 +53,7 @@ export function LogoUploadModal({ isOpen, onClose }: LogoUploadModalProps) {
         description: "Logo uploaded successfully",
       });
       queryClient.invalidateQueries({ queryKey: ['/api/layout-settings'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/layout-settings/company_logo'] });
       onClose();
       setSelectedFile(null);
       setPreviewUrl(null);
@@ -77,6 +78,7 @@ export function LogoUploadModal({ isOpen, onClose }: LogoUploadModalProps) {
         description: "Logo removed successfully",
       });
       queryClient.invalidateQueries({ queryKey: ['/api/layout-settings'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/layout-settings/company_logo'] });
       onClose();
     },
     onError: (error) => {
