@@ -815,6 +815,7 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
                         <SelectContent className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600">
                           {availableApps
                             .filter((app: string) => {
+                              if (!app || app.trim() === '') return false;
                               if (fieldType === 'department') {
                                 return !localDepartmentAppMappings[selectedDepartment]?.includes(app);
                               } else {
