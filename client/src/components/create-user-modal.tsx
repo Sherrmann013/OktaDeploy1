@@ -959,7 +959,7 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
                   </SelectTrigger>
                   <SelectContent className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600">
                     {availableApps
-                      .filter((app: string) => !selectedApps.includes(app))
+                      .filter((app: string) => app && app.trim() !== '' && !selectedApps.includes(app))
                       .map((app: string) => (
                         <SelectItem key={app} value={app} className="bg-white dark:bg-gray-800">
                           {app}
