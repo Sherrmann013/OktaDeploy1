@@ -835,16 +835,23 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
                             <SelectContent className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600">
                               {fieldSettings.department.options.filter((option: string) => {
                                 const isValid = option && option.trim() !== '';
-                                console.log('🔍 Department option validation:', { option, isValid });
+                                console.log('🔍 Department option validation:', { option, isValid, type: typeof option });
+                                if (!isValid) {
+                                  console.error('🚨 Invalid department option found:', option);
+                                }
                                 return isValid;
                               }).map((option: string) => {
-                                console.log('🔍 Creating SelectItem for department:', option);
+                                console.log('🔍 Creating SelectItem for department:', { option, value: option });
+                                if (!option || option.trim() === '') {
+                                  console.error('🚨 Empty department option passed to SelectItem:', option);
+                                  return null;
+                                }
                                 return (
                                   <SelectItem key={option} value={option} className="bg-white dark:bg-gray-800">
                                     {option}
                                   </SelectItem>
                                 );
-                              })}
+                              }).filter(Boolean)}
                             </SelectContent>
                           </Select>
                         ) : (
@@ -925,16 +932,23 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
                         <SelectContent className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600">
                           {fieldSettings?.employeeType?.options?.filter((option: string) => {
                             const isValid = option && option.trim() !== '';
-                            console.log('🔍 Employee Type option validation:', { option, isValid });
+                            console.log('🔍 Employee Type option validation:', { option, isValid, type: typeof option });
+                            if (!isValid) {
+                              console.error('🚨 Invalid employee type option found:', option);
+                            }
                             return isValid;
                           }).map((option: string) => {
-                            console.log('🔍 Creating SelectItem for employee type:', option);
+                            console.log('🔍 Creating SelectItem for employee type:', { option, value: option });
+                            if (!option || option.trim() === '') {
+                              console.error('🚨 Empty employee type option passed to SelectItem:', option);
+                              return null;
+                            }
                             return (
                               <SelectItem key={option} value={option} className="bg-white dark:bg-gray-800">
                                 {option}
                               </SelectItem>
                             );
-                          })}
+                          }).filter(Boolean)}
                         </SelectContent>
                       </Select>
                     </FormControl>
