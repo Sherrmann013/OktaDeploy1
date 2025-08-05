@@ -212,6 +212,14 @@ export function LogoUploadModal({ isOpen, onClose }: LogoUploadModalProps) {
                       src={logo.logoData} 
                       alt={logo.fileName} 
                       className="h-16 w-full object-contain mb-2"
+                      onError={(e) => {
+                        console.error('Image load error for', logo.fileName, e);
+                        e.currentTarget.style.border = '1px solid red';
+                        e.currentTarget.style.background = '#ffeaea';
+                      }}
+                      onLoad={() => {
+                        console.log('Image loaded successfully:', logo.fileName);
+                      }}
                     />
                     <p className="text-xs text-gray-600 dark:text-gray-400 truncate mb-2">
                       {logo.fileName}
