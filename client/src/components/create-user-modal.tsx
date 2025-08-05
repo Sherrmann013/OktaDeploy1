@@ -737,11 +737,18 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
                               <CustomSelectValue />
                             </CustomSelectTrigger>
                             <CustomSelectContent>
-                              {emailDomains.filter((domain: string) => domain && domain.trim() !== '').map((domain: string) => (
-                                <CustomSelectItem key={domain} value={domain}>
-                                  {domain}
-                                </CustomSelectItem>
-                              ))}
+                              {emailDomains.filter((domain: string) => {
+                                const isValid = domain && domain.trim() !== '';
+                                console.log('🔍 Email domain validation:', { domain, isValid });
+                                return isValid;
+                              }).map((domain: string) => {
+                                console.log('🔍 Creating CustomSelectItem for domain:', domain);
+                                return (
+                                  <CustomSelectItem key={domain} value={domain}>
+                                    {domain}
+                                  </CustomSelectItem>
+                                );
+                              })}
                             </CustomSelectContent>
                           </CustomSelect>
                         ) : (
@@ -963,7 +970,7 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
                 
                 {/* Add app dropdown at top */}
                 <Select
-                  value=""
+                  value={undefined}
                   onValueChange={(value) => {
                     if (value && !selectedApps.includes(value)) {
                       setSelectedApps([...selectedApps, value]);
