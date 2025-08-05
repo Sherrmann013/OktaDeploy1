@@ -159,7 +159,7 @@ export function LogoUploadModal({ isOpen, onClose }: LogoUploadModalProps) {
     deleteMutation.mutate();
   };
 
-  const currentLogoUrl = currentLogo?.settingValue;
+  const currentLogoUrl = currentLogo?.settingValue as string | undefined;
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
