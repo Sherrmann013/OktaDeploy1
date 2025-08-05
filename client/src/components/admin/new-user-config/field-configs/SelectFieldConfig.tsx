@@ -774,7 +774,7 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
                       <SelectValue placeholder={fieldType === 'department' ? 'Choose a department...' : 'Choose an employee type...'} />
                     </SelectTrigger>
                     <SelectContent className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600">
-                      {config.options.map((option) => (
+                      {config.options.filter(option => option && option.trim() !== '').map((option) => (
                         <SelectItem key={option} value={option} className="bg-white dark:bg-gray-800">
                           <div className="flex items-center justify-between w-full">
                             <span>{option}</span>
@@ -976,6 +976,7 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
                         <SelectContent className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600">
                           {availableGroups
                             .filter((group: string) => {
+                              if (!group || group.trim() === '') return false;
                               if (fieldType === 'department') {
                                 return !localDepartmentGroupMappings[selectedDepartment]?.includes(group);
                               } else {
