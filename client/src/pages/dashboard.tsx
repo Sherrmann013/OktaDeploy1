@@ -10,6 +10,8 @@ export default function Dashboard() {
   // Fetch dashboard cards from the database
   const { data: dashboardCards } = useQuery({
     queryKey: ["/api/dashboard-cards"],
+    staleTime: 10 * 60 * 1000, // 10 minutes - dashboard layout rarely changes
+    refetchOnWindowFocus: false,
   });
 
   // KnowBe4 campaign data

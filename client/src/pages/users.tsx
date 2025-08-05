@@ -100,6 +100,8 @@ export default function Users() {
       
       return response.json();
     },
+    staleTime: 15 * 60 * 1000, // 15 minutes - rarely changes
+    refetchOnWindowFocus: false,
   });
 
   // Get total user count separately (doesn't change with search)
@@ -116,6 +118,8 @@ export default function Users() {
       
       return response.json();
     },
+    staleTime: 10 * 60 * 1000, // 10 minutes - changes slowly
+    refetchOnWindowFocus: false,
   });
 
   // Get all users for fallback stats if OKTA counts fail - optimized with smaller limit and caching

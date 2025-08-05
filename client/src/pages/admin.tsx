@@ -119,17 +119,19 @@ function AdminComponent() {
   // Fetch dashboard cards from the database
   const { data: dashboardCardsData, refetch: refetchDashboardCards, error: dashboardCardsError, isLoading: dashboardCardsLoading } = useQuery({
     queryKey: ["/api/dashboard-cards"],
-    retry: 3,
-    refetchOnMount: true,
+    staleTime: 10 * 60 * 1000, // 10 minutes - rarely changes
+    refetchOnMount: false,
     refetchOnWindowFocus: false,
+    retry: 1,
   });
 
   // Fetch monitoring cards from the database
   const { data: monitoringCardsData, refetch: refetchMonitoringCards, error: monitoringCardsError, isLoading: monitoringCardsLoading } = useQuery({
     queryKey: ["/api/monitoring-cards"],
-    retry: 3,
-    refetchOnMount: true,
+    staleTime: 10 * 60 * 1000, // 10 minutes - rarely changes
+    refetchOnMount: false,
     refetchOnWindowFocus: false,
+    retry: 1,
   });
 
   // Initialize with empty arrays - only use database data
@@ -816,25 +818,33 @@ function AdminComponent() {
   // Fetch site access users from database
   const { data: siteUsers = [], isLoading } = useQuery<SiteUser[]>({
     queryKey: ["/api/site-access-users"],
-    refetchInterval: 5000
+    staleTime: 2 * 60 * 1000, // 2 minutes
+    refetchOnWindowFocus: false,
+    // Remove aggressive polling
   });
 
   // Fetch integrations from database
   const { data: integrationsData = [], isLoading: integrationsLoading } = useQuery<Integration[]>({
     queryKey: ["/api/integrations"],
-    refetchInterval: 30000
+    staleTime: 10 * 60 * 1000, // 10 minutes - integrations rarely change
+    refetchOnWindowFocus: false,
+    // Remove polling
   });
 
   // Fetch audit logs from database
   const { data: auditLogsData, isLoading: auditLogsLoading } = useQuery<{logs: AuditLog[], pagination: any}>({
     queryKey: ["/api/audit-logs"],
-    refetchInterval: 10000
+    staleTime: 5 * 60 * 1000, // 5 minutes - logs don't change frequently
+    refetchOnWindowFocus: false,
+    // Remove aggressive polling
   });
 
   // Fetch app mappings from database
   const { data: appMappingsData = [], isLoading: appMappingsLoading } = useQuery<AppMapping[]>({
     queryKey: ["/api/app-mappings"],
-    refetchInterval: 30000
+    staleTime: 5 * 60 * 1000, // 5 minutes - app mappings change occasionally
+    refetchOnWindowFocus: false,
+    // Remove polling
   });
 
 
