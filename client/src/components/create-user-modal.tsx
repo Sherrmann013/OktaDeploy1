@@ -418,7 +418,9 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
   ];
 
   // Dynamic apps from database
-  const availableApps = (appMappingsData as any[]).map((app: any) => app.appName);
+  const availableApps = Array.isArray(appMappingsData) 
+    ? appMappingsData.map((app: any) => app.appName).filter((name: string) => name && name.trim() !== '')
+    : [];
 
   // Process department app mappings
   const departmentAppMappings: Record<string, string[]> = {};
