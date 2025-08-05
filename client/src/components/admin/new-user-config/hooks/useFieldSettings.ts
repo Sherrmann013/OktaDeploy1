@@ -23,7 +23,11 @@ const DEFAULT_FIELD_SETTINGS: FieldSettings = {
   employeeType: { required: false, useList: true, options: [] },
   apps: { required: false, hideField: false },
   groups: { required: false, useList: true, options: [], hideField: false },
-  sendActivationEmail: { required: false, hideField: false }
+  sendActivationEmail: { 
+    required: false, 
+    hideField: false, 
+    emailTemplate: "Hello {{manager}},\n\nA new user has been created:\n\nName: {{firstName}} {{lastName}}\nEmail: {{email}}\nDepartment: {{department}}\nEmployee Type: {{employeeType}}\n\nPlease reach out to welcome them to the team!\n\nBest regards,\nIT Team"
+  }
 };
 
 export function useFieldSettings() {

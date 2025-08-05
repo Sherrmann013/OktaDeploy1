@@ -55,6 +55,7 @@ export interface AppsConfig {
 export interface SendActivationEmailConfig {
   required: boolean;
   hideField: boolean;
+  emailTemplate: string;
 }
 
 export interface FieldSettings {
