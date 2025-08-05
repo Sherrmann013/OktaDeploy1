@@ -978,12 +978,16 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
                       })
                       .map((app: string) => {
                         console.log('🔍 Creating SelectItem for app:', app);
+                        if (!app || app.trim() === '') {
+                          console.error('🚨 Empty app passed to SelectItem:', app);
+                          return null;
+                        }
                         return (
                           <SelectItem key={app} value={app} className="bg-white dark:bg-gray-800">
                             {app}
                           </SelectItem>
                         );
-                      })}
+                      }).filter(Boolean)}
                   </SelectContent>
                 </Select>
 
