@@ -150,20 +150,11 @@ export default function KnowBe4UserDisplay({ userEmail }: KnowBe4UserDisplayProp
   }, [userTrainingStats, allCampaigns, userEmail, knowbe4User]);
 
   // Debug logging for exact data structure
-  console.log('=== KNOWBE4 DEBUG DATA ===');
-  console.log('KnowBe4 User Data:', knowbe4User);
-  console.log('All Campaigns:', allCampaigns);
-  console.log('User Email:', userEmail);
   
   // Log detailed enrollment structure for first campaign
   if (allCampaigns && Array.isArray(allCampaigns) && allCampaigns.length > 0) {
-    console.log('First Campaign Enrollments Structure:', allCampaigns[0]?.enrollments);
-    console.log('First Campaign Enrollment Sample:', allCampaigns[0]?.enrollments?.[0]);
   }
   
-  console.log('Found User Enrollments:', campaignEnrollments);
-  console.log('Enrollment Count:', campaignEnrollments?.length);
-  console.log('=== END DEBUG DATA ===');
 
 
 
@@ -272,7 +263,6 @@ export default function KnowBe4UserDisplay({ userEmail }: KnowBe4UserDisplayProp
 
   // Use the user-specific campaign enrollment data to show accurate completion status
   const finalTrainingData = campaignEnrollments || [];
-  console.log('Using campaign enrollments as training stats:', finalTrainingData);
   
   const completed = finalTrainingData.filter((enrollment: any) => 
     enrollment.status === 'Completed' || enrollment.status === 'completed' || 
@@ -292,12 +282,6 @@ export default function KnowBe4UserDisplay({ userEmail }: KnowBe4UserDisplayProp
   const total = finalTrainingData.length;
   const completionPercentage = total > 0 ? Math.round((completed / total) * 100) : 0;
   
-  console.log('User-specific training completion calculation:');
-  console.log('Completed enrollments:', completed);
-  console.log('In Progress enrollments:', inProgress); 
-  console.log('Not Started enrollments:', notStarted);
-  console.log('Total enrollments:', total);
-  console.log('Completion percentage:', completionPercentage);
 
   return (
     <Card>

@@ -76,7 +76,7 @@ export function useFieldSettings() {
             const parsedValue = JSON.parse(data.settingValue || '{}');
             (settings as any)[fieldName] = parsedValue;
           } catch (e) {
-            console.warn(`Failed to parse ${fieldName} settings:`, e);
+            // Failed to parse settings, using defaults
           }
         }
       }
@@ -145,7 +145,6 @@ export function useFieldSettings() {
       }
       return success;
     } catch (error) {
-      console.error('Save error:', error);
       toast({ 
         title: "Error", 
         description: "Failed to save settings", 
@@ -204,7 +203,6 @@ export function useFieldSettings() {
         throw new Error('Save failed');
       }
     } catch (error) {
-      console.error('Save error:', error);
       toast({ 
         title: "Error", 
         description: "Failed to save settings", 
@@ -253,7 +251,6 @@ export function useFieldSettings() {
       
       return allSuccessful;
     } catch (error) {
-      console.error('Save all error:', error);
       toast({ 
         title: "Error", 
         description: "Failed to save some settings", 

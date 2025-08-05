@@ -143,14 +143,12 @@ function AdminComponent() {
   // Update local state when data changes - ALWAYS use database data
   useEffect(() => {
     if (dashboardCardsData) {
-      console.log('🔄 Dashboard cards data received:', dashboardCardsData);
       setDashboardCards(dashboardCardsData as any[]);
     }
   }, [dashboardCardsData]);
 
   useEffect(() => {
     if (monitoringCardsData) {
-      console.log('🔄 Monitoring cards data received:', monitoringCardsData);
       setMonitoringCards(monitoringCardsData as any[]);
     }
   }, [monitoringCardsData]);
@@ -158,11 +156,9 @@ function AdminComponent() {
   // Debug authentication issues
   useEffect(() => {
     if (dashboardCardsError) {
-      console.error('Dashboard cards fetch error:', dashboardCardsError);
       // Try to refetch after a short delay if authentication failed
       if (dashboardCardsError.message?.includes('Unauthorized')) {
         setTimeout(() => {
-          console.log('Retrying dashboard cards fetch...');
           refetchDashboardCards();
         }, 2000);
       }
@@ -171,11 +167,9 @@ function AdminComponent() {
 
   useEffect(() => {
     if (monitoringCardsError) {
-      console.error('Monitoring cards fetch error:', monitoringCardsError);
       // Try to refetch after a short delay if authentication failed
       if (monitoringCardsError.message?.includes('Unauthorized')) {
         setTimeout(() => {
-          console.log('Retrying monitoring cards fetch...');
           refetchMonitoringCards();
         }, 2000);
       }
@@ -185,7 +179,6 @@ function AdminComponent() {
   // Trigger fetch when dashboard tab is selected
   useEffect(() => {
     if (layoutTab === "dashboard") {
-      console.log('Dashboard tab selected, fetching cards...');
       refetchDashboardCards();
     }
   }, [layoutTab, refetchDashboardCards]);
@@ -193,7 +186,6 @@ function AdminComponent() {
   // Trigger fetch when monitoring tab is selected
   useEffect(() => {
     if (layoutTab === "monitoring") {
-      console.log('Monitoring tab selected, fetching cards...');
       refetchMonitoringCards();
     }
   }, [layoutTab, refetchMonitoringCards]);
@@ -201,7 +193,6 @@ function AdminComponent() {
   // Mutation to update dashboard card positions
   const updateCardPositionsMutation = useMutation({
     mutationFn: async (cards: any[]) => {
-      console.log('🔄 Updating card positions:', cards);
       const response = await fetch("/api/dashboard-cards/positions", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
@@ -209,26 +200,21 @@ function AdminComponent() {
       });
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('❌ Failed to update positions:', response.status, errorText);
         throw new Error(`Failed to update card positions: ${response.status} ${errorText}`);
       }
       const result = await response.json();
-      console.log('✅ Card positions updated successfully:', result);
       return result;
     },
     onSuccess: () => {
-      console.log('🔄 Refetching dashboard cards after position update...');
       refetchDashboardCards();
     },
     onError: (error) => {
-      console.error('❌ Mutation error:', error);
     },
   });
 
   // Mutation to update monitoring card positions
   const updateMonitoringCardPositionsMutation = useMutation({
     mutationFn: async (cards: any[]) => {
-      console.log('🔄 Updating monitoring card positions:', cards);
       const response = await fetch("/api/monitoring-cards/positions", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
@@ -236,19 +222,15 @@ function AdminComponent() {
       });
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('❌ Failed to update monitoring positions:', response.status, errorText);
         throw new Error(`Failed to update monitoring card positions: ${response.status} ${errorText}`);
       }
       const result = await response.json();
-      console.log('✅ Monitoring card positions updated successfully:', result);
       return result;
     },
     onSuccess: () => {
-      console.log('🔄 Refetching monitoring cards after position update...');
       refetchMonitoringCards();
     },
     onError: (error) => {
-      console.error('❌ Monitoring mutation error:', error);
     },
   });
 
@@ -331,7 +313,6 @@ function AdminComponent() {
     setDragOverItem(null);
     
     // Update positions in the database
-    console.log('🎯 Calling mutation with cards:', updatedCards.map(card => ({ id: card.id, position: card.position })));
     updateCardPositionsMutation.mutate(
       updatedCards.map(card => ({ id: card.id, position: card.position }))
     );
@@ -367,7 +348,6 @@ function AdminComponent() {
           throw new Error('Failed to create dashboard card');
         }
       } catch (error) {
-        console.error('Failed to add dashboard card:', error);
         toast({
           title: "Error",
           description: "Failed to add dashboard card",
@@ -453,7 +433,6 @@ function AdminComponent() {
     setDragOverMonitoringItem(null);
     
     // Update positions in the database
-    console.log('🎯 Calling monitoring mutation with cards:', updatedCards.map(card => ({ id: card.id, position: card.position })));
     updateMonitoringCardPositionsMutation.mutate(
       updatedCards.map(card => ({ id: card.id, position: card.position }))
     );
@@ -470,7 +449,6 @@ function AdminComponent() {
         refetchMonitoringCards();
       }
     } catch (error) {
-      console.error('Failed to toggle monitoring card:', error);
     }
   };
 
@@ -484,7 +462,6 @@ function AdminComponent() {
           refetchMonitoringCards();
         }
       } catch (error) {
-        console.error('Failed to delete monitoring card:', error);
       }
     }
   };
@@ -528,7 +505,6 @@ function AdminComponent() {
         throw new Error('Failed to create monitoring card');
       }
     } catch (error) {
-      console.error('Failed to add monitoring card:', error);
       toast({
         title: "Error", 
         description: "Failed to add monitoring card",
@@ -669,7 +645,6 @@ function AdminComponent() {
           });
         }
       } catch (error) {
-        console.error('🔍 Failed to parse email username settings:', error);
       }
     } else {
       
@@ -701,7 +676,6 @@ function AdminComponent() {
           });
         }
       } catch (error) {
-        console.error('🔍 Failed to parse password settings:', error);
       }
     } else {
       
@@ -721,7 +695,6 @@ function AdminComponent() {
           newSettings.firstName = { ...newSettings.firstName, ...parsed };
           
         } catch (error) {
-          console.error('Failed to parse firstName settings:', error);
         }
       }
       
@@ -732,7 +705,6 @@ function AdminComponent() {
           newSettings.lastName = { ...newSettings.lastName, ...parsed };
           
         } catch (error) {
-          console.error('Failed to parse lastName settings:', error);
         }
       }
       
@@ -743,7 +715,6 @@ function AdminComponent() {
           newSettings.title = { ...newSettings.title, ...parsed };
           
         } catch (error) {
-          console.error('Failed to parse title settings:', error);
         }
       }
       
@@ -754,7 +725,6 @@ function AdminComponent() {
           newSettings.manager = { ...newSettings.manager, ...parsed };
           
         } catch (error) {
-          console.error('Failed to parse manager settings:', error);
         }
       }
       
@@ -765,7 +735,6 @@ function AdminComponent() {
           newSettings.department = { ...newSettings.department, ...parsed };
           
         } catch (error) {
-          console.error('Failed to parse department settings:', error);
         }
       }
       
@@ -776,7 +745,6 @@ function AdminComponent() {
           newSettings.employeeType = { ...newSettings.employeeType, ...parsed };
           
         } catch (error) {
-          console.error('Failed to parse employee type settings:', error);
         }
       }
       
@@ -811,7 +779,6 @@ function AdminComponent() {
       });
     },
     onError: (error) => {
-      console.error("Failed to update logo text:", error);
       toast({
         title: "Error",
         description: "Failed to update logo text",
@@ -868,7 +835,6 @@ function AdminComponent() {
   // Create site access user mutation
   const createUserMutation = useMutation({
     mutationFn: async (userData: { name: string; email: string; accessLevel: "standard" | "admin"; initials: string; color: string }) => {
-      console.log('🔄 Making API request to create user:', userData);
       const response = await fetch("/api/site-access-users", {
         method: "POST",
         headers: {
@@ -886,13 +852,11 @@ function AdminComponent() {
       return response.json();
     },
     onSuccess: () => {
-      console.log('✅ User created successfully, refreshing data');
       queryClient.invalidateQueries({ queryKey: ["/api/site-access-users"] });
       setIsNewUserOpen(false);
       setNewUser({ name: "", username: "", accessLevel: "" });
     },
     onError: (error) => {
-      console.error('❌ Failed to create user:', error);
       alert(`Failed to create user: ${error.message || 'Unknown error'}`);
     }
   });
@@ -1176,7 +1140,6 @@ function AdminComponent() {
   };
 
   const handleAssignUser = async () => {
-    console.log('🔵 Assign User clicked');
     
     if (!newUser.name.trim()) {
       alert("Please enter a name");
@@ -1199,13 +1162,10 @@ function AdminComponent() {
       color: getRandomColor()
     };
     
-    console.log('🚀 Creating user:', userData);
     
     try {
       await createUserMutation.mutateAsync(userData);
-      console.log('✅ User created successfully');
     } catch (error) {
-      console.error('❌ Failed to create user:', error);
     }
   };
 
@@ -2035,10 +1995,8 @@ function AdminComponent() {
                     </button>
                     <button 
                       onClick={() => {
-                        console.log('📊 Dashboard tab clicked');
                         setLayoutTab("dashboard");
                         setTimeout(() => {
-                          console.log('🔄 Triggering dashboard cards fetch...');
                           refetchDashboardCards();
                         }, 100);
                       }}
@@ -2072,10 +2030,8 @@ function AdminComponent() {
                     </button>
                     <button 
                       onClick={() => {
-                        console.log('📊 Monitoring tab clicked');
                         setLayoutTab("monitoring");
                         setTimeout(() => {
-                          console.log('🔄 Triggering monitoring cards fetch...');
                           refetchMonitoringCards();
                         }, 100);
                       }}
@@ -2154,7 +2110,6 @@ function AdminComponent() {
                           <div className="flex gap-2">
                             <Button 
                               onClick={() => {
-                                console.log('🔄 Manual refresh clicked');
                                 refetchDashboardCards();
                               }}
                               variant="outline"

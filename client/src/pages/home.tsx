@@ -61,7 +61,6 @@ export default function Home() {
             Welcome back, {user?.firstName}
           </h2>
           <p className="text-gray-600 dark:text-gray-300">
-            Manage your organization's users, security, and applications from this central console.
           </p>
         </div>
 

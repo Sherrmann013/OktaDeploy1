@@ -16,6 +16,7 @@ This project is a comprehensive React-based enterprise security management dashb
   • Implementing conditional query loading based on active tabs
   • Adding React.lazy() for heavy components (CreateUserModal, NewUserConfigSection)
   • Adding Suspense fallbacks to reduce initial bundle size
+  • **CRITICAL FIX (August 5, 2025):** Removed ALL excessive console.log statements throughout the entire client-side codebase that were causing browser tab crashes and F12 console performance issues. The application now runs without debug logging noise.
 
 ## System Architecture
 The dashboard is built with a React frontend (TypeScript, Tailwind CSS, Wouter) and an Express.js backend (TypeScript, PostgreSQL).

@@ -104,8 +104,6 @@ export default function AssignAppModal({ open, onClose, userId, userApps }: Assi
       const appsToAdd = Array.from(selectedApps).filter(id => !currentAppIds.has(id));
       const appsToRemove = Array.from(currentAppIds).filter(id => !selectedApps.has(id));
       
-      console.log('Apps to add:', appsToAdd);
-      console.log('Apps to remove:', appsToRemove);
       
       // TODO: Implement actual OKTA group assignment API calls
       return { appsToAdd, appsToRemove };

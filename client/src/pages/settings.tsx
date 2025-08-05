@@ -17,7 +17,6 @@ export default function Settings() {
 
   const handleSave = () => {
     // In real implementation, this would call OKTA API to update settings
-    console.log("Saving settings...");
   };
 
   return (

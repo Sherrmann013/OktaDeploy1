@@ -165,10 +165,6 @@ export default function UserDetail() {
   });
 
   // Debug logging
-  console.log('User ID:', userId);
-  console.log('User data:', user);
-  console.log('Loading:', isLoading);
-  console.log('Error:', error);
 
   const { data: userGroups = [] } = useQuery<any[]>({
     queryKey: [`/api/users/${userId}/groups`],
@@ -1074,7 +1070,6 @@ export default function UserDetail() {
                                 className="w-full"
                                 onClick={() => {
                                   // API call to Microsoft Graph
-                                  console.log('Fetching Microsoft data...');
                                 }}
                               >
                                 <RefreshCw className="w-4 h-4 mr-2" />
@@ -1097,7 +1092,6 @@ export default function UserDetail() {
                                     size="sm"
                                     onClick={() => {
                                       // Reset MFA
-                                      console.log('Resetting MFA for user...');
                                     }}
                                   >
                                     Reset MFA
@@ -1107,7 +1101,6 @@ export default function UserDetail() {
                                     size="sm"
                                     onClick={() => {
                                       // Revoke sessions
-                                      console.log('Revoking all sessions...');
                                     }}
                                   >
                                     Revoke Sessions
@@ -1117,7 +1110,6 @@ export default function UserDetail() {
                                     size="sm"
                                     onClick={() => {
                                       // Get sign-in logs
-                                      console.log('Fetching sign-in logs...');
                                     }}
                                   >
                                     Get Sign-in Logs
@@ -1181,7 +1173,6 @@ export default function UserDetail() {
                           className="flex-1"
                           onClick={() => {
                             // API call to SentinelOne
-                            console.log('Fetching SentinelOne data...');
                           }}
                         >
                           <RefreshCw className="w-4 h-4 mr-1" />
@@ -1193,7 +1184,6 @@ export default function UserDetail() {
                           className="flex-1"
                           onClick={() => {
                             // Initiate scan
-                            console.log('Initiating SentinelOne scan...');
                           }}
                         >
                           Full Scan
@@ -1258,7 +1248,6 @@ export default function UserDetail() {
                           className="flex-1"
                           onClick={() => {
                             // API call to Addigy
-                            console.log('Fetching Addigy data...');
                           }}
                         >
                           <RefreshCw className="w-3 h-3 mr-1" />
@@ -1270,7 +1259,6 @@ export default function UserDetail() {
                           className="flex-1"
                           onClick={() => {
                             // API call to Intune
-                            console.log('Fetching Intune data...');
                           }}
                         >
                           <RefreshCw className="w-3 h-3 mr-1" />
@@ -1308,7 +1296,6 @@ export default function UserDetail() {
                           className="flex-1"
                           onClick={() => {
                             // API call to Jira
-                            console.log('Fetching Jira tickets...');
                           }}
                         >
                           <RefreshCw className="w-4 h-4 mr-1" />
@@ -1320,7 +1307,6 @@ export default function UserDetail() {
                           className="flex-1"
                           onClick={() => {
                             // Create new ticket
-                            console.log('Creating new Jira ticket...');
                           }}
                         >
                           Create Ticket

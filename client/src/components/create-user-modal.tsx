@@ -123,18 +123,17 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
             try {
               const parsedValue = JSON.parse(data.settingValue || '{}');
               settings[fieldName as keyof typeof settings] = parsedValue;
-              console.log(`🔍 CreateUserModal - Loaded ${fieldName} config:`, parsedValue);
+
             } catch (e) {
-              console.warn(`Failed to parse ${fieldName} settings:`, e);
+              // Failed to parse settings, using defaults
             }
           } else {
-            console.log(`🔍 CreateUserModal - No config found for ${fieldName}, using defaults`);
+
           }
         }
         
         return settings;
       } catch (error) {
-        console.error('Error fetching field settings:', error);
         return {
           firstName: { required: true },
           lastName: { required: true },
@@ -408,16 +407,13 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
   // Dynamic apps from database with debug logging
   const availableApps = Array.isArray(appMappingsData) 
     ? appMappingsData.map((app: any) => {
-        console.log('🔍 App mapping item:', app);
         return app.appName;
       }).filter((name: string) => {
         const isValid = name && name.trim() !== '';
-        console.log('🔍 App name validation:', { name, isValid });
         return isValid;
       })
     : [];
   
-  console.log('🔍 Final availableApps:', availableApps);
 
   // Process department app mappings
   const departmentAppMappings: Record<string, string[]> = {};
@@ -613,7 +609,6 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
                 }
               }
             } catch (error) {
-              console.error('Word generation failed:', error);
               passwordParts.push('Word'.substring(0, minWordLength));
             }
             break;
@@ -642,15 +637,6 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
         password += numbers[Math.floor(Math.random() * numbers.length)];
       }
     }
-    
-    console.log('🔑 Generated password with components:', {
-      components: passwordConfig.components,
-      targetLength: passwordConfig.targetLength,
-      generatedParts: passwordParts,
-      finalPassword: password,
-      finalLength: password.length,
-      exactMatch: password.length === targetLength
-    });
     
     setPassword(password);
     form.setValue('password', password);
@@ -732,10 +718,8 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
                             <CustomSelectContent>
                               {emailDomains.filter((domain: string) => {
                                 const isValid = domain && domain.trim() !== '';
-                                console.log('🔍 Email domain validation:', { domain, isValid });
                                 return isValid;
                               }).map((domain: string) => {
-                                console.log('🔍 Creating CustomSelectItem for domain:', domain);
                                 return (
                                   <CustomSelectItem key={domain} value={domain}>
                                     {domain}
@@ -966,13 +950,10 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
                     {availableApps
                       .filter((app: string) => {
                         const isValid = app && app.trim() !== '' && !selectedApps.includes(app);
-                        console.log('🔍 Available app filter:', { app, isValid });
                         return isValid;
                       })
                       .map((app: string) => {
-                        console.log('🔍 Creating SelectItem for app:', app);
                         if (!app || app.trim() === '') {
-                          console.error('🚨 Empty app passed to SelectItem:', app);
                           return null;
                         }
                         return (

@@ -67,7 +67,6 @@ export default function Sidebar() {
       window.location.replace('/login');
     },
     onError: (error) => {
-      console.error('Logout error:', error);
       // Still redirect even if logout fails on server
       window.location.replace('/login');
     },

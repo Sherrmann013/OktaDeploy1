@@ -302,7 +302,6 @@ export default function Users() {
           sortOrder: sortOrder,
         });
 
-        console.log(`Export: Fetching page ${currentPage} - /api/users?${queryParams}`);
         const response = await apiRequest('GET', `/api/users?${queryParams}`);
         
         if (!response.ok) {
@@ -313,13 +312,11 @@ export default function Users() {
         const { users: pageUsers, totalPages } = responseData;
         
         allUsers = [...allUsers, ...pageUsers];
-        console.log(`Export: Page ${currentPage} - fetched ${pageUsers.length} users, total so far: ${allUsers.length}`);
         
         hasMorePages = currentPage < totalPages;
         currentPage++;
       }
 
-      console.log(`Export: Completed fetching all ${allUsers.length} users`);
 
       // Get column mapping for human-readable headers
       const columnMap = AVAILABLE_COLUMNS.reduce((acc, col) => {
@@ -407,9 +404,7 @@ export default function Users() {
         description: `Exported ${allUsers.length} users with ${selectedColumns.length} columns`,
       });
     } catch (error) {
-      console.error('Export error:', error);
       const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
-      console.error('Export error details:', errorMessage);
       toast({
         title: "Export failed",
         description: `Error: ${errorMessage}. Please try again.`,

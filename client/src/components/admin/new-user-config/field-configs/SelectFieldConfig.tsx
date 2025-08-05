@@ -243,7 +243,6 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
       
       return true;
     } catch (error) {
-      console.error('Failed to save department app mappings:', error);
       return false;
     } finally {
       setDepartmentSaveInProgress(false);
@@ -303,7 +302,6 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
       
       return true;
     } catch (error) {
-      console.error('Failed to save employee type app mappings:', error);
       return false;
     } finally {
       setEmployeeTypeSaveInProgress(false);
@@ -376,7 +374,6 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
           if (!response.ok) {
             const errorData = await response.json();
             if (errorData.error !== "Mapping already exists") {
-              console.log('Department group mapping creation failed:', errorData);
               // Don't throw error - just continue with next mapping
             }
             // If mapping already exists, just continue (avoid throwing error)
@@ -393,7 +390,6 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
           
           if (!response.ok) {
             const errorData = await response.json();
-            console.log('Department group mapping deletion failed:', errorData);
             // Don't throw error - just continue with next mapping
           }
         }
@@ -438,7 +434,6 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
             const errorData = await response.json();
             if (errorData.error !== "Mapping already exists") {
               // Silently continue if mapping creation fails - don't throw error to avoid popup
-              console.log('Employee type group mapping creation failed:', errorData);
               // Don't throw error - just continue with next mapping
             }
             // If mapping already exists, just continue (avoid throwing error)
@@ -455,7 +450,6 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
           
           if (!response.ok) {
             const errorData = await response.json();
-            console.log('Employee type group mapping deletion failed:', errorData);
             // Don't throw error - just continue with next mapping
           }
         }
