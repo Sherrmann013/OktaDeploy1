@@ -1,4 +1,4 @@
-import React, { useState, useEffect, Suspense, lazy } from "react";
+import React, { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -14,12 +14,10 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Plus, Pencil, Trash2, Check, ChevronsUpDown, Edit, X, Settings, RefreshCw, Mail, Lock, GripVertical, Link, Eye, EyeOff } from "lucide-react";
 import { LogoUploadModal } from "@/components/LogoUploadModal";
+import CreateUserModal from "@/components/create-user-modal";
 import { useToast } from "@/hooks/use-toast";
 import { CustomSelect, CustomSelectContent, CustomSelectItem, CustomSelectTrigger, CustomSelectValue } from "@/components/ui/custom-select";
-
-// Lazy load heavy components to reduce initial bundle size
-const CreateUserModal = lazy(() => import("@/components/create-user-modal"));
-const NewUserConfigSection = lazy(() => import("@/components/admin/new-user-config").then(module => ({ default: module.NewUserConfigSection })));
+import { NewUserConfigSection } from "@/components/admin/new-user-config";
 
 interface SiteUser {
   id: number;
@@ -2334,13 +2332,11 @@ function AdminComponent() {
                     )}
 
                     {layoutTab === "new-user" && (
-                      <Suspense fallback={<div className="animate-pulse bg-gray-100 dark:bg-gray-800 h-64 rounded-lg"></div>}>
-                        <NewUserConfigSection
-                          selectedApps={selectedApps}
-                          setSelectedApps={setSelectedApps}
-                          appMappingsData={appMappingsData}
-                        />
-                      </Suspense>
+                      <NewUserConfigSection
+                        selectedApps={selectedApps}
+                        setSelectedApps={setSelectedApps}
+                        appMappingsData={appMappingsData}
+                      />
                     )}
 
                     {layoutTab === "profile" && (
@@ -3097,18 +3093,14 @@ function AdminComponent() {
 
 
       {/* Create User Modal */}
-      {isCreateUserModalOpen && (
-        <Suspense fallback={<div className="fixed inset-0 bg-black/50 flex items-center justify-center"><div className="animate-pulse bg-white dark:bg-gray-800 rounded-lg w-96 h-64"></div></div>}>
-          <CreateUserModal 
-            open={isCreateUserModalOpen}
-            onClose={() => setIsCreateUserModalOpen(false)}
-            onSuccess={() => {
-              setIsCreateUserModalOpen(false);
-              // Could add success notification here
-            }}
-          />
-        </Suspense>
-      )}
+      <CreateUserModal 
+        open={isCreateUserModalOpen}
+        onClose={() => setIsCreateUserModalOpen(false)}
+        onSuccess={() => {
+          setIsCreateUserModalOpen(false);
+          // Could add success notification here
+        }}
+      />
     </div>
   );
 }
