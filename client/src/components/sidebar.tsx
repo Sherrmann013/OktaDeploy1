@@ -21,9 +21,10 @@ export default function Sidebar() {
   const { toast } = useToast();
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // Get custom logo setting
-  const { data: logoSetting } = useQuery({
-    queryKey: ['/api/layout-settings/company_logo'],
+  // Get active company logo
+  const { data: activeLogo } = useQuery({
+    queryKey: ['/api/company-logos/active'],
+    retry: false,
   });
 
   // Get custom logo text setting
@@ -100,9 +101,9 @@ export default function Sidebar() {
           <div className="relative inline-block mb-1">
             <div className="relative w-24 h-24 mx-auto rounded bg-purple-600 flex items-center justify-center">
               <div className="relative w-20 h-20">
-                {logoSetting?.settingValue ? (
+                {activeLogo?.logoData ? (
                   <img 
-                    src={logoSetting.settingValue} 
+                    src={activeLogo.logoData} 
                     alt="Company Logo" 
                     className="w-20 h-20 absolute inset-0 object-contain"
                   />

@@ -1,4 +1,4 @@
-import { users, type User, type InsertUser, type UpdateUser } from "@shared/schema";
+import { users, companyLogos, type User, type InsertUser, type UpdateUser, type CompanyLogo, type InsertCompanyLogo } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, or, ilike, desc } from "drizzle-orm";
 
@@ -20,6 +20,13 @@ export interface IStorage {
   createUser(user: InsertUser & { oktaId?: string }): Promise<User>;
   updateUser(id: number, updates: UpdateUser): Promise<User | undefined>;
   deleteUser(id: number): Promise<boolean>;
+  
+  // Company logo methods
+  getAllLogos(): Promise<CompanyLogo[]>;
+  getActiveLogo(): Promise<CompanyLogo | undefined>;
+  createLogo(logo: InsertCompanyLogo): Promise<CompanyLogo>;
+  setActiveLogo(id: number): Promise<boolean>;
+  deleteLogo(id: number): Promise<boolean>;
 }
 
 export class MemStorage implements IStorage {
@@ -195,6 +202,27 @@ export class MemStorage implements IStorage {
   async deleteUser(id: number): Promise<boolean> {
     return this.users.delete(id);
   }
+
+  // Company logo methods - Not implemented for MemStorage
+  async getAllLogos(): Promise<CompanyLogo[]> {
+    return [];
+  }
+
+  async getActiveLogo(): Promise<CompanyLogo | undefined> {
+    return undefined;
+  }
+
+  async createLogo(logo: InsertCompanyLogo): Promise<CompanyLogo> {
+    throw new Error("Logo management not implemented in MemStorage");
+  }
+
+  async setActiveLogo(id: number): Promise<boolean> {
+    return false;
+  }
+
+  async deleteLogo(id: number): Promise<boolean> {
+    return false;
+  }
 }
 
 export class DatabaseStorage implements IStorage {
@@ -359,6 +387,62 @@ export class DatabaseStorage implements IStorage {
 
   async deleteUser(id: number): Promise<boolean> {
     const result = await db.delete(users).where(eq(users.id, id));
+    return (result.rowCount || 0) > 0;
+  }
+
+  // Company logo methods
+  async getAllLogos(): Promise<CompanyLogo[]> {
+    const logos = await db.select().from(companyLogos).orderBy(desc(companyLogos.uploadedAt));
+    return logos;
+  }
+
+  async getActiveLogo(): Promise<CompanyLogo | undefined> {
+    const [logo] = await db.select().from(companyLogos).where(eq(companyLogos.isActive, true));
+    return logo || undefined;
+  }
+
+  async createLogo(logo: InsertCompanyLogo): Promise<CompanyLogo> {
+    // If this is the first logo, make it active
+    const existingLogos = await this.getAllLogos();
+    const isFirstLogo = existingLogos.length === 0;
+
+    // If we already have 3 logos, delete the oldest one
+    if (existingLogos.length >= 3) {
+      const oldestLogo = existingLogos[existingLogos.length - 1];
+      await db.delete(companyLogos).where(eq(companyLogos.id, oldestLogo.id));
+    }
+
+    // If this is set to be active, deactivate all others
+    if (logo.isActive || isFirstLogo) {
+      await db.update(companyLogos).set({ isActive: false });
+    }
+
+    const [newLogo] = await db
+      .insert(companyLogos)
+      .values({
+        ...logo,
+        isActive: logo.isActive || isFirstLogo,
+      })
+      .returning();
+    
+    return newLogo;
+  }
+
+  async setActiveLogo(id: number): Promise<boolean> {
+    // Deactivate all logos first
+    await db.update(companyLogos).set({ isActive: false });
+    
+    // Activate the selected logo
+    const result = await db
+      .update(companyLogos)
+      .set({ isActive: true })
+      .where(eq(companyLogos.id, id));
+    
+    return (result.rowCount || 0) > 0;
+  }
+
+  async deleteLogo(id: number): Promise<boolean> {
+    const result = await db.delete(companyLogos).where(eq(companyLogos.id, id));
     return (result.rowCount || 0) > 0;
   }
 }

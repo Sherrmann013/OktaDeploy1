@@ -268,6 +268,31 @@ export const insertLayoutSettingSchema = createInsertSchema(layoutSettings).omit
 export type InsertLayoutSetting = z.infer<typeof insertLayoutSettingSchema>;
 export type LayoutSetting = typeof layoutSettings.$inferSelect;
 
+// Company logos table - stores up to 3 logo uploads
+export const companyLogos = pgTable('company_logos', {
+  id: serial('id').primaryKey(),
+  logoData: text('logo_data').notNull(), // Base64 encoded image
+  fileName: text('file_name').notNull(),
+  fileSize: integer('file_size').notNull(),
+  mimeType: text('mime_type').notNull(),
+  isActive: boolean('is_active').default(false), // Which logo is currently selected
+  uploadedBy: integer('uploaded_by').references(() => siteAccessUsers.id),
+  uploadedAt: timestamp('uploaded_at').defaultNow().notNull(),
+});
+
+export const insertCompanyLogoSchema = createInsertSchema(companyLogos).omit({
+  id: true,
+  uploadedAt: true,
+}).extend({
+  logoData: z.string().min(1, "Logo data is required"),
+  fileName: z.string().min(1, "File name is required"),
+  fileSize: z.number().min(1, "File size is required"),
+  mimeType: z.string().min(1, "MIME type is required"),
+});
+
+export type InsertCompanyLogo = z.infer<typeof insertCompanyLogoSchema>;
+export type CompanyLogo = typeof companyLogos.$inferSelect;
+
 // Dashboard cards table for layout management
 export const dashboardCards = pgTable("dashboard_cards", {
   id: serial("id").primaryKey(),

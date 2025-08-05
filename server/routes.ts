@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertUserSchema, updateUserSchema, insertSiteAccessUserSchema, siteAccessUsers, insertIntegrationSchema, integrations, auditLogs, insertAppMappingSchema, appMappings, departmentAppMappings, insertDepartmentAppMappingSchema, employeeTypeAppMappings, insertEmployeeTypeAppMappingSchema, departmentGroupMappings, insertDepartmentGroupMappingSchema, employeeTypeGroupMappings, insertEmployeeTypeGroupMappingSchema, insertLayoutSettingSchema, layoutSettings, dashboardCards, insertDashboardCardSchema, updateDashboardCardSchema, monitoringCards, insertMonitoringCardSchema, updateMonitoringCardSchema } from "@shared/schema";
+import { insertUserSchema, updateUserSchema, insertSiteAccessUserSchema, siteAccessUsers, insertIntegrationSchema, integrations, auditLogs, insertAppMappingSchema, appMappings, departmentAppMappings, insertDepartmentAppMappingSchema, employeeTypeAppMappings, insertEmployeeTypeAppMappingSchema, departmentGroupMappings, insertDepartmentGroupMappingSchema, employeeTypeGroupMappings, insertEmployeeTypeGroupMappingSchema, insertLayoutSettingSchema, layoutSettings, dashboardCards, insertDashboardCardSchema, updateDashboardCardSchema, monitoringCards, insertMonitoringCardSchema, updateMonitoringCardSchema, companyLogos, insertCompanyLogoSchema } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and } from "drizzle-orm";
 import { AuditLogger, getAuditLogs } from "./audit";
@@ -3974,6 +3974,110 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: error.errors });
       }
       res.status(500).json({ error: "Failed to delete employee type group mapping" });
+    }
+  });
+
+  // Company Logo API endpoints
+  
+  // Get all logos
+  app.get("/api/company-logos", isAuthenticated, requireAdmin, async (req, res) => {
+    try {
+      const logos = await storage.getAllLogos();
+      res.json(logos);
+    } catch (error) {
+      console.error("Error fetching company logos:", error);
+      res.status(500).json({ message: "Failed to fetch company logos" });
+    }
+  });
+
+  // Get active logo
+  app.get("/api/company-logos/active", isAuthenticated, async (req, res) => {
+    try {
+      const activeLogo = await storage.getActiveLogo();
+      if (!activeLogo) {
+        return res.status(404).json({ message: "No active logo found" });
+      }
+      res.json(activeLogo);
+    } catch (error) {
+      console.error("Error fetching active logo:", error);
+      res.status(500).json({ message: "Failed to fetch active logo" });
+    }
+  });
+
+  // Upload new logo
+  app.post("/api/company-logos", isAuthenticated, requireAdmin, async (req, res) => {
+    try {
+      const logoData = insertCompanyLogoSchema.parse(req.body);
+      const newLogo = await storage.createLogo(logoData);
+      
+      await AuditLogger.log({
+        req,
+        action: "CREATE",
+        resourceType: "COMPANY_LOGO",
+        resourceId: newLogo.id.toString(),
+        resourceName: newLogo.fileName,
+        details: { action: "Uploaded new company logo", fileName: newLogo.fileName }
+      });
+
+      res.status(201).json(newLogo);
+    } catch (error) {
+      console.error("Error uploading logo:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: error.errors });
+      }
+      res.status(500).json({ message: "Failed to upload logo" });
+    }
+  });
+
+  // Set active logo
+  app.put("/api/company-logos/:id/activate", isAuthenticated, requireAdmin, async (req, res) => {
+    try {
+      const id = z.coerce.number().parse(req.params.id);
+      const success = await storage.setActiveLogo(id);
+      
+      if (!success) {
+        return res.status(404).json({ message: "Logo not found" });
+      }
+
+      await AuditLogger.log({
+        req,
+        action: "UPDATE",
+        resourceType: "COMPANY_LOGO",
+        resourceId: id.toString(),
+        resourceName: `Logo ${id}`,
+        details: { action: "Set logo as active" }
+      });
+
+      res.json({ message: "Logo activated successfully" });
+    } catch (error) {
+      console.error("Error activating logo:", error);
+      res.status(500).json({ message: "Failed to activate logo" });
+    }
+  });
+
+  // Delete logo
+  app.delete("/api/company-logos/:id", isAuthenticated, requireAdmin, async (req, res) => {
+    try {
+      const id = z.coerce.number().parse(req.params.id);
+      const success = await storage.deleteLogo(id);
+      
+      if (!success) {
+        return res.status(404).json({ message: "Logo not found" });
+      }
+
+      await AuditLogger.log({
+        req,
+        action: "DELETE",
+        resourceType: "COMPANY_LOGO",
+        resourceId: id.toString(),
+        resourceName: `Logo ${id}`,
+        details: { action: "Deleted company logo" }
+      });
+
+      res.json({ message: "Logo deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting logo:", error);
+      res.status(500).json({ message: "Failed to delete logo" });
     }
   });
 
