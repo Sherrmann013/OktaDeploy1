@@ -323,6 +323,43 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
     },
   });
 
+  // Reset form and all state when modal closes
+  React.useEffect(() => {
+    if (!open) {
+      // Reset form to default values
+      form.reset({
+        firstName: "",
+        lastName: "",
+        email: "",
+        login: "",
+        password: "",
+        title: "",
+        manager: "",
+        department: "",
+        employeeType: "",
+        managerId: undefined,
+        status: "ACTIVE",
+        groups: [],
+        applications: [],
+      });
+      
+      // Reset all state variables
+      setPassword("");
+      setSelectedApps([]);
+      setSelectedGroups([]);
+      setManuallySelectedApps([]);
+      setManuallySelectedGroups([]);
+      setManagerSearch("");
+      setShowManagerDropdown(false);
+      setSendActivationEmail(true);
+      
+      // Reset to default domain
+      if (emailDomains.length > 0) {
+        setSelectedDomain(emailDomains[0]);
+      }
+    }
+  }, [open, form, emailDomains]);
+
   const createUserMutation = useMutation({
     mutationFn: async (userData: InsertUser) => {
       const response = await apiRequest("POST", "/api/users", {
