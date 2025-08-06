@@ -1,7 +1,7 @@
 # Enterprise Security Management Dashboard
 
-## Overview
-This project is a comprehensive React-based enterprise security management dashboard designed for organizations requiring complete data sovereignty through self-hosting. Its primary purpose is to provide enterprise security teams with centralized user management, security monitoring, and compliance tracking capabilities while maintaining full control over sensitive data. The dashboard features robust authentication mechanisms, including local admin and OKTA integration, and is deployed via Docker for easy self-hosting. The business vision is to empower organizations with a secure, controllable, and comprehensive solution for managing their security posture, leveraging real-world enterprise structures for effective management.
+## Overview  
+This project is a comprehensive React-based multi-tenant enterprise security management platform designed for Managed Service Providers (MSPs) requiring complete data sovereignty through self-hosting. Its primary purpose is to provide MSPs with centralized client management and isolated security dashboards for each client organization while maintaining complete data separation for security compliance. The platform features a dual-database architecture: an MSP database for client management and completely isolated client databases ensuring zero data mixing. The dashboard includes robust authentication, OKTA integration, client onboarding workflows, and comprehensive security monitoring capabilities. The business vision is to empower MSPs with a secure, scalable, and compliant solution for managing multiple client security postures with enterprise-grade isolation.
 
 ## User Preferences
 - **Data Security Priority:** Self-hosting required due to sensitive enterprise data requirements
@@ -25,13 +25,11 @@ The dashboard is built with a React frontend (TypeScript, Tailwind CSS, Wouter) 
 - Dual system supporting local admin (CW-Admin / YellowDr@g0nFly) and OKTA SSO (OAuth2 flow).
 - Secure server-side session management.
 
-**Database Schema:**
-- **Users Table:** Stores user profiles, integrated with OKTA.
-- **Employee Types:** Classifications (EMPLOYEE, CONTRACTOR, INTERN, PART_TIME).
-- **Organizational Structure:** Manages manager relationships and department hierarchies.
-- **Integrations Management:** Stores configurations for 6 security integrations (OKTA, KnowBe4, SentinelOne, Addigy, Microsoft, Jira) with dynamic API key configuration.
-- **App Mappings:** Manages OKTA application-to-group mappings for consistent user provisioning.
-- **Layout Settings:** Persists dashboard card configurations, logo customization, and new user form settings.
+**Multi-Database Architecture:**
+- **MSP Database:** Contains client management (clients table), MSP users (msp_users), client access controls (client_access), and MSP-level audit logs (msp_audit_logs). No client-specific data stored here.
+- **Client Databases:** Each client organization gets completely isolated database containing users table, site access users, integrations, layout settings, dashboard cards, company logos, audit logs, and app mappings. Zero data mixing between clients.
+- **Dynamic Connection Routing:** Multi-database manager handles dynamic connections to correct client database based on context.
+- **Security Compliance:** Complete data isolation ensures sensitive client data never crosses organizational boundaries, meeting strict security compliance requirements.
 
 **Self-Hosting Package:**
 - Docker containerization with `docker-compose`.
@@ -63,6 +61,7 @@ The dashboard is built with a React frontend (TypeScript, Tailwind CSS, Wouter) 
 - **Audit Logs Export & Display Enhancement (August 6, 2025):** Added export functionality for CSV and JSON formats that export filtered results with all log fields. Fixed action dropdown duplicates by using Array.from(). Added display limit controls (50/100/200 events) with improved results summary showing "X of Y filtered results (Z total)". Export includes proper CSV escaping and ISO timestamp formatting. Display controls allow viewing more events without performance impact.
 - **Dashboard and Users Pages Modularization (August 6, 2025):** Successfully extracted Dashboard and Users page functionality following strict AS IS rule. Created client/src/components/dashboard/DashboardSection.tsx and client/src/components/users/UsersSection.tsx components. All functionality preserved including dashboard cards, user management, OKTA sync, filtering, export capabilities, and column management. This was successful on the third attempt after strictly following the AS IS rule - moving code exactly as written without modifications, improvements, or shortcuts. Both pages now properly use modular components while maintaining all original functionality.
 - **Integrations Page Redesign (August 6, 2025):** Completely redesigned admin integrations interface by removing modal overlay and splitting into "Active Integrations" and "Available Integrations" sections. Added direct "Add Integration" buttons on available integrations and "Remove" (X icon) buttons on active integrations for immediate deletion. Enhanced logo support with custom SVG designs for all integration types including ScreenConnect, Ninja One, Zendesk, Mesh AI, Abnormal Security, Arctic Wolf, Microsoft Defender, and Hexnode. This provides a much cleaner, more intuitive interface for integration management without modal dialogs.
+- **CRITICAL ARCHITECTURAL TRANSFORMATION (August 6, 2025):** Successfully transformed from single-tenant to multi-tenant MSP architecture for security compliance. Implemented complete database separation with MSP database (client management, MSP users, access controls) and isolated client databases (users, integrations, audit logs). Created multi-database connection manager, MSP storage layer, client storage layer, and MSP dashboard (/msp route). Added MSP navigation link (Building2 icon) in sidebar. Sample clients created: TechCorp Solutions, MedBridge Healthcare, RetailMax Group, StartupHub Inc, FinanceFirst Bank. Each client now has completely isolated database ensuring zero data mixing for security compliance.
 
 ## External Dependencies
 - **OKTA:** Integrated for enterprise user authentication via OAuth2 and user/group management.
