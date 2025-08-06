@@ -29,6 +29,18 @@ export default function Sidebar() {
   const [selectedClient, setSelectedClient] = useState<string>("");
   const { toast } = useToast();
 
+  // Detect current client context from URL
+  const currentClientId = location.startsWith('/client/') ? location.split('/')[2] : null;
+  
+  // Update selected client based on current URL
+  useEffect(() => {
+    if (currentClientId && selectedClient !== currentClientId) {
+      setSelectedClient(currentClientId);
+    } else if (location === '/msp' && selectedClient !== 'msp') {
+      setSelectedClient('msp');
+    }
+  }, [location, currentClientId]);
+
   // Handle client selection
   const handleClientSelect = (clientId: string) => {
     setSelectedClient(clientId);
@@ -73,13 +85,34 @@ export default function Sidebar() {
 
   // Logo data loaded silently
 
-  // Filter navigation based on user access level
-  const navigation = [
-    { name: "Dashboard", href: "/dashboard", icon: Gauge, current: true },
-    { name: "Users", href: "/users", icon: Users, current: false },
-    ...(canViewAdmin ? [{ name: "Admin", href: "/admin", icon: Settings, current: false }] : []),
-    ...(canViewAdmin ? [{ name: "MSP", href: "/msp", icon: Building2, current: false }] : []),
-  ];
+  // Dynamic navigation based on current context (client vs MSP)
+  const getNavigation = () => {
+    const baseUrl = currentClientId ? `/client/${currentClientId}` : '';
+    
+    return [
+      { 
+        name: "Dashboard", 
+        href: currentClientId ? `${baseUrl}` : "/dashboard", 
+        icon: Gauge, 
+        current: true 
+      },
+      { 
+        name: "Users", 
+        href: currentClientId ? `${baseUrl}/users` : "/users", 
+        icon: Users, 
+        current: false 
+      },
+      ...(canViewAdmin ? [{ 
+        name: "Admin", 
+        href: currentClientId ? `${baseUrl}/admin` : "/admin", 
+        icon: Settings, 
+        current: false 
+      }] : []),
+      ...(canViewAdmin ? [{ name: "MSP", href: "/msp", icon: Building2, current: false }] : []),
+    ];
+  };
+
+  const navigation = getNavigation();
 
   // Close dropdown when clicking outside
   useEffect(() => {
