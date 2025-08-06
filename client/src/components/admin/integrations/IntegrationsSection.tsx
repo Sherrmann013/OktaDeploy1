@@ -27,13 +27,9 @@ export function IntegrationsSection() {
   const { toast } = useToast();
   
   const [isConfigureIntegrationOpen, setIsConfigureIntegrationOpen] = useState(false);
-  const [isNewIntegrationOpen, setIsNewIntegrationOpen] = useState(false);
   const [isDeleteIntegrationOpen, setIsDeleteIntegrationOpen] = useState(false);
   const [editingIntegration, setEditingIntegration] = useState<Integration | null>(null);
   const [integrationToDelete, setIntegrationToDelete] = useState<Integration | null>(null);
-  const [selectedIntegrationType, setSelectedIntegrationType] = useState("");
-  const [integrationSearchTerm, setIntegrationSearchTerm] = useState("");
-  const [showIntegrationDropdown, setShowIntegrationDropdown] = useState(false);
 
   // Fetch integrations
   const { data: integrationsData = [], isLoading: integrationsLoading } = useQuery<Integration[]>({
@@ -63,9 +59,6 @@ export function IntegrationsSection() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/integrations"] });
-      setIsNewIntegrationOpen(false);
-      setSelectedIntegrationType("");
-      setIntegrationSearchTerm("");
       toast({
         title: "Integration added successfully",
         description: "The new integration has been created.",
@@ -274,21 +267,12 @@ export function IntegrationsSection() {
     }
   };
 
-  const handleCreateIntegration = () => {
-    if (!selectedIntegrationType) {
-      toast({
-        title: "Integration type required",
-        description: "Please select an integration type",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    const selectedType = availableIntegrationTypes.find(type => type.value === selectedIntegrationType);
+  const handleAddIntegration = (integrationType: string) => {
+    const selectedType = availableIntegrationTypes.find(type => type.value === integrationType);
     if (!selectedType) return;
 
     const integrationData = {
-      name: selectedIntegrationType,
+      name: integrationType,
       displayName: selectedType.label,
       description: `${selectedType.label} integration`,
       status: "pending",
@@ -445,25 +429,28 @@ export function IntegrationsSection() {
     }
   };
 
+  // Get available integrations (not yet added)
+  const availableIntegrations = availableIntegrationTypes.filter(
+    availableType => !integrationsData.some(integration => integration.name === availableType.value)
+  );
+
   return (
     <>
+      {/* Active Integrations Section */}
       <Card>
         <CardContent className="pt-6">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-bold">Integrations</h2>
-            <Button 
-              onClick={() => setIsNewIntegrationOpen(true)}
-              className="bg-blue-600 hover:bg-blue-700 text-white"
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              New Integration
-            </Button>
+          <div className="mb-6">
+            <h2 className="text-2xl font-bold">Active Integrations</h2>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {integrationsLoading ? (
               <div className="col-span-full text-center py-8">
                 <div className="text-muted-foreground">Loading integrations...</div>
+              </div>
+            ) : integrationsData.length === 0 ? (
+              <div className="col-span-full text-center py-8">
+                <div className="text-muted-foreground">No active integrations found</div>
               </div>
             ) : (
               integrationsData.map((integration) => (
@@ -492,6 +479,48 @@ export function IntegrationsSection() {
                       onClick={() => handleConfigureIntegration(integration)}
                     >
                       Configure
+                    </Button>
+                  </CardContent>
+                </Card>
+              ))
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Available Integrations Section */}
+      <Card className="mt-6">
+        <CardContent className="pt-6">
+          <div className="mb-6">
+            <h2 className="text-2xl font-bold">Available Integrations</h2>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {availableIntegrations.length === 0 ? (
+              <div className="col-span-full text-center py-8">
+                <div className="text-muted-foreground">All available integrations have been added</div>
+              </div>
+            ) : (
+              availableIntegrations.map((integration) => (
+                <Card key={integration.value} className="bg-slate-100 dark:bg-slate-800 border-0">
+                  <CardContent className="p-4 bg-gray-50 dark:bg-gray-700 rounded-md">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-3">
+                        {getIntegrationLogo(integration.value)}
+                        <h3 className="font-semibold text-lg">{integration.label}</h3>
+                      </div>
+                      <span className="px-2 py-1 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-600 text-gray-700 dark:text-gray-300">
+                        Available
+                      </span>
+                    </div>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="w-full"
+                      onClick={() => handleAddIntegration(integration.value)}
+                      disabled={createIntegrationMutation.isPending}
+                    >
+                      {createIntegrationMutation.isPending ? "Adding..." : "Add Integration"}
                     </Button>
                   </CardContent>
                 </Card>
@@ -531,90 +560,7 @@ export function IntegrationsSection() {
         </DialogContent>
       </Dialog>
 
-      {/* New Integration Dialog */}
-      <Dialog open={isNewIntegrationOpen} onOpenChange={setIsNewIntegrationOpen}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Add New Integration</DialogTitle>
-          </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid gap-2">
-              <Label htmlFor="integrationType">Integration Type</Label>
-              <div className="relative">
-                <Input
-                  id="integrationType"
-                  type="text"
-                  value={integrationSearchTerm || (selectedIntegrationType ? availableIntegrationTypes.find(t => t.value === selectedIntegrationType)?.label : "")}
-                  onChange={(e) => {
-                    setIntegrationSearchTerm(e.target.value);
-                    setShowIntegrationDropdown(true);
-                  }}
-                  onFocus={() => setShowIntegrationDropdown(true)}
-                  placeholder="Search for integration type..."
-                  className="pr-8"
-                />
-                {showIntegrationDropdown && (
-                  <div className="absolute z-10 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md shadow-lg max-h-48 overflow-y-auto">
-                    {availableIntegrationTypes
-                      .filter(integration => 
-                        integration.label.toLowerCase().includes(integrationSearchTerm.toLowerCase()) ||
-                        integration.value.toLowerCase().includes(integrationSearchTerm.toLowerCase())
-                      )
-                      .map((integration) => (
-                        <div
-                          key={integration.value}
-                          onClick={() => {
-                            setSelectedIntegrationType(integration.value);
-                            setIntegrationSearchTerm("");
-                            setShowIntegrationDropdown(false);
-                          }}
-                          className="flex items-center gap-2 p-3 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"
-                        >
-                          {getIntegrationLogo(integration.value)}
-                          <span className="font-medium">{integration.label}</span>
-                        </div>
-                      ))
-                    }
-                    {availableIntegrationTypes.filter(integration => 
-                      integration.label.toLowerCase().includes(integrationSearchTerm.toLowerCase()) ||
-                      integration.value.toLowerCase().includes(integrationSearchTerm.toLowerCase())
-                    ).length === 0 && (
-                      <div className="p-3 text-gray-500 dark:text-gray-400">No integrations found</div>
-                    )}
-                  </div>
-                )}
-              </div>
-            </div>
-            
-            {selectedIntegrationType && (
-              <div className="mt-4 p-4 bg-muted rounded-lg">
-                <div className="flex items-center gap-3">
-                  {getIntegrationLogo(selectedIntegrationType)}
-                  <h4 className="font-medium">
-                    {availableIntegrationTypes.find(i => i.value === selectedIntegrationType)?.label}
-                  </h4>
-                </div>
-              </div>
-            )}
-          </div>
-          <div className="flex justify-end gap-3">
-            <Button variant="outline" onClick={() => {
-              setIsNewIntegrationOpen(false);
-              setSelectedIntegrationType("");
-              setIntegrationSearchTerm("");
-              setShowIntegrationDropdown(false);
-            }}>
-              Cancel
-            </Button>
-            <Button 
-              onClick={handleCreateIntegration}
-              disabled={createIntegrationMutation.isPending || !selectedIntegrationType}
-            >
-              {createIntegrationMutation.isPending ? "Adding..." : "Add Integration"}
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+
 
       {/* Delete Integration Confirmation Dialog */}
       <Dialog open={isDeleteIntegrationOpen} onOpenChange={setIsDeleteIntegrationOpen}>
