@@ -1,15 +1,23 @@
 import React from "react";
 import { Link, useLocation } from "wouter";
-import { Shield, Users, UsersRound, Grid3x3, Settings, RotateCcw, LayoutDashboard, Gauge, LogOut, Building2 } from "lucide-react";
+import { Shield, Users, UsersRound, Grid3x3, Settings, RotateCcw, LayoutDashboard, Gauge, LogOut, Building2, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { useAuth } from "@/hooks/use-auth";
 import { useRoleAccess } from "@/hooks/useRoleAccess";
 import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useState, useEffect, useRef } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+
+// Client interface for sidebar dropdown
+interface Client {
+  id: number;
+  name: string;
+  status: string;
+}
 
 // Navigation items will be filtered based on user access level
 
@@ -18,8 +26,17 @@ export default function Sidebar() {
   const { user: currentUser } = useAuth();
   const { canViewAdmin } = useRoleAccess();
   const [showUserDropdown, setShowUserDropdown] = useState(false);
+  const [selectedClient, setSelectedClient] = useState<string>("");
   const { toast } = useToast();
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Fetch clients for dropdown (only if user can view admin)
+  const { data: clients = [] } = useQuery<Client[]>({
+    queryKey: ["/api/clients"],
+    enabled: canViewAdmin,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    refetchOnWindowFocus: false,
+  });
 
   // Get active company logo
   const { data: activeLogo } = useQuery({
@@ -50,6 +67,7 @@ export default function Sidebar() {
     { name: "Users", href: "/users", icon: Users, current: false },
     ...(canViewAdmin ? [{ name: "Admin", href: "/admin", icon: Settings, current: false }] : []),
     ...(canViewAdmin ? [{ name: "MSP", href: "/msp", icon: Building2, current: false }] : []),
+    ...(canViewAdmin ? [{ name: "Admin", href: "/admin/client", icon: Settings, current: false }] : []),
   ];
 
   // Close dropdown when clicking outside
@@ -142,11 +160,32 @@ export default function Sidebar() {
       </div>
       
       <nav className="p-4 flex-1">
+        {/* Client Selector - Only show for admin users */}
+        {canViewAdmin && (
+          <div className="mb-4">
+            <Select value={selectedClient} onValueChange={setSelectedClient}>
+              <SelectTrigger className="w-full h-8 text-xs bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600">
+                <SelectValue placeholder="Select Client" />
+              </SelectTrigger>
+              <SelectContent className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600">
+                {clients.map((client) => (
+                  <SelectItem key={client.id} value={client.id.toString()}>
+                    {client.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
+
         <ul className="space-y-2">
-          {navigation.map((item) => {
+          {navigation.map((item, index) => {
             const isActive = location === item.href || (item.href === "/users" && location.startsWith("/users"));
+            const isDuplicateAdmin = item.name === "Admin" && index > 0 && navigation.filter(nav => nav.name === "Admin").length > 1;
+            const displayName = isDuplicateAdmin ? "Client Admin" : item.name;
+            
             return (
-              <li key={item.name}>
+              <li key={`${item.name}-${index}`}>
                 <Link
                   href={item.href}
                   className={cn(
@@ -157,7 +196,7 @@ export default function Sidebar() {
                   )}
                 >
                   <item.icon className="w-4 h-4 flex-shrink-0" />
-                  <span className="text-left">{item.name}</span>
+                  <span className="text-left">{displayName}</span>
                 </Link>
               </li>
             );
