@@ -41,7 +41,7 @@ export function AuditLogsSection() {
 
   // Sort logs newest first and apply filters
   const filteredAndSortedLogs = useMemo(() => {
-    if (!auditLogsData?.logs) return [];
+    if (!auditLogsData?.logs || !Array.isArray(auditLogsData.logs)) return [];
     
     let filtered = [...auditLogsData.logs];
     
