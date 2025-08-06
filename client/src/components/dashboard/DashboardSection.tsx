@@ -19,7 +19,7 @@ export function DashboardSection() {
     : `/api/dashboard-cards`;
     
   // Fetch dashboard cards from the database
-  const { data: dashboardCards = [] } = useQuery({
+  const { data: dashboardCards = [] } = useQuery<any[]>({
     queryKey: [dashboardCardsEndpoint],
     staleTime: 10 * 60 * 1000, // 10 minutes - dashboard layout rarely changes
     refetchOnWindowFocus: false,
@@ -300,7 +300,7 @@ export function DashboardSection() {
     jira: renderJiraCard,
   };
 
-  if (!dashboardCards) {
+  if (!Array.isArray(dashboardCards) || dashboardCards.length === 0) {
     return (
       <div className="p-6">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
