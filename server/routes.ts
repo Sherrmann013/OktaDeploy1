@@ -53,6 +53,7 @@ function determineEmployeeTypeFromGroups(userGroups: any[], employeeTypeApps: Se
   return null;
 }
 import { setupAuth, isAuthenticated, requireAdmin } from "./direct-okta-auth";
+import * as clientRoutes from "./routes/clients";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Setup OKTA authentication
@@ -3148,6 +3149,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             settingKey,
             settingValue,
             settingType: 'field',
+            clientId: 1, // Default client for now
             updatedBy: user.id
           })
           .returning();
@@ -4080,6 +4082,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to delete logo" });
     }
   });
+
+  // Client Management API endpoints
+  app.get("/api/clients", isAuthenticated, clientRoutes.getClients);
+  app.get("/api/clients/:id", isAuthenticated, clientRoutes.getClient);
+  app.post("/api/clients", isAuthenticated, requireAdmin, clientRoutes.createClient);
+  app.put("/api/clients/:id", isAuthenticated, requireAdmin, clientRoutes.updateClient);
+  app.delete("/api/clients/:id", isAuthenticated, requireAdmin, clientRoutes.deleteClient);
+  
+  // Client Access Management
+  app.get("/api/users/:userId/client-access", isAuthenticated, clientRoutes.getUserClientAccess);
+  app.post("/api/client-access", isAuthenticated, requireAdmin, clientRoutes.grantClientAccess);
+  app.delete("/api/client-access/:userId/:clientId", isAuthenticated, requireAdmin, clientRoutes.revokeClientAccess);
 
   const httpServer = createServer(app);
   return httpServer;

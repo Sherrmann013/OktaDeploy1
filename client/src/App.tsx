@@ -17,6 +17,7 @@ import Applications from "@/pages/applications";
 import Security from "@/pages/security";
 import Settings from "@/pages/settings";
 import Admin from "@/pages/admin";
+import MSPDashboard from "@/pages/msp-dashboard";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -54,6 +55,7 @@ function Router() {
         <Route path="/security" component={Security} />
         <Route path="/settings" component={Settings} />
         <Route path="/admin" component={Admin} />
+        <Route path="/msp" component={MSPDashboard} />
         <Route component={NotFound} />
       </Switch>
     </SSOLayout>

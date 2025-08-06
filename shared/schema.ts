@@ -13,6 +13,45 @@ export const sessions = pgTable(
   (table) => [index("IDX_session_expire").on(table.expire)],
 );
 
+// MSP Clients table
+export const clients = pgTable("clients", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  description: text("description"),
+  domain: text("domain"), // Company domain for OKTA integration
+  status: text("status").notNull().default("ACTIVE"), // ACTIVE, SUSPENDED, ARCHIVED
+  logoUrl: text("logo_url"),
+  primaryContact: text("primary_contact"),
+  contactEmail: text("contact_email"),
+  created: timestamp("created").defaultNow(),
+  lastUpdated: timestamp("last_updated").defaultNow(),
+});
+
+export const insertClientSchema = createInsertSchema(clients).omit({
+  id: true,
+  created: true,
+  lastUpdated: true,
+}).extend({
+  name: z.string().min(1, "Client name is required"),
+});
+
+export type InsertClient = z.infer<typeof insertClientSchema>;
+export type UpdateClient = Partial<InsertClient>;
+export type Client = typeof clients.$inferSelect;
+
+// Client access permissions table
+export const clientAccess = pgTable("client_access", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  clientId: integer("client_id").notNull(),
+  accessLevel: text("access_level").notNull().default("standard"), // admin, standard, readonly
+  created: timestamp("created").defaultNow(),
+}, (table) => [
+  unique("unique_user_client_access").on(table.userId, table.clientId)
+]);
+
+export type ClientAccess = typeof clientAccess.$inferSelect;
+
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
   oktaId: text("okta_id").unique(),
@@ -30,6 +69,8 @@ export const users = pgTable("users", {
   status: text("status").notNull().default("ACTIVE"), // ACTIVE, SUSPENDED, DEPROVISIONED
   groups: text("groups").array().default([]),
   applications: text("applications").array().default([]),
+  userType: text("user_type").notNull().default("CLIENT"), // MSP, CLIENT
+  clientId: integer("client_id"), // null for MSP users, set for client users
   created: timestamp("created").defaultNow(),
   lastUpdated: timestamp("last_updated").defaultNow(),
   lastLogin: timestamp("last_login"),
@@ -93,15 +134,19 @@ export type SiteAccessUser = typeof siteAccessUsers.$inferSelect;
 // Integrations table for storing API configurations
 export const integrations = pgTable('integrations', {
   id: serial('id').primaryKey(),
-  name: varchar('name', { length: 100 }).notNull().unique(),
+  name: varchar('name', { length: 100 }).notNull(),
   displayName: varchar('display_name', { length: 100 }).notNull(),
   description: text('description'),
   status: varchar('status', { length: 20 }).notNull().default('disconnected'), // connected, pending, disconnected
   apiKeys: jsonb('api_keys').notNull().default('{}'), // Store encrypted API keys as JSON
   config: jsonb('config').default('{}'), // Additional configuration
+  clientId: integer("client_id").notNull(), // Scope integrations to specific clients
   created: timestamp('created').defaultNow().notNull(),
   lastUpdated: timestamp('last_updated').defaultNow().notNull(),
-});
+}, (table) => [
+  // Unique constraint on name per client
+  unique("unique_integration_per_client").on(table.name, table.clientId)
+]);
 
 export const insertIntegrationSchema = createInsertSchema(integrations).omit({
   id: true,
@@ -112,7 +157,8 @@ export const insertIntegrationSchema = createInsertSchema(integrations).omit({
   displayName: z.string().min(1, "Display name is required"),
   status: z.enum(["connected", "pending", "disconnected"], { required_error: "Status is required" }),
   apiKeys: z.record(z.string()).default({}),
-  config: z.record(z.any()).default({})
+  config: z.record(z.any()).default({}),
+  clientId: z.number().min(1, "Client ID is required")
 });
 
 export type InsertIntegration = z.infer<typeof insertIntegrationSchema>;
@@ -132,6 +178,7 @@ export const auditLogs = pgTable('audit_logs', {
   newValues: jsonb('new_values').default('{}'), // New values (for creates/updates)
   ipAddress: text('ip_address'), // IP address of the user
   userAgent: text('user_agent'), // User agent string
+  clientId: integer("client_id"), // null for MSP-level actions, set for client-specific actions
   timestamp: timestamp('timestamp').defaultNow().notNull(),
 });
 
@@ -248,13 +295,17 @@ export type EmployeeTypeGroupMapping = typeof employeeTypeGroupMappings.$inferSe
 // Layout customization schema
 export const layoutSettings = pgTable('layout_settings', {
   id: serial('id').primaryKey(),
-  settingKey: varchar('setting_key', { length: 100 }).notNull().unique(),
+  settingKey: varchar('setting_key', { length: 100 }).notNull(),
   settingValue: text('setting_value'),
   settingType: varchar('setting_type', { length: 50 }).notNull(), // 'logo', 'card_layout', 'app_config', 'user_config'
   metadata: jsonb('metadata').default('{}'), // Additional config as JSON
+  clientId: integer("client_id").notNull(), // Scope settings to specific clients
   updatedBy: integer('updated_by').references(() => siteAccessUsers.id),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
-});
+}, (table) => [
+  // Unique constraint on setting key per client
+  unique("unique_setting_per_client").on(table.settingKey, table.clientId)
+]);
 
 export const insertLayoutSettingSchema = createInsertSchema(layoutSettings).omit({
   id: true,
@@ -262,7 +313,8 @@ export const insertLayoutSettingSchema = createInsertSchema(layoutSettings).omit
 }).extend({
   settingKey: z.string().min(1, "Setting key is required"),
   settingType: z.enum(["logo", "card_layout", "app_config", "user_config"], { required_error: "Setting type is required" }),
-  metadata: z.record(z.any()).default({})
+  metadata: z.record(z.any()).default({}),
+  clientId: z.number().min(1, "Client ID is required")
 });
 
 export type InsertLayoutSetting = z.infer<typeof insertLayoutSettingSchema>;
@@ -276,6 +328,7 @@ export const companyLogos = pgTable('company_logos', {
   fileSize: integer('file_size').notNull(),
   mimeType: text('mime_type').notNull(),
   isActive: boolean('is_active').default(false), // Which logo is currently selected
+  clientId: integer("client_id").notNull(), // Scope logos to specific clients
   uploadedBy: integer('uploaded_by').references(() => siteAccessUsers.id),
   uploadedAt: timestamp('uploaded_at').defaultNow().notNull(),
 });
@@ -288,6 +341,7 @@ export const insertCompanyLogoSchema = createInsertSchema(companyLogos).omit({
   fileName: z.string().min(1, "File name is required"),
   fileSize: z.number().min(1, "File size is required"),
   mimeType: z.string().min(1, "MIME type is required"),
+  clientId: z.number().min(1, "Client ID is required")
 });
 
 export type InsertCompanyLogo = z.infer<typeof insertCompanyLogoSchema>;
@@ -300,6 +354,7 @@ export const dashboardCards = pgTable("dashboard_cards", {
   type: text("type").notNull(), // knowbe4, sentinelone, device_management, jira
   position: integer("position").notNull(), // 0, 1, 2, 3 for 2x2 grid
   enabled: boolean("enabled").notNull().default(true),
+  clientId: integer("client_id").notNull(), // Scope dashboard cards to specific clients
   created: timestamp("created").defaultNow(),
   updated: timestamp("updated").defaultNow(),
 });

@@ -1,4 +1,4 @@
-import { users, companyLogos, type User, type InsertUser, type UpdateUser, type CompanyLogo, type InsertCompanyLogo } from "@shared/schema";
+import { users, companyLogos, clients, clientAccess, type User, type InsertUser, type UpdateUser, type CompanyLogo, type InsertCompanyLogo, type Client, type InsertClient, type UpdateClient, type ClientAccess } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, or, ilike, desc } from "drizzle-orm";
 
@@ -12,6 +12,7 @@ export interface IStorage {
     status?: string;
     department?: string;
     employeeType?: string;
+    clientId?: number;
     limit?: number;
     offset?: number;
     sortBy?: string;
@@ -21,9 +22,23 @@ export interface IStorage {
   updateUser(id: number, updates: UpdateUser): Promise<User | undefined>;
   deleteUser(id: number): Promise<boolean>;
   
+  // Client methods
+  getAllClients(): Promise<Client[]>;
+  getClient(id: number): Promise<Client | undefined>;
+  createClient(client: InsertClient): Promise<Client>;
+  updateClient(id: number, updates: UpdateClient): Promise<Client | undefined>;
+  deleteClient(id: number): Promise<boolean>;
+  
+  // Client access methods
+  getClientAccess(userId: number): Promise<ClientAccess[]>;
+  getUserClientsAccess(userId: number): Promise<Client[]>;
+  grantClientAccess(userId: number, clientId: number, accessLevel: string): Promise<ClientAccess>;
+  revokeClientAccess(userId: number, clientId: number): Promise<boolean>;
+  updateClientAccess(userId: number, clientId: number, accessLevel: string): Promise<ClientAccess | undefined>;
+  
   // Company logo methods
-  getAllLogos(): Promise<CompanyLogo[]>;
-  getActiveLogo(): Promise<CompanyLogo | undefined>;
+  getAllLogos(clientId?: number): Promise<CompanyLogo[]>;
+  getActiveLogo(clientId?: number): Promise<CompanyLogo | undefined>;
   createLogo(logo: InsertCompanyLogo): Promise<CompanyLogo>;
   setActiveLogo(id: number): Promise<boolean>;
   deleteLogo(id: number): Promise<boolean>;
@@ -31,11 +46,17 @@ export interface IStorage {
 
 export class MemStorage implements IStorage {
   private users: Map<number, User>;
+  private clients: Map<number, Client>;
+  private clientAccess: Map<string, ClientAccess>;
   private currentId: number;
+  private currentClientId: number;
 
   constructor() {
     this.users = new Map();
+    this.clients = new Map();
+    this.clientAccess = new Map();
     this.currentId = 1;
+    this.currentClientId = 1;
     this.seedData();
   }
 
@@ -93,6 +114,11 @@ export class MemStorage implements IStorage {
       const user: User = {
         id: this.currentId++,
         ...userData,
+        employeeType: userData.title?.includes('Engineer') ? 'EMPLOYEE' : 'EMPLOYEE',
+        profileImageUrl: null,
+        managerId: null,
+        userType: 'CLIENT',
+        clientId: 1, // Default client for existing users
         created: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000), // 30 days ago
         lastUpdated: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000), // 5 days ago
       };
@@ -114,6 +140,84 @@ export class MemStorage implements IStorage {
 
   async getUserByLogin(login: string): Promise<User | undefined> {
     return Array.from(this.users.values()).find(user => user.login === login);
+  }
+
+  // Client methods
+  async getAllClients(): Promise<Client[]> {
+    return Array.from(this.clients.values());
+  }
+
+  async getClient(id: number): Promise<Client | undefined> {
+    return this.clients.get(id);
+  }
+
+  async createClient(client: InsertClient): Promise<Client> {
+    const newClient: Client = {
+      id: this.currentClientId++,
+      ...client,
+      status: client.status || 'ACTIVE',
+      created: new Date(),
+      lastUpdated: new Date(),
+    };
+    this.clients.set(newClient.id, newClient);
+    return newClient;
+  }
+
+  async updateClient(id: number, updates: UpdateClient): Promise<Client | undefined> {
+    const client = this.clients.get(id);
+    if (!client) return undefined;
+    
+    const updatedClient: Client = {
+      ...client,
+      ...updates,
+      lastUpdated: new Date(),
+    };
+    this.clients.set(id, updatedClient);
+    return updatedClient;
+  }
+
+  async deleteClient(id: number): Promise<boolean> {
+    return this.clients.delete(id);
+  }
+
+  // Client access methods
+  async getClientAccess(userId: number): Promise<ClientAccess[]> {
+    return Array.from(this.clientAccess.values()).filter(access => access.userId === userId);
+  }
+
+  async getUserClientsAccess(userId: number): Promise<Client[]> {
+    const accessList = await this.getClientAccess(userId);
+    const clientIds = accessList.map(access => access.clientId);
+    return Array.from(this.clients.values()).filter(client => clientIds.includes(client.id));
+  }
+
+  async grantClientAccess(userId: number, clientId: number, accessLevel: string): Promise<ClientAccess> {
+    const access: ClientAccess = {
+      id: Date.now(), // Simple ID for MemStorage
+      userId,
+      clientId,
+      accessLevel,
+      created: new Date(),
+    };
+    this.clientAccess.set(`${userId}-${clientId}`, access);
+    return access;
+  }
+
+  async revokeClientAccess(userId: number, clientId: number): Promise<boolean> {
+    return this.clientAccess.delete(`${userId}-${clientId}`);
+  }
+
+  async updateClientAccess(userId: number, clientId: number, accessLevel: string): Promise<ClientAccess | undefined> {
+    const key = `${userId}-${clientId}`;
+    const access = this.clientAccess.get(key);
+    if (!access) return undefined;
+    
+    const updatedAccess: ClientAccess = {
+      ...access,
+      accessLevel,
+    };
+    this.clientAccess.set(key, updatedAccess);
+    return updatedAccess;
   }
 
   async getAllUsers(options?: {
@@ -251,6 +355,7 @@ export class DatabaseStorage implements IStorage {
     status?: string;
     department?: string;
     employeeType?: string;
+    clientId?: number;
     limit?: number;
     offset?: number;
     sortBy?: string;
