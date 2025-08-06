@@ -227,6 +227,66 @@ export function IntegrationsSection() {
             </svg>
           </div>
         );
+      case 'screenconnect':
+      case 'ninjaone':
+        return (
+          <div className={logoClass}>
+            <svg viewBox="0 0 24 24" className="w-full h-full">
+              <rect width="24" height="24" rx="4" fill="#FF5722"/>
+              <path d="M8 6h8v2H8V6zm0 4h8v2H8v-2zm0 4h6v2H8v-2z" fill="white"/>
+            </svg>
+          </div>
+        );
+      case 'zendesk':
+        return (
+          <div className={logoClass}>
+            <svg viewBox="0 0 24 24" className="w-full h-full">
+              <circle cx="12" cy="12" r="12" fill="#03363D"/>
+              <path d="M6 6h12l-6 6-6-6z" fill="#78A300"/>
+              <path d="M6 18h12l-6-6-6 6z" fill="#78A300"/>
+            </svg>
+          </div>
+        );
+      case 'meshai':
+      case 'abnormal':
+        return (
+          <div className={logoClass}>
+            <svg viewBox="0 0 24 24" className="w-full h-full">
+              <rect width="24" height="24" rx="4" fill="#9C27B0"/>
+              <circle cx="12" cy="12" r="6" fill="white"/>
+              <circle cx="12" cy="12" r="3" fill="#9C27B0"/>
+            </svg>
+          </div>
+        );
+      case 'arcticwolf':
+        return (
+          <div className={logoClass}>
+            <svg viewBox="0 0 24 24" className="w-full h-full">
+              <rect width="24" height="24" rx="4" fill="#2196F3"/>
+              <path d="M12 4l4 4-4 4-4-4 4-4zm0 8l4 4-4 4-4-4 4-4z" fill="white"/>
+            </svg>
+          </div>
+        );
+      case 'msdefender':
+        return (
+          <div className={logoClass}>
+            <svg viewBox="0 0 24 24" className="w-full h-full">
+              <rect width="24" height="24" rx="4" fill="#00BCF2"/>
+              <path d="M12 3l7 4v6c0 4-3 8-7 8s-7-4-7-8V7l7-4z" fill="white"/>
+              <path d="M12 6l4 2v4c0 2-2 4-4 4s-4-2-4-4V8l4-2z" fill="#00BCF2"/>
+            </svg>
+          </div>
+        );
+      case 'hexnode':
+        return (
+          <div className={logoClass}>
+            <svg viewBox="0 0 24 24" className="w-full h-full">
+              <rect width="24" height="24" rx="4" fill="#4CAF50"/>
+              <path d="M12 4l6 3.5v7L12 18l-6-3.5v-7L12 4z" fill="white"/>
+              <path d="M12 7l3 2v4l-3 2-3-2V9l3-2z" fill="#4CAF50"/>
+            </svg>
+          </div>
+        );
       default:
         return (
           <div className={logoClass}>
@@ -472,14 +532,24 @@ export function IntegrationsSection() {
                          integration.status === "pending" ? "Pending" : "Disconnected"}
                       </span>
                     </div>
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      className="w-full"
-                      onClick={() => handleConfigureIntegration(integration)}
-                    >
-                      Configure
-                    </Button>
+                    <div className="flex gap-2">
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="flex-1"
+                        onClick={() => handleConfigureIntegration(integration)}
+                      >
+                        Configure
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={() => handleDeleteIntegration(integration)}
+                        className="border-red-300 text-red-600 hover:bg-red-50 dark:border-red-700 dark:text-red-400 dark:hover:bg-red-950"
+                      >
+                        <X className="w-4 h-4" />
+                      </Button>
+                    </div>
                   </CardContent>
                 </Card>
               ))
