@@ -32,8 +32,13 @@ export default function Sidebar() {
   // Handle client selection
   const handleClientSelect = (clientId: string) => {
     setSelectedClient(clientId);
-    // Navigate to the selected client's dashboard
-    window.location.href = `/client/${clientId}`;
+    if (clientId === "msp") {
+      // Navigate to MSP dashboard
+      window.location.href = `/msp`;
+    } else {
+      // Navigate to the selected client's dashboard
+      window.location.href = `/client/${clientId}`;
+    }
   };
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -174,8 +179,8 @@ export default function Sidebar() {
                 <SelectValue placeholder="Select Client" />
               </SelectTrigger>
               <SelectContent className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600">
-                <SelectItem value="">
-                  <span className="text-gray-500">All Clients</span>
+                <SelectItem value="msp">
+                  <span className="text-blue-600">MSP Dashboard</span>
                 </SelectItem>
                 {clients.map((client) => (
                   <SelectItem key={client.id} value={client.id.toString()}>
