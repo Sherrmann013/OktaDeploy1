@@ -111,7 +111,7 @@ export function UserFormPreview({
               Password {fieldSettings.password.required && <span className="text-red-500">*</span>}
             </Label>
             <div 
-              className={getWrapperClassName('password')}
+              className={`relative ${getWrapperClassName('password')}`}
               onClick={() => handleFieldClick('password')}
             >
               <Input
