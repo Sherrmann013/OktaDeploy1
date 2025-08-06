@@ -21,6 +21,7 @@ import { NewUserConfigSection } from "@/components/admin/new-user-config";
 import { LayoutSection } from "@/components/admin/layout";
 import { SiteAccessSection } from "@/components/admin/site-access";
 import { IntegrationsSection } from "@/components/admin/integrations";
+import { AppsSection } from "@/components/admin/apps";
 
 interface SiteUser {
   id: number;
@@ -53,15 +54,7 @@ interface AuditLog {
   timestamp: string;
 }
 
-interface AppMapping {
-  id: number;
-  appName: string;
-  oktaGroupName: string;
-  description: string | null;
-  status: "active" | "inactive";
-  created: string;
-  lastUpdated: string;
-}
+
 
 import ProtectedRoute from "@/components/ProtectedRoute";
 
@@ -108,13 +101,7 @@ function AdminComponent() {
 
   const [editingUser, setEditingUser] = useState<SiteUser | null>(null);
 
-  const [isNewMappingOpen, setIsNewMappingOpen] = useState(false);
-  const [newMapping, setNewMapping] = useState({ appName: "", oktaGroups: [""], description: "" });
 
-  const [mappingToDelete, setMappingToDelete] = useState<AppMapping | null>(null);
-  const [editingMapping, setEditingMapping] = useState<AppMapping | null>(null);
-  const [isEditMappingOpen, setIsEditMappingOpen] = useState(false);
-  const [editMappingData, setEditMappingData] = useState({ appName: "", oktaGroups: [""] });
   const [newUser, setNewUser] = useState({
     name: "",
     username: "",
@@ -351,11 +338,10 @@ function AdminComponent() {
     refetchOnWindowFocus: false,
   });
 
-  // Fetch app mappings from database - ONLY when App Mappings tab is active
-  const { data: appMappingsData = [], isLoading: appMappingsLoading } = useQuery<AppMapping[]>({
+  // Fetch app mappings data for LayoutSection
+  const { data: appMappingsData = [] } = useQuery({
     queryKey: ["/api/app-mappings"],
-    enabled: activeTab === "app-mappings", // Only load when tab is active
-    staleTime: 5 * 60 * 1000, // 5 minutes - app mappings change occasionally
+    staleTime: 5 * 60 * 1000,
     refetchOnWindowFocus: false,
   });
 
@@ -363,14 +349,7 @@ function AdminComponent() {
 
 
 
-  // Get active apps for the dropdown - matching UserModal logic
-  const availableApps = appMappingsData
-    .filter(app => app.status === 'active')
-    .map(app => app.appName);
 
-  
-
-  // Note: department and employee type app mappings are already declared above
 
   // Create site access user mutation
   const createUserMutation = useMutation({
@@ -455,126 +434,7 @@ function AdminComponent() {
     }
   };
 
-  // App mapping mutations
-  const createAppMappingMutation = useMutation({
-    mutationFn: async (mappingData: { appName: string; oktaGroups: string[]; description?: string }) => {
-      // Create multiple mappings for each group
-      const mappings = mappingData.oktaGroups.filter(group => group.trim()).map(oktaGroupName => ({
-        appName: mappingData.appName,
-        oktaGroupName: oktaGroupName.trim(),
-        description: mappingData.description
-      }));
-      
-      // Send all mappings at once
-      const response = await fetch("/api/app-mappings/bulk", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ mappings })
-      });
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || `HTTP ${response.status}: ${response.statusText}`);
-      }
-      return response.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/app-mappings"] });
-      setIsNewMappingOpen(false);
-      setNewMapping({ appName: "", oktaGroups: [""], description: "" });
-    }
-  });
 
-  // Helper function to add new group input
-  const addGroupInput = () => {
-    setNewMapping(prev => ({
-      ...prev,
-      oktaGroups: [...prev.oktaGroups, ""]
-    }));
-  };
-
-  // Helper function to remove group input
-  const removeGroupInput = (index: number) => {
-    setNewMapping(prev => ({
-      ...prev,
-      oktaGroups: prev.oktaGroups.filter((_, i) => i !== index)
-    }));
-  };
-
-  // Helper function to update group input
-  const updateGroupInput = (index: number, value: string) => {
-    setNewMapping(prev => ({
-      ...prev,
-      oktaGroups: prev.oktaGroups.map((group, i) => i === index ? value : group)
-    }));
-  };
-
-  const deleteAppMappingMutation = useMutation({
-    mutationFn: async (id: number) => {
-      const response = await fetch(`/api/app-mappings/${id}`, {
-        method: "DELETE",
-        credentials: "include"
-      });
-      if (!response.ok) throw new Error("Failed to delete app mapping");
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/app-mappings"] });
-      setMappingToDelete(null);
-    }
-  });
-
-  const handleDeleteMapping = () => {
-    if (mappingToDelete) {
-      deleteAppMappingMutation.mutate(mappingToDelete.id);
-    }
-  };
-
-  const handleEditMapping = (mapping: AppMapping) => {
-    setEditingMapping(mapping);
-    setEditMappingData({
-      appName: mapping.appName,
-      oktaGroups: [mapping.oktaGroupName]
-    });
-    setIsEditMappingOpen(true);
-  };
-
-  const updateAppMappingMutation = useMutation({
-    mutationFn: async ({ id, mappingData }: { id: number; mappingData: { appName: string; oktaGroups: string[] } }) => {
-      // Delete existing mapping and create new ones (bulk replace)
-      await fetch(`/api/app-mappings/${id}`, {
-        method: "DELETE",
-        credentials: "include"
-      });
-      
-      const validGroups = mappingData.oktaGroups.filter(group => group.trim());
-      const mappings = validGroups.map(group => ({
-        appName: mappingData.appName,
-        oktaGroupName: group.trim(),
-        description: null
-      }));
-      
-      const response = await fetch('/api/app-mappings/bulk', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({
-          mappings: mappings
-        })
-      });
-      
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || `HTTP ${response.status}: ${response.statusText}`);
-      }
-      return response.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/app-mappings"] });
-      setIsEditMappingOpen(false);
-      setEditingMapping(null);
-      setEditMappingData({ appName: "", oktaGroups: [""] });
-    }
-  });
 
 
 
@@ -754,72 +614,7 @@ function AdminComponent() {
         </TabsContent>
 
         <TabsContent value="apps" className="mt-6">
-          <Card>
-            <CardHeader>
-              <div className="flex justify-between items-center">
-                <div>
-                  <CardTitle>OKTA Application Mappings</CardTitle>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    Configure application-to-group mappings for OKTA integration
-                  </p>
-                </div>
-                <Button 
-                  className="bg-blue-600 hover:bg-blue-700 text-white"
-                  onClick={() => setIsNewMappingOpen(true)}
-                >
-                  <Plus className="w-4 h-4 mr-2" />
-                  Add Mapping
-                </Button>
-              </div>
-            </CardHeader>
-            <CardContent>
-              {appMappingsLoading ? (
-                <div className="text-center py-8">
-                  <div className="text-muted-foreground">Loading app mappings...</div>
-                </div>
-              ) : appMappingsData.length === 0 ? (
-                <div className="text-center py-8">
-                  <div className="text-muted-foreground">No app mappings configured</div>
-                  <p className="text-sm text-muted-foreground mt-2">
-                    Create your first mapping to connect applications with OKTA security groups
-                  </p>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {appMappingsData.map((mapping) => (
-                    <div key={mapping.id} className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
-                      <div className="flex items-center space-x-4">
-                        <div>
-                          <h4 className="font-semibold">{mapping.appName}</h4>
-                        </div>
-                      </div>
-                      <div className="flex items-center space-x-3">
-                        <div className="text-right">
-                          <p className="text-sm font-medium">{mapping.oktaGroupName}</p>
-                        </div>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="text-green-600 hover:text-green-700 hover:bg-green-50 dark:text-green-400 dark:hover:text-green-300 dark:hover:bg-green-950"
-                          onClick={() => handleEditMapping(mapping)}
-                        >
-                          <Edit className="w-4 h-4" />
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:text-red-300 dark:hover:bg-red-950"
-                          onClick={() => setMappingToDelete(mapping)}
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
+          <AppsSection />
         </TabsContent>
 
         <TabsContent value="layout" className="mt-6">
@@ -877,130 +672,7 @@ function AdminComponent() {
 
 
 
-      {/* Edit App Mapping Dialog */}
-      <Dialog open={isEditMappingOpen} onOpenChange={setIsEditMappingOpen}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Edit App Mapping</DialogTitle>
-            <DialogDescription>
-              Update the application mapping configuration
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div>
-              <Label htmlFor="edit-app-name">Application Name</Label>
-              <Input
-                id="edit-app-name"
-                value={editMappingData.appName}
-                onChange={(e) => setEditMappingData(prev => ({ ...prev, appName: e.target.value }))}
-                className="mt-1"
-              />
-            </div>
-            <div>
-              <Label htmlFor="edit-okta-groups">OKTA Group Name(s)</Label>
-              <div className="space-y-2 mt-1">
-                {editMappingData.oktaGroups.map((group, index) => (
-                  <div key={index} className="flex items-center space-x-2">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        setEditMappingData(prev => ({
-                          ...prev,
-                          oktaGroups: [...prev.oktaGroups, ""]
-                        }));
-                      }}
-                      className="flex-shrink-0"
-                    >
-                      <Plus className="w-4 h-4" />
-                    </Button>
-                    <Input
-                      value={group}
-                      onChange={(e) => {
-                        setEditMappingData(prev => ({
-                          ...prev,
-                          oktaGroups: prev.oktaGroups.map((g, i) => i === index ? e.target.value : g)
-                        }));
-                      }}
-                      className="flex-1"
-                    />
-                    {editMappingData.oktaGroups.length > 1 && (
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={() => {
-                          setEditMappingData(prev => ({
-                            ...prev,
-                            oktaGroups: prev.oktaGroups.filter((_, i) => i !== index)
-                          }));
-                        }}
-                        className="flex-shrink-0 text-red-600 hover:text-red-700"
-                      >
-                        <X className="w-4 h-4" />
-                      </Button>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-          <div className="flex justify-end space-x-2 mt-6">
-            <Button 
-              variant="outline" 
-              onClick={() => {
-                setIsEditMappingOpen(false);
-                setEditingMapping(null);
-                setEditMappingData({ appName: "", oktaGroups: [""] });
-              }}
-            >
-              Cancel
-            </Button>
-            <Button 
-              onClick={() => {
-                if (editingMapping && editMappingData.appName && editMappingData.oktaGroups.some(g => g.trim())) {
-                  updateAppMappingMutation.mutate({
-                    id: editingMapping.id,
-                    mappingData: editMappingData
-                  });
-                }
-              }}
-              disabled={updateAppMappingMutation.isPending || !editMappingData.appName || !editMappingData.oktaGroups.some(g => g.trim())}
-              className="bg-blue-600 hover:bg-blue-700 text-white"
-            >
-              {updateAppMappingMutation.isPending ? "Updating..." : "Update Mapping"}
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
 
-      {/* Delete App Mapping Confirmation Dialog */}
-      <Dialog open={!!mappingToDelete} onOpenChange={() => setMappingToDelete(null)}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Delete App Mapping</DialogTitle>
-            <DialogDescription>
-              Are you sure you want to delete the mapping for "{mappingToDelete?.appName}" → "{mappingToDelete?.oktaGroupName}"? This action cannot be undone.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="flex justify-end space-x-2 mt-4">
-            <Button 
-              variant="outline" 
-              onClick={() => setMappingToDelete(null)}
-            >
-              Cancel
-            </Button>
-            <Button 
-              onClick={handleDeleteMapping}
-              disabled={deleteAppMappingMutation.isPending}
-              className="bg-red-600 hover:bg-red-700 text-white"
-            >
-              {deleteAppMappingMutation.isPending ? "Deleting..." : "Delete Mapping"}
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
 
 
 
@@ -1012,99 +684,7 @@ function AdminComponent() {
 
 
 
-      {/* Add App Mapping Dialog */}
-      <Dialog open={isNewMappingOpen} onOpenChange={setIsNewMappingOpen}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Add App Mapping</DialogTitle>
-            <p className="text-sm text-muted-foreground">
-              Create a new mapping between an application and OKTA security group
-            </p>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <label htmlFor="appName" className="text-sm font-medium">
-                Application Name
-              </label>
-              <input
-                id="appName"
-                type="text"
-                placeholder=""
-                value={newMapping.appName}
-                onChange={(e) => setNewMapping({ ...newMapping, appName: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-            <div className="space-y-2">
-              <label className="text-sm font-medium">
-                OKTA Group Name(s)
-              </label>
-              <div className="space-y-2">
-                {newMapping.oktaGroups.map((group, index) => (
-                  <div key={index} className="flex items-center space-x-2">
-                    <button
-                      type="button"
-                      onClick={addGroupInput}
-                      className="text-gray-400 hover:text-blue-500 focus:outline-none p-1"
-                    >
-                      <Plus className="w-4 h-4" />
-                    </button>
-                    <div className="flex-1">
-                      <input
-                        type="text"
-                        placeholder=""
-                        value={group}
-                        onChange={(e) => updateGroupInput(index, e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      />
-                    </div>
-                    {newMapping.oktaGroups.length > 1 && (
-                      <button
-                        type="button"
-                        onClick={() => removeGroupInput(index)}
-                        className="text-gray-400 hover:text-red-500 focus:outline-none p-1"
-                      >
-                        <X className="w-4 h-4" />
-                      </button>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-            <div className="space-y-2">
-              <label htmlFor="description" className="text-sm font-medium">
-                Description (Optional)
-              </label>
-              <input
-                id="description"
-                type="text"
-                placeholder=""
-                value={newMapping.description}
-                onChange={(e) => setNewMapping({ ...newMapping, description: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-          </div>
-          <div className="flex justify-end space-x-2">
-            <Button 
-              variant="outline" 
-              onClick={() => {
-                setIsNewMappingOpen(false);
-                setNewMapping({ appName: "", oktaGroups: [""], description: "" });
-              }}
-            >
-              Cancel
-            </Button>
-            <Button 
-              onClick={() => createAppMappingMutation.mutate(newMapping)}
-              disabled={!newMapping.appName.trim() || !newMapping.oktaGroups.some(g => g.trim()) || createAppMappingMutation.isPending}
-              className="bg-blue-600 hover:bg-blue-700 text-white"
-            >
-              {createAppMappingMutation.isPending ? "Creating..." : "Create Mapping"}
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+
 
 
 
