@@ -28,6 +28,13 @@ export default function Sidebar() {
   const [showUserDropdown, setShowUserDropdown] = useState(false);
   const [selectedClient, setSelectedClient] = useState<string>("");
   const { toast } = useToast();
+
+  // Handle client selection
+  const handleClientSelect = (clientId: string) => {
+    setSelectedClient(clientId);
+    // Navigate to the selected client's dashboard
+    window.location.href = `/client/${clientId}`;
+  };
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Fetch clients for dropdown (only if user can view admin)
@@ -162,11 +169,14 @@ export default function Sidebar() {
         {/* Client Selector - Only show for admin users */}
         {canViewAdmin && (
           <div className="mb-4">
-            <Select value={selectedClient} onValueChange={setSelectedClient}>
+            <Select value={selectedClient} onValueChange={handleClientSelect}>
               <SelectTrigger className="w-full h-8 text-xs bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600">
                 <SelectValue placeholder="Select Client" />
               </SelectTrigger>
               <SelectContent className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600">
+                <SelectItem value="">
+                  <span className="text-gray-500">All Clients</span>
+                </SelectItem>
                 {clients.map((client) => (
                   <SelectItem key={client.id} value={client.id.toString()}>
                     {client.name}
