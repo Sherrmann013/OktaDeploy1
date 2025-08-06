@@ -53,7 +53,7 @@ function determineEmployeeTypeFromGroups(userGroups: any[], employeeTypeApps: Se
   return null;
 }
 import { setupAuth, isAuthenticated, requireAdmin } from "./direct-okta-auth";
-import * as clientRoutes from "./routes/clients";
+import * as mspRoutes from "./routes/msp";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Setup OKTA authentication
@@ -4083,17 +4083,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Client Management API endpoints
-  app.get("/api/clients", isAuthenticated, clientRoutes.getClients);
-  app.get("/api/clients/:id", isAuthenticated, clientRoutes.getClient);
-  app.post("/api/clients", isAuthenticated, requireAdmin, clientRoutes.createClient);
-  app.put("/api/clients/:id", isAuthenticated, requireAdmin, clientRoutes.updateClient);
-  app.delete("/api/clients/:id", isAuthenticated, requireAdmin, clientRoutes.deleteClient);
+  // MSP Management API endpoints
+  app.get("/api/clients", isAuthenticated, mspRoutes.getClients);
+  app.get("/api/clients/:id", isAuthenticated, mspRoutes.getClient);
+  app.post("/api/clients", isAuthenticated, requireAdmin, mspRoutes.createClient);
+  app.put("/api/clients/:id", isAuthenticated, requireAdmin, mspRoutes.updateClient);
+  app.delete("/api/clients/:id", isAuthenticated, requireAdmin, mspRoutes.deleteClient);
   
-  // Client Access Management
-  app.get("/api/users/:userId/client-access", isAuthenticated, clientRoutes.getUserClientAccess);
-  app.post("/api/client-access", isAuthenticated, requireAdmin, clientRoutes.grantClientAccess);
-  app.delete("/api/client-access/:userId/:clientId", isAuthenticated, requireAdmin, clientRoutes.revokeClientAccess);
+  // MSP Client Access Management
+  app.get("/api/msp-users/:mspUserId/client-access", isAuthenticated, mspRoutes.getMspUserClientAccess);
+  app.post("/api/client-access", isAuthenticated, requireAdmin, mspRoutes.grantClientAccess);
+  app.delete("/api/client-access/:mspUserId/:clientId", isAuthenticated, requireAdmin, mspRoutes.revokeClientAccess);
 
   const httpServer = createServer(app);
   return httpServer;
