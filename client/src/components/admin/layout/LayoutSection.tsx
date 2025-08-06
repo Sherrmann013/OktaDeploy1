@@ -8,6 +8,7 @@ import { Plus, Edit, X, Settings, RefreshCw, Eye, EyeOff, Trash2 } from "lucide-
 import { LogoUploadModal } from "@/components/LogoUploadModal";
 import { useToast } from "@/hooks/use-toast";
 import { NewUserConfigSection } from "@/components/admin/new-user-config";
+import { useLocation } from "wouter";
 
 interface LayoutSectionProps {
   layoutTab: string;
@@ -40,14 +41,20 @@ export function LayoutSection({
 }: LayoutSectionProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [location] = useLocation();
+  
+  // Detect current client context from URL
+  const currentClientId = location.startsWith('/client/') ? parseInt(location.split('/')[2]) : 1;
+  
   const [draggedItem, setDraggedItem] = useState<number | null>(null);
   const [dragOverItem, setDragOverItem] = useState<number | null>(null);
   const [draggedMonitoringItem, setDraggedMonitoringItem] = useState<number | null>(null);
   const [dragOverMonitoringItem, setDragOverMonitoringItem] = useState<number | null>(null);
 
-  // Fetch dashboard cards - ONLY when Layout > Dashboard tab is active
+  // Fetch dashboard cards for current client - ONLY when Layout > Dashboard tab is active
+  const dashboardCardsEndpoint = `/api/client/${currentClientId}/dashboard-cards`;
   const { data: dashboardCardsData, refetch: refetchDashboardCards, error: dashboardCardsError, isLoading: dashboardCardsLoading } = useQuery({
-    queryKey: ["/api/dashboard-cards"],
+    queryKey: [dashboardCardsEndpoint],
     enabled: layoutTab === "dashboard", // Only load when dashboard tab is active
     staleTime: 10 * 60 * 1000, // 10 minutes - rarely changes
     refetchOnMount: false,
@@ -261,7 +268,8 @@ export function LayoutSection({
   // Mutation to update dashboard card positions
   const updateCardPositionsMutation = useMutation({
     mutationFn: async (cards: any[]) => {
-      const response = await fetch("/api/dashboard-cards/positions", {
+      // Use the detected client ID from URL context
+      const response = await fetch(`/api/client/${currentClientId}/dashboard-cards/positions`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ cards }),

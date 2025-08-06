@@ -3239,6 +3239,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Client-specific bulk update dashboard card positions (for drag and drop)
+  app.patch("/api/client/:clientId/dashboard-cards/positions", isAuthenticated, requireAdmin, async (req, res) => {
+    try {
+      const clientId = parseInt(req.params.clientId);
+      const { cards } = req.body;
+      
+      console.log(`🔄 Updating dashboard card positions for client ${clientId}:`, cards.length, 'cards');
+      
+      // Update each card position for the specific client
+      for (const card of cards) {
+        await db
+          .update(dashboardCards)
+          .set({ position: card.position, updated: new Date() })
+          .where(and(eq(dashboardCards.id, card.id), eq(dashboardCards.clientId, clientId)));
+      }
+      
+      // Fetch updated cards to return
+      const updatedCards = await db
+        .select()
+        .from(dashboardCards)
+        .where(eq(dashboardCards.clientId, clientId))
+        .orderBy(dashboardCards.position);
+      
+      console.log('✅ All card positions updated successfully for client', clientId, ':', updatedCards.map(c => ({ id: c.id, name: c.name, position: c.position })));
+      
+      res.json(updatedCards);
+    } catch (error) {
+      console.error("Error updating client dashboard card positions:", error);
+      res.status(500).json({ error: "Failed to update card positions" });
+    }
+  });
+
   // Bulk update dashboard card positions (for drag and drop) - MUST come before /:id route
   app.patch("/api/dashboard-cards/positions", isAuthenticated, requireAdmin, async (req, res) => {
     try {
