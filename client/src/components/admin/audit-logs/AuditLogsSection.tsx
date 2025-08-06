@@ -1,6 +1,11 @@
+import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { CustomSelect, CustomSelectContent, CustomSelectItem, CustomSelectTrigger, CustomSelectValue } from "@/components/ui/custom-select";
+import { Search, X, Filter } from "lucide-react";
 
 interface AuditLog {
   id: number;
@@ -19,6 +24,13 @@ interface AuditLog {
 }
 
 export function AuditLogsSection() {
+  // Filter state
+  const [searchTerm, setSearchTerm] = useState("");
+  const [actionFilter, setActionFilter] = useState("all");
+  const [userFilter, setUserFilter] = useState("");
+  const [resourceFilter, setResourceFilter] = useState("all");
+  const [dateFilter, setDateFilter] = useState("all");
+
   // Fetch audit logs from database
   const { data: auditLogsData, isLoading: auditLogsLoading } = useQuery<{logs: AuditLog[], pagination: any}>({
     queryKey: ["/api/audit-logs"],
@@ -26,15 +38,216 @@ export function AuditLogsSection() {
     refetchOnWindowFocus: false,
   });
 
+  // Sort logs newest first and apply filters
+  const filteredAndSortedLogs = useMemo(() => {
+    if (!auditLogsData?.logs) return [];
+    
+    let filtered = [...auditLogsData.logs];
+    
+    // Sort by timestamp (newest first)
+    filtered.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+    
+    // Apply search filter
+    if (searchTerm) {
+      const term = searchTerm.toLowerCase();
+      filtered = filtered.filter(log => 
+        log.userEmail.toLowerCase().includes(term) ||
+        log.action.toLowerCase().includes(term) ||
+        log.resourceType.toLowerCase().includes(term) ||
+        (log.resourceName && log.resourceName.toLowerCase().includes(term)) ||
+        JSON.stringify(log.details).toLowerCase().includes(term)
+      );
+    }
+    
+    // Apply action filter
+    if (actionFilter !== "all") {
+      filtered = filtered.filter(log => log.action.includes(actionFilter.toUpperCase()));
+    }
+    
+    // Apply user filter
+    if (userFilter) {
+      filtered = filtered.filter(log => 
+        log.userEmail.toLowerCase().includes(userFilter.toLowerCase())
+      );
+    }
+    
+    // Apply resource filter
+    if (resourceFilter !== "all") {
+      filtered = filtered.filter(log => log.resourceType === resourceFilter);
+    }
+    
+    // Apply date filter
+    if (dateFilter !== "all") {
+      const now = new Date();
+      const filterDate = new Date();
+      
+      switch (dateFilter) {
+        case "today":
+          filterDate.setHours(0, 0, 0, 0);
+          break;
+        case "yesterday":
+          filterDate.setDate(filterDate.getDate() - 1);
+          filterDate.setHours(0, 0, 0, 0);
+          break;
+        case "week":
+          filterDate.setDate(filterDate.getDate() - 7);
+          break;
+        case "month":
+          filterDate.setMonth(filterDate.getMonth() - 1);
+          break;
+      }
+      
+      filtered = filtered.filter(log => {
+        const logDate = new Date(log.timestamp);
+        if (dateFilter === "yesterday") {
+          const dayAfter = new Date(filterDate);
+          dayAfter.setDate(dayAfter.getDate() + 1);
+          return logDate >= filterDate && logDate < dayAfter;
+        }
+        return logDate >= filterDate;
+      });
+    }
+    
+    return filtered;
+  }, [auditLogsData?.logs, searchTerm, actionFilter, userFilter, resourceFilter, dateFilter]);
+
+  // Get unique values for filter dropdowns
+  const uniqueActions = useMemo(() => {
+    if (!auditLogsData?.logs) return [];
+    const actions = [...new Set(auditLogsData.logs.map(log => log.action))];
+    return actions.sort();
+  }, [auditLogsData?.logs]);
+
+  const uniqueResources = useMemo(() => {
+    if (!auditLogsData?.logs) return [];
+    const resources = [...new Set(auditLogsData.logs.map(log => log.resourceType))];
+    return resources.sort();
+  }, [auditLogsData?.logs]);
+
+  const clearFilters = () => {
+    setSearchTerm("");
+    setActionFilter("all");
+    setUserFilter("");
+    setResourceFilter("all");
+    setDateFilter("all");
+  };
+
+  const hasActiveFilters = searchTerm || actionFilter !== "all" || userFilter || resourceFilter !== "all" || dateFilter !== "all";
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Audit Logs</CardTitle>
+        <div className="flex justify-between items-start">
+          <div>
+            <CardTitle>Audit Logs</CardTitle>
+            <p className="text-sm text-muted-foreground mt-1">
+              Track all administrative actions and system changes with detailed audit logging.
+            </p>
+          </div>
+          {hasActiveFilters && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={clearFilters}
+              className="text-muted-foreground hover:text-foreground"
+            >
+              <X className="w-4 h-4 mr-1" />
+              Clear Filters
+            </Button>
+          )}
+        </div>
       </CardHeader>
       <CardContent>
-        <p className="text-sm text-muted-foreground mb-4">
-          Track all administrative actions and system changes with detailed audit logging.
-        </p>
+        {/* Filters Section */}
+        <div className="mb-6 space-y-4">
+          <div className="flex flex-wrap gap-4">
+            {/* Search Input */}
+            <div className="flex-1 min-w-[250px]">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                <Input
+                  placeholder="Search logs by user, action, resource, or details..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10 bg-white dark:bg-gray-800"
+                />
+              </div>
+            </div>
+            
+            {/* User Filter */}
+            <div className="min-w-[180px]">
+              <Input
+                placeholder="Filter by user email..."
+                value={userFilter}
+                onChange={(e) => setUserFilter(e.target.value)}
+                className="bg-white dark:bg-gray-800"
+              />
+            </div>
+          </div>
+          
+          <div className="flex flex-wrap gap-4">
+            {/* Action Filter */}
+            <div className="min-w-[150px]">
+              <CustomSelect value={actionFilter} onValueChange={setActionFilter}>
+                <CustomSelectTrigger className="bg-white dark:bg-gray-800">
+                  <CustomSelectValue placeholder="Action Type" />
+                </CustomSelectTrigger>
+                <CustomSelectContent>
+                  <CustomSelectItem value="all">All Actions</CustomSelectItem>
+                  <CustomSelectItem value="CREATE">Create</CustomSelectItem>
+                  <CustomSelectItem value="UPDATE">Update</CustomSelectItem>
+                  <CustomSelectItem value="DELETE">Delete</CustomSelectItem>
+                  <CustomSelectItem value="LOGIN">Login</CustomSelectItem>
+                  {uniqueActions.map(action => (
+                    <CustomSelectItem key={action} value={action}>{action}</CustomSelectItem>
+                  ))}
+                </CustomSelectContent>
+              </CustomSelect>
+            </div>
+            
+            {/* Resource Filter */}
+            <div className="min-w-[150px]">
+              <CustomSelect value={resourceFilter} onValueChange={setResourceFilter}>
+                <CustomSelectTrigger className="bg-white dark:bg-gray-800">
+                  <CustomSelectValue placeholder="Resource Type" />
+                </CustomSelectTrigger>
+                <CustomSelectContent>
+                  <CustomSelectItem value="all">All Resources</CustomSelectItem>
+                  {uniqueResources.map(resource => (
+                    <CustomSelectItem key={resource} value={resource}>{resource}</CustomSelectItem>
+                  ))}
+                </CustomSelectContent>
+              </CustomSelect>
+            </div>
+            
+            {/* Date Filter */}
+            <div className="min-w-[150px]">
+              <CustomSelect value={dateFilter} onValueChange={setDateFilter}>
+                <CustomSelectTrigger className="bg-white dark:bg-gray-800">
+                  <CustomSelectValue placeholder="Time Period" />
+                </CustomSelectTrigger>
+                <CustomSelectContent>
+                  <CustomSelectItem value="all">All Time</CustomSelectItem>
+                  <CustomSelectItem value="today">Today</CustomSelectItem>
+                  <CustomSelectItem value="yesterday">Yesterday</CustomSelectItem>
+                  <CustomSelectItem value="week">Last 7 Days</CustomSelectItem>
+                  <CustomSelectItem value="month">Last 30 Days</CustomSelectItem>
+                </CustomSelectContent>
+              </CustomSelect>
+            </div>
+          </div>
+          
+          {/* Results Summary */}
+          {auditLogsData?.logs && (
+            <div className="flex items-center justify-between text-sm text-muted-foreground">
+              <span>
+                Showing {filteredAndSortedLogs.length} of {auditLogsData.logs.length} audit logs
+                {hasActiveFilters && " (filtered)"}
+              </span>
+              <span className="text-xs">Sorted by newest first</span>
+            </div>
+          )}
+        </div>
         {auditLogsLoading ? (
           <div className="text-center py-8">
             <div className="text-muted-foreground">Loading audit logs...</div>
@@ -42,6 +255,20 @@ export function AuditLogsSection() {
         ) : auditLogsData?.logs.length === 0 ? (
           <div className="text-center py-8">
             <div className="text-muted-foreground">No audit logs found</div>
+          </div>
+        ) : filteredAndSortedLogs.length === 0 ? (
+          <div className="text-center py-8">
+            <div className="text-muted-foreground">No audit logs match your current filters</div>
+            {hasActiveFilters && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={clearFilters}
+                className="mt-2"
+              >
+                Clear Filters
+              </Button>
+            )}
           </div>
         ) : (
           <div className="space-y-4">
@@ -56,7 +283,7 @@ export function AuditLogsSection() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {auditLogsData?.logs.map((log) => (
+                {filteredAndSortedLogs.map((log) => (
                   <TableRow key={log.id}>
                     <TableCell className="text-sm">
                       {new Date(log.timestamp).toLocaleString()}
@@ -95,9 +322,9 @@ export function AuditLogsSection() {
               </TableBody>
             </Table>
             
-            {auditLogsData?.pagination && auditLogsData.pagination.total > 50 && (
+            {auditLogsData?.pagination && auditLogsData.pagination.total > auditLogsData.logs.length && (
               <div className="text-sm text-muted-foreground text-center py-4">
-                Showing latest {auditLogsData.logs.length} of {auditLogsData.pagination.total} audit logs
+                Database contains {auditLogsData.pagination.total} total audit logs (showing latest {auditLogsData.logs.length})
               </div>
             )}
           </div>
