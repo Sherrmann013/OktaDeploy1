@@ -189,7 +189,7 @@ export default function Users() {
   });
 
   const users = usersData?.users || [];
-  const allUsers = Array.isArray(allUsersData?.users) ? allUsersData.users : [];
+  const allUsers = allUsersData?.users || [];
   const total = totalUsersData?.total || usersData?.total || 0;
   const totalPages = usersData?.totalPages || 1;
   const dataSource = usersData?.source || 'unknown';
@@ -459,9 +459,7 @@ export default function Users() {
           <Card>
             <CardContent className="p-3">
               <div className="flex flex-col items-center text-center">
-                <Calendar className={`w-6 h-6 mb-1 ${
-                  employeeTypeFilter === 'PART_TIME' ? 'text-purple-700' : 'text-purple-600'
-                }`} />
+                <Calendar className="w-6 h-6 mb-1 text-purple-600" />
                 <p className="text-xs font-medium text-muted-foreground">Part Time</p>
                 <p className="text-xl font-bold text-gray-900 dark:text-gray-100">
                   {employeeTypeCounts?.PART_TIME ?? allUsers.filter((u: User) => u.employeeType === 'PART_TIME').length}
@@ -473,9 +471,7 @@ export default function Users() {
           <Card>
             <CardContent className="p-3">
               <div className="flex flex-col items-center text-center">
-                <Eye className={`w-6 h-6 mb-1 ${
-                  employeeTypeFilter === 'INTERN' ? 'text-orange-700' : 'text-orange-600'
-                }`} />
+                <Eye className="w-6 h-6 mb-1 text-orange-600" />
                 <p className="text-xs font-medium text-muted-foreground">Interns</p>
                 <p className="text-xl font-bold text-gray-900 dark:text-gray-100">
                   {employeeTypeCounts?.INTERN ?? allUsers.filter((u: User) => u.employeeType === 'INTERN').length}
@@ -486,58 +482,62 @@ export default function Users() {
         </div>
       </div>
 
-      {/* Controls Section */}
-      <div className="bg-background border-b px-6 py-4 flex justify-between items-center">
-        <div className="flex space-x-2">
-          <form onSubmit={handleSearch} className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-            <Input
-              placeholder="Search users..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 w-80"
-            />
-          </form>
-
-          <Button
-            variant="outline"
-            onClick={() => oktaSyncMutation.mutate()}
-            disabled={oktaSyncMutation.isPending}
-            className="flex items-center gap-2"
-          >
-            <RefreshCw className={`w-4 h-4 ${oktaSyncMutation.isPending ? 'animate-spin' : ''}`} />
-            {oktaSyncMutation.isPending ? 'Syncing...' : 'Sync OKTA'}
-          </Button>
-
-          {(searchQuery || employeeTypeFilter) && (
-            <Button 
-              variant="outline" 
-              onClick={clearFilters}
-              className="flex items-center gap-2"
-            >
-              <RotateCcw className="w-4 h-4" />
-              Clear Filters
+      {/* Search and Controls */}
+      <div className="bg-background border-b border-border px-6 py-4">
+        <form onSubmit={handleSearch} className="flex items-center justify-between">
+          <div className="flex items-center space-x-4">
+            <div className="w-96 relative">
+              <Search className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
+              <Input
+                type="text"
+                placeholder="Search users by name, email, or login..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10 border-blue-500 ring-1 ring-blue-500 focus:border-blue-600 focus:ring-blue-600"
+              />
+            </div>
+            
+            <Button onClick={() => setShowCreateModal(true)} className="bg-blue-600 hover:bg-blue-700 text-white">
+              <UserPlus className="w-4 h-4 mr-2" />
+              Add User
             </Button>
-          )}
-        </div>
-
-        <div className="flex space-x-2">
-          <ExportModal onExport={handleExport} />
+          </div>
           
-          <ColumnManager
-            columns={columns}
-            onColumnsChange={setColumns}
-          />
-          
-          <Button onClick={() => setShowCreateModal(true)}>
-            <UserPlus className="w-4 h-4 mr-2" />
-            New User
-          </Button>
-        </div>
+          <div className="flex items-center space-x-3">
+            <Button
+              variant="ghost"
+              onClick={handleRefresh}
+              disabled={isFetching}
+              className="gap-2"
+            >
+              <RefreshCw className={`h-4 w-4 ${isFetching ? 'animate-spin' : ''}`} />
+              Refresh
+            </Button>
+            
+            {(searchQuery || employeeTypeFilter || filters.employeeType.length > 0 || filters.mobilePhone || filters.manager || filters.status.length > 0 || filters.lastLogin) && (
+              <Button type="button" variant="outline" onClick={clearFilters}>
+                <RotateCcw className="h-4 w-4 mr-2" />
+                Clear Filters
+              </Button>
+            )}
+            
+            <ExportModal
+              users={users}
+              currentColumns={columns}
+              totalUsers={total}
+              onExport={handleExport}
+            />
+            
+            <ColumnManager
+              columns={columns}
+              onColumnsChange={setColumns}
+            />
+          </div>
+        </form>
       </div>
 
-      {/* User Table */}
-      <div className="flex-1">
+      {/* Users Table */}
+      <div className="flex-1 overflow-auto bg-background">
         <UserTable
           users={users}
           total={total}
@@ -548,39 +548,35 @@ export default function Users() {
           onUserClick={handleUserClick}
           onPageChange={setCurrentPage}
           onPerPageChange={handlePerPageChange}
+          onRefresh={handleRefresh}
           sortBy={sortBy}
           sortOrder={sortOrder}
           onSort={handleSort}
-          dataSource={dataSource}
-          columns={columns}
+          visibleColumns={columns.filter(col => col.visible).sort((a, b) => a.order - b.order).map(col => col.id)}
+          columnConfig={columns}
+          onColumnReorder={setColumns}
           filters={filters}
           onFiltersChange={setFilters}
-          onEmployeeTypeFilter={handleEmployeeTypeFilter}
-          employeeTypeFilter={employeeTypeFilter}
-          searchQuery={searchQuery}
+          getEmployeeTypeColor={getEmployeeTypeColor}
         />
       </div>
 
-      {/* User Detail Modal */}
-      {selectedUserId && (
-        <UserDetailModal
-          userId={selectedUserId}
-          open={showUserDetail}
-          onClose={() => {
-            setShowUserDetail(false);
-            setSelectedUserId(null);
-          }}
-        />
-      )}
-
       {/* Create User Modal */}
-      {showCreateModal && (
-        <CreateUserModal
-          open={showCreateModal}
-          onClose={() => setShowCreateModal(false)}
-          onSuccess={handleCreateSuccess}
-        />
-      )}
+      <CreateUserModal
+        open={showCreateModal}
+        onClose={() => setShowCreateModal(false)}
+        onSuccess={handleCreateSuccess}
+      />
+
+      {/* User Detail Modal */}
+      <UserDetailModal
+        open={showUserDetail}
+        onClose={() => {
+          setShowUserDetail(false);
+          setSelectedUserId(null);
+        }}
+        userId={selectedUserId}
+      />
     </div>
   );
 }
