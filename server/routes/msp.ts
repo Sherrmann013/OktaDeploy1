@@ -188,10 +188,47 @@ export async function createClientWithTemplate(req: Request, res: Response) {
 // Helper function to copy template data from one client to another
 async function copyTemplateData(templateDb: any, newClientDb: any, identityProvider: string) {
   try {
-    // For development: Skip template copying since we're using single database
-    // In production: This would copy data between separate client databases
-    console.log(`Template copying skipped for development environment. Identity provider: ${identityProvider}`);
-    return;
+    // Import client schema for database operations
+    const { integrations, layoutSettings, dashboardCards } = await import('../../shared/client-schema');
+    
+    console.log(`Copying template data with ${identityProvider} identity provider customization`);
+    
+    // Copy integrations (customize based on identity provider)
+    const templateIntegrations = await templateDb.select().from(integrations);
+    for (const integration of templateIntegrations) {
+      const newIntegration = {
+        ...integration,
+        id: undefined, // Let database generate new ID
+        status: 'DISCONNECTED', // New client starts with disconnected integrations
+        apiKeys: {}, // Clear API keys for security
+        lastUpdated: new Date()
+      };
+      
+      await newClientDb.insert(integrations).values(newIntegration);
+    }
+
+    // Copy layout settings
+    const templateLayoutSettings = await templateDb.select().from(layoutSettings);
+    for (const setting of templateLayoutSettings) {
+      const newSetting = {
+        ...setting,
+        id: undefined,
+        updatedAt: new Date()
+      };
+      await newClientDb.insert(layoutSettings).values(newSetting);
+    }
+
+    // Copy dashboard cards
+    const templateDashboardCards = await templateDb.select().from(dashboardCards);
+    for (const card of templateDashboardCards) {
+      const newCard = {
+        ...card,
+        id: undefined,
+        created: new Date(),
+        updated: new Date()
+      };
+      await newClientDb.insert(dashboardCards).values(newCard);
+    }
 
     console.log(`Template copying completed for ${identityProvider} identity provider`);
   } catch (error) {
@@ -203,9 +240,30 @@ async function copyTemplateData(templateDb: any, newClientDb: any, identityProvi
 // Helper function to apply default template based on identity provider
 async function applyDefaultTemplate(clientDb: any, identityProvider: string) {
   try {
-    // For development: Skip default template application since we're using single database
-    // In production: This would create default data in separate client database
-    console.log(`Default template application skipped for development environment. Identity provider: ${identityProvider}`);
+    // Import client schema for database operations
+    const { integrations, dashboardCards } = await import('../../shared/client-schema');
+    
+    console.log(`Applying default template for ${identityProvider} identity provider`);
+    
+    // Create default integrations based on identity provider
+    const defaultIntegrations = getDefaultIntegrations(identityProvider);
+    for (const integration of defaultIntegrations) {
+      await clientDb.insert(integrations).values(integration);
+    }
+
+    // Create default dashboard cards
+    const defaultDashboardCards = [
+      { name: 'Users', type: 'metric', enabled: true, position: 1 },
+      { name: 'Active Integrations', type: 'metric', enabled: true, position: 2 },
+      { name: 'Recent Activity', type: 'list', enabled: true, position: 3 },
+      { name: 'Security Status', type: 'status', enabled: true, position: 4 }
+    ];
+    
+    for (const card of defaultDashboardCards) {
+      await clientDb.insert(dashboardCards).values(card);
+    }
+
+    console.log(`Successfully applied default template for ${identityProvider}`);
   } catch (error) {
     console.error('Error applying default template:', error);
     throw error;
