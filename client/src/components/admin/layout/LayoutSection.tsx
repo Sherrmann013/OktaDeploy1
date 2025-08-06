@@ -557,6 +557,16 @@ export function LayoutSection({
           <div>
             <div className="flex space-x-1 bg-gray-100 dark:bg-gray-800 p-1 rounded-lg">
               <button 
+                onClick={() => setLayoutTab("new-user")}
+                className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+                  layoutTab === "new-user" 
+                    ? "bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm" 
+                    : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100"
+                }`}
+              >
+                New User Template
+              </button>
+              <button 
                 onClick={() => setLayoutTab("logo")}
                 className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
                   layoutTab === "logo" 
@@ -580,16 +590,6 @@ export function LayoutSection({
                 }`}
               >
                 Dashboard
-              </button>
-              <button 
-                onClick={() => setLayoutTab("new-user")}
-                className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
-                  layoutTab === "new-user" 
-                    ? "bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm" 
-                    : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100"
-                }`}
-              >
-                New User
               </button>
               <button 
                 onClick={() => setLayoutTab("profile")}

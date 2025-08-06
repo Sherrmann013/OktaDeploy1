@@ -83,7 +83,7 @@ function AdminComponent() {
   const [isDeleteIntegrationOpen, setIsDeleteIntegrationOpen] = useState(false);
   const [isDeleteUserOpen, setIsDeleteUserOpen] = useState(false);
   const [userToDelete, setUserToDelete] = useState<SiteUser | null>(null);
-  const [layoutTab, setLayoutTab] = useState("logo");
+  const [layoutTab, setLayoutTab] = useState("new-user");
   const [isLogoUploadOpen, setIsLogoUploadOpen] = useState(false);
   const [isAddDashboardCardOpen, setIsAddDashboardCardOpen] = useState(false);
   const [isAddMonitoringCardOpen, setIsAddMonitoringCardOpen] = useState(false);
