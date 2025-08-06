@@ -67,7 +67,6 @@ export default function Sidebar() {
     { name: "Users", href: "/users", icon: Users, current: false },
     ...(canViewAdmin ? [{ name: "Admin", href: "/admin", icon: Settings, current: false }] : []),
     ...(canViewAdmin ? [{ name: "MSP", href: "/msp", icon: Building2, current: false }] : []),
-    ...(canViewAdmin ? [{ name: "Admin", href: "/admin/client", icon: Settings, current: false }] : []),
   ];
 
   // Close dropdown when clicking outside
@@ -179,13 +178,11 @@ export default function Sidebar() {
         )}
 
         <ul className="space-y-2">
-          {navigation.map((item, index) => {
+          {navigation.map((item) => {
             const isActive = location === item.href || (item.href === "/users" && location.startsWith("/users"));
-            const isDuplicateAdmin = item.name === "Admin" && index > 0 && navigation.filter(nav => nav.name === "Admin").length > 1;
-            const displayName = isDuplicateAdmin ? "Client Admin" : item.name;
             
             return (
-              <li key={`${item.name}-${index}`}>
+              <li key={item.name}>
                 <Link
                   href={item.href}
                   className={cn(
@@ -196,7 +193,7 @@ export default function Sidebar() {
                   )}
                 >
                   <item.icon className="w-4 h-4 flex-shrink-0" />
-                  <span className="text-left">{displayName}</span>
+                  <span className="text-left">{item.name}</span>
                 </Link>
               </li>
             );
