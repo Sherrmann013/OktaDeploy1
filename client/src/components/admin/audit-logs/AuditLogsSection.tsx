@@ -5,7 +5,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { CustomSelect, CustomSelectContent, CustomSelectItem, CustomSelectTrigger, CustomSelectValue } from "@/components/ui/custom-select";
-import { Search, X, Filter } from "lucide-react";
+import { Search, X, Filter, Download } from "lucide-react";
 
 interface AuditLog {
   id: number;
@@ -30,6 +30,7 @@ export function AuditLogsSection() {
   const [userFilter, setUserFilter] = useState("");
   const [resourceFilter, setResourceFilter] = useState("all");
   const [dateFilter, setDateFilter] = useState("all");
+  const [displayLimit, setDisplayLimit] = useState(50);
 
   // Fetch audit logs from database
   const { data: auditLogsData, isLoading: auditLogsLoading } = useQuery<{logs: AuditLog[], pagination: any}>({
@@ -111,16 +112,21 @@ export function AuditLogsSection() {
     return filtered;
   }, [auditLogsData?.logs, searchTerm, actionFilter, userFilter, resourceFilter, dateFilter]);
 
-  // Get unique values for filter dropdowns
+  // Get unique values for filter dropdowns (remove duplicates and sort)
   const uniqueActions = useMemo(() => {
     if (!auditLogsData?.logs) return [];
-    const actions = [...new Set(auditLogsData.logs.map(log => log.action))];
+    const actions = Array.from(new Set(auditLogsData.logs.map(log => log.action)));
     return actions.sort();
   }, [auditLogsData?.logs]);
 
+  // Apply display limit to filtered results
+  const displayedLogs = useMemo(() => {
+    return filteredAndSortedLogs.slice(0, displayLimit);
+  }, [filteredAndSortedLogs, displayLimit]);
+
   const uniqueResources = useMemo(() => {
     if (!auditLogsData?.logs) return [];
-    const resources = [...new Set(auditLogsData.logs.map(log => log.resourceType))];
+    const resources = Array.from(new Set(auditLogsData.logs.map(log => log.resourceType)));
     return resources.sort();
   }, [auditLogsData?.logs]);
 
@@ -134,6 +140,45 @@ export function AuditLogsSection() {
 
   const hasActiveFilters = searchTerm || actionFilter !== "all" || userFilter || resourceFilter !== "all" || dateFilter !== "all";
 
+  // Export functionality
+  const exportLogs = (format: 'csv' | 'json') => {
+    const logsToExport = filteredAndSortedLogs;
+    
+    if (format === 'csv') {
+      const headers = ['Timestamp', 'User Email', 'Action', 'Resource Type', 'Resource Name', 'Details', 'IP Address', 'User Agent'];
+      const csvContent = [
+        headers.join(','),
+        ...logsToExport.map(log => [
+          `"${new Date(log.timestamp).toISOString()}"`,
+          `"${log.userEmail}"`,
+          `"${log.action}"`,
+          `"${log.resourceType}"`,
+          `"${log.resourceName || ''}"`,
+          `"${JSON.stringify(log.details).replace(/"/g, '""')}"`,
+          `"${log.ipAddress || ''}"`,
+          `"${log.userAgent || ''}"`
+        ].join(','))
+      ].join('\n');
+      
+      const blob = new Blob([csvContent], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `audit-logs-${new Date().toISOString().split('T')[0]}.csv`;
+      link.click();
+      URL.revokeObjectURL(url);
+    } else {
+      const jsonContent = JSON.stringify(logsToExport, null, 2);
+      const blob = new Blob([jsonContent], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `audit-logs-${new Date().toISOString().split('T')[0]}.json`;
+      link.click();
+      URL.revokeObjectURL(url);
+    }
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -144,17 +189,38 @@ export function AuditLogsSection() {
               Track all administrative actions and system changes with detailed audit logging.
             </p>
           </div>
-          {hasActiveFilters && (
+          <div className="flex gap-2">
+            {/* Export Buttons */}
             <Button
               variant="outline"
               size="sm"
-              onClick={clearFilters}
+              onClick={() => exportLogs('csv')}
               className="text-muted-foreground hover:text-foreground"
             >
-              <X className="w-4 h-4 mr-1" />
-              Clear Filters
+              <Download className="w-4 h-4 mr-1" />
+              CSV
             </Button>
-          )}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => exportLogs('json')}
+              className="text-muted-foreground hover:text-foreground"
+            >
+              <Download className="w-4 h-4 mr-1" />
+              JSON
+            </Button>
+            {hasActiveFilters && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={clearFilters}
+                className="text-muted-foreground hover:text-foreground"
+              >
+                <X className="w-4 h-4 mr-1" />
+                Clear Filters
+              </Button>
+            )}
+          </div>
         </div>
       </CardHeader>
       <CardContent>
@@ -194,10 +260,6 @@ export function AuditLogsSection() {
                 </CustomSelectTrigger>
                 <CustomSelectContent>
                   <CustomSelectItem value="all">All Actions</CustomSelectItem>
-                  <CustomSelectItem value="CREATE">Create</CustomSelectItem>
-                  <CustomSelectItem value="UPDATE">Update</CustomSelectItem>
-                  <CustomSelectItem value="DELETE">Delete</CustomSelectItem>
-                  <CustomSelectItem value="LOGIN">Login</CustomSelectItem>
                   {uniqueActions.map(action => (
                     <CustomSelectItem key={action} value={action}>{action}</CustomSelectItem>
                   ))}
@@ -237,13 +299,28 @@ export function AuditLogsSection() {
             </div>
           </div>
           
-          {/* Results Summary */}
+          {/* Display Limit and Results Summary */}
           {auditLogsData?.logs && (
             <div className="flex items-center justify-between text-sm text-muted-foreground">
-              <span>
-                Showing {filteredAndSortedLogs.length} of {auditLogsData.logs.length} audit logs
-                {hasActiveFilters && " (filtered)"}
-              </span>
+              <div className="flex items-center gap-4">
+                <span>
+                  Showing {displayedLogs.length} of {filteredAndSortedLogs.length} filtered results
+                  {auditLogsData.logs.length !== filteredAndSortedLogs.length && ` (${auditLogsData.logs.length} total)`}
+                </span>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs">Display:</span>
+                  <CustomSelect value={displayLimit.toString()} onValueChange={(value) => setDisplayLimit(parseInt(value))}>
+                    <CustomSelectTrigger className="w-20 h-7 text-xs bg-white dark:bg-gray-800">
+                      <CustomSelectValue />
+                    </CustomSelectTrigger>
+                    <CustomSelectContent>
+                      <CustomSelectItem value="50">50</CustomSelectItem>
+                      <CustomSelectItem value="100">100</CustomSelectItem>
+                      <CustomSelectItem value="200">200</CustomSelectItem>
+                    </CustomSelectContent>
+                  </CustomSelect>
+                </div>
+              </div>
               <span className="text-xs">Sorted by newest first</span>
             </div>
           )}
@@ -283,7 +360,7 @@ export function AuditLogsSection() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredAndSortedLogs.map((log) => (
+                {displayedLogs.map((log) => (
                   <TableRow key={log.id}>
                     <TableCell className="text-sm">
                       {new Date(log.timestamp).toLocaleString()}
