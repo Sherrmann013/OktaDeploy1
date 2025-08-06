@@ -46,7 +46,7 @@ function Router() {
   return (
     <SSOLayout>
       <Switch>
-        <Route path="/" component={Dashboard} />
+        <Route path="/" component={MSPDashboard} />
         <Route path="/dashboard" component={Dashboard} />
         <Route path="/users" component={Users} />
         <Route path="/users/:id" component={UserDetail} />
