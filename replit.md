@@ -27,9 +27,9 @@ The dashboard is built with a React frontend (TypeScript, Tailwind CSS, Wouter) 
 
 **Multi-Database Architecture:**
 - **MSP Database:** Contains client management (clients table), MSP users (msp_users), client access controls (client_access), and MSP-level audit logs (msp_audit_logs). No client-specific data stored here.
-- **Client Schema Isolation:** Each client organization gets completely isolated PostgreSQL schema containing users table, integrations, layout settings, dashboard cards, audit logs, and app mappings. Zero data mixing between clients through schema-level separation.
-- **Dynamic Connection Routing:** Multi-database manager handles dynamic connections to correct client schema based on context with proper search_path isolation.
-- **Security Compliance:** Complete data isolation through PostgreSQL schemas ensures sensitive client data never crosses organizational boundaries, meeting strict security compliance requirements while maintaining manageable infrastructure.
+- **Client Database Isolation:** Each client organization gets completely separate PostgreSQL database containing users table, integrations, layout settings, dashboard cards, audit logs, and app mappings. Complete infrastructure-level separation ensures zero data mixing between clients.
+- **Dynamic Connection Routing:** Multi-database manager handles dynamic connections to correct client database based on context with separate database instances.
+- **Security Compliance:** Maximum data isolation through separate database instances ensures sensitive client data never crosses organizational boundaries, meeting the highest security compliance requirements for enterprise MSP deployments.
 
 **Self-Hosting Package:**
 - Docker containerization with `docker-compose`.

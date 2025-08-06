@@ -30,14 +30,14 @@ export class MultiDatabaseManager {
     return this.mspDb;
   }
 
-  // Get client-specific database connection with schema isolation
+  // Get client-specific database connection (separate database)
   public async getClientDb(clientId: number) {
     // Check if we already have a connection for this client
     if (this.clientDbs.has(clientId)) {
       return this.clientDbs.get(clientId)!;
     }
 
-    // Get client schema info from MSP database
+    // Get client database info from MSP database
     let connectionString = this.clientConnectionStrings.get(clientId);
     
     if (!connectionString) {
@@ -56,147 +56,177 @@ export class MultiDatabaseManager {
       this.clientConnectionStrings.set(clientId, connectionString);
     }
 
-    // Create new client database connection with schema isolation
-    const clientDbClient = postgres(connectionString);
-    const clientDb = drizzle(clientDbClient, { 
-      schema: clientSchema,
-      logger: false
-    });
-    
-    // Cache the connection
-    this.clientDbs.set(clientId, clientDb);
-    
-    return clientDb;
-  }
-
-  // Create a new client database schema
-  public async createClientDatabase(clientName: string): Promise<{ databaseName: string; databaseUrl: string }> {
-    // Generate unique schema name for client data isolation
-    const schemaName = `client_${clientName.toLowerCase().replace(/[^a-z0-9]/g, '_')}_${Date.now()}`;
-    
-    // Use the same database URL but with client-specific schema
-    const baseUrl = process.env.DATABASE_URL || 'postgresql://localhost:5432/neondb';
-    const databaseUrl = `${baseUrl}?schema=${schemaName}`;
-    
-    // Create the schema for client data isolation
-    const sql = postgres(baseUrl);
     try {
-      await sql`CREATE SCHEMA IF NOT EXISTS ${sql(schemaName)}`;
-      console.log(`Created schema ${schemaName} for client data isolation`);
-    } catch (error) {
-      console.error(`Error creating schema ${schemaName}:`, error);
-    } finally {
-      await sql.end();
-    }
-    
-    return { databaseName: schemaName, databaseUrl };
-  }
-
-  // Initialize client database schema with tables
-  public async initializeClientDatabase(clientId: number) {
-    // Get client info for schema name
-    const [client] = await this.mspDb
-      .select({ databaseName: mspSchema.clients.databaseName })
-      .from(mspSchema.clients)
-      .where(eq(mspSchema.clients.id, clientId))
-      .limit(1);
-
-    if (!client) {
-      throw new Error(`Client ${clientId} not found`);
-    }
-
-    const schemaName = client.databaseName;
-    console.log(`Initializing database schema ${schemaName} for client ${clientId}`);
-    
-    // Create client tables in the schema
-    const baseUrl = process.env.DATABASE_URL || 'postgresql://localhost:5432/neondb';
-    const sql = postgres(baseUrl);
-    
-    try {
-      // Set search path to client schema
-      await sql`SET search_path TO ${sql(schemaName)}`;
+      // Create new client database connection
+      console.log(`🔌 Connecting to client ${clientId} database...`);
+      const clientDbClient = postgres(connectionString);
+      const clientDb = drizzle(clientDbClient, { 
+        schema: clientSchema,
+        logger: false
+      });
       
-      // Create client-specific tables in the schema
-      await sql`
-        CREATE TABLE IF NOT EXISTS users (
-          id SERIAL PRIMARY KEY,
-          okta_id VARCHAR(255) UNIQUE,
-          first_name VARCHAR(100) NOT NULL,
-          last_name VARCHAR(100) NOT NULL,
-          email VARCHAR(255) UNIQUE NOT NULL,
-          login VARCHAR(100) UNIQUE NOT NULL,
-          mobile_phone VARCHAR(50),
-          department VARCHAR(100),
-          title VARCHAR(200),
-          employee_type VARCHAR(50),
-          status VARCHAR(20) NOT NULL DEFAULT 'ACTIVE',
-          groups TEXT[] DEFAULT '{}',
-          applications TEXT[] DEFAULT '{}',
-          profile_image_url TEXT,
-          manager_id INTEGER,
-          manager VARCHAR(200),
-          created TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
-          last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
-          last_login TIMESTAMP,
-          password_changed TIMESTAMP
-        )`;
-
-      await sql`
-        CREATE TABLE IF NOT EXISTS integrations (
-          id SERIAL PRIMARY KEY,
-          name VARCHAR(100) NOT NULL UNIQUE,
-          display_name VARCHAR(100),
-          description TEXT,
-          status VARCHAR(20) NOT NULL DEFAULT 'disconnected',
-          api_keys JSONB DEFAULT '{}',
-          config JSONB DEFAULT '{}',
-          created TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
-          last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
-        )`;
-
-      await sql`
-        CREATE TABLE IF NOT EXISTS layout_settings (
-          id SERIAL PRIMARY KEY,
-          setting_key VARCHAR(100) NOT NULL UNIQUE,
-          setting_value TEXT,
-          setting_type VARCHAR(50) NOT NULL,
-          metadata JSONB DEFAULT '{}',
-          updated_by INTEGER,
-          updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
-        )`;
-
-      await sql`
-        CREATE TABLE IF NOT EXISTS dashboard_cards (
-          id SERIAL PRIMARY KEY,
-          name VARCHAR(100) NOT NULL,
-          type VARCHAR(50) NOT NULL,
-          enabled BOOLEAN NOT NULL DEFAULT true,
-          position INTEGER NOT NULL DEFAULT 0,
-          created TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
-          updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
-        )`;
-
-      await sql`
-        CREATE TABLE IF NOT EXISTS audit_logs (
-          id SERIAL PRIMARY KEY,
-          user_id INTEGER,
-          user_email VARCHAR(255),
-          action VARCHAR(50) NOT NULL,
-          resource_type VARCHAR(100),
-          resource_id VARCHAR(255),
-          resource_name VARCHAR(255),
-          details JSONB DEFAULT '{}',
-          timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
-          old_values JSONB DEFAULT '{}',
-          new_values JSONB DEFAULT '{}'
-        )`;
-
-      console.log(`Successfully created tables in schema ${schemaName} for client ${clientId}`);
+      // Test the connection
+      await clientDbClient`SELECT 1`;
+      console.log(`✅ Successfully connected to client ${clientId} database`);
+      
+      // Cache the connection
+      this.clientDbs.set(clientId, clientDb);
+      
+      return clientDb;
     } catch (error) {
-      console.error(`Error initializing schema ${schemaName}:`, error);
+      console.error(`❌ Failed to connect to client ${clientId} database:`, error);
+      throw error;
+    }
+  }
+
+  // Create a new client database (separate database instance)
+  public async createClientDatabase(clientName: string): Promise<{ databaseName: string; databaseUrl: string }> {
+    // Generate unique database name for complete client isolation
+    const databaseName = `client_${clientName.toLowerCase().replace(/[^a-z0-9]/g, '_')}_${Date.now()}`;
+    
+    // Get base connection info
+    const baseUrl = process.env.DATABASE_URL || 'postgresql://localhost:5432/neondb';
+    const parsedUrl = new URL(baseUrl);
+    
+    // Create the new database using superuser connection
+    const sql = postgres(baseUrl);
+    try {
+      console.log(`Creating separate database: ${databaseName}`);
+      await sql`CREATE DATABASE ${sql(databaseName)}`;
+      console.log(`✅ Successfully created database: ${databaseName}`);
+    } catch (error) {
+      console.error(`❌ Error creating database ${databaseName}:`, error);
       throw error;
     } finally {
       await sql.end();
+    }
+    
+    // Build the new database URL
+    parsedUrl.pathname = `/${databaseName}`;
+    const databaseUrl = parsedUrl.toString();
+    
+    console.log(`🔗 Database URL: ${databaseUrl}`);
+    return { databaseName, databaseUrl };
+  }
+
+  // Initialize client database with tables (separate database)
+  public async initializeClientDatabase(clientId: number) {
+    console.log(`🚀 Initializing separate database for client ${clientId}`);
+    
+    try {
+      // Get the client database connection
+      const clientDb = await this.getClientDb(clientId);
+      
+      // Get client info for logging
+      const [client] = await this.mspDb
+        .select({ databaseName: mspSchema.clients.databaseName })
+        .from(mspSchema.clients)
+        .where(eq(mspSchema.clients.id, clientId))
+        .limit(1);
+
+      if (!client) {
+        throw new Error(`Client ${clientId} not found`);
+      }
+
+      const databaseName = client.databaseName;
+      console.log(`📊 Creating tables in database: ${databaseName}`);
+      
+      // Get the raw SQL connection from the client database
+      const clientConnectionString = this.clientConnectionStrings.get(clientId);
+      if (!clientConnectionString) {
+        throw new Error(`No connection string found for client ${clientId}`);
+      }
+      
+      const sql = postgres(clientConnectionString);
+      
+      try {
+        // Create client-specific tables in the separate database
+        console.log(`🔧 Creating users table...`);
+        await sql`
+          CREATE TABLE IF NOT EXISTS users (
+            id SERIAL PRIMARY KEY,
+            okta_id VARCHAR(255) UNIQUE,
+            first_name VARCHAR(100) NOT NULL,
+            last_name VARCHAR(100) NOT NULL,
+            email VARCHAR(255) UNIQUE NOT NULL,
+            login VARCHAR(100) UNIQUE NOT NULL,
+            mobile_phone VARCHAR(50),
+            department VARCHAR(100),
+            title VARCHAR(200),
+            employee_type VARCHAR(50),
+            status VARCHAR(20) NOT NULL DEFAULT 'ACTIVE',
+            groups TEXT[] DEFAULT '{}',
+            applications TEXT[] DEFAULT '{}',
+            profile_image_url TEXT,
+            manager_id INTEGER,
+            manager VARCHAR(200),
+            created TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+            last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+            last_login TIMESTAMP,
+            password_changed TIMESTAMP
+          )`;
+
+        console.log(`🔧 Creating integrations table...`);
+        await sql`
+          CREATE TABLE IF NOT EXISTS integrations (
+            id SERIAL PRIMARY KEY,
+            name VARCHAR(100) NOT NULL UNIQUE,
+            display_name VARCHAR(100),
+            description TEXT,
+            status VARCHAR(20) NOT NULL DEFAULT 'disconnected',
+            api_keys JSONB DEFAULT '{}',
+            config JSONB DEFAULT '{}',
+            created TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+            last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
+          )`;
+
+        console.log(`🔧 Creating layout_settings table...`);
+        await sql`
+          CREATE TABLE IF NOT EXISTS layout_settings (
+            id SERIAL PRIMARY KEY,
+            setting_key VARCHAR(100) NOT NULL UNIQUE,
+            setting_value TEXT,
+            setting_type VARCHAR(50) NOT NULL,
+            metadata JSONB DEFAULT '{}',
+            updated_by INTEGER,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
+          )`;
+
+        console.log(`🔧 Creating dashboard_cards table...`);
+        await sql`
+          CREATE TABLE IF NOT EXISTS dashboard_cards (
+            id SERIAL PRIMARY KEY,
+            name VARCHAR(100) NOT NULL,
+            type VARCHAR(50) NOT NULL,
+            enabled BOOLEAN NOT NULL DEFAULT true,
+            position INTEGER NOT NULL DEFAULT 0,
+            created TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+            updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
+          )`;
+
+        console.log(`🔧 Creating audit_logs table...`);
+        await sql`
+          CREATE TABLE IF NOT EXISTS audit_logs (
+            id SERIAL PRIMARY KEY,
+            user_id INTEGER,
+            user_email VARCHAR(255),
+            action VARCHAR(50) NOT NULL,
+            resource_type VARCHAR(100),
+            resource_id VARCHAR(255),
+            resource_name VARCHAR(255),
+            details JSONB DEFAULT '{}',
+            timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+            old_values JSONB DEFAULT '{}',
+            new_values JSONB DEFAULT '{}'
+          )`;
+
+        console.log(`✅ Successfully created all tables in database ${databaseName} for client ${clientId}`);
+      } finally {
+        await sql.end();
+      }
+    } catch (error) {
+      console.error(`❌ Error initializing database for client ${clientId}:`, error);
+      throw error;
     }
   }
 
