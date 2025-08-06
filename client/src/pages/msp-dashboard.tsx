@@ -12,15 +12,25 @@ import { Plus, Users, Activity, Settings, Building2, ArrowRight } from "lucide-r
 import { useToast } from "@/hooks/use-toast";
 import { queryClient } from "@/lib/queryClient";
 
+// Update the interface to match the new MSP schema
 interface Client {
   id: number;
   name: string;
-  description?: string;
+  description?: string | null;
+  domain?: string | null;
   status: "ACTIVE" | "SUSPENDED" | "ARCHIVED";
+  databaseUrl: string;
+  databaseName: string;
+  primaryContact?: string | null;
+  contactEmail?: string | null;
+  contactPhone?: string | null;
+  logoUrl?: string | null;
+  timezone?: string | null;
+  created: Date;
+  lastUpdated: Date;
+  // Additional display properties
   userCount?: number;
   lastActivity?: string;
-  primaryContact?: string;
-  contactEmail?: string;
 }
 
 export default function MSPDashboard() {
@@ -55,7 +65,9 @@ export default function MSPDashboard() {
         body: JSON.stringify({
           name: newClientName,
           description: newClientDescription || null,
-          status: 'ACTIVE'
+          status: 'ACTIVE',
+          databaseName: `client_${newClientName.toLowerCase().replace(/[^a-z0-9]/g, '_')}_${Date.now()}`,
+          databaseUrl: `postgresql://localhost:5432/client_${newClientName.toLowerCase().replace(/[^a-z0-9]/g, '_')}_${Date.now()}`
         }),
       });
 

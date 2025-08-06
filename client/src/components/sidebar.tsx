@@ -1,6 +1,6 @@
 import React from "react";
 import { Link, useLocation } from "wouter";
-import { Shield, Users, UsersRound, Grid3x3, Settings, RotateCcw, LayoutDashboard, Gauge, LogOut } from "lucide-react";
+import { Shield, Users, UsersRound, Grid3x3, Settings, RotateCcw, LayoutDashboard, Gauge, LogOut, Building2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { useAuth } from "@/hooks/use-auth";
@@ -49,6 +49,7 @@ export default function Sidebar() {
     { name: "Dashboard", href: "/dashboard", icon: Gauge, current: true },
     { name: "Users", href: "/users", icon: Users, current: false },
     ...(canViewAdmin ? [{ name: "Admin", href: "/admin", icon: Settings, current: false }] : []),
+    ...(canViewAdmin ? [{ name: "MSP", href: "/msp", icon: Building2, current: false }] : []),
   ];
 
   // Close dropdown when clicking outside
