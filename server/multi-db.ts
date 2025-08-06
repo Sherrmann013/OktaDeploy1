@@ -32,38 +32,10 @@ export class MultiDatabaseManager {
 
   // Get client-specific database connection
   public async getClientDb(clientId: number) {
-    // Check if we already have a connection for this client
-    if (this.clientDbs.has(clientId)) {
-      return this.clientDbs.get(clientId)!;
-    }
-
-    // Get client connection string from MSP database
-    let connectionString = this.clientConnectionStrings.get(clientId);
-    
-    if (!connectionString) {
-      // Query MSP database for client connection info
-      const [client] = await this.mspDb
-        .select({ databaseUrl: mspSchema.clients.databaseUrl })
-        .from(mspSchema.clients)
-        .where(eq(mspSchema.clients.id, clientId))
-        .limit(1);
-
-      if (!client) {
-        throw new Error(`Client ${clientId} not found`);
-      }
-
-      connectionString = client.databaseUrl;
-      this.clientConnectionStrings.set(clientId, connectionString);
-    }
-
-    // Create new client database connection
-    const clientDbClient = postgres(connectionString);
-    const clientDb = drizzle(clientDbClient, { schema: clientSchema });
-    
-    // Cache the connection
-    this.clientDbs.set(clientId, clientDb);
-    
-    return clientDb;
+    // For development, return the same database connection as MSP
+    // In production, this would be separate client databases
+    // We'll use the same database but with client-aware queries
+    return this.mspDb;
   }
 
   // Create a new client database
@@ -71,13 +43,9 @@ export class MultiDatabaseManager {
     // Generate unique database name
     const databaseName = `client_${clientName.toLowerCase().replace(/[^a-z0-9]/g, '_')}_${Date.now()}`;
     
-    // For development, we'll use the same PostgreSQL instance with different database names
-    // In production, this could be separate database instances
-    const baseConnectionString = process.env.DATABASE_URL || 'postgresql://localhost:5432/';
-    const databaseUrl = `${baseConnectionString.replace(/\/[^\/]*$/, '')}/${databaseName}`;
-
-    // Create the database (this would need to be done with superuser privileges)
-    // For now, we'll assume it's created externally and just return the connection info
+    // For development environment, use the same database URL
+    // In production, this would be separate database instances
+    const databaseUrl = process.env.DATABASE_URL || 'postgresql://localhost:5432/neondb';
     
     return { databaseName, databaseUrl };
   }

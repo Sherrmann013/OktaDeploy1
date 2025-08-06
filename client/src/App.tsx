@@ -56,6 +56,8 @@ function Router() {
         <Route path="/settings" component={Settings} />
         <Route path="/admin" component={Admin} />
         <Route path="/msp" component={MSPDashboard} />
+        <Route path="/client/:id" component={Dashboard} />
+        <Route path="/client/:id/*" component={Dashboard} />
         <Route component={NotFound} />
       </Switch>
     </SSOLayout>
