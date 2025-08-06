@@ -1,12 +1,15 @@
-import { useState } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import React, { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Eye, EyeOff, Edit, Trash2, Settings } from "lucide-react";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Plus, Pencil, Trash2 } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 interface SiteUser {
   id: number;
@@ -15,20 +18,16 @@ interface SiteUser {
   accessLevel: "standard" | "admin";
   initials: string;
   color: string;
+  created?: Date;
+  lastUpdated?: Date;
 }
 
-interface SiteAccessSectionProps {
-  // Props passed from parent admin component if needed
-}
-
-export function SiteAccessSection({}: SiteAccessSectionProps) {
+export function SiteAccessSection() {
   const queryClient = useQueryClient();
-
-  // State for dialogs and forms
+  const { toast } = useToast();
+  
   const [isNewUserOpen, setIsNewUserOpen] = useState(false);
   const [isEditUserOpen, setIsEditUserOpen] = useState(false);
-  const [isDeleteUserOpen, setIsDeleteUserOpen] = useState(false);
-  const [userToDelete, setUserToDelete] = useState<SiteUser | null>(null);
   const [editingUser, setEditingUser] = useState<SiteUser | null>(null);
   const [newUser, setNewUser] = useState({
     name: "",
@@ -36,14 +35,84 @@ export function SiteAccessSection({}: SiteAccessSectionProps) {
     accessLevel: ""
   });
 
-  // Fetch site access users
   const { data: siteUsers = [], isLoading } = useQuery<SiteUser[]>({
     queryKey: ["/api/site-access-users"],
     staleTime: 2 * 60 * 1000, // 2 minutes
     refetchOnWindowFocus: false,
   });
 
-  // Helper functions
+  const createUserMutation = useMutation({
+    mutationFn: async (userData: { name: string; email: string; accessLevel: "standard" | "admin"; initials: string; color: string }) => {
+      return apiRequest("/api/site-access-users", {
+        method: "POST",
+        body: userData,
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/site-access-users"] });
+      setIsNewUserOpen(false);
+      setNewUser({ name: "", username: "", accessLevel: "" });
+      toast({
+        title: "User created successfully",
+        description: "The new user has been added to site access.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error creating user",
+        description: error.message || "Failed to create user",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const updateUserMutation = useMutation({
+    mutationFn: async ({ id, userData }: { id: number; userData: { name: string; email: string; accessLevel: "standard" | "admin"; initials: string; color: string } }) => {
+      return apiRequest(`/api/site-access-users/${id}`, {
+        method: "PUT",
+        body: userData,
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/site-access-users"] });
+      setIsEditUserOpen(false);
+      setEditingUser(null);
+      toast({
+        title: "User updated successfully",
+        description: "The user information has been updated.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error updating user",
+        description: error.message || "Failed to update user",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const deleteUserMutation = useMutation({
+    mutationFn: async (id: number) => {
+      return apiRequest(`/api/site-access-users/${id}`, {
+        method: "DELETE",
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/site-access-users"] });
+      toast({
+        title: "User deleted successfully",
+        description: "The user has been removed from site access.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error deleting user",
+        description: error.message || "Failed to delete user",
+        variant: "destructive",
+      });
+    },
+  });
+
   const getInitials = (name: string) => {
     return name.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2);
   };
@@ -51,7 +120,7 @@ export function SiteAccessSection({}: SiteAccessSectionProps) {
   const getRandomColor = () => {
     const colors = [
       "#3B82F6", // Blue
-      "#10B981", // Green
+      "#10B981", // Green  
       "#F59E0B", // Yellow
       "#EF4444", // Red
       "#8B5CF6", // Purple
@@ -64,102 +133,29 @@ export function SiteAccessSection({}: SiteAccessSectionProps) {
     return colors[Math.floor(Math.random() * colors.length)];
   };
 
-  // Create user mutation
-  const createUserMutation = useMutation({
-    mutationFn: async (userData: { name: string; email: string; accessLevel: "standard" | "admin"; initials: string; color: string }) => {
-      const response = await fetch("/api/site-access-users", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        credentials: "include",
-        body: JSON.stringify(userData)
-      });
-      
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || `HTTP ${response.status}: ${response.statusText}`);
-      }
-      
-      return response.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/site-access-users"] });
-      setIsNewUserOpen(false);
-      setNewUser({ name: "", username: "", accessLevel: "" });
-    }
-  });
-
-  // Update site access user mutation
-  const updateUserMutation = useMutation({
-    mutationFn: async ({ id, userData }: { id: number; userData: { name: string; email: string; accessLevel: "standard" | "admin"; initials: string; color: string } }) => {
-      const response = await fetch(`/api/site-access-users/${id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        credentials: "include",
-        body: JSON.stringify(userData)
-      });
-      
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || `HTTP ${response.status}: ${response.statusText}`);
-      }
-      
-      return response.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/site-access-users"] });
-      setIsEditUserOpen(false);
-      setEditingUser(null);
-    }
-  });
-
-  // Delete site access user mutation
-  const deleteUserMutation = useMutation({
-    mutationFn: async (id: number) => {
-      const response = await fetch(`/api/site-access-users/${id}`, {
-        method: "DELETE",
-        credentials: "include"
-      });
-      
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || `HTTP ${response.status}: ${response.statusText}`);
-      }
-      
-      return response.status === 204 ? null : response.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/site-access-users"] });
-      setIsDeleteUserOpen(false);
-      setUserToDelete(null);
-    }
-  });
-
-  // Event handlers
-  const handleEditUser = (user: SiteUser) => {
-    setEditingUser(user);
-    setIsEditUserOpen(true);
-  };
-
-  const handleDeleteUser = (user: SiteUser) => {
-    setUserToDelete(user);
-    setIsDeleteUserOpen(true);
-  };
-
   const handleAssignUser = async () => {
     if (!newUser.name.trim()) {
-      alert("Please enter a name");
+      toast({
+        title: "Name required",
+        description: "Please enter a name for the user",
+        variant: "destructive",
+      });
       return;
     }
     if (!newUser.username.trim()) {
-      alert("Please enter a username");
+      toast({
+        title: "Username required",
+        description: "Please enter a username for the user",
+        variant: "destructive",
+      });
       return;
     }
     if (!newUser.accessLevel) {
-      alert("Please select an access level");
+      toast({
+        title: "Access level required",
+        description: "Please select an access level",
+        variant: "destructive",
+      });
       return;
     }
     
@@ -171,10 +167,17 @@ export function SiteAccessSection({}: SiteAccessSectionProps) {
       color: getRandomColor()
     };
     
-    try {
-      await createUserMutation.mutateAsync(userData);
-    } catch (error) {
-      // Error handling is done in the mutation
+    createUserMutation.mutate(userData);
+  };
+
+  const handleEditUser = (user: SiteUser) => {
+    setEditingUser(user);
+    setIsEditUserOpen(true);
+  };
+
+  const handleDeleteUser = (user: SiteUser) => {
+    if (confirm(`Are you sure you want to delete ${user.name}? This action cannot be undone.`)) {
+      deleteUserMutation.mutate(user.id);
     }
   };
 
@@ -189,12 +192,6 @@ export function SiteAccessSection({}: SiteAccessSectionProps) {
       };
       
       updateUserMutation.mutate({ id: editingUser.id, userData });
-    }
-  };
-
-  const confirmDeleteUser = () => {
-    if (userToDelete) {
-      deleteUserMutation.mutate(userToDelete.id);
     }
   };
 
@@ -252,128 +249,62 @@ export function SiteAccessSection({}: SiteAccessSectionProps) {
                   </Select>
                 </div>
               </div>
-              <div className="flex justify-end space-x-2">
-                <Button variant="outline" onClick={() => {
-                  setIsNewUserOpen(false);
-                  setNewUser({ name: "", username: "", accessLevel: "" });
-                }}>
+              <div className="flex justify-end gap-3 pt-4">
+                <Button 
+                  variant="outline" 
+                  onClick={() => setIsNewUserOpen(false)}
+                  className="px-4 py-2"
+                >
                   Cancel
                 </Button>
                 <Button 
-                  onClick={handleAssignUser}
+                  type="button"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleAssignUser();
+                  }}
                   disabled={createUserMutation.isPending}
-                  className="bg-blue-600 hover:bg-blue-700 text-white"
+                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-50"
                 >
                   {createUserMutation.isPending ? "Assigning..." : "Assign User"}
                 </Button>
               </div>
             </DialogContent>
           </Dialog>
-        </div>
 
-        {/* Users Table */}
-        <div className="space-y-4">
-          {isLoading ? (
-            <div className="space-y-3">
-              {[1, 2, 3].map((i) => (
-                <div key={i} className="flex items-center justify-between p-3 border rounded-lg animate-pulse">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-10 h-10 bg-gray-200 dark:bg-gray-700 rounded-full"></div>
-                    <div>
-                      <div className="w-32 h-4 bg-gray-200 dark:bg-gray-700 rounded"></div>
-                      <div className="w-24 h-3 bg-gray-200 dark:bg-gray-700 rounded mt-1"></div>
-                    </div>
-                  </div>
-                  <div className="flex space-x-1">
-                    <div className="w-8 h-8 bg-gray-200 dark:bg-gray-700 rounded"></div>
-                    <div className="w-8 h-8 bg-gray-200 dark:bg-gray-700 rounded"></div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {siteUsers.map((user) => (
-                <div
-                  key={user.id}
-                  className="flex items-center justify-between p-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg hover:shadow-sm transition-shadow"
-                >
-                  <div className="flex items-center space-x-3">
-                    <div 
-                      className="w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-semibold"
-                      style={{ backgroundColor: user.color }}
-                    >
-                      {user.initials}
-                    </div>
-                    <div>
-                      <div className="font-medium text-gray-900 dark:text-gray-100">{user.name}</div>
-                      <div className="text-sm text-gray-500 dark:text-gray-400">{user.email}</div>
-                      <div className="text-xs text-gray-400 dark:text-gray-500 capitalize">
-                        {user.accessLevel} access
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex space-x-1">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleEditUser(user)}
-                      className="text-blue-600 hover:text-blue-800 hover:bg-blue-50"
-                    >
-                      <Edit className="w-4 h-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleDeleteUser(user)}
-                      className="text-red-600 hover:text-red-800 hover:bg-red-50"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Edit User Dialog */}
-        <Dialog open={isEditUserOpen} onOpenChange={setIsEditUserOpen}>
-          <DialogContent className="sm:max-w-[425px]">
-            <DialogHeader>
-              <DialogTitle>Edit User</DialogTitle>
-              <DialogDescription className="sr-only">
-                Edit user details and access level
-              </DialogDescription>
-            </DialogHeader>
-            {editingUser && (
+          {/* Edit User Dialog */}
+          <Dialog open={isEditUserOpen} onOpenChange={setIsEditUserOpen}>
+            <DialogContent className="sm:max-w-[425px]">
+              <DialogHeader>
+                <DialogTitle>Edit User Access</DialogTitle>
+                <DialogDescription className="sr-only">
+                  Edit user access level and information
+                </DialogDescription>
+              </DialogHeader>
               <div className="grid gap-4 py-4">
                 <div className="grid gap-2">
-                  <Label htmlFor="edit-name">Name</Label>
+                  <Label htmlFor="editName">Name</Label>
                   <Input
-                    id="edit-name"
-                    value={editingUser.name}
-                    onChange={(e) => setEditingUser({ ...editingUser, name: e.target.value })}
+                    id="editName"
+                    value={editingUser?.name || ""}
+                    onChange={(e) => setEditingUser(prev => prev ? { ...prev, name: e.target.value } : null)}
                     placeholder="Enter full name"
                   />
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="edit-email">Email</Label>
+                  <Label htmlFor="editEmail">Email</Label>
                   <Input
-                    id="edit-email"
-                    value={editingUser.email}
-                    onChange={(e) => setEditingUser({ ...editingUser, email: e.target.value })}
+                    id="editEmail"
+                    value={editingUser?.email || ""}
+                    onChange={(e) => setEditingUser(prev => prev ? { ...prev, email: e.target.value } : null)}
                     placeholder="Enter email"
                   />
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="edit-access-level">Access Level</Label>
-                  <Select 
-                    value={editingUser.accessLevel} 
-                    onValueChange={(value: "standard" | "admin") => setEditingUser({ ...editingUser, accessLevel: value })}
-                  >
+                  <Label htmlFor="editAccessLevel">Access Level</Label>
+                  <Select value={editingUser?.accessLevel || ""} onValueChange={(value) => setEditingUser(prev => prev ? { ...prev, accessLevel: value as "standard" | "admin" } : null)}>
                     <SelectTrigger className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600">
-                      <SelectValue />
+                      <SelectValue placeholder="Select access level" />
                     </SelectTrigger>
                     <SelectContent className="z-50 bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600">
                       <SelectItem value="standard" className="focus:bg-gray-100 dark:focus:bg-gray-700">Standard</SelectItem>
@@ -382,55 +313,80 @@ export function SiteAccessSection({}: SiteAccessSectionProps) {
                   </Select>
                 </div>
               </div>
-            )}
-            <div className="flex justify-end space-x-2">
-              <Button variant="outline" onClick={() => {
-                setIsEditUserOpen(false);
-                setEditingUser(null);
-              }}>
-                Cancel
-              </Button>
-              <Button 
-                onClick={handleUpdateUser}
-                disabled={updateUserMutation.isPending}
-                className="bg-blue-600 hover:bg-blue-700 text-white"
-              >
-                {updateUserMutation.isPending ? "Updating..." : "Update User"}
-              </Button>
-            </div>
-          </DialogContent>
-        </Dialog>
+              <div className="flex justify-end gap-3 pt-4">
+                <Button 
+                  variant="outline" 
+                  onClick={() => {
+                    setIsEditUserOpen(false);
+                    setEditingUser(null);
+                  }}
+                  className="px-4 py-2"
+                >
+                  Cancel
+                </Button>
+                <Button 
+                  onClick={handleUpdateUser}
+                  disabled={updateUserMutation.isPending}
+                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-50"
+                >
+                  {updateUserMutation.isPending ? "Updating..." : "Update User"}
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+        </div>
 
-        {/* Delete User Confirmation Dialog */}
-        <Dialog open={isDeleteUserOpen} onOpenChange={setIsDeleteUserOpen}>
-          <DialogContent className="sm:max-w-[425px]">
-            <DialogHeader>
-              <DialogTitle>Delete User</DialogTitle>
-              <DialogDescription>
-                Are you sure you want to delete {userToDelete?.name}? This action cannot be undone.
-              </DialogDescription>
-            </DialogHeader>
-            <div className="flex justify-end space-x-2">
-              <Button 
-                variant="outline" 
-                onClick={() => {
-                  setIsDeleteUserOpen(false);
-                  setUserToDelete(null);
-                }}
-              >
-                Cancel
-              </Button>
-              <Button 
-                variant="outline"
-                onClick={confirmDeleteUser}
-                disabled={deleteUserMutation.isPending}
-                className="border-red-300 text-red-600 hover:bg-red-50 dark:border-red-700 dark:text-red-400 dark:hover:bg-red-950"
-              >
-                {deleteUserMutation.isPending ? "Deleting..." : "Delete User"}
-              </Button>
-            </div>
-          </DialogContent>
-        </Dialog>
+        <div className="border rounded-lg">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Name</TableHead>
+                <TableHead>Email</TableHead>
+                <TableHead>Access Level</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {siteUsers.map((user) => (
+                <TableRow key={user.id}>
+                  <TableCell className="font-medium">
+                    <span>{user.name}</span>
+                  </TableCell>
+                  <TableCell>{user.email}</TableCell>
+                  <TableCell>
+                    <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                      user.accessLevel === "admin" 
+                        ? "bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200" 
+                        : "bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200"
+                    }`}>
+                      {user.accessLevel === "admin" ? "Admin" : "Standard"}
+                    </span>
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <div className="flex justify-end space-x-2">
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        onClick={() => handleEditUser(user)}
+                        className="h-8 w-8 p-0"
+                      >
+                        <Pencil className="w-4 h-4" />
+                      </Button>
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        onClick={() => handleDeleteUser(user)}
+                        className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
       </CardContent>
     </Card>
   );
