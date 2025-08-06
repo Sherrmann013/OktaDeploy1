@@ -243,7 +243,7 @@ export function UsersContent() {
     }
     
     // Fallback to allUsersData
-    if (allUsersData?.users) {
+    if (allUsersData?.users && Array.isArray(allUsersData.users)) {
       const users = allUsersData.users;
       return {
         total: users.length,

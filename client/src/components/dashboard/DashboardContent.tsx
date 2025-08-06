@@ -9,7 +9,7 @@ import { useQuery } from "@tanstack/react-query";
 interface DashboardCard {
   id: number;
   name: string;
-  type: 'knowbe4' | 'sentinel' | 'device_management' | 'service_desk';
+  type: 'knowbe4' | 'sentinelone' | 'device_management' | 'jira';
   enabled: boolean;
   position: number;
 }
@@ -335,11 +335,11 @@ export function DashboardContent() {
     switch (cardData.type) {
       case 'knowbe4':
         return renderKnowBe4Card();
-      case 'sentinel':
+      case 'sentinelone':
         return renderSentinelOneCard();
       case 'device_management':
         return renderDeviceManagementCard();
-      case 'service_desk':
+      case 'jira':
         return renderServiceDeskCard();
       default:
         return null;
@@ -348,8 +348,8 @@ export function DashboardContent() {
 
   // Sort cards by position and filter enabled ones
   const sortedCards = dashboardCards
-    ?.filter((card: DashboardCard) => card.enabled)
-    ?.sort((a: DashboardCard, b: DashboardCard) => a.position - b.position) || [];
+    ? dashboardCards.filter((card: DashboardCard) => card.enabled).sort((a: DashboardCard, b: DashboardCard) => a.position - b.position)
+    : [];
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
