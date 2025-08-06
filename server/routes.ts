@@ -3177,12 +3177,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Dashboard cards endpoints
   app.get("/api/dashboard-cards", async (req, res) => {
     try {
-      console.log('📊 Dashboard cards requested, session user:', (req.session as any)?.user?.email || 'No session');
-      const cards = await db.select().from(dashboardCards).orderBy(dashboardCards.position);
-      console.log('📊 Dashboard cards found:', cards.length);
+      const clientId = req.query.clientId ? parseInt(req.query.clientId as string) : 1; // Default to client 1 for MSP context
+      console.log('📊 Dashboard cards requested, session user:', (req.session as any)?.user?.email || 'No session', 'clientId:', clientId);
+      
+      const cards = await db
+        .select()
+        .from(dashboardCards)
+        .where(eq(dashboardCards.clientId, clientId))
+        .orderBy(dashboardCards.position);
+        
+      console.log('📊 Dashboard cards found:', cards.length, 'for client:', clientId);
       res.json(cards);
     } catch (error) {
       console.error("Error fetching dashboard cards:", error);
+      res.status(500).json({ error: "Failed to fetch dashboard cards" });
+    }
+  });
+
+  // Client-specific dashboard cards route
+  app.get("/api/client/:clientId/dashboard-cards", async (req, res) => {
+    try {
+      const clientId = parseInt(req.params.clientId);
+      console.log('📊 Client-specific dashboard cards requested for client:', clientId);
+      
+      const cards = await db
+        .select()
+        .from(dashboardCards)
+        .where(eq(dashboardCards.clientId, clientId))
+        .orderBy(dashboardCards.position);
+        
+      console.log('📊 Client dashboard cards found:', cards.length);
+      res.json(cards);
+    } catch (error) {
+      console.error("Error fetching client dashboard cards:", error);
       res.status(500).json({ error: "Failed to fetch dashboard cards" });
     }
   });

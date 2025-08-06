@@ -5,11 +5,22 @@ import { Badge } from "@/components/ui/badge";
 import { AlertTriangle, Shield, Monitor, Ticket, RefreshCw } from "lucide-react";
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip } from 'recharts';
 import { useQuery } from "@tanstack/react-query";
+import { useLocation } from "wouter";
 
 export function DashboardSection() {
+  const [location] = useLocation();
+  
+  // Detect if we're in a client context
+  const currentClientId = location.startsWith('/client/') ? location.split('/')[2] : null;
+  
+  // Build the appropriate API endpoint
+  const dashboardCardsEndpoint = currentClientId 
+    ? `/api/client/${currentClientId}/dashboard-cards`
+    : `/api/dashboard-cards`;
+    
   // Fetch dashboard cards from the database
-  const { data: dashboardCards } = useQuery({
-    queryKey: ["/api/dashboard-cards"],
+  const { data: dashboardCards = [] } = useQuery({
+    queryKey: [dashboardCardsEndpoint],
     staleTime: 10 * 60 * 1000, // 10 minutes - dashboard layout rarely changes
     refetchOnWindowFocus: false,
   });

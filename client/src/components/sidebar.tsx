@@ -49,7 +49,7 @@ export default function Sidebar() {
       window.location.href = `/msp`;
     } else {
       // Navigate to the selected client's dashboard
-      window.location.href = `/client/${clientId}`;
+      window.location.href = `/client/${clientId}/dashboard`;
     }
   };
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -92,7 +92,7 @@ export default function Sidebar() {
     return [
       { 
         name: "Dashboard", 
-        href: currentClientId ? `${baseUrl}` : "/dashboard", 
+        href: currentClientId ? `${baseUrl}/dashboard` : "/dashboard", 
         icon: Gauge, 
         current: true 
       },

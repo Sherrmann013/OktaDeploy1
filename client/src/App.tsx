@@ -56,11 +56,11 @@ function Router() {
         <Route path="/settings" component={Settings} />
         <Route path="/admin" component={Admin} />
         <Route path="/msp" component={MSPDashboard} />
-        <Route path="/client/:id" component={Dashboard} />
+        <Route path="/client/:id/dashboard" component={Dashboard} />
         <Route path="/client/:id/users" component={Users} />
         <Route path="/client/:id/users/:userId" component={UserDetail} />
         <Route path="/client/:id/admin" component={Admin} />
-        <Route path="/client/:id/dashboard" component={Dashboard} />
+        <Route path="/client/:id" component={Dashboard} />
         <Route component={NotFound} />
       </Switch>
     </SSOLayout>
