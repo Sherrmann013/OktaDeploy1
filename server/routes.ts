@@ -4087,6 +4087,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/clients", isAuthenticated, mspRoutes.getClients);
   app.get("/api/clients/:id", isAuthenticated, mspRoutes.getClient);
   app.post("/api/clients", isAuthenticated, requireAdmin, mspRoutes.createClient);
+  app.post("/api/clients/create-with-template", isAuthenticated, requireAdmin, mspRoutes.createClientWithTemplate);
   app.put("/api/clients/:id", isAuthenticated, requireAdmin, mspRoutes.updateClient);
   app.delete("/api/clients/:id", isAuthenticated, requireAdmin, mspRoutes.deleteClient);
   

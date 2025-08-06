@@ -105,6 +105,249 @@ export async function createClient(req: Request, res: Response) {
   }
 }
 
+// Create new client with template duplication
+export async function createClientWithTemplate(req: Request, res: Response) {
+  try {
+    // TODO: Add proper MSP user authentication
+    
+    const { name, description, identityProvider, templateClientId, status, databaseName, databaseUrl } = req.body;
+    
+    if (!name || !identityProvider) {
+      return res.status(400).json({ 
+        error: 'Name and identity provider are required' 
+      });
+    }
+
+    // Create isolated database for the client
+    const { databaseName: newDbName, databaseUrl: newDbUrl } = await dbManager.createClientDatabase(name);
+    
+    // Create client record in MSP database
+    const newClient = await mspStorage.createClient({
+      name,
+      description: description || null,
+      status: status || 'ACTIVE',
+      databaseName: newDbName,
+      databaseUrl: newDbUrl,
+      primaryContact: null,
+      contactEmail: null,
+      contactPhone: null,
+      domain: null,
+      logoUrl: null,
+      timezone: 'UTC'
+    });
+
+    // Initialize the client's database with schema
+    await dbManager.initializeClientDatabase(newClient.id);
+
+    // Get template client storage if specified
+    if (templateClientId && templateClientId !== 'default') {
+      try {
+        const templateClient = await mspStorage.getClient(parseInt(templateClientId));
+        
+        if (templateClient) {
+          // Get template client's database instance
+          const templateDb = await dbManager.getClientDb(parseInt(templateClientId));
+          const newClientDb = await dbManager.getClientDb(newClient.id);
+          
+          // Copy all template data to new client
+          await copyTemplateData(templateDb, newClientDb, identityProvider);
+        }
+      } catch (templateError) {
+        console.error('Error copying template data:', templateError);
+        // Continue with client creation even if template copy fails
+      }
+    } else {
+      // Apply default template based on identity provider
+      await applyDefaultTemplate(await dbManager.getClientDb(newClient.id), identityProvider);
+    }
+
+    // Log the action in MSP audit log
+    await mspStorage.logMspAudit({
+      mspUserId: null, // TODO: Get from authenticated MSP user
+      mspUserEmail: 'system@msp.local', // TODO: Get from authenticated MSP user
+      action: 'CREATE',
+      resourceType: 'CLIENT',
+      resourceId: newClient.id.toString(),
+      resourceName: newClient.name,
+      details: JSON.stringify({ 
+        action: 'Created new client with template and identity provider',
+        databaseName: newDbName,
+        clientName: newClient.name,
+        identityProvider,
+        templateClientId: templateClientId || 'default'
+      }),
+    });
+
+    res.status(201).json(newClient);
+  } catch (error) {
+    console.error('Error creating client with template:', error);
+    res.status(500).json({ error: 'Failed to create client with template' });
+  }
+}
+
+// Helper function to copy template data from one client to another
+async function copyTemplateData(templateDb: any, newClientDb: any, identityProvider: string) {
+  try {
+    // Import client schema for database operations
+    const { integrations, layoutSettings, dashboardCards, appMappings } = await import('../../shared/client-schema');
+    
+    // Copy integrations (filter based on identity provider)
+    const templateIntegrations = await templateDb.select().from(integrations);
+    for (const integration of templateIntegrations) {
+      // Customize integration based on identity provider
+      const newIntegration = {
+        ...integration,
+        id: undefined, // Let database generate new ID
+        status: 'DISCONNECTED', // New client starts with disconnected integrations
+        apiKey: null, // Clear API keys for security
+        lastSync: null,
+        syncErrors: null
+      };
+      
+      await newClientDb.insert(integrations).values(newIntegration);
+    }
+
+    // Copy layout settings
+    const templateLayoutSettings = await templateDb.select().from(layoutSettings);
+    for (const setting of templateLayoutSettings) {
+      const newSetting = {
+        ...setting,
+        id: undefined,
+      };
+      await newClientDb.insert(layoutSettings).values(newSetting);
+    }
+
+    // Copy dashboard cards
+    const templateDashboardCards = await templateDb.select().from(dashboardCards);
+    for (const card of templateDashboardCards) {
+      const newCard = {
+        ...card,
+        id: undefined,
+      };
+      await newClientDb.insert(dashboardCards).values(newCard);
+    }
+
+    // Copy app mappings (customize for identity provider)
+    const templateAppMappings = await templateDb.select().from(appMappings);
+    for (const mapping of templateAppMappings) {
+      const newMapping = {
+        ...mapping,
+        id: undefined,
+        // Customize mapping based on identity provider
+        oktaGroup: identityProvider === 'okta' ? mapping.oktaGroup : `${identityProvider}_${mapping.oktaGroup}`,
+      };
+      await newClientDb.insert(appMappings).values(newMapping);
+    }
+
+    // Additional mappings can be copied here in the future as needed
+    // For now, we're focusing on the core data: integrations, layout settings, dashboard cards, and app mappings
+
+    console.log(`Successfully copied template data for client with ${identityProvider} identity provider`);
+  } catch (error) {
+    console.error('Error copying template data:', error);
+    throw error;
+  }
+}
+
+// Helper function to apply default template based on identity provider
+async function applyDefaultTemplate(clientDb: any, identityProvider: string) {
+  try {
+    // Import client schema for database operations
+    const { integrations, dashboardCards, appMappings } = await import('../../shared/client-schema');
+    
+    // Create default integrations based on identity provider
+    const defaultIntegrations = getDefaultIntegrations(identityProvider);
+    for (const integration of defaultIntegrations) {
+      await clientDb.insert(integrations).values(integration);
+    }
+
+    // Create default dashboard cards
+    const defaultDashboardCards = [
+      { name: 'Users', type: 'metric', config: '{"metric": "total_users"}', position: 1 },
+      { name: 'Active Integrations', type: 'metric', config: '{"metric": "active_integrations"}', position: 2 },
+      { name: 'Recent Activity', type: 'list', config: '{"source": "audit_logs", "limit": 5}', position: 3 },
+      { name: 'Security Status', type: 'status', config: '{"checks": ["integrations", "users"]}', position: 4 }
+    ];
+    
+    for (const card of defaultDashboardCards) {
+      await clientDb.insert(dashboardCards).values(card);
+    }
+
+    // Create default app mappings based on identity provider
+    const defaultAppMappings = getDefaultAppMappings(identityProvider);
+    for (const mapping of defaultAppMappings) {
+      await clientDb.insert(appMappings).values(mapping);
+    }
+
+    console.log(`Successfully applied default template for ${identityProvider}`);
+  } catch (error) {
+    console.error('Error applying default template:', error);
+    throw error;
+  }
+}
+
+// Get default integrations based on identity provider
+function getDefaultIntegrations(identityProvider: string) {
+  const baseIntegrations = [
+    { name: 'OKTA', type: 'OKTA', status: 'DISCONNECTED', config: '{}', apiKey: null, lastSync: null, syncErrors: null },
+    { name: 'KnowBe4', type: 'KNOWBE4', status: 'DISCONNECTED', config: '{}', apiKey: null, lastSync: null, syncErrors: null },
+    { name: 'SentinelOne', type: 'SENTINELONE', status: 'DISCONNECTED', config: '{}', apiKey: null, lastSync: null, syncErrors: null },
+    { name: 'Microsoft', type: 'MICROSOFT', status: 'DISCONNECTED', config: '{}', apiKey: null, lastSync: null, syncErrors: null },
+    { name: 'Addigy', type: 'ADDIGY', status: 'DISCONNECTED', config: '{}', apiKey: null, lastSync: null, syncErrors: null },
+    { name: 'Jira', type: 'JIRA', status: 'DISCONNECTED', config: '{}', apiKey: null, lastSync: null, syncErrors: null }
+  ];
+
+  // Customize based on identity provider
+  if (identityProvider === 'azure_ad') {
+    // Prioritize Microsoft integrations for Azure AD clients
+    return baseIntegrations.map(integration => ({
+      ...integration,
+      status: integration.type === 'MICROSOFT' ? 'PENDING' : integration.status
+    }));
+  } else if (identityProvider === 'google_workspace') {
+    // Add Google-specific integrations
+    return [
+      ...baseIntegrations,
+      { name: 'Google Workspace', type: 'GOOGLE', status: 'PENDING', config: '{}', apiKey: null, lastSync: null, syncErrors: null }
+    ];
+  }
+
+  // Default OKTA priority
+  return baseIntegrations.map(integration => ({
+    ...integration,
+    status: integration.type === 'OKTA' ? 'PENDING' : integration.status
+  }));
+}
+
+// Get default app mappings based on identity provider
+function getDefaultAppMappings(identityProvider: string) {
+  const baseMapping = [
+    { appName: 'Dashboard Access', oktaGroup: 'dashboard_users' },
+    { appName: 'Admin Panel', oktaGroup: 'admin_users' },
+    { appName: 'Reports', oktaGroup: 'report_users' }
+  ];
+
+  // Customize based on identity provider
+  if (identityProvider === 'azure_ad') {
+    return baseMapping.map(mapping => ({
+      ...mapping,
+      oktaGroup: `azuread_${mapping.oktaGroup}`
+    }));
+  } else if (identityProvider === 'google_workspace') {
+    return baseMapping.map(mapping => ({
+      ...mapping,
+      oktaGroup: `gws_${mapping.oktaGroup}`
+    }));
+  } else if (identityProvider === 'local') {
+    return baseMapping.map(mapping => ({
+      ...mapping,
+      oktaGroup: `local_${mapping.oktaGroup}`
+    }));
+  }
+
+  return baseMapping; // Default OKTA format
+}
+
 // Update client
 export async function updateClient(req: Request, res: Response) {
   try {

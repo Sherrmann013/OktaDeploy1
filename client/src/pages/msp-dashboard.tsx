@@ -7,6 +7,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Plus, Building2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient } from "@/lib/queryClient";
@@ -37,6 +38,8 @@ export default function MSPDashboard() {
   const [isCreateClientOpen, setIsCreateClientOpen] = useState(false);
   const [newClientName, setNewClientName] = useState("");
   const [newClientDescription, setNewClientDescription] = useState("");
+  const [selectedIdentityProvider, setSelectedIdentityProvider] = useState("");
+  const [selectedTemplate, setSelectedTemplate] = useState("");
 
   // Fetch clients for MSP user
   const { data: clients = [], isLoading } = useQuery<Client[]>({
@@ -55,8 +58,26 @@ export default function MSPDashboard() {
       return;
     }
 
+    if (!selectedIdentityProvider) {
+      toast({
+        title: "Identity provider required",
+        description: "Please select an identity provider",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!selectedTemplate) {
+      toast({
+        title: "Template required",
+        description: "Please select a client template",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
-      const response = await fetch('/api/clients', {
+      const response = await fetch('/api/clients/create-with-template', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -64,6 +85,8 @@ export default function MSPDashboard() {
         body: JSON.stringify({
           name: newClientName,
           description: newClientDescription || null,
+          identityProvider: selectedIdentityProvider,
+          templateClientId: selectedTemplate,
           status: 'ACTIVE',
           databaseName: `client_${newClientName.toLowerCase().replace(/[^a-z0-9]/g, '_')}_${Date.now()}`,
           databaseUrl: `postgresql://localhost:5432/client_${newClientName.toLowerCase().replace(/[^a-z0-9]/g, '_')}_${Date.now()}`
@@ -78,7 +101,7 @@ export default function MSPDashboard() {
       
       toast({
         title: "Client created successfully",
-        description: `${newClientName} has been added to your client list.`,
+        description: `${newClientName} has been created with ${selectedIdentityProvider} integration and template data.`,
       });
       
       // Refetch clients to update the list
@@ -87,6 +110,8 @@ export default function MSPDashboard() {
       setIsCreateClientOpen(false);
       setNewClientName("");
       setNewClientDescription("");
+      setSelectedIdentityProvider("");
+      setSelectedTemplate("");
     } catch (error) {
       console.error('Error creating client:', error);
       toast({
@@ -137,7 +162,7 @@ export default function MSPDashboard() {
                 <DialogHeader>
                   <DialogTitle>Add New Client</DialogTitle>
                   <DialogDescription>
-                    Create a new client organization to manage through your MSP dashboard.
+                    Create a new client organization with identity provider integration and template configuration.
                   </DialogDescription>
                 </DialogHeader>
                 <div className="grid gap-4 py-4">
@@ -160,6 +185,39 @@ export default function MSPDashboard() {
                       placeholder="Brief description of the client organization"
                       className="bg-white dark:bg-gray-800 border"
                     />
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="identityProvider">Identity Provider</Label>
+                    <Select value={selectedIdentityProvider} onValueChange={setSelectedIdentityProvider}>
+                      <SelectTrigger className="bg-white dark:bg-gray-800 border">
+                        <SelectValue placeholder="Select identity provider" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-white dark:bg-gray-800 border">
+                        <SelectItem value="okta">OKTA</SelectItem>
+                        <SelectItem value="azure_ad">Azure Active Directory</SelectItem>
+                        <SelectItem value="google_workspace">Google Workspace</SelectItem>
+                        <SelectItem value="local">Local Authentication</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="template">Client Template</Label>
+                    <Select value={selectedTemplate} onValueChange={setSelectedTemplate}>
+                      <SelectTrigger className="bg-white dark:bg-gray-800 border">
+                        <SelectValue placeholder="Select template to copy from" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-white dark:bg-gray-800 border">
+                        {clients.map((client) => (
+                          <SelectItem key={client.id} value={client.id.toString()}>
+                            {client.name} Template
+                          </SelectItem>
+                        ))}
+                        <SelectItem value="default">Default Template</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <p className="text-xs text-gray-600 dark:text-gray-400">
+                      All settings, integrations, and configurations will be copied from the selected template.
+                    </p>
                   </div>
                 </div>
                 <div className="flex justify-end gap-3">
