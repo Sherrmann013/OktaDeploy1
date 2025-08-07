@@ -68,11 +68,20 @@ export function UsersSection() {
     }));
   });
 
-  // OKTA Sync Mutation
+  // OKTA Sync Mutation - CLIENT-AWARE
   const oktaSyncMutation = useMutation({
     mutationFn: async () => {
-      const response = await apiRequest("GET", "/api/okta/sync-all");
-      return await response.json();
+      const response = await fetch(`/api/client/${currentClientId}/okta/sync-users`, {
+        method: "POST",
+        credentials: "include"
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || `HTTP ${response.status}: ${response.statusText}`);
+      }
+      
+      return response.json();
     },
     onSuccess: (data) => {
       toast({
@@ -509,6 +518,15 @@ export function UsersSection() {
           </div>
           
           <div className="flex items-center space-x-3">
+            <Button
+              variant="outline"
+              onClick={() => oktaSyncMutation.mutate()}
+              disabled={oktaSyncMutation.isPending}
+              className="gap-2 border-green-300 text-green-600 hover:bg-green-50 dark:border-green-700 dark:text-green-400 dark:hover:bg-green-950"
+            >
+              <RefreshCw className={`w-4 h-4 ${oktaSyncMutation.isPending ? 'animate-spin' : ''}`} />
+              {oktaSyncMutation.isPending ? 'Syncing OKTA...' : 'Sync from OKTA'}
+            </Button>
             <Button
               variant="ghost"
               onClick={handleRefresh}

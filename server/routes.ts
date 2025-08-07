@@ -153,6 +153,146 @@ async function testJiraConnection(apiKeys: Record<string, string>): Promise<{ su
   }
 }
 
+// OKTA user fetching and syncing functions
+async function fetchOktaUsers(apiKeys: Record<string, string>): Promise<{ success: boolean; users?: any[]; message: string }> {
+  try {
+    if (!apiKeys.domain || !apiKeys.apiToken) {
+      return { success: false, message: "Missing OKTA domain or API token" };
+    }
+
+    const domain = apiKeys.domain.replace(/^https?:\/\//, '');
+    const allUsers: any[] = [];
+    let nextUrl = `https://${domain}/api/v1/users?limit=200`;
+
+    // Fetch all users with pagination
+    while (nextUrl) {
+      console.log(`🔄 Fetching OKTA users from: ${nextUrl}`);
+      
+      const response = await fetch(nextUrl, {
+        headers: {
+          'Authorization': `SSWS ${apiKeys.apiToken}`,
+          'Accept': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        return { 
+          success: false, 
+          message: `Failed to fetch users: ${response.status} ${response.statusText}` 
+        };
+      }
+
+      const users = await response.json();
+      allUsers.push(...users);
+
+      // Check for next page link in Link header
+      const linkHeader = response.headers.get('Link');
+      nextUrl = null;
+      
+      if (linkHeader) {
+        const nextMatch = linkHeader.match(/<([^>]+)>;\s*rel="next"/);
+        if (nextMatch) {
+          nextUrl = nextMatch[1];
+        }
+      }
+    }
+
+    console.log(`✅ Fetched ${allUsers.length} users from OKTA`);
+
+    // Transform OKTA users to our schema
+    const transformedUsers = allUsers.map(oktaUser => ({
+      id: oktaUser.id,
+      login: oktaUser.profile.login,
+      email: oktaUser.profile.email,
+      firstName: oktaUser.profile.firstName,
+      lastName: oktaUser.profile.lastName || '',
+      displayName: oktaUser.profile.displayName || `${oktaUser.profile.firstName || ''} ${oktaUser.profile.lastName || ''}`,
+      title: oktaUser.profile.title || '',
+      department: oktaUser.profile.department || '',
+      manager: oktaUser.profile.manager || '',
+      employeeType: oktaUser.profile.employeeType || '',
+      mobilePhone: oktaUser.profile.mobilePhone || '',
+      status: oktaUser.status,
+      created: new Date(oktaUser.created),
+      lastLogin: oktaUser.lastLogin ? new Date(oktaUser.lastLogin) : null,
+      lastUpdated: new Date(oktaUser.lastUpdated)
+    }));
+
+    return { 
+      success: true, 
+      users: transformedUsers, 
+      message: `Successfully fetched ${transformedUsers.length} users from OKTA` 
+    };
+  } catch (error) {
+    return { 
+      success: false, 
+      message: `Error fetching OKTA users: ${error instanceof Error ? error.message : 'Unknown error'}` 
+    };
+  }
+}
+
+async function syncUsersToDatabase(clientDb: any, oktaUsers: any[]): Promise<{ newUsers: number; updatedUsers: number }> {
+  let newUsers = 0;
+  let updatedUsers = 0;
+
+  for (const oktaUser of oktaUsers) {
+    try {
+      // Check if user already exists
+      const [existingUser] = await clientDb.select()
+        .from(clientUsers)
+        .where(eq(clientUsers.login, oktaUser.login));
+
+      if (existingUser) {
+        // Update existing user
+        await clientDb.update(clientUsers)
+          .set({
+            email: oktaUser.email,
+            firstName: oktaUser.firstName,
+            lastName: oktaUser.lastName,
+            displayName: oktaUser.displayName,
+            title: oktaUser.title,
+            department: oktaUser.department,
+            manager: oktaUser.manager,
+            employeeType: oktaUser.employeeType,
+            mobilePhone: oktaUser.mobilePhone,
+            status: oktaUser.status,
+            lastLogin: oktaUser.lastLogin,
+            lastUpdated: oktaUser.lastUpdated
+          })
+          .where(eq(clientUsers.login, oktaUser.login));
+        
+        updatedUsers++;
+      } else {
+        // Insert new user
+        await clientDb.insert(clientUsers)
+          .values({
+            login: oktaUser.login,
+            email: oktaUser.email,
+            firstName: oktaUser.firstName,
+            lastName: oktaUser.lastName,
+            displayName: oktaUser.displayName,
+            title: oktaUser.title || '',
+            department: oktaUser.department || '',
+            manager: oktaUser.manager || '',
+            employeeType: oktaUser.employeeType || '',
+            mobilePhone: oktaUser.mobilePhone || '',
+            status: oktaUser.status,
+            created: oktaUser.created,
+            lastLogin: oktaUser.lastLogin,
+            lastUpdated: oktaUser.lastUpdated
+          });
+        
+        newUsers++;
+      }
+    } catch (error) {
+      console.error(`Error syncing user ${oktaUser.login}:`, error);
+      // Continue with other users even if one fails
+    }
+  }
+
+  return { newUsers, updatedUsers };
+}
+
 // Import client-specific schemas
 import { 
   users as clientUsers,
@@ -2738,13 +2878,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Test based on integration type
       switch (integration.name.toLowerCase()) {
         case 'okta':
-          testResult = await testOktaConnection(integration.apiKeys);
+          testResult = await testOktaConnection(integration.apiKeys as Record<string, string>);
           break;
         case 'sentinelone':
-          testResult = await testSentinelOneConnection(integration.apiKeys);
+          testResult = await testSentinelOneConnection(integration.apiKeys as Record<string, string>);
           break;
         case 'jira':
-          testResult = await testJiraConnection(integration.apiKeys);
+          testResult = await testJiraConnection(integration.apiKeys as Record<string, string>);
           break;
         default:
           testResult = { success: false, message: `Testing not implemented for ${integration.name}` };
@@ -2771,6 +2911,89 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error testing integration connection:", error);
       res.status(500).json({ error: "Failed to test integration connection" });
+    }
+  });
+
+  // Client-specific OKTA user sync endpoint
+  app.post("/api/client/:clientId/okta/sync-users", isAuthenticated, requireAdmin, async (req, res) => {
+    try {
+      const clientId = parseInt(req.params.clientId);
+      console.log(`👥 Starting OKTA user sync for client ${clientId}`);
+      
+      const multiDb = MultiDatabaseManager.getInstance();
+      const clientDb = await multiDb.getClientDb(clientId);
+      
+      // Get OKTA integration for this client
+      const [oktaIntegration] = await clientDb.select()
+        .from(clientIntegrations)
+        .where(and(
+          eq(clientIntegrations.name, 'okta'),
+          eq(clientIntegrations.status, 'connected')
+        ));
+      
+      if (!oktaIntegration) {
+        return res.status(404).json({ error: "OKTA integration not found or not connected" });
+      }
+
+      const oktaUsers = await fetchOktaUsers(oktaIntegration.apiKeys as Record<string, string>);
+      if (!oktaUsers.success || !oktaUsers.users) {
+        return res.status(400).json({ error: oktaUsers.message });
+      }
+
+      // Sync users to local database
+      const syncResult = await syncUsersToDatabase(clientDb, oktaUsers.users);
+      
+      console.log(`✅ OKTA sync completed for client ${clientId}: ${syncResult.newUsers} new, ${syncResult.updatedUsers} updated`);
+      
+      res.json({
+        success: true,
+        message: "OKTA user sync completed successfully",
+        totalUsers: oktaUsers.users.length,
+        newUsers: syncResult.newUsers,
+        updatedUsers: syncResult.updatedUsers
+      });
+
+    } catch (error) {
+      console.error("Error syncing OKTA users:", error);
+      res.status(500).json({ error: "Failed to sync OKTA users" });
+    }
+  });
+
+  // Client-specific OKTA users endpoint (read-only from OKTA)
+  app.get("/api/client/:clientId/okta/users", isAuthenticated, async (req, res) => {
+    try {
+      const clientId = parseInt(req.params.clientId);
+      console.log(`👥 Fetching OKTA users for client ${clientId}`);
+      
+      const multiDb = MultiDatabaseManager.getInstance();
+      const clientDb = await multiDb.getClientDb(clientId);
+      
+      // Get OKTA integration for this client
+      const [oktaIntegration] = await clientDb.select()
+        .from(clientIntegrations)
+        .where(and(
+          eq(clientIntegrations.name, 'okta'),
+          eq(clientIntegrations.status, 'connected')
+        ));
+      
+      if (!oktaIntegration) {
+        return res.status(404).json({ error: "OKTA integration not found or not connected" });
+      }
+
+      const oktaUsers = await fetchOktaUsers(oktaIntegration.apiKeys as Record<string, string>);
+      if (!oktaUsers.success || !oktaUsers.users) {
+        return res.status(400).json({ error: oktaUsers.message });
+      }
+      
+      res.json({
+        users: oktaUsers.users,
+        total: oktaUsers.users.length,
+        source: 'okta'
+      });
+
+    } catch (error) {
+      console.error("Error fetching OKTA users:", error);
+      res.status(500).json({ error: "Failed to fetch OKTA users" });
     }
   });
 
