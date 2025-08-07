@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Building2, Database, Settings } from "lucide-react";
+import { Plus, Building2, ExternalLink } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient } from "@/lib/queryClient";
 
@@ -48,35 +48,7 @@ export default function MSPDashboard() {
     refetchOnWindowFocus: false,
   });
 
-  const initializeClientDatabase = async (clientId: number, clientName: string) => {
-    try {
-      console.log(`Initializing database for client ${clientId}`);
-      
-      const response = await fetch(`/api/initialize-client-db/${clientId}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-      });
 
-      if (!response.ok) {
-        throw new Error('Failed to initialize client database');
-      }
-
-      toast({
-        title: "Database initialized",
-        description: `Successfully initialized database for ${clientName}`,
-      });
-    } catch (error) {
-      console.error('Error initializing client database:', error);
-      toast({
-        title: "Initialization failed",
-        description: `Failed to initialize database for ${clientName}`,
-        variant: "destructive",
-      });
-    }
-  };
 
   const handleCreateClient = async () => {
     if (!newClientName.trim()) {
@@ -308,31 +280,18 @@ export default function MSPDashboard() {
                   </CardContent>
                 </div>
                 
-                {/* Action Buttons */}
-                <div className="absolute bottom-3 left-3 right-3 flex gap-2">
+                {/* Action Button */}
+                <div className="absolute bottom-3 left-3 right-3">
                   <Button 
                     size="sm" 
-                    variant="outline"
-                    className="flex-1 text-green-600 hover:text-green-800 border-green-300 hover:border-green-500 bg-white dark:bg-gray-800"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      initializeClientDatabase(client.id, client.name);
-                    }}
-                  >
-                    <Database className="w-3 h-3 mr-1" />
-                    Init DB
-                  </Button>
-                  <Button 
-                    size="sm" 
-                    variant="outline"
-                    className="flex-1 text-gray-600 hover:text-gray-800 border-gray-300 hover:border-gray-500 bg-white dark:bg-gray-800"
+                    className="w-full bg-blue-600 hover:bg-blue-700 text-white"
                     onClick={(e) => {
                       e.stopPropagation();
                       window.location.href = `/client/${client.id}`;
                     }}
                   >
-                    <Settings className="w-3 h-3 mr-1" />
-                    Manage
+                    <ExternalLink className="w-3 h-3 mr-1" />
+                    Access Dashboard
                   </Button>
                 </div>
               </Card>
