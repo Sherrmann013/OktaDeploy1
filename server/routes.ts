@@ -3513,6 +3513,53 @@ export async function registerRoutes(app: Express): Promise<Server> {
           
           // Check if app_mappings table exists by attempting a simple query
           await clientDb.select().from((await import('../shared/client-schema')).appMappings).limit(1);
+          
+          // Check and fix logo table structure
+          try {
+            const connectionString = multiDb.clientConnectionStrings.get(client.id);
+            if (connectionString) {
+              const requireSSL = !connectionString.includes('localhost');
+              const sql = postgres(connectionString, {
+                ssl: requireSSL ? 'require' : false,
+                transform: { undefined: null }
+              });
+              
+              try {
+                // Check current logo table columns
+                const columns = await sql`
+                  SELECT column_name 
+                  FROM information_schema.columns 
+                  WHERE table_name = 'company_logos' 
+                  AND table_schema = 'public'
+                `;
+                
+                const columnNames = columns.map(c => c.column_name);
+                
+                // Fix the table structure if needed
+                if (columnNames.includes('name') && !columnNames.includes('file_name')) {
+                  console.log(`🔧 Fixing logo table for client ${client.id}: renaming 'name' to 'file_name'`);
+                  await sql`ALTER TABLE company_logos RENAME COLUMN name TO file_name`;
+                }
+                
+                if (!columnNames.includes('mime_type')) {
+                  console.log(`🔧 Fixing logo table for client ${client.id}: adding 'mime_type'`);
+                  await sql`ALTER TABLE company_logos ADD COLUMN mime_type VARCHAR(100) DEFAULT 'image/png'`;
+                  await sql`ALTER TABLE company_logos ALTER COLUMN mime_type SET NOT NULL`;
+                }
+                
+                if (!columnNames.includes('file_size')) {
+                  console.log(`🔧 Fixing logo table for client ${client.id}: adding 'file_size'`);
+                  await sql`ALTER TABLE company_logos ADD COLUMN file_size INTEGER DEFAULT 1000`;
+                  await sql`ALTER TABLE company_logos ALTER COLUMN file_size SET NOT NULL`;
+                }
+              } finally {
+                await sql.end();
+              }
+            }
+          } catch (logoError) {
+            console.error(`⚠️  Error fixing logo table for client ${client.id}:`, logoError);
+          }
+          
           console.log(`✅ Client ${client.id} (${client.name}) database is properly initialized`);
         } catch (error) {
           // If table doesn't exist, initialize the database

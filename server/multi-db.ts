@@ -305,11 +305,13 @@ export class MultiDatabaseManager {
         await sql`
           CREATE TABLE IF NOT EXISTS company_logos (
             id SERIAL PRIMARY KEY,
-            name VARCHAR(100),
+            file_name VARCHAR(255) NOT NULL,
+            mime_type VARCHAR(100) NOT NULL,
+            file_size INTEGER NOT NULL,
             logo_data TEXT NOT NULL,
             is_active BOOLEAN NOT NULL DEFAULT false,
-            uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
-            uploaded_by INTEGER
+            uploaded_by INTEGER,
+            uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
           )`;
 
         console.log(`✅ Successfully created all tables in database ${databaseName} for client ${clientId}`);
