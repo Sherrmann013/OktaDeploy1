@@ -4,7 +4,7 @@ import postgres from "postgres";
 import { storage } from "./storage";
 import { insertUserSchema, updateUserSchema, insertSiteAccessUserSchema, siteAccessUsers, insertIntegrationSchema, integrations, auditLogs, insertAppMappingSchema, appMappings, departmentAppMappings, insertDepartmentAppMappingSchema, employeeTypeAppMappings, insertEmployeeTypeAppMappingSchema, departmentGroupMappings, insertDepartmentGroupMappingSchema, employeeTypeGroupMappings, insertEmployeeTypeGroupMappingSchema, insertLayoutSettingSchema, layoutSettings, dashboardCards, insertDashboardCardSchema, updateDashboardCardSchema, monitoringCards, insertMonitoringCardSchema, updateMonitoringCardSchema, companyLogos, insertCompanyLogoSchema, insertMspLogoSchema } from "@shared/schema";
 import { db } from "./db";
-import { eq, desc, and } from "drizzle-orm";
+import { eq, desc, and, or, ilike, asc } from "drizzle-orm";
 import { AuditLogger, getAuditLogs } from "./audit";
 import { z } from "zod";
 import { oktaService } from "./okta-service";
@@ -57,6 +57,11 @@ import { setupAuth, isAuthenticated, requireAdmin } from "./direct-okta-auth";
 
 // Import client-specific schemas
 import { 
+  users as clientUsers,
+  siteAccessUsers as clientSiteAccessUsers,
+  integrations as clientIntegrations,
+  insertIntegrationSchema as clientInsertIntegrationSchema,
+  auditLogs as clientAuditLogs,
   layoutSettings as clientLayoutSettings, 
   dashboardCards as clientDashboardCards, 
   insertLayoutSettingSchema as clientInsertLayoutSettingSchema,
@@ -2517,7 +2522,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Use client-specific database connection
       const multiDb = MultiDatabaseManager.getInstance();
       const clientDb = await multiDb.getClientDb(clientId);
-      const integrationsData = await clientDb.select().from(integrations);
+      const integrationsData = await clientDb.select().from(clientIntegrations);
       
       console.log(`✅ Found ${integrationsData.length} integrations for client ${clientId}`);
       res.json(integrationsData);
@@ -2531,13 +2536,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/client/:clientId/integrations", isAuthenticated, requireAdmin, async (req, res) => {
     try {
       const clientId = parseInt(req.params.clientId);
-      const integrationData = insertIntegrationSchema.parse(req.body);
+      const integrationData = clientInsertIntegrationSchema.parse(req.body);
       console.log(`🔗 Creating integration for client ${clientId}:`, integrationData.name);
       
       const multiDb = MultiDatabaseManager.getInstance();
       const clientDb = await multiDb.getClientDb(clientId);
       
-      const [result] = await clientDb.insert(integrations)
+      const [result] = await clientDb.insert(clientIntegrations)
         .values(integrationData)
         .returning();
       
@@ -2557,15 +2562,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const clientId = parseInt(req.params.clientId);
       const integrationId = parseInt(req.params.integrationId);
-      const integrationData = insertIntegrationSchema.parse(req.body);
+      const integrationData = clientInsertIntegrationSchema.parse(req.body);
       console.log(`🔗 Updating integration ${integrationId} for client ${clientId}`);
       
       const multiDb = MultiDatabaseManager.getInstance();
       const clientDb = await multiDb.getClientDb(clientId);
       
-      const [result] = await clientDb.update(integrations)
+      const [result] = await clientDb.update(clientIntegrations)
         .set(integrationData)
-        .where(eq(integrations.id, integrationId))
+        .where(eq(clientIntegrations.id, integrationId))
         .returning();
       
       if (!result) {
@@ -2593,8 +2598,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const multiDb = MultiDatabaseManager.getInstance();
       const clientDb = await multiDb.getClientDb(clientId);
       
-      const result = await clientDb.delete(integrations)
-        .where(eq(integrations.id, integrationId))
+      const result = await clientDb.delete(clientIntegrations)
+        .where(eq(clientIntegrations.id, integrationId))
         .returning();
       
       if (result.length === 0) {
@@ -3606,7 +3611,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // For stats-only requests, return minimal data quickly
       if (statsOnly === 'true') {
-        const allUsers = await clientDb.select().from(users).limit(500);
+        const allUsers = await clientDb.select().from(clientUsers).limit(500);
         res.json({
           users: [],
           total: allUsers.length,
@@ -3619,23 +3624,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Get users from client-specific database
-      let query = clientDb.select().from(users);
+      let query = clientDb.select().from(clientUsers);
       
       // Apply search filter if provided
       if (search && typeof search === 'string') {
         const searchTerm = `%${search.toLowerCase()}%`;
         query = query.where(
           or(
-            ilike(users.firstName, searchTerm),
-            ilike(users.lastName, searchTerm),
-            ilike(users.email, searchTerm)
+            ilike(clientUsers.firstName, searchTerm),
+            ilike(clientUsers.lastName, searchTerm),
+            ilike(clientUsers.email, searchTerm)
           )
         );
       }
       
       // Apply employee type filter
       if (employeeTypeFilter && typeof employeeTypeFilter === 'string') {
-        query = query.where(eq(users.employeeType, employeeTypeFilter));
+        query = query.where(eq(clientUsers.employeeType, employeeTypeFilter));
       }
       
       // Get total count for pagination
@@ -3643,11 +3648,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const total = allFilteredUsers.length;
       
       // Apply sorting
-      const sortField = sortBy as keyof typeof users.$inferSelect;
+      const sortField = sortBy as keyof typeof clientUsers.$inferSelect;
       if (sortOrder === 'desc') {
-        query = query.orderBy(desc(users[sortField]));
+        query = query.orderBy(desc(clientUsers[sortField]));
       } else {
-        query = query.orderBy(asc(users[sortField]));
+        query = query.orderBy(asc(clientUsers[sortField]));
       }
       
       // Apply pagination
