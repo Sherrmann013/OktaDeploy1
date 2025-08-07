@@ -29,6 +29,21 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
   
   // Detect current client context from URL
   const currentClientId = location.startsWith('/client/') ? parseInt(location.split('/')[2]) : 1;
+
+  // Fetch client information for generating group names - CLIENT-AWARE
+  const { data: clientInfo } = useQuery({
+    queryKey: [`/api/clients/${currentClientId}`],
+    queryFn: async () => {
+      const response = await fetch(`/api/clients/${currentClientId}`, {
+        credentials: 'include'
+      });
+      if (!response.ok) {
+        throw new Error('Failed to fetch client information');
+      }
+      return response.json();
+    },
+    staleTime: 10 * 60 * 1000, // Cache for 10 minutes
+  });
   const [departmentAppMappings, setDepartmentAppMappings] = useState<Record<string, string[]>>({});
   const [localDepartmentAppMappings, setLocalDepartmentAppMappings] = useState<Record<string, string[]>>({});
   const [selectedDepartment, setSelectedDepartment] = useState<string>('');
@@ -598,6 +613,26 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
 
   // Get available groups from the Groups field configuration, not from current field config
   const availableGroups = groupsFieldConfig?.options || [];
+  
+  // Helper function to derive company initials from client name
+  const getCompanyInitials = (clientName: string): string => {
+    if (!clientName) return 'CL'; // Default fallback
+    
+    // Split by spaces and capital letters, take first letter of each part
+    const words = clientName.split(/[\s\-_]+/).filter(word => word.length > 0);
+    if (words.length > 1) {
+      return words.map(word => word.charAt(0).toUpperCase()).join('');
+    } else {
+      // For single words, take first letter and first uppercase letter after it
+      const matches = clientName.match(/[A-Z]/g);
+      if (matches && matches.length >= 2) {
+        return matches.slice(0, 2).join('');
+      } else {
+        return clientName.substring(0, 2).toUpperCase();
+      }
+    }
+  };
+  
   const handleUseListChange = (checked: boolean) => {
     onUpdate({
       ...config,
@@ -621,13 +656,88 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
 
 
 
-  const handleOptionChange = (index: number, newValue: string) => {
+  const handleOptionChange = async (index: number, newValue: string) => {
+    const oldValue = config.options[index];
     const newOptions = [...config.options];
     newOptions[index] = newValue;
+    
+    // Update the config first
     onUpdate({
       ...config,
       options: newOptions
     });
+
+    // For employee types, create group automatically when a new employee type is added
+    if (fieldType === 'employeeType' && 
+        newValue.trim() !== '' && 
+        oldValue === '' && 
+        config.linkGroups) {
+      
+      const groupName = await createEmployeeTypeGroup(newValue.trim());
+      
+      if (groupName) {
+        // Auto-map the employee type to the newly created group
+        setLocalEmployeeTypeGroupMappings(prev => ({
+          ...prev,
+          [newValue.trim()]: [...(prev[newValue.trim()] || []), groupName]
+        }));
+        setHasEmployeeTypeGroupUnsavedChanges(true);
+      }
+    }
+  };
+
+  // Create group mutation for employee types
+  const createGroupMutation = useMutation({
+    mutationFn: async (groupName: string) => {
+      const response = await apiRequest("POST", `/api/client/${currentClientId}/groups`, {
+        name: groupName
+      });
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Failed to create group");
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      // Invalidate layout settings cache to refresh groups field configuration
+      queryClient.invalidateQueries({ queryKey: [`/api/client/${currentClientId}/layout-settings`] });
+      // Also invalidate any groups-related queries
+      queryClient.invalidateQueries({ queryKey: [`/api/client/${currentClientId}/groups`] });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: `Failed to create group: ${error.message}`,
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Helper function to create group for employee type
+  const createEmployeeTypeGroup = async (employeeTypeName: string): Promise<string | null> => {
+    if (!clientInfo?.name || !employeeTypeName.trim()) return null;
+    
+    const initials = getCompanyInitials(clientInfo.name);
+    const groupName = `${initials}-ET-${employeeTypeName.toUpperCase().replace(/\s+/g, '')}`;
+    
+    try {
+      await createGroupMutation.mutateAsync(groupName);
+      
+      // Add group to the groups field configuration
+      if (groupsFieldConfig) {
+        const updatedGroups = [...(groupsFieldConfig.options || []), groupName];
+        // Update groups field config through parent - this will need to be handled by parent component
+        toast({
+          title: "Success",
+          description: `Group '${groupName}' created for employee type '${employeeTypeName}'`,
+        });
+      }
+      
+      return groupName;
+    } catch (error) {
+      console.error('Failed to create employee type group:', error);
+      return null;
+    }
   };
 
   const addOption = () => {

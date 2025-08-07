@@ -2770,6 +2770,116 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // CLIENT-SPECIFIC: Create group for client - also creates OKTA group if integration exists
+  app.post('/api/client/:clientId/groups', isAuthenticated, requireAdmin, async (req, res) => {
+    try {
+      const clientId = parseInt(req.params.clientId);
+      const { name, description } = req.body;
+      
+      if (!name || name.trim() === '') {
+        return res.status(400).json({ message: 'Group name is required' });
+      }
+      
+      // Get client database connection
+      const clientDb = await multiDb.getClientDb(clientId);
+      if (!clientDb) {
+        return res.status(404).json({ error: 'Client database not found' });
+      }
+      
+      console.log(`🔗 Creating group '${name}' for client ${clientId}`);
+      
+      // Check if client has OKTA integration
+      const oktaIntegration = await clientDb.select().from(clientIntegrations)
+        .where(eq(clientIntegrations.name, 'okta'))
+        .limit(1);
+      
+      let oktaGroupResult = null;
+      
+      if (oktaIntegration.length > 0) {
+        console.log(`🔗 OKTA integration found for client ${clientId}, creating OKTA group...`);
+        
+        try {
+          oktaGroupResult = await createOktaGroup(
+            oktaIntegration[0].apiKeys as Record<string, string>, 
+            name, 
+            description
+          );
+          
+          if (oktaGroupResult.success) {
+            console.log(`✅ OKTA group '${name}' created successfully for client ${clientId}`);
+          } else {
+            console.log(`⚠️  OKTA group creation failed but continuing: ${oktaGroupResult.message}`);
+          }
+        } catch (error) {
+          console.error(`Failed to create OKTA group '${name}' for client ${clientId}:`, error);
+          // Continue even if OKTA group creation fails - we still add it to field config
+        }
+      } else {
+        console.log(`⚠️  No OKTA integration found for client ${clientId}, creating group in field config only`);
+      }
+      
+      // Add group to groups field configuration
+      const groupsConfig = await clientDb.select().from(clientLayoutSettings)
+        .where(eq(clientLayoutSettings.settingKey, 'groups'))
+        .limit(1);
+      
+      let currentGroups: string[] = [];
+      if (groupsConfig.length > 0) {
+        try {
+          const parsedConfig = JSON.parse(groupsConfig[0].settingValue || '{"options":[]}');
+          currentGroups = parsedConfig.options || [];
+        } catch (e) {
+          console.error('Failed to parse existing groups config:', e);
+        }
+      }
+      
+      // Add new group if not already present
+      if (!currentGroups.includes(name)) {
+        currentGroups.push(name);
+        
+        const updatedConfig = {
+          required: false,
+          useList: true,
+          options: currentGroups,
+          hideField: false
+        };
+        
+        if (groupsConfig.length > 0) {
+          // Update existing configuration
+          await clientDb.update(clientLayoutSettings)
+            .set({
+              settingValue: JSON.stringify(updatedConfig),
+              updatedAt: new Date()
+            })
+            .where(eq(clientLayoutSettings.settingKey, 'groups'));
+        } else {
+          // Create new configuration
+          await clientDb.insert(clientLayoutSettings).values({
+            settingKey: 'groups',
+            settingValue: JSON.stringify(updatedConfig),
+            settingType: 'json'
+          });
+        }
+        
+        console.log(`✅ Group '${name}' added to field configuration for client ${clientId}`);
+      }
+      
+      res.json({
+        success: true,
+        groupName: name,
+        oktaResult: oktaGroupResult,
+        addedToFieldConfig: !currentGroups.includes(name)
+      });
+      
+    } catch (error) {
+      console.error(`Error creating group for client ${req.params.clientId}:`, error);
+      res.status(500).json({ 
+        message: 'Failed to create group',
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
   // REMOVED: Global site access users endpoints - All site access users should be client-specific for multi-tenant data isolation
 
   // REMOVED: Global site access users PUT and DELETE endpoints - All site access users should be client-specific for multi-tenant data isolation
