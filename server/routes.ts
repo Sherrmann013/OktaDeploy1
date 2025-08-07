@@ -3,6 +3,7 @@ import { createServer, type Server } from "http";
 import postgres from "postgres";
 import { storage } from "./storage";
 import { insertUserSchema, updateUserSchema, insertSiteAccessUserSchema, siteAccessUsers, insertIntegrationSchema, integrations, auditLogs, insertAppMappingSchema, appMappings, departmentAppMappings, insertDepartmentAppMappingSchema, employeeTypeAppMappings, insertEmployeeTypeAppMappingSchema, departmentGroupMappings, insertDepartmentGroupMappingSchema, employeeTypeGroupMappings, insertEmployeeTypeGroupMappingSchema, insertLayoutSettingSchema, layoutSettings, dashboardCards, insertDashboardCardSchema, updateDashboardCardSchema, monitoringCards, insertMonitoringCardSchema, updateMonitoringCardSchema, companyLogos, insertCompanyLogoSchema, insertMspLogoSchema } from "@shared/schema";
+import { departmentAppMappings as clientDepartmentAppMappings, insertDepartmentAppMappingSchema as clientInsertDepartmentAppMappingSchema, employeeTypeAppMappings as clientEmployeeTypeAppMappings, insertEmployeeTypeAppMappingSchema as clientInsertEmployeeTypeAppMappingSchema, departmentGroupMappings as clientDepartmentGroupMappings, insertDepartmentGroupMappingSchema as clientInsertDepartmentGroupMappingSchema, employeeTypeGroupMappings as clientEmployeeTypeGroupMappings, insertEmployeeTypeGroupMappingSchema as clientInsertEmployeeTypeGroupMappingSchema } from "@shared/client-schema";
 import { db } from "./db";
 import { eq, desc, and, or, ilike, asc } from "drizzle-orm";
 import { AuditLogger, getAuditLogs } from "./audit";
@@ -3389,10 +3390,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Temporary client-specific endpoints - these will return empty arrays until proper schema is implemented
+  // Client-specific department app mappings endpoints
   app.get("/api/client/:clientId/department-app-mappings", isAuthenticated, async (req, res) => {
-    // TODO: Implement proper department/employee type mappings in separate table
-    res.json([]);
+    try {
+      const clientId = parseInt(req.params.clientId);
+      console.log(`📱 Fetching department app mappings for client ${clientId}`);
+      
+      // Use client-specific database connection
+      const multiDb = MultiDatabaseManager.getInstance();
+      const clientDb = await multiDb.getClientDb(clientId);
+      const mappings = await clientDb.select().from(clientDepartmentAppMappings);
+      
+      console.log(`✅ Found ${mappings.length} department app mappings for client ${clientId}`);
+      res.json(mappings);
+    } catch (error) {
+      console.error(`Error fetching department app mappings for client:`, error);
+      res.status(500).json({ error: "Failed to fetch department app mappings" });
+    }
   });
 
   app.get("/api/client/:clientId/employee-type-app-mappings", isAuthenticated, async (req, res) => {
@@ -3408,6 +3422,67 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/client/:clientId/employee-type-group-mappings", isAuthenticated, async (req, res) => {
     // TODO: Implement proper group mappings in separate table
     res.json([]);
+  });
+
+  app.post("/api/client/:clientId/department-app-mappings", isAuthenticated, requireAdmin, async (req, res) => {
+    try {
+      const clientId = parseInt(req.params.clientId);
+      const { departmentName, appName } = req.body;
+      console.log(`➕ Adding department app mapping for client ${clientId}: ${departmentName} -> ${appName}`);
+      
+      // Validate input data
+      const validatedData = clientInsertDepartmentAppMappingSchema.parse({ departmentName, appName });
+      
+      // Use client-specific database connection
+      const multiDb = MultiDatabaseManager.getInstance();
+      const clientDb = await multiDb.getClientDb(clientId);
+      
+      // Check if mapping already exists
+      const existing = await clientDb.select().from(clientDepartmentAppMappings)
+        .where(and(eq(clientDepartmentAppMappings.departmentName, departmentName), eq(clientDepartmentAppMappings.appName, appName)))
+        .limit(1);
+      
+      if (existing.length > 0) {
+        return res.status(409).json({ error: "Mapping already exists" });
+      }
+      
+      // Insert new mapping
+      const [result] = await clientDb.insert(clientDepartmentAppMappings)
+        .values(validatedData)
+        .returning();
+      
+      console.log(`✅ Added department app mapping for client ${clientId}: ${departmentName} -> ${appName}`);
+      res.status(201).json(result);
+    } catch (error) {
+      console.error(`Error adding department app mapping for client:`, error);
+      res.status(500).json({ error: "Failed to add department app mapping" });
+    }
+  });
+
+  app.delete("/api/client/:clientId/department-app-mappings", isAuthenticated, requireAdmin, async (req, res) => {
+    try {
+      const clientId = parseInt(req.params.clientId);
+      const { departmentName, appName } = req.body;
+      console.log(`🗑️  Removing department app mapping for client ${clientId}: ${departmentName} -> ${appName}`);
+      
+      // Use client-specific database connection
+      const multiDb = MultiDatabaseManager.getInstance();
+      const clientDb = await multiDb.getClientDb(clientId);
+      
+      const result = await clientDb.delete(clientDepartmentAppMappings)
+        .where(and(eq(clientDepartmentAppMappings.departmentName, departmentName), eq(clientDepartmentAppMappings.appName, appName)))
+        .returning();
+      
+      if (result.length === 0) {
+        return res.status(404).json({ error: "Mapping not found" });
+      }
+      
+      console.log(`✅ Removed department app mapping for client ${clientId}: ${departmentName} -> ${appName}`);
+      res.status(200).json({ message: "Mapping deleted successfully" });
+    } catch (error) {
+      console.error(`Error removing department app mapping for client:`, error);
+      res.status(500).json({ error: "Failed to remove department app mapping" });
+    }
   });
 
   app.post("/api/client/:clientId/employee-type-app-mappings", isAuthenticated, requireAdmin, async (req, res) => {
