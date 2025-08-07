@@ -87,8 +87,8 @@ export default function Sidebar() {
 
   // Dynamic navigation based on current context (client vs MSP)
   const getNavigation = () => {
-    // If we're on the MSP page, don't show any navigation items
-    if (location === '/msp') {
+    // If we're on the MSP page (both / and /msp routes), don't show any navigation items
+    if (location === '/msp' || location === '/') {
       return [];
     }
     
