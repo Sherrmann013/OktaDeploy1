@@ -122,7 +122,16 @@ export function useFieldSettings() {
 
   // Save only the current field's changes
   const saveCurrentFieldChanges = async (fieldKey: FieldKey) => {
-    if (!unsavedChanges[fieldKey]) {
+    // Check if there are any changes to save (including mapping functions)
+    const hasRegularChanges = !!unsavedChanges[fieldKey];
+    const hasDepartmentAppChanges = fieldKey === 'department' && departmentAppSaveFunction !== null;
+    const hasEmployeeTypeAppChanges = fieldKey === 'employeeType' && employeeTypeAppSaveFunction !== null;
+    const hasDepartmentGroupChanges = fieldKey === 'department' && departmentGroupSaveFunction !== null;
+    const hasEmployeeTypeGroupChanges = fieldKey === 'employeeType' && employeeTypeGroupSaveFunction !== null;
+    
+    const hasAnyChanges = hasRegularChanges || hasDepartmentAppChanges || hasEmployeeTypeAppChanges || hasDepartmentGroupChanges || hasEmployeeTypeGroupChanges;
+    
+    if (!hasAnyChanges) {
       toast({ 
         title: "No Changes", 
         description: "No unsaved changes to save for this field" 
@@ -133,23 +142,60 @@ export function useFieldSettings() {
     setIsSaving(true);
     
     try {
-      const success = await saveFieldSetting(fieldKey, unsavedChanges[fieldKey]);
-      if (success) {
-        // Move unsaved changes to saved settings
-        setFieldSettings(prev => ({
-          ...prev,
-          [fieldKey]: unsavedChanges[fieldKey]
-        }));
-        
-        // Clear unsaved changes for this field
-        discardFieldChanges(fieldKey);
-        
+      let allSuccessful = true;
+      
+      // Save regular field changes
+      if (hasRegularChanges) {
+        const success = await saveFieldSetting(fieldKey, unsavedChanges[fieldKey]);
+        if (success) {
+          // Move unsaved changes to saved settings
+          setFieldSettings(prev => ({
+            ...prev,
+            [fieldKey]: unsavedChanges[fieldKey]
+          }));
+          
+          // Clear unsaved changes for this field
+          discardFieldChanges(fieldKey);
+        }
+        allSuccessful = allSuccessful && success;
+      }
+      
+      // Save department/employee type app mappings
+      if (hasDepartmentAppChanges && departmentAppSaveFunction) {
+        const success = await departmentAppSaveFunction();
+        allSuccessful = allSuccessful && success;
+      }
+      
+      if (hasEmployeeTypeAppChanges && employeeTypeAppSaveFunction) {
+        const success = await employeeTypeAppSaveFunction();
+        allSuccessful = allSuccessful && success;
+      }
+      
+      // Save department/employee type group mappings
+      if (hasDepartmentGroupChanges && departmentGroupSaveFunction) {
+        const success = await departmentGroupSaveFunction();
+        allSuccessful = allSuccessful && success;
+      }
+      
+      if (hasEmployeeTypeGroupChanges && employeeTypeGroupSaveFunction) {
+        const success = await employeeTypeGroupSaveFunction();
+        allSuccessful = allSuccessful && success;
+      }
+      
+      if (allSuccessful) {
         toast({ 
           title: "Success", 
           description: `${getFieldDisplayName(fieldKey)} settings saved` 
         });
+      } else {
+        toast({ 
+          title: "Partial Success", 
+          description: "Some settings may not have saved properly", 
+          variant: "destructive" 
+        });
       }
-      return success;
+      
+      return allSuccessful;
     } catch (error) {
       toast({ 
         title: "Error", 
