@@ -196,8 +196,14 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
     setHasEmployeeTypeGroupUnsavedChanges(true);
   };
 
-  // Save department app mappings to database
-  const saveDepartmentAppMappings = async () => {
+  // Save department app mappings to database (MANUAL SAVE ONLY)
+  const saveDepartmentAppMappings = async (manualSave = false) => {
+    // Prevent auto-save - only allow manual saves
+    if (!manualSave) {
+      console.log('⚠️ Auto-save blocked - department mappings require manual save');
+      return false;
+    }
+    
     if (departmentSaveInProgress) return false;
     setDepartmentSaveInProgress(true);
     
@@ -481,7 +487,8 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
   useEffect(() => {
     if (fieldType === 'department' && setDepartmentAppSaveFunction) {
       if (hasDepartmentUnsavedChanges) {
-        setDepartmentAppSaveFunction(saveDepartmentAppMappings);
+        // Register save function that requires manual trigger
+        setDepartmentAppSaveFunction(() => saveDepartmentAppMappings(true));
       } else {
         setDepartmentAppSaveFunction(null);
       }
