@@ -3231,27 +3231,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // GLOBAL Logo API endpoints (for MSP use)
   
-  // Get all logos (global)
+  // Get all logos (global - MSP only, clientId: 0)
   app.get("/api/company-logos", isAuthenticated, requireAdmin, async (req, res) => {
     try {
-      const logos = await storage.getAllLogos();
+      console.log("🔍 Fetching MSP logos (clientId: 0 only)");
+      const logos = await storage.getAllLogos(0); // Only MSP logos
+      console.log("✅ Found", logos.length, "MSP logos");
       res.json(logos);
     } catch (error) {
-      console.error("Error fetching company logos:", error);
+      console.error("Error fetching MSP company logos:", error);
       res.status(500).json({ message: "Failed to fetch company logos" });
     }
   });
 
-  // Get active logo (global)
+  // Get active logo (global - MSP only, clientId: 0)
   app.get("/api/company-logos/active", isAuthenticated, async (req, res) => {
     try {
-      const activeLogo = await storage.getActiveLogo();
+      console.log("🔍 Fetching active MSP logo (clientId: 0 only)");
+      const activeLogo = await storage.getActiveLogo(0); // Only MSP logos
       if (!activeLogo) {
+        console.log("❌ No active MSP logo found");
         return res.status(404).json({ message: "No active logo found" });
       }
+      console.log("✅ Found active MSP logo:", activeLogo.fileName);
       res.json(activeLogo);
     } catch (error) {
-      console.error("Error fetching active logo:", error);
+      console.error("Error fetching active MSP logo:", error);
       res.status(500).json({ message: "Failed to fetch active logo" });
     }
   });

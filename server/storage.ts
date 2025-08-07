@@ -496,30 +496,46 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Company logo methods
-  async getAllLogos(): Promise<CompanyLogo[]> {
-    const logos = await db.select().from(companyLogos).orderBy(desc(companyLogos.uploadedAt));
+  async getAllLogos(clientId?: number): Promise<CompanyLogo[]> {
+    let query = db.select().from(companyLogos);
+    
+    if (clientId !== undefined) {
+      // Filter by specific clientId (0 for MSP, specific number for clients)
+      query = query.where(eq(companyLogos.clientId, clientId));
+    }
+    
+    const logos = await query.orderBy(desc(companyLogos.uploadedAt));
     return logos;
   }
 
-  async getActiveLogo(): Promise<CompanyLogo | undefined> {
-    const [logo] = await db.select().from(companyLogos).where(eq(companyLogos.isActive, true));
+  async getActiveLogo(clientId?: number): Promise<CompanyLogo | undefined> {
+    let whereConditions = [eq(companyLogos.isActive, true)];
+    
+    if (clientId !== undefined) {
+      // Filter by specific clientId (0 for MSP, specific number for clients)
+      whereConditions.push(eq(companyLogos.clientId, clientId));
+    }
+    
+    const [logo] = await db.select().from(companyLogos).where(and(...whereConditions));
     return logo || undefined;
   }
 
   async createLogo(logo: InsertCompanyLogo): Promise<CompanyLogo> {
-    // If this is the first logo, make it active
-    const existingLogos = await this.getAllLogos();
+    // Get existing logos for this specific client context (0 for MSP, specific clientId for clients)
+    const existingLogos = await this.getAllLogos(logo.clientId);
     const isFirstLogo = existingLogos.length === 0;
 
-    // If we already have 3 logos, delete the oldest one
+    // If we already have 3 logos for this client context, delete the oldest one
     if (existingLogos.length >= 3) {
       const oldestLogo = existingLogos[existingLogos.length - 1];
       await db.delete(companyLogos).where(eq(companyLogos.id, oldestLogo.id));
     }
 
-    // If this is set to be active, deactivate all others
+    // If this is set to be active, deactivate all others for this client context only
     if (logo.isActive || isFirstLogo) {
-      await db.update(companyLogos).set({ isActive: false });
+      await db.update(companyLogos)
+        .set({ isActive: false })
+        .where(eq(companyLogos.clientId, logo.clientId));
     }
 
     const [newLogo] = await db
@@ -534,8 +550,16 @@ export class DatabaseStorage implements IStorage {
   }
 
   async setActiveLogo(id: number): Promise<boolean> {
-    // Deactivate all logos first
-    await db.update(companyLogos).set({ isActive: false });
+    // First, get the logo to find its clientId context
+    const [targetLogo] = await db.select().from(companyLogos).where(eq(companyLogos.id, id));
+    if (!targetLogo) {
+      return false;
+    }
+
+    // Deactivate all logos for this specific client context only
+    await db.update(companyLogos)
+      .set({ isActive: false })
+      .where(eq(companyLogos.clientId, targetLogo.clientId));
     
     // Activate the selected logo
     const result = await db
