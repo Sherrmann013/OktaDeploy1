@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useLocation } from "wouter";
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -25,15 +26,19 @@ interface Integration {
 export function IntegrationsSection() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const [location] = useLocation();
+  
+  // Detect current client context from URL
+  const currentClientId = location.startsWith('/client/') ? parseInt(location.split('/')[2]) : 1;
   
   const [isConfigureIntegrationOpen, setIsConfigureIntegrationOpen] = useState(false);
   const [isDeleteIntegrationOpen, setIsDeleteIntegrationOpen] = useState(false);
   const [editingIntegration, setEditingIntegration] = useState<Integration | null>(null);
   const [integrationToDelete, setIntegrationToDelete] = useState<Integration | null>(null);
 
-  // Fetch integrations
+  // Fetch integrations - CLIENT-AWARE
   const { data: integrationsData = [], isLoading: integrationsLoading } = useQuery<Integration[]>({
-    queryKey: ["/api/integrations"],
+    queryKey: [`/api/client/${currentClientId}/integrations`],
     staleTime: 5 * 60 * 1000, // 5 minutes
     refetchOnWindowFocus: false,
   });

@@ -53,6 +53,7 @@ function determineEmployeeTypeFromGroups(userGroups: any[], employeeTypeApps: Se
   return null;
 }
 import { setupAuth, isAuthenticated, requireAdmin } from "./direct-okta-auth";
+import { MultiDatabaseManager } from "./multi-db";
 import * as mspRoutes from "./routes/msp";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -2640,6 +2641,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Client-specific integrations endpoint
+  app.get("/api/client/:clientId/integrations", isAuthenticated, async (req, res) => {
+    try {
+      const clientId = parseInt(req.params.clientId);
+      console.log(`🔗 Fetching integrations for client ${clientId}`);
+      
+      // Use client-specific database connection
+      const multiDb = MultiDatabaseManager.getInstance();
+      const clientDb = await multiDb.getClientDb(clientId);
+      const integrationsData = await clientDb.select().from(integrations);
+      
+      console.log(`✅ Found ${integrationsData.length} integrations for client ${clientId}`);
+      res.json(integrationsData);
+    } catch (error) {
+      console.error(`Error fetching integrations for client:`, error);
+      res.status(500).json({ error: "Failed to fetch client integrations" });
+    }
+  });
+
   app.post("/api/integrations", isAuthenticated, requireAdmin, async (req, res) => {
     try {
       const integrationData = insertIntegrationSchema.parse(req.body);
@@ -2802,6 +2822,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching app mappings:", error);
       res.status(500).json({ message: "Failed to fetch app mappings" });
+    }
+  });
+
+  // Client-specific app mappings endpoint
+  app.get("/api/client/:clientId/app-mappings", isAuthenticated, async (req, res) => {
+    try {
+      const clientId = parseInt(req.params.clientId);
+      console.log(`📱 Fetching app mappings for client ${clientId}`);
+      
+      // Use client-specific database connection  
+      const multiDb = MultiDatabaseManager.getInstance();
+      const clientDb = await multiDb.getClientDb(clientId);
+      const mappings = await clientDb.select().from(appMappings).orderBy(desc(appMappings.created));
+      
+      console.log(`✅ Found ${mappings.length} app mappings for client ${clientId}`);
+      res.json(mappings);
+    } catch (error) {
+      console.error(`Error fetching app mappings for client:`, error);
+      res.status(500).json({ error: "Failed to fetch client app mappings" });
     }
   });
 
@@ -2982,6 +3021,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Client-specific layout settings endpoint
+  app.get("/api/client/:clientId/layout-settings", isAuthenticated, async (req, res) => {
+    try {
+      const clientId = parseInt(req.params.clientId);
+      console.log(`⚙️  Fetching layout settings for client ${clientId}`);
+      
+      // Use client-specific database connection
+      const multiDb = MultiDatabaseManager.getInstance();
+      const clientDb = await multiDb.getClientDb(clientId);
+      const settings = await clientDb.select().from(layoutSettings).orderBy(layoutSettings.settingKey);
+      
+      console.log(`✅ Found ${settings.length} layout settings for client ${clientId}`);
+      res.json(settings);
+    } catch (error) {
+      console.error(`Error fetching layout settings for client:`, error);
+      res.status(500).json({ error: "Failed to fetch client layout settings" });
+    }
+  });
+
   app.get("/api/layout-settings/:key", isAuthenticated, async (req, res) => {
     try {
       const { key } = req.params;
@@ -2998,6 +3056,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching layout setting:", error);
       res.status(500).json({ error: "Failed to fetch layout setting" });
+    }
+  });
+
+  // Client-specific layout setting by key endpoint
+  app.get("/api/client/:clientId/layout-settings/:key", isAuthenticated, async (req, res) => {
+    try {
+      const clientId = parseInt(req.params.clientId);
+      const { key } = req.params;
+      console.log(`⚙️  Fetching layout setting '${key}' for client ${clientId}`);
+      
+      // Use client-specific database connection
+      const multiDb = MultiDatabaseManager.getInstance();
+      const clientDb = await multiDb.getClientDb(clientId);
+      const setting = await clientDb.select()
+        .from(layoutSettings)
+        .where(eq(layoutSettings.settingKey, key))
+        .limit(1);
+      
+      if (setting.length === 0) {
+        console.log(`❌ Layout setting '${key}' not found for client ${clientId}`);
+        return res.status(404).json({ error: "Setting not found" });
+      }
+      
+      console.log(`✅ Found layout setting '${key}' for client ${clientId}`);
+      res.json(setting[0]);
+    } catch (error) {
+      console.error(`Error fetching layout setting for client:`, error);
+      res.status(500).json({ error: "Failed to fetch client layout setting" });
     }
   });
 
@@ -3410,6 +3496,163 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching monitoring cards:", error);
       res.status(500).json({ error: "Failed to fetch monitoring cards" });
+    }
+  });
+
+  // Client-specific monitoring cards endpoint
+  app.get("/api/client/:clientId/monitoring-cards", isAuthenticated, async (req, res) => {
+    try {
+      const clientId = parseInt(req.params.clientId);
+      console.log(`📊 Fetching monitoring cards for client ${clientId}`);
+      
+      // Use client-specific database connection
+      const multiDb = MultiDatabaseManager.getInstance();
+      const clientDb = await multiDb.getClientDb(clientId);
+      const cards = await clientDb.select().from(monitoringCards).orderBy(monitoringCards.position);
+      
+      console.log(`✅ Found ${cards.length} monitoring cards for client ${clientId}`);
+      res.json(cards);
+    } catch (error) {
+      console.error(`Error fetching monitoring cards for client:`, error);
+      res.status(500).json({ error: "Failed to fetch client monitoring cards" });
+    }
+  });
+
+  // Client-specific department app mappings endpoint
+  app.get("/api/client/:clientId/department-app-mappings", isAuthenticated, async (req, res) => {
+    try {
+      const clientId = parseInt(req.params.clientId);
+      console.log(`🏢 Fetching department app mappings for client ${clientId}`);
+      
+      // Use client-specific database connection
+      const multiDb = MultiDatabaseManager.getInstance();
+      const clientDb = await multiDb.getClientDb(clientId);
+      const mappings = await clientDb.select().from(appMappings)
+        .where(eq(appMappings.mappingType, 'department'))
+        .orderBy(appMappings.created);
+      
+      console.log(`✅ Found ${mappings.length} department app mappings for client ${clientId}`);
+      res.json(mappings);
+    } catch (error) {
+      console.error(`Error fetching department app mappings for client:`, error);
+      res.status(500).json({ error: "Failed to fetch client department app mappings" });
+    }
+  });
+
+  // Client-specific employee type app mappings endpoint
+  app.get("/api/client/:clientId/employee-type-app-mappings", isAuthenticated, async (req, res) => {
+    try {
+      const clientId = parseInt(req.params.clientId);
+      console.log(`👥 Fetching employee type app mappings for client ${clientId}`);
+      
+      // Use client-specific database connection
+      const multiDb = MultiDatabaseManager.getInstance();
+      const clientDb = await multiDb.getClientDb(clientId);
+      const mappings = await clientDb.select().from(appMappings)
+        .where(eq(appMappings.mappingType, 'employeeType'))
+        .orderBy(appMappings.created);
+      
+      console.log(`✅ Found ${mappings.length} employee type app mappings for client ${clientId}`);
+      res.json(mappings);
+    } catch (error) {
+      console.error(`Error fetching employee type app mappings for client:`, error);
+      res.status(500).json({ error: "Failed to fetch client employee type app mappings" });
+    }
+  });
+
+  // Client-specific department group mappings endpoint
+  app.get("/api/client/:clientId/department-group-mappings", isAuthenticated, async (req, res) => {
+    try {
+      const clientId = parseInt(req.params.clientId);
+      console.log(`🏢 Fetching department group mappings for client ${clientId}`);
+      
+      // Use client-specific database connection
+      const multiDb = MultiDatabaseManager.getInstance();
+      const clientDb = await multiDb.getClientDb(clientId);
+      const mappings = await clientDb.select().from(groupMappings)
+        .where(eq(groupMappings.mappingType, 'department'))
+        .orderBy(groupMappings.created);
+      
+      console.log(`✅ Found ${mappings.length} department group mappings for client ${clientId}`);
+      res.json(mappings);
+    } catch (error) {
+      console.error(`Error fetching department group mappings for client:`, error);
+      res.status(500).json({ error: "Failed to fetch client department group mappings" });
+    }
+  });
+
+  // Client-specific employee type group mappings endpoint
+  app.get("/api/client/:clientId/employee-type-group-mappings", isAuthenticated, async (req, res) => {
+    try {
+      const clientId = parseInt(req.params.clientId);
+      console.log(`👥 Fetching employee type group mappings for client ${clientId}`);
+      
+      // Use client-specific database connection
+      const multiDb = MultiDatabaseManager.getInstance();
+      const clientDb = await multiDb.getClientDb(clientId);
+      const mappings = await clientDb.select().from(groupMappings)
+        .where(eq(groupMappings.mappingType, 'employeeType'))
+        .orderBy(groupMappings.created);
+      
+      console.log(`✅ Found ${mappings.length} employee type group mappings for client ${clientId}`);
+      res.json(mappings);
+    } catch (error) {
+      console.error(`Error fetching employee type group mappings for client:`, error);
+      res.status(500).json({ error: "Failed to fetch client employee type group mappings" });
+    }
+  });
+
+  // Client-specific employee type app mappings POST endpoint
+  app.post("/api/client/:clientId/employee-type-app-mappings", isAuthenticated, requireAdmin, async (req, res) => {
+    try {
+      const clientId = parseInt(req.params.clientId);
+      const { employeeType, appName } = req.body;
+      console.log(`👥 Creating employee type app mapping for client ${clientId}: ${employeeType} -> ${appName}`);
+      
+      // Use client-specific database connection
+      const multiDb = MultiDatabaseManager.getInstance();
+      const clientDb = await multiDb.getClientDb(clientId);
+      
+      const [result] = await clientDb.insert(appMappings).values({
+        mappingType: 'employeeType',
+        sourceValue: employeeType,
+        targetValue: appName,
+        created: new Date()
+      }).returning();
+      
+      console.log(`✅ Created employee type app mapping for client ${clientId}`);
+      res.json(result);
+    } catch (error) {
+      console.error(`Error creating employee type app mapping for client:`, error);
+      res.status(500).json({ error: "Failed to create client employee type app mapping" });
+    }
+  });
+
+  // Client-specific employee type app mappings DELETE endpoint
+  app.delete("/api/client/:clientId/employee-type-app-mappings", isAuthenticated, requireAdmin, async (req, res) => {
+    try {
+      const clientId = parseInt(req.params.clientId);
+      const { employeeType, appName } = req.body;
+      console.log(`👥 Deleting employee type app mapping for client ${clientId}: ${employeeType} -> ${appName}`);
+      
+      // Use client-specific database connection
+      const multiDb = MultiDatabaseManager.getInstance();
+      const clientDb = await multiDb.getClientDb(clientId);
+      
+      await clientDb.delete(appMappings)
+        .where(
+          and(
+            eq(appMappings.mappingType, 'employeeType'),
+            eq(appMappings.sourceValue, employeeType),
+            eq(appMappings.targetValue, appName)
+          )
+        );
+      
+      console.log(`✅ Deleted employee type app mapping for client ${clientId}`);
+      res.json({ message: "Employee type app mapping deleted successfully" });
+    } catch (error) {
+      console.error(`Error deleting employee type app mapping for client:`, error);
+      res.status(500).json({ error: "Failed to delete client employee type app mapping" });
     }
   });
 

@@ -62,9 +62,10 @@ export function LayoutSection({
     retry: 1,
   });
 
-  // Fetch monitoring cards - ONLY when Layout > Monitoring tab is active
+  // Fetch monitoring cards - CLIENT-AWARE, ONLY when Layout > Monitoring tab is active
+  const monitoringCardsEndpoint = `/api/client/${currentClientId}/monitoring-cards`;
   const { data: monitoringCardsData, refetch: refetchMonitoringCards, error: monitoringCardsError, isLoading: monitoringCardsLoading } = useQuery({
-    queryKey: ["/api/monitoring-cards"],
+    queryKey: [monitoringCardsEndpoint],
     enabled: layoutTab === "monitoring", // Only load when monitoring tab is active
     staleTime: 10 * 60 * 1000, // 10 minutes - rarely changes
     refetchOnMount: false,
@@ -135,27 +136,27 @@ export function LayoutSection({
     refetchOnWindowFocus: false,
   });
 
-  // Get current logo text setting - ONLY when Layout > Logo tab is active
+  // Get current logo text setting - CLIENT-AWARE, ONLY when Layout > Logo tab is active
   const { data: logoTextSetting, refetch: refetchLogoTextSetting } = useQuery({
-    queryKey: ["/api/layout-settings/logo_text"],
+    queryKey: [`/api/client/${currentClientId}/layout-settings/logo_text`],
     enabled: layoutTab === "logo", // Only load when logo tab is active
     staleTime: 2 * 60 * 1000, // 2 minutes
     refetchOnMount: false,
     refetchOnWindowFocus: false,
   });
 
-  // Get logo background color setting - ONLY when Layout > Logo tab is active
+  // Get logo background color setting - CLIENT-AWARE, ONLY when Layout > Logo tab is active
   const { data: logoBackgroundSetting, refetch: refetchLogoBackgroundSetting } = useQuery({
-    queryKey: ["/api/layout-settings/logo_background_color"],
+    queryKey: [`/api/client/${currentClientId}/layout-settings/logo_background_color`],
     enabled: layoutTab === "logo", // Only load when logo tab is active
     staleTime: 2 * 60 * 1000, // 2 minutes
     refetchOnMount: false,
     refetchOnWindowFocus: false,
   });
 
-  // Get logo text visibility setting - ONLY when Layout > Logo tab is active
+  // Get logo text visibility setting - CLIENT-AWARE, ONLY when Layout > Logo tab is active
   const { data: logoTextVisibilitySetting, refetch: refetchLogoTextVisibilitySetting } = useQuery({
-    queryKey: ["/api/layout-settings/logo_text_visible"],
+    queryKey: [`/api/client/${currentClientId}/layout-settings/logo_text_visible`],
     enabled: layoutTab === "logo", // Only load when logo tab is active
     staleTime: 2 * 60 * 1000, // 2 minutes
     refetchOnMount: false,

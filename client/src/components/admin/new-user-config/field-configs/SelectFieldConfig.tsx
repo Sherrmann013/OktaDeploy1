@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useLocation } from "wouter";
+import { apiRequest } from "@/lib/queryClient";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -23,6 +25,10 @@ interface SelectFieldConfigProps {
 export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAppSaveFunction, setEmployeeTypeAppSaveFunction, setDepartmentGroupSaveFunction, setEmployeeTypeGroupSaveFunction, groupsFieldConfig }: SelectFieldConfigProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [location] = useLocation();
+  
+  // Detect current client context from URL
+  const currentClientId = location.startsWith('/client/') ? parseInt(location.split('/')[2]) : 1;
   const [departmentAppMappings, setDepartmentAppMappings] = useState<Record<string, string[]>>({});
   const [localDepartmentAppMappings, setLocalDepartmentAppMappings] = useState<Record<string, string[]>>({});
   const [selectedDepartment, setSelectedDepartment] = useState<string>('');
@@ -44,33 +50,33 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
   const [departmentGroupSaveInProgress, setDepartmentGroupSaveInProgress] = useState(false);
   const [employeeTypeGroupSaveInProgress, setEmployeeTypeGroupSaveInProgress] = useState(false);
 
-  // Fetch available apps
+  // Fetch available apps - CLIENT-AWARE
   const { data: appMappingsData = [] } = useQuery({
-    queryKey: ["/api/app-mappings"],
+    queryKey: [`/api/client/${currentClientId}/app-mappings`],
     enabled: (fieldType === 'department' || fieldType === 'employeeType') && config.linkApps,
   });
 
-  // Fetch department app mappings
+  // Fetch department app mappings - CLIENT-AWARE
   const { data: departmentAppMappingsData = [] } = useQuery({
-    queryKey: ["/api/department-app-mappings"],
+    queryKey: [`/api/client/${currentClientId}/department-app-mappings`],
     enabled: fieldType === 'department' && config.linkApps,
   });
 
-  // Fetch employee type app mappings
+  // Fetch employee type app mappings - CLIENT-AWARE
   const { data: employeeTypeAppMappingsData = [] } = useQuery({
-    queryKey: ["/api/employee-type-app-mappings"],
+    queryKey: [`/api/client/${currentClientId}/employee-type-app-mappings`],
     enabled: fieldType === 'employeeType' && config.linkApps,
   });
 
-  // Fetch department group mappings
+  // Fetch department group mappings - CLIENT-AWARE
   const { data: departmentGroupMappingsData = [] } = useQuery({
-    queryKey: ["/api/department-group-mappings"],
+    queryKey: [`/api/client/${currentClientId}/department-group-mappings`],
     enabled: fieldType === 'department' && config.linkGroups,
   });
 
-  // Fetch employee type group mappings
+  // Fetch employee type group mappings - CLIENT-AWARE
   const { data: employeeTypeGroupMappingsData = [] } = useQuery({
-    queryKey: ["/api/employee-type-group-mappings"],
+    queryKey: [`/api/client/${currentClientId}/employee-type-group-mappings`],
     enabled: fieldType === 'employeeType' && config.linkGroups,
   });
 
@@ -239,7 +245,7 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
       // Update saved state and clear unsaved changes
       setDepartmentAppMappings(localDepartmentAppMappings);
       setHasDepartmentUnsavedChanges(false);
-      queryClient.invalidateQueries({ queryKey: ["/api/department-app-mappings"] });
+      queryClient.invalidateQueries({ queryKey: [`/api/client/${currentClientId}/department-app-mappings`] });
       
       return true;
     } catch (error) {
@@ -263,7 +269,7 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
       for (const employeeType in currentMappings) {
         for (const app of currentMappings[employeeType]) {
           if (!newMappings[employeeType]?.includes(app)) {
-            await fetch('/api/employee-type-app-mappings', {
+            await fetch(`/api/client/${currentClientId}/employee-type-app-mappings`, {
               method: 'DELETE',
               headers: { 'Content-Type': 'application/json' },
               credentials: 'include',
@@ -277,7 +283,7 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
       for (const employeeType in newMappings) {
         for (const app of newMappings[employeeType]) {
           if (!currentMappings[employeeType]?.includes(app)) {
-            const response = await fetch('/api/employee-type-app-mappings', {
+            const response = await fetch(`/api/client/${currentClientId}/employee-type-app-mappings`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               credentials: 'include',
@@ -298,7 +304,7 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
       // Update saved state and clear unsaved changes
       setEmployeeTypeAppMappings(localEmployeeTypeAppMappings);
       setHasEmployeeTypeUnsavedChanges(false);
-      queryClient.invalidateQueries({ queryKey: ["/api/employee-type-app-mappings"] });
+      queryClient.invalidateQueries({ queryKey: [`/api/client/${currentClientId}/employee-type-app-mappings`] });
       
       return true;
     } catch (error) {
