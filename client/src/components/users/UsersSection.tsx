@@ -68,37 +68,7 @@ export function UsersSection() {
     }));
   });
 
-  // OKTA Sync Mutation - CLIENT-AWARE
-  const oktaSyncMutation = useMutation({
-    mutationFn: async () => {
-      const response = await fetch(`/api/client/${currentClientId}/okta/sync-users`, {
-        method: "POST",
-        credentials: "include"
-      });
-      
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || `HTTP ${response.status}: ${response.statusText}`);
-      }
-      
-      return response.json();
-    },
-    onSuccess: (data) => {
-      toast({
-        title: "OKTA Sync Completed",
-        description: `${data.message}. Total: ${data.totalUsers}, New: ${data.newUsers}, Updated: ${data.updatedUsers}`,
-      });
-      queryClient.invalidateQueries({ queryKey: [`/api/client/${currentClientId}/users`] });
-      refetch();
-    },
-    onError: (error) => {
-      toast({
-        title: "OKTA Sync Failed", 
-        description: error.message,
-        variant: "destructive",
-      });
-    },
-  });
+
 
   // Get employee type counts from OKTA groups
   const { data: employeeTypeCounts } = useQuery({
@@ -169,6 +139,25 @@ export function UsersSection() {
   const { data: usersData, isLoading, refetch, isFetching } = useQuery({
     queryKey: [`/api/client/${currentClientId}/users`, currentPage, usersPerPage, debouncedSearchQuery, sortBy, sortOrder, employeeTypeFilter, filters],
     queryFn: async () => {
+      // First try to sync from OKTA, then fetch users
+      try {
+        console.log('Auto-syncing users from OKTA...');
+        const syncResponse = await fetch(`/api/client/${currentClientId}/okta/sync-users`, {
+          method: "POST",
+          credentials: "include"
+        });
+        
+        if (syncResponse.ok) {
+          const syncData = await syncResponse.json();
+          console.log(`OKTA sync completed: ${syncData.totalUsers} total, ${syncData.newUsers} new, ${syncData.updatedUsers} updated`);
+        } else {
+          console.warn('OKTA sync failed, falling back to local users');
+        }
+      } catch (error) {
+        console.warn('OKTA sync error, falling back to local users:', error);
+      }
+
+      // Now fetch users from local database
       const params = new URLSearchParams({
         page: currentPage.toString(),
         limit: usersPerPage.toString(),
@@ -182,8 +171,6 @@ export function UsersSection() {
         ...(filters.status.length > 0 && { statuses: filters.status.join(',') }),
         ...(filters.lastLogin && { lastLoginDays: filters.lastLogin })
       });
-      
-
       
       const response = await fetch(`/api/client/${currentClientId}/users?${params}`, {
         credentials: 'include'
@@ -208,9 +195,7 @@ export function UsersSection() {
   const totalPages = usersData?.totalPages || 1;
   const dataSource = usersData?.source || 'unknown';
 
-  const handleRefresh = () => {
-    refetch();
-  };
+
 
   const [, setLocation] = useLocation();
   
@@ -220,7 +205,7 @@ export function UsersSection() {
 
   const handleCreateSuccess = () => {
     setShowCreateModal(false);
-    refetch();
+    queryClient.invalidateQueries({ queryKey: [`/api/client/${currentClientId}/users`] });
   };
 
   const handleEmployeeTypeFilter = (employeeType: string) => {
@@ -518,24 +503,6 @@ export function UsersSection() {
           </div>
           
           <div className="flex items-center space-x-3">
-            <Button
-              variant="outline"
-              onClick={() => oktaSyncMutation.mutate()}
-              disabled={oktaSyncMutation.isPending}
-              className="gap-2 border-green-300 text-green-600 hover:bg-green-50 dark:border-green-700 dark:text-green-400 dark:hover:bg-green-950"
-            >
-              <RefreshCw className={`w-4 h-4 ${oktaSyncMutation.isPending ? 'animate-spin' : ''}`} />
-              {oktaSyncMutation.isPending ? 'Syncing OKTA...' : 'Sync from OKTA'}
-            </Button>
-            <Button
-              variant="ghost"
-              onClick={handleRefresh}
-              disabled={isFetching}
-              className="gap-2"
-            >
-              <RefreshCw className={`h-4 w-4 ${isFetching ? 'animate-spin' : ''}`} />
-              Refresh
-            </Button>
             
             {(searchQuery || employeeTypeFilter || filters.employeeType.length > 0 || filters.mobilePhone || filters.manager || filters.status.length > 0 || filters.lastLogin) && (
               <Button type="button" variant="outline" onClick={clearFilters}>
@@ -572,7 +539,7 @@ export function UsersSection() {
           onUserClick={handleUserClick}
           onPageChange={setCurrentPage}
           onPerPageChange={handlePerPageChange}
-          onRefresh={handleRefresh}
+          onRefresh={() => queryClient.invalidateQueries({ queryKey: [`/api/client/${currentClientId}/users`] })}
           sortBy={sortBy}
           sortOrder={sortOrder}
           onSort={handleSort}
