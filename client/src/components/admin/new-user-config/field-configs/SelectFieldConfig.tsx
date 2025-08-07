@@ -488,7 +488,7 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
     if (fieldType === 'department' && setDepartmentAppSaveFunction) {
       if (hasDepartmentUnsavedChanges) {
         // Register save function that requires manual trigger
-        setDepartmentAppSaveFunction(() => saveDepartmentAppMappings(true));
+        setDepartmentAppSaveFunction(() => () => saveDepartmentAppMappings(true));
       } else {
         setDepartmentAppSaveFunction(null);
       }
@@ -498,7 +498,7 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
   useEffect(() => {
     if (fieldType === 'employeeType' && setEmployeeTypeAppSaveFunction) {
       if (hasEmployeeTypeUnsavedChanges) {
-        setEmployeeTypeAppSaveFunction(saveEmployeeTypeAppMappings);
+        setEmployeeTypeAppSaveFunction(() => saveEmployeeTypeAppMappings);
       } else {
         setEmployeeTypeAppSaveFunction(null);
       }
@@ -509,7 +509,7 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
   useEffect(() => {
     if (fieldType === 'department' && setDepartmentGroupSaveFunction) {
       if (hasDepartmentGroupUnsavedChanges) {
-        setDepartmentGroupSaveFunction(saveDepartmentGroupMappings);
+        setDepartmentGroupSaveFunction(() => saveDepartmentGroupMappings);
       } else {
         setDepartmentGroupSaveFunction(null);
       }
@@ -519,7 +519,7 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
   useEffect(() => {
     if (fieldType === 'employeeType' && setEmployeeTypeGroupSaveFunction) {
       if (hasEmployeeTypeGroupUnsavedChanges) {
-        setEmployeeTypeGroupSaveFunction(saveEmployeeTypeGroupMappings);
+        setEmployeeTypeGroupSaveFunction(() => saveEmployeeTypeGroupMappings);
       } else {
         setEmployeeTypeGroupSaveFunction(null);
       }
