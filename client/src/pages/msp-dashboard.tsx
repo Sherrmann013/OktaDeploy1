@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Plus, Building2, ExternalLink } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient } from "@/lib/queryClient";
+import { ClientLogoDisplay } from "@/components/ClientLogoDisplay";
 
 // Update the interface to match the new MSP schema
 interface Client {
@@ -260,17 +261,11 @@ export default function MSPDashboard() {
                   <CardContent className="p-6 text-center pb-12">
                     {/* Logo Section */}
                     <div className="mb-4 flex justify-center">
-                      {client.logoUrl ? (
-                        <img 
-                          src={client.logoUrl} 
-                          alt={`${client.name} logo`}
-                          className="w-16 h-16 object-contain rounded-lg"
-                        />
-                      ) : (
-                        <div className="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center">
-                          <Building2 className="w-8 h-8 text-gray-400 dark:text-gray-500" />
-                        </div>
-                      )}
+                      <ClientLogoDisplay 
+                        clientId={client.id} 
+                        clientName={client.name}
+                        className="w-16 h-16"
+                      />
                     </div>
                     
                     {/* Client Name */}
