@@ -54,6 +54,32 @@ function determineEmployeeTypeFromGroups(userGroups: any[], employeeTypeApps: Se
   return null;
 }
 import { setupAuth, isAuthenticated, requireAdmin } from "./direct-okta-auth";
+import { MultiDatabaseManager } from './multi-db';
+import { fetchOktaUsers, testOktaConnection, testSentinelOneConnection, testJiraConnection, OktaService } from './okta-service';
+import { syncUsersToDatabase } from './user-sync';
+
+// Helper function to create OKTA group
+async function createOktaGroup(apiKeys: Record<string, string>, groupName: string, description?: string) {
+  if (!apiKeys.domain || !apiKeys.apiToken) {
+    throw new Error('OKTA domain and API token are required');
+  }
+
+  // Temporarily set environment variables for this operation
+  const originalDomain = process.env.OKTA_DOMAIN;
+  const originalToken = process.env.OKTA_API_TOKEN;
+  
+  process.env.OKTA_DOMAIN = apiKeys.domain;
+  process.env.OKTA_API_TOKEN = apiKeys.apiToken;
+  
+  try {
+    const oktaService = new OktaService();
+    return await oktaService.createGroup(groupName, description);
+  } finally {
+    // Restore original environment variables
+    if (originalDomain) process.env.OKTA_DOMAIN = originalDomain;
+    if (originalToken) process.env.OKTA_API_TOKEN = originalToken;
+  }
+}
 
 // Integration testing functions
 async function testOktaConnection(apiKeys: Record<string, string>): Promise<{ success: boolean; message: string }> {
@@ -3463,10 +3489,49 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { mappings } = req.body;
       console.log(`📦 Creating ${mappings.length} app mappings for client ${clientId}`);
       
-      // Use client-specific database connection
+      // Get OKTA integration for this client to create groups
       const multiDb = MultiDatabaseManager.getInstance();
       const clientDb = await multiDb.getClientDb(clientId);
       
+      const oktaIntegration = await clientDb.select()
+        .from(clientIntegrations)
+        .where(and(
+          eq(clientIntegrations.name, 'okta'),
+          eq(clientIntegrations.status, 'connected')
+        ))
+        .limit(1);
+
+      // Create OKTA groups if integration is available
+      const groupCreationResults: any[] = [];
+      if (oktaIntegration.length > 0) {
+        console.log(`🔗 OKTA integration found for client ${clientId}, creating groups...`);
+        
+        for (const mapping of mappings) {
+          const groupName = mapping.oktaGroupName;
+          if (groupName && groupName.trim()) {
+            try {
+              const groupResult = await createOktaGroup(oktaIntegration[0].apiKeys as Record<string, string>, groupName, mapping.description);
+              groupCreationResults.push({
+                groupName,
+                result: groupResult
+              });
+              
+              // Small delay between group creation requests to avoid rate limiting
+              await new Promise(resolve => setTimeout(resolve, 100));
+            } catch (error) {
+              console.error(`Failed to create OKTA group '${groupName}':`, error);
+              groupCreationResults.push({
+                groupName,
+                result: { success: false, message: error instanceof Error ? error.message : 'Unknown error' }
+              });
+            }
+          }
+        }
+      } else {
+        console.log(`⚠️  No OKTA integration found for client ${clientId}, skipping group creation`);
+      }
+      
+      // Create database mappings
       const results = await clientDb.insert(appMappings).values(
         mappings.map((mapping: any) => ({
           ...mapping,
@@ -3477,7 +3542,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       ).returning();
       
       console.log(`✅ Created ${results.length} app mappings for client ${clientId}`);
-      res.json(results);
+      
+      // Return results with group creation information
+      res.json({
+        mappings: results,
+        groupCreationResults
+      });
     } catch (error) {
       console.error(`Error creating app mappings for client:`, error);
       res.status(500).json({ error: "Failed to create client app mappings" });

@@ -210,6 +210,48 @@ class OktaService {
     }
   }
 
+  async createGroup(groupName: string, description?: string): Promise<any> {
+    try {
+      this.initialize();
+      if (!this.config) {
+        throw new Error('OKTA service not properly configured');
+      }
+
+      const groupData = {
+        profile: {
+          name: groupName,
+          description: description || `Security group for ${groupName} access`
+        }
+      };
+
+      console.log(`🏗️  Creating OKTA group: ${groupName}`);
+      const response = await this.makeRequest('/groups', {
+        method: 'POST',
+        body: JSON.stringify(groupData)
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        // Check if group already exists
+        if (response.status === 400 && data.errorSummary?.includes('already exists')) {
+          console.log(`✅ OKTA group '${groupName}' already exists`);
+          return { success: true, exists: true, message: `Group '${groupName}' already exists` };
+        }
+        throw new Error(`OKTA API error: ${response.status} ${response.statusText} - ${data.errorSummary || data.error}`);
+      }
+
+      console.log(`✅ Created OKTA group: ${groupName} (ID: ${data.id})`);
+      return { success: true, exists: false, group: data };
+    } catch (error) {
+      console.error(`❌ Error creating OKTA group '${groupName}':`, error);
+      return { 
+        success: false, 
+        message: error instanceof Error ? error.message : 'Unknown error creating group' 
+      };
+    }
+  }
+
   async getUsers(limit: number = 200): Promise<any[]> {
     // Optimize for large datasets - implement progressive loading
     if (limit > 100) {
@@ -915,37 +957,9 @@ class OktaService {
     }
   }
 
-  async createGroup(groupName: string, description?: string): Promise<any> {
-    try {
-      console.log(`Creating OKTA group: ${groupName}`);
-      
-      const groupData = {
-        profile: {
-          name: groupName,
-          description: description || `Auto-created group: ${groupName}`
-        }
-      };
-      
-      const response = await this.makeRequest('/groups', {
-        method: 'POST',
-        body: JSON.stringify(groupData),
-        useEnhancedToken: true
-      });
-      
-      if (response.ok) {
-        const createdGroup = await response.json();
-        console.log(`Successfully created OKTA group: ${groupName} (ID: ${createdGroup.id})`);
-        return createdGroup;
-      } else {
-        const errorText = await response.text();
-        throw new Error(`Failed to create group: ${response.status} ${response.statusText} - ${errorText}`);
-      }
-    } catch (error) {
-      console.error(`Failed to create OKTA group ${groupName}:`, error);
-      throw new Error(`Failed to create group: ${error instanceof Error ? error.message : 'Unknown error'}`);
-    }
-  }
+
 }
 
 // Export a safe instance that can be used even when OKTA isn't configured
 export const oktaService = new OktaService();
+export { OktaService };
