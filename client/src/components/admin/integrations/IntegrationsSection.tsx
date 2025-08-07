@@ -650,28 +650,18 @@ export function IntegrationsSection() {
           <div className="grid gap-4 py-4">
             {renderApiKeyFields(editingIntegration)}
           </div>
-          <div className="flex justify-between items-center">
+          <div className="flex justify-end gap-3">
             <Button 
-              variant="outline"
-              onClick={() => editingIntegration && handleDeleteIntegration(editingIntegration)}
-              disabled={deleteIntegrationMutation.isPending}
-              className="border-red-300 text-red-600 hover:bg-red-50 dark:border-red-700 dark:text-red-400 dark:hover:bg-red-950"
+              variant="outline" 
+              onClick={() => editingIntegration && testConnectionMutation.mutate(editingIntegration.id)}
+              disabled={testConnectionMutation.isPending}
+              className="border-blue-300 text-blue-600 hover:bg-blue-50 dark:border-blue-700 dark:text-blue-400 dark:hover:bg-blue-950"
             >
-              {deleteIntegrationMutation.isPending ? "Deleting..." : "Delete Integration"}
+              {testConnectionMutation.isPending ? "Testing..." : "Test Connection"}
             </Button>
-            <div className="flex gap-3">
-              <Button 
-                variant="outline" 
-                onClick={() => editingIntegration && testConnectionMutation.mutate(editingIntegration.id)}
-                disabled={testConnectionMutation.isPending}
-                className="border-blue-300 text-blue-600 hover:bg-blue-50 dark:border-blue-700 dark:text-blue-400 dark:hover:bg-blue-950"
-              >
-                {testConnectionMutation.isPending ? "Testing..." : "Test Connection"}
-              </Button>
-              <Button onClick={handleUpdateIntegration} disabled={updateIntegrationMutation.isPending}>
-                {updateIntegrationMutation.isPending ? "Saving..." : "Save Changes"}
-              </Button>
-            </div>
+            <Button onClick={handleUpdateIntegration} disabled={updateIntegrationMutation.isPending}>
+              {updateIntegrationMutation.isPending ? "Saving..." : "Save Changes"}
+            </Button>
           </div>
         </DialogContent>
       </Dialog>
