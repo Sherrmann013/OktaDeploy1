@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useLocation } from "wouter";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -21,6 +22,10 @@ interface AppMapping {
 export function AppsSection() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [location] = useLocation();
+  
+  // 🔥 CRITICAL: Detect current client context from URL for database isolation
+  const currentClientId = location.startsWith('/client/') ? parseInt(location.split('/')[2]) : 1;
   
   const [isNewMappingOpen, setIsNewMappingOpen] = useState(false);
   const [newMapping, setNewMapping] = useState({ appName: "", oktaGroups: [""], description: "" });
@@ -29,9 +34,9 @@ export function AppsSection() {
   const [isEditMappingOpen, setIsEditMappingOpen] = useState(false);
   const [editMappingData, setEditMappingData] = useState({ appName: "", oktaGroups: [""] });
 
-  // Fetch app mappings from database
+  // Fetch app mappings from database - CLIENT-AWARE for database isolation
   const { data: appMappingsData = [], isLoading: appMappingsLoading } = useQuery<AppMapping[]>({
-    queryKey: ["/api/app-mappings"],
+    queryKey: [`/api/client/${currentClientId}/app-mappings`],
     staleTime: 5 * 60 * 1000, // 5 minutes - app mappings change occasionally
     refetchOnWindowFocus: false,
   });
@@ -46,7 +51,7 @@ export function AppsSection() {
         description: mappingData.description || null
       }));
       
-      const response = await fetch('/api/app-mappings/bulk', {
+      const response = await fetch(`/api/client/${currentClientId}/app-mappings/bulk`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -62,7 +67,7 @@ export function AppsSection() {
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/app-mappings"] });
+      queryClient.invalidateQueries({ queryKey: [`/api/client/${currentClientId}/app-mappings`] });
       setIsNewMappingOpen(false);
       setNewMapping({ appName: "", oktaGroups: [""], description: "" });
       toast({
@@ -89,8 +94,8 @@ export function AppsSection() {
 
       // If there's more than one group, we need to delete the original and create multiple new ones
       if (validGroups.length > 1) {
-        // First delete the original
-        await fetch(`/api/app-mappings/${id}`, {
+        // First delete the original - CLIENT-AWARE
+        await fetch(`/api/client/${currentClientId}/app-mappings/${id}`, {
           method: 'DELETE',
           credentials: 'include'
         });
@@ -102,7 +107,7 @@ export function AppsSection() {
           description: null
         }));
         
-        const response = await fetch('/api/app-mappings/bulk', {
+        const response = await fetch(`/api/client/${currentClientId}/app-mappings/bulk`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           credentials: 'include',
@@ -117,8 +122,8 @@ export function AppsSection() {
         }
         return response.json();
       } else {
-        // Single group - just update the existing mapping
-        const response = await fetch(`/api/app-mappings/${id}`, {
+        // Single group - just update the existing mapping - CLIENT-AWARE
+        const response = await fetch(`/api/client/${currentClientId}/app-mappings/${id}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           credentials: 'include',
@@ -137,7 +142,7 @@ export function AppsSection() {
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/app-mappings"] });
+      queryClient.invalidateQueries({ queryKey: [`/api/client/${currentClientId}/app-mappings`] });
       setIsEditMappingOpen(false);
       setEditingMapping(null);
       setEditMappingData({ appName: "", oktaGroups: [""] });
@@ -157,7 +162,7 @@ export function AppsSection() {
 
   const deleteAppMappingMutation = useMutation({
     mutationFn: async (id: number) => {
-      const response = await fetch(`/api/app-mappings/${id}`, {
+      const response = await fetch(`/api/client/${currentClientId}/app-mappings/${id}`, {
         method: "DELETE",
         credentials: "include"
       });
@@ -170,7 +175,7 @@ export function AppsSection() {
       return response.status === 204 ? null : response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/app-mappings"] });
+      queryClient.invalidateQueries({ queryKey: [`/api/client/${currentClientId}/app-mappings`] });
       setMappingToDelete(null);
       toast({
         title: "App mapping deleted successfully",

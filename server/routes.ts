@@ -3518,141 +3518,122 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Client-specific department app mappings endpoint
+  // Temporary client-specific endpoints - these will return empty arrays until proper schema is implemented
   app.get("/api/client/:clientId/department-app-mappings", isAuthenticated, async (req, res) => {
-    try {
-      const clientId = parseInt(req.params.clientId);
-      console.log(`🏢 Fetching department app mappings for client ${clientId}`);
-      
-      // Use client-specific database connection
-      const multiDb = MultiDatabaseManager.getInstance();
-      const clientDb = await multiDb.getClientDb(clientId);
-      const mappings = await clientDb.select().from(appMappings)
-        .where(eq(appMappings.mappingType, 'department'))
-        .orderBy(appMappings.created);
-      
-      console.log(`✅ Found ${mappings.length} department app mappings for client ${clientId}`);
-      res.json(mappings);
-    } catch (error) {
-      console.error(`Error fetching department app mappings for client:`, error);
-      res.status(500).json({ error: "Failed to fetch client department app mappings" });
-    }
+    // TODO: Implement proper department/employee type mappings in separate table
+    res.json([]);
   });
 
-  // Client-specific employee type app mappings endpoint
   app.get("/api/client/:clientId/employee-type-app-mappings", isAuthenticated, async (req, res) => {
-    try {
-      const clientId = parseInt(req.params.clientId);
-      console.log(`👥 Fetching employee type app mappings for client ${clientId}`);
-      
-      // Use client-specific database connection
-      const multiDb = MultiDatabaseManager.getInstance();
-      const clientDb = await multiDb.getClientDb(clientId);
-      const mappings = await clientDb.select().from(appMappings)
-        .where(eq(appMappings.mappingType, 'employeeType'))
-        .orderBy(appMappings.created);
-      
-      console.log(`✅ Found ${mappings.length} employee type app mappings for client ${clientId}`);
-      res.json(mappings);
-    } catch (error) {
-      console.error(`Error fetching employee type app mappings for client:`, error);
-      res.status(500).json({ error: "Failed to fetch client employee type app mappings" });
-    }
+    // TODO: Implement proper department/employee type mappings in separate table  
+    res.json([]);
   });
 
-  // Client-specific department group mappings endpoint
   app.get("/api/client/:clientId/department-group-mappings", isAuthenticated, async (req, res) => {
-    try {
-      const clientId = parseInt(req.params.clientId);
-      console.log(`🏢 Fetching department group mappings for client ${clientId}`);
-      
-      // Use client-specific database connection
-      const multiDb = MultiDatabaseManager.getInstance();
-      const clientDb = await multiDb.getClientDb(clientId);
-      const mappings = await clientDb.select().from(groupMappings)
-        .where(eq(groupMappings.mappingType, 'department'))
-        .orderBy(groupMappings.created);
-      
-      console.log(`✅ Found ${mappings.length} department group mappings for client ${clientId}`);
-      res.json(mappings);
-    } catch (error) {
-      console.error(`Error fetching department group mappings for client:`, error);
-      res.status(500).json({ error: "Failed to fetch client department group mappings" });
-    }
+    // TODO: Implement proper group mappings in separate table
+    res.json([]);
   });
 
-  // Client-specific employee type group mappings endpoint
   app.get("/api/client/:clientId/employee-type-group-mappings", isAuthenticated, async (req, res) => {
+    // TODO: Implement proper group mappings in separate table
+    res.json([]);
+  });
+
+  app.post("/api/client/:clientId/employee-type-app-mappings", isAuthenticated, requireAdmin, async (req, res) => {
+    // TODO: Implement proper employee type app mappings
+    res.json({ message: "Feature not yet implemented" });
+  });
+
+  app.delete("/api/client/:clientId/employee-type-app-mappings", isAuthenticated, requireAdmin, async (req, res) => {
+    // TODO: Implement proper employee type app mappings
+    res.json({ message: "Feature not yet implemented" });
+  });
+
+  // Client-specific app mappings DELETE endpoint (by ID)
+  app.delete("/api/client/:clientId/app-mappings/:id", isAuthenticated, requireAdmin, async (req, res) => {
     try {
       const clientId = parseInt(req.params.clientId);
-      console.log(`👥 Fetching employee type group mappings for client ${clientId}`);
+      const mappingId = parseInt(req.params.id);
+      console.log(`🗑️  Deleting app mapping ${mappingId} for client ${clientId}`);
       
       // Use client-specific database connection
       const multiDb = MultiDatabaseManager.getInstance();
       const clientDb = await multiDb.getClientDb(clientId);
-      const mappings = await clientDb.select().from(groupMappings)
-        .where(eq(groupMappings.mappingType, 'employeeType'))
-        .orderBy(groupMappings.created);
       
-      console.log(`✅ Found ${mappings.length} employee type group mappings for client ${clientId}`);
-      res.json(mappings);
+      // Get the mapping details for audit log before deletion
+      const existing = await clientDb.select().from(appMappings).where(eq(appMappings.id, mappingId)).limit(1);
+      if (existing.length === 0) {
+        return res.status(404).json({ error: "App mapping not found" });
+      }
+      
+      await clientDb.delete(appMappings).where(eq(appMappings.id, mappingId));
+      
+      console.log(`✅ Deleted app mapping ${mappingId} for client ${clientId}: ${existing[0].appName}`);
+      res.status(204).send();
     } catch (error) {
-      console.error(`Error fetching employee type group mappings for client:`, error);
-      res.status(500).json({ error: "Failed to fetch client employee type group mappings" });
+      console.error(`Error deleting app mapping for client:`, error);
+      res.status(500).json({ error: "Failed to delete client app mapping" });
     }
   });
 
-  // Client-specific employee type app mappings POST endpoint
-  app.post("/api/client/:clientId/employee-type-app-mappings", isAuthenticated, requireAdmin, async (req, res) => {
+  // Client-specific app mappings PUT endpoint (by ID)
+  app.put("/api/client/:clientId/app-mappings/:id", isAuthenticated, requireAdmin, async (req, res) => {
     try {
       const clientId = parseInt(req.params.clientId);
-      const { employeeType, appName } = req.body;
-      console.log(`👥 Creating employee type app mapping for client ${clientId}: ${employeeType} -> ${appName}`);
+      const mappingId = parseInt(req.params.id);
+      const { appName, oktaGroupName } = req.body;
+      console.log(`✏️  Updating app mapping ${mappingId} for client ${clientId}: ${appName} -> ${oktaGroupName}`);
       
       // Use client-specific database connection
       const multiDb = MultiDatabaseManager.getInstance();
       const clientDb = await multiDb.getClientDb(clientId);
       
-      const [result] = await clientDb.insert(appMappings).values({
-        mappingType: 'employeeType',
-        sourceValue: employeeType,
-        targetValue: appName,
-        created: new Date()
-      }).returning();
+      const [result] = await clientDb.update(appMappings)
+        .set({ 
+          appName,
+          oktaGroupName,
+          lastUpdated: new Date()
+        })
+        .where(eq(appMappings.id, mappingId))
+        .returning();
       
-      console.log(`✅ Created employee type app mapping for client ${clientId}`);
+      if (!result) {
+        return res.status(404).json({ error: "App mapping not found" });
+      }
+      
+      console.log(`✅ Updated app mapping ${mappingId} for client ${clientId}`);
       res.json(result);
     } catch (error) {
-      console.error(`Error creating employee type app mapping for client:`, error);
-      res.status(500).json({ error: "Failed to create client employee type app mapping" });
+      console.error(`Error updating app mapping for client:`, error);
+      res.status(500).json({ error: "Failed to update client app mapping" });
     }
   });
 
-  // Client-specific employee type app mappings DELETE endpoint
-  app.delete("/api/client/:clientId/employee-type-app-mappings", isAuthenticated, requireAdmin, async (req, res) => {
+  // Client-specific app mappings bulk POST endpoint
+  app.post("/api/client/:clientId/app-mappings/bulk", isAuthenticated, requireAdmin, async (req, res) => {
     try {
       const clientId = parseInt(req.params.clientId);
-      const { employeeType, appName } = req.body;
-      console.log(`👥 Deleting employee type app mapping for client ${clientId}: ${employeeType} -> ${appName}`);
+      const { mappings } = req.body;
+      console.log(`📦 Creating ${mappings.length} app mappings for client ${clientId}`);
       
       // Use client-specific database connection
       const multiDb = MultiDatabaseManager.getInstance();
       const clientDb = await multiDb.getClientDb(clientId);
       
-      await clientDb.delete(appMappings)
-        .where(
-          and(
-            eq(appMappings.mappingType, 'employeeType'),
-            eq(appMappings.sourceValue, employeeType),
-            eq(appMappings.targetValue, appName)
-          )
-        );
+      const results = await clientDb.insert(appMappings).values(
+        mappings.map((mapping: any) => ({
+          ...mapping,
+          created: new Date(),
+          lastUpdated: new Date(),
+          status: 'active'
+        }))
+      ).returning();
       
-      console.log(`✅ Deleted employee type app mapping for client ${clientId}`);
-      res.json({ message: "Employee type app mapping deleted successfully" });
+      console.log(`✅ Created ${results.length} app mappings for client ${clientId}`);
+      res.json(results);
     } catch (error) {
-      console.error(`Error deleting employee type app mapping for client:`, error);
-      res.status(500).json({ error: "Failed to delete client employee type app mapping" });
+      console.error(`Error creating app mappings for client:`, error);
+      res.status(500).json({ error: "Failed to create client app mappings" });
     }
   });
 
