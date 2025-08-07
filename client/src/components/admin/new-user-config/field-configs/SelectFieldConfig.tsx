@@ -670,64 +670,45 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
 
       {config.useList && (
         <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <Label className="text-sm font-medium">
-              {fieldType === 'department' ? 'Department' : 'Employee Type'} Options
-            </Label>
-            {config.options.length === 0 && (
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={loadDefaultOptions}
-                className="h-7 text-xs"
-              >
-                Load Defaults
-              </Button>
-            )}
-          </div>
+          <Label className="text-sm font-medium">
+            {fieldType === 'department' ? 'Department' : 'Employee Type'} Options
+          </Label>
           
-          {config.options.length > 0 ? (
-            <div className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md divide-y divide-gray-200 dark:divide-gray-600 max-w-64">
-              {config.options.map((option, index) => (
-                <div key={index} className="flex items-center px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700/50">
-                  <Input
-                    value={option}
-                    onChange={(e) => handleOptionChange(index, e.target.value)}
-                    className="flex-1 text-sm border-0 bg-transparent focus:ring-0 p-0"
-                    placeholder={fieldType === 'department' ? 'Department name' : 'Employee type'}
-                  />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => removeOption(index)}
-                    className="h-6 w-6 p-0 ml-2 text-gray-400 hover:text-red-500"
-                  >
-                    <X className="w-3 h-3" />
-                  </Button>
-                </div>
-              ))}
-              <div className="flex items-center px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700/50">
+          <div className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md divide-y divide-gray-200 dark:divide-gray-600 max-w-64">
+            {config.options.map((option, index) => (
+              <div key={index} className="flex items-center px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                <Input
+                  value={option}
+                  onChange={(e) => handleOptionChange(index, e.target.value)}
+                  className="flex-1 text-sm border-0 bg-transparent focus:ring-0 p-0"
+                  placeholder={fieldType === 'department' ? 'Department name' : 'Employee type'}
+                />
                 <Button
                   type="button"
                   variant="ghost"
                   size="sm"
-                  onClick={addOption}
-                  className="h-6 w-6 p-0 mr-2 text-green-500 hover:text-green-700 hover:bg-green-50 dark:hover:bg-green-900/20"
+                  onClick={() => removeOption(index)}
+                  className="h-6 w-6 p-0 ml-2 text-gray-400 hover:text-red-500"
                 >
-                  <Plus className="w-3 h-3" />
+                  <X className="w-3 h-3" />
                 </Button>
-                <span className="text-sm text-gray-500 dark:text-gray-400">
-                  Add {fieldType === 'department' ? 'department' : 'employee type'}
-                </span>
               </div>
+            ))}
+            <div className="flex items-center px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700/50">
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={addOption}
+                className="h-6 w-6 p-0 mr-2 text-green-500 hover:text-green-700 hover:bg-green-50 dark:hover:bg-green-900/20"
+              >
+                <Plus className="w-3 h-3" />
+              </Button>
+              <span className="text-sm text-gray-500 dark:text-gray-400">
+                Add {fieldType === 'department' ? 'department' : 'employee type'}
+              </span>
             </div>
-          ) : (
-            <div className="text-center py-6 text-sm text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-700 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600">
-              No options configured. Users will see a free text input.
-            </div>
-          )}
+          </div>
         </div>
       )}
 
