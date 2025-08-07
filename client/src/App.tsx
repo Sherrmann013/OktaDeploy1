@@ -47,7 +47,8 @@ function Router() {
   return (
     <SSOLayout>
       <Switch>
-        <Route path="/" component={MSPDashboard} />
+        <Route path="/msp" component={MSPDashboard} />
+        <Route path="/msp/admin" component={MSPAdmin} />
         <Route path="/dashboard" component={Dashboard} />
         <Route path="/users" component={Users} />
         <Route path="/users/:id" component={UserDetail} />
@@ -56,13 +57,12 @@ function Router() {
         <Route path="/security" component={Security} />
         <Route path="/settings" component={Settings} />
         <Route path="/admin" component={Admin} />
-        <Route path="/msp" component={MSPDashboard} />
-        <Route path="/msp/admin" component={MSPAdmin} />
         <Route path="/client/:id/dashboard" component={Dashboard} />
         <Route path="/client/:id/users" component={Users} />
         <Route path="/client/:id/users/:userId" component={UserDetail} />
         <Route path="/client/:id/admin" component={Admin} />
         <Route path="/client/:id" component={Dashboard} />
+        <Route path="/" component={() => { window.location.href = "/msp"; return null; }} />
         <Route component={NotFound} />
       </Switch>
     </SSOLayout>

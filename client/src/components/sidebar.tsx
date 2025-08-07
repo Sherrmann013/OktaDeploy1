@@ -36,7 +36,7 @@ export default function Sidebar() {
   useEffect(() => {
     if (currentClientId && selectedClient !== currentClientId) {
       setSelectedClient(currentClientId);
-    } else if (location === '/msp' && selectedClient !== 'msp') {
+    } else if ((location === '/msp' || location === '/' || location.startsWith('/msp/')) && selectedClient !== 'msp') {
       setSelectedClient('msp');
     }
   }, [location, currentClientId]);
@@ -63,7 +63,7 @@ export default function Sidebar() {
   });
 
   // Determine if we should fetch logo data
-  const shouldFetchLogos = Boolean(currentClientId || location === '/msp' || location.startsWith('/msp'));
+  const shouldFetchLogos = Boolean(currentClientId || location === '/msp' || location === '/' || location.startsWith('/msp'));
 
   // Get active company logo - STRICTLY CLIENT-SPECIFIC OR MSP-SPECIFIC
   const { data: activeLogo } = useQuery({
