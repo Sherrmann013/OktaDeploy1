@@ -14,7 +14,9 @@ export class MultiDatabaseManager {
   private constructor() {
     // Initialize MSP database connection
     const mspConnectionString = process.env.MSP_DATABASE_URL || process.env.DATABASE_URL || 'postgresql://localhost:5432/msp_db';
-    const requireSSL = mspConnectionString.includes('neon.db') || mspConnectionString.includes('amazonaws.com') || process.env.NODE_ENV === 'production';
+    // Force SSL for all cloud databases (Replit uses Neon which requires SSL)
+    const requireSSL = !mspConnectionString.includes('localhost');
+    console.log(`MSP DB SSL mode: ${requireSSL ? 'require' : 'disabled'} for ${mspConnectionString.substring(0, 30)}...`);
     const mspClient = postgres(mspConnectionString, { 
       ssl: requireSSL ? 'require' : false,
       transform: { undefined: null }
@@ -63,7 +65,8 @@ export class MultiDatabaseManager {
     try {
       // Create new client database connection
       console.log(`🔌 Connecting to client ${clientId} database...`);
-      const requireSSL = connectionString.includes('neon.db') || connectionString.includes('amazonaws.com') || process.env.NODE_ENV === 'production';
+      // Force SSL for all cloud databases (Replit uses Neon which requires SSL)
+      const requireSSL = !connectionString.includes('localhost');
       const clientDbClient = postgres(connectionString, {
         ssl: requireSSL ? 'require' : false,
         transform: { undefined: null }
@@ -97,7 +100,8 @@ export class MultiDatabaseManager {
     const parsedUrl = new URL(baseUrl);
     
     // Create the new database using superuser connection
-    const requireSSL = baseUrl.includes('neon.db') || baseUrl.includes('amazonaws.com') || process.env.NODE_ENV === 'production';
+    // Force SSL for all cloud databases (Replit uses Neon which requires SSL)
+    const requireSSL = !baseUrl.includes('localhost');
     const sql = postgres(baseUrl, {
       ssl: requireSSL ? 'require' : false,
       transform: { undefined: null }
@@ -149,7 +153,8 @@ export class MultiDatabaseManager {
         throw new Error(`No connection string found for client ${clientId}`);
       }
       
-      const requireSSL = clientConnectionString.includes('neon.db') || clientConnectionString.includes('amazonaws.com') || process.env.NODE_ENV === 'production';
+      // Force SSL for all cloud databases (Replit uses Neon which requires SSL)
+      const requireSSL = !clientConnectionString.includes('localhost');
       const sql = postgres(clientConnectionString, {
         ssl: requireSSL ? 'require' : false,
         transform: { undefined: null }
