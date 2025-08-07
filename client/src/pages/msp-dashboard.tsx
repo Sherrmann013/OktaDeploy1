@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Building2 } from "lucide-react";
+import { Plus, Building2, Database, Settings } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient } from "@/lib/queryClient";
 
@@ -47,6 +47,36 @@ export default function MSPDashboard() {
     staleTime: 5 * 60 * 1000, // 5 minutes
     refetchOnWindowFocus: false,
   });
+
+  const initializeClientDatabase = async (clientId: number, clientName: string) => {
+    try {
+      console.log(`Initializing database for client ${clientId}`);
+      
+      const response = await fetch(`/api/initialize-client-db/${clientId}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to initialize client database');
+      }
+
+      toast({
+        title: "Database initialized",
+        description: `Successfully initialized database for ${clientName}`,
+      });
+    } catch (error) {
+      console.error('Error initializing client database:', error);
+      toast({
+        title: "Initialization failed",
+        description: `Failed to initialize database for ${clientName}`,
+        variant: "destructive",
+      });
+    }
+  };
 
   const handleCreateClient = async () => {
     if (!newClientName.trim()) {
@@ -253,9 +283,9 @@ export default function MSPDashboard() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {clients.map((client) => (
-              <Card key={client.id} className="hover:shadow-lg transition-shadow duration-200 cursor-pointer group" onClick={() => window.location.href = `/client/${client.id}`}>
-                <div>
-                  <CardContent className="p-6 text-center">
+              <Card key={client.id} className="hover:shadow-lg transition-shadow duration-200 relative group">
+                <div onClick={() => window.location.href = `/client/${client.id}`} className="cursor-pointer">
+                  <CardContent className="p-6 text-center pb-12">
                     {/* Logo Section */}
                     <div className="mb-4 flex justify-center">
                       {client.logoUrl ? (
@@ -276,6 +306,34 @@ export default function MSPDashboard() {
                       {client.name}
                     </h3>
                   </CardContent>
+                </div>
+                
+                {/* Action Buttons */}
+                <div className="absolute bottom-3 left-3 right-3 flex gap-2">
+                  <Button 
+                    size="sm" 
+                    variant="outline"
+                    className="flex-1 text-green-600 hover:text-green-800 border-green-300 hover:border-green-500 bg-white dark:bg-gray-800"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      initializeClientDatabase(client.id, client.name);
+                    }}
+                  >
+                    <Database className="w-3 h-3 mr-1" />
+                    Init DB
+                  </Button>
+                  <Button 
+                    size="sm" 
+                    variant="outline"
+                    className="flex-1 text-gray-600 hover:text-gray-800 border-gray-300 hover:border-gray-500 bg-white dark:bg-gray-800"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      window.location.href = `/client/${client.id}`;
+                    }}
+                  >
+                    <Settings className="w-3 h-3 mr-1" />
+                    Manage
+                  </Button>
                 </div>
               </Card>
             ))}

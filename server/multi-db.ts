@@ -241,6 +241,77 @@ export class MultiDatabaseManager {
             new_values JSONB DEFAULT '{}'
           )`;
 
+        console.log(`🔧 Creating app_mappings table...`);
+        await sql`
+          CREATE TABLE IF NOT EXISTS app_mappings (
+            id SERIAL PRIMARY KEY,
+            app_name VARCHAR(200) NOT NULL,
+            okta_group_name VARCHAR(200) NOT NULL,
+            description TEXT,
+            status VARCHAR(20) NOT NULL DEFAULT 'active',
+            created TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+            last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
+          )`;
+
+        console.log(`🔧 Creating department_app_mappings table...`);
+        await sql`
+          CREATE TABLE IF NOT EXISTS department_app_mappings (
+            id SERIAL PRIMARY KEY,
+            department_name VARCHAR(100) NOT NULL,
+            app_name VARCHAR(200) NOT NULL,
+            created TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
+          )`;
+
+        console.log(`🔧 Creating employee_type_app_mappings table...`);
+        await sql`
+          CREATE TABLE IF NOT EXISTS employee_type_app_mappings (
+            id SERIAL PRIMARY KEY,
+            employee_type VARCHAR(50) NOT NULL,
+            app_name VARCHAR(200) NOT NULL,
+            created TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
+          )`;
+
+        console.log(`🔧 Creating department_group_mappings table...`);
+        await sql`
+          CREATE TABLE IF NOT EXISTS department_group_mappings (
+            id SERIAL PRIMARY KEY,
+            department_name VARCHAR(100) NOT NULL,
+            okta_group_name VARCHAR(200) NOT NULL,
+            created TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
+          )`;
+
+        console.log(`🔧 Creating employee_type_group_mappings table...`);
+        await sql`
+          CREATE TABLE IF NOT EXISTS employee_type_group_mappings (
+            id SERIAL PRIMARY KEY,
+            employee_type VARCHAR(50) NOT NULL,
+            okta_group_name VARCHAR(200) NOT NULL,
+            created TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
+          )`;
+
+        console.log(`🔧 Creating monitoring_cards table...`);
+        await sql`
+          CREATE TABLE IF NOT EXISTS monitoring_cards (
+            id SERIAL PRIMARY KEY,
+            name VARCHAR(100) NOT NULL,
+            type VARCHAR(50) NOT NULL,
+            enabled BOOLEAN NOT NULL DEFAULT true,
+            position INTEGER NOT NULL DEFAULT 0,
+            created TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+            updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
+          )`;
+
+        console.log(`🔧 Creating company_logos table...`);
+        await sql`
+          CREATE TABLE IF NOT EXISTS company_logos (
+            id SERIAL PRIMARY KEY,
+            name VARCHAR(100),
+            logo_data TEXT NOT NULL,
+            is_active BOOLEAN NOT NULL DEFAULT false,
+            uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+            uploaded_by INTEGER
+          )`;
+
         console.log(`✅ Successfully created all tables in database ${databaseName} for client ${clientId}`);
       } finally {
         await sql.end();

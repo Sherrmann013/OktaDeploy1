@@ -4373,6 +4373,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/clients/create-with-template", isAuthenticated, requireAdmin, mspRoutes.createClientWithTemplate);
   app.put("/api/clients/:id", isAuthenticated, requireAdmin, mspRoutes.updateClient);
   app.delete("/api/clients/:id", isAuthenticated, requireAdmin, mspRoutes.deleteClient);
+
+  // Initialize client database tables
+  app.post("/api/initialize-client-db/:clientId", isAuthenticated, requireAdmin, async (req, res) => {
+    try {
+      const clientId = parseInt(req.params.clientId);
+      console.log(`🚀 Initializing database for client ${clientId}`);
+      
+      const multiDb = MultiDatabaseManager.getInstance();
+      await multiDb.initializeClientDatabase(clientId);
+      
+      console.log(`✅ Successfully initialized database for client ${clientId}`);
+      res.json({ message: "Client database initialized successfully" });
+    } catch (error) {
+      console.error(`❌ Error initializing client database:`, error);
+      res.status(500).json({ error: "Failed to initialize client database" });
+    }
+  });
   
   // MSP Client Access Management
   app.get("/api/msp-users/:mspUserId/client-access", isAuthenticated, mspRoutes.getMspUserClientAccess);
