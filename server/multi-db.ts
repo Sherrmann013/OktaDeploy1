@@ -14,7 +14,10 @@ export class MultiDatabaseManager {
   private constructor() {
     // Initialize MSP database connection
     const mspConnectionString = process.env.MSP_DATABASE_URL || process.env.DATABASE_URL || 'postgresql://localhost:5432/msp_db';
-    const mspClient = postgres(mspConnectionString);
+    const mspClient = postgres(mspConnectionString, { 
+      ssl: process.env.NODE_ENV === 'production' ? 'require' : false,
+      transform: { undefined: null }
+    });
     this.mspDb = drizzle(mspClient, { schema: mspSchema });
   }
 
@@ -59,7 +62,10 @@ export class MultiDatabaseManager {
     try {
       // Create new client database connection
       console.log(`🔌 Connecting to client ${clientId} database...`);
-      const clientDbClient = postgres(connectionString);
+      const clientDbClient = postgres(connectionString, {
+        ssl: process.env.NODE_ENV === 'production' ? 'require' : false,
+        transform: { undefined: null }
+      });
       const clientDb = drizzle(clientDbClient, { 
         schema: clientSchema,
         logger: false
@@ -89,7 +95,10 @@ export class MultiDatabaseManager {
     const parsedUrl = new URL(baseUrl);
     
     // Create the new database using superuser connection
-    const sql = postgres(baseUrl);
+    const sql = postgres(baseUrl, {
+      ssl: process.env.NODE_ENV === 'production' ? 'require' : false,
+      transform: { undefined: null }
+    });
     try {
       console.log(`Creating separate database: ${databaseName}`);
       await sql`CREATE DATABASE ${sql(databaseName)}`;
@@ -137,7 +146,10 @@ export class MultiDatabaseManager {
         throw new Error(`No connection string found for client ${clientId}`);
       }
       
-      const sql = postgres(clientConnectionString);
+      const sql = postgres(clientConnectionString, {
+        ssl: process.env.NODE_ENV === 'production' ? 'require' : false,
+        transform: { undefined: null }
+      });
       
       try {
         // Create client-specific tables in the separate database
