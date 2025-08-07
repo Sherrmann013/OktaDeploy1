@@ -15,6 +15,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Plus, Pencil, Trash2, Check, ChevronsUpDown, Edit, X, Settings, RefreshCw, Mail, Lock, GripVertical, Link, Eye, EyeOff } from "lucide-react";
 import { LogoUploadModal } from "@/components/LogoUploadModal";
 import CreateUserModal from "@/components/create-user-modal";
+import { AddDashboardCardModal } from "@/components/AddDashboardCardModal";
+import { AddMonitoringCardModal } from "@/components/AddMonitoringCardModal";
 import { useToast } from "@/hooks/use-toast";
 import { CustomSelect, CustomSelectContent, CustomSelectItem, CustomSelectTrigger, CustomSelectValue } from "@/components/ui/custom-select";
 import { NewUserConfigSection } from "@/components/admin/new-user-config";
@@ -97,6 +99,15 @@ function AdminComponent() {
 
   const [isCreateUserModalOpen, setIsCreateUserModalOpen] = useState(false);
   // State moved to NewUserConfigSection component
+
+  // Query to fetch integrations data
+  const { data: integrationsData = [] } = useQuery({
+    queryKey: ["/api/integrations"],
+    staleTime: 5 * 60 * 1000,
+    refetchOnWindowFocus: false,
+  });
+
+  // App mappings data query already declared above - removed duplicate
 
   // Query to fetch email username settings
   const { data: emailUsernameSettings, refetch: refetchEmailSettings } = useQuery({
@@ -531,7 +542,9 @@ function AdminComponent() {
             selectedApps={selectedApps}
             setSelectedApps={setSelectedApps}
             appMappingsData={appMappingsData}
-
+            integrationsData={integrationsData}
+            setEditingIntegration={() => {}}
+            setIsConfigureIntegrationOpen={() => {}}
             setIsAddDashboardCardOpen={setIsAddDashboardCardOpen}
             setIsAddMonitoringCardOpen={setIsAddMonitoringCardOpen}
           />
@@ -587,11 +600,19 @@ function AdminComponent() {
         onClose={() => setIsLogoUploadOpen(false)} 
       />
 
+      {/* Add Dashboard Card Modal */}
+      <AddDashboardCardModal
+        isOpen={isAddDashboardCardOpen}
+        onClose={() => setIsAddDashboardCardOpen(false)}
+        integrationsData={integrationsData}
+      />
 
-
-
-
-
+      {/* Add Monitoring Card Modal */}
+      <AddMonitoringCardModal
+        isOpen={isAddMonitoringCardOpen}
+        onClose={() => setIsAddMonitoringCardOpen(false)}
+        integrationsData={integrationsData}
+      />
 
       {/* Create User Modal */}
       <CreateUserModal 
