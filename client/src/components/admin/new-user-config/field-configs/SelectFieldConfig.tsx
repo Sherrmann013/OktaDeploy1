@@ -488,7 +488,7 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
     if (fieldType === 'department' && setDepartmentAppSaveFunction) {
       if (hasDepartmentUnsavedChanges) {
         // Register save function that requires manual trigger
-        setDepartmentAppSaveFunction(() => () => saveDepartmentAppMappings(true));
+        setDepartmentAppSaveFunction(() => saveDepartmentAppMappings(true));
       } else {
         setDepartmentAppSaveFunction(null);
       }

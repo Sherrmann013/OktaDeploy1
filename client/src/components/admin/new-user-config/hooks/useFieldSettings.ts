@@ -180,9 +180,20 @@ export function useFieldSettings() {
     return displayNames[fieldKey];
   };
 
-  // Check if a field has unsaved changes
+  // Check if a field has unsaved changes (including app/group mappings)
   const hasUnsavedChanges = (fieldKey: FieldKey) => {
-    return fieldKey in unsavedChanges;
+    // Check regular field settings
+    const hasRegularChanges = fieldKey in unsavedChanges;
+    
+    // Check department/employee type specific mappings
+    if (fieldKey === 'department') {
+      return hasRegularChanges || (departmentAppSaveFunction !== null) || (departmentGroupSaveFunction !== null);
+    }
+    if (fieldKey === 'employeeType') {
+      return hasRegularChanges || (employeeTypeAppSaveFunction !== null) || (employeeTypeGroupSaveFunction !== null);
+    }
+    
+    return hasRegularChanges;
   };
 
   const saveFieldSetting = async (fieldKey: FieldKey, config: any) => {
