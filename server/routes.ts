@@ -53,6 +53,18 @@ function determineEmployeeTypeFromGroups(userGroups: any[], employeeTypeApps: Se
   return null;
 }
 import { setupAuth, isAuthenticated, requireAdmin } from "./direct-okta-auth";
+
+// Import client-specific schemas
+import { 
+  layoutSettings as clientLayoutSettings, 
+  dashboardCards as clientDashboardCards, 
+  insertLayoutSettingSchema as clientInsertLayoutSettingSchema,
+  insertDashboardCardSchema as clientInsertDashboardCardSchema,
+  companyLogos as clientCompanyLogos,
+  insertCompanyLogoSchema as clientInsertCompanyLogoSchema,
+  appMappings as clientAppMappings,
+  insertAppMappingSchema as clientInsertAppMappingSchema
+} from "../shared/client-schema";
 import { MultiDatabaseManager } from "./multi-db";
 import * as mspRoutes from "./routes/msp";
 
@@ -2663,7 +2675,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Use client-specific database connection
       const multiDb = MultiDatabaseManager.getInstance();
       const clientDb = await multiDb.getClientDb(clientId);
-      const settings = await clientDb.select().from(layoutSettings).orderBy(layoutSettings.settingKey);
+      const settings = await clientDb.select().from(clientLayoutSettings).orderBy(clientLayoutSettings.settingKey);
       
       console.log(`✅ Found ${settings.length} layout settings for client ${clientId}`);
       res.json(settings);
@@ -2686,8 +2698,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const multiDb = MultiDatabaseManager.getInstance();
       const clientDb = await multiDb.getClientDb(clientId);
       const setting = await clientDb.select()
-        .from(layoutSettings)
-        .where(eq(layoutSettings.settingKey, key))
+        .from(clientLayoutSettings)
+        .where(eq(clientLayoutSettings.settingKey, key))
         .limit(1);
       
       if (setting.length === 0) {
@@ -2708,7 +2720,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const clientId = parseInt(req.params.clientId);
       const user = (req.session as any).user;
-      const validatedData = insertLayoutSettingSchema.parse(req.body);
+      const validatedData = clientInsertLayoutSettingSchema.parse(req.body);
       console.log(`⚙️  Saving layout setting for client ${clientId}:`, validatedData.settingKey);
       
       // Use client-specific database connection
@@ -2717,25 +2729,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Check if setting already exists
       const existing = await clientDb.select()
-        .from(layoutSettings)
-        .where(eq(layoutSettings.settingKey, validatedData.settingKey))
+        .from(clientLayoutSettings)
+        .where(eq(clientLayoutSettings.settingKey, validatedData.settingKey))
         .limit(1);
       
       let result;
       if (existing.length > 0) {
         // Update existing setting
-        [result] = await clientDb.update(layoutSettings)
+        [result] = await clientDb.update(clientLayoutSettings)
           .set({ 
             ...validatedData, 
             updatedBy: user.id,
             updatedAt: new Date()
           })
-          .where(eq(layoutSettings.settingKey, validatedData.settingKey))
+          .where(eq(clientLayoutSettings.settingKey, validatedData.settingKey))
           .returning();
         console.log(`✅ Updated layout setting for client ${clientId}`);
       } else {
         // Create new setting
-        [result] = await clientDb.insert(layoutSettings)
+        [result] = await clientDb.insert(clientLayoutSettings)
           .values({ ...validatedData, updatedBy: user.id })
           .returning();
         console.log(`✅ Created layout setting for client ${clientId}`);
@@ -2760,18 +2772,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // REMOVED: Global dashboard cards GET - Client-specific endpoint exists at /api/client/:clientId/dashboard-cards
 
   // Client-specific dashboard cards route
-  app.get("/api/client/:clientId/dashboard-cards", async (req, res) => {
+  app.get("/api/client/:clientId/dashboard-cards", isAuthenticated, async (req, res) => {
     try {
       const clientId = parseInt(req.params.clientId);
-      console.log('📊 Client-specific dashboard cards requested for client:', clientId);
+      console.log(`📊 Fetching dashboard cards for client ${clientId}`);
       
-      const cards = await db
-        .select()
-        .from(dashboardCards)
-        .where(eq(dashboardCards.clientId, clientId))
-        .orderBy(dashboardCards.position);
-        
-      console.log('📊 Client dashboard cards found:', cards.length);
+      // Use client-specific database connection
+      const multiDb = MultiDatabaseManager.getInstance();
+      const clientDb = await multiDb.getClientDb(clientId);
+      const cards = await clientDb.select().from(clientDashboardCards).orderBy(clientDashboardCards.position);
+      
+      console.log(`✅ Found ${cards.length} dashboard cards for client ${clientId}`);
       res.json(cards);
     } catch (error) {
       console.error("Error fetching client dashboard cards:", error);
@@ -2789,20 +2800,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       console.log(`🔄 Updating dashboard card positions for client ${clientId}:`, cards.length, 'cards');
       
+      // Use client-specific database connection
+      const multiDb = MultiDatabaseManager.getInstance();
+      const clientDb = await multiDb.getClientDb(clientId);
+      
       // Update each card position for the specific client
       for (const card of cards) {
-        await db
-          .update(dashboardCards)
+        await clientDb
+          .update(clientDashboardCards)
           .set({ position: card.position, updated: new Date() })
-          .where(and(eq(dashboardCards.id, card.id), eq(dashboardCards.clientId, clientId)));
+          .where(eq(clientDashboardCards.id, card.id));
       }
       
       // Fetch updated cards to return
-      const updatedCards = await db
+      const updatedCards = await clientDb
         .select()
-        .from(dashboardCards)
-        .where(eq(dashboardCards.clientId, clientId))
-        .orderBy(dashboardCards.position);
+        .from(clientDashboardCards)
+        .orderBy(clientDashboardCards.position);
       
       console.log('✅ All card positions updated successfully for client', clientId, ':', updatedCards.map(c => ({ id: c.id, name: c.name, position: c.position })));
       
@@ -3215,9 +3229,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // REMOVED: Global employee type group mappings - All employee type group mappings are now client-specific
 
-  // Company Logo API endpoints
+  // GLOBAL Logo API endpoints (for MSP use)
   
-  // Get all logos
+  // Get all logos (global)
   app.get("/api/company-logos", isAuthenticated, requireAdmin, async (req, res) => {
     try {
       const logos = await storage.getAllLogos();
@@ -3228,7 +3242,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get active logo
+  // Get active logo (global)
   app.get("/api/company-logos/active", isAuthenticated, async (req, res) => {
     try {
       const activeLogo = await storage.getActiveLogo();
@@ -3242,7 +3256,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Upload new logo
+  // Upload new logo (global - requires clientId in body)
   app.post("/api/company-logos", isAuthenticated, requireAdmin, async (req, res) => {
     try {
       const logoData = insertCompanyLogoSchema.parse(req.body);
@@ -3267,7 +3281,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Set active logo
+  // Set active logo (global)
   app.put("/api/company-logos/:id/activate", isAuthenticated, requireAdmin, async (req, res) => {
     try {
       const id = z.coerce.number().parse(req.params.id);
@@ -3293,7 +3307,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Delete logo
+  // Delete logo (global)
   app.delete("/api/company-logos/:id", isAuthenticated, requireAdmin, async (req, res) => {
     try {
       const id = z.coerce.number().parse(req.params.id);
@@ -3316,6 +3330,148 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error deleting logo:", error);
       res.status(500).json({ message: "Failed to delete logo" });
+    }
+  });
+
+  // CLIENT-SPECIFIC Logo API endpoints
+  
+  // Get all logos for specific client
+  app.get("/api/client/:clientId/company-logos", isAuthenticated, async (req, res) => {
+    try {
+      const clientId = parseInt(req.params.clientId);
+      console.log(`🖼️  Fetching logos for client ${clientId}`);
+      
+      // Use client-specific database connection
+      const multiDb = MultiDatabaseManager.getInstance();
+      const clientDb = await multiDb.getClientDb(clientId);
+      const logos = await clientDb.select().from(clientCompanyLogos).orderBy(clientCompanyLogos.uploadedAt);
+      
+      console.log(`✅ Found ${logos.length} logos for client ${clientId}`);
+      res.json(logos);
+    } catch (error) {
+      console.error(`Error fetching logos for client:`, error);
+      res.status(500).json({ error: "Failed to fetch client logos" });
+    }
+  });
+
+  // Get active logo for specific client
+  app.get("/api/client/:clientId/company-logos/active", isAuthenticated, async (req, res) => {
+    try {
+      const clientId = parseInt(req.params.clientId);
+      console.log(`🖼️  Fetching active logo for client ${clientId}`);
+      
+      // Use client-specific database connection
+      const multiDb = MultiDatabaseManager.getInstance();
+      const clientDb = await multiDb.getClientDb(clientId);
+      const activeLogo = await clientDb.select()
+        .from(clientCompanyLogos)
+        .where(eq(clientCompanyLogos.isActive, true))
+        .limit(1);
+      
+      if (activeLogo.length === 0) {
+        console.log(`❌ No active logo found for client ${clientId}`);
+        return res.status(404).json({ error: "No active logo found" });
+      }
+      
+      console.log(`✅ Found active logo for client ${clientId}`);
+      res.json(activeLogo[0]);
+    } catch (error) {
+      console.error(`Error fetching active logo for client:`, error);
+      res.status(500).json({ error: "Failed to fetch client active logo" });
+    }
+  });
+
+  // Upload new logo for specific client
+  app.post("/api/client/:clientId/company-logos", isAuthenticated, requireAdmin, async (req, res) => {
+    try {
+      const clientId = parseInt(req.params.clientId);
+      const user = (req.session as any).user;
+      const logoData = clientInsertCompanyLogoSchema.parse(req.body);
+      console.log(`🖼️  Uploading logo for client ${clientId}:`, logoData.fileName);
+      
+      // Use client-specific database connection
+      const multiDb = MultiDatabaseManager.getInstance();
+      const clientDb = await multiDb.getClientDb(clientId);
+      
+      // Create new logo
+      const [newLogo] = await clientDb.insert(clientCompanyLogos)
+        .values({ ...logoData, uploadedBy: user.id })
+        .returning();
+      
+      console.log(`✅ Uploaded logo for client ${clientId}: ${newLogo.fileName}`);
+      res.status(201).json(newLogo);
+    } catch (error) {
+      console.error(`Error uploading logo for client:`, error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: error.errors });
+      }
+      res.status(500).json({ error: "Failed to upload client logo" });
+    }
+  });
+
+  // Set active logo for specific client
+  app.put("/api/client/:clientId/company-logos/:id/activate", isAuthenticated, requireAdmin, async (req, res) => {
+    try {
+      const clientId = parseInt(req.params.clientId);
+      const logoId = parseInt(req.params.id);
+      console.log(`🖼️  Activating logo ${logoId} for client ${clientId}`);
+      
+      // Use client-specific database connection
+      const multiDb = MultiDatabaseManager.getInstance();
+      const clientDb = await multiDb.getClientDb(clientId);
+      
+      // Deactivate all logos first
+      await clientDb.update(clientCompanyLogos)
+        .set({ isActive: false });
+      
+      // Activate the specified logo
+      const [activatedLogo] = await clientDb.update(clientCompanyLogos)
+        .set({ isActive: true })
+        .where(eq(clientCompanyLogos.id, logoId))
+        .returning();
+      
+      if (!activatedLogo) {
+        return res.status(404).json({ error: "Logo not found" });
+      }
+      
+      console.log(`✅ Activated logo ${logoId} for client ${clientId}`);
+      res.json({ message: "Logo activated successfully" });
+    } catch (error) {
+      console.error(`Error activating logo for client:`, error);
+      res.status(500).json({ error: "Failed to activate client logo" });
+    }
+  });
+
+  // Delete logo for specific client
+  app.delete("/api/client/:clientId/company-logos/:id", isAuthenticated, requireAdmin, async (req, res) => {
+    try {
+      const clientId = parseInt(req.params.clientId);
+      const logoId = parseInt(req.params.id);
+      console.log(`🖼️  Deleting logo ${logoId} for client ${clientId}`);
+      
+      // Use client-specific database connection
+      const multiDb = MultiDatabaseManager.getInstance();
+      const clientDb = await multiDb.getClientDb(clientId);
+      
+      // Check if logo exists
+      const existing = await clientDb.select()
+        .from(clientCompanyLogos)
+        .where(eq(clientCompanyLogos.id, logoId))
+        .limit(1);
+      
+      if (existing.length === 0) {
+        return res.status(404).json({ error: "Logo not found" });
+      }
+      
+      // Delete the logo
+      await clientDb.delete(clientCompanyLogos)
+        .where(eq(clientCompanyLogos.id, logoId));
+      
+      console.log(`✅ Deleted logo ${logoId} for client ${clientId}`);
+      res.json({ message: "Logo deleted successfully" });
+    } catch (error) {
+      console.error(`Error deleting logo for client:`, error);
+      res.status(500).json({ error: "Failed to delete client logo" });
     }
   });
 
