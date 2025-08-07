@@ -87,9 +87,16 @@ export default function Sidebar() {
 
   // Dynamic navigation based on current context (client vs MSP)
   const getNavigation = () => {
-    // If we're on the MSP page (both / and /msp routes), don't show any navigation items
-    if (location === '/msp' || location === '/') {
-      return [];
+    // If we're on the MSP page (both / and /msp routes), show MSP-specific navigation
+    if (location === '/msp' || location === '/' || location.startsWith('/msp/')) {
+      return canViewAdmin ? [
+        { 
+          name: "Admin", 
+          href: "/msp/admin", 
+          icon: Settings, 
+          current: false 
+        }
+      ] : [];
     }
     
     const baseUrl = currentClientId ? `/client/${currentClientId}` : '';

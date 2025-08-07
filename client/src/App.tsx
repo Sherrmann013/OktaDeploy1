@@ -17,6 +17,7 @@ import Applications from "@/pages/applications";
 import Security from "@/pages/security";
 import Settings from "@/pages/settings";
 import Admin from "@/pages/admin";
+import MSPAdmin from "@/pages/msp-admin";
 import MSPDashboard from "@/pages/msp-dashboard";
 import NotFound from "@/pages/not-found";
 
@@ -56,6 +57,7 @@ function Router() {
         <Route path="/settings" component={Settings} />
         <Route path="/admin" component={Admin} />
         <Route path="/msp" component={MSPDashboard} />
+        <Route path="/msp/admin" component={MSPAdmin} />
         <Route path="/client/:id/dashboard" component={Dashboard} />
         <Route path="/client/:id/users" component={Users} />
         <Route path="/client/:id/users/:userId" component={UserDetail} />
