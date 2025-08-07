@@ -405,175 +405,176 @@ export default function MSPAdmin() {
                     </TabsTrigger>
                   </TabsList>
 
-                  {/* Logo Sub-Tab */}
+                  {/* Logo Sub-Tab - EXACT COPY FROM CLIENT */}
                   <TabsContent value="logo" className="space-y-6">
                     <div className="bg-white dark:bg-gray-800 rounded-lg border dark:border-gray-700 p-6">
-                      <div className="flex justify-between items-center mb-6">
+                      <h4 className="text-lg font-semibold mb-6">Logo Management</h4>
+                      
+                      {/* Logo Display Section */}
+                      <div className="space-y-6">
+                        {/* Current Active Logo */}
                         <div>
-                          <h4 className="text-lg font-semibold">MSP Logo Configuration</h4>
-                          <p className="text-sm text-muted-foreground">
-                            Upload and configure your MSP logo and branding
-                          </p>
+                          <h5 className="text-md font-medium mb-3">Active Logo</h5>
+                          <div className="flex items-center gap-4">
+                            <div 
+                              className="relative w-24 h-24 rounded-lg flex items-center justify-center border-2 border-gray-200 dark:border-gray-600"
+                              style={{ 
+                                backgroundColor: logoBackgroundColor === "transparent" ? "transparent" : logoBackgroundColor
+                              }}
+                            >
+                              {(activeLogo as any)?.logoData ? (
+                                <img 
+                                  src={(activeLogo as any).logoData} 
+                                  alt="Active Logo" 
+                                  className="w-20 h-20 object-contain"
+                                />
+                              ) : (
+                                <div className="text-gray-400 dark:text-gray-500 text-xs text-center">
+                                  No Logo
+                                </div>
+                              )}
+                            </div>
+                            <div className="space-y-2">
+                              <p className="text-sm text-gray-600 dark:text-gray-400">
+                                {(activeLogo as any)?.logoData ? "This logo appears in the sidebar" : "No logo currently active"}
+                              </p>
+                              {(activeLogo as any)?.logoData && (
+                                <Button 
+                                  variant="outline" 
+                                  size="sm"
+                                  onClick={handleDeleteLogo}
+                                  className="text-red-600 hover:text-red-700"
+                                >
+                                  <Trash2 className="w-4 h-4 mr-2" />
+                                  Delete Current Logo
+                                </Button>
+                              )}
+                            </div>
+                          </div>
                         </div>
+
+                        {/* Manage Logos Button */}
                         <Button 
                           onClick={() => setIsLogoUploadOpen(true)}
                           className="bg-orange-600 hover:bg-orange-700 text-white"
                         >
                           <Plus className="w-4 h-4 mr-2" />
-                          Upload Logo
+                          Manage Logos
                         </Button>
-                      </div>
-
-                      {/* Active Logo Display */}
-                      <div className="mb-8">
-                        <h5 className="font-medium mb-4">Current Logo</h5>
-                        <div className="flex items-center gap-6">
-                          <div 
-                            className="relative w-24 h-24 rounded-lg flex items-center justify-center border-2 border-gray-200 dark:border-gray-600"
-                            style={{ 
-                              backgroundColor: logoBackgroundColor === "transparent" ? "transparent" : logoBackgroundColor
-                            }}
-                          >
-                            {(activeLogo as any)?.logoData ? (
-                              <img 
-                                src={(activeLogo as any).logoData} 
-                                alt="MSP Logo" 
-                                className="w-20 h-20 object-contain"
+                        
+                        {/* Background Color Section */}
+                        <div className="space-y-2">
+                          <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                            Background Color:
+                          </label>
+                          
+                          {/* Option Selection */}
+                          <div className="flex items-center gap-4">
+                            <label className="flex items-center gap-2 cursor-pointer">
+                              <input
+                                type="radio"
+                                name="logoBackground"
+                                checked={logoBackgroundColor === "transparent"}
+                                onChange={() => setLogoBackgroundColor("transparent")}
+                                className="w-4 h-4 text-blue-600"
                               />
-                            ) : (
-                              <div className="text-gray-400 dark:text-gray-500 text-xs text-center">
-                                No Logo
-                              </div>
-                            )}
+                              <span className="text-sm text-gray-700 dark:text-gray-300">
+                                None/Transparent
+                              </span>
+                            </label>
+                            
+                            <label className="flex items-center gap-2 cursor-pointer">
+                              <input
+                                type="radio"
+                                name="logoBackground"
+                                checked={logoBackgroundColor !== "transparent"}
+                                onChange={() => {
+                                  if (logoBackgroundColor === "transparent") {
+                                    setLogoBackgroundColor("#7c3aed");
+                                  }
+                                }}
+                                className="w-4 h-4 text-blue-600"
+                              />
+                              <span className="text-sm text-gray-700 dark:text-gray-300">
+                                Custom Color
+                              </span>
+                            </label>
                           </div>
-                          <div className="space-y-2">
-                            <p className="text-sm text-gray-600 dark:text-gray-400">
-                              {(activeLogo as any)?.logoData ? "Logo is active" : "No logo uploaded"}
-                            </p>
-                            {(activeLogo as any)?.logoData && (
-                              <Button 
-                                variant="outline" 
-                                size="sm"
-                                onClick={handleDeleteLogo}
-                                className="text-red-600 hover:text-red-700"
-                              >
-                                <Trash2 className="w-4 h-4 mr-2" />
-                                Delete Logo
-                              </Button>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Logo Settings */}
-                      <div className="space-y-6">
-                        {/* Logo Text */}
-                        <div>
-                          <div className="flex items-center justify-between mb-3">
-                            <Label htmlFor="logo-text">Logo Text</Label>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={handleLogoTextVisibilityToggle}
-                              className="text-gray-600 dark:text-gray-400"
-                            >
-                              {showLogoText ? (
-                                <>
-                                  <Eye className="w-4 h-4 mr-2" />
-                                  Visible
-                                </>
-                              ) : (
-                                <>
-                                  <EyeOff className="w-4 h-4 mr-2" />
-                                  Hidden
-                                </>
-                              )}
-                            </Button>
-                          </div>
-                          <div className="flex gap-2">
-                            <Input
-                              id="logo-text"
-                              value={logoText}
-                              onChange={(e) => setLogoText(e.target.value)}
-                              placeholder="Enter logo text"
-                              className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600"
-                            />
-                            <Button onClick={handleLogoTextSave} size="sm">
-                              Save
-                            </Button>
-                          </div>
-                        </div>
-
-                        {/* Logo Background Color */}
-                        <div>
-                          <Label htmlFor="logo-bg-color">Logo Background Color</Label>
-                          <div className="flex gap-2 mt-2">
+                          
+                          {/* Color Controls - only show when not transparent */}
+                          {logoBackgroundColor !== "transparent" && (
                             <div className="flex items-center gap-2">
-                              <Input
-                                id="logo-bg-color"
+                              <input
                                 type="color"
+                                id="logoBackgroundColor"
                                 value={logoBackgroundColor}
                                 onChange={(e) => setLogoBackgroundColor(e.target.value)}
-                                className="w-16 h-10 p-1 border border-gray-200 dark:border-gray-600 rounded"
+                                className="w-8 h-8 rounded border border-gray-300 dark:border-gray-600 cursor-pointer"
                               />
                               <Input
                                 value={logoBackgroundColor}
                                 onChange={(e) => setLogoBackgroundColor(e.target.value)}
                                 placeholder="#7c3aed"
-                                className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600 flex-1"
+                                className="w-24 text-xs bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700"
                               />
                             </div>
-                            <Button onClick={handleLogoBackgroundColorSave} size="sm">
-                              Save
-                            </Button>
-                          </div>
-                          <div className="flex gap-2 mt-2">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => setLogoBackgroundColor("transparent")}
-                            >
-                              Transparent
-                            </Button>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => setLogoBackgroundColor("#7c3aed")}
-                            >
-                              Default Purple
-                            </Button>
-                          </div>
+                          )}
+                          
+                          {/* Update Button */}
+                          <Button 
+                            onClick={() => updateLogoBackgroundColorMutation.mutate(logoBackgroundColor)}
+                            disabled={updateLogoBackgroundColorMutation.isPending || logoBackgroundColor === ((logoBackgroundSetting as any)?.settingValue || "#7c3aed")}
+                            size="sm"
+                            className="bg-green-600 hover:bg-green-700 text-white"
+                          >
+                            {updateLogoBackgroundColorMutation.isPending ? "Updating..." : "Update Background"}
+                          </Button>
                         </div>
+                      </div>
+                    </div>
 
-                        {/* Preview */}
-                        <div>
-                          <Label>Preview</Label>
-                          <div className="mt-2 p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
-                            <div className="flex items-center gap-3">
-                              <div 
-                                className="relative w-16 h-16 rounded flex items-center justify-center"
-                                style={{ 
-                                  backgroundColor: logoBackgroundColor === "transparent" ? "transparent" : logoBackgroundColor
-                                }}
-                              >
-                                {(activeLogo as any)?.logoData ? (
-                                  <img 
-                                    src={(activeLogo as any).logoData} 
-                                    alt="Preview" 
-                                    className="w-14 h-14 object-contain"
-                                  />
-                                ) : (
-                                  <div className="text-gray-400 text-xs">Logo</div>
-                                )}
-                              </div>
-                              {showLogoText && (
-                                <div className="text-sm text-gray-600 dark:text-gray-300">
-                                  {logoText}
-                                </div>
-                              )}
-                            </div>
-                          </div>
+                    {/* Logo Text Section */}
+                    <div>
+                      <h5 className="text-md font-medium mb-3">Logo Text</h5>
+                      <div className="space-y-3">
+                        {/* Show/Hide Toggle */}
+                        <div className="flex items-center gap-3">
+                          <label className="flex items-center gap-2 cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={showLogoText}
+                              onChange={(e) => {
+                                const newValue = e.target.checked;
+                                setShowLogoText(newValue);
+                                updateLogoTextVisibilityMutation.mutate(newValue);
+                              }}
+                              className="w-4 h-4 text-blue-600 rounded border border-gray-300 dark:border-gray-600 focus:ring-blue-500"
+                            />
+                            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                              Show logo text in sidebar
+                            </span>
+                          </label>
                         </div>
+                        
+                        {/* Text Input - only show when text is enabled */}
+                        {showLogoText && (
+                          <div className="flex items-center gap-3">
+                            <Input
+                              id="logoText"
+                              value={logoText}
+                              onChange={(e) => setLogoText(e.target.value)}
+                              placeholder="Enter text to display under logo"
+                              className="w-1/4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700"
+                            />
+                            <Button 
+                              onClick={() => updateLogoTextMutation.mutate(logoText)}
+                              disabled={updateLogoTextMutation.isPending || logoText === ((logoTextSetting as any)?.settingValue || "Powered by ClockWerk.it")}
+                              className="bg-green-600 hover:bg-green-700 text-white"
+                            >
+                              {updateLogoTextMutation.isPending ? "Updating..." : "Update Text"}
+                            </Button>
+                          </div>
+                        )}
                       </div>
                     </div>
                   </TabsContent>
