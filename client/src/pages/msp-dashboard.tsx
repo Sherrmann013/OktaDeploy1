@@ -256,9 +256,9 @@ export default function MSPDashboard() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {clients.map((client) => (
-              <Card key={client.id} className="hover:shadow-lg transition-shadow duration-200 relative group">
-                <div onClick={() => window.location.href = `/client/${client.id}`} className="cursor-pointer">
-                  <CardContent className="p-6 text-center pb-12">
+              <Card key={client.id} className="hover:shadow-lg transition-shadow duration-200 group cursor-pointer">
+                <div onClick={() => window.location.href = `/client/${client.id}`}>
+                  <CardContent className="p-6 text-center">
                     {/* Logo Section */}
                     <div className="mb-4 flex justify-center">
                       <ClientLogoDisplay 
@@ -273,21 +273,6 @@ export default function MSPDashboard() {
                       {client.name}
                     </h3>
                   </CardContent>
-                </div>
-                
-                {/* Action Button */}
-                <div className="absolute bottom-3 left-3 right-3">
-                  <Button 
-                    size="sm" 
-                    className="w-full bg-blue-600 hover:bg-blue-700 text-white"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      window.location.href = `/client/${client.id}`;
-                    }}
-                  >
-                    <ExternalLink className="w-3 h-3 mr-1" />
-                    Access Dashboard
-                  </Button>
                 </div>
               </Card>
             ))}
