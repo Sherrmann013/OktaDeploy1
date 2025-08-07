@@ -62,25 +62,25 @@ export default function Sidebar() {
     refetchOnWindowFocus: false,
   });
 
-  // Get active company logo
+  // Get active company logo - CLIENT-SPECIFIC
   const { data: activeLogo } = useQuery({
-    queryKey: ['/api/company-logos/active'],
+    queryKey: currentClientId ? [`/api/client/${currentClientId}/company-logos/active`] : ['/api/company-logos/active'],
     retry: false,
   });
 
-  // Get custom logo text setting
+  // Get custom logo text setting - CLIENT-SPECIFIC
   const { data: logoTextSetting } = useQuery({
-    queryKey: ['/api/layout-settings/logo_text'],
+    queryKey: currentClientId ? [`/api/client/${currentClientId}/layout-settings/logo_text`] : ['/api/layout-settings/logo_text'],
   });
 
-  // Get logo background color setting
+  // Get logo background color setting - CLIENT-SPECIFIC
   const { data: logoBackgroundSetting } = useQuery({
-    queryKey: ['/api/layout-settings/logo_background_color'],
+    queryKey: currentClientId ? [`/api/client/${currentClientId}/layout-settings/logo_background_color`] : ['/api/layout-settings/logo_background_color'],
   });
 
-  // Get logo text visibility setting
+  // Get logo text visibility setting - CLIENT-SPECIFIC
   const { data: logoTextVisibilitySetting } = useQuery({
-    queryKey: ['/api/layout-settings/logo_text_visible'],
+    queryKey: currentClientId ? [`/api/client/${currentClientId}/layout-settings/logo_text_visible`] : ['/api/layout-settings/logo_text_visible'],
   });
 
   // Logo data loaded silently
