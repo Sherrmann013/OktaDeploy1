@@ -210,7 +210,7 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
       for (const department in currentMappings) {
         for (const app of currentMappings[department]) {
           if (!newMappings[department]?.includes(app)) {
-            await fetch('/api/department-app-mappings', {
+            await fetch(`/api/client/${currentClientId}/department-app-mappings`, {
               method: 'DELETE',
               headers: { 'Content-Type': 'application/json' },
               credentials: 'include',
@@ -224,7 +224,7 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
       for (const department in newMappings) {
         for (const app of newMappings[department]) {
           if (!currentMappings[department]?.includes(app)) {
-            const response = await fetch('/api/department-app-mappings', {
+            const response = await fetch(`/api/client/${currentClientId}/department-app-mappings`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               credentials: 'include',
@@ -370,7 +370,7 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
       // Apply changes
       for (const { departmentName, added, removed } of differences) {
         for (const groupName of added) {
-          const response = await fetch('/api/department-group-mappings', {
+          const response = await fetch(`/api/client/${currentClientId}/department-group-mappings`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             credentials: 'include',
@@ -387,7 +387,7 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
         }
         
         for (const groupName of removed) {
-          const response = await fetch('/api/department-group-mappings', {
+          const response = await fetch(`/api/client/${currentClientId}/department-group-mappings`, {
             method: 'DELETE',
             headers: { 'Content-Type': 'application/json' },
             credentials: 'include',
@@ -403,7 +403,7 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
       
       setDepartmentGroupMappings(localDepartmentGroupMappings);
       setHasDepartmentGroupUnsavedChanges(false);
-      await queryClient.invalidateQueries({ queryKey: ['/api/department-group-mappings'] });
+      await queryClient.invalidateQueries({ queryKey: [`/api/client/${currentClientId}/department-group-mappings`] });
       return true;
     } catch (error) {
       toast({
@@ -429,7 +429,7 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
       // Apply changes
       for (const { employeeType, added, removed } of differences) {
         for (const groupName of added) {
-          const response = await fetch('/api/employee-type-group-mappings', {
+          const response = await fetch(`/api/client/${currentClientId}/employee-type-group-mappings`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             credentials: 'include',
@@ -447,7 +447,7 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
         }
         
         for (const groupName of removed) {
-          const response = await fetch('/api/employee-type-group-mappings', {
+          const response = await fetch(`/api/client/${currentClientId}/employee-type-group-mappings`, {
             method: 'DELETE',
             headers: { 'Content-Type': 'application/json' },
             credentials: 'include',
@@ -463,7 +463,7 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
       
       setEmployeeTypeGroupMappings(localEmployeeTypeGroupMappings);
       setHasEmployeeTypeGroupUnsavedChanges(false);
-      await queryClient.invalidateQueries({ queryKey: ['/api/employee-type-group-mappings'] });
+      await queryClient.invalidateQueries({ queryKey: [`/api/client/${currentClientId}/employee-type-group-mappings`] });
       return true;
     } catch (error) {
       toast({
