@@ -133,7 +133,7 @@ export const departmentAppMappings = pgTable('department_app_mappings', {
   id: serial('id').primaryKey(),
   departmentName: varchar('department_name', { length: 100 }).notNull(),
   appName: varchar('app_name', { length: 100 }).notNull(),
-  createdAt: timestamp('created_at').defaultNow()
+  created: timestamp('created').defaultNow()
 });
 
 // Employee type app mappings for this client
@@ -141,7 +141,7 @@ export const employeeTypeAppMappings = pgTable('employee_type_app_mappings', {
   id: serial('id').primaryKey(),
   employeeType: varchar('employee_type', { length: 100 }).notNull(),
   appName: varchar('app_name', { length: 100 }).notNull(),
-  createdAt: timestamp('created_at').defaultNow()
+  created: timestamp('created').defaultNow()
 });
 
 // Department group mappings for this client
@@ -149,7 +149,7 @@ export const departmentGroupMappings = pgTable('department_group_mappings', {
   id: serial('id').primaryKey(),
   departmentName: varchar('department_name', { length: 100 }).notNull(),
   groupName: varchar('group_name', { length: 200 }).notNull(),
-  createdAt: timestamp('created_at').defaultNow()
+  created: timestamp('created').defaultNow()
 });
 
 // Employee type group mappings for this client
@@ -157,7 +157,7 @@ export const employeeTypeGroupMappings = pgTable('employee_type_group_mappings',
   id: serial('id').primaryKey(),
   employeeType: varchar('employee_type', { length: 100 }).notNull(),
   groupName: varchar('group_name', { length: 200 }).notNull(),
-  createdAt: timestamp('created_at').defaultNow()
+  created: timestamp('created').defaultNow()
 });
 
 // Schema validation
@@ -228,22 +228,22 @@ export const insertAuditLogSchema = createInsertSchema(auditLogs).omit({
 
 export const insertDepartmentAppMappingSchema = createInsertSchema(departmentAppMappings).omit({
   id: true,
-  createdAt: true,
+  created: true,
 });
 
 export const insertEmployeeTypeAppMappingSchema = createInsertSchema(employeeTypeAppMappings).omit({
   id: true,
-  createdAt: true,
+  created: true,
 });
 
 export const insertDepartmentGroupMappingSchema = createInsertSchema(departmentGroupMappings).omit({
   id: true,
-  createdAt: true,
+  created: true,
 });
 
 export const insertEmployeeTypeGroupMappingSchema = createInsertSchema(employeeTypeGroupMappings).omit({
   id: true,
-  createdAt: true,
+  created: true,
 });
 
 // Type exports
