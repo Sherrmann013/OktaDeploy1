@@ -258,20 +258,18 @@ export default function MSPDashboard() {
             {clients.map((client) => (
               <Card key={client.id} className="hover:shadow-lg transition-shadow duration-200 group cursor-pointer">
                 <div onClick={() => window.location.href = `/client/${client.id}`}>
-                  <CardContent className="p-6 text-center">
-                    {/* Logo Section */}
-                    <div className="mb-4 flex justify-center">
+                  <CardContent className="p-6">
+                    {/* Logo and Name Section */}
+                    <div className="flex items-center gap-4">
                       <ClientLogoDisplay 
                         clientId={client.id} 
                         clientName={client.name}
-                        className="w-16 h-16"
+                        className="w-12 h-12 flex-shrink-0"
                       />
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                        {client.name}
+                      </h3>
                     </div>
-                    
-                    {/* Client Name */}
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-                      {client.name}
-                    </h3>
                   </CardContent>
                 </div>
               </Card>
