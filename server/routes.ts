@@ -55,6 +55,104 @@ function determineEmployeeTypeFromGroups(userGroups: any[], employeeTypeApps: Se
 }
 import { setupAuth, isAuthenticated, requireAdmin } from "./direct-okta-auth";
 
+// Integration testing functions
+async function testOktaConnection(apiKeys: Record<string, string>): Promise<{ success: boolean; message: string }> {
+  try {
+    if (!apiKeys.domain || !apiKeys.apiToken) {
+      return { success: false, message: "Missing OKTA domain or API token" };
+    }
+
+    const domain = apiKeys.domain.replace(/^https?:\/\//, '');
+    const response = await fetch(`https://${domain}/api/v1/users/me`, {
+      headers: {
+        'Authorization': `SSWS ${apiKeys.apiToken}`,
+        'Accept': 'application/json'
+      }
+    });
+
+    if (response.ok) {
+      const userData = await response.json();
+      return { 
+        success: true, 
+        message: `Connected successfully as ${userData.profile?.firstName || 'user'}` 
+      };
+    } else {
+      return { 
+        success: false, 
+        message: `Failed to connect: ${response.status} ${response.statusText}` 
+      };
+    }
+  } catch (error) {
+    return { 
+      success: false, 
+      message: `Connection error: ${error instanceof Error ? error.message : 'Unknown error'}` 
+    };
+  }
+}
+
+async function testSentinelOneConnection(apiKeys: Record<string, string>): Promise<{ success: boolean; message: string }> {
+  try {
+    if (!apiKeys.managementUrl || !apiKeys.apiToken) {
+      return { success: false, message: "Missing SentinelOne management URL or API token" };
+    }
+
+    const response = await fetch(`${apiKeys.managementUrl}/web/api/v2.1/system/info`, {
+      headers: {
+        'Authorization': `ApiToken ${apiKeys.apiToken}`,
+        'Accept': 'application/json'
+      }
+    });
+
+    if (response.ok) {
+      return { success: true, message: "SentinelOne connection successful" };
+    } else {
+      return { 
+        success: false, 
+        message: `Failed to connect: ${response.status} ${response.statusText}` 
+      };
+    }
+  } catch (error) {
+    return { 
+      success: false, 
+      message: `Connection error: ${error instanceof Error ? error.message : 'Unknown error'}` 
+    };
+  }
+}
+
+async function testJiraConnection(apiKeys: Record<string, string>): Promise<{ success: boolean; message: string }> {
+  try {
+    if (!apiKeys.baseUrl || !apiKeys.username || !apiKeys.apiToken) {
+      return { success: false, message: "Missing Jira configuration (baseUrl, username, or API token)" };
+    }
+
+    const auth = Buffer.from(`${apiKeys.username}:${apiKeys.apiToken}`).toString('base64');
+    const response = await fetch(`${apiKeys.baseUrl}/rest/api/2/myself`, {
+      headers: {
+        'Authorization': `Basic ${auth}`,
+        'Accept': 'application/json'
+      }
+    });
+
+    if (response.ok) {
+      const userData = await response.json();
+      return { 
+        success: true, 
+        message: `Connected successfully as ${userData.displayName || 'user'}` 
+      };
+    } else {
+      return { 
+        success: false, 
+        message: `Failed to connect: ${response.status} ${response.statusText}` 
+      };
+    }
+  } catch (error) {
+    return { 
+      success: false, 
+      message: `Connection error: ${error instanceof Error ? error.message : 'Unknown error'}` 
+    };
+  }
+}
+
 // Import client-specific schemas
 import { 
   users as clientUsers,
@@ -2615,6 +2713,66 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // REMOVED: Global integration POST - All integration operations are now client-specific
+
+  // Client-specific integration test connection endpoint
+  app.post("/api/client/:clientId/integrations/:integrationId/test", isAuthenticated, requireAdmin, async (req, res) => {
+    try {
+      const clientId = parseInt(req.params.clientId);
+      const integrationId = parseInt(req.params.integrationId);
+      console.log(`🧪 Testing connection for integration ${integrationId} in client ${clientId}`);
+      
+      const multiDb = MultiDatabaseManager.getInstance();
+      const clientDb = await multiDb.getClientDb(clientId);
+      
+      // Get the integration to test
+      const [integration] = await clientDb.select()
+        .from(clientIntegrations)
+        .where(eq(clientIntegrations.id, integrationId));
+      
+      if (!integration) {
+        return res.status(404).json({ error: "Integration not found" });
+      }
+
+      let testResult = { success: false, message: "Unknown integration type" };
+
+      // Test based on integration type
+      switch (integration.name.toLowerCase()) {
+        case 'okta':
+          testResult = await testOktaConnection(integration.apiKeys);
+          break;
+        case 'sentinelone':
+          testResult = await testSentinelOneConnection(integration.apiKeys);
+          break;
+        case 'jira':
+          testResult = await testJiraConnection(integration.apiKeys);
+          break;
+        default:
+          testResult = { success: false, message: `Testing not implemented for ${integration.name}` };
+      }
+
+      // Update integration status based on test result
+      const newStatus = testResult.success ? 'connected' : 'disconnected';
+      const [updatedIntegration] = await clientDb.update(clientIntegrations)
+        .set({ 
+          status: newStatus,
+          lastUpdated: new Date()
+        })
+        .where(eq(clientIntegrations.id, integrationId))
+        .returning();
+
+      console.log(`✅ Test completed for integration ${integrationId}: ${testResult.success ? 'SUCCESS' : 'FAILED'}`);
+      
+      res.json({
+        success: testResult.success,
+        message: testResult.message,
+        integration: updatedIntegration
+      });
+
+    } catch (error) {
+      console.error("Error testing integration connection:", error);
+      res.status(500).json({ error: "Failed to test integration connection" });
+    }
+  });
 
   // REMOVED: Global integration PUT/DELETE - All integration operations are now client-specific
 

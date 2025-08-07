@@ -115,6 +115,42 @@ export function IntegrationsSection() {
     },
   });
 
+  // Test integration connection mutation - CLIENT-AWARE
+  const testConnectionMutation = useMutation({
+    mutationFn: async (id: number) => {
+      const response = await fetch(`/api/client/${currentClientId}/integrations/${id}/test`, {
+        method: "POST",
+        credentials: "include"
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || `HTTP ${response.status}: ${response.statusText}`);
+      }
+      
+      return response.json();
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: [`/api/client/${currentClientId}/integrations`] });
+      toast({
+        title: data.success ? "Connection successful" : "Connection failed",
+        description: data.message,
+        variant: data.success ? "default" : "destructive",
+      });
+      // Update the editing integration status locally
+      if (editingIntegration && data.integration) {
+        setEditingIntegration(data.integration);
+      }
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error testing connection",
+        description: error.message || "Failed to test connection",
+        variant: "destructive",
+      });
+    },
+  });
+
   // Delete integration mutation - CLIENT-AWARE
   const deleteIntegrationMutation = useMutation({
     mutationFn: async (id: number) => {
@@ -624,8 +660,13 @@ export function IntegrationsSection() {
               {deleteIntegrationMutation.isPending ? "Deleting..." : "Delete Integration"}
             </Button>
             <div className="flex gap-3">
-              <Button variant="outline" onClick={() => setIsConfigureIntegrationOpen(false)}>
-                Cancel
+              <Button 
+                variant="outline" 
+                onClick={() => editingIntegration && testConnectionMutation.mutate(editingIntegration.id)}
+                disabled={testConnectionMutation.isPending}
+                className="border-blue-300 text-blue-600 hover:bg-blue-50 dark:border-blue-700 dark:text-blue-400 dark:hover:bg-blue-950"
+              >
+                {testConnectionMutation.isPending ? "Testing..." : "Test Connection"}
               </Button>
               <Button onClick={handleUpdateIntegration} disabled={updateIntegrationMutation.isPending}>
                 {updateIntegrationMutation.isPending ? "Saving..." : "Save Changes"}
