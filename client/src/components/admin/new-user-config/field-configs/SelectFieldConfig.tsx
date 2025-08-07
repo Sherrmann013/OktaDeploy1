@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { apiRequest } from "@/lib/queryClient";
@@ -197,7 +197,7 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
   };
 
   // Save department app mappings to database (MANUAL SAVE ONLY)
-  const saveDepartmentAppMappings = async (manualSave = false) => {
+  const saveDepartmentAppMappings = useCallback(async (manualSave = false) => {
     // Prevent auto-save - only allow manual saves
     if (!manualSave) {
       console.log('⚠️ Auto-save blocked - department mappings require manual save');
@@ -259,10 +259,10 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
     } finally {
       setDepartmentSaveInProgress(false);
     }
-  };
+  }, [departmentAppMappings, localDepartmentAppMappings, currentClientId, queryClient]);
 
   // Save employee type app mappings to database
-  const saveEmployeeTypeAppMappings = async () => {
+  const saveEmployeeTypeAppMappings = useCallback(async () => {
     if (employeeTypeSaveInProgress) return false;
     setEmployeeTypeSaveInProgress(true);
     
@@ -318,7 +318,7 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
     } finally {
       setEmployeeTypeSaveInProgress(false);
     }
-  };
+  }, [employeeTypeAppMappings, localEmployeeTypeAppMappings, currentClientId, queryClient]);
 
   // Helper function to calculate differences for department mappings
   const calculateDifferences = (currentMappings: Record<string, string[]>, newMappings: Record<string, string[]>) => {
