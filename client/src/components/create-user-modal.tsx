@@ -72,25 +72,25 @@ export default function CreateUserModal({ open, onClose, onSuccess, clientId }: 
     staleTime: 10 * 60 * 1000, // Cache for 10 minutes
   });
 
-  // Fetch all field settings from admin layout - MUST BE DECLARED FIRST
+  // Fetch all field settings from client-specific admin layout - CLIENT-AWARE
   const { data: fieldSettings } = useQuery({
-    queryKey: ["/api/layout-settings", "all-fields"],
+    queryKey: [`/api/client/${currentClientId}/layout-settings`, "all-fields"],
     staleTime: 5 * 60 * 1000, // Cache for 5 minutes
     queryFn: async () => {
       try {
-        // Removed excessive console logging for performance
+        // Fetch from client-specific endpoints for proper multi-tenant isolation
         const settingsQueries = [
-          fetch('/api/layout-settings/firstName', { credentials: 'include' }),
-          fetch('/api/layout-settings/lastName', { credentials: 'include' }),
-          fetch('/api/layout-settings/emailUsername', { credentials: 'include' }),
-          fetch('/api/layout-settings/password', { credentials: 'include' }),
-          fetch('/api/layout-settings/title', { credentials: 'include' }),
-          fetch('/api/layout-settings/manager', { credentials: 'include' }),
-          fetch('/api/layout-settings/department', { credentials: 'include' }),
-          fetch('/api/layout-settings/employeeType', { credentials: 'include' }),
-          fetch('/api/layout-settings/apps', { credentials: 'include' }),
-          fetch('/api/layout-settings/groups', { credentials: 'include' }),
-          fetch('/api/layout-settings/sendActivationEmail', { credentials: 'include' })
+          fetch(`/api/client/${currentClientId}/layout-settings/firstName`, { credentials: 'include' }),
+          fetch(`/api/client/${currentClientId}/layout-settings/lastName`, { credentials: 'include' }),
+          fetch(`/api/client/${currentClientId}/layout-settings/emailUsername`, { credentials: 'include' }),
+          fetch(`/api/client/${currentClientId}/layout-settings/password`, { credentials: 'include' }),
+          fetch(`/api/client/${currentClientId}/layout-settings/title`, { credentials: 'include' }),
+          fetch(`/api/client/${currentClientId}/layout-settings/manager`, { credentials: 'include' }),
+          fetch(`/api/client/${currentClientId}/layout-settings/department`, { credentials: 'include' }),
+          fetch(`/api/client/${currentClientId}/layout-settings/employeeType`, { credentials: 'include' }),
+          fetch(`/api/client/${currentClientId}/layout-settings/apps`, { credentials: 'include' }),
+          fetch(`/api/client/${currentClientId}/layout-settings/groups`, { credentials: 'include' }),
+          fetch(`/api/client/${currentClientId}/layout-settings/sendActivationEmail`, { credentials: 'include' })
         ];
         
 
@@ -99,7 +99,7 @@ export default function CreateUserModal({ open, onClose, onSuccess, clientId }: 
         const settings = {
           firstName: { required: true },
           lastName: { required: true },
-          emailUsername: { required: true, domains: ['@mazetx.com'] },
+          emailUsername: { required: true, domains: [] },
           password: { 
             required: true, 
             showGenerateButton: true,
@@ -144,7 +144,7 @@ export default function CreateUserModal({ open, onClose, onSuccess, clientId }: 
         return {
           firstName: { required: true },
           lastName: { required: true },
-          emailUsername: { required: true, domains: ['@mazetx.com'] },
+          emailUsername: { required: true, domains: [] },
           password: { 
             required: true, 
             showGenerateButton: true,
@@ -188,25 +188,25 @@ export default function CreateUserModal({ open, onClose, onSuccess, clientId }: 
     staleTime: 5 * 60 * 1000, // Cache for 5 minutes
   });
 
-  // Fetch email domain configuration from New User Layout settings
+  // Fetch email domain configuration from client-specific settings - CLIENT-AWARE
   const { data: emailDomainConfig } = useQuery({
-    queryKey: ["/api/layout-settings", "emailUsername"],
+    queryKey: [`/api/client/${currentClientId}/layout-settings`, "emailUsername"],
     queryFn: async () => {
       try {
-        const response = await fetch('/api/layout-settings/emailUsername', {
+        const response = await fetch(`/api/client/${currentClientId}/layout-settings/emailUsername`, {
           credentials: 'include'
         });
         
         if (!response.ok) {
-          // Return default configuration if not found
-          return { domains: ['@mazetx.com'] };
+          // Return empty default configuration if not found - no hardcoded domains
+          return { domains: [] };
         }
         
         const data = await response.json();
-        return JSON.parse(data.settingValue || '{"domains":["@mazetx.com"]}');
+        return JSON.parse(data.settingValue || '{"domains":[]}');
       } catch (error) {
-        // Return default configuration on error
-        return { domains: ['@mazetx.com'] };
+        // Return empty default configuration on error - no hardcoded domains
+        return { domains: [] };
       }
     },
     enabled: open,
@@ -218,7 +218,7 @@ export default function CreateUserModal({ open, onClose, onSuccess, clientId }: 
   const passwordConfig = fieldSettings?.password;
 
   const availableManagers = usersData?.users || [];
-  const emailDomains = (emailDomainConfig?.domains || ['@mazetx.com']).filter((domain: string) => domain && domain.trim() !== '');
+  const emailDomains = (emailDomainConfig?.domains || []).filter((domain: string) => domain && domain.trim() !== '');
   const hasMultipleDomains = emailDomains.length > 1;
 
   // Field configuration loaded silently
@@ -403,13 +403,7 @@ export default function CreateUserModal({ open, onClose, onSuccess, clientId }: 
     createUserMutation.mutate(data);
   };
 
-  const availableGroups = fieldSettings?.groups?.options || [
-    "R&D@mazetx.com",
-    "Labusers@mazetx.com", 
-    "finfacit@mazetx.com",
-    "HR@mazetx.com",
-    "GXP@mazetx.com"
-  ];
+  const availableGroups = fieldSettings?.groups?.options || [];
 
   // Dynamic apps from database with debug logging
   const availableApps = Array.isArray(appMappingsData) 
@@ -702,7 +696,7 @@ export default function CreateUserModal({ open, onClose, onSuccess, clientId }: 
                           value={String(field.value || '').split('@')[0] || ''}
                           onChange={(e) => {
                             const username = e.target.value;
-                            const domain = selectedDomain || emailDomains[0] || '@mazetx.com';
+                            const domain = selectedDomain || emailDomains[0] || '';
                             const email = `${username}${domain}`;
                             field.onChange(email);
                             form.setValue('login', username);
@@ -737,7 +731,7 @@ export default function CreateUserModal({ open, onClose, onSuccess, clientId }: 
                           </CustomSelect>
                         ) : (
                           <div className="bg-gray-100 dark:bg-gray-800 border border-l-0 rounded-r-md px-3 py-2 text-sm text-gray-600 dark:text-gray-400 flex items-center">
-                            {emailDomains[0] || '@mazetx.com'}
+                            {emailDomains[0] || ''}
                           </div>
                         )}
                       </div>
