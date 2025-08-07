@@ -152,34 +152,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Auth routes are handled by setupAuth
 
-  // Get employee type counts from local storage (fast, no OKTA calls)
-  app.get("/api/employee-type-counts", isAuthenticated, async (req, res) => {
-    try {
-      const result = await storage.getAllUsers();
-      const users = result.users;
-      
-      const counts = {
-        EMPLOYEE: 0,
-        CONTRACTOR: 0,
-        INTERN: 0,
-        PART_TIME: 0
-      };
-      
-      for (const user of users) {
-        if (user.employeeType && user.employeeType in counts) {
-          (counts as any)[user.employeeType]++;
-        }
-      }
-      
-      res.json(counts);
-    } catch (error) {
-      console.error("Error getting employee type counts:", error);
-      res.status(500).json({ 
-        error: "Failed to get employee type counts",
-        message: error instanceof Error ? error.message : "Unknown error"
-      });
-    }
-  });
+  // REMOVED: Global employee type counts - Each client should have their own employee counts via client-specific endpoints
 
   // Get manager suggestions for autocomplete
   app.get("/api/managers", isAuthenticated, async (req, res) => {
@@ -2516,130 +2489,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Site Access Users API routes
-  app.get("/api/site-access-users", isAuthenticated, async (req, res) => {
-    try {
-      const users = await db.select().from(siteAccessUsers);
-      res.json(users);
-    } catch (error) {
-      console.error("Error fetching site access users:", error);
-      res.status(500).json({ message: "Failed to fetch site access users" });
-    }
-  });
+  // REMOVED: Global site access users endpoints - All site access users should be client-specific for multi-tenant data isolation
 
-  app.post("/api/site-access-users", isAuthenticated, requireAdmin, async (req, res) => {
-    try {
-      const userData = insertSiteAccessUserSchema.parse(req.body);
-      const [user] = await db.insert(siteAccessUsers).values(userData).returning();
-      
-      // Log the audit trail
-      await AuditLogger.logSiteAccessAction(
-        req,
-        'CREATE',
-        user.id.toString(),
-        user.name,
-        { action: 'Created new site access user', accessLevel: user.accessLevel },
-        {},
-        { name: user.name, email: user.email, accessLevel: user.accessLevel }
-      );
-      
-      res.json(user);
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        return res.status(400).json({
-          message: "Validation error",
-          errors: error.errors
-        });
-      }
-      console.error("Error creating site access user:", error);
-      res.status(500).json({ message: "Failed to create site access user" });
-    }
-  });
+  // REMOVED: Global site access users PUT and DELETE endpoints - All site access users should be client-specific for multi-tenant data isolation
 
-  app.put("/api/site-access-users/:id", isAuthenticated, requireAdmin, async (req, res) => {
-    try {
-      const id = z.coerce.number().parse(req.params.id);
-      const userData = insertSiteAccessUserSchema.parse(req.body);
-      
-      // Get old values for audit log
-      const [oldUser] = await db.select().from(siteAccessUsers).where(eq(siteAccessUsers.id, id));
-      
-      const [user] = await db
-        .update(siteAccessUsers)
-        .set({ ...userData, lastUpdated: new Date() })
-        .where(eq(siteAccessUsers.id, id))
-        .returning();
-      
-      if (!user) {
-        return res.status(404).json({ message: "Site access user not found" });
-      }
-      
-      // Log the audit trail
-      if (oldUser) {
-        await AuditLogger.logSiteAccessAction(
-          req,
-          'UPDATE',
-          user.id.toString(),
-          user.name,
-          { action: 'Updated site access user' },
-          { name: oldUser.name, email: oldUser.email, accessLevel: oldUser.accessLevel },
-          { name: user.name, email: user.email, accessLevel: user.accessLevel }
-        );
-      }
-      
-      res.json(user);
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        return res.status(400).json({
-          message: "Validation error",
-          errors: error.errors
-        });
-      }
-      console.error("Error updating site access user:", error);
-      res.status(500).json({ message: "Failed to update site access user" });
-    }
-  });
-
-  app.delete("/api/site-access-users/:id", isAuthenticated, requireAdmin, async (req, res) => {
-    try {
-      const id = z.coerce.number().parse(req.params.id);
-      const [deletedUser] = await db
-        .delete(siteAccessUsers)
-        .where(eq(siteAccessUsers.id, id))
-        .returning();
-      
-      if (!deletedUser) {
-        return res.status(404).json({ message: "Site access user not found" });
-      }
-      
-      // Log the audit trail
-      await AuditLogger.logSiteAccessAction(
-        req,
-        'DELETE',
-        deletedUser.id.toString(),
-        deletedUser.name,
-        { action: 'Deleted site access user' },
-        { name: deletedUser.name, email: deletedUser.email, accessLevel: deletedUser.accessLevel },
-        {}
-      );
-      
-      res.status(204).send();
-    } catch (error) {
-      console.error("Error deleting site access user:", error);
-      res.status(500).json({ message: "Failed to delete site access user" });
-    }
-  });
-
-  // Integrations routes
-  app.get("/api/integrations", isAuthenticated, requireAdmin, async (req, res) => {
-    try {
-      const integrationsData = await db.select().from(integrations);
-      res.json(integrationsData);
-    } catch (error) {
-      console.error("Error fetching integrations:", error);
-      res.status(500).json({ message: "Failed to fetch integrations" });
-    }
-  });
+  // Integrations routes - REMOVED: All integration operations are now client-specific
 
   // Client-specific integrations endpoint
   app.get("/api/client/:clientId/integrations", isAuthenticated, async (req, res) => {
@@ -2742,170 +2596,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/integrations", isAuthenticated, requireAdmin, async (req, res) => {
-    try {
-      const integrationData = insertIntegrationSchema.parse(req.body);
-      const [integration] = await db.insert(integrations).values(integrationData).returning();
-      
-      // Log the audit trail
-      await AuditLogger.logIntegrationAction(
-        req,
-        'CREATE',
-        integration.id.toString(),
-        integration.displayName,
-        { action: 'Created new integration', status: integration.status },
-        {},
-        { name: integration.name, displayName: integration.displayName, status: integration.status }
-      );
-      
-      res.json(integration);
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        return res.status(400).json({
-          message: "Validation error",
-          errors: error.errors
-        });
-      }
-      console.error("Error creating integration:", error);
-      res.status(500).json({ message: "Failed to create integration" });
-    }
-  });
+  // REMOVED: Global integration POST - All integration operations are now client-specific
 
-  app.put("/api/integrations/:id", isAuthenticated, requireAdmin, async (req, res) => {
-    try {
-      const id = z.coerce.number().parse(req.params.id);
-      const integrationData = insertIntegrationSchema.parse(req.body);
-      
-      // Get old values for audit log
-      const [oldIntegration] = await db.select().from(integrations).where(eq(integrations.id, id));
-      
-      const [integration] = await db
-        .update(integrations)
-        .set({ ...integrationData, lastUpdated: new Date() })
-        .where(eq(integrations.id, id))
-        .returning();
-      
-      if (!integration) {
-        return res.status(404).json({ message: "Integration not found" });
-      }
-      
-      // Log the audit trail
-      if (oldIntegration) {
-        await AuditLogger.logIntegrationAction(
-          req,
-          'UPDATE',
-          integration.id.toString(),
-          integration.displayName,
-          { action: 'Updated integration configuration' },
-          { status: oldIntegration.status, apiKeys: Object.keys(oldIntegration.apiKeys || {}) },
-          { status: integration.status, apiKeys: Object.keys(integration.apiKeys || {}) }
-        );
-      }
-      
-      res.json(integration);
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        return res.status(400).json({
-          message: "Validation error",
-          errors: error.errors
-        });
-      }
-      console.error("Error updating integration:", error);
-      res.status(500).json({ message: "Failed to update integration" });
-    }
-  });
+  // REMOVED: Global integration PUT/DELETE - All integration operations are now client-specific
 
-  app.delete("/api/integrations/:id", isAuthenticated, requireAdmin, async (req, res) => {
-    try {
-      const id = z.coerce.number().parse(req.params.id);
-      const [deletedIntegration] = await db
-        .delete(integrations)
-        .where(eq(integrations.id, id))
-        .returning();
-      
-      if (!deletedIntegration) {
-        return res.status(404).json({ message: "Integration not found" });
-      }
-      
-      // Log the audit trail
-      await AuditLogger.logIntegrationAction(
-        req,
-        'DELETE',
-        deletedIntegration.id.toString(),
-        deletedIntegration.displayName,
-        { action: 'Deleted integration' },
-        { name: deletedIntegration.name, displayName: deletedIntegration.displayName, status: deletedIntegration.status },
-        {}
-      );
-      
-      res.status(204).send();
-    } catch (error) {
-      console.error("Error deleting integration:", error);
-      res.status(500).json({ message: "Failed to delete integration" });
-    }
-  });
-
-  // Audit logs endpoint
-  app.get("/api/audit-logs", isAuthenticated, requireAdmin, async (req, res) => {
-    try {
-      const {
-        page = 1,
-        limit = 50,
-        action,
-        resourceType,
-        resourceId,
-        userId,
-        startDate,
-        endDate
-      } = req.query;
-
-      const offset = (Number(page) - 1) * Number(limit);
-      
-      const options: any = {
-        limit: Number(limit),
-        offset,
-      };
-
-      if (action) options.action = action as string;
-      if (resourceType) options.resourceType = resourceType as string;
-      if (resourceId) options.resourceId = resourceId as string;
-      if (userId) options.userId = Number(userId);
-      if (startDate) options.startDate = new Date(startDate as string);
-      if (endDate) options.endDate = new Date(endDate as string);
-
-      const logs = await getAuditLogs(options);
-      
-      // Get total count for pagination
-      const totalLogs = await db.select().from(auditLogs);
-      const total = totalLogs.length;
-      
-      res.json({
-        logs,
-        pagination: {
-          page: Number(page),
-          limit: Number(limit),
-          total,
-          pages: Math.ceil(total / Number(limit))
-        }
-      });
-    } catch (error) {
-      console.error("Error fetching audit logs:", error);
-      res.status(500).json({ message: "Failed to fetch audit logs" });
-    }
-  });
+  // REMOVED: Global audit logs endpoint - All audit logs are now client-specific
 
   // App Mappings API endpoints
 
-  // Get all app mappings
-  app.get("/api/app-mappings", isAuthenticated, requireAdmin, async (req, res) => {
-    try {
-      const mappings = await db.select().from(appMappings).orderBy(desc(appMappings.created));
-      res.json(mappings);
-    } catch (error) {
-      console.error("Error fetching app mappings:", error);
-      res.status(500).json({ message: "Failed to fetch app mappings" });
-    }
-  });
+  // REMOVED: Global app mappings GET - All app mappings are now client-specific
 
   // Client-specific app mappings endpoint
   app.get("/api/client/:clientId/app-mappings", isAuthenticated, async (req, res) => {
@@ -2926,151 +2625,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Create new app mapping
-  app.post("/api/app-mappings", isAuthenticated, requireAdmin, async (req, res) => {
-    try {
-      const mappingData = insertAppMappingSchema.parse(req.body);
-      
-      // Note: Removed unique constraint check to allow multiple groups per app
+  // REMOVED: Global app mappings POST and bulk POST - All app mappings are now client-specific
 
-      const [newMapping] = await db.insert(appMappings).values(mappingData).returning();
-      
-      // Log the audit event
-      await AuditLogger.log({
-        req,
-        action: "CREATE",
-        resourceType: "APP_MAPPING",
-        resourceId: newMapping.id.toString(),
-        resourceName: newMapping.appName,
-        details: {
-          action: "Created new app mapping",
-          appName: newMapping.appName,
-          oktaGroupName: newMapping.oktaGroupName
-        },
-        newValues: mappingData
-      });
+  // REMOVED: Global app mappings PUT - All app mappings are now client-specific
 
-      res.status(201).json(newMapping);
-    } catch (error) {
-      console.error("Error creating app mapping:", error);
-      res.status(500).json({ message: "Failed to create app mapping" });
-    }
-  });
-
-  // Bulk create app mappings (remove unique constraint check for multiple groups per app)
-  app.post('/api/app-mappings/bulk', isAuthenticated, requireAdmin, async (req, res) => {
-    try {
-      const { mappings } = req.body;
-      
-      if (!Array.isArray(mappings) || mappings.length === 0) {
-        return res.status(400).json({ message: 'Mappings array is required' });
-      }
-
-      const validatedMappings = mappings.map(mapping => insertAppMappingSchema.parse(mapping));
-      
-      const createdMappings = await db.insert(appMappings).values(
-        validatedMappings.map(mapping => ({
-          ...mapping,
-          lastUpdated: new Date()
-        }))
-      ).returning();
-
-      // Audit log for each mapping
-      for (const mapping of createdMappings) {
-        await AuditLogger.log({
-          req,
-          action: "CREATE",
-          resourceType: "APP_MAPPING", 
-          resourceId: mapping.id.toString(),
-          resourceName: mapping.appName,
-          details: {
-            action: "Created app mapping (bulk)",
-            appName: mapping.appName,
-            oktaGroupName: mapping.oktaGroupName
-          },
-          newValues: mapping
-        });
-      }
-
-      res.status(201).json(createdMappings);
-    } catch (error) {
-      console.error('Error creating bulk app mappings:', error);
-      if (error instanceof z.ZodError) {
-        res.status(400).json({ message: 'Validation error', errors: error.errors });
-      } else {
-        res.status(500).json({ message: 'Internal server error' });
-      }
-    }
-  });
-
-  // Update app mapping
-  app.put("/api/app-mappings/:id", isAuthenticated, requireAdmin, async (req, res) => {
-    try {
-      const id = z.coerce.number().parse(req.params.id);
-      const mappingData = insertAppMappingSchema.partial().parse(req.body);
-      
-      // Get the existing mapping for audit log
-      const [existingMapping] = await db.select().from(appMappings).where(eq(appMappings.id, id));
-      if (!existingMapping) {
-        return res.status(404).json({ message: "App mapping not found" });
-      }
-
-      // Note: Multiple mappings per app are now allowed, so no unique constraint check needed
-
-      const [updatedMapping] = await db.update(appMappings)
-        .set({ ...mappingData, lastUpdated: new Date() })
-        .where(eq(appMappings.id, id))
-        .returning();
-
-      // Log the audit event
-      await AuditLogger.log({
-        req,
-        action: "UPDATE",
-        resourceType: "APP_MAPPING",
-        resourceId: updatedMapping.id.toString(),
-        resourceName: updatedMapping.appName,
-        details: { action: "Updated app mapping" },
-        oldValues: existingMapping,
-        newValues: updatedMapping
-      });
-
-      res.json(updatedMapping);
-    } catch (error) {
-      console.error("Error updating app mapping:", error);
-      res.status(500).json({ message: "Failed to update app mapping" });
-    }
-  });
-
-  // Delete app mapping
-  app.delete("/api/app-mappings/:id", isAuthenticated, requireAdmin, async (req, res) => {
-    try {
-      const id = z.coerce.number().parse(req.params.id);
-      
-      // Get the existing mapping for audit log
-      const [existingMapping] = await db.select().from(appMappings).where(eq(appMappings.id, id));
-      if (!existingMapping) {
-        return res.status(404).json({ message: "App mapping not found" });
-      }
-
-      await db.delete(appMappings).where(eq(appMappings.id, id));
-
-      // Log the audit event
-      await AuditLogger.log({
-        req,
-        action: "DELETE",
-        resourceType: "APP_MAPPING",
-        resourceId: existingMapping.id.toString(),
-        resourceName: existingMapping.appName,
-        details: { action: "Deleted app mapping" },
-        oldValues: existingMapping
-      });
-
-      res.status(204).send();
-    } catch (error) {
-      console.error("Error deleting app mapping:", error);
-      res.status(500).json({ message: "Failed to delete app mapping" });
-    }
-  });
+  // REMOVED: Global app mappings DELETE - All app mappings are now client-specific
 
   // Get OKTA group for specific app (helper endpoint for user creation)
   app.get("/api/app-mappings/lookup/:appName", isAuthenticated, async (req, res) => {
@@ -3093,15 +2652,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Layout settings endpoints
-  app.get("/api/layout-settings", isAuthenticated, async (req, res) => {
-    try {
-      const settings = await db.select().from(layoutSettings).orderBy(layoutSettings.settingKey);
-      res.json(settings);
-    } catch (error) {
-      console.error("Error fetching layout settings:", error);
-      res.status(500).json({ error: "Failed to fetch layout settings" });
-    }
-  });
+  // REMOVED: Global layout settings - All layout settings are now client-specific
 
   // Client-specific layout settings endpoint
   app.get("/api/client/:clientId/layout-settings", isAuthenticated, async (req, res) => {
@@ -3122,24 +2673,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/layout-settings/:key", isAuthenticated, async (req, res) => {
-    try {
-      const { key } = req.params;
-      const setting = await db.select()
-        .from(layoutSettings)
-        .where(eq(layoutSettings.settingKey, key))
-        .limit(1);
-      
-      if (setting.length === 0) {
-        return res.status(404).json({ error: "Setting not found" });
-      }
-      
-      res.json(setting[0]);
-    } catch (error) {
-      console.error("Error fetching layout setting:", error);
-      res.status(500).json({ error: "Failed to fetch layout setting" });
-    }
-  });
+  // REMOVED: Global layout setting by key - All layout settings are now client-specific
 
   // Client-specific layout setting by key endpoint
   app.get("/api/client/:clientId/layout-settings/:key", isAuthenticated, async (req, res) => {
@@ -3169,13 +2703,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/layout-settings", isAuthenticated, requireAdmin, async (req, res) => {
+  // Client-specific layout settings POST endpoint
+  app.post("/api/client/:clientId/layout-settings", isAuthenticated, requireAdmin, async (req, res) => {
     try {
+      const clientId = parseInt(req.params.clientId);
       const user = (req.session as any).user;
       const validatedData = insertLayoutSettingSchema.parse(req.body);
+      console.log(`⚙️  Saving layout setting for client ${clientId}:`, validatedData.settingKey);
+      
+      // Use client-specific database connection
+      const multiDb = MultiDatabaseManager.getInstance();
+      const clientDb = await multiDb.getClientDb(clientId);
       
       // Check if setting already exists
-      const existing = await db.select()
+      const existing = await clientDb.select()
         .from(layoutSettings)
         .where(eq(layoutSettings.settingKey, validatedData.settingKey))
         .limit(1);
@@ -3183,7 +2724,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let result;
       if (existing.length > 0) {
         // Update existing setting
-        [result] = await db.update(layoutSettings)
+        [result] = await clientDb.update(layoutSettings)
           .set({ 
             ...validatedData, 
             updatedBy: user.id,
@@ -3191,176 +2732,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
           })
           .where(eq(layoutSettings.settingKey, validatedData.settingKey))
           .returning();
+        console.log(`✅ Updated layout setting for client ${clientId}`);
       } else {
         // Create new setting
-        [result] = await db.insert(layoutSettings)
+        [result] = await clientDb.insert(layoutSettings)
           .values({ ...validatedData, updatedBy: user.id })
           .returning();
+        console.log(`✅ Created layout setting for client ${clientId}`);
       }
-      
-      // Log the change
-      await AuditLogger.log({
-        req,
-        action: existing.length > 0 ? 'UPDATE' : 'CREATE',
-        resourceType: 'LAYOUT_SETTING',
-        resourceId: result.id.toString(),
-        resourceName: result.settingKey,
-        details: { settingType: result.settingType, settingKey: result.settingKey },
-        oldValues: existing.length > 0 ? existing[0] : {},
-        newValues: result
-      });
       
       res.json(result);
     } catch (error) {
-      console.error("Error saving layout setting:", error);
+      console.error("Error saving layout setting for client:", error);
       if (error instanceof z.ZodError) {
         return res.status(400).json({ error: error.errors });
       }
-      res.status(500).json({ error: "Failed to save layout setting" });
+      res.status(500).json({ error: "Failed to save client layout setting" });
     }
   });
 
-  app.delete("/api/layout-settings/:key", isAuthenticated, requireAdmin, async (req, res) => {
-    try {
-      const { key } = req.params;
-      
-      const existing = await db.select()
-        .from(layoutSettings)
-        .where(eq(layoutSettings.settingKey, key))
-        .limit(1);
-      
-      if (existing.length === 0) {
-        return res.status(404).json({ error: "Setting not found" });
-      }
-      
-      await db.delete(layoutSettings)
-        .where(eq(layoutSettings.settingKey, key));
-      
-      // Log the deletion
-      await AuditLogger.log({
-        req,
-        action: 'DELETE',
-        resourceType: 'LAYOUT_SETTING',
-        resourceId: existing[0].id.toString(),
-        resourceName: existing[0].settingKey,
-        details: { settingType: existing[0].settingType, settingKey: existing[0].settingKey },
-        oldValues: existing[0]
-      });
-      
-      res.json({ message: "Layout setting deleted successfully" });
-    } catch (error) {
-      console.error("Error deleting layout setting:", error);
-      res.status(500).json({ error: "Failed to delete layout setting" });
-    }
-  });
+  // REMOVED: Global layout settings DELETE - All layout settings are now client-specific
 
-  // Field settings endpoints (for department and employee type options)
-  app.get("/api/field-settings/:fieldType", isAuthenticated, async (req, res) => {
-    try {
-      const { fieldType } = req.params;
-      const setting = await db.select()
-        .from(layoutSettings)
-        .where(eq(layoutSettings.settingKey, `${fieldType}_options`))
-        .limit(1);
-      
-      if (setting.length === 0) {
-        // Return default values
-        const defaultOptions = fieldType === 'department' 
-          ? []
-          : ['EMPLOYEE', 'CONTRACTOR', 'INTERN', 'PART_TIME'];
-        
-        return res.json({ 
-          options: defaultOptions,
-          required: false
-        });
-      }
-      
-      const parsedValue = JSON.parse(setting[0].settingValue || '{}');
-      res.json(parsedValue);
-    } catch (error) {
-      console.error("Error fetching field setting:", error);
-      res.status(500).json({ error: "Failed to fetch field setting" });
-    }
-  });
+  // REMOVED: Global field settings GET - All field settings are now client-specific
 
-  app.post("/api/field-settings/:fieldType", isAuthenticated, requireAdmin, async (req, res) => {
-    try {
-      const { fieldType } = req.params;
-      const { options, required } = req.body;
-      const user = (req.session as any).user;
-      
-      const settingKey = `${fieldType}_options`;
-      const settingValue = JSON.stringify({ options, required });
-      
-      // Check if setting already exists
-      const existing = await db.select()
-        .from(layoutSettings)
-        .where(eq(layoutSettings.settingKey, settingKey))
-        .limit(1);
-      
-      let result;
-      if (existing.length > 0) {
-        // Update existing setting
-        [result] = await db.update(layoutSettings)
-          .set({ 
-            settingValue,
-            settingType: 'field',
-            updatedBy: user.id,
-            updatedAt: new Date()
-          })
-          .where(eq(layoutSettings.settingKey, settingKey))
-          .returning();
-      } else {
-        // Create new setting
-        [result] = await db.insert(layoutSettings)
-          .values({ 
-            settingKey,
-            settingValue,
-            settingType: 'field',
-            clientId: 1, // Default client for now
-            updatedBy: user.id
-          })
-          .returning();
-      }
-      
-      // Log the change
-      await AuditLogger.log({
-        req,
-        action: existing.length > 0 ? 'UPDATE' : 'CREATE',
-        resourceType: 'FIELD_SETTING',
-        resourceId: result.id.toString(),
-        resourceName: result.settingKey,
-        details: { fieldType, optionsCount: options.length },
-        oldValues: existing.length > 0 ? existing[0] : {},
-        newValues: result
-      });
-      
-      res.json({ options, required });
-    } catch (error) {
-      console.error("Error saving field setting:", error);
-      res.status(500).json({ error: "Failed to save field setting" });
-    }
-  });
+  // REMOVED: Global field settings POST - All field settings are now client-specific
 
-  // Dashboard cards endpoints
-  app.get("/api/dashboard-cards", async (req, res) => {
-    try {
-      const clientId = req.query.clientId ? parseInt(req.query.clientId as string) : 1; // Default to client 1 for MSP context
-      console.log('📊 Dashboard cards requested, session user:', (req.session as any)?.user?.email || 'No session', 'clientId:', clientId);
-      
-      const cards = await db
-        .select()
-        .from(dashboardCards)
-        .where(eq(dashboardCards.clientId, clientId))
-        .orderBy(dashboardCards.position);
-        
-      console.log('📊 Dashboard cards found:', cards.length, 'for client:', clientId);
-      res.json(cards);
-    } catch (error) {
-      console.error("Error fetching dashboard cards:", error);
-      res.status(500).json({ error: "Failed to fetch dashboard cards" });
-    }
-  });
+  // REMOVED: Global dashboard cards GET - Client-specific endpoint exists at /api/client/:clientId/dashboard-cards
 
   // Client-specific dashboard cards route
   app.get("/api/client/:clientId/dashboard-cards", async (req, res) => {
@@ -3382,30 +2779,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/dashboard-cards", isAuthenticated, requireAdmin, async (req, res) => {
-    try {
-      const validatedData = insertDashboardCardSchema.parse(req.body);
-      const [result] = await db.insert(dashboardCards).values(validatedData).returning();
-      
-      await AuditLogger.log({
-        req,
-        action: 'CREATE',
-        resourceType: 'DASHBOARD_CARD',
-        resourceId: result.id.toString(),
-        resourceName: result.name,
-        details: { type: result.type, position: result.position },
-        newValues: result
-      });
-      
-      res.json(result);
-    } catch (error) {
-      console.error("Error creating dashboard card:", error);
-      if (error instanceof z.ZodError) {
-        return res.status(400).json({ error: error.errors });
-      }
-      res.status(500).json({ error: "Failed to create dashboard card" });
-    }
-  });
+  // REMOVED: Global dashboard cards POST - Client-specific endpoint exists at /api/client/:clientId/dashboard-cards
 
   // Client-specific bulk update dashboard card positions (for drag and drop)
   app.patch("/api/client/:clientId/dashboard-cards/positions", isAuthenticated, requireAdmin, async (req, res) => {
@@ -3569,17 +2943,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Monitoring cards endpoints
-  app.get("/api/monitoring-cards", async (req, res) => {
-    try {
-      console.log('📊 Monitoring cards requested, session user:', (req.session as any)?.user?.email || 'No session');
-      const cards = await db.select().from(monitoringCards).orderBy(monitoringCards.position);
-      console.log('📊 Monitoring cards found:', cards.length);
-      res.json(cards);
-    } catch (error) {
-      console.error("Error fetching monitoring cards:", error);
-      res.status(500).json({ error: "Failed to fetch monitoring cards" });
-    }
-  });
+  // REMOVED: Global monitoring cards GET - Client-specific endpoint exists at /api/client/:clientId/monitoring-cards
 
   // Client-specific monitoring cards endpoint
   app.get("/api/client/:clientId/monitoring-cards", isAuthenticated, async (req, res) => {
@@ -3719,30 +3083,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/monitoring-cards", isAuthenticated, requireAdmin, async (req, res) => {
-    try {
-      const validatedData = insertMonitoringCardSchema.parse(req.body);
-      const [result] = await db.insert(monitoringCards).values(validatedData).returning();
-      
-      await AuditLogger.log({
-        req,
-        action: 'CREATE',
-        resourceType: 'MONITORING_CARD',
-        resourceId: result.id.toString(),
-        resourceName: result.name,
-        details: { type: result.type, position: result.position },
-        newValues: result
-      });
-      
-      res.json(result);
-    } catch (error) {
-      console.error("Error creating monitoring card:", error);
-      if (error instanceof z.ZodError) {
-        return res.status(400).json({ error: error.errors });
-      }
-      res.status(500).json({ error: "Failed to create monitoring card" });
-    }
-  });
+  // REMOVED: Global monitoring cards POST - Client-specific endpoint exists at /api/client/:clientId/monitoring-cards
 
   // Bulk update monitoring card positions (for drag and drop)
   app.patch("/api/monitoring-cards/positions", isAuthenticated, requireAdmin, async (req, res) => {
@@ -3864,485 +3205,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Department Application Mappings API
-  app.get("/api/department-app-mappings", isAuthenticated, async (req, res) => {
-    try {
-      const mappings = await db.select().from(departmentAppMappings);
-      res.json(mappings);
-    } catch (error) {
-      console.error("Error fetching department app mappings:", error);
-      res.status(500).json({ error: "Failed to fetch department app mappings" });
-    }
-  });
+  // REMOVED: Global department app mappings - All department app mappings are now client-specific
 
-  app.post("/api/department-app-mappings", isAuthenticated, requireAdmin, async (req, res) => {
-    try {
-      const { departmentName, appName } = insertDepartmentAppMappingSchema.parse(req.body);
-      
-      // Check if mapping already exists
-      const existing = await db.select()
-        .from(departmentAppMappings)
-        .where(and(
-          eq(departmentAppMappings.departmentName, departmentName),
-          eq(departmentAppMappings.appName, appName)
-        ))
-        .limit(1);
-      
-      if (existing.length > 0) {
-        return res.status(400).json({ error: "Mapping already exists" });
-      }
-      
-      const [result] = await db.insert(departmentAppMappings)
-        .values({ departmentName, appName })
-        .returning();
-      
-      await AuditLogger.log({
-        req,
-        action: 'CREATE',
-        resourceType: 'DEPARTMENT_APP_MAPPING',
-        resourceId: result.id.toString(),
-        resourceName: `${departmentName} - ${appName}`,
-        details: { departmentName, appName }
-      });
-      
-      res.json(result);
-    } catch (error) {
-      console.error("Error creating department app mapping:", error);
-      if (error instanceof z.ZodError) {
-        return res.status(400).json({ error: error.errors });
-      }
-      res.status(500).json({ error: "Failed to create department app mapping" });
-    }
-  });
+  // REMOVED: Global department app mappings DELETE - All department app mappings are now client-specific
 
-  app.delete("/api/department-app-mappings", isAuthenticated, requireAdmin, async (req, res) => {
-    try {
-      const { departmentName, appName } = z.object({
-        departmentName: z.string(),
-        appName: z.string()
-      }).parse(req.body);
-      
-      const existing = await db.select()
-        .from(departmentAppMappings)
-        .where(and(
-          eq(departmentAppMappings.departmentName, departmentName),
-          eq(departmentAppMappings.appName, appName)
-        ))
-        .limit(1);
-      
-      if (existing.length === 0) {
-        return res.status(404).json({ error: "Mapping not found" });
-      }
-      
-      await db.delete(departmentAppMappings)
-        .where(and(
-          eq(departmentAppMappings.departmentName, departmentName),
-          eq(departmentAppMappings.appName, appName)
-        ));
-      
-      await AuditLogger.log({
-        req,
-        action: 'DELETE',
-        resourceType: 'DEPARTMENT_APP_MAPPING',
-        resourceId: existing[0].id.toString(),
-        resourceName: `${departmentName} - ${appName}`,
-        details: { departmentName, appName },
-        oldValues: existing[0]
-      });
-      
-      res.json({ message: "Department app mapping deleted successfully" });
-    } catch (error) {
-      console.error("Error deleting department app mapping:", error);
-      if (error instanceof z.ZodError) {
-        return res.status(400).json({ error: error.errors });
-      }
-      res.status(500).json({ error: "Failed to delete department app mapping" });
-    }
-  });
+  // REMOVED: Global employee type app mappings (both duplicate sections) - All employee type app mappings are now client-specific
 
-  // Employee Type App Mappings API Routes
-  app.get("/api/employee-type-app-mappings", isAuthenticated, async (req, res) => {
-    try {
-      const mappings = await db.select().from(employeeTypeAppMappings);
-      res.json(mappings);
-    } catch (error) {
-      console.error("Error fetching employee type app mappings:", error);
-      res.status(500).json({ error: "Failed to fetch employee type app mappings" });
-    }
-  });
+  // REMOVED: Global department group mappings - All department group mappings are now client-specific
 
-  app.post("/api/employee-type-app-mappings", isAuthenticated, requireAdmin, async (req, res) => {
-    try {
-      const { employeeType, appName } = insertEmployeeTypeAppMappingSchema.parse(req.body);
-      
-      // Check if mapping already exists
-      const existing = await db.select()
-        .from(employeeTypeAppMappings)
-        .where(and(
-          eq(employeeTypeAppMappings.employeeType, employeeType),
-          eq(employeeTypeAppMappings.appName, appName)
-        ))
-        .limit(1);
-      
-      if (existing.length > 0) {
-        return res.status(400).json({ error: "Mapping already exists" });
-      }
-      
-      const [result] = await db.insert(employeeTypeAppMappings)
-        .values({ employeeType, appName })
-        .returning();
-      
-      await AuditLogger.log({
-        req,
-        action: 'CREATE',
-        resourceType: 'EMPLOYEE_TYPE_APP_MAPPING',
-        resourceId: result.id.toString(),
-        resourceName: `${employeeType} - ${appName}`,
-        details: { employeeType, appName }
-      });
-      
-      res.json(result);
-    } catch (error) {
-      console.error("Error creating employee type app mapping:", error);
-      if (error instanceof z.ZodError) {
-        return res.status(400).json({ error: error.errors });
-      }
-      res.status(500).json({ error: "Failed to create employee type app mapping" });
-    }
-  });
-
-  app.delete("/api/employee-type-app-mappings", isAuthenticated, requireAdmin, async (req, res) => {
-    try {
-      const { employeeType, appName } = z.object({
-        employeeType: z.string(),
-        appName: z.string()
-      }).parse(req.body);
-      
-      const existing = await db.select()
-        .from(employeeTypeAppMappings)
-        .where(and(
-          eq(employeeTypeAppMappings.employeeType, employeeType),
-          eq(employeeTypeAppMappings.appName, appName)
-        ))
-        .limit(1);
-      
-      if (existing.length === 0) {
-        return res.status(404).json({ error: "Mapping not found" });
-      }
-      
-      await db.delete(employeeTypeAppMappings)
-        .where(and(
-          eq(employeeTypeAppMappings.employeeType, employeeType),
-          eq(employeeTypeAppMappings.appName, appName)
-        ));
-      
-      await AuditLogger.log({
-        req,
-        action: 'DELETE',
-        resourceType: 'EMPLOYEE_TYPE_APP_MAPPING',
-        resourceId: existing[0].id.toString(),
-        resourceName: `${employeeType} - ${appName}`,
-        details: { employeeType, appName },
-        oldValues: existing[0]
-      });
-      
-      res.json({ message: "Employee type app mapping deleted successfully" });
-    } catch (error) {
-      console.error("Error deleting employee type app mapping:", error);
-      if (error instanceof z.ZodError) {
-        return res.status(400).json({ error: error.errors });
-      }
-      res.status(500).json({ error: "Failed to delete employee type app mapping" });
-    }
-  });
-
-  // Employee Type Application Mappings API
-  app.get("/api/employee-type-app-mappings", isAuthenticated, async (req, res) => {
-    try {
-      const mappings = await db.select().from(employeeTypeAppMappings);
-      res.json(mappings);
-    } catch (error) {
-      console.error("Error fetching employee type app mappings:", error);
-      res.status(500).json({ error: "Failed to fetch employee type app mappings" });
-    }
-  });
-
-  app.post("/api/employee-type-app-mappings", isAuthenticated, requireAdmin, async (req, res) => {
-    try {
-      const { employeeType, appName } = insertEmployeeTypeAppMappingSchema.parse(req.body);
-      
-      // Check if mapping already exists
-      const existing = await db.select()
-        .from(employeeTypeAppMappings)
-        .where(and(
-          eq(employeeTypeAppMappings.employeeType, employeeType),
-          eq(employeeTypeAppMappings.appName, appName)
-        ))
-        .limit(1);
-      
-      if (existing.length > 0) {
-        return res.status(400).json({ error: "Mapping already exists" });
-      }
-      
-      const [result] = await db.insert(employeeTypeAppMappings)
-        .values({ employeeType, appName })
-        .returning();
-      
-      await AuditLogger.log({
-        req,
-        action: 'CREATE',
-        resourceType: 'EMPLOYEE_TYPE_APP_MAPPING',
-        resourceId: result.id.toString(),
-        resourceName: `${employeeType} - ${appName}`,
-        details: { employeeType, appName }
-      });
-      
-      res.json(result);
-    } catch (error) {
-      console.error("Error creating employee type app mapping:", error);
-      if (error instanceof z.ZodError) {
-        return res.status(400).json({ error: error.errors });
-      }
-      res.status(500).json({ error: "Failed to create employee type app mapping" });
-    }
-  });
-
-  app.delete("/api/employee-type-app-mappings", isAuthenticated, requireAdmin, async (req, res) => {
-    try {
-      const { employeeType, appName } = z.object({
-        employeeType: z.string(),
-        appName: z.string()
-      }).parse(req.body);
-      
-      const existing = await db.select()
-        .from(employeeTypeAppMappings)
-        .where(and(
-          eq(employeeTypeAppMappings.employeeType, employeeType),
-          eq(employeeTypeAppMappings.appName, appName)
-        ))
-        .limit(1);
-      
-      if (existing.length === 0) {
-        return res.status(404).json({ error: "Mapping not found" });
-      }
-      
-      await db.delete(employeeTypeAppMappings)
-        .where(and(
-          eq(employeeTypeAppMappings.employeeType, employeeType),
-          eq(employeeTypeAppMappings.appName, appName)
-        ));
-      
-      await AuditLogger.log({
-        req,
-        action: 'DELETE',
-        resourceType: 'EMPLOYEE_TYPE_APP_MAPPING',
-        resourceId: existing[0].id.toString(),
-        resourceName: `${employeeType} - ${appName}`,
-        details: { employeeType, appName },
-        oldValues: existing[0]
-      });
-      
-      res.json({ message: "Employee type app mapping deleted successfully" });
-    } catch (error) {
-      console.error("Error deleting employee type app mapping:", error);
-      if (error instanceof z.ZodError) {
-        return res.status(400).json({ error: error.errors });
-      }
-      res.status(500).json({ error: "Failed to delete employee type app mapping" });
-    }
-  });
-
-  // Department Group Mappings API
-  app.get("/api/department-group-mappings", isAuthenticated, async (req, res) => {
-    try {
-      const mappings = await db.select().from(departmentGroupMappings);
-      res.json(mappings);
-    } catch (error) {
-      console.error("Error fetching department group mappings:", error);
-      res.status(500).json({ error: "Failed to fetch department group mappings" });
-    }
-  });
-
-  app.post("/api/department-group-mappings", isAuthenticated, requireAdmin, async (req, res) => {
-    try {
-      const { departmentName, groupName } = insertDepartmentGroupMappingSchema.parse(req.body);
-      
-      // Check if mapping already exists
-      const existing = await db.select()
-        .from(departmentGroupMappings)
-        .where(and(
-          eq(departmentGroupMappings.departmentName, departmentName),
-          eq(departmentGroupMappings.groupName, groupName)
-        ))
-        .limit(1);
-      
-      if (existing.length > 0) {
-        return res.status(400).json({ error: "Mapping already exists" });
-      }
-      
-      const [result] = await db.insert(departmentGroupMappings)
-        .values({ departmentName, groupName })
-        .returning();
-      
-      await AuditLogger.log({
-        req,
-        action: 'CREATE',
-        resourceType: 'DEPARTMENT_GROUP_MAPPING',
-        resourceId: result.id.toString(),
-        resourceName: `${departmentName} - ${groupName}`,
-        details: { departmentName, groupName }
-      });
-      
-      res.json(result);
-    } catch (error) {
-      console.error("Error creating department group mapping:", error);
-      if (error instanceof z.ZodError) {
-        return res.status(400).json({ error: error.errors });
-      }
-      res.status(500).json({ error: "Failed to create department group mapping" });
-    }
-  });
-
-  app.delete("/api/department-group-mappings", isAuthenticated, requireAdmin, async (req, res) => {
-    try {
-      const { departmentName, groupName } = z.object({
-        departmentName: z.string(),
-        groupName: z.string()
-      }).parse(req.body);
-      
-      const existing = await db.select()
-        .from(departmentGroupMappings)
-        .where(and(
-          eq(departmentGroupMappings.departmentName, departmentName),
-          eq(departmentGroupMappings.groupName, groupName)
-        ))
-        .limit(1);
-      
-      if (existing.length === 0) {
-        return res.status(404).json({ error: "Mapping not found" });
-      }
-      
-      await db.delete(departmentGroupMappings)
-        .where(and(
-          eq(departmentGroupMappings.departmentName, departmentName),
-          eq(departmentGroupMappings.groupName, groupName)
-        ));
-      
-      await AuditLogger.log({
-        req,
-        action: 'DELETE',
-        resourceType: 'DEPARTMENT_GROUP_MAPPING',
-        resourceId: existing[0].id.toString(),
-        resourceName: `${departmentName} - ${groupName}`,
-        details: { departmentName, groupName },
-        oldValues: existing[0]
-      });
-      
-      res.json({ message: "Department group mapping deleted successfully" });
-    } catch (error) {
-      console.error("Error deleting department group mapping:", error);
-      if (error instanceof z.ZodError) {
-        return res.status(400).json({ error: error.errors });
-      }
-      res.status(500).json({ error: "Failed to delete department group mapping" });
-    }
-  });
-
-  // Employee Type Group Mappings API
-  app.get("/api/employee-type-group-mappings", isAuthenticated, async (req, res) => {
-    try {
-      const mappings = await db.select().from(employeeTypeGroupMappings);
-      res.json(mappings);
-    } catch (error) {
-      console.error("Error fetching employee type group mappings:", error);
-      res.status(500).json({ error: "Failed to fetch employee type group mappings" });
-    }
-  });
-
-  app.post("/api/employee-type-group-mappings", isAuthenticated, requireAdmin, async (req, res) => {
-    try {
-      const { employeeType, groupName } = insertEmployeeTypeGroupMappingSchema.parse(req.body);
-      
-      // Check if mapping already exists
-      const existing = await db.select()
-        .from(employeeTypeGroupMappings)
-        .where(and(
-          eq(employeeTypeGroupMappings.employeeType, employeeType),
-          eq(employeeTypeGroupMappings.groupName, groupName)
-        ))
-        .limit(1);
-      
-      if (existing.length > 0) {
-        return res.status(400).json({ error: "Mapping already exists" });
-      }
-      
-      const [result] = await db.insert(employeeTypeGroupMappings)
-        .values({ employeeType, groupName })
-        .returning();
-      
-      await AuditLogger.log({
-        req,
-        action: 'CREATE',
-        resourceType: 'EMPLOYEE_TYPE_GROUP_MAPPING',
-        resourceId: result.id.toString(),
-        resourceName: `${employeeType} - ${groupName}`,
-        details: { employeeType, groupName }
-      });
-      
-      res.json(result);
-    } catch (error) {
-      console.error("Error creating employee type group mapping:", error);
-      if (error instanceof z.ZodError) {
-        return res.status(400).json({ error: error.errors });
-      }
-      res.status(500).json({ error: "Failed to create employee type group mapping" });
-    }
-  });
-
-  app.delete("/api/employee-type-group-mappings", isAuthenticated, requireAdmin, async (req, res) => {
-    try {
-      const { employeeType, groupName } = z.object({
-        employeeType: z.string(),
-        groupName: z.string()
-      }).parse(req.body);
-      
-      const existing = await db.select()
-        .from(employeeTypeGroupMappings)
-        .where(and(
-          eq(employeeTypeGroupMappings.employeeType, employeeType),
-          eq(employeeTypeGroupMappings.groupName, groupName)
-        ))
-        .limit(1);
-      
-      if (existing.length === 0) {
-        return res.status(404).json({ error: "Mapping not found" });
-      }
-      
-      await db.delete(employeeTypeGroupMappings)
-        .where(and(
-          eq(employeeTypeGroupMappings.employeeType, employeeType),
-          eq(employeeTypeGroupMappings.groupName, groupName)
-        ));
-      
-      await AuditLogger.log({
-        req,
-        action: 'DELETE',
-        resourceType: 'EMPLOYEE_TYPE_GROUP_MAPPING',
-        resourceId: existing[0].id.toString(),
-        resourceName: `${employeeType} - ${groupName}`,
-        details: { employeeType, groupName },
-        oldValues: existing[0]
-      });
-      
-      res.json({ message: "Employee type group mapping deleted successfully" });
-    } catch (error) {
-      console.error("Error deleting employee type group mapping:", error);
-      if (error instanceof z.ZodError) {
-        return res.status(400).json({ error: error.errors });
-      }
-      res.status(500).json({ error: "Failed to delete employee type group mapping" });
-    }
-  });
+  // REMOVED: Global employee type group mappings - All employee type group mappings are now client-specific
 
   // Company Logo API endpoints
   

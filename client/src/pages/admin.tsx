@@ -338,7 +338,7 @@ function AdminComponent() {
 
   // Fetch app mappings data for LayoutSection
   const { data: appMappingsData = [] } = useQuery({
-    queryKey: ["/api/app-mappings"],
+    queryKey: [`/api/client/${currentClientId}/app-mappings`],
     staleTime: 5 * 60 * 1000,
     refetchOnWindowFocus: false,
   });

@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { FieldSettings, FieldKey } from "../types";
 
@@ -32,6 +33,11 @@ const DEFAULT_FIELD_SETTINGS: FieldSettings = {
 
 export function useFieldSettings() {
   const { toast } = useToast();
+  const [location] = useLocation();
+  
+  // Detect current client context from URL - CLIENT-AWARE
+  const currentClientId = location.startsWith('/client/') ? parseInt(location.split('/')[2]) : 1;
+  
   const [fieldSettings, setFieldSettings] = useState<FieldSettings>(DEFAULT_FIELD_SETTINGS);
   const [unsavedChanges, setUnsavedChanges] = useState<Partial<FieldSettings>>({});
   const [departmentAppSaveFunction, setDepartmentAppSaveFunction] = useState<(() => Promise<boolean>) | null>(null);
@@ -40,22 +46,22 @@ export function useFieldSettings() {
   const [employeeTypeGroupSaveFunction, setEmployeeTypeGroupSaveFunction] = useState<(() => Promise<boolean>) | null>(null);
   const [isSaving, setIsSaving] = useState(false);
 
-  // Fetch all field settings
+  // Fetch all field settings - CLIENT-AWARE
   const { data: fetchedSettings, isLoading, error } = useQuery({
-    queryKey: ["/api/layout-settings", "all-fields"],
+    queryKey: [`/api/client/${currentClientId}/layout-settings`, "all-fields"],
     queryFn: async () => {
       const settingsQueries = [
-        fetch('/api/layout-settings/firstName', { credentials: 'include' }),
-        fetch('/api/layout-settings/lastName', { credentials: 'include' }),
-        fetch('/api/layout-settings/emailUsername', { credentials: 'include' }),
-        fetch('/api/layout-settings/password', { credentials: 'include' }),
-        fetch('/api/layout-settings/title', { credentials: 'include' }),
-        fetch('/api/layout-settings/manager', { credentials: 'include' }),
-        fetch('/api/layout-settings/department', { credentials: 'include' }),
-        fetch('/api/layout-settings/employeeType', { credentials: 'include' }),
-        fetch('/api/layout-settings/apps', { credentials: 'include' }),
-        fetch('/api/layout-settings/groups', { credentials: 'include' }),
-        fetch('/api/layout-settings/sendActivationEmail', { credentials: 'include' })
+        fetch(`/api/client/${currentClientId}/layout-settings/firstName`, { credentials: 'include' }),
+        fetch(`/api/client/${currentClientId}/layout-settings/lastName`, { credentials: 'include' }),
+        fetch(`/api/client/${currentClientId}/layout-settings/emailUsername`, { credentials: 'include' }),
+        fetch(`/api/client/${currentClientId}/layout-settings/password`, { credentials: 'include' }),
+        fetch(`/api/client/${currentClientId}/layout-settings/title`, { credentials: 'include' }),
+        fetch(`/api/client/${currentClientId}/layout-settings/manager`, { credentials: 'include' }),
+        fetch(`/api/client/${currentClientId}/layout-settings/department`, { credentials: 'include' }),
+        fetch(`/api/client/${currentClientId}/layout-settings/employeeType`, { credentials: 'include' }),
+        fetch(`/api/client/${currentClientId}/layout-settings/apps`, { credentials: 'include' }),
+        fetch(`/api/client/${currentClientId}/layout-settings/groups`, { credentials: 'include' }),
+        fetch(`/api/client/${currentClientId}/layout-settings/sendActivationEmail`, { credentials: 'include' })
       ];
 
       const responses = await Promise.all(settingsQueries);
@@ -181,7 +187,7 @@ export function useFieldSettings() {
 
   const saveFieldSetting = async (fieldKey: FieldKey, config: any) => {
     try {
-      const response = await fetch('/api/layout-settings', {
+      const response = await fetch(`/api/client/${currentClientId}/layout-settings`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -189,6 +195,7 @@ export function useFieldSettings() {
           settingKey: fieldKey,
           settingValue: JSON.stringify(config),
           settingType: 'user_config' as const,
+          clientId: currentClientId,
           metadata: {}
         })
       });

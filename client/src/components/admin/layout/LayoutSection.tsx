@@ -190,8 +190,10 @@ export function LayoutSection({
   // Mutations for logo settings
   const updateLogoTextMutation = useMutation({
     mutationFn: async (newText: string) => {
-      const response = await apiRequest("POST", "/api/layout-settings/logo_text", {
-        settingValue: newText
+      const response = await apiRequest("POST", `/api/client/${currentClientId}/layout-settings`, {
+        settingKey: "logo_text",
+        settingValue: newText,
+        settingType: "logo"
       });
       if (!response.ok) {
         throw new Error("Failed to update logo text");
@@ -216,8 +218,10 @@ export function LayoutSection({
 
   const updateLogoBackgroundColorMutation = useMutation({
     mutationFn: async (newColor: string) => {
-      const response = await apiRequest("POST", "/api/layout-settings/logo_background_color", {
-        settingValue: newColor
+      const response = await apiRequest("POST", `/api/client/${currentClientId}/layout-settings`, {
+        settingKey: "logo_background_color",
+        settingValue: newColor,
+        settingType: "logo"
       });
       if (!response.ok) {
         throw new Error("Failed to update logo background color");
@@ -242,8 +246,10 @@ export function LayoutSection({
 
   const updateLogoTextVisibilityMutation = useMutation({
     mutationFn: async (visible: boolean) => {
-      const response = await apiRequest("POST", "/api/layout-settings/logo_text_visible", {
-        settingValue: visible.toString()
+      const response = await apiRequest("POST", `/api/client/${currentClientId}/layout-settings`, {
+        settingKey: "logo_text_visible",
+        settingValue: visible.toString(),
+        settingType: "logo"
       });
       if (!response.ok) {
         throw new Error("Failed to update logo text visibility");
