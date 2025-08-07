@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Upload, X } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
+import { useLocation } from 'wouter';
 
 interface LogoUploadModalProps {
   isOpen: boolean;
@@ -19,17 +20,22 @@ export function LogoUploadModal({ isOpen, onClose }: LogoUploadModalProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [location] = useLocation();
 
-  // Get all logos
+  // Detect current client context from URL
+  const currentClientId = location.startsWith('/client/') ? location.split('/')[2] : null;
+  const isMspContext = location === '/msp' || location.startsWith('/msp');
+
+  // Get all logos - CLIENT-SPECIFIC or MSP-SPECIFIC
   const { data: allLogos = [] } = useQuery({
-    queryKey: ['/api/company-logos'],
-    enabled: isOpen,
+    queryKey: currentClientId ? [`/api/client/${currentClientId}/company-logos`] : ['/api/company-logos'],
+    enabled: isOpen && (currentClientId || isMspContext),
   });
 
-  // Get active logo
+  // Get active logo - CLIENT-SPECIFIC or MSP-SPECIFIC
   const { data: activeLogo } = useQuery({
-    queryKey: ['/api/company-logos/active'],
-    enabled: isOpen,
+    queryKey: currentClientId ? [`/api/client/${currentClientId}/company-logos/active`] : ['/api/company-logos/active'],
+    enabled: isOpen && (currentClientId || isMspContext),
     retry: false,
   });
 
@@ -42,7 +48,8 @@ export function LogoUploadModal({ isOpen, onClose }: LogoUploadModalProps) {
         reader.readAsDataURL(file);
       });
 
-      const response = await apiRequest('POST', '/api/company-logos', {
+      const endpoint = currentClientId ? `/api/client/${currentClientId}/company-logos` : '/api/company-logos';
+      const response = await apiRequest('POST', endpoint, {
         logoData: base64,
         fileName: file.name,
         fileSize: file.size,
@@ -56,8 +63,14 @@ export function LogoUploadModal({ isOpen, onClose }: LogoUploadModalProps) {
         title: "Success",
         description: "Logo uploaded successfully",
       });
-      queryClient.invalidateQueries({ queryKey: ['/api/company-logos'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/company-logos/active'] });
+      // Invalidate the correct endpoints based on context
+      if (currentClientId) {
+        queryClient.invalidateQueries({ queryKey: [`/api/client/${currentClientId}/company-logos`] });
+        queryClient.invalidateQueries({ queryKey: [`/api/client/${currentClientId}/company-logos/active`] });
+      } else {
+        queryClient.invalidateQueries({ queryKey: ['/api/company-logos'] });
+        queryClient.invalidateQueries({ queryKey: ['/api/company-logos/active'] });
+      }
       onClose();
       setSelectedFile(null);
       setPreviewUrl(null);
@@ -73,7 +86,8 @@ export function LogoUploadModal({ isOpen, onClose }: LogoUploadModalProps) {
 
   const deleteMutation = useMutation({
     mutationFn: async (logoId: number) => {
-      const response = await apiRequest('DELETE', `/api/company-logos/${logoId}`);
+      const endpoint = currentClientId ? `/api/client/${currentClientId}/company-logos/${logoId}` : `/api/company-logos/${logoId}`;
+      const response = await apiRequest('DELETE', endpoint);
       return response.json();
     },
     onSuccess: () => {
@@ -81,8 +95,14 @@ export function LogoUploadModal({ isOpen, onClose }: LogoUploadModalProps) {
         title: "Success",
         description: "Logo removed successfully",
       });
-      queryClient.invalidateQueries({ queryKey: ['/api/company-logos'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/company-logos/active'] });
+      // Invalidate the correct endpoints based on context
+      if (currentClientId) {
+        queryClient.invalidateQueries({ queryKey: [`/api/client/${currentClientId}/company-logos`] });
+        queryClient.invalidateQueries({ queryKey: [`/api/client/${currentClientId}/company-logos/active`] });
+      } else {
+        queryClient.invalidateQueries({ queryKey: ['/api/company-logos'] });
+        queryClient.invalidateQueries({ queryKey: ['/api/company-logos/active'] });
+      }
     },
     onError: (error) => {
       toast({
@@ -95,7 +115,8 @@ export function LogoUploadModal({ isOpen, onClose }: LogoUploadModalProps) {
 
   const setActiveMutation = useMutation({
     mutationFn: async (logoId: number) => {
-      const response = await apiRequest('PUT', `/api/company-logos/${logoId}/activate`);
+      const endpoint = currentClientId ? `/api/client/${currentClientId}/company-logos/${logoId}/activate` : `/api/company-logos/${logoId}/activate`;
+      const response = await apiRequest('PUT', endpoint);
       return response.json();
     },
     onSuccess: () => {
@@ -103,8 +124,14 @@ export function LogoUploadModal({ isOpen, onClose }: LogoUploadModalProps) {
         title: "Success",
         description: "Logo activated successfully",
       });
-      queryClient.invalidateQueries({ queryKey: ['/api/company-logos'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/company-logos/active'] });
+      // Invalidate the correct endpoints based on context
+      if (currentClientId) {
+        queryClient.invalidateQueries({ queryKey: [`/api/client/${currentClientId}/company-logos`] });
+        queryClient.invalidateQueries({ queryKey: [`/api/client/${currentClientId}/company-logos/active`] });
+      } else {
+        queryClient.invalidateQueries({ queryKey: ['/api/company-logos'] });
+        queryClient.invalidateQueries({ queryKey: ['/api/company-logos/active'] });
+      }
     },
     onError: (error) => {
       toast({

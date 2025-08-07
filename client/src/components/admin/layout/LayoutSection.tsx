@@ -127,10 +127,10 @@ export function LayoutSection({
     }
   }, [layoutTab, refetchMonitoringCards]);
 
-  // Get active company logo - ONLY when Layout > Logo tab is active
+  // Get active company logo - CLIENT-SPECIFIC, ONLY when Layout > Logo tab is active
   const { data: activeLogo, refetch: refetchActiveLogo } = useQuery({
-    queryKey: ["/api/company-logos/active"],
-    enabled: layoutTab === "logo", // Only load when logo tab is active
+    queryKey: [`/api/client/${currentClientId}/company-logos/active`],
+    enabled: layoutTab === "logo" && currentClientId, // Only load when logo tab is active and we have a client
     staleTime: 2 * 60 * 1000, // 2 minutes
     refetchOnMount: false,
     refetchOnWindowFocus: false,
