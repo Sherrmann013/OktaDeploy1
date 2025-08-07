@@ -128,9 +128,10 @@ export function LayoutSection({
   }, [layoutTab, refetchMonitoringCards]);
 
   // Get active company logo - CLIENT-SPECIFIC, ONLY when Layout > Logo tab is active
+  const shouldFetchLogo = layoutTab === "logo" && Boolean(currentClientId);
   const { data: activeLogo, refetch: refetchActiveLogo } = useQuery({
     queryKey: [`/api/client/${currentClientId}/company-logos/active`],
-    enabled: layoutTab === "logo" && currentClientId, // Only load when logo tab is active and we have a client
+    enabled: shouldFetchLogo,
     staleTime: 2 * 60 * 1000, // 2 minutes
     refetchOnMount: false,
     refetchOnWindowFocus: false,
@@ -139,7 +140,7 @@ export function LayoutSection({
   // Get current logo text setting - CLIENT-AWARE, ONLY when Layout > Logo tab is active
   const { data: logoTextSetting, refetch: refetchLogoTextSetting } = useQuery({
     queryKey: [`/api/client/${currentClientId}/layout-settings/logo_text`],
-    enabled: layoutTab === "logo", // Only load when logo tab is active
+    enabled: shouldFetchLogo, // Only load when logo tab is active and we have a client
     staleTime: 2 * 60 * 1000, // 2 minutes
     refetchOnMount: false,
     refetchOnWindowFocus: false,
@@ -148,7 +149,7 @@ export function LayoutSection({
   // Get logo background color setting - CLIENT-AWARE, ONLY when Layout > Logo tab is active
   const { data: logoBackgroundSetting, refetch: refetchLogoBackgroundSetting } = useQuery({
     queryKey: [`/api/client/${currentClientId}/layout-settings/logo_background_color`],
-    enabled: layoutTab === "logo", // Only load when logo tab is active
+    enabled: shouldFetchLogo, // Only load when logo tab is active and we have a client
     staleTime: 2 * 60 * 1000, // 2 minutes
     refetchOnMount: false,
     refetchOnWindowFocus: false,
@@ -157,7 +158,7 @@ export function LayoutSection({
   // Get logo text visibility setting - CLIENT-AWARE, ONLY when Layout > Logo tab is active
   const { data: logoTextVisibilitySetting, refetch: refetchLogoTextVisibilitySetting } = useQuery({
     queryKey: [`/api/client/${currentClientId}/layout-settings/logo_text_visible`],
-    enabled: layoutTab === "logo", // Only load when logo tab is active
+    enabled: shouldFetchLogo, // Only load when logo tab is active and we have a client
     staleTime: 2 * 60 * 1000, // 2 minutes
     refetchOnMount: false,
     refetchOnWindowFocus: false,

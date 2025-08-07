@@ -62,29 +62,32 @@ export default function Sidebar() {
     refetchOnWindowFocus: false,
   });
 
+  // Determine if we should fetch logo data
+  const shouldFetchLogos = Boolean(currentClientId || location === '/msp' || location.startsWith('/msp'));
+
   // Get active company logo - STRICTLY CLIENT-SPECIFIC OR MSP-SPECIFIC
   const { data: activeLogo } = useQuery({
     queryKey: currentClientId ? [`/api/client/${currentClientId}/company-logos/active`] : ['/api/company-logos/active'],
-    enabled: currentClientId ? true : (location === '/msp' || location.startsWith('/msp')), // Only fetch in MSP context if no client
+    enabled: shouldFetchLogos,
     retry: false,
   });
 
   // Get custom logo text setting - STRICTLY CLIENT-SPECIFIC OR MSP-SPECIFIC  
   const { data: logoTextSetting } = useQuery({
     queryKey: currentClientId ? [`/api/client/${currentClientId}/layout-settings/logo_text`] : ['/api/layout-settings/logo_text'],
-    enabled: currentClientId ? true : (location === '/msp' || location.startsWith('/msp')), // Only fetch in MSP context if no client
+    enabled: shouldFetchLogos,
   });
 
   // Get logo background color setting - STRICTLY CLIENT-SPECIFIC OR MSP-SPECIFIC
   const { data: logoBackgroundSetting } = useQuery({
     queryKey: currentClientId ? [`/api/client/${currentClientId}/layout-settings/logo_background_color`] : ['/api/layout-settings/logo_background_color'],
-    enabled: currentClientId ? true : (location === '/msp' || location.startsWith('/msp')), // Only fetch in MSP context if no client
+    enabled: shouldFetchLogos,
   });
 
   // Get logo text visibility setting - STRICTLY CLIENT-SPECIFIC OR MSP-SPECIFIC
   const { data: logoTextVisibilitySetting } = useQuery({
     queryKey: currentClientId ? [`/api/client/${currentClientId}/layout-settings/logo_text_visible`] : ['/api/layout-settings/logo_text_visible'],
-    enabled: currentClientId ? true : (location === '/msp' || location.startsWith('/msp')), // Only fetch in MSP context if no client
+    enabled: shouldFetchLogos,
   });
 
   // Logo data loaded silently

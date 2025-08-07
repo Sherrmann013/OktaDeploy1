@@ -25,17 +25,18 @@ export function LogoUploadModal({ isOpen, onClose }: LogoUploadModalProps) {
   // Detect current client context from URL
   const currentClientId = location.startsWith('/client/') ? location.split('/')[2] : null;
   const isMspContext = location === '/msp' || location.startsWith('/msp');
+  const shouldFetch = isOpen && Boolean(currentClientId || isMspContext);
 
   // Get all logos - CLIENT-SPECIFIC or MSP-SPECIFIC
   const { data: allLogos = [] } = useQuery({
     queryKey: currentClientId ? [`/api/client/${currentClientId}/company-logos`] : ['/api/company-logos'],
-    enabled: isOpen && (currentClientId || isMspContext),
+    enabled: shouldFetch,
   });
 
   // Get active logo - CLIENT-SPECIFIC or MSP-SPECIFIC
   const { data: activeLogo } = useQuery({
     queryKey: currentClientId ? [`/api/client/${currentClientId}/company-logos/active`] : ['/api/company-logos/active'],
-    enabled: isOpen && (currentClientId || isMspContext),
+    enabled: shouldFetch,
     retry: false,
   });
 
