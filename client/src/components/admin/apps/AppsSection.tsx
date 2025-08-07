@@ -71,25 +71,35 @@ export function AppsSection() {
       setIsNewMappingOpen(false);
       setNewMapping({ appName: "", oktaGroups: [""], description: "" });
       
-      // Check for warnings in response
-      if (data.warnings && data.warnings.length > 0) {
+      // Check for errors and warnings in response
+      if (data.errors && data.errors.length > 0) {
+        const oktaError = data.errors.find((e: any) => e.type === 'oktaGroupCreationFailed');
+        if (oktaError) {
+          toast({
+            title: "App mapping creation failed",
+            description: `${oktaError.message}. Database entries were not created to maintain data integrity.`,
+            variant: "destructive",
+          });
+        }
+      } else if (data.warnings && data.warnings.length > 0) {
         const oktaWarning = data.warnings.find((w: any) => w.type === 'oktaIntegrationMissing');
         if (oktaWarning) {
           toast({
             title: "App mappings created with warnings",
-            description: `Mappings saved but OKTA groups not created: ${oktaWarning.message}`,
+            description: `Some mappings not saved: ${oktaWarning.message}`,
             variant: "destructive",
           });
-        } else {
-          toast({
-            title: "App mapping(s) created successfully",
-            description: "The new mapping(s) have been added.",
-          });
         }
-      } else {
+      } else if (data.successfulMappings > 0) {
         toast({
           title: "App mapping(s) created successfully",
-          description: "The new mapping(s) have been added and OKTA groups created.",
+          description: `${data.successfulMappings} mapping(s) added and OKTA groups created.`,
+        });
+      } else {
+        toast({
+          title: "No mappings created",
+          description: "All mapping attempts failed. Please check OKTA integration and try again.",
+          variant: "destructive",
         });
       }
     },

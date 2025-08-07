@@ -3499,8 +3499,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         ))
         .limit(1);
 
-      // Create OKTA groups if integration is available
+      // Process OKTA group creation and determine which mappings can be saved
       const groupCreationResults: any[] = [];
+      const successfulMappings: any[] = [];
+      const failedMappings: any[] = [];
+      
       if (oktaIntegration.length > 0) {
         console.log(`🔗 OKTA integration found for client ${clientId}, creating groups...`);
         
@@ -3511,49 +3514,99 @@ export async function registerRoutes(app: Express): Promise<Server> {
               const groupResult = await createOktaGroup(oktaIntegration[0].apiKeys as Record<string, string>, groupName, mapping.description);
               groupCreationResults.push({
                 groupName,
+                mapping,
                 result: groupResult
               });
+              
+              if (groupResult.success) {
+                successfulMappings.push(mapping);
+                console.log(`✅ OKTA group '${groupName}' created successfully, mapping will be saved`);
+              } else {
+                failedMappings.push({ mapping, error: groupResult.message });
+                console.log(`❌ OKTA group '${groupName}' creation failed, mapping will not be saved: ${groupResult.message}`);
+              }
               
               // Small delay between group creation requests to avoid rate limiting
               await new Promise(resolve => setTimeout(resolve, 100));
             } catch (error) {
+              const errorMessage = error instanceof Error ? error.message : 'Unknown error';
               console.error(`Failed to create OKTA group '${groupName}':`, error);
               groupCreationResults.push({
                 groupName,
-                result: { success: false, message: error instanceof Error ? error.message : 'Unknown error' }
+                mapping,
+                result: { success: false, message: errorMessage }
               });
+              failedMappings.push({ mapping, error: errorMessage });
             }
+          } else {
+            // Mappings without OKTA group names can be saved directly
+            successfulMappings.push(mapping);
           }
         }
       } else {
-        console.log(`⚠️  No OKTA integration found for client ${clientId}, skipping group creation`);
+        // No OKTA integration - check if any mappings have group names
+        const hasOktaGroupNames = mappings.some((m: any) => m.oktaGroupName && m.oktaGroupName.trim());
+        if (hasOktaGroupNames) {
+          console.log(`⚠️  OKTA integration missing but group names specified - no mappings will be saved`);
+          failedMappings.push(...mappings.filter((m: any) => m.oktaGroupName && m.oktaGroupName.trim()).map(mapping => ({
+            mapping,
+            error: 'No OKTA integration configured for this client'
+          })));
+          // Only save mappings without group names
+          successfulMappings.push(...mappings.filter((m: any) => !m.oktaGroupName || !m.oktaGroupName.trim()));
+        } else {
+          // No group names specified, save all mappings
+          successfulMappings.push(...mappings);
+        }
       }
       
-      // Create database mappings
-      const results = await clientDb.insert(appMappings).values(
-        mappings.map((mapping: any) => ({
-          ...mapping,
-          created: new Date(),
-          lastUpdated: new Date(),
-          status: 'active'
-        }))
-      ).returning();
+      // Only create database mappings for successful OKTA group creations
+      let results: any[] = [];
+      if (successfulMappings.length > 0) {
+        results = await clientDb.insert(appMappings).values(
+          successfulMappings.map((mapping: any) => ({
+            ...mapping,
+            created: new Date(),
+            lastUpdated: new Date(),
+            status: 'active'
+          }))
+        ).returning();
+        console.log(`✅ Created ${results.length} app mappings for client ${clientId}`);
+      } else {
+        console.log(`❌ No app mappings created for client ${clientId} - all OKTA group creations failed`);
+      }
       
-      console.log(`✅ Created ${results.length} app mappings for client ${clientId}`);
+      // Prepare response with detailed results
+      const warnings: any[] = [];
+      const errors: any[] = [];
       
-      // Check if any mappings have OKTA group names but no integration
-      const hasOktaGroupNames = mappings.some((m: any) => m.oktaGroupName && m.oktaGroupName.trim());
-      const oktaIntegrationMissing = hasOktaGroupNames && oktaIntegration.length === 0;
+      if (failedMappings.length > 0) {
+        errors.push({
+          type: 'oktaGroupCreationFailed',
+          message: `${failedMappings.length} mapping(s) not saved due to OKTA group creation failures`,
+          failedMappings: failedMappings.map(f => ({
+            appName: f.mapping.appName,
+            oktaGroupName: f.mapping.oktaGroupName,
+            error: f.error
+          }))
+        });
+      }
       
-      // Return results with group creation information and warnings
+      if (oktaIntegration.length === 0 && mappings.some((m: any) => m.oktaGroupName && m.oktaGroupName.trim())) {
+        warnings.push({
+          type: 'oktaIntegrationMissing',
+          message: 'OKTA integration not configured for this client',
+          affectedMappings: mappings.filter((m: any) => m.oktaGroupName && m.oktaGroupName.trim()).length
+        });
+      }
+      
       res.json({
         mappings: results,
         groupCreationResults,
-        warnings: oktaIntegrationMissing ? [{
-          type: 'oktaIntegrationMissing',
-          message: 'OKTA group names were specified but no OKTA integration is configured for this client. Groups were not created in OKTA.',
-          affectedMappings: mappings.filter((m: any) => m.oktaGroupName && m.oktaGroupName.trim()).length
-        }] : []
+        successfulMappings: successfulMappings.length,
+        failedMappings: failedMappings.length,
+        warnings,
+        errors
       });
     } catch (error) {
       console.error(`Error creating app mappings for client:`, error);
