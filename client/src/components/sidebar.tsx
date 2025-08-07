@@ -87,6 +87,11 @@ export default function Sidebar() {
 
   // Dynamic navigation based on current context (client vs MSP)
   const getNavigation = () => {
+    // If we're on the MSP page, don't show any navigation items
+    if (location === '/msp') {
+      return [];
+    }
+    
     const baseUrl = currentClientId ? `/client/${currentClientId}` : '';
     
     return [
@@ -108,7 +113,7 @@ export default function Sidebar() {
         icon: Settings, 
         current: false 
       }] : []),
-      ...(canViewAdmin ? [{ name: "MSP", href: "/msp", icon: Building2, current: false }] : []),
+      // MSP option removed - access only through client dropdown
     ];
   };
 
