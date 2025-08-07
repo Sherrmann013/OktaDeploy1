@@ -14,8 +14,9 @@ export class MultiDatabaseManager {
   private constructor() {
     // Initialize MSP database connection
     const mspConnectionString = process.env.MSP_DATABASE_URL || process.env.DATABASE_URL || 'postgresql://localhost:5432/msp_db';
+    const requireSSL = mspConnectionString.includes('neon.db') || mspConnectionString.includes('amazonaws.com') || process.env.NODE_ENV === 'production';
     const mspClient = postgres(mspConnectionString, { 
-      ssl: process.env.NODE_ENV === 'production' ? 'require' : false,
+      ssl: requireSSL ? 'require' : false,
       transform: { undefined: null }
     });
     this.mspDb = drizzle(mspClient, { schema: mspSchema });
@@ -62,8 +63,9 @@ export class MultiDatabaseManager {
     try {
       // Create new client database connection
       console.log(`🔌 Connecting to client ${clientId} database...`);
+      const requireSSL = connectionString.includes('neon.db') || connectionString.includes('amazonaws.com') || process.env.NODE_ENV === 'production';
       const clientDbClient = postgres(connectionString, {
-        ssl: process.env.NODE_ENV === 'production' ? 'require' : false,
+        ssl: requireSSL ? 'require' : false,
         transform: { undefined: null }
       });
       const clientDb = drizzle(clientDbClient, { 
@@ -95,8 +97,9 @@ export class MultiDatabaseManager {
     const parsedUrl = new URL(baseUrl);
     
     // Create the new database using superuser connection
+    const requireSSL = baseUrl.includes('neon.db') || baseUrl.includes('amazonaws.com') || process.env.NODE_ENV === 'production';
     const sql = postgres(baseUrl, {
-      ssl: process.env.NODE_ENV === 'production' ? 'require' : false,
+      ssl: requireSSL ? 'require' : false,
       transform: { undefined: null }
     });
     try {
@@ -146,8 +149,9 @@ export class MultiDatabaseManager {
         throw new Error(`No connection string found for client ${clientId}`);
       }
       
+      const requireSSL = clientConnectionString.includes('neon.db') || clientConnectionString.includes('amazonaws.com') || process.env.NODE_ENV === 'production';
       const sql = postgres(clientConnectionString, {
-        ssl: process.env.NODE_ENV === 'production' ? 'require' : false,
+        ssl: requireSSL ? 'require' : false,
         transform: { undefined: null }
       });
       
