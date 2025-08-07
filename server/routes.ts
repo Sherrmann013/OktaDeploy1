@@ -4374,6 +4374,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put("/api/clients/:id", isAuthenticated, requireAdmin, mspRoutes.updateClient);
   app.delete("/api/clients/:id", isAuthenticated, requireAdmin, mspRoutes.deleteClient);
 
+  // Auto-initialize missing client database tables on startup
+  async function initializeExistingClients() {
+    try {
+      console.log('🔄 Checking existing client databases for missing tables...');
+      
+      const multiDb = MultiDatabaseManager.getInstance();
+      const { mspStorage } = await import('./msp-storage');
+      
+      // Get all clients
+      const clients = await mspStorage.getAllClients();
+      console.log(`Found ${clients.length} clients to check`);
+      
+      for (const client of clients) {
+        try {
+          // Try to access client database
+          const clientDb = await multiDb.getClientDb(client.id);
+          
+          // Check if app_mappings table exists by attempting a simple query
+          await clientDb.select().from((await import('../shared/client-schema')).appMappings).limit(1);
+          console.log(`✅ Client ${client.id} (${client.name}) database is properly initialized`);
+        } catch (error) {
+          // If table doesn't exist, initialize the database
+          if (error.message?.includes('relation') && error.message?.includes('does not exist')) {
+            console.log(`🚀 Initializing missing tables for client ${client.id} (${client.name})`);
+            await multiDb.initializeClientDatabase(client.id);
+            console.log(`✅ Successfully initialized database for client ${client.id}`);
+          } else {
+            console.error(`❌ Error checking client ${client.id}:`, error);
+          }
+        }
+      }
+      
+      console.log('✅ Client database initialization check completed');
+    } catch (error) {
+      console.error('❌ Client database initialization check failed:', error);
+    }
+  }
+
+  // Run the initialization check
+  setTimeout(initializeExistingClients, 2000); // Wait 2 seconds for everything to be ready
+
 
   
   // MSP Client Access Management
