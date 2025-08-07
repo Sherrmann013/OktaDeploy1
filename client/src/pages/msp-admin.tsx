@@ -1,5 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useLocation } from "wouter";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -8,13 +10,205 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { Users, Shield, Settings, Activity, Search, Plus, Database, Wifi, WifiOff } from "lucide-react";
+import { Users, Shield, Settings, Activity, Search, Plus, Database, Wifi, WifiOff, Upload, Eye, EyeOff, Trash2, Image } from "lucide-react";
+import { LogoUploadModal } from "@/components/LogoUploadModal";
 
 export default function MSPAdmin() {
   const { toast } = useToast();
   const [location] = useLocation();
   const [activeTab, setActiveTab] = useState("site-access");
+  const [layoutTab, setLayoutTab] = useState("logo");
+  const [isLogoUploadOpen, setIsLogoUploadOpen] = useState(false);
+  const queryClient = useQueryClient();
+
+  // MSP logo queries - using global endpoints since this is MSP-level
+  const { data: activeLogo, refetch: refetchActiveLogo } = useQuery({
+    queryKey: ['/api/company-logos/active'],
+    enabled: layoutTab === "logo",
+    staleTime: 2 * 60 * 1000,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+  });
+
+  const { data: logoTextSetting, refetch: refetchLogoTextSetting } = useQuery({
+    queryKey: ['/api/layout-settings/logo_text'],
+    enabled: layoutTab === "logo",
+    staleTime: 2 * 60 * 1000,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+  });
+
+  const { data: logoBackgroundSetting, refetch: refetchLogoBackgroundSetting } = useQuery({
+    queryKey: ['/api/layout-settings/logo_background_color'],
+    enabled: layoutTab === "logo",
+    staleTime: 2 * 60 * 1000,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+  });
+
+  const { data: logoTextVisibilitySetting, refetch: refetchLogoTextVisibilitySetting } = useQuery({
+    queryKey: ['/api/layout-settings/logo_text_visible'],
+    enabled: layoutTab === "logo",
+    staleTime: 2 * 60 * 1000,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+  });
+
+  // Local state for logo settings
+  const [logoText, setLogoText] = useState("Powered by ClockWerk.it");
+  const [logoBackgroundColor, setLogoBackgroundColor] = useState("#7c3aed");
+  const [showLogoText, setShowLogoText] = useState(true);
+
+  // Update local state when settings change
+  useEffect(() => {
+    if (logoTextSetting) {
+      setLogoText((logoTextSetting as any)?.settingValue || "Powered by ClockWerk.it");
+    }
+  }, [logoTextSetting]);
+
+  useEffect(() => {
+    if (logoBackgroundSetting) {
+      setLogoBackgroundColor((logoBackgroundSetting as any)?.settingValue || "#7c3aed");
+    }
+  }, [logoBackgroundSetting]);
+
+  useEffect(() => {
+    if (logoTextVisibilitySetting) {
+      setShowLogoText((logoTextVisibilitySetting as any)?.settingValue === "true" || (logoTextVisibilitySetting as any)?.settingValue === true);
+    }
+  }, [logoTextVisibilitySetting]);
+
+  // Mutations for logo settings
+  const updateLogoTextMutation = useMutation({
+    mutationFn: async (newText: string) => {
+      const response = await apiRequest("POST", "/api/layout-settings", {
+        settingKey: "logo_text",
+        settingValue: newText,
+        settingType: "logo"
+      });
+      if (!response.ok) {
+        throw new Error("Failed to update logo text");
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Success",
+        description: "Logo text updated successfully",
+      });
+      refetchLogoTextSetting();
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: "Failed to update logo text",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const updateLogoBackgroundColorMutation = useMutation({
+    mutationFn: async (newColor: string) => {
+      const response = await apiRequest("POST", "/api/layout-settings", {
+        settingKey: "logo_background_color",
+        settingValue: newColor,
+        settingType: "logo"
+      });
+      if (!response.ok) {
+        throw new Error("Failed to update logo background color");
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Success",
+        description: "Logo background color updated successfully",
+      });
+      refetchLogoBackgroundSetting();
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: "Failed to update logo background color",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const updateLogoTextVisibilityMutation = useMutation({
+    mutationFn: async (isVisible: boolean) => {
+      const response = await apiRequest("POST", "/api/layout-settings", {
+        settingKey: "logo_text_visible",
+        settingValue: isVisible.toString(),
+        settingType: "logo"
+      });
+      if (!response.ok) {
+        throw new Error("Failed to update logo text visibility");
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Success",
+        description: "Logo text visibility updated successfully",
+      });
+      refetchLogoTextVisibilitySetting();
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: "Failed to update logo text visibility",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Delete logo mutation
+  const deleteLogoMutation = useMutation({
+    mutationFn: async (logoId: number) => {
+      const response = await apiRequest("DELETE", `/api/company-logos/${logoId}`);
+      if (!response.ok) {
+        throw new Error("Failed to delete logo");
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Success",
+        description: "Logo deleted successfully",
+      });
+      refetchActiveLogo();
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: "Failed to delete logo",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleLogoTextSave = () => {
+    updateLogoTextMutation.mutate(logoText);
+  };
+
+  const handleLogoBackgroundColorSave = () => {
+    updateLogoBackgroundColorMutation.mutate(logoBackgroundColor);
+  };
+
+  const handleLogoTextVisibilityToggle = () => {
+    const newVisibility = !showLogoText;
+    setShowLogoText(newVisibility);
+    updateLogoTextVisibilityMutation.mutate(newVisibility);
+  };
+
+  const handleDeleteLogo = () => {
+    if ((activeLogo as any)?.id) {
+      deleteLogoMutation.mutate((activeLogo as any).id);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -203,46 +397,187 @@ export default function MSPAdmin() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="space-y-6">
-                  <div className="grid gap-4">
-                    <div>
-                      <Label htmlFor="msp-name">MSP Name</Label>
-                      <Input
-                        id="msp-name"
-                        placeholder="Enter MSP name"
-                        className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600"
-                      />
-                    </div>
+                <Tabs value={layoutTab} onValueChange={setLayoutTab} className="space-y-6">
+                  <TabsList className="grid w-full grid-cols-1 bg-gray-100 dark:bg-gray-700">
+                    <TabsTrigger value="logo" className="flex items-center gap-2">
+                      <Image className="h-4 w-4" />
+                      Logo
+                    </TabsTrigger>
+                  </TabsList>
 
-                    <div>
-                      <Label htmlFor="msp-logo">MSP Logo</Label>
-                      <div className="flex items-center gap-4 mt-2">
-                        <div className="w-16 h-16 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg flex items-center justify-center">
-                          <Settings className="h-6 w-6 text-gray-400" />
+                  {/* Logo Sub-Tab */}
+                  <TabsContent value="logo" className="space-y-6">
+                    <div className="bg-white dark:bg-gray-800 rounded-lg border dark:border-gray-700 p-6">
+                      <div className="flex justify-between items-center mb-6">
+                        <div>
+                          <h4 className="text-lg font-semibold">MSP Logo Configuration</h4>
+                          <p className="text-sm text-muted-foreground">
+                            Upload and configure your MSP logo and branding
+                          </p>
                         </div>
-                        <Button variant="outline">Upload Logo</Button>
+                        <Button 
+                          onClick={() => setIsLogoUploadOpen(true)}
+                          className="bg-orange-600 hover:bg-orange-700 text-white"
+                        >
+                          <Plus className="w-4 h-4 mr-2" />
+                          Upload Logo
+                        </Button>
+                      </div>
+
+                      {/* Active Logo Display */}
+                      <div className="mb-8">
+                        <h5 className="font-medium mb-4">Current Logo</h5>
+                        <div className="flex items-center gap-6">
+                          <div 
+                            className="relative w-24 h-24 rounded-lg flex items-center justify-center border-2 border-gray-200 dark:border-gray-600"
+                            style={{ 
+                              backgroundColor: logoBackgroundColor === "transparent" ? "transparent" : logoBackgroundColor
+                            }}
+                          >
+                            {(activeLogo as any)?.logoData ? (
+                              <img 
+                                src={(activeLogo as any).logoData} 
+                                alt="MSP Logo" 
+                                className="w-20 h-20 object-contain"
+                              />
+                            ) : (
+                              <div className="text-gray-400 dark:text-gray-500 text-xs text-center">
+                                No Logo
+                              </div>
+                            )}
+                          </div>
+                          <div className="space-y-2">
+                            <p className="text-sm text-gray-600 dark:text-gray-400">
+                              {(activeLogo as any)?.logoData ? "Logo is active" : "No logo uploaded"}
+                            </p>
+                            {(activeLogo as any)?.logoData && (
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                onClick={handleDeleteLogo}
+                                className="text-red-600 hover:text-red-700"
+                              >
+                                <Trash2 className="w-4 h-4 mr-2" />
+                                Delete Logo
+                              </Button>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Logo Settings */}
+                      <div className="space-y-6">
+                        {/* Logo Text */}
+                        <div>
+                          <div className="flex items-center justify-between mb-3">
+                            <Label htmlFor="logo-text">Logo Text</Label>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={handleLogoTextVisibilityToggle}
+                              className="text-gray-600 dark:text-gray-400"
+                            >
+                              {showLogoText ? (
+                                <>
+                                  <Eye className="w-4 h-4 mr-2" />
+                                  Visible
+                                </>
+                              ) : (
+                                <>
+                                  <EyeOff className="w-4 h-4 mr-2" />
+                                  Hidden
+                                </>
+                              )}
+                            </Button>
+                          </div>
+                          <div className="flex gap-2">
+                            <Input
+                              id="logo-text"
+                              value={logoText}
+                              onChange={(e) => setLogoText(e.target.value)}
+                              placeholder="Enter logo text"
+                              className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600"
+                            />
+                            <Button onClick={handleLogoTextSave} size="sm">
+                              Save
+                            </Button>
+                          </div>
+                        </div>
+
+                        {/* Logo Background Color */}
+                        <div>
+                          <Label htmlFor="logo-bg-color">Logo Background Color</Label>
+                          <div className="flex gap-2 mt-2">
+                            <div className="flex items-center gap-2">
+                              <Input
+                                id="logo-bg-color"
+                                type="color"
+                                value={logoBackgroundColor}
+                                onChange={(e) => setLogoBackgroundColor(e.target.value)}
+                                className="w-16 h-10 p-1 border border-gray-200 dark:border-gray-600 rounded"
+                              />
+                              <Input
+                                value={logoBackgroundColor}
+                                onChange={(e) => setLogoBackgroundColor(e.target.value)}
+                                placeholder="#7c3aed"
+                                className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600 flex-1"
+                              />
+                            </div>
+                            <Button onClick={handleLogoBackgroundColorSave} size="sm">
+                              Save
+                            </Button>
+                          </div>
+                          <div className="flex gap-2 mt-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => setLogoBackgroundColor("transparent")}
+                            >
+                              Transparent
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => setLogoBackgroundColor("#7c3aed")}
+                            >
+                              Default Purple
+                            </Button>
+                          </div>
+                        </div>
+
+                        {/* Preview */}
+                        <div>
+                          <Label>Preview</Label>
+                          <div className="mt-2 p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                            <div className="flex items-center gap-3">
+                              <div 
+                                className="relative w-16 h-16 rounded flex items-center justify-center"
+                                style={{ 
+                                  backgroundColor: logoBackgroundColor === "transparent" ? "transparent" : logoBackgroundColor
+                                }}
+                              >
+                                {(activeLogo as any)?.logoData ? (
+                                  <img 
+                                    src={(activeLogo as any).logoData} 
+                                    alt="Preview" 
+                                    className="w-14 h-14 object-contain"
+                                  />
+                                ) : (
+                                  <div className="text-gray-400 text-xs">Logo</div>
+                                )}
+                              </div>
+                              {showLogoText && (
+                                <div className="text-sm text-gray-600 dark:text-gray-300">
+                                  {logoText}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
                       </div>
                     </div>
-
-                    <div>
-                      <Label htmlFor="theme">Theme</Label>
-                      <Select>
-                        <SelectTrigger className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600">
-                          <SelectValue placeholder="Select theme" />
-                        </SelectTrigger>
-                        <SelectContent className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600">
-                          <SelectItem value="light">Light</SelectItem>
-                          <SelectItem value="dark">Dark</SelectItem>
-                          <SelectItem value="auto">Auto</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-
-                  <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
-                    <Button>Save Layout Settings</Button>
-                  </div>
-                </div>
+                  </TabsContent>
+                </Tabs>
               </CardContent>
             </Card>
           </TabsContent>
@@ -322,6 +657,16 @@ export default function MSPAdmin() {
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* Logo Upload Modal */}
+      <LogoUploadModal 
+        isOpen={isLogoUploadOpen}
+        onClose={() => setIsLogoUploadOpen(false)}
+        onUploadSuccess={() => {
+          refetchActiveLogo();
+          setIsLogoUploadOpen(false);
+        }}
+      />
     </div>
   );
 }
