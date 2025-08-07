@@ -2660,6 +2660,88 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Client-specific integrations POST endpoint
+  app.post("/api/client/:clientId/integrations", isAuthenticated, requireAdmin, async (req, res) => {
+    try {
+      const clientId = parseInt(req.params.clientId);
+      const integrationData = insertIntegrationSchema.parse(req.body);
+      console.log(`🔗 Creating integration for client ${clientId}:`, integrationData.name);
+      
+      const multiDb = MultiDatabaseManager.getInstance();
+      const clientDb = await multiDb.getClientDb(clientId);
+      
+      const [result] = await clientDb.insert(integrations)
+        .values(integrationData)
+        .returning();
+      
+      console.log(`✅ Created integration for client ${clientId}:`, result);
+      res.json(result);
+    } catch (error) {
+      console.error("Error creating integration for client:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: error.errors });
+      }
+      res.status(500).json({ error: "Failed to create client integration" });
+    }
+  });
+
+  // Client-specific integrations PUT endpoint
+  app.put("/api/client/:clientId/integrations/:integrationId", isAuthenticated, requireAdmin, async (req, res) => {
+    try {
+      const clientId = parseInt(req.params.clientId);
+      const integrationId = parseInt(req.params.integrationId);
+      const integrationData = insertIntegrationSchema.parse(req.body);
+      console.log(`🔗 Updating integration ${integrationId} for client ${clientId}`);
+      
+      const multiDb = MultiDatabaseManager.getInstance();
+      const clientDb = await multiDb.getClientDb(clientId);
+      
+      const [result] = await clientDb.update(integrations)
+        .set(integrationData)
+        .where(eq(integrations.id, integrationId))
+        .returning();
+      
+      if (!result) {
+        return res.status(404).json({ error: "Integration not found" });
+      }
+      
+      console.log(`✅ Updated integration for client ${clientId}:`, result);
+      res.json(result);
+    } catch (error) {
+      console.error("Error updating integration for client:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: error.errors });
+      }
+      res.status(500).json({ error: "Failed to update client integration" });
+    }
+  });
+
+  // Client-specific integrations DELETE endpoint
+  app.delete("/api/client/:clientId/integrations/:integrationId", isAuthenticated, requireAdmin, async (req, res) => {
+    try {
+      const clientId = parseInt(req.params.clientId);
+      const integrationId = parseInt(req.params.integrationId);
+      console.log(`🔗 Deleting integration ${integrationId} for client ${clientId}`);
+      
+      const multiDb = MultiDatabaseManager.getInstance();
+      const clientDb = await multiDb.getClientDb(clientId);
+      
+      const result = await clientDb.delete(integrations)
+        .where(eq(integrations.id, integrationId))
+        .returning();
+      
+      if (result.length === 0) {
+        return res.status(404).json({ error: "Integration not found" });
+      }
+      
+      console.log(`✅ Deleted integration for client ${clientId}`);
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting integration for client:", error);
+      res.status(500).json({ error: "Failed to delete client integration" });
+    }
+  });
+
   app.post("/api/integrations", isAuthenticated, requireAdmin, async (req, res) => {
     try {
       const integrationData = insertIntegrationSchema.parse(req.body);
@@ -4421,6 +4503,327 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/msp-users/:mspUserId/client-access", isAuthenticated, mspRoutes.getMspUserClientAccess);
   app.post("/api/client-access", isAuthenticated, requireAdmin, mspRoutes.grantClientAccess);
   app.delete("/api/client-access/:mspUserId/:clientId", isAuthenticated, requireAdmin, mspRoutes.revokeClientAccess);
+
+  // CLIENT-SPECIFIC USER ENDPOINTS - CRITICAL FOR DATA ISOLATION
+  
+  // Get users for specific client
+  app.get("/api/client/:clientId/users", isAuthenticated, async (req, res) => {
+    try {
+      const clientId = parseInt(req.params.clientId);
+      const { search, limit = 20, page = 1, statsOnly = false, sortBy = 'firstName', sortOrder = 'asc', employeeTypeFilter, ...filters } = req.query;
+      
+      console.log(`👥 Fetching users for client ${clientId}`);
+      
+      // Use client-specific database connection
+      const multiDb = MultiDatabaseManager.getInstance();
+      const clientDb = await multiDb.getClientDb(clientId);
+      
+      // For stats-only requests, return minimal data quickly
+      if (statsOnly === 'true') {
+        const allUsers = await clientDb.select().from(users).limit(500);
+        res.json({
+          users: [],
+          total: allUsers.length,
+          currentPage: 1,
+          totalPages: 1,
+          usersPerPage: parseInt(limit as string),
+          source: 'client_db_stats'
+        });
+        return;
+      }
+      
+      // Get users from client-specific database
+      let query = clientDb.select().from(users);
+      
+      // Apply search filter if provided
+      if (search && typeof search === 'string') {
+        const searchTerm = `%${search.toLowerCase()}%`;
+        query = query.where(
+          or(
+            ilike(users.firstName, searchTerm),
+            ilike(users.lastName, searchTerm),
+            ilike(users.email, searchTerm)
+          )
+        );
+      }
+      
+      // Apply employee type filter
+      if (employeeTypeFilter && typeof employeeTypeFilter === 'string') {
+        query = query.where(eq(users.employeeType, employeeTypeFilter));
+      }
+      
+      // Get total count for pagination
+      const allFilteredUsers = await query;
+      const total = allFilteredUsers.length;
+      
+      // Apply sorting
+      const sortField = sortBy as keyof typeof users.$inferSelect;
+      if (sortOrder === 'desc') {
+        query = query.orderBy(desc(users[sortField]));
+      } else {
+        query = query.orderBy(asc(users[sortField]));
+      }
+      
+      // Apply pagination
+      const offset = (parseInt(page as string) - 1) * parseInt(limit as string);
+      const paginatedUsers = allFilteredUsers.slice(offset, offset + parseInt(limit as string));
+      
+      const totalPages = Math.ceil(total / parseInt(limit as string));
+      
+      console.log(`✅ Found ${paginatedUsers.length} users for client ${clientId} (${total} total)`);
+      
+      res.json({
+        users: paginatedUsers,
+        total,
+        currentPage: parseInt(page as string),
+        totalPages,
+        usersPerPage: parseInt(limit as string),
+        source: 'client_db'
+      });
+    } catch (error) {
+      console.error(`Error fetching users for client:`, error);
+      res.status(500).json({ error: "Failed to fetch client users" });
+    }
+  });
+  
+  // Create user for specific client
+  app.post("/api/client/:clientId/users", isAuthenticated, requireAdmin, async (req, res) => {
+    try {
+      const clientId = parseInt(req.params.clientId);
+      const userData = insertUserSchema.parse(req.body);
+      
+      console.log(`👤 Creating user for client ${clientId}:`, userData.email);
+      
+      // Use client-specific database connection
+      const multiDb = MultiDatabaseManager.getInstance();
+      const clientDb = await multiDb.getClientDb(clientId);
+      
+      // Check for existing user by email
+      const existingUser = await clientDb.select().from(users).where(eq(users.email, userData.email)).limit(1);
+      if (existingUser.length > 0) {
+        return res.status(400).json({ message: "User with this email already exists" });
+      }
+      
+      // Create user in client-specific database
+      const [newUser] = await clientDb.insert(users).values({
+        ...userData,
+        created: new Date(),
+        lastUpdated: new Date()
+      }).returning();
+      
+      console.log(`✅ Created user for client ${clientId}:`, newUser.id);
+      res.json(newUser);
+    } catch (error) {
+      console.error(`Error creating user for client:`, error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: error.errors });
+      }
+      res.status(500).json({ error: "Failed to create client user" });
+    }
+  });
+  
+  // Get specific user for client
+  app.get("/api/client/:clientId/users/:userId", isAuthenticated, async (req, res) => {
+    try {
+      const clientId = parseInt(req.params.clientId);
+      const userId = parseInt(req.params.userId);
+      
+      console.log(`👤 Fetching user ${userId} for client ${clientId}`);
+      
+      // Use client-specific database connection
+      const multiDb = MultiDatabaseManager.getInstance();
+      const clientDb = await multiDb.getClientDb(clientId);
+      
+      const [user] = await clientDb.select().from(users).where(eq(users.id, userId)).limit(1);
+      
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+      
+      console.log(`✅ Found user ${userId} for client ${clientId}`);
+      res.json(user);
+    } catch (error) {
+      console.error(`Error fetching user for client:`, error);
+      res.status(500).json({ error: "Failed to fetch client user" });
+    }
+  });
+  
+  // Update user for specific client
+  app.patch("/api/client/:clientId/users/:userId", isAuthenticated, requireAdmin, async (req, res) => {
+    try {
+      const clientId = parseInt(req.params.clientId);
+      const userId = parseInt(req.params.userId);
+      const updates = updateUserSchema.parse(req.body);
+      
+      console.log(`👤 Updating user ${userId} for client ${clientId}`);
+      
+      // Use client-specific database connection
+      const multiDb = MultiDatabaseManager.getInstance();
+      const clientDb = await multiDb.getClientDb(clientId);
+      
+      // Check if user exists
+      const [existingUser] = await clientDb.select().from(users).where(eq(users.id, userId)).limit(1);
+      if (!existingUser) {
+        return res.status(404).json({ error: "User not found" });
+      }
+      
+      // Update user in client-specific database
+      const [updatedUser] = await clientDb.update(users)
+        .set({ ...updates, lastUpdated: new Date() })
+        .where(eq(users.id, userId))
+        .returning();
+      
+      console.log(`✅ Updated user ${userId} for client ${clientId}`);
+      res.json(updatedUser);
+    } catch (error) {
+      console.error(`Error updating user for client:`, error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: error.errors });
+      }
+      res.status(500).json({ error: "Failed to update client user" });
+    }
+  });
+  
+  // Update user status for specific client
+  app.patch("/api/client/:clientId/users/:userId/status", isAuthenticated, requireAdmin, async (req, res) => {
+    try {
+      const clientId = parseInt(req.params.clientId);
+      const userId = parseInt(req.params.userId);
+      const { status } = z.object({
+        status: z.enum(["ACTIVE", "SUSPENDED", "DEPROVISIONED"])
+      }).parse(req.body);
+      
+      console.log(`👤 Updating status for user ${userId} in client ${clientId} to ${status}`);
+      
+      // Use client-specific database connection
+      const multiDb = MultiDatabaseManager.getInstance();
+      const clientDb = await multiDb.getClientDb(clientId);
+      
+      // Update status in client-specific database
+      const [updatedUser] = await clientDb.update(users)
+        .set({ status, lastUpdated: new Date() })
+        .where(eq(users.id, userId))
+        .returning();
+      
+      if (!updatedUser) {
+        return res.status(404).json({ error: "User not found" });
+      }
+      
+      console.log(`✅ Updated status for user ${userId} in client ${clientId}`);
+      res.json(updatedUser);
+    } catch (error) {
+      console.error(`Error updating user status for client:`, error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: error.errors });
+      }
+      res.status(500).json({ error: "Failed to update client user status" });
+    }
+  });
+  
+  // Delete user for specific client
+  app.delete("/api/client/:clientId/users/:userId", isAuthenticated, requireAdmin, async (req, res) => {
+    try {
+      const clientId = parseInt(req.params.clientId);
+      const userId = parseInt(req.params.userId);
+      
+      console.log(`👤 Deleting user ${userId} for client ${clientId}`);
+      
+      // Use client-specific database connection
+      const multiDb = MultiDatabaseManager.getInstance();
+      const clientDb = await multiDb.getClientDb(clientId);
+      
+      // Delete user from client-specific database
+      const result = await clientDb.delete(users).where(eq(users.id, userId)).returning();
+      
+      if (result.length === 0) {
+        return res.status(404).json({ error: "User not found" });
+      }
+      
+      console.log(`✅ Deleted user ${userId} for client ${clientId}`);
+      res.status(204).send();
+    } catch (error) {
+      console.error(`Error deleting user for client:`, error);
+      res.status(500).json({ error: "Failed to delete client user" });
+    }
+  });
+  
+  // Get user applications for specific client
+  app.get("/api/client/:clientId/users/:userId/applications", isAuthenticated, async (req, res) => {
+    try {
+      const clientId = parseInt(req.params.clientId);
+      const userId = parseInt(req.params.userId);
+      
+      console.log(`📱 Fetching applications for user ${userId} in client ${clientId}`);
+      
+      // Use client-specific database connection
+      const multiDb = MultiDatabaseManager.getInstance();
+      const clientDb = await multiDb.getClientDb(clientId);
+      
+      // For now, return empty array - this would need proper implementation
+      // based on client-specific application assignments
+      res.json([]);
+    } catch (error) {
+      console.error(`Error fetching user applications for client:`, error);
+      res.status(500).json({ error: "Failed to fetch client user applications" });
+    }
+  });
+  
+  // Get user groups for specific client
+  app.get("/api/client/:clientId/users/:userId/groups", isAuthenticated, async (req, res) => {
+    try {
+      const clientId = parseInt(req.params.clientId);
+      const userId = parseInt(req.params.userId);
+      
+      console.log(`👥 Fetching groups for user ${userId} in client ${clientId}`);
+      
+      // Use client-specific database connection
+      const multiDb = MultiDatabaseManager.getInstance();
+      const clientDb = await multiDb.getClientDb(clientId);
+      
+      // For now, return empty array - this would need proper implementation
+      // based on client-specific group assignments
+      res.json([]);
+    } catch (error) {
+      console.error(`Error fetching user groups for client:`, error);
+      res.status(500).json({ error: "Failed to fetch client user groups" });
+    }
+  });
+  
+  // Get user devices for specific client
+  app.get("/api/client/:clientId/users/:userId/devices", isAuthenticated, async (req, res) => {
+    try {
+      const clientId = parseInt(req.params.clientId);
+      const userId = parseInt(req.params.userId);
+      
+      console.log(`💻 Fetching devices for user ${userId} in client ${clientId}`);
+      
+      // For now, return empty array - this would need proper implementation
+      res.json([]);
+    } catch (error) {
+      console.error(`Error fetching user devices for client:`, error);
+      res.status(500).json({ error: "Failed to fetch client user devices" });
+    }
+  });
+  
+  // Get user logs for specific client
+  app.get("/api/client/:clientId/users/:userId/logs", isAuthenticated, async (req, res) => {
+    try {
+      const clientId = parseInt(req.params.clientId);
+      const userId = parseInt(req.params.userId);
+      
+      console.log(`📜 Fetching logs for user ${userId} in client ${clientId}`);
+      
+      // Use client-specific database connection
+      const multiDb = MultiDatabaseManager.getInstance();
+      const clientDb = await multiDb.getClientDb(clientId);
+      
+      // For now, return empty array - this would need proper implementation
+      res.json([]);
+    } catch (error) {
+      console.error(`Error fetching user logs for client:`, error);
+      res.status(500).json({ error: "Failed to fetch client user logs" });
+    }
+  });
 
   const httpServer = createServer(app);
   return httpServer;

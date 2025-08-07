@@ -33,6 +33,11 @@ import {
 import { ThemeToggle } from "@/components/theme-toggle";
 
 export function UsersSection() {
+  const [location] = useLocation();
+  
+  // Detect current client context from URL - CLIENT-AWARE
+  const currentClientId = location.startsWith('/client/') ? parseInt(location.split('/')[2]) : 1;
+  
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [usersPerPage, setUsersPerPage] = useState(10);
@@ -74,7 +79,7 @@ export function UsersSection() {
         title: "OKTA Sync Completed",
         description: `${data.message}. Total: ${data.totalUsers}, New: ${data.newUsers}, Updated: ${data.updatedUsers}`,
       });
-      queryClient.invalidateQueries({ queryKey: ["/api/users"] });
+      queryClient.invalidateQueries({ queryKey: [`/api/client/${currentClientId}/users`] });
       refetch();
     },
     onError: (error) => {
@@ -104,11 +109,11 @@ export function UsersSection() {
     refetchOnWindowFocus: false,
   });
 
-  // Get total user count separately (doesn't change with search)
+  // Get total user count separately (doesn't change with search) - CLIENT-AWARE
   const { data: totalUsersData } = useQuery({
-    queryKey: ["/api/users/total"],
+    queryKey: [`/api/client/${currentClientId}/users/total`],
     queryFn: async () => {
-      const response = await fetch('/api/users?limit=1&page=1', {
+      const response = await fetch(`/api/client/${currentClientId}/users?limit=1&page=1`, {
         credentials: 'include'
       });
       
@@ -122,11 +127,11 @@ export function UsersSection() {
     refetchOnWindowFocus: false,
   });
 
-  // Get all users for fallback stats if OKTA counts fail - optimized with smaller limit and caching
+  // Get all users for fallback stats if OKTA counts fail - optimized with smaller limit and caching - CLIENT-AWARE
   const { data: allUsersData } = useQuery({
-    queryKey: ["/api/users/stats"],
+    queryKey: [`/api/client/${currentClientId}/users/stats`],
     queryFn: async () => {
-      const response = await fetch(`/api/users?limit=500&statsOnly=true`, {
+      const response = await fetch(`/api/client/${currentClientId}/users?limit=500&statsOnly=true`, {
         credentials: 'include'
       });
       
@@ -153,7 +158,7 @@ export function UsersSection() {
   }, [searchQuery]);
 
   const { data: usersData, isLoading, refetch, isFetching } = useQuery({
-    queryKey: ["/api/users", currentPage, usersPerPage, debouncedSearchQuery, sortBy, sortOrder, employeeTypeFilter, filters],
+    queryKey: [`/api/client/${currentClientId}/users`, currentPage, usersPerPage, debouncedSearchQuery, sortBy, sortOrder, employeeTypeFilter, filters],
     queryFn: async () => {
       const params = new URLSearchParams({
         page: currentPage.toString(),
@@ -171,7 +176,7 @@ export function UsersSection() {
       
 
       
-      const response = await fetch(`/api/users?${params}`, {
+      const response = await fetch(`/api/client/${currentClientId}/users?${params}`, {
         credentials: 'include'
       });
       
@@ -302,7 +307,7 @@ export function UsersSection() {
           sortOrder: sortOrder,
         });
 
-        const response = await apiRequest('GET', `/api/users?${queryParams}`);
+        const response = await apiRequest('GET', `/api/client/${currentClientId}/users?${queryParams}`);
         
         if (!response.ok) {
           throw new Error(`API request failed with status ${response.status}`);
@@ -545,6 +550,7 @@ export function UsersSection() {
           totalPages={totalPages}
           usersPerPage={usersPerPage}
           isLoading={isLoading || isFetching}
+          clientId={currentClientId} // CLIENT-AWARE - Pass client context
           onUserClick={handleUserClick}
           onPageChange={setCurrentPage}
           onPerPageChange={handlePerPageChange}
@@ -566,6 +572,7 @@ export function UsersSection() {
         open={showCreateModal}
         onClose={() => setShowCreateModal(false)}
         onSuccess={handleCreateSuccess}
+        clientId={currentClientId} // CLIENT-AWARE - Pass client context
       />
 
       {/* User Detail Modal */}
@@ -576,6 +583,7 @@ export function UsersSection() {
           setSelectedUserId(null);
         }}
         userId={selectedUserId}
+        clientId={currentClientId} // CLIENT-AWARE - Pass client context
       />
     </div>
   );

@@ -43,10 +43,10 @@ export function IntegrationsSection() {
     refetchOnWindowFocus: false,
   });
 
-  // Create integration mutation
+  // Create integration mutation - CLIENT-AWARE
   const createIntegrationMutation = useMutation({
     mutationFn: async (integrationData: { name: string; displayName: string; description: string; status: string; apiKeys: Record<string, string>; config: Record<string, any> }) => {
-      const response = await fetch("/api/integrations", {
+      const response = await fetch(`/api/client/${currentClientId}/integrations`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
@@ -63,7 +63,7 @@ export function IntegrationsSection() {
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/integrations"] });
+      queryClient.invalidateQueries({ queryKey: [`/api/client/${currentClientId}/integrations`] });
       toast({
         title: "Integration added successfully",
         description: "The new integration has been created.",
@@ -78,10 +78,10 @@ export function IntegrationsSection() {
     },
   });
 
-  // Update integration mutation
+  // Update integration mutation - CLIENT-AWARE
   const updateIntegrationMutation = useMutation({
     mutationFn: async ({ id, integrationData }: { id: number; integrationData: { name: string; displayName: string; description: string; status: string; apiKeys: Record<string, string>; config: Record<string, any> } }) => {
-      const response = await fetch(`/api/integrations/${id}`, {
+      const response = await fetch(`/api/client/${currentClientId}/integrations/${id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json"
@@ -98,7 +98,7 @@ export function IntegrationsSection() {
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/integrations"] });
+      queryClient.invalidateQueries({ queryKey: [`/api/client/${currentClientId}/integrations`] });
       setIsConfigureIntegrationOpen(false);
       setEditingIntegration(null);
       toast({
@@ -115,10 +115,10 @@ export function IntegrationsSection() {
     },
   });
 
-  // Delete integration mutation
+  // Delete integration mutation - CLIENT-AWARE
   const deleteIntegrationMutation = useMutation({
     mutationFn: async (id: number) => {
-      const response = await fetch(`/api/integrations/${id}`, {
+      const response = await fetch(`/api/client/${currentClientId}/integrations/${id}`, {
         method: "DELETE",
         credentials: "include"
       });
@@ -131,7 +131,7 @@ export function IntegrationsSection() {
       return response.status === 204 ? null : response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/integrations"] });
+      queryClient.invalidateQueries({ queryKey: [`/api/client/${currentClientId}/integrations`] });
       setIsDeleteIntegrationOpen(false);
       setIntegrationToDelete(null);
       setIsConfigureIntegrationOpen(false);

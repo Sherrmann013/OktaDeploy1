@@ -2,8 +2,8 @@ import { apiRequest } from "./queryClient";
 import type { User, InsertUser, UpdateUser } from "@shared/schema";
 
 export const userApi = {
-  // Get all users with optional filtering
-  getUsers: async (params?: {
+  // Get all users with optional filtering - CLIENT-AWARE
+  getUsers: async (clientId: number, params?: {
     search?: string;
     status?: string;
     department?: string;
@@ -17,38 +17,38 @@ export const userApi = {
     if (params?.limit) searchParams.append("limit", params.limit.toString());
     if (params?.offset) searchParams.append("offset", params.offset.toString());
 
-    const response = await fetch(`/api/users?${searchParams.toString()}`);
+    const response = await fetch(`/api/client/${clientId}/users?${searchParams.toString()}`);
     if (!response.ok) throw new Error("Failed to fetch users");
     return response.json();
   },
 
-  // Get single user by ID
-  getUser: async (id: number): Promise<User> => {
-    const response = await fetch(`/api/users/${id}`);
+  // Get single user by ID - CLIENT-AWARE
+  getUser: async (clientId: number, id: number): Promise<User> => {
+    const response = await fetch(`/api/client/${clientId}/users/${id}`);
     if (!response.ok) throw new Error("Failed to fetch user");
     return response.json();
   },
 
-  // Create new user
-  createUser: async (userData: InsertUser): Promise<User> => {
-    const response = await apiRequest("POST", "/api/users", userData);
+  // Create new user - CLIENT-AWARE
+  createUser: async (clientId: number, userData: InsertUser): Promise<User> => {
+    const response = await apiRequest("POST", `/api/client/${clientId}/users`, userData);
     return response.json();
   },
 
-  // Update user
-  updateUser: async (id: number, updates: UpdateUser): Promise<User> => {
-    const response = await apiRequest("PATCH", `/api/users/${id}`, updates);
+  // Update user - CLIENT-AWARE
+  updateUser: async (clientId: number, id: number, updates: UpdateUser): Promise<User> => {
+    const response = await apiRequest("PATCH", `/api/client/${clientId}/users/${id}`, updates);
     return response.json();
   },
 
-  // Update user status
-  updateUserStatus: async (id: number, status: string): Promise<User> => {
-    const response = await apiRequest("PATCH", `/api/users/${id}/status`, { status });
+  // Update user status - CLIENT-AWARE
+  updateUserStatus: async (clientId: number, id: number, status: string): Promise<User> => {
+    const response = await apiRequest("PATCH", `/api/client/${clientId}/users/${id}/status`, { status });
     return response.json();
   },
 
-  // Delete user
-  deleteUser: async (id: number): Promise<void> => {
-    await apiRequest("DELETE", `/api/users/${id}`, undefined);
+  // Delete user - CLIENT-AWARE
+  deleteUser: async (clientId: number, id: number): Promise<void> => {
+    await apiRequest("DELETE", `/api/client/${clientId}/users/${id}`, undefined);
   },
 };

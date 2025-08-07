@@ -32,19 +32,20 @@ interface UserDetailModalProps {
   open: boolean;
   onClose: () => void;
   userId: number | null;
+  clientId: number; // CLIENT-AWARE - Required for data isolation
 }
 
-export default function UserDetailModal({ open, onClose, userId }: UserDetailModalProps) {
+export default function UserDetailModal({ open, onClose, userId, clientId }: UserDetailModalProps) {
   const { toast } = useToast();
   const [isEditing, setIsEditing] = useState(false);
   const [editedUser, setEditedUser] = useState<Partial<UserType>>({});
 
-  // Fetch user details
+  // Fetch user details - CLIENT-AWARE
   const { data: user, isLoading } = useQuery({
-    queryKey: ["/api/users", userId],
+    queryKey: [`/api/client/${clientId}/users`, userId],
     queryFn: async () => {
       if (!userId) return null;
-      const response = await fetch(`/api/users/${userId}`, {
+      const response = await fetch(`/api/client/${clientId}/users/${userId}`, {
         credentials: 'include'
       });
       
@@ -57,10 +58,10 @@ export default function UserDetailModal({ open, onClose, userId }: UserDetailMod
     enabled: open && !!userId,
   });
 
-  // Update user mutation
+  // Update user mutation - CLIENT-AWARE
   const updateUserMutation = useMutation({
     mutationFn: async (updatedData: Partial<UserType>) => {
-      const response = await apiRequest('PATCH', `/api/users/${userId}`, updatedData);
+      const response = await apiRequest('PATCH', `/api/client/${clientId}/users/${userId}`, updatedData);
       if (!response.ok) {
         const error = await response.json();
         throw new Error(error.message || 'Failed to update user');
@@ -74,7 +75,7 @@ export default function UserDetailModal({ open, onClose, userId }: UserDetailMod
       });
       setIsEditing(false);
       setEditedUser({});
-      queryClient.invalidateQueries({ queryKey: ["/api/users"] });
+      queryClient.invalidateQueries({ queryKey: [`/api/client/${clientId}/users`] });
     },
     onError: (error: Error) => {
       toast({

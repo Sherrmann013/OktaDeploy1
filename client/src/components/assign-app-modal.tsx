@@ -21,16 +21,17 @@ interface AssignAppModalProps {
   onClose: () => void;
   userId: string;
   userApps: Application[];
+  clientId: number; // CLIENT-AWARE - Required for data isolation
 }
 
-export default function AssignAppModal({ open, onClose, userId, userApps }: AssignAppModalProps) {
+export default function AssignAppModal({ open, onClose, userId, userApps, clientId }: AssignAppModalProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedApps, setSelectedApps] = useState<Set<string>>(new Set());
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
   // Get all available applications
-  const { data: allApplications = [], isLoading } = useQuery({
+  const { data: allApplications = [], isLoading } = useQuery<Application[]>({
     queryKey: ["/api/applications"],
     queryFn: getQueryFn({ on401: "throw" }),
     enabled: open,
@@ -43,7 +44,7 @@ export default function AssignAppModal({ open, onClose, userId, userApps }: Assi
     if (open && allApplications.length > 0) {
       // First try exact ID matches
       const currentAppIds = userApps.map(app => app.id);
-      const allAppIds = allApplications.map((app: any) => app.id);
+      const allAppIds = allApplications.map((app: Application) => app.id);
       const exactMatches = currentAppIds.filter(id => allAppIds.includes(id));
       
       // For apps without exact ID matches, try name matching
@@ -52,7 +53,7 @@ export default function AssignAppModal({ open, onClose, userId, userApps }: Assi
       userApps.forEach(userApp => {
         if (!exactMatches.includes(userApp.id)) {
           // Find app in all applications with similar name
-          const matchingApp = allApplications.find((allApp: any) => {
+          const matchingApp = allApplications.find((allApp: Application) => {
             const allAppName = (allApp.name || allApp.label || '').toLowerCase().trim();
             const userAppName = userApp.name.toLowerCase().trim();
             
@@ -114,7 +115,7 @@ export default function AssignAppModal({ open, onClose, userId, userApps }: Assi
         description: "User application assignments have been updated.",
       });
       // Refresh user applications
-      queryClient.invalidateQueries({ queryKey: [`/api/users/${userId}/applications`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/client/${clientId}/users/${userId}/applications`] });
       onClose();
     },
     onError: (error: Error) => {

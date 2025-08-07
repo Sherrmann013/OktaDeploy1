@@ -2,6 +2,7 @@ import React, { useState, useMemo } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useLocation } from "wouter";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -27,10 +28,16 @@ interface CreateUserModalProps {
   open: boolean;
   onClose: () => void;
   onSuccess: () => void;
+  clientId?: number; // CLIENT-AWARE - Optional since we also detect from URL
 }
 
-export default function CreateUserModal({ open, onClose, onSuccess }: CreateUserModalProps) {
+export default function CreateUserModal({ open, onClose, onSuccess, clientId }: CreateUserModalProps) {
   const { toast } = useToast();
+  const [location] = useLocation();
+  
+  // Detect current client context from URL or use provided clientId - CLIENT-AWARE
+  const currentClientId = clientId ?? (location.startsWith('/client/') ? parseInt(location.split('/')[2]) : 1);
+  
   const [selectedGroups, setSelectedGroups] = useState<string[]>([]);
   const [selectedApps, setSelectedApps] = useState<string[]>([]);
   const [managerSearch, setManagerSearch] = useState("");
@@ -39,29 +46,29 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
   const [sendActivationEmail, setSendActivationEmail] = useState(false);
   const [selectedDomain, setSelectedDomain] = useState<string>("");
 
-  // Fetch app mappings for dynamic app dropdown
+  // Fetch app mappings for dynamic app dropdown - CLIENT-AWARE
   const { data: appMappingsData = [], isLoading: appMappingsLoading } = useQuery({
-    queryKey: ['/api/app-mappings'],
+    queryKey: [`/api/client/${currentClientId}/app-mappings`],
     staleTime: 10 * 60 * 1000, // Cache for 10 minutes
   });
 
   const { data: departmentAppMappingsData = [], isLoading: deptAppMappingsLoading } = useQuery({
-    queryKey: ["/api/department-app-mappings"],
+    queryKey: [`/api/client/${currentClientId}/department-app-mappings`],
     staleTime: 10 * 60 * 1000, // Cache for 10 minutes
   });
 
   const { data: employeeTypeAppMappingsData = [], isLoading: empTypeAppMappingsLoading } = useQuery({
-    queryKey: ["/api/employee-type-app-mappings"],
+    queryKey: [`/api/client/${currentClientId}/employee-type-app-mappings`],
     staleTime: 10 * 60 * 1000, // Cache for 10 minutes
   });
 
   const { data: departmentGroupMappingsData = [] } = useQuery({
-    queryKey: ["/api/department-group-mappings"],
+    queryKey: [`/api/client/${currentClientId}/department-group-mappings`],
     staleTime: 10 * 60 * 1000, // Cache for 10 minutes
   });
 
   const { data: employeeTypeGroupMappingsData = [] } = useQuery({
-    queryKey: ["/api/employee-type-group-mappings"],
+    queryKey: [`/api/client/${currentClientId}/employee-type-group-mappings`],
     staleTime: 10 * 60 * 1000, // Cache for 10 minutes
   });
 
@@ -165,9 +172,9 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
 
   // Fetch existing users for manager dropdown - only when manager search is active
   const { data: usersData } = useQuery({
-    queryKey: ["/api/users", "all"],
+    queryKey: [`/api/client/${currentClientId}/users`, "all"],
     queryFn: async () => {
-      const response = await fetch('/api/users?limit=1000', {
+      const response = await fetch(`/api/client/${currentClientId}/users?limit=1000`, {
         credentials: 'include'
       });
       
@@ -356,7 +363,7 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
 
   const createUserMutation = useMutation({
     mutationFn: async (userData: InsertUser) => {
-      const response = await apiRequest("POST", "/api/users", {
+      const response = await apiRequest("POST", `/api/client/${currentClientId}/users`, {
         ...userData,
         groups: selectedGroups,
         applications: selectedApps,
@@ -371,7 +378,7 @@ export default function CreateUserModal({ open, onClose, onSuccess }: CreateUser
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/users"] });
+      queryClient.invalidateQueries({ queryKey: [`/api/client/${currentClientId}/users`] });
       toast({
         title: "Success",
         description: "User created successfully",

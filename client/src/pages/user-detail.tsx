@@ -36,10 +36,13 @@ const editUserSchema = z.object({
 });
 
 export default function UserDetail() {
-  const [, params] = useRoute("/users/:id");
-  const [, setLocation] = useLocation();
+  const [, params] = useRoute("/client/:clientId/users/:id");
+  const [location, setLocation] = useLocation();
   const { toast } = useToast();
 
+  // Detect current client context from URL - CLIENT-AWARE
+  const clientId = params?.clientId ? parseInt(params.clientId) : 
+    (location.startsWith('/client/') ? parseInt(location.split('/')[2]) : 1);
   
   const [isEditing, setIsEditing] = useState(false);
   const [managerSearch, setManagerSearch] = useState("");
@@ -57,11 +60,11 @@ export default function UserDetail() {
   
   const userId = params?.id ? parseInt(params.id) : null;
   
-  // Fetch all users for manager auto-complete
+  // Fetch all users for manager auto-complete - CLIENT-AWARE
   const { data: allUsersData } = useQuery({
-    queryKey: ["/api/users/all"],
+    queryKey: [`/api/client/${clientId}/users/all`],
     queryFn: async () => {
-      const response = await fetch('/api/users?limit=1000', {
+      const response = await fetch(`/api/client/${clientId}/users?limit=1000`, {
         credentials: 'include'
       });
       
@@ -145,19 +148,19 @@ export default function UserDetail() {
   const [appSearchTerm, setAppSearchTerm] = useState("");
   const [showAssignAppModal, setShowAssignAppModal] = useState(false);
 
-  // Clear problematic cache entries on mount
+  // Clear problematic cache entries on mount - CLIENT-AWARE
   useEffect(() => {
     if (userId) {
       // Invalidate any cached data that might interfere
       queryClient.removeQueries({ 
-        queryKey: ["/api/users"], 
+        queryKey: [`/api/client/${clientId}/users`], 
         exact: false 
       });
     }
-  }, [userId]);
+  }, [userId, clientId]);
 
   const { data: user, isLoading, error } = useQuery<User>({
-    queryKey: [`/api/users/${userId}`],
+    queryKey: [`/api/client/${clientId}/users/${userId}`],
     enabled: !!userId,
     retry: 1,
     staleTime: 0,
@@ -167,22 +170,22 @@ export default function UserDetail() {
   // Debug logging
 
   const { data: userGroups = [] } = useQuery<any[]>({
-    queryKey: [`/api/users/${userId}/groups`],
+    queryKey: [`/api/client/${clientId}/users/${userId}/groups`],
     enabled: !!userId,
   });
 
   const { data: userApps = [] } = useQuery<any[]>({
-    queryKey: [`/api/users/${userId}/applications`],
+    queryKey: [`/api/client/${clientId}/users/${userId}/applications`],
     enabled: !!userId,
   });
 
   const { data: userDevices = [] } = useQuery<any[]>({
-    queryKey: [`/api/users/${userId}/devices`],
+    queryKey: [`/api/client/${clientId}/users/${userId}/devices`],
     enabled: !!userId,
   });
 
   const { data: userLogs = [] } = useQuery<any[]>({
-    queryKey: [`/api/users/${userId}/logs`],
+    queryKey: [`/api/client/${clientId}/users/${userId}/logs`],
     enabled: !!userId && activeTab === "activity",
   });
 
@@ -272,14 +275,14 @@ export default function UserDetail() {
 
   const updateStatusMutation = useMutation({
     mutationFn: async ({ status }: { status: string }) => {
-      return apiRequest("PATCH", `/api/users/${userId}`, { status });
+      return apiRequest("PATCH", `/api/client/${clientId}/users/${userId}`, { status });
     },
     onSuccess: () => {
       toast({
         title: "Success",
         description: "User status updated successfully",
       });
-      queryClient.invalidateQueries({ queryKey: ["/api/users", userId] });
+      queryClient.invalidateQueries({ queryKey: [`/api/client/${clientId}/users`, userId] });
     },
     onError: (error) => {
       toast({
@@ -292,14 +295,14 @@ export default function UserDetail() {
 
   const syncStatusMutation = useMutation({
     mutationFn: async () => {
-      return apiRequest("POST", `/api/users/${userId}/reset-status`, {});
+      return apiRequest("POST", `/api/client/${clientId}/users/${userId}/reset-status`, {});
     },
     onSuccess: () => {
       toast({
         title: "Success",
         description: "Status synced with OKTA successfully",
       });
-      queryClient.invalidateQueries({ queryKey: ["/api/users", userId] });
+      queryClient.invalidateQueries({ queryKey: [`/api/client/${clientId}/users`, userId] });
     },
     onError: (error) => {
       toast({
@@ -312,7 +315,7 @@ export default function UserDetail() {
 
   const updateUserMutation = useMutation({
     mutationFn: async (userData: z.infer<typeof editUserSchema>) => {
-      const response = await apiRequest("PATCH", `/api/users/${userId}`, userData);
+      const response = await apiRequest("PATCH", `/api/client/${clientId}/users/${userId}`, userData);
       return response.json();
     },
     onSuccess: (updatedUser) => {
@@ -366,14 +369,14 @@ export default function UserDetail() {
 
   const deleteUserMutation = useMutation({
     mutationFn: async () => {
-      return apiRequest("DELETE", `/api/users/${userId}`, undefined);
+      return apiRequest("DELETE", `/api/client/${clientId}/users/${userId}`, undefined);
     },
     onSuccess: () => {
       toast({
         title: "Success",
         description: "User deleted successfully",
       });
-      setLocation("/");
+      setLocation(`/client/${clientId}/users`);
     },
     onError: (error) => {
       toast({
@@ -387,7 +390,7 @@ export default function UserDetail() {
   const passwordResetMutation = useMutation({
     mutationFn: async (action: "reset" | "expire") => {
       const endpoint = action === "reset" ? "reset" : "expire";
-      return apiRequest("POST", `/api/users/${userId}/password/${endpoint}`, {});
+      return apiRequest("POST", `/api/client/${clientId}/users/${userId}/password/${endpoint}`, {});
     },
     onSuccess: (_, action) => {
       const actionText = action === "reset" ? "Password reset email sent" : "Password expired successfully";
@@ -395,7 +398,7 @@ export default function UserDetail() {
         title: "Success",
         description: actionText,
       });
-      queryClient.invalidateQueries({ queryKey: ["/api/users", userId] });
+      queryClient.invalidateQueries({ queryKey: [`/api/client/${clientId}/users`, userId] });
     },
     onError: (error) => {
       toast({
@@ -1725,6 +1728,7 @@ export default function UserDetail() {
         onClose={() => setShowAssignAppModal(false)}
         userId={userId?.toString() || ""}
         userApps={userApps}
+        clientId={clientId} // CLIENT-AWARE - Pass client context
       />
 
       {/* Password Reset Modal */}

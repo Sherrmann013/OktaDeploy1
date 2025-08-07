@@ -70,6 +70,7 @@ interface UserTableProps {
   totalPages: number;
   usersPerPage: number;
   isLoading: boolean;
+  clientId: number; // CLIENT-AWARE - Required for data isolation
   onUserClick: (userId: number) => void;
   onPageChange: (page: number) => void;
   onPerPageChange: (perPage: number) => void;
@@ -142,6 +143,7 @@ export default function UserTable({
   totalPages,
   usersPerPage,
   isLoading,
+  clientId, // CLIENT-AWARE
   onUserClick,
   onPageChange,
   onPerPageChange,
@@ -250,10 +252,10 @@ export default function UserTable({
 
   const updateStatusMutation = useMutation({
     mutationFn: async ({ userId, status }: { userId: number; status: string }) => {
-      return apiRequest("PATCH", `/api/users/${userId}/status`, { status });
+      return apiRequest("PATCH", `/api/client/${clientId}/users/${userId}/status`, { status });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/users"] });
+      queryClient.invalidateQueries({ queryKey: [`/api/client/${clientId}/users`] });
       toast({
         title: "Success",
         description: "User status updated successfully",
@@ -270,10 +272,10 @@ export default function UserTable({
 
   const deleteUserMutation = useMutation({
     mutationFn: async (userId: number) => {
-      return apiRequest("DELETE", `/api/users/${userId}`, undefined);
+      return apiRequest("DELETE", `/api/client/${clientId}/users/${userId}`, undefined);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/users"] });
+      queryClient.invalidateQueries({ queryKey: [`/api/client/${clientId}/users`] });
       toast({
         title: "Success",
         description: "User deleted successfully",

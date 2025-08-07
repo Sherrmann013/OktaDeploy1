@@ -152,7 +152,10 @@ export default function Sidebar() {
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/users"] });
+      // Clear user cache for the current client context
+      if (currentClientId) {
+        queryClient.invalidateQueries({ queryKey: [`/api/client/${currentClientId}/users`] });
+      }
       queryClient.invalidateQueries({ queryKey: ["/api/employee-type-counts"] });
       toast({
         title: "Success",

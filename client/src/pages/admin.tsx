@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useLocation } from "wouter";
 import { apiRequest } from "@/lib/queryClient";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -49,6 +50,11 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 
 function AdminComponent() {
   const { toast } = useToast();
+  const [location] = useLocation();
+  
+  // Detect current client context from URL - CLIENT-AWARE  
+  const currentClientId = location.startsWith('/client/') ? parseInt(location.split('/')[2]) : 1;
+  
   const [activeTab, setActiveTab] = useState("site-access");
   const [isNewUserOpen, setIsNewUserOpen] = useState(false);
   const [isEditUserOpen, setIsEditUserOpen] = useState(false);
@@ -100,9 +106,9 @@ function AdminComponent() {
   const [isCreateUserModalOpen, setIsCreateUserModalOpen] = useState(false);
   // State moved to NewUserConfigSection component
 
-  // Query to fetch integrations data
+  // Query to fetch integrations data - CLIENT-AWARE
   const { data: integrationsData = [] } = useQuery({
-    queryKey: ["/api/integrations"],
+    queryKey: [`/api/client/${currentClientId}/integrations`],
     staleTime: 5 * 60 * 1000,
     refetchOnWindowFocus: false,
   });
