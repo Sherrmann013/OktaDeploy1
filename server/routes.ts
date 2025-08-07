@@ -54,9 +54,6 @@ function determineEmployeeTypeFromGroups(userGroups: any[], employeeTypeApps: Se
   return null;
 }
 import { setupAuth, isAuthenticated, requireAdmin } from "./direct-okta-auth";
-import { MultiDatabaseManager } from './multi-db';
-import { fetchOktaUsers, testOktaConnection, testSentinelOneConnection, testJiraConnection, OktaService } from './okta-service';
-import { syncUsersToDatabase } from './user-sync';
 
 // Helper function to create OKTA group
 async function createOktaGroup(apiKeys: Record<string, string>, groupName: string, description?: string) {
@@ -72,6 +69,7 @@ async function createOktaGroup(apiKeys: Record<string, string>, groupName: strin
   process.env.OKTA_API_TOKEN = apiKeys.apiToken;
   
   try {
+    const { OktaService } = await import('./okta-service');
     const oktaService = new OktaService();
     return await oktaService.createGroup(groupName, description);
   } finally {
@@ -3543,10 +3541,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       console.log(`✅ Created ${results.length} app mappings for client ${clientId}`);
       
-      // Return results with group creation information
+      // Check if any mappings have OKTA group names but no integration
+      const hasOktaGroupNames = mappings.some((m: any) => m.oktaGroupName && m.oktaGroupName.trim());
+      const oktaIntegrationMissing = hasOktaGroupNames && oktaIntegration.length === 0;
+      
+      // Return results with group creation information and warnings
       res.json({
         mappings: results,
-        groupCreationResults
+        groupCreationResults,
+        warnings: oktaIntegrationMissing ? [{
+          type: 'oktaIntegrationMissing',
+          message: 'OKTA group names were specified but no OKTA integration is configured for this client. Groups were not created in OKTA.',
+          affectedMappings: mappings.filter((m: any) => m.oktaGroupName && m.oktaGroupName.trim()).length
+        }] : []
       });
     } catch (error) {
       console.error(`Error creating app mappings for client:`, error);

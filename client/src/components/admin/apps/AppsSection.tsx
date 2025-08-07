@@ -66,14 +66,32 @@ export function AppsSection() {
       }
       return response.json();
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: [`/api/client/${currentClientId}/app-mappings`] });
       setIsNewMappingOpen(false);
       setNewMapping({ appName: "", oktaGroups: [""], description: "" });
-      toast({
-        title: "App mapping(s) created successfully",
-        description: "The new mapping(s) have been added.",
-      });
+      
+      // Check for warnings in response
+      if (data.warnings && data.warnings.length > 0) {
+        const oktaWarning = data.warnings.find((w: any) => w.type === 'oktaIntegrationMissing');
+        if (oktaWarning) {
+          toast({
+            title: "App mappings created with warnings",
+            description: `Mappings saved but OKTA groups not created: ${oktaWarning.message}`,
+            variant: "destructive",
+          });
+        } else {
+          toast({
+            title: "App mapping(s) created successfully",
+            description: "The new mapping(s) have been added.",
+          });
+        }
+      } else {
+        toast({
+          title: "App mapping(s) created successfully",
+          description: "The new mapping(s) have been added and OKTA groups created.",
+        });
+      }
     },
     onError: (error: Error) => {
       toast({
