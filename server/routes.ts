@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertUserSchema, updateUserSchema, insertSiteAccessUserSchema, siteAccessUsers, insertIntegrationSchema, integrations, auditLogs, insertAppMappingSchema, appMappings, departmentAppMappings, insertDepartmentAppMappingSchema, employeeTypeAppMappings, insertEmployeeTypeAppMappingSchema, departmentGroupMappings, insertDepartmentGroupMappingSchema, employeeTypeGroupMappings, insertEmployeeTypeGroupMappingSchema, insertLayoutSettingSchema, layoutSettings, dashboardCards, insertDashboardCardSchema, updateDashboardCardSchema, monitoringCards, insertMonitoringCardSchema, updateMonitoringCardSchema, companyLogos, insertCompanyLogoSchema } from "@shared/schema";
+import { insertUserSchema, updateUserSchema, insertSiteAccessUserSchema, siteAccessUsers, insertIntegrationSchema, integrations, auditLogs, insertAppMappingSchema, appMappings, departmentAppMappings, insertDepartmentAppMappingSchema, employeeTypeAppMappings, insertEmployeeTypeAppMappingSchema, departmentGroupMappings, insertDepartmentGroupMappingSchema, employeeTypeGroupMappings, insertEmployeeTypeGroupMappingSchema, insertLayoutSettingSchema, layoutSettings, dashboardCards, insertDashboardCardSchema, updateDashboardCardSchema, monitoringCards, insertMonitoringCardSchema, updateMonitoringCardSchema, companyLogos, insertCompanyLogoSchema, insertMspLogoSchema } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and } from "drizzle-orm";
 import { AuditLogger, getAuditLogs } from "./audit";
@@ -3256,11 +3256,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Upload new logo (global - requires clientId in body)
+  // Upload new logo (global - MSP context, no clientId required)
   app.post("/api/company-logos", isAuthenticated, requireAdmin, async (req, res) => {
     try {
-      const logoData = insertCompanyLogoSchema.parse(req.body);
-      const newLogo = await storage.createLogo(logoData);
+      // Use MSP schema that doesn't require clientId
+      const logoData = insertMspLogoSchema.parse(req.body);
+      console.log("🖼️  Uploading MSP logo:", logoData.fileName);
+      
+      // Add a default clientId for storage compatibility (use 0 for MSP/global)
+      const logoWithClientId = { ...logoData, clientId: 0 };
+      const newLogo = await storage.createLogo(logoWithClientId);
       
       await AuditLogger.log({
         req,
@@ -3268,12 +3273,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         resourceType: "COMPANY_LOGO",
         resourceId: newLogo.id.toString(),
         resourceName: newLogo.fileName,
-        details: { action: "Uploaded new company logo", fileName: newLogo.fileName }
+        details: { action: "Uploaded new MSP company logo", fileName: newLogo.fileName }
       });
 
+      console.log("✅ MSP logo uploaded successfully:", newLogo.fileName);
       res.status(201).json(newLogo);
     } catch (error) {
-      console.error("Error uploading logo:", error);
+      console.error("Error uploading MSP logo:", error);
       if (error instanceof z.ZodError) {
         return res.status(400).json({ error: error.errors });
       }

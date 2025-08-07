@@ -344,6 +344,18 @@ export const insertCompanyLogoSchema = createInsertSchema(companyLogos).omit({
   clientId: z.number().min(1, "Client ID is required")
 });
 
+// MSP-specific logo schema that doesn't require clientId
+export const insertMspLogoSchema = createInsertSchema(companyLogos).omit({
+  id: true,
+  uploadedAt: true,
+  clientId: true, // Remove clientId requirement for MSP context
+}).extend({
+  logoData: z.string().min(1, "Logo data is required"),
+  fileName: z.string().min(1, "File name is required"),
+  fileSize: z.number().min(1, "File size is required"),
+  mimeType: z.string().min(1, "MIME type is required")
+});
+
 export type InsertCompanyLogo = z.infer<typeof insertCompanyLogoSchema>;
 export type CompanyLogo = typeof companyLogos.$inferSelect;
 
