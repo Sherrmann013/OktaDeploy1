@@ -62,8 +62,8 @@ export default function MSPDashboard() {
   // Fetch clients for MSP user
   const { data: clients = [], isLoading } = useQuery<Client[]>({
     queryKey: ["/api/clients"],
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    refetchOnWindowFocus: false,
+    staleTime: 0, // Always fetch fresh data after invalidation
+    refetchOnWindowFocus: true, // Refetch when window gains focus
   });
 
   // Update client mutation
