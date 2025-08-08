@@ -72,6 +72,9 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
   const [employeeTypeDisplayName, setEmployeeTypeDisplayName] = useState('');
   const [employeeTypeGroupSuffix, setEmployeeTypeGroupSuffix] = useState('');
 
+  // Inline group configuration state
+  const [expandedEmployeeType, setExpandedEmployeeType] = useState<string | null>(null);
+
   // Fetch available apps - CLIENT-AWARE
   const { data: appMappingsData = [] } = useQuery({
     queryKey: [`/api/client/${currentClientId}/app-mappings`],
@@ -679,18 +682,7 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
       options: newOptions
     });
 
-    // For employee types, show dialog to create group when a new employee type is added
-    if (fieldType === 'employeeType' && 
-        newValue.trim() !== '' && 
-        oldValue === '' && 
-        config.linkGroups) {
-      
-      // Set up dialog state and show the group creation dialog
-      setPendingEmployeeTypeName(newValue.trim());
-      setEmployeeTypeDisplayName(newValue.trim());
-      setEmployeeTypeGroupSuffix(newValue.trim().toUpperCase().replace(/\s+/g, ''));
-      setShowEmployeeTypeGroupDialog(true);
-    }
+    // No automatic dialog anymore - users will use inline configuration
   };
 
   // Create group mutation for employee types
@@ -821,22 +813,122 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
           
           <div className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md divide-y divide-gray-200 dark:divide-gray-600 max-w-64">
             {config.options.map((option, index) => (
-              <div key={index} className="flex items-center px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700/50">
-                <Input
-                  value={option}
-                  onChange={(e) => handleOptionChange(index, e.target.value)}
-                  className="flex-1 text-sm border-0 bg-transparent focus:ring-0 p-0"
-                  placeholder={fieldType === 'department' ? 'Department name' : 'Employee type'}
-                />
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => removeOption(index)}
-                  className="h-6 w-6 p-0 ml-2 text-gray-400 hover:text-red-500"
-                >
-                  <X className="w-3 h-3" />
-                </Button>
+              <div key={index}>
+                <div className="flex items-center px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                  <Input
+                    value={option}
+                    onChange={(e) => handleOptionChange(index, e.target.value)}
+                    className="flex-1 text-sm border-0 bg-transparent focus:ring-0 p-0"
+                    placeholder={fieldType === 'department' ? 'Department name' : 'Employee type'}
+                  />
+                  
+                  {/* Inline Group Configuration Button for Employee Types */}
+                  {fieldType === 'employeeType' && config.linkGroups && option.trim() !== '' && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setExpandedEmployeeType(expandedEmployeeType === option ? null : option)}
+                      className="h-6 w-6 p-0 ml-2 text-blue-500 hover:text-blue-700"
+                      title="Configure Email Groups"
+                    >
+                      {expandedEmployeeType === option ? <X className="w-3 h-3" /> : <Link className="w-3 h-3" />}
+                    </Button>
+                  )}
+                  
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => removeOption(index)}
+                    className="h-6 w-6 p-0 ml-2 text-gray-400 hover:text-red-500"
+                  >
+                    <X className="w-3 h-3" />
+                  </Button>
+                </div>
+
+                {/* Inline Group Configuration Panel */}
+                {fieldType === 'employeeType' && config.linkGroups && expandedEmployeeType === option && (
+                  <div className="px-3 pb-3 border-t border-gray-100 dark:border-gray-600 bg-gray-50 dark:bg-gray-700/30">
+                    <div className="pt-3 space-y-2">
+                      <div className="text-xs font-medium text-gray-600 dark:text-gray-400 mb-2">
+                        Email Groups for "{option}"
+                      </div>
+                      
+                      {/* Add Group Dropdown */}
+                      <Select
+                        onValueChange={(groupName) => {
+                          if (groupName === 'create-new') {
+                            // Set up dialog state for creating new group
+                            setPendingEmployeeTypeName(option);
+                            setEmployeeTypeDisplayName(option);
+                            setEmployeeTypeGroupSuffix(option.toUpperCase().replace(/\s+/g, ''));
+                            setShowEmployeeTypeGroupDialog(true);
+                          } else {
+                            handleLinkEmployeeTypeGroup(option, groupName);
+                          }
+                        }}
+                      >
+                        <SelectTrigger className="w-full h-8 text-xs bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600">
+                          <div className="flex items-center">
+                            <span className="text-blue-500 mr-1">+</span>
+                            <SelectValue placeholder="Add email group" />
+                          </div>
+                        </SelectTrigger>
+                        <SelectContent className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600">
+                          {availableGroups
+                            .filter((group: string) => {
+                              if (!group || group.trim() === '') return false;
+                              return !localEmployeeTypeGroupMappings[option]?.includes(group);
+                            })
+                            .map((group: string) => (
+                              <SelectItem key={group} value={group} className="bg-white dark:bg-gray-800 text-xs">
+                                {group}
+                              </SelectItem>
+                            ))}
+                          {availableGroups.filter((group: string) => {
+                            return !localEmployeeTypeGroupMappings[option]?.includes(group);
+                          }).length === 0 && (
+                            <SelectItem value="no-groups" disabled className="text-gray-500 text-xs">
+                              All email groups already linked
+                            </SelectItem>
+                          )}
+                          <SelectItem value="create-new" className="bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-xs">
+                            + Create New Email Group
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
+
+                      {/* Linked Groups Display */}
+                      {localEmployeeTypeGroupMappings[option] && localEmployeeTypeGroupMappings[option].length > 0 && (
+                        <div className="space-y-1">
+                          {localEmployeeTypeGroupMappings[option].map((groupName, groupIndex) => (
+                            <div key={groupIndex} className="flex items-center justify-between bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded px-2 py-1">
+                              <span className="text-xs text-gray-700 dark:text-gray-300 uppercase">
+                                {groupName}
+                              </span>
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleUnlinkEmployeeTypeGroup(option, groupName)}
+                                className="h-4 w-4 p-0 text-red-500 hover:text-red-700"
+                              >
+                                {'×'}
+                              </Button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                      
+                      {(!localEmployeeTypeGroupMappings[option] || localEmployeeTypeGroupMappings[option].length === 0) && (
+                        <div className="text-xs text-gray-500 dark:text-gray-400 text-center py-2">
+                          No email groups linked
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
             ))}
             <div className="flex items-center px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700/50">
