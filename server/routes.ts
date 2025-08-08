@@ -2,7 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import postgres from "postgres";
 import { storage } from "./storage";
-import { insertUserSchema, updateUserSchema, insertSiteAccessUserSchema, siteAccessUsers, insertIntegrationSchema, integrations, auditLogs, insertAppMappingSchema, appMappings, departmentAppMappings, insertDepartmentAppMappingSchema, employeeTypeAppMappings, insertEmployeeTypeAppMappingSchema, departmentGroupMappings, insertDepartmentGroupMappingSchema, employeeTypeGroupMappings, insertEmployeeTypeGroupMappingSchema, insertLayoutSettingSchema, layoutSettings, dashboardCards, insertDashboardCardSchema, updateDashboardCardSchema, monitoringCards, insertMonitoringCardSchema, updateMonitoringCardSchema, companyLogos, insertCompanyLogoSchema, insertMspLogoSchema } from "@shared/schema";
+import { insertUserSchema, updateUserSchema, insertSiteAccessUserSchema, siteAccessUsers, insertIntegrationSchema, integrations, auditLogs, insertAppMappingSchema, appMappings, departmentAppMappings, insertDepartmentAppMappingSchema, employeeTypeAppMappings, insertEmployeeTypeAppMappingSchema, departmentGroupMappings, insertDepartmentGroupMappingSchema, employeeTypeGroupMappings, insertEmployeeTypeGroupMappingSchema, insertLayoutSettingSchema, layoutSettings, dashboardCards, insertDashboardCardSchema, updateDashboardCardSchema, monitoringCards, insertMonitoringCardSchema, updateMonitoringCardSchema, companyLogos, insertCompanyLogoSchema, insertMspLogoSchema, clients, clientAccess } from "@shared/schema";
 import { departmentAppMappings as clientDepartmentAppMappings, insertDepartmentAppMappingSchema as clientInsertDepartmentAppMappingSchema, employeeTypeAppMappings as clientEmployeeTypeAppMappings, insertEmployeeTypeAppMappingSchema as clientInsertEmployeeTypeAppMappingSchema, departmentGroupMappings as clientDepartmentGroupMappings, insertDepartmentGroupMappingSchema as clientInsertDepartmentGroupMappingSchema, employeeTypeGroupMappings as clientEmployeeTypeGroupMappings, insertEmployeeTypeGroupMappingSchema as clientInsertEmployeeTypeGroupMappingSchema } from "@shared/client-schema";
 import { db } from "./db";
 import { eq, desc, and, or, ilike, asc } from "drizzle-orm";
@@ -2781,6 +2781,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Get client database connection
+      const multiDb = MultiDatabaseManager.getInstance();
       const clientDb = await multiDb.getClientDb(clientId);
       if (!clientDb) {
         return res.status(404).json({ error: 'Client database not found' });
@@ -4284,8 +4285,70 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Run the initialization check
   setTimeout(initializeExistingClients, 2000); // Wait 2 seconds for everything to be ready
 
+  // MSP Client Management Routes
+  // Update client
+  app.put("/api/clients/:id", isAuthenticated, requireAdmin, async (req, res) => {
+    try {
+      const clientId = parseInt(req.params.id);
+      const updates = req.body;
+      
+      console.log(`🔄 Updating client ${clientId}:`, updates);
+      
+      // Update the client in the MSP database
+      const [updatedClient] = await db.update(clients)
+        .set({
+          ...updates,
+          lastUpdated: new Date()
+        })
+        .where(eq(clients.id, clientId))
+        .returning();
+      
+      if (!updatedClient) {
+        return res.status(404).json({ error: "Client not found" });
+      }
+      
+      console.log(`✅ Client ${clientId} updated successfully`);
+      res.json(updatedClient);
+    } catch (error) {
+      console.error(`Error updating client ${req.params.id}:`, error);
+      res.status(500).json({ error: "Failed to update client" });
+    }
+  });
 
-  
+  // Delete client
+  app.delete("/api/clients/:id", isAuthenticated, requireAdmin, async (req, res) => {
+    try {
+      const clientId = parseInt(req.params.id);
+      
+      console.log(`🗑️ Deleting client ${clientId}...`);
+      
+      // First, delete client access records
+      await db.delete(clientAccess).where(eq(clientAccess.clientId, clientId));
+      
+      // Then delete the client from MSP database
+      const [deletedClient] = await db.delete(clients)
+        .where(eq(clients.id, clientId))
+        .returning();
+      
+      if (!deletedClient) {
+        return res.status(404).json({ error: "Client not found" });
+      }
+      
+      // Note: We don't delete the client database itself as it may contain important data
+      // This should be handled manually or through a separate maintenance process
+      
+      console.log(`✅ Client ${clientId} deleted successfully from MSP database`);
+      res.json({ 
+        message: "Client deleted successfully", 
+        deletedClient,
+        note: "Client database preserved for data recovery" 
+      });
+    } catch (error) {
+      console.error(`Error deleting client ${req.params.id}:`, error);
+      res.status(500).json({ error: "Failed to delete client" });
+    }
+  });
+
   // MSP Client Access Management
   app.get("/api/msp-users/:mspUserId/client-access", isAuthenticated, mspRoutes.getMspUserClientAccess);
   app.post("/api/client-access", isAuthenticated, requireAdmin, mspRoutes.grantClientAccess);

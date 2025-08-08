@@ -8,10 +8,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Building2, ExternalLink } from "lucide-react";
+import { Plus, Building2, ExternalLink, Edit2, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { queryClient } from "@/lib/queryClient";
+import { queryClient, apiRequest } from "@/lib/queryClient";
 import { ClientLogoDisplay } from "@/components/ClientLogoDisplay";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { useMutation } from "@tanstack/react-query";
 
 // Update the interface to match the new MSP schema
 interface Client {
@@ -32,6 +34,12 @@ interface Client {
   // Additional display properties
   userCount?: number;
   lastActivity?: string;
+  // New fields for edit form
+  displayName?: string;
+  companyName?: string;
+  companyInitials?: string;
+  identityProvider?: string;
+  notes?: string;
 }
 
 export default function MSPDashboard() {
@@ -41,6 +49,15 @@ export default function MSPDashboard() {
   const [newClientDescription, setNewClientDescription] = useState("");
   const [selectedIdentityProvider, setSelectedIdentityProvider] = useState("");
   const [selectedTemplate, setSelectedTemplate] = useState("");
+  
+  // Edit client state
+  const [isEditClientOpen, setIsEditClientOpen] = useState(false);
+  const [editingClient, setEditingClient] = useState<Client | null>(null);
+  const [editDisplayName, setEditDisplayName] = useState("");
+  const [editCompanyName, setEditCompanyName] = useState("");
+  const [editCompanyInitials, setEditCompanyInitials] = useState("");
+  const [editIdentityProvider, setEditIdentityProvider] = useState("");
+  const [editNotes, setEditNotes] = useState("");
 
   // Fetch clients for MSP user
   const { data: clients = [], isLoading } = useQuery<Client[]>({
@@ -49,7 +66,88 @@ export default function MSPDashboard() {
     refetchOnWindowFocus: false,
   });
 
+  // Update client mutation
+  const updateClientMutation = useMutation({
+    mutationFn: async (updatedClient: { id: number; [key: string]: any }) => {
+      const response = await apiRequest("PUT", `/api/clients/${updatedClient.id}`, updatedClient);
+      if (!response.ok) {
+        throw new Error('Failed to update client');
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/clients"] });
+      toast({
+        title: "Client updated successfully",
+        description: "Client information has been updated.",
+      });
+      setIsEditClientOpen(false);
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error updating client",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
 
+  // Delete client mutation
+  const deleteClientMutation = useMutation({
+    mutationFn: async (clientId: number) => {
+      const response = await apiRequest("DELETE", `/api/clients/${clientId}`, {});
+      if (!response.ok) {
+        throw new Error('Failed to delete client');
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/clients"] });
+      toast({
+        title: "Client deleted successfully",
+        description: "Client has been permanently deleted.",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error deleting client",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+
+
+  // Handle edit client
+  const handleEditClient = (client: Client) => {
+    setEditingClient(client);
+    setEditDisplayName(client.displayName || client.name || "");
+    setEditCompanyName(client.companyName || client.name || "");
+    setEditCompanyInitials(client.companyInitials || "");
+    setEditIdentityProvider(client.identityProvider || "");
+    setEditNotes(client.notes || "");
+    setIsEditClientOpen(true);
+  };
+
+  // Handle save edited client
+  const handleSaveEditedClient = () => {
+    if (!editingClient) return;
+
+    updateClientMutation.mutate({
+      id: editingClient.id,
+      displayName: editDisplayName,
+      companyName: editCompanyName,
+      companyInitials: editCompanyInitials,
+      identityProvider: editIdentityProvider,
+      notes: editNotes,
+    });
+  };
+
+  // Handle delete client
+  const handleDeleteClient = (clientId: number) => {
+    deleteClientMutation.mutate(clientId);
+  };
 
   const handleCreateClient = async () => {
     if (!newClientName.trim()) {
@@ -256,27 +354,156 @@ export default function MSPDashboard() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {clients.map((client) => (
-              <Card key={client.id} className="hover:shadow-lg transition-shadow duration-200 group cursor-pointer">
-                <div onClick={() => window.location.href = `/client/${client.id}`}>
-                  <CardContent className="p-6">
-                    {/* Logo and Name Section */}
-                    <div className="flex items-center gap-4">
-                      <ClientLogoDisplay 
-                        clientId={client.id} 
-                        clientName={client.name}
-                        className="w-12 h-12 flex-shrink-0"
-                      />
+              <Card key={client.id} className="hover:shadow-lg transition-shadow duration-200 group">
+                <CardContent className="p-6">
+                  {/* Logo and Name Section */}
+                  <div className="flex items-center gap-4 mb-4 cursor-pointer" onClick={() => window.location.href = `/client/${client.id}`}>
+                    <ClientLogoDisplay 
+                      clientId={client.id} 
+                      clientName={client.name}
+                      className="w-12 h-12 flex-shrink-0"
+                    />
+                    <div className="flex-1">
                       <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-                        {client.name}
+                        {client.displayName || client.name}
                       </h3>
+                      {client.companyInitials && (
+                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                          {client.companyInitials}
+                        </p>
+                      )}
                     </div>
-                  </CardContent>
-                </div>
+                  </div>
+                  
+                  {/* Action Buttons */}
+                  <div className="flex gap-2 pt-2 border-t border-gray-200 dark:border-gray-700">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleEditClient(client);
+                      }}
+                      className="flex-1"
+                    >
+                      <Edit2 className="w-3 h-3 mr-1" />
+                      Edit
+                    </Button>
+                    
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          onClick={(e) => e.stopPropagation()}
+                          className="flex-1 text-red-600 hover:text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:text-red-300 dark:hover:bg-red-950"
+                        >
+                          <Trash2 className="w-3 h-3 mr-1" />
+                          Delete
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Delete Client</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            Are you sure you want to delete <strong>{client.name}</strong>? This action cannot be undone and will permanently delete all client data including users, integrations, and settings.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction 
+                            onClick={() => handleDeleteClient(client.id)}
+                            className="bg-red-600 hover:bg-red-700 text-white"
+                          >
+                            Delete Client
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  </div>
+                </CardContent>
               </Card>
             ))}
           </div>
         )}
       </div>
+
+      {/* Edit Client Dialog */}
+      <Dialog open={isEditClientOpen} onOpenChange={setIsEditClientOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Edit Client</DialogTitle>
+            <DialogDescription>
+              Update client information and configuration.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="editDisplayName">Display Name</Label>
+              <Input
+                id="editDisplayName"
+                value={editDisplayName}
+                onChange={(e) => setEditDisplayName(e.target.value)}
+                placeholder="Display name for the client"
+                className="bg-white dark:bg-gray-800 border"
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="editCompanyName">Company Name</Label>
+              <Input
+                id="editCompanyName"
+                value={editCompanyName}
+                onChange={(e) => setEditCompanyName(e.target.value)}
+                placeholder="Official company name"
+                className="bg-white dark:bg-gray-800 border"
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="editCompanyInitials">Company Initials</Label>
+              <Input
+                id="editCompanyInitials"
+                value={editCompanyInitials}
+                onChange={(e) => setEditCompanyInitials(e.target.value.toUpperCase())}
+                placeholder="e.g., CW, ABC, XYZ"
+                maxLength={5}
+                className="bg-white dark:bg-gray-800 border"
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="editIdentityProvider">Identity Provider</Label>
+              <Select value={editIdentityProvider} onValueChange={setEditIdentityProvider}>
+                <SelectTrigger className="bg-white dark:bg-gray-800 border">
+                  <SelectValue placeholder="Select identity provider" />
+                </SelectTrigger>
+                <SelectContent className="bg-white dark:bg-gray-800 border">
+                  <SelectItem value="okta">OKTA</SelectItem>
+                  <SelectItem value="google">Google Workspace</SelectItem>
+                  <SelectItem value="azure">Microsoft Azure AD</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="editNotes">Notes</Label>
+              <Textarea
+                id="editNotes"
+                value={editNotes}
+                onChange={(e) => setEditNotes(e.target.value)}
+                placeholder="Additional notes about this client"
+                rows={3}
+                className="bg-white dark:bg-gray-800 border"
+              />
+            </div>
+          </div>
+          <div className="flex justify-end gap-3">
+            <Button variant="outline" onClick={() => setIsEditClientOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleSaveEditedClient} disabled={updateClientMutation.isPending}>
+              {updateClientMutation.isPending ? "Saving..." : "Save Changes"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

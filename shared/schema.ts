@@ -25,6 +25,12 @@ export const clients = pgTable("clients", {
   contactEmail: text("contact_email"),
   created: timestamp("created").defaultNow(),
   lastUpdated: timestamp("last_updated").defaultNow(),
+  // New fields for enhanced client management
+  displayName: text("display_name"),
+  companyName: text("company_name"),
+  companyInitials: text("company_initials"),
+  identityProvider: text("identity_provider"), // okta, google, azure
+  notes: text("notes"),
 });
 
 export const insertClientSchema = createInsertSchema(clients).omit({
