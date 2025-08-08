@@ -1068,7 +1068,7 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
                             <span className="text-xs text-gray-500 ml-2">
                               {fieldType === 'department' 
                                 ? (localDepartmentGroupMappings[option]?.length || 0) 
-                                : (localEmployeeTypeGroupMappings[option]?.length || 0)} groups
+                                : (localEmployeeTypeGroupMappings[option]?.length || 0)} email groups
                             </span>
                           </div>
                         </SelectItem>
@@ -1079,7 +1079,7 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
 
                 {/* Right Column: Group Selection (CreateUserModal style) */}
                 <div className="space-y-2">
-                  <Label className="text-sm font-medium">Groups</Label>
+                  <Label className="text-sm font-medium">Email Groups</Label>
                   {(fieldType === 'department' ? selectedDepartment : selectedEmployeeType) ? (
                     <>
                       {/* Add group dropdown at top */}
@@ -1095,7 +1095,7 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
                         <SelectTrigger className="w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600">
                           <div className="flex items-center">
                             <span className="text-blue-500 mr-2">+</span>
-                            <SelectValue placeholder="Add group" />
+                            <SelectValue placeholder="Add email group" />
                           </div>
                         </SelectTrigger>
                         <SelectContent className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600">
@@ -1121,7 +1121,7 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
                             }
                           }).length === 0 && (
                             <SelectItem value="no-groups" disabled className="text-gray-500">
-                              All groups already linked
+                              All email groups already linked
                             </SelectItem>
                           )}
                         </SelectContent>
