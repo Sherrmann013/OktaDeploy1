@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Plus, X, Link, Unlink } from "lucide-react";
 import { SelectConfig, FieldKey } from "../types";
 import { useToast } from "@/hooks/use-toast";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 interface SelectFieldConfigProps {
   config: SelectConfig;
@@ -64,6 +65,12 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
   const [hasEmployeeTypeGroupUnsavedChanges, setHasEmployeeTypeGroupUnsavedChanges] = useState(false);
   const [departmentGroupSaveInProgress, setDepartmentGroupSaveInProgress] = useState(false);
   const [employeeTypeGroupSaveInProgress, setEmployeeTypeGroupSaveInProgress] = useState(false);
+
+  // Employee type group creation dialog state
+  const [showEmployeeTypeGroupDialog, setShowEmployeeTypeGroupDialog] = useState(false);
+  const [pendingEmployeeTypeName, setPendingEmployeeTypeName] = useState('');
+  const [employeeTypeDisplayName, setEmployeeTypeDisplayName] = useState('');
+  const [employeeTypeGroupSuffix, setEmployeeTypeGroupSuffix] = useState('');
 
   // Fetch available apps - CLIENT-AWARE
   const { data: appMappingsData = [] } = useQuery({
@@ -618,6 +625,11 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
   const getCompanyInitials = (clientName: string): string => {
     if (!clientName) return 'CL'; // Default fallback
     
+    // Use client's company initials if available, otherwise derive from name
+    if (clientInfo?.companyInitials) {
+      return clientInfo.companyInitials.toUpperCase();
+    }
+    
     // Split by spaces and capital letters, take first letter of each part
     const words = clientName.split(/[\s\-_]+/).filter(word => word.length > 0);
     if (words.length > 1) {
@@ -667,22 +679,17 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
       options: newOptions
     });
 
-    // For employee types, create group automatically when a new employee type is added
+    // For employee types, show dialog to create group when a new employee type is added
     if (fieldType === 'employeeType' && 
         newValue.trim() !== '' && 
         oldValue === '' && 
         config.linkGroups) {
       
-      const groupName = await createEmployeeTypeGroup(newValue.trim());
-      
-      if (groupName) {
-        // Auto-map the employee type to the newly created group
-        setLocalEmployeeTypeGroupMappings(prev => ({
-          ...prev,
-          [newValue.trim()]: [...(prev[newValue.trim()] || []), groupName]
-        }));
-        setHasEmployeeTypeGroupUnsavedChanges(true);
-      }
+      // Set up dialog state and show the group creation dialog
+      setPendingEmployeeTypeName(newValue.trim());
+      setEmployeeTypeDisplayName(newValue.trim());
+      setEmployeeTypeGroupSuffix(newValue.trim().toUpperCase().replace(/\s+/g, ''));
+      setShowEmployeeTypeGroupDialog(true);
     }
   };
 
@@ -713,31 +720,52 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
     },
   });
 
-  // Helper function to create group for employee type
-  const createEmployeeTypeGroup = async (employeeTypeName: string): Promise<string | null> => {
-    if (!clientInfo?.name || !employeeTypeName.trim()) return null;
+  // Helper function to create group for employee type with user input
+  const createEmployeeTypeGroupWithDialog = async (): Promise<void> => {
+    if (!clientInfo?.name || !pendingEmployeeTypeName.trim() || !employeeTypeGroupSuffix.trim()) {
+      toast({
+        title: "Error",
+        description: "Please fill in all required fields",
+        variant: "destructive",
+      });
+      return;
+    }
     
     const initials = getCompanyInitials(clientInfo.name);
-    const groupName = `${initials}-ET-${employeeTypeName.toUpperCase().replace(/\s+/g, '')}`;
+    const groupName = `${initials}-ET-${employeeTypeGroupSuffix.toUpperCase().replace(/\s+/g, '')}`;
     
     try {
       await createGroupMutation.mutateAsync(groupName);
       
-      // Add group to the groups field configuration
-      if (groupsFieldConfig) {
-        const updatedGroups = [...(groupsFieldConfig.options || []), groupName];
-        // Update groups field config through parent - this will need to be handled by parent component
-        toast({
-          title: "Success",
-          description: `Group '${groupName}' created for employee type '${employeeTypeName}'`,
-        });
-      }
+      // Auto-map the employee type to the newly created group
+      setLocalEmployeeTypeGroupMappings(prev => ({
+        ...prev,
+        [pendingEmployeeTypeName]: [...(prev[pendingEmployeeTypeName] || []), groupName]
+      }));
+      setHasEmployeeTypeGroupUnsavedChanges(true);
       
-      return groupName;
+      toast({
+        title: "Success",
+        description: `Group '${groupName}' created and linked to employee type '${employeeTypeDisplayName}'`,
+      });
+      
+      // Close dialog and reset state
+      setShowEmployeeTypeGroupDialog(false);
+      setPendingEmployeeTypeName('');
+      setEmployeeTypeDisplayName('');
+      setEmployeeTypeGroupSuffix('');
+      
     } catch (error) {
       console.error('Failed to create employee type group:', error);
-      return null;
     }
+  };
+
+  // Handle dialog cancellation
+  const handleEmployeeTypeGroupDialogCancel = () => {
+    setShowEmployeeTypeGroupDialog(false);
+    setPendingEmployeeTypeName('');
+    setEmployeeTypeDisplayName('');
+    setEmployeeTypeGroupSuffix('');
   };
 
   const addOption = () => {
@@ -1156,6 +1184,59 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
           )}
         </div>
       )}
+
+      {/* Employee Type Group Creation Dialog */}
+      <Dialog open={showEmployeeTypeGroupDialog} onOpenChange={setShowEmployeeTypeGroupDialog}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Create Group for Employee Type</DialogTitle>
+            <DialogDescription>
+              Configure the group name and display information for the employee type "{pendingEmployeeTypeName}".
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="displayName">Display Name</Label>
+              <Input
+                id="displayName"
+                value={employeeTypeDisplayName}
+                onChange={(e) => setEmployeeTypeDisplayName(e.target.value)}
+                placeholder="Employee type display name"
+                className="bg-white dark:bg-gray-800 border"
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="groupName">Group Name</Label>
+              <div className="flex items-center gap-1">
+                <span className="text-sm text-gray-600 dark:text-gray-400 px-3 py-2 bg-gray-100 dark:bg-gray-700 rounded-l border border-r-0">
+                  {clientInfo?.name ? getCompanyInitials(clientInfo.name) : 'CL'}-ET-
+                </span>
+                <Input
+                  id="groupName"
+                  value={employeeTypeGroupSuffix}
+                  onChange={(e) => setEmployeeTypeGroupSuffix(e.target.value)}
+                  placeholder="GROUP_SUFFIX"
+                  className="bg-white dark:bg-gray-800 border rounded-l-none"
+                />
+              </div>
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                Final group name: {clientInfo?.name ? getCompanyInitials(clientInfo.name) : 'CL'}-ET-{employeeTypeGroupSuffix.toUpperCase().replace(/\s+/g, '')}
+              </p>
+            </div>
+          </div>
+          <div className="flex justify-end gap-3">
+            <Button variant="outline" onClick={handleEmployeeTypeGroupDialogCancel}>
+              Cancel
+            </Button>
+            <Button 
+              onClick={createEmployeeTypeGroupWithDialog}
+              disabled={!employeeTypeGroupSuffix.trim() || !employeeTypeDisplayName.trim()}
+            >
+              Create Group
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
