@@ -3322,6 +3322,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const user = (req.session as any).user;
       const validatedData = clientInsertLayoutSettingSchema.parse(req.body);
       console.log(`⚙️  Saving layout setting for client ${clientId}:`, validatedData.settingKey);
+      console.log('🔴 SERVER RECEIVED DATA TO SAVE:', {
+        settingKey: validatedData.settingKey,
+        settingValue: validatedData.settingValue,
+        settingValueParsed: (() => {
+          try {
+            return JSON.parse(validatedData.settingValue);
+          } catch(e) {
+            return 'PARSE_ERROR';
+          }
+        })(),
+        clientId
+      });
       
       // Use client-specific database connection
       const multiDb = MultiDatabaseManager.getInstance();
@@ -3376,9 +3388,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
             
             if (client.length > 0) {
               const clientName = client[0].name;
-              const companyInitials = clientName.split(' ')
-                .map(word => word.charAt(0).toUpperCase())
-                .join('');
+              // Extract initials from capital letters (ClockWerk -> CW)
+              const companyInitials = clientName.match(/[A-Z]/g)?.join('') || 
+                                    clientName.split(' ').map(word => word.charAt(0).toUpperCase()).join('');
               
               console.log(`🏢 Client: ${clientName} → Company Initials: ${companyInitials}`);
               

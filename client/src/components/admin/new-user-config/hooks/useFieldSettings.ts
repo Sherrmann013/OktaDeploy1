@@ -247,18 +247,31 @@ export function useFieldSettings() {
   };
 
   const saveFieldSetting = async (fieldKey: FieldKey, config: any) => {
+    console.log('🔴 DETAILED SAVE LOGGING - WHAT IS BEING SAVED:', {
+      fieldKey,
+      config,
+      configStringified: JSON.stringify(config),
+      currentClientId,
+      configOptions: config?.options,
+      configOptionsLength: config?.options?.length
+    });
+    
     try {
+      const payload = {
+        settingKey: fieldKey,
+        settingValue: JSON.stringify(config),
+        settingType: 'user_config' as const,
+        clientId: currentClientId,
+        metadata: {}
+      };
+      
+      console.log('🔴 PAYLOAD BEING SENT TO SERVER:', payload);
+      
       const response = await fetch(`/api/client/${currentClientId}/layout-settings`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({
-          settingKey: fieldKey,
-          settingValue: JSON.stringify(config),
-          settingType: 'user_config' as const,
-          clientId: currentClientId,
-          metadata: {}
-        })
+        body: JSON.stringify(payload)
       });
 
       if (response.ok) {
