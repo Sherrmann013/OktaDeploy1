@@ -75,8 +75,18 @@ export default function MSPDashboard() {
       }
       return response.json();
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      console.log('🟢 CLIENT UPDATE SUCCESS - UI DEBUGGING:', {
+        updatedData: data,
+        timestamp: new Date().toISOString()
+      });
+      
+      // Force immediate cache invalidation and refetch
       queryClient.invalidateQueries({ queryKey: ["/api/clients"] });
+      queryClient.refetchQueries({ queryKey: ["/api/clients"] });
+      
+      console.log('🔄 CACHE INVALIDATION TRIGGERED - forcing UI refresh');
+      
       toast({
         title: "Client updated successfully",
         description: "Client information has been updated.",
@@ -134,14 +144,22 @@ export default function MSPDashboard() {
   const handleSaveEditedClient = () => {
     if (!editingClient) return;
 
-    updateClientMutation.mutate({
+    const updateData = {
       id: editingClient.id,
       displayName: editDisplayName,
       companyName: editCompanyName,
       companyInitials: editCompanyInitials,
       identityProvider: editIdentityProvider,
       notes: editNotes,
+    };
+    
+    console.log('🔵 CLIENT UPDATE MUTATION START - UI DEBUGGING:', {
+      updateData,
+      editingClient: editingClient.id,
+      timestamp: new Date().toISOString()
     });
+
+    updateClientMutation.mutate(updateData);
   };
 
   // Handle delete client
