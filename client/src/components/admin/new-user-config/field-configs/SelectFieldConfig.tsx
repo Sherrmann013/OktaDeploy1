@@ -286,7 +286,13 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
   }, [departmentAppMappings, localDepartmentAppMappings, currentClientId, queryClient]);
 
   // Save employee type app mappings to database
-  const saveEmployeeTypeAppMappings = useCallback(async () => {
+  const saveEmployeeTypeAppMappings = useCallback(async (manualSave = false) => {
+    // Prevent auto-save - only allow manual saves
+    if (!manualSave) {
+      console.log('⚠️ Auto-save blocked - employee type mappings require manual save');
+      return false;
+    }
+    
     if (employeeTypeSaveInProgress) return false;
     setEmployeeTypeSaveInProgress(true);
     
@@ -522,7 +528,8 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
   useEffect(() => {
     if (fieldType === 'employeeType' && setEmployeeTypeAppSaveFunction) {
       if (hasEmployeeTypeUnsavedChanges) {
-        setEmployeeTypeAppSaveFunction(() => saveEmployeeTypeAppMappings());
+        // Register save function that requires manual trigger
+        setEmployeeTypeAppSaveFunction(() => saveEmployeeTypeAppMappings(true));
       } else {
         setEmployeeTypeAppSaveFunction(null);
       }
