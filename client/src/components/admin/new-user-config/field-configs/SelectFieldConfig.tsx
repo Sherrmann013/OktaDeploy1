@@ -72,8 +72,7 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
   const [employeeTypeDisplayName, setEmployeeTypeDisplayName] = useState('');
   const [employeeTypeGroupSuffix, setEmployeeTypeGroupSuffix] = useState('');
 
-  // Inline group configuration state
-  const [expandedEmployeeType, setExpandedEmployeeType] = useState<string | null>(null);
+
 
   // Fetch available apps - CLIENT-AWARE
   const { data: appMappingsData = [] } = useQuery({
@@ -822,19 +821,7 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
                     placeholder={fieldType === 'department' ? 'Department name' : 'Employee type'}
                   />
                   
-                  {/* Inline Group Configuration Button for Employee Types */}
-                  {fieldType === 'employeeType' && config.linkGroups && option.trim() !== '' && (
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setExpandedEmployeeType(expandedEmployeeType === option ? null : option)}
-                      className="h-6 w-6 p-0 ml-2 text-blue-500 hover:text-blue-700"
-                      title="Configure Security Groups"
-                    >
-                      {expandedEmployeeType === option ? <X className="w-3 h-3" /> : <Link className="w-3 h-3" />}
-                    </Button>
-                  )}
+
                   
                   <Button
                     type="button"
@@ -847,88 +834,7 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
                   </Button>
                 </div>
 
-                {/* Inline Group Configuration Panel */}
-                {fieldType === 'employeeType' && config.linkGroups && expandedEmployeeType === option && (
-                  <div className="px-3 pb-3 border-t border-gray-100 dark:border-gray-600 bg-gray-50 dark:bg-gray-700/30">
-                    <div className="pt-3 space-y-2">
-                      <div className="text-xs font-medium text-gray-600 dark:text-gray-400 mb-2">
-                        Security Groups for "{option}"
-                      </div>
-                      
-                      {/* Add Group Dropdown */}
-                      <Select
-                        onValueChange={(groupName) => {
-                          if (groupName === 'create-new') {
-                            // Set up dialog state for creating new group
-                            setPendingEmployeeTypeName(option);
-                            setEmployeeTypeDisplayName(option);
-                            setEmployeeTypeGroupSuffix(option.toUpperCase().replace(/\s+/g, ''));
-                            setShowEmployeeTypeGroupDialog(true);
-                          } else {
-                            handleLinkEmployeeTypeGroup(option, groupName);
-                          }
-                        }}
-                      >
-                        <SelectTrigger className="w-full h-8 text-xs bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600">
-                          <div className="flex items-center">
-                            <span className="text-blue-500 mr-1">+</span>
-                            <SelectValue placeholder="Add security group" />
-                          </div>
-                        </SelectTrigger>
-                        <SelectContent className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600">
-                          {availableGroups
-                            .filter((group: string) => {
-                              if (!group || group.trim() === '') return false;
-                              return !localEmployeeTypeGroupMappings[option]?.includes(group);
-                            })
-                            .map((group: string) => (
-                              <SelectItem key={group} value={group} className="bg-white dark:bg-gray-800 text-xs">
-                                {group}
-                              </SelectItem>
-                            ))}
-                          {availableGroups.filter((group: string) => {
-                            return !localEmployeeTypeGroupMappings[option]?.includes(group);
-                          }).length === 0 && (
-                            <SelectItem value="no-groups" disabled className="text-gray-500 text-xs">
-                              All security groups already linked
-                            </SelectItem>
-                          )}
-                          <SelectItem value="create-new" className="bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-xs">
-                            + Create New Security Group
-                          </SelectItem>
-                        </SelectContent>
-                      </Select>
 
-                      {/* Linked Groups Display */}
-                      {localEmployeeTypeGroupMappings[option] && localEmployeeTypeGroupMappings[option].length > 0 && (
-                        <div className="space-y-1">
-                          {localEmployeeTypeGroupMappings[option].map((groupName, groupIndex) => (
-                            <div key={groupIndex} className="flex items-center justify-between bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded px-2 py-1">
-                              <span className="text-xs text-gray-700 dark:text-gray-300 uppercase">
-                                {groupName}
-                              </span>
-                              <Button
-                                type="button"
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => handleUnlinkEmployeeTypeGroup(option, groupName)}
-                                className="h-4 w-4 p-0 text-red-500 hover:text-red-700"
-                              >
-                                {'×'}
-                              </Button>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                      
-                      {(!localEmployeeTypeGroupMappings[option] || localEmployeeTypeGroupMappings[option].length === 0) && (
-                        <div className="text-xs text-gray-500 dark:text-gray-400 text-center py-2">
-                          No security groups linked
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )}
               </div>
             ))}
             <div className="flex items-center px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700/50">
@@ -1116,8 +1022,8 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
         </div>
       )}
 
-      {/* Link Groups Section - Only for Department and Employee Type fields */}
-      {(fieldType === 'department' || fieldType === 'employeeType') && (
+      {/* Link Email Groups Section - Only for Department field */}
+      {fieldType === 'department' && (
         <div className="space-y-4 border-t border-gray-200 dark:border-gray-700 pt-4">
           <div className="flex items-center space-x-2">
             <Checkbox 
@@ -1126,31 +1032,27 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
               onCheckedChange={handleLinkGroupsChange}
             />
             <Label htmlFor="link-groups" className="text-sm font-medium">
-              {fieldType === 'department' ? 'Link Email Groups to Departments' : 'Link Security Groups to Employee Types'}
+              Link Email Groups to Departments
             </Label>
           </div>
           
           <div className="text-sm text-gray-600 dark:text-gray-400">
-            {fieldType === 'department' 
-              ? 'When enabled, specific email groups will be automatically assigned when a department is selected.'
-              : 'When enabled, specific security groups will be automatically assigned when an employee type is selected.'}
+            When enabled, specific email groups will be automatically assigned when a department is selected.
           </div>
 
           {config.linkGroups && config.useList && config.options.length > 0 && (
             <div className="space-y-4">
-              {/* Two-column layout: Department/EmployeeType Selection + Group Selection */}
+              {/* Department Email Group Configuration */}
               <div className="grid grid-cols-2 gap-4">
-                {/* Left Column: Selection */}
+                {/* Left Column: Department Selection */}
                 <div className="space-y-2">
-                  <Label className="text-sm font-medium">
-                    {fieldType === 'department' ? 'Select Department to Configure' : 'Select Employee Type to Configure'}
-                  </Label>
+                  <Label className="text-sm font-medium">Select Department to Configure</Label>
                   <Select 
-                    value={fieldType === 'department' ? selectedDepartment : selectedEmployeeType} 
-                    onValueChange={fieldType === 'department' ? setSelectedDepartment : setSelectedEmployeeType}
+                    value={selectedDepartment} 
+                    onValueChange={setSelectedDepartment}
                   >
                     <SelectTrigger className="w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600">
-                      <SelectValue placeholder={fieldType === 'department' ? 'Choose a department...' : 'Choose an employee type...'} />
+                      <SelectValue placeholder="Choose a department..." />
                     </SelectTrigger>
                     <SelectContent className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600">
                       {config.options.filter(option => option && option.trim() !== '').map((option) => (
@@ -1158,9 +1060,7 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
                           <div className="flex items-center justify-between w-full">
                             <span>{option}</span>
                             <span className="text-xs text-gray-500 ml-2">
-                              {fieldType === 'department' 
-                                ? (localDepartmentGroupMappings[option]?.length || 0) 
-                                : (localEmployeeTypeGroupMappings[option]?.length || 0)} email groups
+                              {(localDepartmentGroupMappings[option]?.length || 0)} email groups
                             </span>
                           </div>
                         </SelectItem>
@@ -1169,19 +1069,15 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
                   </Select>
                 </div>
 
-                {/* Right Column: Group Selection (CreateUserModal style) */}
+                {/* Right Column: Email Group Selection */}
                 <div className="space-y-2">
                   <Label className="text-sm font-medium">Email Groups</Label>
-                  {(fieldType === 'department' ? selectedDepartment : selectedEmployeeType) ? (
+                  {selectedDepartment ? (
                     <>
-                      {/* Add group dropdown at top */}
+                      {/* Add group dropdown */}
                       <Select
                         onValueChange={(groupName) => {
-                          if (fieldType === 'department') {
-                            handleLinkDepartmentGroup(selectedDepartment, groupName);
-                          } else {
-                            handleLinkEmployeeTypeGroup(selectedEmployeeType, groupName);
-                          }
+                          handleLinkDepartmentGroup(selectedDepartment, groupName);
                         }}
                       >
                         <SelectTrigger className="w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600">
@@ -1194,11 +1090,7 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
                           {availableGroups
                             .filter((group: string) => {
                               if (!group || group.trim() === '') return false;
-                              if (fieldType === 'department') {
-                                return !localDepartmentGroupMappings[selectedDepartment]?.includes(group);
-                              } else {
-                                return !localEmployeeTypeGroupMappings[selectedEmployeeType]?.includes(group);
-                              }
+                              return !localDepartmentGroupMappings[selectedDepartment]?.includes(group);
                             })
                             .map((group: string) => (
                               <SelectItem key={group} value={group} className="bg-white dark:bg-gray-800">
@@ -1206,11 +1098,7 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
                               </SelectItem>
                             ))}
                           {availableGroups.filter((group: string) => {
-                            if (fieldType === 'department') {
-                              return !localDepartmentGroupMappings[selectedDepartment]?.includes(group);
-                            } else {
-                              return !localEmployeeTypeGroupMappings[selectedEmployeeType]?.includes(group);
-                            }
+                            return !localDepartmentGroupMappings[selectedDepartment]?.includes(group);
                           }).length === 0 && (
                             <SelectItem value="no-groups" disabled className="text-gray-500">
                               All email groups already linked
@@ -1219,47 +1107,34 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
                         </SelectContent>
                       </Select>
 
-                      {/* Selected groups using exact CreateUserModal format */}
+                      {/* Selected email groups */}
                       <div className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md divide-y divide-gray-200 dark:divide-gray-600 max-w-48">
-                        {(() => {
-                          const currentSelection = fieldType === 'department' ? selectedDepartment : selectedEmployeeType;
-                          const currentMappings = fieldType === 'department' 
-                            ? localDepartmentGroupMappings[currentSelection] 
-                            : localEmployeeTypeGroupMappings[currentSelection];
-                          
-                          return currentMappings && currentMappings.length > 0 ? (
-                            currentMappings.map((groupName, index) => (
-                              <div key={index} className="flex items-center px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700/50">
-                                <span className="flex-1 text-gray-900 dark:text-gray-100 text-sm uppercase">
-                                  {groupName}
-                                </span>
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => {
-                                    if (fieldType === 'department') {
-                                      handleUnlinkDepartmentGroup(selectedDepartment, groupName);
-                                    } else {
-                                      handleUnlinkEmployeeTypeGroup(selectedEmployeeType, groupName);
-                                    }
-                                  }}
-                                  className="h-4 w-4 p-0 text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 ml-1"
-                                >
-                                  {'×'}
-                                </Button>
-                              </div>
-                            ))
-                          ) : (
-                            <div className="flex items-center px-3 py-4 text-center">
-                              <span className="text-sm text-gray-500 dark:text-gray-400 w-full">No email groups linked</span>
+                        {localDepartmentGroupMappings[selectedDepartment] && localDepartmentGroupMappings[selectedDepartment].length > 0 ? (
+                          localDepartmentGroupMappings[selectedDepartment].map((groupName, index) => (
+                            <div key={index} className="flex items-center px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                              <span className="flex-1 text-gray-900 dark:text-gray-100 text-sm uppercase">
+                                {groupName}
+                              </span>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleUnlinkDepartmentGroup(selectedDepartment, groupName)}
+                                className="h-4 w-4 p-0 text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 ml-1"
+                              >
+                                {'×'}
+                              </Button>
                             </div>
-                          );
-                        })()}
+                          ))
+                        ) : (
+                          <div className="flex items-center px-3 py-4 text-center">
+                            <span className="text-sm text-gray-500 dark:text-gray-400 w-full">No email groups linked</span>
+                          </div>
+                        )}
                       </div>
                     </>
                   ) : (
                     <div className="text-sm text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800 rounded-lg p-3 border border-gray-200 dark:border-gray-600">
-                      {fieldType === 'department' ? 'Select a department to configure email groups' : 'Select an employee type to configure email groups'}
+                      Select a department to configure email groups
                     </div>
                   )}
                 </div>
@@ -1269,66 +1144,36 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
 
           {config.linkGroups && (!config.useList || config.options.length === 0) && (
             <div className="text-sm text-gray-500 dark:text-gray-400 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded-lg p-3">
-              {fieldType === 'department' 
-                ? 'Enable "Use predefined list" and add department options to configure email group linking.'
-                : 'Enable "Use predefined list" and add employee type options to configure security group linking.'}
+              Enable "Use predefined list" and add department options to configure email group linking.
             </div>
           )}
         </div>
       )}
 
-      {/* Employee Type Group Creation Dialog */}
-      <Dialog open={showEmployeeTypeGroupDialog} onOpenChange={setShowEmployeeTypeGroupDialog}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Create OKTA Security Group for Employee Type</DialogTitle>
-            <DialogDescription>
-              Configure the security group name for the employee type "{pendingEmployeeTypeName}". This will create an OKTA security group with pattern: [company initials]-ET-[group suffix].
-            </DialogDescription>
-          </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid gap-2">
-              <Label htmlFor="displayName">Display Name</Label>
-              <Input
-                id="displayName"
-                value={employeeTypeDisplayName}
-                onChange={(e) => setEmployeeTypeDisplayName(e.target.value)}
-                placeholder="Employee type display name"
-                className="bg-white dark:bg-gray-800 border"
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="groupName">Security Group Name</Label>
-              <div className="flex items-center gap-1">
-                <span className="text-sm text-gray-600 dark:text-gray-400 px-3 py-2 bg-gray-100 dark:bg-gray-700 rounded-l border border-r-0">
-                  {clientInfo?.name ? getCompanyInitials(clientInfo.name) : 'CL'}-ET-
-                </span>
-                <Input
-                  id="groupName"
-                  value={employeeTypeGroupSuffix}
-                  onChange={(e) => setEmployeeTypeGroupSuffix(e.target.value)}
-                  placeholder="GROUP_SUFFIX"
-                  className="bg-white dark:bg-gray-800 border rounded-l-none"
-                />
+      {/* Employee Type OKTA Security Group Automation */}
+      {fieldType === 'employeeType' && config.useList && config.options.length > 0 && (
+        <div className="space-y-4 border-t border-gray-200 dark:border-gray-700 pt-4">
+          <div className="text-sm text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg p-4">
+            <div className="flex items-start gap-3">
+              <div className="text-blue-500 mt-0.5">🔐</div>
+              <div>
+                <div className="font-medium mb-2">OKTA Security Group Automation</div>
+                <div className="text-sm text-blue-600 dark:text-blue-300 mb-2">
+                  When you save this configuration, corresponding OKTA security groups will be automatically created for each employee type using the pattern:
+                </div>
+                <div className="font-mono text-sm bg-white dark:bg-gray-800 border border-blue-200 dark:border-blue-600 rounded px-2 py-1 mb-2">
+                  {clientInfo?.name ? getCompanyInitials(clientInfo.name) : 'CL'}-ET-[EMPLOYEE_TYPE]
+                </div>
+                <div className="text-xs text-blue-500 dark:text-blue-400">
+                  Example: For employee type "Manager" → {clientInfo?.name ? getCompanyInitials(clientInfo.name) : 'CL'}-ET-MANAGER
+                </div>
               </div>
-              <p className="text-xs text-gray-500 dark:text-gray-400">
-                Final security group name: {clientInfo?.name ? getCompanyInitials(clientInfo.name) : 'CL'}-ET-{employeeTypeGroupSuffix.toUpperCase().replace(/\s+/g, '')}
-              </p>
             </div>
           </div>
-          <div className="flex justify-end gap-3">
-            <Button variant="outline" onClick={handleEmployeeTypeGroupDialogCancel}>
-              Cancel
-            </Button>
-            <Button 
-              onClick={createEmployeeTypeGroupWithDialog}
-              disabled={!employeeTypeGroupSuffix.trim() || !employeeTypeDisplayName.trim()}
-            >
-              Create Security Group
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+        </div>
+      )}
+
+
     </div>
   );
 }
