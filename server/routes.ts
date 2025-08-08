@@ -3366,9 +3366,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const employeeTypes = settingValue?.options || [];
           
           if (employeeTypes.length > 0) {
-            // Get client information for company initials
-            const client = await db.select()
-              .from(clients)
+            // Get client information for company initials  
+            const client = await db.select({
+              id: clients.id,
+              name: clients.name
+            }).from(clients)
               .where(eq(clients.id, clientId))
               .limit(1);
             
