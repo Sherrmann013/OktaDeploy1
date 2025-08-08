@@ -3381,15 +3381,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
             // Get client information for company initials  
             const client = await db.select({
               id: clients.id,
-              name: clients.name
+              name: clients.name,
+              companyInitials: clients.companyInitials
             }).from(clients)
               .where(eq(clients.id, clientId))
               .limit(1);
             
             if (client.length > 0) {
               const clientName = client[0].name;
-              // Extract initials from capital letters (ClockWerk -> CW)
-              const companyInitials = clientName.match(/[A-Z]/g)?.join('') || 
+              // Use stored company initials, fallback to deriving from name if not set
+              const companyInitials = client[0].companyInitials || 
+                                    clientName.match(/[A-Z]/g)?.join('') || 
                                     clientName.split(' ').map(word => word.charAt(0).toUpperCase()).join('');
               
               console.log(`🏢 Client: ${clientName} → Company Initials: ${companyInitials}`);
