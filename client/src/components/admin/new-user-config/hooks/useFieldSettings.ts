@@ -99,11 +99,13 @@ export function useFieldSettings() {
   }, [fetchedSettings]);
 
   const updateFieldSetting = (fieldKey: FieldKey, newConfig: any) => {
+    console.log('🔵 updateFieldSetting called:', { fieldKey, hasChanges: fieldKey in unsavedChanges });
     // Update only in unsaved changes, not in the main settings
     setUnsavedChanges(prev => ({
       ...prev,
       [fieldKey]: newConfig
     }));
+    console.log('🔵 unsavedChanges updated for', fieldKey);
   };
 
   // Get the current state for a field (including unsaved changes)
@@ -122,6 +124,8 @@ export function useFieldSettings() {
 
   // Save only the current field's changes
   const saveCurrentFieldChanges = async (fieldKey: FieldKey) => {
+    console.log('🔴 saveCurrentFieldChanges called for:', fieldKey);
+    console.trace('🔴 SAVE STACK TRACE - WHO CALLED THIS?');
     // Check if there are any changes to save (including mapping functions)
     const hasRegularChanges = !!unsavedChanges[fieldKey];
     const hasDepartmentAppChanges = fieldKey === 'department' && departmentAppSaveFunction !== null;

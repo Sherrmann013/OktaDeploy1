@@ -678,15 +678,18 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
 
 
   const handleOptionChange = async (index: number, newValue: string) => {
+    console.log('🟡 handleOptionChange called:', { index, newValue, fieldType });
     const oldValue = config.options[index];
     const newOptions = [...config.options];
     newOptions[index] = newValue;
     
+    console.log('🟡 About to call onUpdate - this will trigger parent state change');
     // Update the config first
     onUpdate({
       ...config,
       options: newOptions
     });
+    console.log('🟡 onUpdate called successfully');
 
     // No automatic dialog anymore - users will use inline configuration
   };

@@ -3380,9 +3380,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
               
               console.log(`🏢 Client: ${clientName} → Company Initials: ${companyInitials}`);
               
-              // Check if client has OKTA integration
-              const oktaIntegration = await clientDb.select().from(clientIntegrations)
-                .where(eq(clientIntegrations.name, 'okta'))
+              // Check if client has OKTA integration (use correct schema)
+              const { integrations } = await import('../shared/client-schema');
+              const oktaIntegration = await clientDb.select().from(integrations)
+                .where(eq(integrations.name, 'okta'))
                 .limit(1);
               
               if (oktaIntegration.length > 0) {
