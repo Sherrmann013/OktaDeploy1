@@ -3275,6 +3275,100 @@ export async function registerRoutes(app: Express): Promise<Server> {
           .returning();
         console.log(`✅ Created layout setting for client ${clientId}`);
       }
+
+      // AUTOMATIC OKTA SECURITY GROUP CREATION FOR EMPLOYEE TYPES
+      if (validatedData.settingKey === 'employeeType') {
+        console.log(`🔐 Processing employee type field configuration for automatic OKTA security group creation`);
+        
+        try {
+          // Parse the employee type options
+          const settingValue = typeof validatedData.settingValue === 'string' 
+            ? JSON.parse(validatedData.settingValue) 
+            : validatedData.settingValue;
+          
+          const employeeTypes = settingValue?.options || [];
+          
+          if (employeeTypes.length > 0) {
+            // Get client information for company initials
+            const client = await db.select()
+              .from(clients)
+              .where(eq(clients.id, clientId))
+              .limit(1);
+            
+            if (client.length > 0) {
+              const clientName = client[0].name;
+              const companyInitials = clientName.split(' ')
+                .map(word => word.charAt(0).toUpperCase())
+                .join('');
+              
+              console.log(`🏢 Client: ${clientName} → Company Initials: ${companyInitials}`);
+              
+              // Check if client has OKTA integration
+              const oktaIntegration = await clientDb.select().from(clientIntegrations)
+                .where(eq(clientIntegrations.name, 'okta'))
+                .limit(1);
+              
+              if (oktaIntegration.length > 0) {
+                console.log(`🔐 OKTA integration found for client ${clientId}, creating security groups for employee types...`);
+                
+                const oktaResults = [];
+                
+                for (const employeeType of employeeTypes) {
+                  if (employeeType && employeeType.trim() !== '') {
+                    const securityGroupName = `${companyInitials}-ET-${employeeType.toUpperCase().replace(/\s+/g, '')}`;
+                    
+                    try {
+                      const oktaGroupResult = await createOktaGroup(
+                        oktaIntegration[0].apiKeys as Record<string, string>, 
+                        securityGroupName, 
+                        `Security group for ${employeeType} employee type`
+                      );
+                      
+                      oktaResults.push({
+                        employeeType,
+                        groupName: securityGroupName,
+                        ...oktaGroupResult
+                      });
+                      
+                      if (oktaGroupResult.success) {
+                        if (oktaGroupResult.exists) {
+                          console.log(`✅ OKTA security group '${securityGroupName}' already exists (${employeeType})`);
+                        } else {
+                          console.log(`✅ Created OKTA security group '${securityGroupName}' (${employeeType})`);
+                        }
+                      } else {
+                        console.log(`⚠️ Failed to create OKTA security group '${securityGroupName}' (${employeeType}): ${oktaGroupResult.message}`);
+                      }
+                    } catch (error) {
+                      console.error(`❌ Error creating OKTA security group '${securityGroupName}' (${employeeType}):`, error);
+                      oktaResults.push({
+                        employeeType,
+                        groupName: securityGroupName,
+                        success: false,
+                        message: error instanceof Error ? error.message : 'Unknown error'
+                      });
+                    }
+                  }
+                }
+                
+                console.log(`🔐 Completed automatic OKTA security group creation for ${oktaResults.length} employee types`);
+                
+                // Add OKTA results to response for transparency
+                (result as any).oktaSecurityGroups = oktaResults;
+              } else {
+                console.log(`⚠️ No OKTA integration found for client ${clientId}, skipping security group creation`);
+                (result as any).oktaSecurityGroups = { message: 'No OKTA integration configured' };
+              }
+            }
+          }
+        } catch (error) {
+          console.error(`❌ Error in automatic OKTA security group creation:`, error);
+          // Don't fail the main operation - just log the error
+          (result as any).oktaSecurityGroups = { 
+            error: error instanceof Error ? error.message : 'Unknown error in OKTA group creation' 
+          };
+        }
+      }
       
       res.json(result);
     } catch (error) {
