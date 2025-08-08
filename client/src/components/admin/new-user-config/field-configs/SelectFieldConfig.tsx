@@ -1183,28 +1183,7 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
         </div>
       )}
 
-      {/* Employee Type OKTA Security Group Automation */}
-      {fieldType === 'employeeType' && config.useList && config.options.length > 0 && (
-        <div className="space-y-4 border-t border-gray-200 dark:border-gray-700 pt-4">
-          <div className="text-sm text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg p-4">
-            <div className="flex items-start gap-3">
-              <div className="text-blue-500 mt-0.5">🔐</div>
-              <div>
-                <div className="font-medium mb-2">OKTA Security Group Automation</div>
-                <div className="text-sm text-blue-600 dark:text-blue-300 mb-2">
-                  When you save this configuration, corresponding OKTA security groups will be automatically created for each employee type using the pattern:
-                </div>
-                <div className="font-mono text-sm bg-white dark:bg-gray-800 border border-blue-200 dark:border-blue-600 rounded px-2 py-1 mb-2">
-                  {clientInfo?.name ? getCompanyInitials(clientInfo.name) : 'CL'}-ET-[EMPLOYEE_TYPE]
-                </div>
-                <div className="text-xs text-blue-500 dark:text-blue-400">
-                  Example: For employee type "Manager" → {clientInfo?.name ? getCompanyInitials(clientInfo.name) : 'CL'}-ET-MANAGER
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+
 
 
     </div>
