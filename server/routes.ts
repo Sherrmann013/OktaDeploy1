@@ -4387,7 +4387,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/clients/:id", isAuthenticated, mspRoutes.getClient);
   app.post("/api/clients", isAuthenticated, requireAdmin, mspRoutes.createClient);
   app.post("/api/clients/create-with-template", isAuthenticated, requireAdmin, mspRoutes.createClientWithTemplate);
-  app.put("/api/clients/:id", isAuthenticated, requireAdmin, mspRoutes.updateClient);
+  // PUT route handled below with debugging
   app.delete("/api/clients/:id", isAuthenticated, requireAdmin, mspRoutes.deleteClient);
 
   // Auto-initialize missing client database tables on startup
@@ -4485,7 +4485,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const clientId = parseInt(req.params.id);
       const updates = req.body;
       
-      console.log(`🔄 Updating client ${clientId}:`, updates);
+      console.log('🔴 CLIENT SAVE - DETAILED DEBUGGING:', {
+        clientId,
+        updates,
+        updateKeys: Object.keys(updates),
+        updatesStringified: JSON.stringify(updates)
+      });
       
       // Update the client in the MSP database
       const [updatedClient] = await db.update(clients)
@@ -4496,11 +4501,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         .where(eq(clients.id, clientId))
         .returning();
       
+      console.log('🔴 CLIENT DATABASE UPDATE RESULT:', {
+        clientId,
+        updatedClient,
+        wasFound: !!updatedClient
+      });
+      
       if (!updatedClient) {
+        console.log('❌ CLIENT NOT FOUND IN DATABASE');
         return res.status(404).json({ error: "Client not found" });
       }
       
-      console.log(`✅ Client ${clientId} updated successfully`);
+      console.log(`✅ Client ${clientId} updated successfully - RETURNING:`, updatedClient);
       res.json(updatedClient);
     } catch (error) {
       console.error(`Error updating client ${req.params.id}:`, error);
