@@ -62,8 +62,11 @@ export default function MSPDashboard() {
   // Fetch clients for MSP user
   const { data: clients = [], isLoading } = useQuery<Client[]>({
     queryKey: ["/api/clients"],
-    staleTime: 0, // Always fetch fresh data after invalidation
-    refetchOnWindowFocus: true, // Refetch when window gains focus
+    staleTime: 0, // Always fetch fresh data
+    gcTime: 0, // Don't cache at all (v5 syntax)
+    refetchOnWindowFocus: true,
+    refetchOnMount: true,
+    refetchOnReconnect: true,
   });
 
   // Update client mutation
@@ -81,14 +84,15 @@ export default function MSPDashboard() {
         timestamp: new Date().toISOString()
       });
       
-      // Force immediate cache invalidation and refetch
+      // Force complete cache removal and refetch
+      queryClient.removeQueries({ queryKey: ["/api/clients"] });
       queryClient.invalidateQueries({ queryKey: ["/api/clients"] });
       queryClient.refetchQueries({ queryKey: ["/api/clients"] });
       
-      console.log('🔄 CACHE INVALIDATION TRIGGERED - forcing UI refresh');
+      console.log('🔄 AGGRESSIVE CACHE RESET - complete removal and refetch');
       
       toast({
-        title: "Client updated successfully",
+        title: "Client updated successfully", 
         description: "Client information has been updated.",
       });
       setIsEditClientOpen(false);
