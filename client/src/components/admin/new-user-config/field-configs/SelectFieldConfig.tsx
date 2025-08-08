@@ -106,17 +106,25 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
 
   // Local functions for managing department-app mappings (no auto-save)
   const handleLinkApp = (department: string, appName: string) => {
+    console.log('🔗 LINK DEPARTMENT APP CALLED:', { department, appName });
+    console.trace('🔗 LINK DEPARTMENT APP STACK TRACE');
+    
     setLocalDepartmentAppMappings(prev => {
       const updated = { ...prev };
       if (!updated[department]) {
         updated[department] = [];
       }
       if (!updated[department].includes(appName)) {
+        console.log('🔗 ADDING APP TO DEPARTMENT:', { department, appName, current: updated[department] });
         updated[department] = [...updated[department], appName];
+      } else {
+        console.log('🔗 APP ALREADY LINKED TO DEPARTMENT:', { department, appName });
       }
+      console.log('🔗 UPDATED DEPARTMENT MAPPINGS:', updated);
       return updated;
     });
     setHasDepartmentUnsavedChanges(true);
+    console.log('🔗 DEPARTMENT UNSAVED CHANGES SET TO TRUE');
   };
 
   const handleUnlinkApp = (department: string, appName: string) => {
@@ -135,17 +143,25 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
 
   // Local functions for managing employee type-app mappings (no auto-save)
   const handleLinkEmployeeTypeApp = (employeeType: string, appName: string) => {
+    console.log('🔗 LINK EMPLOYEE TYPE APP CALLED:', { employeeType, appName });
+    console.trace('🔗 LINK EMPLOYEE TYPE APP STACK TRACE');
+    
     setLocalEmployeeTypeAppMappings(prev => {
       const updated = { ...prev };
       if (!updated[employeeType]) {
         updated[employeeType] = [];
       }
       if (!updated[employeeType].includes(appName)) {
+        console.log('🔗 ADDING APP TO EMPLOYEE TYPE:', { employeeType, appName, current: updated[employeeType] });
         updated[employeeType] = [...updated[employeeType], appName];
+      } else {
+        console.log('🔗 APP ALREADY LINKED TO EMPLOYEE TYPE:', { employeeType, appName });
       }
+      console.log('🔗 UPDATED EMPLOYEE TYPE MAPPINGS:', updated);
       return updated;
     });
     setHasEmployeeTypeUnsavedChanges(true);
+    console.log('🔗 EMPLOYEE TYPE UNSAVED CHANGES SET TO TRUE');
   };
 
   const handleUnlinkEmployeeTypeApp = (employeeType: string, appName: string) => {
