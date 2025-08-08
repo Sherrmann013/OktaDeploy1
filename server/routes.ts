@@ -62,21 +62,98 @@ async function createOktaGroup(apiKeys: Record<string, string>, groupName: strin
     throw new Error('OKTA domain and API token are required');
   }
 
-  // Temporarily set environment variables for this operation
-  const originalDomain = process.env.OKTA_DOMAIN;
-  const originalToken = process.env.OKTA_API_TOKEN;
-  
-  process.env.OKTA_DOMAIN = apiKeys.domain;
-  process.env.OKTA_API_TOKEN = apiKeys.apiToken;
-  
+  // Use client-specific credentials directly without environment variable manipulation
   try {
-    const { OktaService } = await import('./okta-service');
-    const oktaService = new OktaService();
-    return await oktaService.createGroup(groupName, description);
-  } finally {
-    // Restore original environment variables
-    if (originalDomain) process.env.OKTA_DOMAIN = originalDomain;
-    if (originalToken) process.env.OKTA_API_TOKEN = originalToken;
+    console.log(`🔐 Creating OKTA group '${groupName}' using client-specific credentials for domain: ${apiKeys.domain}`);
+    
+    const https = await import('https');
+    
+    const domain = apiKeys.domain.replace(/^https?:\/\//, ''); // Remove protocol if present
+    const groupData = {
+      profile: {
+        name: groupName,
+        description: description || `Security group: ${groupName}`
+      }
+    };
+    
+    const postData = JSON.stringify(groupData);
+    
+    return new Promise((resolve, reject) => {
+      const requestOptions = {
+        hostname: domain,
+        port: 443,
+        path: '/api/v1/groups',
+        method: 'POST',
+        headers: {
+          'Authorization': `SSWS ${apiKeys.apiToken}`,
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          'Content-Length': Buffer.byteLength(postData)
+        }
+      };
+
+      const req = https.request(requestOptions, (res) => {
+        let data = '';
+        
+        res.on('data', (chunk) => {
+          data += chunk;
+        });
+        
+        res.on('end', () => {
+          try {
+            const responseData = JSON.parse(data);
+            
+            if (res.statusCode === 200 || res.statusCode === 201) {
+              // Group created successfully
+              resolve({
+                success: true,
+                exists: false,
+                groupId: responseData.id,
+                message: `Group '${groupName}' created successfully`
+              });
+            } else if (res.statusCode === 400 && data.includes('already exists')) {
+              // Group already exists - treat as success
+              resolve({
+                success: true,
+                exists: true,
+                message: `Group '${groupName}' already exists`
+              });
+            } else {
+              // Other error
+              resolve({
+                success: false,
+                exists: false,
+                message: `Failed to create group: ${responseData.errorSummary || data}`
+              });
+            }
+          } catch (parseError) {
+            // Failed to parse response
+            resolve({
+              success: false,
+              exists: false,
+              message: `Failed to parse OKTA response: ${data}`
+            });
+          }
+        });
+      });
+
+      req.on('error', (error) => {
+        resolve({
+          success: false,
+          exists: false,
+          message: `Network error: ${error.message}`
+        });
+      });
+
+      req.write(postData);
+      req.end();
+    });
+  } catch (error) {
+    return {
+      success: false,
+      exists: false,
+      message: error instanceof Error ? error.message : 'Unknown error'
+    };
   }
 }
 
