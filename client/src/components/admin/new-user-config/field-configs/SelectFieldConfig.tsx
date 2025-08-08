@@ -830,7 +830,7 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
                       size="sm"
                       onClick={() => setExpandedEmployeeType(expandedEmployeeType === option ? null : option)}
                       className="h-6 w-6 p-0 ml-2 text-blue-500 hover:text-blue-700"
-                      title="Configure Email Groups"
+                      title="Configure Security Groups"
                     >
                       {expandedEmployeeType === option ? <X className="w-3 h-3" /> : <Link className="w-3 h-3" />}
                     </Button>
@@ -852,7 +852,7 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
                   <div className="px-3 pb-3 border-t border-gray-100 dark:border-gray-600 bg-gray-50 dark:bg-gray-700/30">
                     <div className="pt-3 space-y-2">
                       <div className="text-xs font-medium text-gray-600 dark:text-gray-400 mb-2">
-                        Email Groups for "{option}"
+                        Security Groups for "{option}"
                       </div>
                       
                       {/* Add Group Dropdown */}
@@ -872,7 +872,7 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
                         <SelectTrigger className="w-full h-8 text-xs bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600">
                           <div className="flex items-center">
                             <span className="text-blue-500 mr-1">+</span>
-                            <SelectValue placeholder="Add email group" />
+                            <SelectValue placeholder="Add security group" />
                           </div>
                         </SelectTrigger>
                         <SelectContent className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600">
@@ -890,11 +890,11 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
                             return !localEmployeeTypeGroupMappings[option]?.includes(group);
                           }).length === 0 && (
                             <SelectItem value="no-groups" disabled className="text-gray-500 text-xs">
-                              All email groups already linked
+                              All security groups already linked
                             </SelectItem>
                           )}
                           <SelectItem value="create-new" className="bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-xs">
-                            + Create New Email Group
+                            + Create New Security Group
                           </SelectItem>
                         </SelectContent>
                       </Select>
@@ -923,7 +923,7 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
                       
                       {(!localEmployeeTypeGroupMappings[option] || localEmployeeTypeGroupMappings[option].length === 0) && (
                         <div className="text-xs text-gray-500 dark:text-gray-400 text-center py-2">
-                          No email groups linked
+                          No security groups linked
                         </div>
                       )}
                     </div>
@@ -1126,14 +1126,14 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
               onCheckedChange={handleLinkGroupsChange}
             />
             <Label htmlFor="link-groups" className="text-sm font-medium">
-              {fieldType === 'department' ? 'Link Email Groups to Departments' : 'Link Email Groups to Employee Types'}
+              {fieldType === 'department' ? 'Link Email Groups to Departments' : 'Link Security Groups to Employee Types'}
             </Label>
           </div>
           
           <div className="text-sm text-gray-600 dark:text-gray-400">
             {fieldType === 'department' 
-              ? 'When enabled, specific groups will be automatically assigned when a department is selected.'
-              : 'When enabled, specific groups will be automatically assigned when an employee type is selected.'}
+              ? 'When enabled, specific email groups will be automatically assigned when a department is selected.'
+              : 'When enabled, specific security groups will be automatically assigned when an employee type is selected.'}
           </div>
 
           {config.linkGroups && config.useList && config.options.length > 0 && (
@@ -1271,7 +1271,7 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
             <div className="text-sm text-gray-500 dark:text-gray-400 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded-lg p-3">
               {fieldType === 'department' 
                 ? 'Enable "Use predefined list" and add department options to configure email group linking.'
-                : 'Enable "Use predefined list" and add employee type options to configure email group linking.'}
+                : 'Enable "Use predefined list" and add employee type options to configure security group linking.'}
             </div>
           )}
         </div>
@@ -1281,9 +1281,9 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
       <Dialog open={showEmployeeTypeGroupDialog} onOpenChange={setShowEmployeeTypeGroupDialog}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle>Create Group for Employee Type</DialogTitle>
+            <DialogTitle>Create OKTA Security Group for Employee Type</DialogTitle>
             <DialogDescription>
-              Configure the group name and display information for the employee type "{pendingEmployeeTypeName}".
+              Configure the security group name for the employee type "{pendingEmployeeTypeName}". This will create an OKTA security group with pattern: [company initials]-ET-[group suffix].
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
@@ -1298,7 +1298,7 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="groupName">Group Name</Label>
+              <Label htmlFor="groupName">Security Group Name</Label>
               <div className="flex items-center gap-1">
                 <span className="text-sm text-gray-600 dark:text-gray-400 px-3 py-2 bg-gray-100 dark:bg-gray-700 rounded-l border border-r-0">
                   {clientInfo?.name ? getCompanyInitials(clientInfo.name) : 'CL'}-ET-
@@ -1312,7 +1312,7 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
                 />
               </div>
               <p className="text-xs text-gray-500 dark:text-gray-400">
-                Final group name: {clientInfo?.name ? getCompanyInitials(clientInfo.name) : 'CL'}-ET-{employeeTypeGroupSuffix.toUpperCase().replace(/\s+/g, '')}
+                Final security group name: {clientInfo?.name ? getCompanyInitials(clientInfo.name) : 'CL'}-ET-{employeeTypeGroupSuffix.toUpperCase().replace(/\s+/g, '')}
               </p>
             </div>
           </div>
@@ -1324,7 +1324,7 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
               onClick={createEmployeeTypeGroupWithDialog}
               disabled={!employeeTypeGroupSuffix.trim() || !employeeTypeDisplayName.trim()}
             >
-              Create Group
+              Create Security Group
             </Button>
           </div>
         </DialogContent>
