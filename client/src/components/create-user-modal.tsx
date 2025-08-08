@@ -911,7 +911,7 @@ export default function CreateUserModal({ open, onClose, onSuccess, clientId }: 
             {/* Groups and Apps */}
             <div className="grid grid-cols-2 gap-4">
               <div className={`space-y-2 ${fieldSettings?.groups?.hideField ? 'invisible' : ''}`}>
-                <Label>Groups {fieldSettings?.groups?.required ? '*' : ''}</Label>
+                <Label>Email Groups {fieldSettings?.groups?.required ? '*' : ''}</Label>
                 <div className="space-y-2">
                   {availableGroups.map((group) => (
                     <div key={group} className="flex items-center space-x-2">

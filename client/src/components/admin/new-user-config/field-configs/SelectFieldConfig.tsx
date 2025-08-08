@@ -1034,7 +1034,7 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
               onCheckedChange={handleLinkGroupsChange}
             />
             <Label htmlFor="link-groups" className="text-sm font-medium">
-              {fieldType === 'department' ? 'Link Groups to Departments' : 'Link Groups to Employee Types'}
+              {fieldType === 'department' ? 'Link Email Groups to Departments' : 'Link Email Groups to Employee Types'}
             </Label>
           </div>
           
@@ -1159,7 +1159,7 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
                             ))
                           ) : (
                             <div className="flex items-center px-3 py-4 text-center">
-                              <span className="text-sm text-gray-500 dark:text-gray-400 w-full">No groups linked</span>
+                              <span className="text-sm text-gray-500 dark:text-gray-400 w-full">No email groups linked</span>
                             </div>
                           );
                         })()}
@@ -1167,7 +1167,7 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
                     </>
                   ) : (
                     <div className="text-sm text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800 rounded-lg p-3 border border-gray-200 dark:border-gray-600">
-                      {fieldType === 'department' ? 'Select a department to configure groups' : 'Select an employee type to configure groups'}
+                      {fieldType === 'department' ? 'Select a department to configure email groups' : 'Select an employee type to configure email groups'}
                     </div>
                   )}
                 </div>
@@ -1178,8 +1178,8 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
           {config.linkGroups && (!config.useList || config.options.length === 0) && (
             <div className="text-sm text-gray-500 dark:text-gray-400 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded-lg p-3">
               {fieldType === 'department' 
-                ? 'Enable "Use predefined list" and add department options to configure group linking.'
-                : 'Enable "Use predefined list" and add employee type options to configure group linking.'}
+                ? 'Enable "Use predefined list" and add department options to configure email group linking.'
+                : 'Enable "Use predefined list" and add employee type options to configure email group linking.'}
             </div>
           )}
         </div>

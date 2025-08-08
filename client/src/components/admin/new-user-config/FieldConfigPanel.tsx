@@ -60,7 +60,7 @@ export function FieldConfigPanel({
       department: 'Department Options',
       employeeType: 'Employee Type Options',
       apps: 'Apps Options',
-      groups: 'Groups Options',
+      groups: 'Email Groups Options',
       sendActivationEmail: 'Send Activation Email Options'
     };
     return titles[field];
