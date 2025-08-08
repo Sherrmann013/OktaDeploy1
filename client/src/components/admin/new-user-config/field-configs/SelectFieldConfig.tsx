@@ -1022,8 +1022,8 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
         </div>
       )}
 
-      {/* Link Email Groups Section - Only for Department field */}
-      {fieldType === 'department' && (
+      {/* Link Email Groups Section - For both Department and Employee Type fields */}
+      {(fieldType === 'department' || fieldType === 'employeeType') && (
         <div className="space-y-4 border-t border-gray-200 dark:border-gray-700 pt-4">
           <div className="flex items-center space-x-2">
             <Checkbox 
@@ -1032,27 +1032,31 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
               onCheckedChange={handleLinkGroupsChange}
             />
             <Label htmlFor="link-groups" className="text-sm font-medium">
-              Link Email Groups to Departments
+              {fieldType === 'department' ? 'Link Email Groups to Departments' : 'Link Email Groups to Employee Types'}
             </Label>
           </div>
           
           <div className="text-sm text-gray-600 dark:text-gray-400">
-            When enabled, specific email groups will be automatically assigned when a department is selected.
+            {fieldType === 'department' 
+              ? 'When enabled, specific email groups will be automatically assigned when a department is selected.'
+              : 'When enabled, specific email groups will be automatically assigned when an employee type is selected (in addition to automatic OKTA security groups).'}
           </div>
 
           {config.linkGroups && config.useList && config.options.length > 0 && (
             <div className="space-y-4">
-              {/* Department Email Group Configuration */}
+              {/* Email Group Configuration for Department/Employee Type */}
               <div className="grid grid-cols-2 gap-4">
-                {/* Left Column: Department Selection */}
+                {/* Left Column: Selection */}
                 <div className="space-y-2">
-                  <Label className="text-sm font-medium">Select Department to Configure</Label>
+                  <Label className="text-sm font-medium">
+                    {fieldType === 'department' ? 'Select Department to Configure' : 'Select Employee Type to Configure'}
+                  </Label>
                   <Select 
-                    value={selectedDepartment} 
-                    onValueChange={setSelectedDepartment}
+                    value={fieldType === 'department' ? selectedDepartment : selectedEmployeeType} 
+                    onValueChange={fieldType === 'department' ? setSelectedDepartment : setSelectedEmployeeType}
                   >
                     <SelectTrigger className="w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600">
-                      <SelectValue placeholder="Choose a department..." />
+                      <SelectValue placeholder={fieldType === 'department' ? 'Choose a department...' : 'Choose an employee type...'} />
                     </SelectTrigger>
                     <SelectContent className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600">
                       {config.options.filter(option => option && option.trim() !== '').map((option) => (
@@ -1060,7 +1064,9 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
                           <div className="flex items-center justify-between w-full">
                             <span>{option}</span>
                             <span className="text-xs text-gray-500 ml-2">
-                              {(localDepartmentGroupMappings[option]?.length || 0)} email groups
+                              {fieldType === 'department' 
+                                ? (localDepartmentGroupMappings[option]?.length || 0) 
+                                : (localEmployeeTypeGroupMappings[option]?.length || 0)} email groups
                             </span>
                           </div>
                         </SelectItem>
@@ -1072,12 +1078,16 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
                 {/* Right Column: Email Group Selection */}
                 <div className="space-y-2">
                   <Label className="text-sm font-medium">Email Groups</Label>
-                  {selectedDepartment ? (
+                  {(fieldType === 'department' ? selectedDepartment : selectedEmployeeType) ? (
                     <>
                       {/* Add group dropdown */}
                       <Select
                         onValueChange={(groupName) => {
-                          handleLinkDepartmentGroup(selectedDepartment, groupName);
+                          if (fieldType === 'department') {
+                            handleLinkDepartmentGroup(selectedDepartment, groupName);
+                          } else {
+                            handleLinkEmployeeTypeGroup(selectedEmployeeType, groupName);
+                          }
                         }}
                       >
                         <SelectTrigger className="w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600">
@@ -1090,7 +1100,11 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
                           {availableGroups
                             .filter((group: string) => {
                               if (!group || group.trim() === '') return false;
-                              return !localDepartmentGroupMappings[selectedDepartment]?.includes(group);
+                              if (fieldType === 'department') {
+                                return !localDepartmentGroupMappings[selectedDepartment]?.includes(group);
+                              } else {
+                                return !localEmployeeTypeGroupMappings[selectedEmployeeType]?.includes(group);
+                              }
                             })
                             .map((group: string) => (
                               <SelectItem key={group} value={group} className="bg-white dark:bg-gray-800">
@@ -1098,7 +1112,11 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
                               </SelectItem>
                             ))}
                           {availableGroups.filter((group: string) => {
-                            return !localDepartmentGroupMappings[selectedDepartment]?.includes(group);
+                            if (fieldType === 'department') {
+                              return !localDepartmentGroupMappings[selectedDepartment]?.includes(group);
+                            } else {
+                              return !localEmployeeTypeGroupMappings[selectedEmployeeType]?.includes(group);
+                            }
                           }).length === 0 && (
                             <SelectItem value="no-groups" disabled className="text-gray-500">
                               All email groups already linked
@@ -1109,32 +1127,45 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
 
                       {/* Selected email groups */}
                       <div className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md divide-y divide-gray-200 dark:divide-gray-600 max-w-48">
-                        {localDepartmentGroupMappings[selectedDepartment] && localDepartmentGroupMappings[selectedDepartment].length > 0 ? (
-                          localDepartmentGroupMappings[selectedDepartment].map((groupName, index) => (
-                            <div key={index} className="flex items-center px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700/50">
-                              <span className="flex-1 text-gray-900 dark:text-gray-100 text-sm uppercase">
-                                {groupName}
-                              </span>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => handleUnlinkDepartmentGroup(selectedDepartment, groupName)}
-                                className="h-4 w-4 p-0 text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 ml-1"
-                              >
-                                {'×'}
-                              </Button>
+                        {(() => {
+                          const currentSelection = fieldType === 'department' ? selectedDepartment : selectedEmployeeType;
+                          const currentMappings = fieldType === 'department' 
+                            ? localDepartmentGroupMappings[currentSelection] 
+                            : localEmployeeTypeGroupMappings[currentSelection];
+                          
+                          return currentMappings && currentMappings.length > 0 ? (
+                            currentMappings.map((groupName, index) => (
+                              <div key={index} className="flex items-center px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                                <span className="flex-1 text-gray-900 dark:text-gray-100 text-sm uppercase">
+                                  {groupName}
+                                </span>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => {
+                                    if (fieldType === 'department') {
+                                      handleUnlinkDepartmentGroup(selectedDepartment, groupName);
+                                    } else {
+                                      handleUnlinkEmployeeTypeGroup(selectedEmployeeType, groupName);
+                                    }
+                                  }}
+                                  className="h-4 w-4 p-0 text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 ml-1"
+                                >
+                                  {'×'}
+                                </Button>
+                              </div>
+                            ))
+                          ) : (
+                            <div className="flex items-center px-3 py-4 text-center">
+                              <span className="text-sm text-gray-500 dark:text-gray-400 w-full">No email groups linked</span>
                             </div>
-                          ))
-                        ) : (
-                          <div className="flex items-center px-3 py-4 text-center">
-                            <span className="text-sm text-gray-500 dark:text-gray-400 w-full">No email groups linked</span>
-                          </div>
-                        )}
+                          );
+                        })()}
                       </div>
                     </>
                   ) : (
                     <div className="text-sm text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800 rounded-lg p-3 border border-gray-200 dark:border-gray-600">
-                      Select a department to configure email groups
+                      {fieldType === 'department' ? 'Select a department to configure email groups' : 'Select an employee type to configure email groups'}
                     </div>
                   )}
                 </div>
@@ -1144,7 +1175,9 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
 
           {config.linkGroups && (!config.useList || config.options.length === 0) && (
             <div className="text-sm text-gray-500 dark:text-gray-400 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded-lg p-3">
-              Enable "Use predefined list" and add department options to configure email group linking.
+              {fieldType === 'department' 
+                ? 'Enable "Use predefined list" and add department options to configure email group linking.'
+                : 'Enable "Use predefined list" and add employee type options to configure email group linking.'}
             </div>
           )}
         </div>
