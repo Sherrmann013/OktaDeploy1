@@ -992,6 +992,8 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
                                   variant="ghost"
                                   size="sm"
                                   onClick={() => {
+                                    console.log('🚨 UNLINK APP BUTTON CLICKED - WHO CLICKED THIS?', { fieldType, appName });
+                                    console.trace('🚨 UNLINK APP STACK TRACE');
                                     if (fieldType === 'department') {
                                       handleUnlinkApp(selectedDepartment, appName);
                                     } else {
@@ -1153,6 +1155,8 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
                                   variant="ghost"
                                   size="sm"
                                   onClick={() => {
+                                    console.log('🚨 UNLINK GROUP BUTTON CLICKED - WHO CLICKED THIS?', { fieldType, groupName });
+                                    console.trace('🚨 UNLINK GROUP STACK TRACE');
                                     if (fieldType === 'department') {
                                       handleUnlinkDepartmentGroup(selectedDepartment, groupName);
                                     } else {

@@ -3382,7 +3382,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
               
               // Check if client has OKTA integration (use correct schema)
               const { integrations } = await import('../shared/client-schema');
-              const oktaIntegration = await clientDb.select().from(integrations)
+              const oktaIntegration = await clientDb.select({
+                id: integrations.id,
+                name: integrations.name,
+                apiKeys: integrations.apiKeys
+              }).from(integrations)
                 .where(eq(integrations.name, 'okta'))
                 .limit(1);
               
@@ -3396,6 +3400,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                     const securityGroupName = `${companyInitials}-ET-${employeeType.toUpperCase().replace(/\s+/g, '')}`;
                     
                     try {
+                      const { createOktaGroup } = await import('./client-okta-service');
                       const oktaGroupResult = await createOktaGroup(
                         oktaIntegration[0].apiKeys as Record<string, string>, 
                         securityGroupName, 

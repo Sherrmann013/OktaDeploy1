@@ -173,7 +173,10 @@ export function FieldConfigPanel({
                 )}
               </div>
               <Button 
-                onClick={() => saveCurrentFieldChanges(selectedField)}
+                onClick={() => {
+                  console.log('🟢 MANUAL Save button clicked for:', selectedField);
+                  saveCurrentFieldChanges(selectedField);
+                }}
                 disabled={!hasUnsavedChanges(selectedField)}
                 size="sm"
                 className="bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-50"
