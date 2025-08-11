@@ -259,7 +259,7 @@ export class MultiDatabaseManager {
             id SERIAL PRIMARY KEY,
             department_name VARCHAR(100) NOT NULL,
             app_name VARCHAR(200) NOT NULL,
-            created TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
           )`;
 
         console.log(`🔧 Creating employee_type_app_mappings table...`);
@@ -268,7 +268,7 @@ export class MultiDatabaseManager {
             id SERIAL PRIMARY KEY,
             employee_type VARCHAR(50) NOT NULL,
             app_name VARCHAR(200) NOT NULL,
-            created TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
           )`;
 
         console.log(`🔧 Creating department_group_mappings table...`);
@@ -276,8 +276,8 @@ export class MultiDatabaseManager {
           CREATE TABLE IF NOT EXISTS department_group_mappings (
             id SERIAL PRIMARY KEY,
             department_name VARCHAR(100) NOT NULL,
-            okta_group_name VARCHAR(200) NOT NULL,
-            created TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
+            group_name VARCHAR(200) NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
           )`;
 
         console.log(`🔧 Creating employee_type_group_mappings table...`);
@@ -285,8 +285,8 @@ export class MultiDatabaseManager {
           CREATE TABLE IF NOT EXISTS employee_type_group_mappings (
             id SERIAL PRIMARY KEY,
             employee_type VARCHAR(50) NOT NULL,
-            okta_group_name VARCHAR(200) NOT NULL,
-            created TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
+            group_name VARCHAR(200) NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
           )`;
 
         console.log(`🔧 Creating monitoring_cards table...`);
