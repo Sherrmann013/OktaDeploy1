@@ -400,6 +400,10 @@ export default function CreateUserModal({ open, onClose, onSuccess, clientId }: 
   });
 
   const onSubmit = (data: InsertUser) => {
+    console.log('Form submitted with data:', data);
+    console.log('Form errors:', form.formState.errors);
+    console.log('Selected apps:', selectedApps);
+    console.log('Selected groups:', selectedGroups);
     createUserMutation.mutate(data);
   };
 
@@ -1013,7 +1017,15 @@ export default function CreateUserModal({ open, onClose, onSuccess, clientId }: 
               <Button type="button" variant="outline" onClick={onClose}>
                 Cancel
               </Button>
-              <Button type="submit" disabled={createUserMutation.isPending}>
+              <Button 
+                type="submit" 
+                disabled={createUserMutation.isPending}
+                onClick={(e) => {
+                  console.log('Submit button clicked');
+                  console.log('Form is valid:', form.formState.isValid);
+                  console.log('Form errors:', form.formState.errors);
+                }}
+              >
                 {createUserMutation.isPending && <RefreshCw className="w-4 h-4 mr-2 animate-spin" />}
                 Create User
               </Button>
