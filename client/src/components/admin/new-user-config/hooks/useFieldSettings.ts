@@ -177,14 +177,15 @@ export function useFieldSettings() {
         allSuccessful = allSuccessful && success;
       }
       
-      // Save mapping changes if they exist by calling SelectFieldConfig's manual save trigger
-      if (hasCurrentMappingChanges && triggerManualSave) {
-        console.log('🔥 MAPPING CHANGES DETECTED - Calling manual save trigger:', fieldKey);
-        const success = await triggerManualSave();
-        allSuccessful = allSuccessful && success;
-        console.log('🔥 MANUAL SAVE RESULT:', success);
-      } else if (hasCurrentMappingChanges && !triggerManualSave) {
-        console.log('⚠️ WARNING: Mapping changes detected but no manual save trigger available');
+      // MAPPING CHANGES: Do NOT auto-trigger manual save - user must click individual save buttons
+      if (hasCurrentMappingChanges) {
+        console.log('⚠️ MAPPING CHANGES DETECTED - Manual save required. User must click individual save buttons.');
+        toast({ 
+          title: "Mapping Changes Detected", 
+          description: "Please click the individual save buttons for app/group mappings to save those changes.",
+          variant: "default"
+        });
+        // Don't call triggerManualSave() - this was causing auto-save behavior
       }
       
       if (allSuccessful) {
