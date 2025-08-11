@@ -679,43 +679,35 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
     }
   };
 
-  // Register save function with parent when there are unsaved changes - DISABLED FOR MANUAL-ONLY SAVES
+  // Register save function with parent - ENABLED FOR MAIN SAVE BUTTON
   useEffect(() => {
     if (fieldType === 'department' && setDepartmentAppSaveFunction) {
-      // DISABLED: Auto-registration was causing unwanted auto-saves
-      // Department app mappings now require explicit user action via their dedicated save button
-      console.log('🔴 AUTO-REGISTRATION DISABLED: Department app mappings require manual save only');
-      setDepartmentAppSaveFunction(null);
+      console.log('🔧 REGISTERING Department app save function for main save button');
+      setDepartmentAppSaveFunction(() => () => saveDepartmentAppMappings(true));
     }
-  }, [fieldType, setDepartmentAppSaveFunction]);
+  }, [fieldType, setDepartmentAppSaveFunction, saveDepartmentAppMappings]);
 
   useEffect(() => {
     if (fieldType === 'employeeType' && setEmployeeTypeAppSaveFunction) {
-      // DISABLED: Auto-registration was causing unwanted auto-saves
-      // Employee type app mappings now require explicit user action via their dedicated save button
-      console.log('🔴 AUTO-REGISTRATION DISABLED: Employee type app mappings require manual save only');
-      setEmployeeTypeAppSaveFunction(null);
+      console.log('🔧 REGISTERING Employee type app save function for main save button');
+      setEmployeeTypeAppSaveFunction(() => () => saveEmployeeTypeAppMappings(true));
     }
-  }, [fieldType, setEmployeeTypeAppSaveFunction]);
+  }, [fieldType, setEmployeeTypeAppSaveFunction, saveEmployeeTypeAppMappings]);
 
-  // Hook save functions for group mappings - DISABLED FOR MANUAL-ONLY SAVES
+  // Hook save functions for group mappings - ENABLED FOR MAIN SAVE BUTTON  
   useEffect(() => {
     if (fieldType === 'department' && setDepartmentGroupSaveFunction) {
-      // DISABLED: Auto-registration was causing unwanted auto-saves
-      // Department group mappings now require explicit user action via their dedicated save button
-      console.log('🔴 AUTO-REGISTRATION DISABLED: Department group mappings require manual save only');
-      setDepartmentGroupSaveFunction(null);
+      console.log('🔧 REGISTERING Department group save function for main save button');
+      setDepartmentGroupSaveFunction(() => () => saveDepartmentGroupMappings());
     }
-  }, [fieldType, setDepartmentGroupSaveFunction]);
+  }, [fieldType, setDepartmentGroupSaveFunction, saveDepartmentGroupMappings]);
 
   useEffect(() => {
     if (fieldType === 'employeeType' && setEmployeeTypeGroupSaveFunction) {
-      // DISABLED: Auto-registration was causing unwanted auto-saves
-      // Employee type group mappings now require explicit user action via their dedicated save button
-      console.log('🔴 AUTO-REGISTRATION DISABLED: Employee type group mappings require manual save only');
-      setEmployeeTypeGroupSaveFunction(null);
+      console.log('🔧 REGISTERING Employee type group save function for main save button');
+      setEmployeeTypeGroupSaveFunction(() => () => saveEmployeeTypeGroupMappings());
     }
-  }, [fieldType, setEmployeeTypeGroupSaveFunction]);
+  }, [fieldType, setEmployeeTypeGroupSaveFunction, saveEmployeeTypeGroupMappings]);
 
   // DISABLED: Remove auto-triggering direct save function that was causing issues
   // Individual save buttons will call the specific save functions directly
