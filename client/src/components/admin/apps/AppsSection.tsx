@@ -39,7 +39,7 @@ export function AppsSection() {
   const currentClientId = location.startsWith('/client/') ? parseInt(location.split('/')[2]) : 1;
   
   const [isNewMappingOpen, setIsNewMappingOpen] = useState(false);
-  const [newMapping, setNewMapping] = useState({ appName: "", oktaGroup: "", description: "" });
+  const [newMapping, setNewMapping] = useState({ appName: "", oktaGroupSuffix: "", description: "" });
   const [mappingToDelete, setMappingToDelete] = useState<AppMapping | null>(null);
   const [editingMapping, setEditingMapping] = useState<AppMapping | null>(null);
   const [isEditMappingOpen, setIsEditMappingOpen] = useState(false);
@@ -70,11 +70,13 @@ export function AppsSection() {
 
   // App mapping mutations
   const createAppMappingMutation = useMutation({
-    mutationFn: async (mappingData: { appName: string; oktaGroup: string; description?: string }) => {
+    mutationFn: async (mappingData: { appName: string; oktaGroupSuffix: string; description?: string }) => {
       // Create single mapping with description passed to OKTA group
+      const clientInitials = clientInitialsData?.settingValue || 'XX';
+      const fullGroupName = `${clientInitials}-SG-${mappingData.oktaGroupSuffix.trim()}`;
       const mapping = {
         appName: mappingData.appName,
-        oktaGroupName: mappingData.oktaGroup.trim(),
+        oktaGroupName: fullGroupName,
         description: mappingData.description || null // This will be used for OKTA group description
       };
       
@@ -96,7 +98,7 @@ export function AppsSection() {
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: [`/api/client/${currentClientId}/app-mappings`] });
       setIsNewMappingOpen(false);
-      setNewMapping({ appName: "", oktaGroup: "", description: "" });
+      setNewMapping({ appName: "", oktaGroupSuffix: "", description: "" });
       
       // Check for errors and warnings in response
       if (data.errors && data.errors.length > 0) {
@@ -500,48 +502,30 @@ export function AppsSection() {
               />
             </div>
             <div className="space-y-2">
-              <label htmlFor="oktaGroup" className="text-sm font-medium">
+              <label htmlFor="oktaGroupSuffix" className="text-sm font-medium">
                 OKTA Group Name
               </label>
               <div className="space-y-2">
-                <input
-                  id="oktaGroup"
-                  type="text"
-                  value={newMapping.oktaGroup}
-                  onChange={(e) => {
-                    // Extract the user input after the prefix
-                    const prefix = `${clientInitialsData?.settingValue || 'XX'}-SG-`;
-                    let userInput = e.target.value;
-                    
-                    // If user is typing and the value starts with our prefix, extract just their part
-                    if (userInput.startsWith(prefix)) {
-                      userInput = userInput.substring(prefix.length);
-                    }
-                    
-                    // Always set the full value with prefix + user input
-                    const fullValue = prefix + userInput;
-                    setNewMapping(prev => ({
-                      ...prev,
-                      oktaGroup: fullValue
-                    }));
-                  }}
-                  onFocus={(e) => {
-                    // Auto-fill with prefix when field is focused if empty
-                    if (!newMapping.oktaGroup) {
-                      const prefix = `${clientInitialsData?.settingValue || 'XX'}-SG-`;
+                <div className="flex items-center border border-input rounded-md bg-background focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 bg-white dark:bg-gray-800">
+                  {/* Non-editable prefix box */}
+                  <div className="flex-shrink-0 px-3 py-2 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 text-sm font-medium border-r border-gray-300 dark:border-gray-600 rounded-l-md">
+                    {clientInitialsData?.settingValue || 'XX'}-SG-
+                  </div>
+                  {/* Editable suffix input */}
+                  <input
+                    id="oktaGroupSuffix"
+                    type="text"
+                    value={newMapping.oktaGroupSuffix}
+                    onChange={(e) => {
                       setNewMapping(prev => ({
                         ...prev,
-                        oktaGroup: prefix
+                        oktaGroupSuffix: e.target.value
                       }));
-                      // Position cursor at the end
-                      setTimeout(() => {
-                        e.target.setSelectionRange(prefix.length, prefix.length);
-                      }, 0);
-                    }
-                  }}
-                  placeholder={`${clientInitialsData?.settingValue || 'XX'}-SG-[group name]`}
-                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 bg-white dark:bg-gray-800"
-                />
+                    }}
+                    placeholder="[group name]"
+                    className="flex-1 h-10 px-3 py-2 text-sm bg-transparent border-0 ring-0 focus:outline-none focus:ring-0"
+                  />
+                </div>
               </div>
             </div>
             <div className="space-y-2">
@@ -562,18 +546,18 @@ export function AppsSection() {
               variant="outline" 
               onClick={() => {
                 setIsNewMappingOpen(false);
-                setNewMapping({ appName: "", oktaGroup: "", description: "" });
+                setNewMapping({ appName: "", oktaGroupSuffix: "", description: "" });
               }}
             >
               Cancel
             </Button>
             <Button 
               onClick={() => {
-                if (newMapping.appName && newMapping.oktaGroup.trim()) {
+                if (newMapping.appName && newMapping.oktaGroupSuffix.trim()) {
                   createAppMappingMutation.mutate(newMapping);
                 }
               }}
-              disabled={createAppMappingMutation.isPending || !newMapping.appName || !newMapping.oktaGroup.trim()}
+              disabled={createAppMappingMutation.isPending || !newMapping.appName || !newMapping.oktaGroupSuffix.trim()}
               className="bg-blue-600 hover:bg-blue-700 text-white"
             >
               {createAppMappingMutation.isPending ? "Creating..." : "Create Mapping"}
