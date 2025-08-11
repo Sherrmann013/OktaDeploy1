@@ -117,6 +117,7 @@ export class MemStorage implements IStorage {
         employeeType: userData.title?.includes('Engineer') ? 'EMPLOYEE' : 'EMPLOYEE',
         profileImageUrl: null,
         managerId: null,
+        manager: null,
         userType: 'CLIENT',
         clientId: 1, // Default client for existing users
         created: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000), // 30 days ago
@@ -155,7 +156,17 @@ export class MemStorage implements IStorage {
     const newClient: Client = {
       id: this.currentClientId++,
       ...client,
+      domain: client.domain || null,
       status: client.status || 'ACTIVE',
+      logoUrl: client.logoUrl || null,
+      primaryContact: client.primaryContact || null,
+      contactEmail: client.contactEmail || null,
+      description: client.description || null,
+      displayName: client.displayName || null,
+      companyName: client.companyName || null,
+      companyInitials: client.companyInitials || null,
+      identityProvider: client.identityProvider || null,
+      notes: client.notes || null,
       created: new Date(),
       lastUpdated: new Date(),
     };
@@ -278,9 +289,15 @@ export class MemStorage implements IStorage {
       mobilePhone: insertUser.mobilePhone || null,
       department: insertUser.department || null,
       title: insertUser.title || null,
+      employeeType: insertUser.employeeType || null,
+      profileImageUrl: insertUser.profileImageUrl || null,
+      managerId: insertUser.managerId || null,
+      manager: insertUser.manager || null,
       status: insertUser.status || "ACTIVE",
       groups: insertUser.groups || [],
       applications: insertUser.applications || [],
+      userType: insertUser.userType || 'CLIENT',
+      clientId: insertUser.clientId || null,
       created: new Date(),
       lastUpdated: new Date(),
       lastLogin: null,
@@ -397,56 +414,54 @@ export class DatabaseStorage implements IStorage {
       .where(whereClause);
     const total = totalResult.length;
 
-    // Get paginated results with dynamic sorting
-    let query = db.select().from(users).where(whereClause);
-    
-    // Apply sorting
+    // Build query with sorting, pagination
+    let orderByClause;
     if (options?.sortBy && options?.sortOrder) {
       const isDesc = options.sortOrder === 'desc';
       switch (options.sortBy) {
         case 'firstName':
-          query = isDesc ? query.orderBy(desc(users.firstName)) : query.orderBy(users.firstName);
+          orderByClause = isDesc ? desc(users.firstName) : users.firstName;
           break;
         case 'lastName':
-          query = isDesc ? query.orderBy(desc(users.lastName)) : query.orderBy(users.lastName);
+          orderByClause = isDesc ? desc(users.lastName) : users.lastName;
           break;
         case 'email':
-          query = isDesc ? query.orderBy(desc(users.email)) : query.orderBy(users.email);
+          orderByClause = isDesc ? desc(users.email) : users.email;
           break;
         case 'title':
-          query = isDesc ? query.orderBy(desc(users.title)) : query.orderBy(users.title);
+          orderByClause = isDesc ? desc(users.title) : users.title;
           break;
         case 'department':
-          query = isDesc ? query.orderBy(desc(users.department)) : query.orderBy(users.department);
+          orderByClause = isDesc ? desc(users.department) : users.department;
           break;
         case 'employeeType':
-          query = isDesc ? query.orderBy(desc(users.employeeType)) : query.orderBy(users.employeeType);
+          orderByClause = isDesc ? desc(users.employeeType) : users.employeeType;
           break;
         case 'status':
-          query = isDesc ? query.orderBy(desc(users.status)) : query.orderBy(users.status);
+          orderByClause = isDesc ? desc(users.status) : users.status;
           break;
         case 'lastLogin':
-          query = isDesc ? query.orderBy(desc(users.lastLogin)) : query.orderBy(users.lastLogin);
+          orderByClause = isDesc ? desc(users.lastLogin) : users.lastLogin;
           break;
         case 'lastUpdated':
-          query = isDesc ? query.orderBy(desc(users.lastUpdated)) : query.orderBy(users.lastUpdated);
+          orderByClause = isDesc ? desc(users.lastUpdated) : users.lastUpdated;
           break;
         default:
-          query = query.orderBy(desc(users.created));
+          orderByClause = desc(users.created);
       }
     } else {
       // Default sorting
-      query = query.orderBy(desc(users.created));
+      orderByClause = desc(users.created);
     }
 
-    if (options?.limit) {
-      query = query.limit(options.limit);
-    }
-    if (options?.offset) {
-      query = query.offset(options.offset);
-    }
+    // Build the final query
+    const baseQuery = db.select().from(users);
+    const withWhere = whereClause ? baseQuery.where(whereClause) : baseQuery;
+    const withOrder = withWhere.orderBy(orderByClause);
+    const withLimit = options?.limit ? withOrder.limit(options.limit) : withOrder;
+    const finalQuery = options?.offset ? withLimit.offset(options.offset) : withLimit;
 
-    const userResults = await query;
+    const userResults = await finalQuery;
 
     return { users: userResults, total };
   }
@@ -497,14 +512,12 @@ export class DatabaseStorage implements IStorage {
 
   // Company logo methods
   async getAllLogos(clientId?: number): Promise<CompanyLogo[]> {
-    let query = db.select().from(companyLogos);
+    const baseQuery = db.select().from(companyLogos);
+    const withFilter = clientId !== undefined 
+      ? baseQuery.where(eq(companyLogos.clientId, clientId))
+      : baseQuery;
     
-    if (clientId !== undefined) {
-      // Filter by specific clientId (0 for MSP, specific number for clients)
-      query = query.where(eq(companyLogos.clientId, clientId));
-    }
-    
-    const logos = await query.orderBy(desc(companyLogos.uploadedAt));
+    const logos = await withFilter.orderBy(desc(companyLogos.uploadedAt));
     return logos;
   }
 
@@ -573,6 +586,94 @@ export class DatabaseStorage implements IStorage {
   async deleteLogo(id: number): Promise<boolean> {
     const result = await db.delete(companyLogos).where(eq(companyLogos.id, id));
     return (result.rowCount || 0) > 0;
+  }
+
+  // Client methods
+  async getAllClients(): Promise<Client[]> {
+    const clientList = await db.select().from(clients).orderBy(desc(clients.created));
+    return clientList;
+  }
+
+  async getClient(id: number): Promise<Client | undefined> {
+    const [client] = await db.select().from(clients).where(eq(clients.id, id));
+    return client || undefined;
+  }
+
+  async createClient(client: InsertClient): Promise<Client> {
+    const [newClient] = await db
+      .insert(clients)
+      .values({
+        ...client,
+        created: new Date(),
+        lastUpdated: new Date(),
+      })
+      .returning();
+    return newClient;
+  }
+
+  async updateClient(id: number, updates: UpdateClient): Promise<Client | undefined> {
+    const [updatedClient] = await db
+      .update(clients)
+      .set({
+        ...updates,
+        lastUpdated: new Date(),
+      })
+      .where(eq(clients.id, id))
+      .returning();
+    return updatedClient || undefined;
+  }
+
+  async deleteClient(id: number): Promise<boolean> {
+    const result = await db.delete(clients).where(eq(clients.id, id));
+    return (result.rowCount || 0) > 0;
+  }
+
+  // Client access methods
+  async getClientAccess(userId: number): Promise<ClientAccess[]> {
+    const accessList = await db.select().from(clientAccess).where(eq(clientAccess.userId, userId));
+    return accessList;
+  }
+
+  async getUserClientsAccess(userId: number): Promise<Client[]> {
+    const accessList = await this.getClientAccess(userId);
+    const clientIds = accessList.map(access => access.clientId);
+    
+    if (clientIds.length === 0) {
+      return [];
+    }
+    
+    const clientList = await db.select().from(clients).where(
+      or(...clientIds.map(id => eq(clients.id, id)))
+    );
+    return clientList;
+  }
+
+  async grantClientAccess(userId: number, clientId: number, accessLevel: string): Promise<ClientAccess> {
+    const [access] = await db
+      .insert(clientAccess)
+      .values({
+        userId,
+        clientId,
+        accessLevel,
+        created: new Date(),
+      })
+      .returning();
+    return access;
+  }
+
+  async revokeClientAccess(userId: number, clientId: number): Promise<boolean> {
+    const result = await db.delete(clientAccess)
+      .where(and(eq(clientAccess.userId, userId), eq(clientAccess.clientId, clientId)));
+    return (result.rowCount || 0) > 0;
+  }
+
+  async updateClientAccess(userId: number, clientId: number, accessLevel: string): Promise<ClientAccess | undefined> {
+    const [updatedAccess] = await db
+      .update(clientAccess)
+      .set({ accessLevel })
+      .where(and(eq(clientAccess.userId, userId), eq(clientAccess.clientId, clientId)))
+      .returning();
+    return updatedAccess || undefined;
   }
 }
 
