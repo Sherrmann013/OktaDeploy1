@@ -22,10 +22,11 @@ interface SelectFieldConfigProps {
   setEmployeeTypeGroupSaveFunction?: (fn: (() => Promise<boolean>) | null) => void;
   setHasDepartmentMappingChanges?: (hasChanges: boolean) => void;
   setHasEmployeeTypeMappingChanges?: (hasChanges: boolean) => void;
+  setTriggerManualSave?: (fn: (() => Promise<boolean>) | null) => void;
   groupsFieldConfig?: any; // Groups field configuration to access group options
 }
 
-export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAppSaveFunction, setEmployeeTypeAppSaveFunction, setDepartmentGroupSaveFunction, setEmployeeTypeGroupSaveFunction, setHasDepartmentMappingChanges, setHasEmployeeTypeMappingChanges, groupsFieldConfig }: SelectFieldConfigProps) {
+export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAppSaveFunction, setEmployeeTypeAppSaveFunction, setDepartmentGroupSaveFunction, setEmployeeTypeGroupSaveFunction, setHasDepartmentMappingChanges, setHasEmployeeTypeMappingChanges, setTriggerManualSave, groupsFieldConfig }: SelectFieldConfigProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [location] = useLocation();
@@ -649,6 +650,55 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
       setEmployeeTypeGroupSaveFunction(null);
     }
   }, [fieldType, setEmployeeTypeGroupSaveFunction]);
+
+  // MANUAL SAVE TRIGGER: Register comprehensive save function for manual saves
+  useEffect(() => {
+    if (!setTriggerManualSave) return;
+
+    const comprehensiveSaveFunction = async (): Promise<boolean> => {
+      console.log('🚀 COMPREHENSIVE MANUAL SAVE TRIGGERED for:', fieldType);
+      let allSuccessful = true;
+
+      try {
+        // Save based on field type
+        if (fieldType === 'department') {
+          console.log('🚀 SAVING DEPARTMENT MAPPINGS...');
+          const appSuccess = await saveDepartmentAppMappings();
+          const groupSuccess = await saveDepartmentGroupMappings();
+          allSuccessful = appSuccess && groupSuccess;
+          console.log('🚀 DEPARTMENT SAVE RESULTS:', { appSuccess, groupSuccess });
+        } else if (fieldType === 'employeeType') {
+          console.log('🚀 SAVING EMPLOYEE TYPE MAPPINGS...');
+          const appSuccess = await saveEmployeeTypeAppMappings();
+          const groupSuccess = await saveEmployeeTypeGroupMappings();
+          allSuccessful = appSuccess && groupSuccess;
+          console.log('🚀 EMPLOYEE TYPE SAVE RESULTS:', { appSuccess, groupSuccess });
+        }
+
+        // Reset change state on successful save
+        if (allSuccessful) {
+          if (fieldType === 'department') {
+            setHasDepartmentMappingChanges?.(false);
+          } else if (fieldType === 'employeeType') {
+            setHasEmployeeTypeMappingChanges?.(false);
+          }
+        }
+
+        return allSuccessful;
+      } catch (error) {
+        console.error('❌ COMPREHENSIVE SAVE FAILED:', error);
+        return false;
+      }
+    };
+
+    console.log('🔧 REGISTERING MANUAL SAVE TRIGGER for:', fieldType);
+    setTriggerManualSave(comprehensiveSaveFunction);
+
+    // Cleanup on unmount or field type change
+    return () => {
+      setTriggerManualSave(null);
+    };
+  }, [fieldType, saveDepartmentAppMappings, saveDepartmentGroupMappings, saveEmployeeTypeAppMappings, saveEmployeeTypeGroupMappings, setTriggerManualSave, setHasDepartmentMappingChanges, setHasEmployeeTypeMappingChanges]);
 
   // Process department app mappings data - set both saved and local state
   useEffect(() => {

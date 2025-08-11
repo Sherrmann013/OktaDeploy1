@@ -49,6 +49,9 @@ export function useFieldSettings() {
   // Direct state tracking for mapping changes (since auto-registration is disabled)
   const [hasDepartmentMappingChanges, setHasDepartmentMappingChanges] = useState(false);
   const [hasEmployeeTypeMappingChanges, setHasEmployeeTypeMappingChanges] = useState(false);
+  
+  // Manual save trigger functions for SelectFieldConfig to use
+  const [triggerManualSave, setTriggerManualSave] = useState<(() => Promise<boolean>) | null>(null);
 
   // Fetch all field settings - CLIENT-AWARE
   const { data: fetchedSettings, isLoading, error } = useQuery({
@@ -130,14 +133,20 @@ export function useFieldSettings() {
   const saveCurrentFieldChanges = async (fieldKey: FieldKey) => {
     console.log('🔴 saveCurrentFieldChanges called for:', fieldKey);
     console.trace('🔴 SAVE STACK TRACE - WHO CALLED THIS?');
-    // Check if there are any changes to save (including mapping functions)
+    // Check if there are any changes to save (using new direct state tracking)
     const hasRegularChanges = !!unsavedChanges[fieldKey];
-    const hasDepartmentAppChanges = fieldKey === 'department' && departmentAppSaveFunction !== null;
-    const hasEmployeeTypeAppChanges = fieldKey === 'employeeType' && employeeTypeAppSaveFunction !== null;
-    const hasDepartmentGroupChanges = fieldKey === 'department' && departmentGroupSaveFunction !== null;
-    const hasEmployeeTypeGroupChanges = fieldKey === 'employeeType' && employeeTypeGroupSaveFunction !== null;
+    const hasCurrentMappingChanges = fieldKey === 'department' ? hasDepartmentMappingChanges : 
+                                   fieldKey === 'employeeType' ? hasEmployeeTypeMappingChanges : false;
     
-    const hasAnyChanges = hasRegularChanges || hasDepartmentAppChanges || hasEmployeeTypeAppChanges || hasDepartmentGroupChanges || hasEmployeeTypeGroupChanges;
+    console.log('🔍 SAVE CHECK DETAILS:', {
+      fieldKey,
+      hasRegularChanges,
+      hasCurrentMappingChanges,
+      hasDepartmentMappingChanges: fieldKey === 'department' ? hasDepartmentMappingChanges : 'N/A',
+      hasEmployeeTypeMappingChanges: fieldKey === 'employeeType' ? hasEmployeeTypeMappingChanges : 'N/A'
+    });
+    
+    const hasAnyChanges = hasRegularChanges || hasCurrentMappingChanges;
     
     if (!hasAnyChanges) {
       toast({ 
@@ -168,26 +177,14 @@ export function useFieldSettings() {
         allSuccessful = allSuccessful && success;
       }
       
-      // Save department/employee type app mappings
-      if (hasDepartmentAppChanges && departmentAppSaveFunction) {
-        const success = await departmentAppSaveFunction();
+      // Save mapping changes if they exist by calling SelectFieldConfig's manual save trigger
+      if (hasCurrentMappingChanges && triggerManualSave) {
+        console.log('🔥 MAPPING CHANGES DETECTED - Calling manual save trigger:', fieldKey);
+        const success = await triggerManualSave();
         allSuccessful = allSuccessful && success;
-      }
-      
-      if (hasEmployeeTypeAppChanges && employeeTypeAppSaveFunction) {
-        const success = await employeeTypeAppSaveFunction();
-        allSuccessful = allSuccessful && success;
-      }
-      
-      // Save department/employee type group mappings
-      if (hasDepartmentGroupChanges && departmentGroupSaveFunction) {
-        const success = await departmentGroupSaveFunction();
-        allSuccessful = allSuccessful && success;
-      }
-      
-      if (hasEmployeeTypeGroupChanges && employeeTypeGroupSaveFunction) {
-        const success = await employeeTypeGroupSaveFunction();
-        allSuccessful = allSuccessful && success;
+        console.log('🔥 MANUAL SAVE RESULT:', success);
+      } else if (hasCurrentMappingChanges && !triggerManualSave) {
+        console.log('⚠️ WARNING: Mapping changes detected but no manual save trigger available');
       }
       
       if (allSuccessful) {
@@ -352,6 +349,7 @@ export function useFieldSettings() {
     setEmployeeTypeGroupSaveFunction,
     setHasDepartmentMappingChanges,
     setHasEmployeeTypeMappingChanges,
+    setTriggerManualSave,
     isLoading,
     isSaving,
     error

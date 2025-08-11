@@ -24,6 +24,7 @@ interface FieldConfigPanelProps {
   setEmployeeTypeGroupSaveFunction?: (fn: (() => Promise<boolean>) | null) => void;
   setHasDepartmentMappingChanges?: (hasChanges: boolean) => void;
   setHasEmployeeTypeMappingChanges?: (hasChanges: boolean) => void;
+  setTriggerManualSave?: (fn: (() => Promise<boolean>) | null) => void;
 }
 
 export function FieldConfigPanel({
@@ -38,7 +39,8 @@ export function FieldConfigPanel({
   setDepartmentGroupSaveFunction,
   setEmployeeTypeGroupSaveFunction,
   setHasDepartmentMappingChanges,
-  setHasEmployeeTypeMappingChanges
+  setHasEmployeeTypeMappingChanges,
+  setTriggerManualSave
 }: FieldConfigPanelProps) {
   if (!selectedField) {
     return (
@@ -109,6 +111,7 @@ export function FieldConfigPanel({
             setEmployeeTypeGroupSaveFunction={setEmployeeTypeGroupSaveFunction}
             setHasDepartmentMappingChanges={setHasDepartmentMappingChanges}
             setHasEmployeeTypeMappingChanges={setHasEmployeeTypeMappingChanges}
+            setTriggerManualSave={setTriggerManualSave}
             groupsFieldConfig={fieldSettings.groups}
           />
         );
