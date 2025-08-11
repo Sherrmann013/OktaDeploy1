@@ -46,6 +46,10 @@ export function useFieldSettings() {
   const [employeeTypeGroupSaveFunction, setEmployeeTypeGroupSaveFunction] = useState<(() => Promise<boolean>) | null>(null);
   const [isSaving, setIsSaving] = useState(false);
 
+  // Direct state tracking for mapping changes (since auto-registration is disabled)
+  const [hasDepartmentMappingChanges, setHasDepartmentMappingChanges] = useState(false);
+  const [hasEmployeeTypeMappingChanges, setHasEmployeeTypeMappingChanges] = useState(false);
+
   // Fetch all field settings - CLIENT-AWARE
   const { data: fetchedSettings, isLoading, error } = useQuery({
     queryKey: [`/api/client/${currentClientId}/layout-settings`, "all-fields"],
@@ -235,12 +239,14 @@ export function useFieldSettings() {
     // Check regular field settings
     const hasRegularChanges = fieldKey in unsavedChanges;
     
-    // Check department/employee type specific mappings
+    // Check department/employee type specific mappings using direct state tracking
     if (fieldKey === 'department') {
-      return hasRegularChanges || (departmentAppSaveFunction !== null) || (departmentGroupSaveFunction !== null);
+      console.log('🔍 CHECKING DEPARTMENT CHANGES:', { hasRegularChanges, hasDepartmentMappingChanges });
+      return hasRegularChanges || hasDepartmentMappingChanges;
     }
     if (fieldKey === 'employeeType') {
-      return hasRegularChanges || (employeeTypeAppSaveFunction !== null) || (employeeTypeGroupSaveFunction !== null);
+      console.log('🔍 CHECKING EMPLOYEE TYPE CHANGES:', { hasRegularChanges, hasEmployeeTypeMappingChanges });
+      return hasRegularChanges || hasEmployeeTypeMappingChanges;
     }
     
     return hasRegularChanges;
@@ -344,6 +350,8 @@ export function useFieldSettings() {
     setEmployeeTypeAppSaveFunction,
     setDepartmentGroupSaveFunction,
     setEmployeeTypeGroupSaveFunction,
+    setHasDepartmentMappingChanges,
+    setHasEmployeeTypeMappingChanges,
     isLoading,
     isSaving,
     error

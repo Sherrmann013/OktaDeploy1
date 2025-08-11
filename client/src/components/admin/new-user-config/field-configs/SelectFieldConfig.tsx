@@ -20,10 +20,12 @@ interface SelectFieldConfigProps {
   setEmployeeTypeAppSaveFunction?: (fn: (() => Promise<boolean>) | null) => void;
   setDepartmentGroupSaveFunction?: (fn: (() => Promise<boolean>) | null) => void;
   setEmployeeTypeGroupSaveFunction?: (fn: (() => Promise<boolean>) | null) => void;
+  setHasDepartmentMappingChanges?: (hasChanges: boolean) => void;
+  setHasEmployeeTypeMappingChanges?: (hasChanges: boolean) => void;
   groupsFieldConfig?: any; // Groups field configuration to access group options
 }
 
-export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAppSaveFunction, setEmployeeTypeAppSaveFunction, setDepartmentGroupSaveFunction, setEmployeeTypeGroupSaveFunction, groupsFieldConfig }: SelectFieldConfigProps) {
+export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAppSaveFunction, setEmployeeTypeAppSaveFunction, setDepartmentGroupSaveFunction, setEmployeeTypeGroupSaveFunction, setHasDepartmentMappingChanges, setHasEmployeeTypeMappingChanges, groupsFieldConfig }: SelectFieldConfigProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [location] = useLocation();
@@ -125,6 +127,12 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
     });
     setHasDepartmentUnsavedChanges(true);
     console.log('🔗 DEPARTMENT UNSAVED CHANGES SET TO TRUE');
+    
+    // Notify parent component about mapping changes
+    if (setHasDepartmentMappingChanges) {
+      setHasDepartmentMappingChanges(true);
+      console.log('🔗 NOTIFIED PARENT: Department has mapping changes');
+    }
   };
 
   const handleUnlinkApp = (department: string, appName: string) => {
@@ -139,6 +147,12 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
       return updated;
     });
     setHasDepartmentUnsavedChanges(true);
+    
+    // Notify parent component about mapping changes
+    if (setHasDepartmentMappingChanges) {
+      setHasDepartmentMappingChanges(true);
+      console.log('🔗 NOTIFIED PARENT: Department has mapping changes (unlink)');
+    }
   };
 
   // Local functions for managing employee type-app mappings (no auto-save)
@@ -162,6 +176,12 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
     });
     setHasEmployeeTypeUnsavedChanges(true);
     console.log('🔗 EMPLOYEE TYPE UNSAVED CHANGES SET TO TRUE');
+    
+    // Notify parent component about mapping changes
+    if (setHasEmployeeTypeMappingChanges) {
+      setHasEmployeeTypeMappingChanges(true);
+      console.log('🔗 NOTIFIED PARENT: Employee Type has mapping changes');
+    }
   };
 
   const handleUnlinkEmployeeTypeApp = (employeeType: string, appName: string) => {
@@ -176,6 +196,12 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
       return updated;
     });
     setHasEmployeeTypeUnsavedChanges(true);
+    
+    // Notify parent component about mapping changes
+    if (setHasEmployeeTypeMappingChanges) {
+      setHasEmployeeTypeMappingChanges(true);
+      console.log('🔗 NOTIFIED PARENT: Employee Type has mapping changes (unlink)');
+    }
   };
 
   // Department group management functions
@@ -191,6 +217,12 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
       return updated;
     });
     setHasDepartmentGroupUnsavedChanges(true);
+    
+    // Notify parent component about mapping changes
+    if (setHasDepartmentMappingChanges) {
+      setHasDepartmentMappingChanges(true);
+      console.log('🔗 NOTIFIED PARENT: Department has group mapping changes');
+    }
   };
 
   const handleUnlinkDepartmentGroup = (department: string, groupName: string) => {
@@ -205,6 +237,12 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
       return updated;
     });
     setHasDepartmentGroupUnsavedChanges(true);
+    
+    // Notify parent component about mapping changes
+    if (setHasDepartmentMappingChanges) {
+      setHasDepartmentMappingChanges(true);
+      console.log('🔗 NOTIFIED PARENT: Department has group mapping changes (unlink)');
+    }
   };
 
   // Employee type group management functions
@@ -220,6 +258,12 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
       return updated;
     });
     setHasEmployeeTypeGroupUnsavedChanges(true);
+    
+    // Notify parent component about mapping changes
+    if (setHasEmployeeTypeMappingChanges) {
+      setHasEmployeeTypeMappingChanges(true);
+      console.log('🔗 NOTIFIED PARENT: Employee Type has group mapping changes');
+    }
   };
 
   const handleUnlinkEmployeeTypeGroup = (employeeType: string, groupName: string) => {
@@ -234,6 +278,12 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
       return updated;
     });
     setHasEmployeeTypeGroupUnsavedChanges(true);
+    
+    // Notify parent component about mapping changes
+    if (setHasEmployeeTypeMappingChanges) {
+      setHasEmployeeTypeMappingChanges(true);
+      console.log('🔗 NOTIFIED PARENT: Employee Type has group mapping changes (unlink)');
+    }
   };
 
   // Save department app mappings to database (MANUAL SAVE ONLY)
@@ -292,6 +342,12 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
       setDepartmentAppMappings(localDepartmentAppMappings);
       setHasDepartmentUnsavedChanges(false);
       queryClient.invalidateQueries({ queryKey: [`/api/client/${currentClientId}/department-app-mappings`] });
+      
+      // Reset parent mapping change state
+      if (setHasDepartmentMappingChanges) {
+        setHasDepartmentMappingChanges(false);
+        console.log('✅ RESET PARENT: Department mapping changes cleared after save');
+      }
       
       return true;
     } catch (error) {
@@ -357,6 +413,12 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
       setEmployeeTypeAppMappings(localEmployeeTypeAppMappings);
       setHasEmployeeTypeUnsavedChanges(false);
       queryClient.invalidateQueries({ queryKey: [`/api/client/${currentClientId}/employee-type-app-mappings`] });
+      
+      // Reset parent mapping change state
+      if (setHasEmployeeTypeMappingChanges) {
+        setHasEmployeeTypeMappingChanges(false);
+        console.log('✅ RESET PARENT: Employee Type mapping changes cleared after save');
+      }
       
       return true;
     } catch (error) {
@@ -456,6 +518,13 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
       setDepartmentGroupMappings(localDepartmentGroupMappings);
       setHasDepartmentGroupUnsavedChanges(false);
       await queryClient.invalidateQueries({ queryKey: [`/api/client/${currentClientId}/department-group-mappings`] });
+      
+      // Reset parent mapping change state
+      if (setHasDepartmentMappingChanges) {
+        setHasDepartmentMappingChanges(false);
+        console.log('✅ RESET PARENT: Department group mapping changes cleared after save');
+      }
+      
       return true;
     } catch (error) {
       toast({
@@ -516,6 +585,13 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
       setEmployeeTypeGroupMappings(localEmployeeTypeGroupMappings);
       setHasEmployeeTypeGroupUnsavedChanges(false);
       await queryClient.invalidateQueries({ queryKey: [`/api/client/${currentClientId}/employee-type-group-mappings`] });
+      
+      // Reset parent mapping change state
+      if (setHasEmployeeTypeMappingChanges) {
+        setHasEmployeeTypeMappingChanges(false);
+        console.log('✅ RESET PARENT: Employee Type group mapping changes cleared after save');
+      }
+      
       return true;
     } catch (error) {
       toast({
