@@ -520,7 +520,11 @@ export default function MSPDashboard() {
             <Button variant="outline" onClick={() => setIsEditClientOpen(false)}>
               Cancel
             </Button>
-            <Button onClick={handleSaveEditedClient} disabled={updateClientMutation.isPending}>
+            <Button 
+              onClick={handleSaveEditedClient} 
+              disabled={updateClientMutation.isPending}
+              className="bg-blue-600 hover:bg-blue-700 text-white"
+            >
               {updateClientMutation.isPending ? "Saving..." : "Save Changes"}
             </Button>
           </div>

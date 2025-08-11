@@ -3,30 +3,44 @@ import { z } from 'zod';
 import { mspStorage } from '../msp-storage';
 import { dbManager } from '../multi-db';
 import * as mspSchema from '../../shared/msp-schema';
+import { db } from '../db';
+import { clients } from '../../shared/schema';
 
 // Get all clients for MSP dashboard
 export async function getClients(req: Request, res: Response) {
   try {
-    // TODO: Add proper MSP user authentication
-    // For now, return all clients
+    console.log('📊 MSP GET /api/clients - Fetching all clients with COMPLETE data...');
     
-    const allClients = await mspStorage.getAllClients();
+    // Use direct database query instead of storage to get complete data
+    const allClients = await db.select({
+      id: clients.id,
+      name: clients.name,
+      description: clients.description,
+      domain: clients.domain,
+      status: clients.status,
+      logoUrl: clients.logoUrl,
+      primaryContact: clients.primaryContact,
+      contactEmail: clients.contactEmail,
+      created: clients.created,
+      lastUpdated: clients.lastUpdated,
+      // Include the new fields we added
+      displayName: clients.displayName,
+      companyName: clients.companyName,
+      companyInitials: clients.companyInitials,
+      identityProvider: clients.identityProvider,
+      notes: clients.notes
+    }).from(clients).orderBy(clients.name);
+    
+    console.log('📊 MSP RAW DATABASE RESULTS:', allClients);
     
     // Add additional metadata for each client
-    const clientsWithStats = await Promise.all(
-      allClients.map(async (client) => {
-        // TODO: Get real user count and activity from client database
-        // const clientStorage = createClientStorage(client.id);
-        // const { total } = await clientStorage.getAllUsers({ limit: 1 });
-        
-        return {
-          ...client,
-          userCount: 0, // Placeholder - will implement after database setup
-          lastActivity: "2 days ago", // Placeholder - will implement activity tracking
-        };
-      })
-    );
+    const clientsWithStats = allClients.map(client => ({
+      ...client,
+      userCount: 0, // TODO: Get real user count from client database
+      lastActivity: "2 days ago", // TODO: Implement activity tracking
+    }));
 
+    console.log('📊 MSP FINAL RESPONSE TO FRONTEND:', clientsWithStats);
     res.json(clientsWithStats);
   } catch (error) {
     console.error('Error fetching clients:', error);
