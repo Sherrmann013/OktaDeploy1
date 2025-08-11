@@ -14,7 +14,7 @@ const insertClientSchema = createInsertSchema(clients).omit({
 // Get all clients for MSP user
 export async function getClients(req: Request, res: Response) {
   try {
-    console.log('📊 Fetching all clients with complete data...');
+    console.log('📊 GET /api/clients - Fetching all clients with COMPLETE data...');
     
     const allClients = await db.select({
       id: clients.id,
@@ -35,12 +35,7 @@ export async function getClients(req: Request, res: Response) {
       notes: clients.notes
     }).from(clients).orderBy(clients.name);
     
-    console.log('📊 Retrieved clients:', allClients.map(c => ({ 
-      id: c.id, 
-      name: c.name, 
-      displayName: c.displayName, 
-      companyName: c.companyName 
-    })));
+    console.log('📊 RAW DATABASE RESULTS:', allClients);
     
     // Add placeholder stats for now
     const clientsWithStats = allClients.map(client => ({
@@ -49,6 +44,7 @@ export async function getClients(req: Request, res: Response) {
       lastActivity: "2 days ago", // TODO: implement activity tracking
     }));
 
+    console.log('📊 FINAL RESPONSE TO FRONTEND:', clientsWithStats);
     res.json(clientsWithStats);
   } catch (error) {
     console.error('Error fetching clients:', error);

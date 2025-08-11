@@ -76,7 +76,11 @@ export default function MSPDashboard() {
           id: c.id, 
           name: c.name, 
           displayName: c.displayName,
-          companyName: c.companyName 
+          companyName: c.companyName,
+          companyInitials: c.companyInitials,
+          identityProvider: c.identityProvider,
+          notes: c.notes,
+          rawClientData: c // Show the complete object
         })),
         timestamp: new Date().toISOString()
       });
