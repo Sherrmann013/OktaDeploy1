@@ -781,9 +781,23 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
               
               setDepartmentAppMappings(localDepartmentAppMappings);
               setHasDepartmentUnsavedChanges(false);
-              console.log('✅ DEPARTMENT APP SAVE SUCCESS (DIRECT)');
+              
+              // Refresh data from server to ensure UI matches database
+              await queryClient.refetchQueries({ 
+                queryKey: [`/api/client/${currentClientId}/department-app-mappings`],
+                exact: true 
+              });
+              
+              console.log('✅ DEPARTMENT APP SAVE SUCCESS (DIRECT) + DATA REFRESHED');
             } catch (error) {
               console.error('❌ Department app save failed (DIRECT):', error);
+              
+              // Even on error, refresh data to show current database state
+              await queryClient.refetchQueries({ 
+                queryKey: [`/api/client/${currentClientId}/department-app-mappings`],
+                exact: true 
+              });
+              
               allSuccessful = false;
             } finally {
               setDepartmentSaveInProgress(false);
