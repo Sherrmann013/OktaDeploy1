@@ -50,6 +50,24 @@ The dashboard uses a React frontend (TypeScript, Tailwind CSS, Wouter) and an Ex
 - **Logo Data Isolation:** Corrected client logo loading and implemented client-specific and global MSP logo endpoints with separate database connections.
 - **Unified Save System:** Consolidated save functionality into a single main save button that handles both field configuration and app/group mapping assignments for a cleaner user experience.
 
+## Known Issues and Solutions
+
+### Duplicate User Management Issue (Resolved: August 11, 2025)
+**Problem:** Duplicate users with identical names but case-different emails (e.g., "comrad@domain.com" vs "Comrad@domain.com") were being created in client databases due to OKTA sync not performing case-insensitive email matching.
+
+**Root Cause:** 
+- Manual user creation allowed lowercase emails
+- OKTA sync created users with different email casing
+- System treated these as different users due to case sensitivity
+
+**Resolution Approach:**
+- Identify duplicates by querying client-specific databases
+- Remove both duplicate entries completely  
+- Delete corresponding OKTA user manually via admin console
+- Recreate user properly to ensure employee type and app assignments work correctly
+
+**Prevention:** Future OKTA sync improvements should include case-insensitive email matching when checking for existing users.
+
 ## External Dependencies
 - **OKTA:** For enterprise user authentication and management.
 - **KnowBe4:** Security training platform.
