@@ -660,16 +660,16 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
       let allSuccessful = true;
 
       try {
-        // Save based on field type
+        // Save based on field type (app functions need manualSave=true, group functions take no params)
         if (fieldType === 'department') {
           console.log('🚀 SAVING DEPARTMENT MAPPINGS...');
-          const appSuccess = await saveDepartmentAppMappings();
+          const appSuccess = await saveDepartmentAppMappings(true);
           const groupSuccess = await saveDepartmentGroupMappings();
           allSuccessful = appSuccess && groupSuccess;
           console.log('🚀 DEPARTMENT SAVE RESULTS:', { appSuccess, groupSuccess });
         } else if (fieldType === 'employeeType') {
           console.log('🚀 SAVING EMPLOYEE TYPE MAPPINGS...');
-          const appSuccess = await saveEmployeeTypeAppMappings();
+          const appSuccess = await saveEmployeeTypeAppMappings(true);
           const groupSuccess = await saveEmployeeTypeGroupMappings();
           allSuccessful = appSuccess && groupSuccess;
           console.log('🚀 EMPLOYEE TYPE SAVE RESULTS:', { appSuccess, groupSuccess });
