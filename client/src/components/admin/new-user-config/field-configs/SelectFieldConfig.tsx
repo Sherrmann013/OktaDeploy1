@@ -838,7 +838,7 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
       });
       setDepartmentAppMappings(mappingsByDepartment);
       setLocalDepartmentAppMappings(mappingsByDepartment);
-      setHasDepartmentUnsavedChanges(false);
+      // DON'T automatically clear unsaved changes when data loads - only clear when explicitly saved
     }
   }, [departmentAppMappingsData]);
 
@@ -854,7 +854,7 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
       });
       setEmployeeTypeAppMappings(mappingsByEmployeeType);
       setLocalEmployeeTypeAppMappings(mappingsByEmployeeType);
-      setHasEmployeeTypeUnsavedChanges(false);
+      // DON'T automatically clear unsaved changes when data loads - only clear when explicitly saved
     }
   }, [employeeTypeAppMappingsData]);
 
@@ -870,7 +870,7 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
       });
       setDepartmentGroupMappings(mappingsByDepartment);
       setLocalDepartmentGroupMappings(mappingsByDepartment);
-      setHasDepartmentGroupUnsavedChanges(false);
+      // DON'T automatically clear unsaved changes when data loads - only clear when explicitly saved
     }
   }, [departmentGroupMappingsData]);
 
@@ -886,7 +886,7 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
       });
       setEmployeeTypeGroupMappings(mappingsByEmployeeType);
       setLocalEmployeeTypeGroupMappings(mappingsByEmployeeType);
-      setHasEmployeeTypeGroupUnsavedChanges(false);
+      // DON'T automatically clear unsaved changes when data loads - only clear when explicitly saved
     }
   }, [employeeTypeGroupMappingsData]);
 
