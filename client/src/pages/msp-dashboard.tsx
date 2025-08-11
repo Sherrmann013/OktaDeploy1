@@ -412,11 +412,6 @@ export default function MSPDashboard() {
                       <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
                         {client.displayName || client.name}
                       </h3>
-                      {client.companyInitials && (
-                        <p className="text-sm text-gray-500 dark:text-gray-400">
-                          {client.companyInitials}
-                        </p>
-                      )}
                     </div>
                   </div>
                   
