@@ -3315,6 +3315,57 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Client-specific layout setting UPDATE by key endpoint (MISSING ENDPOINT ADDED)
+  app.put("/api/client/:clientId/layout-settings/:key", isAuthenticated, requireAdmin, async (req, res) => {
+    try {
+      const clientId = parseInt(req.params.clientId);
+      const { key } = req.params;
+      const { value } = req.body;
+      const user = (req.session as any).user;
+      console.log(`⚙️  Updating layout setting '${key}' for client ${clientId} with value:`, value);
+      
+      // Use client-specific database connection
+      const multiDb = MultiDatabaseManager.getInstance();
+      const clientDb = await multiDb.getClientDb(clientId);
+      
+      // Check if setting already exists
+      const existing = await clientDb.select()
+        .from(clientLayoutSettings)
+        .where(eq(clientLayoutSettings.settingKey, key))
+        .limit(1);
+      
+      let result;
+      if (existing.length > 0) {
+        // Update existing setting
+        [result] = await clientDb.update(clientLayoutSettings)
+          .set({ 
+            settingValue: value,
+            updatedBy: user.id,
+            updatedAt: new Date()
+          })
+          .where(eq(clientLayoutSettings.settingKey, key))
+          .returning();
+        console.log(`✅ Updated layout setting '${key}' for client ${clientId}`);
+      } else {
+        // Create new setting
+        [result] = await clientDb.insert(clientLayoutSettings)
+          .values({
+            settingKey: key,
+            settingValue: value,
+            updatedBy: user.id,
+            updatedAt: new Date()
+          })
+          .returning();
+        console.log(`✅ Created layout setting '${key}' for client ${clientId}`);
+      }
+      
+      res.json(result);
+    } catch (error) {
+      console.error(`Error updating layout setting for client:`, error);
+      res.status(500).json({ error: "Failed to update client layout setting" });
+    }
+  });
+
   // Client-specific layout settings POST endpoint
   app.post("/api/client/:clientId/layout-settings", isAuthenticated, requireAdmin, async (req, res) => {
     try {

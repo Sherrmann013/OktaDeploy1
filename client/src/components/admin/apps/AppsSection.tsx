@@ -280,8 +280,20 @@ export function AppsSection() {
         throw new Error(`Failed to update ${setting}: ${response.status} ${errorText}`);
       }
       
-      const result = await response.json();
-      console.log('✅ CLIENT CONFIG SUCCESS:', result);
+      // Check if response has content before parsing JSON
+      const responseText = await response.text();
+      console.log('📄 CLIENT CONFIG RAW RESPONSE:', responseText);
+      
+      let result;
+      try {
+        result = responseText ? JSON.parse(responseText) : {};
+        console.log('✅ CLIENT CONFIG SUCCESS:', result);
+      } catch (parseError) {
+        console.log('❌ CLIENT CONFIG JSON PARSE ERROR:', parseError);
+        console.log('❌ RESPONSE TEXT THAT FAILED TO PARSE:', responseText);
+        throw new Error(`Invalid JSON response: ${responseText}`);
+      }
+      
       return result;
     },
     onSuccess: (data, variables) => {
