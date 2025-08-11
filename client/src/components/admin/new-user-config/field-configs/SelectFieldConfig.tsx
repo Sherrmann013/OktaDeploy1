@@ -824,7 +824,7 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
     return () => {
       setTriggerManualSave(null);
     };
-  }, [fieldType, setTriggerManualSave, hasDepartmentUnsavedChanges, departmentAppMappings, localDepartmentAppMappings, currentClientId, setHasDepartmentMappingChanges]);
+  }, [fieldType, setTriggerManualSave, currentClientId]); // Removed reactive dependencies to prevent auto-trigger on changes
 
   // Process department app mappings data - set both saved and local state
   useEffect(() => {
