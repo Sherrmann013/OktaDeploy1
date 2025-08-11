@@ -3790,13 +3790,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.get("/api/client/:clientId/department-group-mappings", isAuthenticated, async (req, res) => {
-    // TODO: Implement proper group mappings in separate table
-    res.json([]);
+    try {
+      const clientId = parseInt(req.params.clientId);
+      console.log(`📧 Fetching department group mappings for client ${clientId}`);
+      
+      // Use client-specific database connection
+      const multiDb = MultiDatabaseManager.getInstance();
+      const clientDb = await multiDb.getClientDb(clientId);
+      const mappings = await clientDb.select().from(clientDepartmentGroupMappings);
+      
+      console.log(`✅ Found ${mappings.length} department group mappings for client ${clientId}`);
+      res.json(mappings);
+    } catch (error) {
+      console.error(`Error fetching department group mappings for client:`, error);
+      res.status(500).json({ error: "Failed to fetch department group mappings" });
+    }
   });
 
   app.get("/api/client/:clientId/employee-type-group-mappings", isAuthenticated, async (req, res) => {
-    // TODO: Implement proper group mappings in separate table
-    res.json([]);
+    try {
+      const clientId = parseInt(req.params.clientId);
+      console.log(`📧 Fetching employee type group mappings for client ${clientId}`);
+      
+      // Use client-specific database connection
+      const multiDb = MultiDatabaseManager.getInstance();
+      const clientDb = await multiDb.getClientDb(clientId);
+      const mappings = await clientDb.select().from(clientEmployeeTypeGroupMappings);
+      
+      console.log(`✅ Found ${mappings.length} employee type group mappings for client ${clientId}`);
+      res.json(mappings);
+    } catch (error) {
+      console.error(`Error fetching employee type group mappings for client:`, error);
+      res.status(500).json({ error: "Failed to fetch employee type group mappings" });
+    }
   });
 
   app.post("/api/client/:clientId/department-app-mappings", isAuthenticated, requireAdmin, async (req, res) => {
@@ -3918,6 +3944,128 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error(`Error removing employee type app mapping for client:`, error);
       res.status(500).json({ error: "Failed to remove employee type app mapping" });
+    }
+  });
+
+  app.post("/api/client/:clientId/department-group-mappings", isAuthenticated, requireAdmin, async (req, res) => {
+    try {
+      const clientId = parseInt(req.params.clientId);
+      const { departmentName, groupName } = req.body;
+      console.log(`➕ Adding department group mapping for client ${clientId}: ${departmentName} -> ${groupName}`);
+      
+      // Validate input data
+      const validatedData = clientInsertDepartmentGroupMappingSchema.parse({ departmentName, groupName });
+      
+      // Use client-specific database connection
+      const multiDb = MultiDatabaseManager.getInstance();
+      const clientDb = await multiDb.getClientDb(clientId);
+      
+      // Check if mapping already exists
+      const existing = await clientDb.select().from(clientDepartmentGroupMappings)
+        .where(and(eq(clientDepartmentGroupMappings.departmentName, departmentName), eq(clientDepartmentGroupMappings.groupName, groupName)))
+        .limit(1);
+      
+      if (existing.length > 0) {
+        return res.status(409).json({ error: "Mapping already exists" });
+      }
+      
+      // Insert new mapping
+      const [result] = await clientDb.insert(clientDepartmentGroupMappings)
+        .values(validatedData)
+        .returning();
+      
+      console.log(`✅ Added department group mapping for client ${clientId}: ${departmentName} -> ${groupName}`);
+      res.status(201).json(result);
+    } catch (error) {
+      console.error(`Error adding department group mapping for client:`, error);
+      res.status(500).json({ error: "Failed to add department group mapping" });
+    }
+  });
+
+  app.delete("/api/client/:clientId/department-group-mappings", isAuthenticated, requireAdmin, async (req, res) => {
+    try {
+      const clientId = parseInt(req.params.clientId);
+      const { departmentName, groupName } = req.body;
+      console.log(`🗑️  Removing department group mapping for client ${clientId}: ${departmentName} -> ${groupName}`);
+      
+      // Use client-specific database connection
+      const multiDb = MultiDatabaseManager.getInstance();
+      const clientDb = await multiDb.getClientDb(clientId);
+      
+      const result = await clientDb.delete(clientDepartmentGroupMappings)
+        .where(and(eq(clientDepartmentGroupMappings.departmentName, departmentName), eq(clientDepartmentGroupMappings.groupName, groupName)))
+        .returning();
+      
+      if (result.length === 0) {
+        return res.status(404).json({ error: "Mapping not found" });
+      }
+      
+      console.log(`✅ Removed department group mapping for client ${clientId}: ${departmentName} -> ${groupName}`);
+      res.status(200).json({ message: "Mapping deleted successfully" });
+    } catch (error) {
+      console.error(`Error removing department group mapping for client:`, error);
+      res.status(500).json({ error: "Failed to remove department group mapping" });
+    }
+  });
+
+  app.post("/api/client/:clientId/employee-type-group-mappings", isAuthenticated, requireAdmin, async (req, res) => {
+    try {
+      const clientId = parseInt(req.params.clientId);
+      const { employeeType, groupName } = req.body;
+      console.log(`➕ Adding employee type group mapping for client ${clientId}: ${employeeType} -> ${groupName}`);
+      
+      // Validate input data
+      const validatedData = clientInsertEmployeeTypeGroupMappingSchema.parse({ employeeType, groupName });
+      
+      // Use client-specific database connection
+      const multiDb = MultiDatabaseManager.getInstance();
+      const clientDb = await multiDb.getClientDb(clientId);
+      
+      // Check if mapping already exists
+      const existing = await clientDb.select().from(clientEmployeeTypeGroupMappings)
+        .where(and(eq(clientEmployeeTypeGroupMappings.employeeType, employeeType), eq(clientEmployeeTypeGroupMappings.groupName, groupName)))
+        .limit(1);
+      
+      if (existing.length > 0) {
+        return res.status(409).json({ error: "Mapping already exists" });
+      }
+      
+      // Insert new mapping
+      const [result] = await clientDb.insert(clientEmployeeTypeGroupMappings)
+        .values(validatedData)
+        .returning();
+      
+      console.log(`✅ Added employee type group mapping for client ${clientId}: ${employeeType} -> ${groupName}`);
+      res.status(201).json(result);
+    } catch (error) {
+      console.error(`Error adding employee type group mapping for client:`, error);
+      res.status(500).json({ error: "Failed to add employee type group mapping" });
+    }
+  });
+
+  app.delete("/api/client/:clientId/employee-type-group-mappings", isAuthenticated, requireAdmin, async (req, res) => {
+    try {
+      const clientId = parseInt(req.params.clientId);
+      const { employeeType, groupName } = req.body;
+      console.log(`🗑️  Removing employee type group mapping for client ${clientId}: ${employeeType} -> ${groupName}`);
+      
+      // Use client-specific database connection
+      const multiDb = MultiDatabaseManager.getInstance();
+      const clientDb = await multiDb.getClientDb(clientId);
+      
+      const result = await clientDb.delete(clientEmployeeTypeGroupMappings)
+        .where(and(eq(clientEmployeeTypeGroupMappings.employeeType, employeeType), eq(clientEmployeeTypeGroupMappings.groupName, groupName)))
+        .returning();
+      
+      if (result.length === 0) {
+        return res.status(404).json({ error: "Mapping not found" });
+      }
+      
+      console.log(`✅ Removed employee type group mapping for client ${clientId}: ${employeeType} -> ${groupName}`);
+      res.status(200).json({ message: "Mapping deleted successfully" });
+    } catch (error) {
+      console.error(`Error removing employee type group mapping for client:`, error);
+      res.status(500).json({ error: "Failed to remove employee type group mapping" });
     }
   });
 
