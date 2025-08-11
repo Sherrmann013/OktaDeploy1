@@ -84,34 +84,54 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
 
 
 
-  // Fetch available apps - CLIENT-AWARE
+  // Fetch available apps - CLIENT-AWARE with proper caching
   const { data: appMappingsData = [] } = useQuery({
     queryKey: [`/api/client/${currentClientId}/app-mappings`],
     enabled: (fieldType === 'department' || fieldType === 'employeeType') && config.linkApps,
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+    refetchInterval: false, // Disable auto-refetch
+    refetchOnWindowFocus: false, // Don't refetch on focus
+    refetchOnReconnect: false, // Don't refetch on reconnect
   });
 
-  // Fetch department app mappings - CLIENT-AWARE
+  // Fetch department app mappings - CLIENT-AWARE with proper caching
   const { data: departmentAppMappingsData = [] } = useQuery({
     queryKey: [`/api/client/${currentClientId}/department-app-mappings`],
     enabled: fieldType === 'department' && config.linkApps,
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+    refetchInterval: false, // Disable auto-refetch
+    refetchOnWindowFocus: false, // Don't refetch on focus
+    refetchOnReconnect: false, // Don't refetch on reconnect
   });
 
-  // Fetch employee type app mappings - CLIENT-AWARE
+  // Fetch employee type app mappings - CLIENT-AWARE with proper caching
   const { data: employeeTypeAppMappingsData = [] } = useQuery({
     queryKey: [`/api/client/${currentClientId}/employee-type-app-mappings`],
     enabled: fieldType === 'employeeType' && config.linkApps,
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+    refetchInterval: false, // Disable auto-refetch
+    refetchOnWindowFocus: false, // Don't refetch on focus
+    refetchOnReconnect: false, // Don't refetch on reconnect
   });
 
-  // Fetch department group mappings - CLIENT-AWARE
+  // Fetch department group mappings - CLIENT-AWARE with proper caching
   const { data: departmentGroupMappingsData = [] } = useQuery({
     queryKey: [`/api/client/${currentClientId}/department-group-mappings`],
     enabled: fieldType === 'department' && config.linkGroups,
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+    refetchInterval: false, // Disable auto-refetch
+    refetchOnWindowFocus: false, // Don't refetch on focus
+    refetchOnReconnect: false, // Don't refetch on reconnect
   });
 
-  // Fetch employee type group mappings - CLIENT-AWARE
+  // Fetch employee type group mappings - CLIENT-AWARE with proper caching
   const { data: employeeTypeGroupMappingsData = [] } = useQuery({
     queryKey: [`/api/client/${currentClientId}/employee-type-group-mappings`],
     enabled: fieldType === 'employeeType' && config.linkGroups,
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+    refetchInterval: false, // Disable auto-refetch
+    refetchOnWindowFocus: false, // Don't refetch on focus
+    refetchOnReconnect: false, // Don't refetch on reconnect
   });
 
   // Local functions for managing department-app mappings (no auto-save)
@@ -359,6 +379,12 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
       
       return true;
     } catch (error) {
+      console.error('❌ Department app save failed:', error);
+      toast({
+        title: "Error",
+        description: "Failed to save department app mappings",
+        variant: "destructive"
+      });
       return false;
     } finally {
       setDepartmentSaveInProgress(false);
@@ -430,6 +456,12 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
       
       return true;
     } catch (error) {
+      console.error('❌ Employee type app save failed:', error);
+      toast({
+        title: "Error",
+        description: "Failed to save employee type app mappings",
+        variant: "destructive"
+      });
       return false;
     } finally {
       setEmployeeTypeSaveInProgress(false);
