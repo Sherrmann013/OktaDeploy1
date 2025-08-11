@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -6,7 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { Plus, Edit, Trash2, X } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Plus, Edit, Trash2, X, Settings } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface AppMapping {
@@ -17,6 +18,16 @@ interface AppMapping {
   status: "active" | "inactive";
   created: string;
   lastUpdated: string;
+}
+
+interface LayoutSetting {
+  id: number;
+  settingKey: string;
+  settingValue: string;
+  settingType: string;
+  metadata: any;
+  updatedBy: number | null;
+  updatedAt: string;
 }
 
 export function AppsSection() {
@@ -34,11 +45,27 @@ export function AppsSection() {
   const [isEditMappingOpen, setIsEditMappingOpen] = useState(false);
   const [editMappingData, setEditMappingData] = useState({ appName: "", oktaGroups: [""] });
 
+  // Client configuration state
+  const [isClientConfigOpen, setIsClientConfigOpen] = useState(false);
+  const [clientInitials, setClientInitials] = useState("");
+  const [identityProvider, setIdentityProvider] = useState("");
+
   // Fetch app mappings from database - CLIENT-AWARE for database isolation
   const { data: appMappingsData = [], isLoading: appMappingsLoading } = useQuery<AppMapping[]>({
     queryKey: [`/api/client/${currentClientId}/app-mappings`],
     staleTime: 5 * 60 * 1000, // 5 minutes - app mappings change occasionally
     refetchOnWindowFocus: false,
+  });
+
+  // Fetch client configuration from layout settings
+  const { data: clientInitialsData } = useQuery<LayoutSetting>({
+    queryKey: [`/api/client/${currentClientId}/layout-settings/client_initials`],
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const { data: identityProviderData } = useQuery<LayoutSetting>({
+    queryKey: [`/api/client/${currentClientId}/layout-settings/identity_provider`],
+    staleTime: 5 * 60 * 1000,
   });
 
   // App mapping mutations
@@ -219,6 +246,63 @@ export function AppsSection() {
     }
   });
 
+  // Client configuration mutations
+  const updateClientConfigMutation = useMutation({
+    mutationFn: async ({ setting, value }: { setting: string; value: string }) => {
+      const response = await fetch(`/api/client/${currentClientId}/layout-settings/${setting}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          settingKey: setting,
+          settingValue: value,
+          settingType: 'text'
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to update ${setting}`);
+      }
+      return response.json();
+    },
+    onSuccess: (data, variables) => {
+      queryClient.invalidateQueries({ queryKey: [`/api/client/${currentClientId}/layout-settings/${variables.setting}`] });
+      toast({
+        title: "Configuration updated",
+        description: `${variables.setting === 'client_initials' ? 'Client Initials' : 'Identity Provider'} updated successfully.`,
+      });
+    },
+    onError: (error: Error, variables) => {
+      toast({
+        title: "Update failed",
+        description: `Failed to update ${variables.setting}: ${error.message}`,
+        variant: "destructive",
+      });
+    }
+  });
+
+  const handleSaveClientConfig = async () => {
+    try {
+      if (clientInitials !== (clientInitialsData?.settingValue || '')) {
+        await updateClientConfigMutation.mutateAsync({
+          setting: 'client_initials',
+          value: clientInitials
+        });
+      }
+
+      if (identityProvider !== (identityProviderData?.settingValue || '')) {
+        await updateClientConfigMutation.mutateAsync({
+          setting: 'identity_provider', 
+          value: identityProvider
+        });
+      }
+
+      setIsClientConfigOpen(false);
+    } catch (error) {
+      // Error already handled by mutation onError
+    }
+  };
+
   const handleEditMapping = (mapping: AppMapping) => {
     setEditingMapping(mapping);
     setEditMappingData({
@@ -234,8 +318,66 @@ export function AppsSection() {
     }
   };
 
+  // Initialize client configuration state when data loads
+  React.useEffect(() => {
+    if (clientInitialsData?.settingValue && clientInitials === "") {
+      setClientInitials(clientInitialsData.settingValue);
+    }
+  }, [clientInitialsData?.settingValue]);
+
+  React.useEffect(() => {
+    if (identityProviderData?.settingValue && identityProvider === "") {
+      setIdentityProvider(identityProviderData.settingValue);
+    }
+  }, [identityProviderData?.settingValue]);
+
   return (
     <>
+      {/* Client Configuration Card */}
+      <Card className="mb-6">
+        <CardHeader>
+          <div className="flex justify-between items-center">
+            <div>
+              <CardTitle>Client Configuration</CardTitle>
+              <p className="text-sm text-muted-foreground mt-1">
+                Configure client initials and identity provider settings
+              </p>
+            </div>
+            <Button 
+              variant="outline"
+              onClick={() => {
+                setClientInitials(clientInitialsData?.settingValue || '');
+                setIdentityProvider(identityProviderData?.settingValue || '');
+                setIsClientConfigOpen(true);
+              }}
+            >
+              <Settings className="w-4 h-4 mr-2" />
+              Configure
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label className="text-sm font-medium">Client Initials</Label>
+              <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-md">
+                <span className="text-sm text-gray-700 dark:text-gray-300">
+                  {clientInitialsData?.settingValue || 'Not configured'}
+                </span>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label className="text-sm font-medium">Identity Provider</Label>
+              <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-md">
+                <span className="text-sm text-gray-700 dark:text-gray-300">
+                  {identityProviderData?.settingValue || 'Not configured'}
+                </span>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       <Card>
         <CardHeader>
           <div className="flex justify-between items-center">
@@ -536,6 +678,62 @@ export function AppsSection() {
               className="bg-red-600 hover:bg-red-700 text-white"
             >
               {deleteAppMappingMutation.isPending ? "Deleting..." : "Delete Mapping"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Client Configuration Dialog */}
+      <Dialog open={isClientConfigOpen} onOpenChange={setIsClientConfigOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Client Configuration</DialogTitle>
+            <DialogDescription>
+              Configure client initials and identity provider settings
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="clientInitials">Client Initials</Label>
+              <Input
+                id="clientInitials"
+                value={clientInitials}
+                onChange={(e) => setClientInitials(e.target.value)}
+                placeholder="e.g., CW"
+                className="bg-white dark:bg-gray-800 border"
+              />
+              <p className="text-xs text-muted-foreground">
+                Used in OKTA group naming pattern: {clientInitials || '{initials}'}-ET-{'{employee_type}'}
+              </p>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="identityProvider">Identity Provider</Label>
+              <Select value={identityProvider} onValueChange={setIdentityProvider}>
+                <SelectTrigger className="bg-white dark:bg-gray-800 border">
+                  <SelectValue placeholder="Select identity provider" />
+                </SelectTrigger>
+                <SelectContent className="bg-white dark:bg-gray-800 border">
+                  <SelectItem value="okta">OKTA</SelectItem>
+                  <SelectItem value="azure_ad">Azure Active Directory</SelectItem>
+                  <SelectItem value="google_workspace">Google Workspace</SelectItem>
+                  <SelectItem value="local">Local Authentication</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <div className="flex justify-end space-x-2">
+            <Button 
+              variant="outline" 
+              onClick={() => setIsClientConfigOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button 
+              onClick={handleSaveClientConfig}
+              disabled={updateClientConfigMutation.isPending}
+              className="bg-blue-600 hover:bg-blue-700 text-white"
+            >
+              {updateClientConfigMutation.isPending ? "Saving..." : "Save Configuration"}
             </Button>
           </div>
         </DialogContent>

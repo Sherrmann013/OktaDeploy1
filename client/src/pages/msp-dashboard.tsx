@@ -55,8 +55,6 @@ export default function MSPDashboard() {
   const [editingClient, setEditingClient] = useState<Client | null>(null);
   const [editDisplayName, setEditDisplayName] = useState("");
   const [editCompanyName, setEditCompanyName] = useState("");
-  const [editCompanyInitials, setEditCompanyInitials] = useState("");
-  const [editIdentityProvider, setEditIdentityProvider] = useState("");
   const [editNotes, setEditNotes] = useState("");
 
   // Fetch clients for MSP user
@@ -138,8 +136,6 @@ export default function MSPDashboard() {
     setEditingClient(client);
     setEditDisplayName(client.displayName || client.name || "");
     setEditCompanyName(client.companyName || client.name || "");
-    setEditCompanyInitials(client.companyInitials || "");
-    setEditIdentityProvider(client.identityProvider || "");
     setEditNotes(client.notes || "");
     setIsEditClientOpen(true);
   };
@@ -152,8 +148,6 @@ export default function MSPDashboard() {
       id: editingClient.id,
       displayName: editDisplayName,
       companyName: editCompanyName,
-      companyInitials: editCompanyInitials,
-      identityProvider: editIdentityProvider,
       notes: editNotes,
     };
     
@@ -480,30 +474,7 @@ export default function MSPDashboard() {
                 className="bg-white dark:bg-gray-800 border"
               />
             </div>
-            <div className="grid gap-2">
-              <Label htmlFor="editCompanyInitials">Company Initials</Label>
-              <Input
-                id="editCompanyInitials"
-                value={editCompanyInitials}
-                onChange={(e) => setEditCompanyInitials(e.target.value.toUpperCase())}
-                placeholder="e.g., CW, ABC, XYZ"
-                maxLength={5}
-                className="bg-white dark:bg-gray-800 border"
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="editIdentityProvider">Identity Provider</Label>
-              <Select value={editIdentityProvider} onValueChange={setEditIdentityProvider}>
-                <SelectTrigger className="bg-white dark:bg-gray-800 border">
-                  <SelectValue placeholder="Select identity provider" />
-                </SelectTrigger>
-                <SelectContent className="bg-white dark:bg-gray-800 border">
-                  <SelectItem value="okta">OKTA</SelectItem>
-                  <SelectItem value="google">Google Workspace</SelectItem>
-                  <SelectItem value="azure">Microsoft Azure AD</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+
             <div className="grid gap-2">
               <Label htmlFor="editNotes">Notes</Label>
               <Textarea
