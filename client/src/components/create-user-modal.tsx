@@ -699,7 +699,7 @@ export default function CreateUserModal({ open, onClose, onSuccess, clientId }: 
                             const domain = selectedDomain || emailDomains[0] || '';
                             const email = `${username}${domain}`;
                             field.onChange(email);
-                            form.setValue('login', username);
+                            // Don't set login separately - let server use email as login
                           }}
                           className="rounded-r-none border-r-0"
                         />
