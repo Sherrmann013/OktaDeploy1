@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import postgres from "postgres";
 import { storage } from "./storage";
 import { insertUserSchema, updateUserSchema, insertSiteAccessUserSchema, siteAccessUsers, insertIntegrationSchema, integrations, auditLogs, insertAppMappingSchema, appMappings, departmentAppMappings, insertDepartmentAppMappingSchema, employeeTypeAppMappings, insertEmployeeTypeAppMappingSchema, departmentGroupMappings, insertDepartmentGroupMappingSchema, employeeTypeGroupMappings, insertEmployeeTypeGroupMappingSchema, insertLayoutSettingSchema, layoutSettings, dashboardCards, insertDashboardCardSchema, updateDashboardCardSchema, monitoringCards, insertMonitoringCardSchema, updateMonitoringCardSchema, companyLogos, insertCompanyLogoSchema, insertMspLogoSchema, clients, clientAccess } from "@shared/schema";
-import { departmentAppMappings as clientDepartmentAppMappings, insertDepartmentAppMappingSchema as clientInsertDepartmentAppMappingSchema, employeeTypeAppMappings as clientEmployeeTypeAppMappings, insertEmployeeTypeAppMappingSchema as clientInsertEmployeeTypeAppMappingSchema, departmentGroupMappings as clientDepartmentGroupMappings, insertDepartmentGroupMappingSchema as clientInsertDepartmentGroupMappingSchema, employeeTypeGroupMappings as clientEmployeeTypeGroupMappings, insertEmployeeTypeGroupMappingSchema as clientInsertEmployeeTypeGroupMappingSchema } from "@shared/client-schema";
+import { users as clientUsers, departmentAppMappings as clientDepartmentAppMappings, insertDepartmentAppMappingSchema as clientInsertDepartmentAppMappingSchema, employeeTypeAppMappings as clientEmployeeTypeAppMappings, insertEmployeeTypeAppMappingSchema as clientInsertEmployeeTypeAppMappingSchema, departmentGroupMappings as clientDepartmentGroupMappings, insertDepartmentGroupMappingSchema as clientInsertDepartmentGroupMappingSchema, employeeTypeGroupMappings as clientEmployeeTypeGroupMappings, insertEmployeeTypeGroupMappingSchema as clientInsertEmployeeTypeGroupMappingSchema } from "@shared/client-schema";
 import { db } from "./db";
 import { eq, desc, and, or, ilike, asc } from "drizzle-orm";
 import { AuditLogger, getAuditLogs } from "./audit";
@@ -4924,13 +4924,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const clientDb = await multiDb.getClientDb(clientId);
       
       // Check for existing user by email
-      const existingUser = await clientDb.select().from(users).where(eq(users.email, userData.email)).limit(1);
+      const existingUser = await clientDb.select().from(clientUsers).where(eq(clientUsers.email, userData.email)).limit(1);
       if (existingUser.length > 0) {
         return res.status(400).json({ message: "User with this email already exists" });
       }
       
       // Create user in client-specific database
-      const [newUser] = await clientDb.insert(users).values({
+      const [newUser] = await clientDb.insert(clientUsers).values({
         ...userData,
         created: new Date(),
         lastUpdated: new Date()
@@ -4959,7 +4959,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const multiDb = MultiDatabaseManager.getInstance();
       const clientDb = await multiDb.getClientDb(clientId);
       
-      const [user] = await clientDb.select().from(users).where(eq(users.id, userId)).limit(1);
+      const [user] = await clientDb.select().from(clientUsers).where(eq(clientUsers.id, userId)).limit(1);
       
       if (!user) {
         return res.status(404).json({ error: "User not found" });
@@ -4987,15 +4987,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const clientDb = await multiDb.getClientDb(clientId);
       
       // Check if user exists
-      const [existingUser] = await clientDb.select().from(users).where(eq(users.id, userId)).limit(1);
+      const [existingUser] = await clientDb.select().from(clientUsers).where(eq(clientUsers.id, userId)).limit(1);
       if (!existingUser) {
         return res.status(404).json({ error: "User not found" });
       }
       
       // Update user in client-specific database
-      const [updatedUser] = await clientDb.update(users)
+      const [updatedUser] = await clientDb.update(clientUsers)
         .set({ ...updates, lastUpdated: new Date() })
-        .where(eq(users.id, userId))
+        .where(eq(clientUsers.id, userId))
         .returning();
       
       console.log(`✅ Updated user ${userId} for client ${clientId}`);
@@ -5025,9 +5025,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const clientDb = await multiDb.getClientDb(clientId);
       
       // Update status in client-specific database
-      const [updatedUser] = await clientDb.update(users)
+      const [updatedUser] = await clientDb.update(clientUsers)
         .set({ status, lastUpdated: new Date() })
-        .where(eq(users.id, userId))
+        .where(eq(clientUsers.id, userId))
         .returning();
       
       if (!updatedUser) {
@@ -5058,7 +5058,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const clientDb = await multiDb.getClientDb(clientId);
       
       // Delete user from client-specific database
-      const result = await clientDb.delete(users).where(eq(users.id, userId)).returning();
+      const result = await clientDb.delete(clientUsers).where(eq(clientUsers.id, userId)).returning();
       
       if (result.length === 0) {
         return res.status(404).json({ error: "User not found" });
