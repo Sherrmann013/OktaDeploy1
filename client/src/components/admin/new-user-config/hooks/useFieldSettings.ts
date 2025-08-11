@@ -177,15 +177,35 @@ export function useFieldSettings() {
         allSuccessful = allSuccessful && success;
       }
       
-      // MAPPING CHANGES: Do NOT auto-trigger manual save - user must click individual save buttons
+      // MAPPING CHANGES: Save them automatically with the main save button
       if (hasCurrentMappingChanges) {
-        console.log('⚠️ MAPPING CHANGES DETECTED - Manual save required. User must click individual save buttons.');
-        toast({ 
-          title: "Mapping Changes Detected", 
-          description: "Please click the individual save buttons for app/group mappings to save those changes.",
-          variant: "default"
-        });
-        // Don't call triggerManualSave() - this was causing auto-save behavior
+        console.log('🔄 MAPPING CHANGES DETECTED - Saving with main save button');
+        
+        // Save department mappings if this is department field with changes
+        if (fieldKey === 'department' && hasDepartmentMappingChanges) {
+          console.log('🔄 Saving department app mappings...');
+          if (departmentAppSaveFunction) {
+            const departmentAppSuccess = await departmentAppSaveFunction();
+            allSuccessful = allSuccessful && departmentAppSuccess;
+          }
+          if (departmentGroupSaveFunction) {
+            const departmentGroupSuccess = await departmentGroupSaveFunction();
+            allSuccessful = allSuccessful && departmentGroupSuccess;
+          }
+        }
+        
+        // Save employee type mappings if this is employee type field with changes  
+        if (fieldKey === 'employeeType' && hasEmployeeTypeMappingChanges) {
+          console.log('🔄 Saving employee type app mappings...');
+          if (employeeTypeAppSaveFunction) {
+            const employeeTypeAppSuccess = await employeeTypeAppSaveFunction();
+            allSuccessful = allSuccessful && employeeTypeAppSuccess;
+          }
+          if (employeeTypeGroupSaveFunction) {
+            const employeeTypeGroupSuccess = await employeeTypeGroupSaveFunction();
+            allSuccessful = allSuccessful && employeeTypeGroupSuccess;
+          }
+        }
       }
       
       if (allSuccessful) {

@@ -1147,27 +1147,7 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
                         </SelectContent>
                       </Select>
 
-                      {/* Individual Save Button for Apps */}
-                      {(fieldType === 'department' ? hasDepartmentUnsavedChanges : hasEmployeeTypeUnsavedChanges) && (
-                        <Button
-                          onClick={async () => {
-                            console.log(`🟢 INDIVIDUAL SAVE CLICKED: ${fieldType} apps`);
-                            if (fieldType === 'department') {
-                              await saveDepartmentAppMappings(true);
-                            } else {
-                              await saveEmployeeTypeAppMappings(true);
-                            }
-                          }}
-                          disabled={fieldType === 'department' ? departmentSaveInProgress : employeeTypeSaveInProgress}
-                          className="w-full mb-2 bg-green-600 hover:bg-green-700 text-white"
-                        >
-                          {fieldType === 'department' ? (
-                            departmentSaveInProgress ? 'Saving...' : 'Save Department Apps'
-                          ) : (
-                            employeeTypeSaveInProgress ? 'Saving...' : 'Save Employee Type Apps'
-                          )}
-                        </Button>
-                      )}
+
 
                       {/* Selected apps using exact CreateUserModal format */}
                       <div className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md divide-y divide-gray-200 dark:divide-gray-600 max-w-48">
@@ -1332,27 +1312,7 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
                         </SelectContent>
                       </Select>
 
-                      {/* Individual Save Button for Groups */}
-                      {(fieldType === 'department' ? hasDepartmentGroupUnsavedChanges : hasEmployeeTypeGroupUnsavedChanges) && (
-                        <Button
-                          onClick={async () => {
-                            console.log(`🟢 INDIVIDUAL SAVE CLICKED: ${fieldType} groups`);
-                            if (fieldType === 'department') {
-                              await saveDepartmentGroupMappings();
-                            } else {
-                              await saveEmployeeTypeGroupMappings();
-                            }
-                          }}
-                          disabled={fieldType === 'department' ? departmentGroupSaveInProgress : employeeTypeGroupSaveInProgress}
-                          className="w-full mb-2 bg-green-600 hover:bg-green-700 text-white"
-                        >
-                          {fieldType === 'department' ? (
-                            departmentGroupSaveInProgress ? 'Saving...' : 'Save Department Groups'
-                          ) : (
-                            employeeTypeGroupSaveInProgress ? 'Saving...' : 'Save Employee Type Groups'
-                          )}
-                        </Button>
-                      )}
+
 
                       {/* Selected email groups */}
                       <div className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md divide-y divide-gray-200 dark:divide-gray-600 max-w-48">
