@@ -183,7 +183,12 @@ export function useFieldSettings() {
         
         // Save department mappings if this is department field with changes
         if (fieldKey === 'department' && hasDepartmentMappingChanges) {
-          console.log('🔄 Saving department app mappings...', { departmentAppSaveFunction: !!departmentAppSaveFunction });
+          console.log('🔄 Saving department mappings...', { 
+            departmentAppSaveFunction: !!departmentAppSaveFunction,
+            departmentGroupSaveFunction: !!departmentGroupSaveFunction 
+          });
+          
+          // Save department app mappings
           if (departmentAppSaveFunction) {
             console.log('🔄 Calling departmentAppSaveFunction...');
             const departmentAppSuccess = await departmentAppSaveFunction();
@@ -192,19 +197,26 @@ export function useFieldSettings() {
           } else {
             console.error('❌ departmentAppSaveFunction is null/undefined!');
           }
+          
+          // Save department group mappings (email groups)
           if (departmentGroupSaveFunction) {
             console.log('🔄 Calling departmentGroupSaveFunction...');
             const departmentGroupSuccess = await departmentGroupSaveFunction();
             console.log('🔄 Department group save result:', departmentGroupSuccess);
             allSuccessful = allSuccessful && departmentGroupSuccess;
           } else {
-            console.log('ℹ️ No departmentGroupSaveFunction (groups may not be configured)');
+            console.log('ℹ️ No departmentGroupSaveFunction (email groups may not be configured)');
           }
         }
         
         // Save employee type mappings if this is employee type field with changes  
         if (fieldKey === 'employeeType' && hasEmployeeTypeMappingChanges) {
-          console.log('🔄 Saving employee type app mappings...', { employeeTypeAppSaveFunction: !!employeeTypeAppSaveFunction });
+          console.log('🔄 Saving employee type mappings...', { 
+            employeeTypeAppSaveFunction: !!employeeTypeAppSaveFunction,
+            employeeTypeGroupSaveFunction: !!employeeTypeGroupSaveFunction 
+          });
+          
+          // Save employee type app mappings
           if (employeeTypeAppSaveFunction) {
             console.log('🔄 Calling employeeTypeAppSaveFunction...');
             const employeeTypeAppSuccess = await employeeTypeAppSaveFunction();
@@ -213,6 +225,8 @@ export function useFieldSettings() {
           } else {
             console.error('❌ employeeTypeAppSaveFunction is null/undefined!');
           }
+          
+          // Save employee type group mappings
           if (employeeTypeGroupSaveFunction) {
             console.log('🔄 Calling employeeTypeGroupSaveFunction...');
             const employeeTypeGroupSuccess = await employeeTypeGroupSaveFunction();
