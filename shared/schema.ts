@@ -95,7 +95,7 @@ export const insertUserSchema = createInsertSchema(users).omit({
   lastName: z.string().min(1, "Last name is required"),
   email: z.string().email("Invalid email address"),
   login: z.string().min(1, "Login is required"),
-  password: z.string().length(10, "Password must be exactly 10 characters").optional(),
+  password: z.string().min(6, "Password must be at least 6 characters").max(20, "Password must be no more than 20 characters").optional(),
   sendActivationEmail: z.boolean().optional(),
   selectedApps: z.array(z.string()).optional(),
   selectedGroups: z.array(z.string()).optional(),
