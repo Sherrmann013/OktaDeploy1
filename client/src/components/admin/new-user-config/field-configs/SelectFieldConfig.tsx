@@ -334,12 +334,21 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
       for (const department in currentMappings) {
         for (const app of currentMappings[department]) {
           if (!newMappings[department]?.includes(app)) {
-            await fetch(`/api/client/${currentClientId}/department-app-mappings`, {
+            console.log('🗑️ DELETING MAPPING:', { department, app });
+            const deleteResponse = await fetch(`/api/client/${currentClientId}/department-app-mappings`, {
               method: 'DELETE',
               headers: { 'Content-Type': 'application/json' },
               credentials: 'include',
               body: JSON.stringify({ departmentName: department, appName: app })
             });
+            
+            if (!deleteResponse.ok) {
+              const errorData = await deleteResponse.json();
+              console.error('❌ DELETE FAILED:', { department, app, error: errorData });
+              throw new Error(`Failed to delete mapping: ${errorData.error || 'Unknown error'}`);
+            } else {
+              console.log('✅ DELETE SUCCESS:', { department, app });
+            }
           }
         }
       }
@@ -369,7 +378,12 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
       // Update saved state and clear unsaved changes
       setDepartmentAppMappings(localDepartmentAppMappings);
       setHasDepartmentUnsavedChanges(false);
-      queryClient.invalidateQueries({ queryKey: [`/api/client/${currentClientId}/department-app-mappings`] });
+      
+      // Only refresh the data once, don't invalidate cache to prevent aggressive polling
+      await queryClient.refetchQueries({ 
+        queryKey: [`/api/client/${currentClientId}/department-app-mappings`],
+        exact: true 
+      });
       
       // Reset parent mapping change state
       if (setHasDepartmentMappingChanges) {
@@ -411,12 +425,21 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
       for (const employeeType in currentMappings) {
         for (const app of currentMappings[employeeType]) {
           if (!newMappings[employeeType]?.includes(app)) {
-            await fetch(`/api/client/${currentClientId}/employee-type-app-mappings`, {
+            console.log('🗑️ DELETING EMPLOYEE TYPE MAPPING:', { employeeType, app });
+            const deleteResponse = await fetch(`/api/client/${currentClientId}/employee-type-app-mappings`, {
               method: 'DELETE',
               headers: { 'Content-Type': 'application/json' },
               credentials: 'include',
               body: JSON.stringify({ employeeType: employeeType, appName: app })
             });
+            
+            if (!deleteResponse.ok) {
+              const errorData = await deleteResponse.json();
+              console.error('❌ EMPLOYEE TYPE DELETE FAILED:', { employeeType, app, error: errorData });
+              throw new Error(`Failed to delete employee type mapping: ${errorData.error || 'Unknown error'}`);
+            } else {
+              console.log('✅ EMPLOYEE TYPE DELETE SUCCESS:', { employeeType, app });
+            }
           }
         }
       }
@@ -446,7 +469,12 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
       // Update saved state and clear unsaved changes
       setEmployeeTypeAppMappings(localEmployeeTypeAppMappings);
       setHasEmployeeTypeUnsavedChanges(false);
-      queryClient.invalidateQueries({ queryKey: [`/api/client/${currentClientId}/employee-type-app-mappings`] });
+      
+      // Only refresh the data once, don't invalidate cache to prevent aggressive polling
+      await queryClient.refetchQueries({ 
+        queryKey: [`/api/client/${currentClientId}/employee-type-app-mappings`],
+        exact: true 
+      });
       
       // Reset parent mapping change state
       if (setHasEmployeeTypeMappingChanges) {
@@ -557,7 +585,12 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
       
       setDepartmentGroupMappings(localDepartmentGroupMappings);
       setHasDepartmentGroupUnsavedChanges(false);
-      await queryClient.invalidateQueries({ queryKey: [`/api/client/${currentClientId}/department-group-mappings`] });
+      
+      // Only refresh the data once, don't invalidate cache to prevent aggressive polling
+      await queryClient.refetchQueries({ 
+        queryKey: [`/api/client/${currentClientId}/department-group-mappings`],
+        exact: true 
+      });
       
       // Reset parent mapping change state
       if (setHasDepartmentMappingChanges) {
@@ -624,7 +657,12 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
       
       setEmployeeTypeGroupMappings(localEmployeeTypeGroupMappings);
       setHasEmployeeTypeGroupUnsavedChanges(false);
-      await queryClient.invalidateQueries({ queryKey: [`/api/client/${currentClientId}/employee-type-group-mappings`] });
+      
+      // Only refresh the data once, don't invalidate cache to prevent aggressive polling
+      await queryClient.refetchQueries({ 
+        queryKey: [`/api/client/${currentClientId}/employee-type-group-mappings`],
+        exact: true 
+      });
       
       // Reset parent mapping change state
       if (setHasEmployeeTypeMappingChanges) {
