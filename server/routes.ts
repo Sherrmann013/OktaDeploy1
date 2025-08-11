@@ -65,19 +65,48 @@ async function createOktaUser(apiKeys: Record<string, string>, userData: any) {
   try {
     console.log(`🔐 Creating OKTA user '${userData.email}' using client-specific credentials for domain: ${apiKeys.domain}`);
     
+    // Check if user already exists in OKTA first
+    const existingUser = await checkOktaUserExists(apiKeys, userData.email);
+    if (existingUser.exists) {
+      return {
+        success: false,
+        message: `User with email '${userData.email}' already exists in OKTA`
+      };
+    }
+    
     const https = await import('https');
     
     const domain = apiKeys.domain.replace(/^https?:\/\//, ''); // Remove protocol if present
+    // Ensure login field is valid - use email if no login provided and clean up the format
+    const loginValue = userData.login || userData.email;
+    
+    // Validate required fields
+    if (!userData.firstName || !userData.lastName || !userData.email) {
+      return {
+        success: false,
+        message: 'First name, last name, and email are required fields'
+      };
+    }
+    
+    // Ensure email format is valid
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(userData.email)) {
+      return {
+        success: false,
+        message: 'Invalid email format'
+      };
+    }
+    
     const oktaUserData = {
       profile: {
-        firstName: userData.firstName,
-        lastName: userData.lastName,
-        email: userData.email,
-        login: userData.login || userData.email,
-        title: userData.title || null,
-        department: userData.department || null,
-        mobilePhone: userData.mobilePhone || null,
-        manager: userData.manager || null,
+        firstName: userData.firstName.trim(),
+        lastName: userData.lastName.trim(),
+        email: userData.email.trim().toLowerCase(),
+        login: loginValue.trim().toLowerCase(),
+        title: userData.title ? userData.title.trim() : undefined,
+        department: userData.department ? userData.department.trim() : undefined,
+        mobilePhone: userData.mobilePhone ? userData.mobilePhone.trim() : undefined,
+        manager: userData.manager ? userData.manager.trim() : undefined,
       },
       credentials: {
         password: {
@@ -87,6 +116,7 @@ async function createOktaUser(apiKeys: Record<string, string>, userData: any) {
     };
     
     const postData = JSON.stringify(oktaUserData);
+    console.log(`🔍 OKTA User Data:`, JSON.stringify(oktaUserData, null, 2));
     
     return new Promise((resolve, reject) => {
       const requestOptions = {
@@ -153,6 +183,63 @@ async function createOktaUser(apiKeys: Record<string, string>, userData: any) {
       success: false,
       message: error instanceof Error ? error.message : 'Unknown error'
     };
+  }
+}
+
+// Helper function to check if user exists in OKTA
+async function checkOktaUserExists(apiKeys: Record<string, string>, email: string) {
+  if (!apiKeys.domain || !apiKeys.apiToken) {
+    return { exists: false, error: 'OKTA credentials missing' };
+  }
+
+  try {
+    const https = await import('https');
+    const domain = apiKeys.domain.replace(/^https?:\/\//, '');
+    
+    return new Promise((resolve) => {
+      const searchOptions = {
+        hostname: domain,
+        port: 443,
+        path: `/api/v1/users?q=${encodeURIComponent(email)}&limit=1`,
+        method: 'GET',
+        headers: {
+          'Authorization': `SSWS ${apiKeys.apiToken}`,
+          'Accept': 'application/json'
+        }
+      };
+
+      const searchReq = https.request(searchOptions, (searchRes) => {
+        let searchData = '';
+        
+        searchRes.on('data', (chunk) => {
+          searchData += chunk;
+        });
+        
+        searchRes.on('end', () => {
+          try {
+            if (searchRes.statusCode === 200) {
+              const users = JSON.parse(searchData);
+              const userExists = Array.isArray(users) && users.length > 0 && 
+                users.some((u: any) => u.profile.email === email || u.profile.login === email);
+              
+              resolve({ exists: userExists });
+            } else {
+              resolve({ exists: false, error: `HTTP ${searchRes.statusCode}` });
+            }
+          } catch (parseError) {
+            resolve({ exists: false, error: 'Parse error' });
+          }
+        });
+      });
+
+      searchReq.on('error', (error) => {
+        resolve({ exists: false, error: error.message });
+      });
+
+      searchReq.end();
+    });
+  } catch (error) {
+    return { exists: false, error: error instanceof Error ? error.message : 'Unknown error' };
   }
 }
 
