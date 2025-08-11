@@ -3320,9 +3320,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const clientId = parseInt(req.params.clientId);
       const { key } = req.params;
-      const { value } = req.body;
+      const { settingKey, settingValue, settingType } = req.body;
       const user = (req.session as any).user;
-      console.log(`⚙️  Updating layout setting '${key}' for client ${clientId} with value:`, value);
+      console.log(`⚙️  Updating layout setting '${key}' for client ${clientId}:`, {
+        settingKey,
+        settingValue,
+        settingType,
+        bodyReceived: req.body
+      });
       
       // Use client-specific database connection
       const multiDb = MultiDatabaseManager.getInstance();
@@ -3339,7 +3344,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Update existing setting
         [result] = await clientDb.update(clientLayoutSettings)
           .set({ 
-            settingValue: value,
+            settingValue: settingValue,
+            settingType: settingType || 'text',
             updatedBy: user.id,
             updatedAt: new Date()
           })
@@ -3351,7 +3357,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         [result] = await clientDb.insert(clientLayoutSettings)
           .values({
             settingKey: key,
-            settingValue: value,
+            settingValue: settingValue,
+            settingType: settingType || 'text',
             updatedBy: user.id,
             updatedAt: new Date()
           })
