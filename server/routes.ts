@@ -56,6 +56,106 @@ function determineEmployeeTypeFromGroups(userGroups: any[], employeeTypeApps: Se
 }
 import { setupAuth, isAuthenticated, requireAdmin } from "./direct-okta-auth";
 
+// Helper function to create OKTA user with client-specific API keys
+async function createOktaUser(apiKeys: Record<string, string>, userData: any) {
+  if (!apiKeys.domain || !apiKeys.apiToken) {
+    throw new Error('OKTA domain and API token are required');
+  }
+
+  try {
+    console.log(`🔐 Creating OKTA user '${userData.email}' using client-specific credentials for domain: ${apiKeys.domain}`);
+    
+    const https = await import('https');
+    
+    const domain = apiKeys.domain.replace(/^https?:\/\//, ''); // Remove protocol if present
+    const oktaUserData = {
+      profile: {
+        firstName: userData.firstName,
+        lastName: userData.lastName,
+        email: userData.email,
+        login: userData.login || userData.email,
+        title: userData.title || null,
+        department: userData.department || null,
+        mobilePhone: userData.mobilePhone || null,
+        manager: userData.manager || null,
+      },
+      credentials: {
+        password: {
+          value: userData.password || Math.random().toString(36).slice(-12) + "A1!" // Use provided password or generate temporary
+        }
+      }
+    };
+    
+    const postData = JSON.stringify(oktaUserData);
+    
+    return new Promise((resolve, reject) => {
+      const requestOptions = {
+        hostname: domain,
+        port: 443,
+        path: '/api/v1/users?activate=true', // Always activate immediately
+        method: 'POST',
+        headers: {
+          'Authorization': `SSWS ${apiKeys.apiToken}`,
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          'Content-Length': Buffer.byteLength(postData)
+        }
+      };
+
+      const req = https.request(requestOptions, (res) => {
+        let data = '';
+        
+        res.on('data', (chunk) => {
+          data += chunk;
+        });
+        
+        res.on('end', () => {
+          try {
+            const responseData = JSON.parse(data);
+            
+            if (res.statusCode === 200 || res.statusCode === 201) {
+              // User created successfully
+              resolve({
+                success: true,
+                oktaUser: responseData,
+                message: `User '${userData.email}' created successfully in OKTA`
+              });
+            } else {
+              // User creation failed
+              resolve({
+                success: false,
+                message: `Failed to create user in OKTA: ${responseData.errorSummary || data}`,
+                error: responseData
+              });
+            }
+          } catch (parseError) {
+            // Failed to parse response
+            resolve({
+              success: false,
+              message: `Failed to parse OKTA response: ${data}`
+            });
+          }
+        });
+      });
+
+      req.on('error', (error) => {
+        resolve({
+          success: false,
+          message: `Network error: ${error.message}`
+        });
+      });
+
+      req.write(postData);
+      req.end();
+    });
+  } catch (error) {
+    return {
+      success: false,
+      message: error instanceof Error ? error.message : 'Unknown error'
+    };
+  }
+}
+
 // Helper function to create OKTA group
 async function createOktaGroup(apiKeys: Record<string, string>, groupName: string, description?: string) {
   if (!apiKeys.domain || !apiKeys.apiToken) {
@@ -4929,15 +5029,59 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "User with this email already exists" });
       }
       
+      let oktaId: string | null = null;
+      let oktaResult: { success: boolean; message: string; oktaUser?: any } | null = null;
+      
+      // Check if client has OKTA integration
+      const [oktaIntegration] = await clientDb.select()
+        .from(clientIntegrations)
+        .where(and(
+          eq(clientIntegrations.name, 'okta'),
+          eq(clientIntegrations.status, 'connected')
+        ));
+      
+      if (oktaIntegration) {
+        console.log(`🔗 OKTA integration found for client ${clientId}, creating user in OKTA...`);
+        
+        try {
+          const result = await createOktaUser(
+            oktaIntegration.apiKeys as Record<string, string>, 
+            userData
+          ) as { success: boolean; message: string; oktaUser?: any };
+          
+          oktaResult = result;
+          
+          if (result.success && result.oktaUser) {
+            oktaId = result.oktaUser.id;
+            console.log(`✅ OKTA user '${userData.email}' created successfully for client ${clientId} with ID: ${oktaId}`);
+          } else {
+            console.log(`⚠️  OKTA user creation failed but continuing with local creation: ${result.message}`);
+            // We'll continue to create the user locally even if OKTA creation fails
+          }
+        } catch (error) {
+          console.error(`Failed to create OKTA user '${userData.email}' for client ${clientId}:`, error);
+          // Continue even if OKTA user creation fails - we still add it to local database
+        }
+      } else {
+        console.log(`⚠️  No OKTA integration found for client ${clientId}, creating user in local database only`);
+      }
+      
       // Create user in client-specific database
       const [newUser] = await clientDb.insert(clientUsers).values({
         ...userData,
+        oktaId: oktaId, // Store OKTA ID if user was created in OKTA
         created: new Date(),
         lastUpdated: new Date()
       }).returning();
       
       console.log(`✅ Created user for client ${clientId}:`, newUser.id);
-      res.json(newUser);
+      res.json({
+        ...newUser,
+        oktaResult: oktaResult || { 
+          success: false, 
+          message: "No OKTA integration configured" 
+        }
+      });
     } catch (error) {
       console.error(`Error creating user for client:`, error);
       if (error instanceof z.ZodError) {
