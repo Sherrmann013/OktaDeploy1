@@ -3772,8 +3772,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.get("/api/client/:clientId/employee-type-app-mappings", isAuthenticated, async (req, res) => {
-    // TODO: Implement proper department/employee type mappings in separate table  
-    res.json([]);
+    try {
+      const clientId = parseInt(req.params.clientId);
+      console.log(`📱 Fetching employee type app mappings for client ${clientId}`);
+      
+      // Use client-specific database connection
+      const multiDb = MultiDatabaseManager.getInstance();
+      const clientDb = await multiDb.getClientDb(clientId);
+      const mappings = await clientDb.select().from(clientEmployeeTypeAppMappings);
+      
+      console.log(`✅ Found ${mappings.length} employee type app mappings for client ${clientId}`);
+      res.json(mappings);
+    } catch (error) {
+      console.error(`Error fetching employee type app mappings for client:`, error);
+      res.status(500).json({ error: "Failed to fetch employee type app mappings" });
+    }
   });
 
   app.get("/api/client/:clientId/department-group-mappings", isAuthenticated, async (req, res) => {
@@ -3848,13 +3861,64 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.post("/api/client/:clientId/employee-type-app-mappings", isAuthenticated, requireAdmin, async (req, res) => {
-    // TODO: Implement proper employee type app mappings
-    res.json({ message: "Feature not yet implemented" });
+    try {
+      const clientId = parseInt(req.params.clientId);
+      const { employeeType, appName } = req.body;
+      console.log(`➕ Adding employee type app mapping for client ${clientId}: ${employeeType} -> ${appName}`);
+      
+      // Validate input data
+      const validatedData = clientInsertEmployeeTypeAppMappingSchema.parse({ employeeType, appName });
+      
+      // Use client-specific database connection
+      const multiDb = MultiDatabaseManager.getInstance();
+      const clientDb = await multiDb.getClientDb(clientId);
+      
+      // Check if mapping already exists
+      const existing = await clientDb.select().from(clientEmployeeTypeAppMappings)
+        .where(and(eq(clientEmployeeTypeAppMappings.employeeType, employeeType), eq(clientEmployeeTypeAppMappings.appName, appName)))
+        .limit(1);
+      
+      if (existing.length > 0) {
+        return res.status(409).json({ error: "Mapping already exists" });
+      }
+      
+      // Insert new mapping
+      const [result] = await clientDb.insert(clientEmployeeTypeAppMappings)
+        .values(validatedData)
+        .returning();
+      
+      console.log(`✅ Added employee type app mapping for client ${clientId}: ${employeeType} -> ${appName}`);
+      res.status(201).json(result);
+    } catch (error) {
+      console.error(`Error adding employee type app mapping for client:`, error);
+      res.status(500).json({ error: "Failed to add employee type app mapping" });
+    }
   });
 
   app.delete("/api/client/:clientId/employee-type-app-mappings", isAuthenticated, requireAdmin, async (req, res) => {
-    // TODO: Implement proper employee type app mappings
-    res.json({ message: "Feature not yet implemented" });
+    try {
+      const clientId = parseInt(req.params.clientId);
+      const { employeeType, appName } = req.body;
+      console.log(`🗑️  Removing employee type app mapping for client ${clientId}: ${employeeType} -> ${appName}`);
+      
+      // Use client-specific database connection
+      const multiDb = MultiDatabaseManager.getInstance();
+      const clientDb = await multiDb.getClientDb(clientId);
+      
+      const result = await clientDb.delete(clientEmployeeTypeAppMappings)
+        .where(and(eq(clientEmployeeTypeAppMappings.employeeType, employeeType), eq(clientEmployeeTypeAppMappings.appName, appName)))
+        .returning();
+      
+      if (result.length === 0) {
+        return res.status(404).json({ error: "Mapping not found" });
+      }
+      
+      console.log(`✅ Removed employee type app mapping for client ${clientId}: ${employeeType} -> ${appName}`);
+      res.status(200).json({ message: "Mapping deleted successfully" });
+    } catch (error) {
+      console.error(`Error removing employee type app mapping for client:`, error);
+      res.status(500).json({ error: "Failed to remove employee type app mapping" });
+    }
   });
 
   // Client-specific app mappings DELETE endpoint (by ID)
