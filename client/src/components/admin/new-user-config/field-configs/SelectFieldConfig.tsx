@@ -403,6 +403,8 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
 
   // Save employee type app mappings to database
   const saveEmployeeTypeAppMappings = useCallback(async (manualSave = false) => {
+    console.log('🔥 EMPLOYEE TYPE SAVE FUNCTION CALLED!', { manualSave, hasUnsavedChanges: hasEmployeeTypeUnsavedChanges });
+    
     // Prevent auto-save - only allow manual saves
     if (!manualSave) {
       console.log('⚠️ Auto-save blocked - employee type mappings require manual save');
