@@ -403,11 +403,8 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
 
   // Save employee type app mappings to database
   const saveEmployeeTypeAppMappings = useCallback(async (manualSave = false) => {
-    console.log('🔥 EMPLOYEE TYPE SAVE FUNCTION CALLED!', { manualSave, hasUnsavedChanges: hasEmployeeTypeUnsavedChanges });
-    
     // Prevent auto-save - only allow manual saves
     if (!manualSave) {
-      console.log('⚠️ Auto-save blocked - employee type mappings require manual save');
       return false;
     }
     
@@ -696,16 +693,7 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
     }
   }, [fieldType, setEmployeeTypeAppSaveFunction, saveEmployeeTypeAppMappings]);
 
-  // Debug: Log when Employee Type component renders
-  useEffect(() => {
-    if (fieldType === 'employeeType') {
-      console.log('🟦 EMPLOYEE TYPE COMPONENT RENDERED', { 
-        fieldType, 
-        hasSetEmployeeTypeAppSaveFunction: !!setEmployeeTypeAppSaveFunction,
-        saveEmployeeTypeAppMappingsExists: !!saveEmployeeTypeAppMappings 
-      });
-    }
-  }, [fieldType, setEmployeeTypeAppSaveFunction, saveEmployeeTypeAppMappings]);
+
 
   // Hook save functions for group mappings - ENABLED FOR MAIN SAVE BUTTON  
   useEffect(() => {
