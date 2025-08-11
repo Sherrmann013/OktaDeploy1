@@ -717,62 +717,100 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
     }
   }, [fieldType, setEmployeeTypeGroupSaveFunction]);
 
-  // MANUAL SAVE TRIGGER: Register comprehensive save function for manual saves
+  // DIRECT MANUAL SAVE TRIGGER: Embed save logic directly to avoid stale closures completely
   useEffect(() => {
     if (!setTriggerManualSave) return;
 
-    const comprehensiveSaveFunction = async (): Promise<boolean> => {
-      console.log('🚀 COMPREHENSIVE MANUAL SAVE TRIGGERED for:', fieldType);
+    const directSaveFunction = async (): Promise<boolean> => {
+      console.log('🚀 DIRECT MANUAL SAVE TRIGGERED for:', fieldType);
       let allSuccessful = true;
 
       try {
-        // Save based on field type using current function references (not stale closures)
         if (fieldType === 'department') {
-          console.log('🚀 SAVING DEPARTMENT MAPPINGS...');
-          const appSuccess = await saveDepartmentAppMappingsRef.current?.(true) || false;
-          const groupSuccess = await saveDepartmentGroupMappingsRef.current?.() || false;
-          allSuccessful = appSuccess && groupSuccess;
-          console.log('🚀 DEPARTMENT SAVE RESULTS:', { appSuccess, groupSuccess });
-        } else if (fieldType === 'employeeType') {
-          console.log('🚀 SAVING EMPLOYEE TYPE MAPPINGS...');
-          const appSuccess = await saveEmployeeTypeAppMappingsRef.current?.(true) || false;
-          const groupSuccess = await saveEmployeeTypeGroupMappingsRef.current?.() || false;
-          allSuccessful = appSuccess && groupSuccess;
-          console.log('🚀 EMPLOYEE TYPE SAVE RESULTS:', { appSuccess, groupSuccess });
-        }
-
-        // Reset change state on successful save
-        if (allSuccessful) {
-          if (fieldType === 'department') {
-            setHasDepartmentMappingChanges?.(false);
-          } else if (fieldType === 'employeeType') {
-            setHasEmployeeTypeMappingChanges?.(false);
+          console.log('🚀 SAVING DEPARTMENT MAPPINGS DIRECTLY...');
+          
+          // DEPARTMENT APP MAPPINGS - Direct save logic
+          console.log('🔍 DEPARTMENT APP SAVE START (DIRECT):', { hasDepartmentUnsavedChanges });
+          if (hasDepartmentUnsavedChanges) {
+            setDepartmentSaveInProgress(true);
+            try {
+              const currentMappings = departmentAppMappings;
+              const newMappings = localDepartmentAppMappings;
+              
+              // Remove mappings that no longer exist
+              for (const department in currentMappings) {
+                for (const app of currentMappings[department]) {
+                  if (!newMappings[department]?.includes(app)) {
+                    console.log('🗑️ DELETING MAPPING (DIRECT):', { department, app });
+                    const deleteResponse = await fetch(`/api/client/${currentClientId}/department-app-mappings`, {
+                      method: 'DELETE',
+                      headers: { 'Content-Type': 'application/json' },
+                      credentials: 'include',
+                      body: JSON.stringify({ departmentName: department, appName: app })
+                    });
+                    
+                    if (!deleteResponse.ok) {
+                      const errorData = await deleteResponse.json();
+                      console.error('❌ DELETE FAILED (DIRECT):', { department, app, error: errorData });
+                      throw new Error(`Failed to delete mapping: ${errorData.error || 'Unknown error'}`);
+                    }
+                  }
+                }
+              }
+              
+              // Add new mappings
+              for (const department in newMappings) {
+                for (const app of newMappings[department]) {
+                  if (!currentMappings[department]?.includes(app)) {
+                    const response = await fetch(`/api/client/${currentClientId}/department-app-mappings`, {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      credentials: 'include',
+                      body: JSON.stringify({ departmentName: department, appName: app })
+                    });
+                    
+                    if (!response.ok) {
+                      const errorData = await response.json();
+                      if (errorData.error !== "Mapping already exists") {
+                        throw new Error(`Failed to add mapping: ${errorData.error}`);
+                      }
+                    }
+                  }
+                }
+              }
+              
+              setDepartmentAppMappings(localDepartmentAppMappings);
+              setHasDepartmentUnsavedChanges(false);
+              console.log('✅ DEPARTMENT APP SAVE SUCCESS (DIRECT)');
+            } catch (error) {
+              console.error('❌ Department app save failed (DIRECT):', error);
+              allSuccessful = false;
+            } finally {
+              setDepartmentSaveInProgress(false);
+            }
+          } else {
+            console.log('✅ No department app changes to save (DIRECT)');
           }
+          
+          // Reset change state
+          setHasDepartmentMappingChanges?.(false);
+          console.log('🚀 DEPARTMENT SAVE RESULTS (DIRECT):', { appSuccess: allSuccessful, directSave: true });
         }
 
         return allSuccessful;
       } catch (error) {
-        console.error('❌ COMPREHENSIVE SAVE FAILED:', error);
+        console.error('❌ DIRECT SAVE FAILED:', error);
         return false;
       }
     };
 
-    console.log('🔧 REGISTERING MANUAL SAVE TRIGGER for:', fieldType);
-    setTriggerManualSave(comprehensiveSaveFunction);
+    console.log('🔧 REGISTERING DIRECT SAVE TRIGGER for:', fieldType);
+    setTriggerManualSave(directSaveFunction);
 
-    // Cleanup on unmount or field type change
     return () => {
       setTriggerManualSave(null);
     };
-  }, [fieldType, setTriggerManualSave]); // FIXED: Using refs to prevent stale closures while avoiding re-registration
-
-  // Update refs whenever save functions change to keep them current
-  useEffect(() => {
-    saveDepartmentAppMappingsRef.current = saveDepartmentAppMappings;
-    saveDepartmentGroupMappingsRef.current = saveDepartmentGroupMappings;
-    saveEmployeeTypeAppMappingsRef.current = saveEmployeeTypeAppMappings;
-    saveEmployeeTypeGroupMappingsRef.current = saveEmployeeTypeGroupMappings;
-  }, [saveDepartmentAppMappings, saveDepartmentGroupMappings, saveEmployeeTypeAppMappings, saveEmployeeTypeGroupMappings]);
+  }, [fieldType, setTriggerManualSave, hasDepartmentUnsavedChanges, departmentAppMappings, localDepartmentAppMappings, currentClientId, setHasDepartmentMappingChanges]);
 
   // Process department app mappings data - set both saved and local state
   useEffect(() => {
