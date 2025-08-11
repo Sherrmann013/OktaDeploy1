@@ -5437,11 +5437,50 @@ export async function registerRoutes(app: Express): Promise<Server> {
               }
             }
             
-            // Selected groups assignment (if provided in userData.selectedGroups)
-            if (userData.selectedGroups && userData.selectedGroups.length > 0) {
-              console.log('Processing selected groups:', userData.selectedGroups);
+            // Process manually selected apps from frontend
+            const selectedApps = (req.body.applications || []) as string[];
+            if (selectedApps.length > 0) {
+              console.log(`📱 Processing ${selectedApps.length} manually selected apps:`, selectedApps);
               
-              for (const selectedGroupName of userData.selectedGroups) {
+              for (const selectedAppName of selectedApps) {
+                // Get the OKTA group name for this app
+                const [appGroup] = await clientDb.select()
+                  .from(clientAppMappings)
+                  .where(eq(clientAppMappings.appName, selectedAppName))
+                  .limit(1);
+                
+                if (appGroup) {
+                  try {
+                    const groupResult = await addUserToOktaGroup(
+                      oktaIntegration.apiKeys as Record<string, string>,
+                      oktaId,
+                      appGroup.oktaGroupName
+                    );
+                    
+                    if (groupResult.success) {
+                      console.log(`✅ Added user to manually selected app group: ${appGroup.oktaGroupName} (${selectedAppName})`);
+                      groupAssignments.push({ type: 'manualApp', group: appGroup.oktaGroupName, app: selectedAppName, success: true });
+                    } else {
+                      console.log(`⚠️  Failed to add user to manually selected app group ${appGroup.oktaGroupName}: ${groupResult.message}`);
+                      groupAssignments.push({ type: 'manualApp', group: appGroup.oktaGroupName, app: selectedAppName, success: false, error: groupResult.message });
+                    }
+                  } catch (error) {
+                    console.error(`Error adding user to manually selected app group ${appGroup.oktaGroupName}:`, error);
+                    groupAssignments.push({ type: 'manualApp', group: appGroup.oktaGroupName, app: selectedAppName, success: false, error: 'Exception occurred' });
+                  }
+                } else {
+                  console.log(`⚠️  No OKTA group mapping found for manually selected app: ${selectedAppName}`);
+                  groupAssignments.push({ type: 'manualApp', group: 'N/A', app: selectedAppName, success: false, error: 'App not mapped to OKTA group' });
+                }
+              }
+            }
+            
+            // Selected groups assignment (if provided in req.body.groups)
+            const selectedGroups = (req.body.groups || []) as string[];
+            if (selectedGroups.length > 0) {
+              console.log('Processing manually selected groups:', selectedGroups);
+              
+              for (const selectedGroupName of selectedGroups) {
                 try {
                   const groupResult = await addUserToOktaGroup(
                     oktaIntegration.apiKeys as Record<string, string>,
@@ -5450,15 +5489,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
                   );
                   
                   if (groupResult.success) {
-                    console.log(`✅ Added user to selected group: ${selectedGroupName}`);
-                    groupAssignments.push({ type: 'selected', group: selectedGroupName, success: true });
+                    console.log(`✅ Added user to manually selected group: ${selectedGroupName}`);
+                    groupAssignments.push({ type: 'manualGroup', group: selectedGroupName, success: true });
                   } else {
-                    console.log(`⚠️  Failed to add user to selected group ${selectedGroupName}: ${groupResult.message}`);
-                    groupAssignments.push({ type: 'selected', group: selectedGroupName, success: false, error: groupResult.message });
+                    console.log(`⚠️  Failed to add user to manually selected group ${selectedGroupName}: ${groupResult.message}`);
+                    groupAssignments.push({ type: 'manualGroup', group: selectedGroupName, success: false, error: groupResult.message });
                   }
                 } catch (error) {
-                  console.error(`Error adding user to selected group ${selectedGroupName}:`, error);
-                  groupAssignments.push({ type: 'selected', group: selectedGroupName, success: false, error: 'Exception occurred' });
+                  console.error(`Error adding user to manually selected group ${selectedGroupName}:`, error);
+                  groupAssignments.push({ type: 'manualGroup', group: selectedGroupName, success: false, error: 'Exception occurred' });
                 }
               }
             }
