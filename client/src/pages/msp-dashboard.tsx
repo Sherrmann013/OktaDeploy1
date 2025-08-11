@@ -67,6 +67,22 @@ export default function MSPDashboard() {
     refetchOnReconnect: true,
   });
 
+  // Debug clients data changes
+  React.useEffect(() => {
+    if (clients.length > 0) {
+      console.log('📊 CLIENTS DATA UPDATED:', {
+        clientCount: clients.length,
+        clients: clients.map(c => ({ 
+          id: c.id, 
+          name: c.name, 
+          displayName: c.displayName,
+          companyName: c.companyName 
+        })),
+        timestamp: new Date().toISOString()
+      });
+    }
+  }, [clients]);
+
   // Update client mutation
   const updateClientMutation = useMutation({
     mutationFn: async (updatedClient: { id: number; [key: string]: any }) => {
@@ -76,18 +92,27 @@ export default function MSPDashboard() {
       }
       return response.json();
     },
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       console.log('🟢 CLIENT UPDATE SUCCESS - UI DEBUGGING:', {
         updatedData: data,
         timestamp: new Date().toISOString()
       });
       
-      // Force complete cache removal and refetch
+      // Force complete cache removal and refetch with detailed logging
+      console.log('🔄 STEP 1: Removing queries from cache');
       queryClient.removeQueries({ queryKey: ["/api/clients"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/clients"] });
-      queryClient.refetchQueries({ queryKey: ["/api/clients"] });
       
-      console.log('🔄 AGGRESSIVE CACHE RESET - complete removal and refetch');
+      console.log('🔄 STEP 2: Invalidating queries');
+      queryClient.invalidateQueries({ queryKey: ["/api/clients"] });
+      
+      console.log('🔄 STEP 3: Manually refetching queries');
+      const refetchResult = await queryClient.refetchQueries({ queryKey: ["/api/clients"] });
+      console.log('🔄 STEP 3 RESULT:', refetchResult);
+      
+      // Add a small delay to ensure state updates
+      setTimeout(() => {
+        console.log('🔄 STEP 4: Checking if UI will update...');
+      }, 100);
       
       toast({
         title: "Client updated successfully", 
