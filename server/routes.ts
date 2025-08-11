@@ -5238,8 +5238,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
             const employeeTypeGroups = await clientDb.select().from(clientEmployeeTypeGroupMappings)
               .where(eq(clientEmployeeTypeGroupMappings.employeeType, userData.employeeType || ''));
             
-            const departmentGroups = await clientDb.select().from(clientDepartmentGroupMappings)
-              .where(eq(clientDepartmentGroupMappings.departmentName, userData.department || ''));
+            // Get department-specific apps
+            const departmentApps = await clientDb.select()
+              .from(clientDepartmentAppMappings)
+              .where(eq(clientDepartmentAppMappings.departmentName, userData.department || ''));
+            
+            // Get employee type-specific apps
+            const employeeTypeApps = await clientDb.select()
+              .from(clientEmployeeTypeAppMappings)
+              .where(eq(clientEmployeeTypeAppMappings.employeeType, userData.employeeType || ''));
             
             // Employee type group assignment
             if (employeeTypeGroups.length > 0) {
@@ -5265,26 +5272,76 @@ export async function registerRoutes(app: Express): Promise<Server> {
               }
             }
             
-            // Department group assignment
-            if (departmentGroups.length > 0) {
-              for (const mapping of departmentGroups) {
-                try {
-                  const groupResult = await addUserToOktaGroup(
-                    oktaIntegration.apiKeys as Record<string, string>,
-                    oktaId,
-                    mapping.groupName
-                  );
-                  
-                  if (groupResult.success) {
-                    console.log(`✅ Added user to department group: ${mapping.groupName}`);
-                    groupAssignments.push({ type: 'department', group: mapping.groupName, success: true });
-                  } else {
-                    console.log(`⚠️  Failed to add user to department group ${mapping.groupName}: ${groupResult.message}`);
-                    groupAssignments.push({ type: 'department', group: mapping.groupName, success: false, error: groupResult.message });
+            // Department app-based group assignment
+            if (departmentApps.length > 0) {
+              console.log(`🏢 Found ${departmentApps.length} department apps for ${userData.department}:`, departmentApps.map(a => a.appName));
+              
+              for (const appMapping of departmentApps) {
+                // Get the OKTA group name for this app
+                const [appGroup] = await clientDb.select()
+                  .from(clientAppMappings)
+                  .where(eq(clientAppMappings.appName, appMapping.appName))
+                  .limit(1);
+                
+                if (appGroup) {
+                  try {
+                    const groupResult = await addUserToOktaGroup(
+                      oktaIntegration.apiKeys as Record<string, string>,
+                      oktaId,
+                      appGroup.oktaGroupName
+                    );
+                    
+                    if (groupResult.success) {
+                      console.log(`✅ Added user to department app group: ${appGroup.oktaGroupName} (${appMapping.appName})`);
+                      groupAssignments.push({ type: 'departmentApp', group: appGroup.oktaGroupName, app: appMapping.appName, success: true });
+                    } else {
+                      console.log(`⚠️  Failed to add user to department app group ${appGroup.oktaGroupName}: ${groupResult.message}`);
+                      groupAssignments.push({ type: 'departmentApp', group: appGroup.oktaGroupName, app: appMapping.appName, success: false, error: groupResult.message });
+                    }
+                  } catch (error) {
+                    console.error(`Error adding user to department app group ${appGroup.oktaGroupName}:`, error);
+                    groupAssignments.push({ type: 'departmentApp', group: appGroup.oktaGroupName, app: appMapping.appName, success: false, error: 'Exception occurred' });
                   }
-                } catch (error) {
-                  console.error(`Error adding user to department group ${mapping.groupName}:`, error);
-                  groupAssignments.push({ type: 'department', group: mapping.groupName, success: false, error: 'Exception occurred' });
+                } else {
+                  console.log(`⚠️  No OKTA group mapping found for app: ${appMapping.appName}`);
+                  groupAssignments.push({ type: 'departmentApp', group: 'N/A', app: appMapping.appName, success: false, error: 'App not mapped to OKTA group' });
+                }
+              }
+            }
+            
+            // Employee type app-based group assignment
+            if (employeeTypeApps.length > 0) {
+              console.log(`👔 Found ${employeeTypeApps.length} employee type apps for ${userData.employeeType}:`, employeeTypeApps.map(a => a.appName));
+              
+              for (const appMapping of employeeTypeApps) {
+                // Get the OKTA group name for this app
+                const [appGroup] = await clientDb.select()
+                  .from(clientAppMappings)
+                  .where(eq(clientAppMappings.appName, appMapping.appName))
+                  .limit(1);
+                
+                if (appGroup) {
+                  try {
+                    const groupResult = await addUserToOktaGroup(
+                      oktaIntegration.apiKeys as Record<string, string>,
+                      oktaId,
+                      appGroup.oktaGroupName
+                    );
+                    
+                    if (groupResult.success) {
+                      console.log(`✅ Added user to employee type app group: ${appGroup.oktaGroupName} (${appMapping.appName})`);
+                      groupAssignments.push({ type: 'employeeTypeApp', group: appGroup.oktaGroupName, app: appMapping.appName, success: true });
+                    } else {
+                      console.log(`⚠️  Failed to add user to employee type app group ${appGroup.oktaGroupName}: ${groupResult.message}`);
+                      groupAssignments.push({ type: 'employeeTypeApp', group: appGroup.oktaGroupName, app: appMapping.appName, success: false, error: groupResult.message });
+                    }
+                  } catch (error) {
+                    console.error(`Error adding user to employee type app group ${appGroup.oktaGroupName}:`, error);
+                    groupAssignments.push({ type: 'employeeTypeApp', group: appGroup.oktaGroupName, app: appMapping.appName, success: false, error: 'Exception occurred' });
+                  }
+                } else {
+                  console.log(`⚠️  No OKTA group mapping found for app: ${appMapping.appName}`);
+                  groupAssignments.push({ type: 'employeeTypeApp', group: 'N/A', app: appMapping.appName, success: false, error: 'App not mapped to OKTA group' });
                 }
               }
             }
