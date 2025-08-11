@@ -84,54 +84,34 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
 
 
 
-  // Fetch available apps - CLIENT-AWARE with proper caching
+  // Fetch available apps - CLIENT-AWARE (using global cache settings)
   const { data: appMappingsData = [] } = useQuery({
     queryKey: [`/api/client/${currentClientId}/app-mappings`],
     enabled: (fieldType === 'department' || fieldType === 'employeeType') && config.linkApps,
-    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
-    refetchInterval: false, // Disable auto-refetch
-    refetchOnWindowFocus: false, // Don't refetch on focus
-    refetchOnReconnect: false, // Don't refetch on reconnect
   });
 
-  // Fetch department app mappings - CLIENT-AWARE with proper caching
+  // Fetch department app mappings - CLIENT-AWARE (using global cache settings)
   const { data: departmentAppMappingsData = [] } = useQuery({
     queryKey: [`/api/client/${currentClientId}/department-app-mappings`],
     enabled: fieldType === 'department' && config.linkApps,
-    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
-    refetchInterval: false, // Disable auto-refetch
-    refetchOnWindowFocus: false, // Don't refetch on focus
-    refetchOnReconnect: false, // Don't refetch on reconnect
   });
 
-  // Fetch employee type app mappings - CLIENT-AWARE with proper caching
+  // Fetch employee type app mappings - CLIENT-AWARE (using global cache settings)
   const { data: employeeTypeAppMappingsData = [] } = useQuery({
     queryKey: [`/api/client/${currentClientId}/employee-type-app-mappings`],
     enabled: fieldType === 'employeeType' && config.linkApps,
-    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
-    refetchInterval: false, // Disable auto-refetch
-    refetchOnWindowFocus: false, // Don't refetch on focus
-    refetchOnReconnect: false, // Don't refetch on reconnect
   });
 
-  // Fetch department group mappings - CLIENT-AWARE with proper caching
+  // Fetch department group mappings - CLIENT-AWARE (using global cache settings)
   const { data: departmentGroupMappingsData = [] } = useQuery({
     queryKey: [`/api/client/${currentClientId}/department-group-mappings`],
     enabled: fieldType === 'department' && config.linkGroups,
-    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
-    refetchInterval: false, // Disable auto-refetch
-    refetchOnWindowFocus: false, // Don't refetch on focus
-    refetchOnReconnect: false, // Don't refetch on reconnect
   });
 
-  // Fetch employee type group mappings - CLIENT-AWARE with proper caching
+  // Fetch employee type group mappings - CLIENT-AWARE (using global cache settings)
   const { data: employeeTypeGroupMappingsData = [] } = useQuery({
     queryKey: [`/api/client/${currentClientId}/employee-type-group-mappings`],
     enabled: fieldType === 'employeeType' && config.linkGroups,
-    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
-    refetchInterval: false, // Disable auto-refetch
-    refetchOnWindowFocus: false, // Don't refetch on focus
-    refetchOnReconnect: false, // Don't refetch on reconnect
   });
 
   // Local functions for managing department-app mappings (no auto-save)
@@ -316,13 +296,23 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
 
   // Save department app mappings to database (MANUAL SAVE ONLY)
   const saveDepartmentAppMappings = useCallback(async (manualSave = false) => {
+    console.log('🔍 DEPARTMENT APP SAVE START:', { manualSave, departmentSaveInProgress, hasDepartmentUnsavedChanges });
+    
     // Prevent auto-save - only allow manual saves
     if (!manualSave) {
       console.log('⚠️ Auto-save blocked - department mappings require manual save');
       return false;
     }
     
-    if (departmentSaveInProgress) return false;
+    if (departmentSaveInProgress) {
+      console.log('⚠️ Save already in progress, skipping');
+      return false;
+    }
+    
+    if (!hasDepartmentUnsavedChanges) {
+      console.log('✅ No department app changes to save');
+      return true;
+    }
     setDepartmentSaveInProgress(true);
     
     try {
@@ -768,7 +758,7 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
     return () => {
       setTriggerManualSave(null);
     };
-  }, [fieldType, saveDepartmentAppMappings, saveDepartmentGroupMappings, saveEmployeeTypeAppMappings, saveEmployeeTypeGroupMappings, setTriggerManualSave, setHasDepartmentMappingChanges, setHasEmployeeTypeMappingChanges]);
+  }, [fieldType, setTriggerManualSave]); // FIXED: Removed save functions from dependencies to prevent constant re-registration
 
   // Process department app mappings data - set both saved and local state
   useEffect(() => {
