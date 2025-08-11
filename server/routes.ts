@@ -77,8 +77,8 @@ async function createOktaUser(apiKeys: Record<string, string>, userData: any) {
     const https = await import('https');
     
     const domain = apiKeys.domain.replace(/^https?:\/\//, ''); // Remove protocol if present
-    // Ensure login field is valid - use email if no login provided and clean up the format
-    const loginValue = userData.login || userData.email;
+    // OKTA typically requires login to be the email address for most configurations
+    const loginValue = userData.email; // Always use email as login for OKTA compatibility
     
     // Validate required fields
     if (!userData.firstName || !userData.lastName || !userData.email) {
@@ -102,7 +102,7 @@ async function createOktaUser(apiKeys: Record<string, string>, userData: any) {
         firstName: userData.firstName.trim(),
         lastName: userData.lastName.trim(),
         email: userData.email.trim().toLowerCase(),
-        login: loginValue.trim().toLowerCase(),
+        login: loginValue.trim().toLowerCase(), // Using email as login for OKTA
         title: userData.title ? userData.title.trim() : undefined,
         department: userData.department ? userData.department.trim() : undefined,
         mobilePhone: userData.mobilePhone ? userData.mobilePhone.trim() : undefined,
