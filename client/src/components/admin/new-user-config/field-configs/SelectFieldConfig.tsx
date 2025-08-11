@@ -1096,6 +1096,7 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
                     <>
                       {/* Add app dropdown at top */}
                       <Select
+                        value=""
                         onValueChange={(appName) => {
                           if (fieldType === 'department') {
                             handleLinkApp(selectedDepartment, appName);
@@ -1261,6 +1262,7 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
                     <>
                       {/* Add group dropdown */}
                       <Select
+                        value=""
                         onValueChange={(groupName) => {
                           if (fieldType === 'department') {
                             handleLinkDepartmentGroup(selectedDepartment, groupName);
