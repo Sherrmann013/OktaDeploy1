@@ -696,6 +696,17 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
     }
   }, [fieldType, setEmployeeTypeAppSaveFunction, saveEmployeeTypeAppMappings]);
 
+  // Debug: Log when Employee Type component renders
+  useEffect(() => {
+    if (fieldType === 'employeeType') {
+      console.log('🟦 EMPLOYEE TYPE COMPONENT RENDERED', { 
+        fieldType, 
+        hasSetEmployeeTypeAppSaveFunction: !!setEmployeeTypeAppSaveFunction,
+        saveEmployeeTypeAppMappingsExists: !!saveEmployeeTypeAppMappings 
+      });
+    }
+  }, [fieldType, setEmployeeTypeAppSaveFunction, saveEmployeeTypeAppMappings]);
+
   // Hook save functions for group mappings - ENABLED FOR MAIN SAVE BUTTON  
   useEffect(() => {
     if (fieldType === 'department' && setDepartmentGroupSaveFunction) {
