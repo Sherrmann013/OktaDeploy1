@@ -5243,7 +5243,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/client/:clientId/users", isAuthenticated, requireAdmin, async (req, res) => {
     try {
       const clientId = parseInt(req.params.clientId);
-      const userData = insertUserSchema.parse(req.body);
+      // Create a modified schema that doesn't require login since server generates it
+      const serverUserSchema = insertUserSchema.omit({ login: true }).extend({
+        login: z.string().optional()
+      });
+      const userData = serverUserSchema.parse(req.body);
       
       console.log(`👤 Creating user for client ${clientId}:`, userData.email);
       
