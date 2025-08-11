@@ -717,114 +717,18 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
     }
   }, [fieldType, setEmployeeTypeGroupSaveFunction]);
 
-  // DIRECT MANUAL SAVE TRIGGER: Embed save logic directly to avoid stale closures completely
+  // DISABLED: Remove auto-triggering direct save function that was causing issues
+  // Individual save buttons will call the specific save functions directly
   useEffect(() => {
     if (!setTriggerManualSave) return;
-
-    const directSaveFunction = async (): Promise<boolean> => {
-      console.log('🚀 DIRECT MANUAL SAVE TRIGGERED for:', fieldType);
-      let allSuccessful = true;
-
-      try {
-        if (fieldType === 'department') {
-          console.log('🚀 SAVING DEPARTMENT MAPPINGS DIRECTLY...');
-          
-          // DEPARTMENT APP MAPPINGS - Direct save logic
-          console.log('🔍 DEPARTMENT APP SAVE START (DIRECT):', { hasDepartmentUnsavedChanges });
-          if (hasDepartmentUnsavedChanges) {
-            setDepartmentSaveInProgress(true);
-            try {
-              const currentMappings = departmentAppMappings;
-              const newMappings = localDepartmentAppMappings;
-              
-              // Remove mappings that no longer exist
-              for (const department in currentMappings) {
-                for (const app of currentMappings[department]) {
-                  if (!newMappings[department]?.includes(app)) {
-                    console.log('🗑️ DELETING MAPPING (DIRECT):', { department, app });
-                    const deleteResponse = await fetch(`/api/client/${currentClientId}/department-app-mappings`, {
-                      method: 'DELETE',
-                      headers: { 'Content-Type': 'application/json' },
-                      credentials: 'include',
-                      body: JSON.stringify({ departmentName: department, appName: app })
-                    });
-                    
-                    if (!deleteResponse.ok) {
-                      const errorData = await deleteResponse.json();
-                      console.error('❌ DELETE FAILED (DIRECT):', { department, app, error: errorData });
-                      throw new Error(`Failed to delete mapping: ${errorData.error || 'Unknown error'}`);
-                    }
-                  }
-                }
-              }
-              
-              // Add new mappings
-              for (const department in newMappings) {
-                for (const app of newMappings[department]) {
-                  if (!currentMappings[department]?.includes(app)) {
-                    const response = await fetch(`/api/client/${currentClientId}/department-app-mappings`, {
-                      method: 'POST',
-                      headers: { 'Content-Type': 'application/json' },
-                      credentials: 'include',
-                      body: JSON.stringify({ departmentName: department, appName: app })
-                    });
-                    
-                    if (!response.ok) {
-                      const errorData = await response.json();
-                      if (errorData.error !== "Mapping already exists") {
-                        throw new Error(`Failed to add mapping: ${errorData.error}`);
-                      }
-                    }
-                  }
-                }
-              }
-              
-              setDepartmentAppMappings(localDepartmentAppMappings);
-              setHasDepartmentUnsavedChanges(false);
-              
-              // Refresh data from server to ensure UI matches database
-              await queryClient.refetchQueries({ 
-                queryKey: [`/api/client/${currentClientId}/department-app-mappings`],
-                exact: true 
-              });
-              
-              console.log('✅ DEPARTMENT APP SAVE SUCCESS (DIRECT) + DATA REFRESHED');
-            } catch (error) {
-              console.error('❌ Department app save failed (DIRECT):', error);
-              
-              // Even on error, refresh data to show current database state
-              await queryClient.refetchQueries({ 
-                queryKey: [`/api/client/${currentClientId}/department-app-mappings`],
-                exact: true 
-              });
-              
-              allSuccessful = false;
-            } finally {
-              setDepartmentSaveInProgress(false);
-            }
-          } else {
-            console.log('✅ No department app changes to save (DIRECT)');
-          }
-          
-          // Reset change state
-          setHasDepartmentMappingChanges?.(false);
-          console.log('🚀 DEPARTMENT SAVE RESULTS (DIRECT):', { appSuccess: allSuccessful, directSave: true });
-        }
-
-        return allSuccessful;
-      } catch (error) {
-        console.error('❌ DIRECT SAVE FAILED:', error);
-        return false;
-      }
-    };
-
-    console.log('🔧 REGISTERING DIRECT SAVE TRIGGER for:', fieldType);
-    setTriggerManualSave(directSaveFunction);
-
+    
+    // Clear any existing trigger to prevent auto-calls
+    setTriggerManualSave(null);
+    
     return () => {
       setTriggerManualSave(null);
     };
-  }, [fieldType, setTriggerManualSave, currentClientId]); // Removed reactive dependencies to prevent auto-trigger on changes
+  }, [setTriggerManualSave]);
 
   // Process department app mappings data - set both saved and local state
   useEffect(() => {
@@ -1243,6 +1147,28 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
                         </SelectContent>
                       </Select>
 
+                      {/* Individual Save Button for Apps */}
+                      {(fieldType === 'department' ? hasDepartmentUnsavedChanges : hasEmployeeTypeUnsavedChanges) && (
+                        <Button
+                          onClick={async () => {
+                            console.log(`🟢 INDIVIDUAL SAVE CLICKED: ${fieldType} apps`);
+                            if (fieldType === 'department') {
+                              await saveDepartmentAppMappings(true);
+                            } else {
+                              await saveEmployeeTypeAppMappings(true);
+                            }
+                          }}
+                          disabled={fieldType === 'department' ? departmentSaveInProgress : employeeTypeSaveInProgress}
+                          className="w-full mb-2 bg-green-600 hover:bg-green-700 text-white"
+                        >
+                          {fieldType === 'department' ? (
+                            departmentSaveInProgress ? 'Saving...' : 'Save Department Apps'
+                          ) : (
+                            employeeTypeSaveInProgress ? 'Saving...' : 'Save Employee Type Apps'
+                          )}
+                        </Button>
+                      )}
+
                       {/* Selected apps using exact CreateUserModal format */}
                       <div className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md divide-y divide-gray-200 dark:divide-gray-600 max-w-48">
                         {(() => {
@@ -1405,6 +1331,28 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
                           )}
                         </SelectContent>
                       </Select>
+
+                      {/* Individual Save Button for Groups */}
+                      {(fieldType === 'department' ? hasDepartmentGroupUnsavedChanges : hasEmployeeTypeGroupUnsavedChanges) && (
+                        <Button
+                          onClick={async () => {
+                            console.log(`🟢 INDIVIDUAL SAVE CLICKED: ${fieldType} groups`);
+                            if (fieldType === 'department') {
+                              await saveDepartmentGroupMappings();
+                            } else {
+                              await saveEmployeeTypeGroupMappings();
+                            }
+                          }}
+                          disabled={fieldType === 'department' ? departmentGroupSaveInProgress : employeeTypeGroupSaveInProgress}
+                          className="w-full mb-2 bg-green-600 hover:bg-green-700 text-white"
+                        >
+                          {fieldType === 'department' ? (
+                            departmentGroupSaveInProgress ? 'Saving...' : 'Save Department Groups'
+                          ) : (
+                            employeeTypeGroupSaveInProgress ? 'Saving...' : 'Save Employee Type Groups'
+                          )}
+                        </Button>
+                      )}
 
                       {/* Selected email groups */}
                       <div className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md divide-y divide-gray-200 dark:divide-gray-600 max-w-48">
