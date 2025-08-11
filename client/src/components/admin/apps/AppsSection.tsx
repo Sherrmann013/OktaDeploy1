@@ -249,6 +249,14 @@ export function AppsSection() {
   // Client configuration mutations
   const updateClientConfigMutation = useMutation({
     mutationFn: async ({ setting, value }: { setting: string; value: string }) => {
+      console.log('🔧 CLIENT CONFIG SAVE START:', {
+        endpoint: `/api/client/${currentClientId}/layout-settings/${setting}`,
+        setting,
+        value,
+        currentClientId,
+        timestamp: new Date().toISOString()
+      });
+
       const response = await fetch(`/api/client/${currentClientId}/layout-settings/${setting}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
@@ -260,10 +268,21 @@ export function AppsSection() {
         })
       });
 
+      console.log('🔧 CLIENT CONFIG RESPONSE:', {
+        status: response.status,
+        statusText: response.statusText,
+        ok: response.ok
+      });
+
       if (!response.ok) {
-        throw new Error(`Failed to update ${setting}`);
+        const errorText = await response.text();
+        console.log('❌ CLIENT CONFIG ERROR:', errorText);
+        throw new Error(`Failed to update ${setting}: ${response.status} ${errorText}`);
       }
-      return response.json();
+      
+      const result = await response.json();
+      console.log('✅ CLIENT CONFIG SUCCESS:', result);
+      return result;
     },
     onSuccess: (data, variables) => {
       queryClient.invalidateQueries({ queryKey: [`/api/client/${currentClientId}/layout-settings/${variables.setting}`] });

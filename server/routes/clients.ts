@@ -14,16 +14,39 @@ const insertClientSchema = createInsertSchema(clients).omit({
 // Get all clients for MSP user
 export async function getClients(req: Request, res: Response) {
   try {
-    // TODO: Add proper authentication check for MSP users
-    // For now, return all clients
+    console.log('📊 Fetching all clients with complete data...');
     
-    const allClients = await db.select().from(clients).orderBy(clients.name);
+    const allClients = await db.select({
+      id: clients.id,
+      name: clients.name,
+      description: clients.description,
+      domain: clients.domain,
+      status: clients.status,
+      logoUrl: clients.logoUrl,
+      primaryContact: clients.primaryContact,
+      contactEmail: clients.contactEmail,
+      created: clients.created,
+      lastUpdated: clients.lastUpdated,
+      // Include the new fields we added
+      displayName: clients.displayName,
+      companyName: clients.companyName,
+      companyInitials: clients.companyInitials,
+      identityProvider: clients.identityProvider,
+      notes: clients.notes
+    }).from(clients).orderBy(clients.name);
     
-    // TODO: Add user count and last activity data
+    console.log('📊 Retrieved clients:', allClients.map(c => ({ 
+      id: c.id, 
+      name: c.name, 
+      displayName: c.displayName, 
+      companyName: c.companyName 
+    })));
+    
+    // Add placeholder stats for now
     const clientsWithStats = allClients.map(client => ({
       ...client,
-      userCount: 0, // Placeholder - implement user counting
-      lastActivity: "2 days ago", // Placeholder - implement activity tracking
+      userCount: 0, // TODO: implement user counting
+      lastActivity: "2 days ago", // TODO: implement activity tracking
     }));
 
     res.json(clientsWithStats);
