@@ -156,6 +156,147 @@ async function createOktaUser(apiKeys: Record<string, string>, userData: any) {
   }
 }
 
+// Helper function to add user to OKTA group with client-specific API keys
+async function addUserToOktaGroup(apiKeys: Record<string, string>, oktaUserId: string, groupName: string) {
+  if (!apiKeys.domain || !apiKeys.apiToken) {
+    throw new Error('OKTA domain and API token are required');
+  }
+
+  try {
+    console.log(`🔐 Adding user ${oktaUserId} to group '${groupName}' using client-specific credentials for domain: ${apiKeys.domain}`);
+    
+    const https = await import('https');
+    
+    const domain = apiKeys.domain.replace(/^https?:\/\//, ''); // Remove protocol if present
+    
+    // First, find the group by name to get its ID
+    return new Promise((resolve, reject) => {
+      const searchOptions = {
+        hostname: domain,
+        port: 443,
+        path: `/api/v1/groups?q=${encodeURIComponent(groupName)}&limit=1`,
+        method: 'GET',
+        headers: {
+          'Authorization': `SSWS ${apiKeys.apiToken}`,
+          'Accept': 'application/json'
+        }
+      };
+
+      const searchReq = https.request(searchOptions, (searchRes) => {
+        let searchData = '';
+        
+        searchRes.on('data', (chunk) => {
+          searchData += chunk;
+        });
+        
+        searchRes.on('end', () => {
+          try {
+            const groups = JSON.parse(searchData);
+            
+            if (searchRes.statusCode !== 200 || !Array.isArray(groups) || groups.length === 0) {
+              resolve({
+                success: false,
+                message: `Group '${groupName}' not found in OKTA`
+              });
+              return;
+            }
+            
+            const group = groups.find(g => g.profile.name === groupName);
+            if (!group) {
+              resolve({
+                success: false,
+                message: `Group '${groupName}' not found in OKTA`
+              });
+              return;
+            }
+            
+            // Now add the user to the group
+            const addUserOptions = {
+              hostname: domain,
+              port: 443,
+              path: `/api/v1/groups/${group.id}/users/${oktaUserId}`,
+              method: 'PUT',
+              headers: {
+                'Authorization': `SSWS ${apiKeys.apiToken}`,
+                'Accept': 'application/json'
+              }
+            };
+
+            const addUserReq = https.request(addUserOptions, (addUserRes) => {
+              let addUserData = '';
+              
+              addUserRes.on('data', (chunk) => {
+                addUserData += chunk;
+              });
+              
+              addUserRes.on('end', () => {
+                if (addUserRes.statusCode === 204 || addUserRes.statusCode === 200) {
+                  // User added successfully
+                  resolve({
+                    success: true,
+                    message: `User added to group '${groupName}' successfully`,
+                    groupId: group.id
+                  });
+                } else if (addUserRes.statusCode === 400 && addUserData.includes('already a member')) {
+                  // User is already in the group - treat as success
+                  resolve({
+                    success: true,
+                    message: `User is already a member of group '${groupName}'`,
+                    groupId: group.id
+                  });
+                } else {
+                  // Other error
+                  try {
+                    const errorData = JSON.parse(addUserData);
+                    resolve({
+                      success: false,
+                      message: `Failed to add user to group: ${errorData.errorSummary || addUserData}`
+                    });
+                  } catch (parseError) {
+                    resolve({
+                      success: false,
+                      message: `Failed to add user to group: ${addUserRes.statusCode} ${addUserRes.statusMessage}`
+                    });
+                  }
+                }
+              });
+            });
+
+            addUserReq.on('error', (error) => {
+              resolve({
+                success: false,
+                message: `Network error adding user to group: ${error.message}`
+              });
+            });
+
+            addUserReq.end();
+            
+          } catch (parseError) {
+            resolve({
+              success: false,
+              message: `Failed to parse group search response: ${searchData}`
+            });
+          }
+        });
+      });
+
+      searchReq.on('error', (error) => {
+        resolve({
+          success: false,
+          message: `Network error searching for group: ${error.message}`
+        });
+      });
+
+      searchReq.end();
+    });
+  } catch (error) {
+    return {
+      success: false,
+      message: error instanceof Error ? error.message : 'Unknown error'
+    };
+  }
+}
+
 // Helper function to create OKTA group
 async function createOktaGroup(apiKeys: Record<string, string>, groupName: string, description?: string) {
   if (!apiKeys.domain || !apiKeys.apiToken) {
@@ -5081,12 +5222,111 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }).returning();
       
       console.log(`✅ Created user for client ${clientId}:`, newUser.id);
+      
+      // Add user to groups based on employee type, department, and app mappings
+      let groupAssignments: any[] = [];
+      if (oktaIntegration && oktaId) {
+        console.log(`🔗 Adding user to groups based on client ${clientId} mappings...`);
+        
+        try {
+          // Fetch OKTA groups using client-specific credentials
+          const oktaUsers = await fetchOktaUsers(oktaIntegration.apiKeys as Record<string, string>);
+          if (!oktaUsers.success) {
+            console.log(`⚠️  Could not fetch OKTA groups for group assignment: ${oktaUsers.message}`);
+          } else {
+            // Get client-specific group mappings
+            const employeeTypeGroups = await clientDb.select().from(clientEmployeeTypeGroupMappings)
+              .where(eq(clientEmployeeTypeGroupMappings.employeeType, userData.employeeType || ''));
+            
+            const departmentGroups = await clientDb.select().from(clientDepartmentGroupMappings)
+              .where(eq(clientDepartmentGroupMappings.departmentName, userData.department || ''));
+            
+            // Employee type group assignment
+            if (employeeTypeGroups.length > 0) {
+              for (const mapping of employeeTypeGroups) {
+                try {
+                  const groupResult = await addUserToOktaGroup(
+                    oktaIntegration.apiKeys as Record<string, string>,
+                    oktaId,
+                    mapping.groupName
+                  );
+                  
+                  if (groupResult.success) {
+                    console.log(`✅ Added user to employee type group: ${mapping.groupName}`);
+                    groupAssignments.push({ type: 'employeeType', group: mapping.groupName, success: true });
+                  } else {
+                    console.log(`⚠️  Failed to add user to employee type group ${mapping.groupName}: ${groupResult.message}`);
+                    groupAssignments.push({ type: 'employeeType', group: mapping.groupName, success: false, error: groupResult.message });
+                  }
+                } catch (error) {
+                  console.error(`Error adding user to employee type group ${mapping.groupName}:`, error);
+                  groupAssignments.push({ type: 'employeeType', group: mapping.groupName, success: false, error: 'Exception occurred' });
+                }
+              }
+            }
+            
+            // Department group assignment
+            if (departmentGroups.length > 0) {
+              for (const mapping of departmentGroups) {
+                try {
+                  const groupResult = await addUserToOktaGroup(
+                    oktaIntegration.apiKeys as Record<string, string>,
+                    oktaId,
+                    mapping.groupName
+                  );
+                  
+                  if (groupResult.success) {
+                    console.log(`✅ Added user to department group: ${mapping.groupName}`);
+                    groupAssignments.push({ type: 'department', group: mapping.groupName, success: true });
+                  } else {
+                    console.log(`⚠️  Failed to add user to department group ${mapping.groupName}: ${groupResult.message}`);
+                    groupAssignments.push({ type: 'department', group: mapping.groupName, success: false, error: groupResult.message });
+                  }
+                } catch (error) {
+                  console.error(`Error adding user to department group ${mapping.groupName}:`, error);
+                  groupAssignments.push({ type: 'department', group: mapping.groupName, success: false, error: 'Exception occurred' });
+                }
+              }
+            }
+            
+            // Selected groups assignment (if provided in userData.selectedGroups)
+            if (userData.selectedGroups && userData.selectedGroups.length > 0) {
+              console.log('Processing selected groups:', userData.selectedGroups);
+              
+              for (const selectedGroupName of userData.selectedGroups) {
+                try {
+                  const groupResult = await addUserToOktaGroup(
+                    oktaIntegration.apiKeys as Record<string, string>,
+                    oktaId,
+                    selectedGroupName
+                  );
+                  
+                  if (groupResult.success) {
+                    console.log(`✅ Added user to selected group: ${selectedGroupName}`);
+                    groupAssignments.push({ type: 'selected', group: selectedGroupName, success: true });
+                  } else {
+                    console.log(`⚠️  Failed to add user to selected group ${selectedGroupName}: ${groupResult.message}`);
+                    groupAssignments.push({ type: 'selected', group: selectedGroupName, success: false, error: groupResult.message });
+                  }
+                } catch (error) {
+                  console.error(`Error adding user to selected group ${selectedGroupName}:`, error);
+                  groupAssignments.push({ type: 'selected', group: selectedGroupName, success: false, error: 'Exception occurred' });
+                }
+              }
+            }
+          }
+        } catch (error) {
+          console.error(`Error during group assignment for client ${clientId}:`, error);
+        }
+      }
+      
       res.json({
         ...newUser,
         oktaResult: oktaResult || { 
           success: false, 
           message: "No OKTA integration configured" 
-        }
+        },
+        groupAssignments: groupAssignments
       });
     } catch (error) {
       console.error(`Error creating user for client:`, error);
