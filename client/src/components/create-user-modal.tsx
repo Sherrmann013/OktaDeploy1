@@ -276,31 +276,38 @@ export default function CreateUserModal({ open, onClose, onSuccess, clientId }: 
   const validationSchema = useMemo(() => {
     if (!fieldSettings) return insertUserSchema;
     
-    return insertUserSchema.extend({
+    // Create a fresh schema to avoid extend() conflicts with required base fields
+    return z.object({
       firstName: fieldSettings.firstName?.required 
-        ? z.string().min(1)
+        ? z.string().min(1, "First name is required")
         : z.string().optional(),
       lastName: fieldSettings.lastName?.required 
-        ? z.string().min(1) 
+        ? z.string().min(1, "Last name is required") 
         : z.string().optional(),
       email: fieldSettings.emailUsername?.required 
-        ? z.string().min(1).email()
-        : z.string().email().optional().or(z.literal("")),
+        ? z.string().min(1).email("Invalid email address")
+        : z.string().email("Invalid email address").optional().or(z.literal("")),
+      login: z.string().optional(), // Server will handle login generation
       password: fieldSettings.password?.required 
-        ? z.string().min(1)
+        ? z.string().min(1, "Password is required")
         : z.string().optional(),
       title: fieldSettings.title?.required 
-        ? z.string().min(1)
+        ? z.string().min(1, "Title is required")
         : z.string().optional(),
       manager: fieldSettings.manager?.required 
-        ? z.string().min(1)
+        ? z.string().min(1, "Manager is required")
         : z.string().optional(),
       department: fieldSettings.department?.required 
-        ? z.string().min(1)
+        ? z.string().min(1, "Department is required")
         : z.string().optional(),
       employeeType: fieldSettings.employeeType?.required 
-        ? z.string().min(1)
+        ? z.string().min(1, "Employee type is required")
         : z.string().optional(),
+      mobilePhone: z.string().optional(),
+      managerId: z.number().optional(),
+      status: z.enum(["ACTIVE", "SUSPENDED", "DEPROVISIONED"]).default("ACTIVE"),
+      groups: z.array(z.string()).default([]),
+      applications: z.array(z.string()).default([]),
     });
   }, [fieldSettings]);
 
