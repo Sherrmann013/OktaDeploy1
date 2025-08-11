@@ -5055,12 +5055,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
             oktaId = result.oktaUser.id;
             console.log(`✅ OKTA user '${userData.email}' created successfully for client ${clientId} with ID: ${oktaId}`);
           } else {
-            console.log(`⚠️  OKTA user creation failed but continuing with local creation: ${result.message}`);
-            // We'll continue to create the user locally even if OKTA creation fails
+            console.error(`❌ OKTA user creation failed for client ${clientId}: ${result.message}`);
+            return res.status(400).json({ 
+              message: "Failed to create user in OKTA", 
+              error: result.message 
+            });
           }
         } catch (error) {
-          console.error(`Failed to create OKTA user '${userData.email}' for client ${clientId}:`, error);
-          // Continue even if OKTA user creation fails - we still add it to local database
+          console.error(`❌ Failed to create OKTA user '${userData.email}' for client ${clientId}:`, error);
+          return res.status(500).json({ 
+            message: "Failed to create user in OKTA", 
+            error: error instanceof Error ? error.message : 'Unknown OKTA error' 
+          });
         }
       } else {
         console.log(`⚠️  No OKTA integration found for client ${clientId}, creating user in local database only`);
