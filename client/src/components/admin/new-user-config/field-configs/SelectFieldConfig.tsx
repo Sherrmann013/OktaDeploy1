@@ -30,6 +30,13 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
   const queryClient = useQueryClient();
   const [location] = useLocation();
   
+  // Debug: Check if parent state setters are passed
+  console.log('🔍 DEBUG PARENT SETTERS:', { 
+    hasDepSetters: !!setHasDepartmentMappingChanges, 
+    hasEmpSetters: !!setHasEmployeeTypeMappingChanges,
+    fieldType 
+  });
+  
   // Detect current client context from URL
   const currentClientId = location.startsWith('/client/') ? parseInt(location.split('/')[2]) : 1;
 
