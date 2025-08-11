@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { apiRequest } from "@/lib/queryClient";
@@ -81,6 +81,12 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
   const [pendingEmployeeTypeName, setPendingEmployeeTypeName] = useState('');
   const [employeeTypeDisplayName, setEmployeeTypeDisplayName] = useState('');
   const [employeeTypeGroupSuffix, setEmployeeTypeGroupSuffix] = useState('');
+
+  // Stable references to save functions to prevent stale closures in useEffect
+  const saveDepartmentAppMappingsRef = useRef<((manualSave?: boolean) => Promise<boolean>) | null>(null);
+  const saveDepartmentGroupMappingsRef = useRef<(() => Promise<boolean>) | null>(null);
+  const saveEmployeeTypeAppMappingsRef = useRef<((manualSave?: boolean) => Promise<boolean>) | null>(null);
+  const saveEmployeeTypeGroupMappingsRef = useRef<(() => Promise<boolean>) | null>(null);
 
 
 
@@ -720,17 +726,17 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
       let allSuccessful = true;
 
       try {
-        // Save based on field type (app functions need manualSave=true, group functions take no params)
+        // Save based on field type using current function references (not stale closures)
         if (fieldType === 'department') {
           console.log('🚀 SAVING DEPARTMENT MAPPINGS...');
-          const appSuccess = await saveDepartmentAppMappings(true);
-          const groupSuccess = await saveDepartmentGroupMappings();
+          const appSuccess = await saveDepartmentAppMappingsRef.current?.(true) || false;
+          const groupSuccess = await saveDepartmentGroupMappingsRef.current?.() || false;
           allSuccessful = appSuccess && groupSuccess;
           console.log('🚀 DEPARTMENT SAVE RESULTS:', { appSuccess, groupSuccess });
         } else if (fieldType === 'employeeType') {
           console.log('🚀 SAVING EMPLOYEE TYPE MAPPINGS...');
-          const appSuccess = await saveEmployeeTypeAppMappings(true);
-          const groupSuccess = await saveEmployeeTypeGroupMappings();
+          const appSuccess = await saveEmployeeTypeAppMappingsRef.current?.(true) || false;
+          const groupSuccess = await saveEmployeeTypeGroupMappingsRef.current?.() || false;
           allSuccessful = appSuccess && groupSuccess;
           console.log('🚀 EMPLOYEE TYPE SAVE RESULTS:', { appSuccess, groupSuccess });
         }
@@ -758,7 +764,15 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
     return () => {
       setTriggerManualSave(null);
     };
-  }, [fieldType, setTriggerManualSave]); // FIXED: Removed save functions from dependencies to prevent constant re-registration
+  }, [fieldType, setTriggerManualSave]); // FIXED: Using refs to prevent stale closures while avoiding re-registration
+
+  // Update refs whenever save functions change to keep them current
+  useEffect(() => {
+    saveDepartmentAppMappingsRef.current = saveDepartmentAppMappings;
+    saveDepartmentGroupMappingsRef.current = saveDepartmentGroupMappings;
+    saveEmployeeTypeAppMappingsRef.current = saveEmployeeTypeAppMappings;
+    saveEmployeeTypeGroupMappingsRef.current = saveEmployeeTypeGroupMappings;
+  }, [saveDepartmentAppMappings, saveDepartmentGroupMappings, saveEmployeeTypeAppMappings, saveEmployeeTypeGroupMappings]);
 
   // Process department app mappings data - set both saved and local state
   useEffect(() => {
