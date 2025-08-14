@@ -223,7 +223,7 @@ export function useFieldSettings() {
               const employeeTypeAppSuccess = await Promise.race([
                 employeeTypeAppSaveFunction(),
                 new Promise((_, reject) => setTimeout(() => reject(new Error('Save timeout')), 10000))
-              ]);
+              ]) as boolean;
               console.log('🔄 Employee type app save result:', employeeTypeAppSuccess);
               allSuccessful = allSuccessful && employeeTypeAppSuccess;
             } catch (error) {
@@ -241,7 +241,7 @@ export function useFieldSettings() {
               const employeeTypeGroupSuccess = await Promise.race([
                 employeeTypeGroupSaveFunction(),
                 new Promise((_, reject) => setTimeout(() => reject(new Error('Save timeout')), 10000))
-              ]);
+              ]) as boolean;
               console.log('🔄 Employee type group save result:', employeeTypeGroupSuccess);
               allSuccessful = allSuccessful && employeeTypeGroupSuccess;
             } catch (error) {

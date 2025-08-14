@@ -375,11 +375,7 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
       setDepartmentAppMappings(localDepartmentAppMappings);
       setHasDepartmentUnsavedChanges(false);
       
-      // Only refresh the data once, don't invalidate cache to prevent aggressive polling
-      await queryClient.refetchQueries({ 
-        queryKey: [`/api/client/${currentClientId}/department-app-mappings`],
-        exact: true 
-      });
+      // Skip refetch to prevent recursive loops - state update is sufficient
       
       // Reset parent mapping change state
       if (setHasDepartmentMappingChanges) {
@@ -479,12 +475,8 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
       setEmployeeTypeAppMappings(localEmployeeTypeAppMappings);
       setHasEmployeeTypeUnsavedChanges(false);
       
-      console.log('🔄 Refetching queries...');
-      // Only refresh the data once, don't invalidate cache to prevent aggressive polling
-      await queryClient.refetchQueries({ 
-        queryKey: [`/api/client/${currentClientId}/employee-type-app-mappings`],
-        exact: true 
-      });
+      console.log('🔄 Skipping query refetch to prevent recursive loops...');
+      // Skip refetch to prevent recursive loops - state update is sufficient
       
       console.log('🔄 Resetting parent state...');
       // Reset parent mapping change state
@@ -598,11 +590,7 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
       setDepartmentGroupMappings(localDepartmentGroupMappings);
       setHasDepartmentGroupUnsavedChanges(false);
       
-      // Only refresh the data once, don't invalidate cache to prevent aggressive polling
-      await queryClient.refetchQueries({ 
-        queryKey: [`/api/client/${currentClientId}/department-group-mappings`],
-        exact: true 
-      });
+      // Skip refetch to prevent recursive loops - state update is sufficient
       
       // Reset parent mapping change state
       if (setHasDepartmentMappingChanges) {
@@ -674,11 +662,7 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
       setEmployeeTypeGroupMappings(localEmployeeTypeGroupMappings);
       setHasEmployeeTypeGroupUnsavedChanges(false);
       
-      // Only refresh the data once, don't invalidate cache to prevent aggressive polling
-      await queryClient.refetchQueries({ 
-        queryKey: [`/api/client/${currentClientId}/employee-type-group-mappings`],
-        exact: true 
-      });
+      // Skip refetch to prevent recursive loops - state update is sufficient
       
       // Reset parent mapping change state
       if (setHasEmployeeTypeMappingChanges) {
