@@ -53,7 +53,7 @@ function AdminComponent() {
   const [location] = useLocation();
   
   // Detect current client context from URL - CLIENT-AWARE  
-  const currentClientId = location.startsWith('/client/') ? parseInt(location.split('/')[2]) : 1;
+  const currentClientId = location.startsWith('/client/') ? parseInt(location.split('/')[2]) : 13; // Default to ClockWerk for testing
   
   const [activeTab, setActiveTab] = useState("site-access");
   const [isNewUserOpen, setIsNewUserOpen] = useState(false);

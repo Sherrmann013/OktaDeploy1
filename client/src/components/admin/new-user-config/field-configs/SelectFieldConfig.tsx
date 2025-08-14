@@ -39,7 +39,7 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
   });
   
   // Detect current client context from URL
-  const currentClientId = location.startsWith('/client/') ? parseInt(location.split('/')[2]) : 1;
+  const currentClientId = location.startsWith('/client/') ? parseInt(location.split('/')[2]) : 13; // Default to ClockWerk for testing
 
   // Fetch client information for generating group names - CLIENT-AWARE
   const { data: clientInfo } = useQuery({
@@ -999,11 +999,6 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
           <Label className="text-sm font-medium">
             {fieldType === 'department' ? 'Department' : 'Employee Type'} Options
           </Label>
-          
-          {/* Debug information */}
-          <div className="text-xs text-blue-500 dark:text-blue-400 p-2 bg-blue-50 dark:bg-blue-900/20 rounded">
-            Debug: fieldType = "{fieldType}", condition check = {fieldType === 'employeeType' ? 'TRUE' : 'FALSE'}
-          </div>
           
           {fieldType === 'employeeType' ? (
             // Two-column layout for Employee Type with OKTA group auto-generation
