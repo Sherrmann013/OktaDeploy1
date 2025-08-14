@@ -682,14 +682,14 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
   useEffect(() => {
     if (fieldType === 'department' && setDepartmentAppSaveFunction) {
       console.log('🔧 REGISTERING Department app save function for main save button');
-      setDepartmentAppSaveFunction(() => () => saveDepartmentAppMappings(true));
+      setDepartmentAppSaveFunction(() => saveDepartmentAppMappings(true));
     }
   }, [fieldType, setDepartmentAppSaveFunction, saveDepartmentAppMappings]);
 
   useEffect(() => {
     if (fieldType === 'employeeType' && setEmployeeTypeAppSaveFunction) {
       console.log('🔧 REGISTERING Employee type app save function for main save button');
-      setEmployeeTypeAppSaveFunction(() => () => saveEmployeeTypeAppMappings(true));
+      setEmployeeTypeAppSaveFunction(() => saveEmployeeTypeAppMappings(true));
     }
   }, [fieldType, setEmployeeTypeAppSaveFunction, saveEmployeeTypeAppMappings]);
 
@@ -699,14 +699,14 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
   useEffect(() => {
     if (fieldType === 'department' && setDepartmentGroupSaveFunction) {
       console.log('🔧 REGISTERING Department group save function for main save button');
-      setDepartmentGroupSaveFunction(() => () => saveDepartmentGroupMappings());
+      setDepartmentGroupSaveFunction(() => saveDepartmentGroupMappings());
     }
   }, [fieldType, setDepartmentGroupSaveFunction, saveDepartmentGroupMappings]);
 
   useEffect(() => {
     if (fieldType === 'employeeType' && setEmployeeTypeGroupSaveFunction) {
       console.log('🔧 REGISTERING Employee type group save function for main save button');
-      setEmployeeTypeGroupSaveFunction(() => () => saveEmployeeTypeGroupMappings());
+      setEmployeeTypeGroupSaveFunction(() => saveEmployeeTypeGroupMappings());
     }
   }, [fieldType, setEmployeeTypeGroupSaveFunction, saveEmployeeTypeGroupMappings]);
 
@@ -962,8 +962,28 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
   };
 
   const removeOption = (index: number) => {
+    const removedOption = localOptions[index];
     const newOptions = localOptions.filter((_, i) => i !== index);
     setLocalOptions(newOptions);
+    
+    // Clean up any related mappings for the removed employee type
+    if (fieldType === 'employeeType' && removedOption) {
+      // Clear group mappings for this employee type
+      setLocalEmployeeTypeGroupMappings(prev => {
+        const updated = { ...prev };
+        delete updated[removedOption];
+        return updated;
+      });
+      setHasEmployeeTypeGroupUnsavedChanges(true);
+      
+      // Clear app mappings for this employee type  
+      setLocalEmployeeTypeAppMappings(prev => {
+        const updated = { ...prev };
+        delete updated[removedOption];
+        return updated;
+      });
+      setHasEmployeeTypeUnsavedChanges(true);
+    }
     
     // Update config immediately for add/remove operations
     onUpdate({
@@ -1009,49 +1029,43 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
           </Label>
           
           {fieldType === 'employeeType' ? (
-            // Compact two-column layout for Employee Type with OKTA group auto-generation
+            // Exact layout matching image 186
             <div className="space-y-2">
-              <div className="grid grid-cols-2 gap-4 text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
-                <span>Employee Type</span>
-                <span>OKTA Security Group</span>
-              </div>
-              <div className="space-y-1">
-                {localOptions.map((option, index) => (
-                  <div key={index} className="grid grid-cols-2 gap-4 bg-gray-800 dark:bg-gray-700 p-3 rounded">
-                    <Input
-                      value={option}
-                      onChange={(e) => handleOptionChange(index, e.target.value)}
-                      onBlur={handleEmployeeTypeBlur}
-                      className="text-sm bg-transparent border-0 focus:ring-0 p-0 text-white placeholder-gray-400"
-                      placeholder="Employee type"
-                    />
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-300 font-mono">
-                        {option ? `${getCompanyInitials(clientInfo?.name || '')}-ET-${option.toUpperCase().replace(/\s+/g, '')}` : ''}
-                      </span>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => removeOption(index)}
-                        className="h-6 w-6 p-0 text-gray-400 hover:text-red-400"
-                      >
-                        <X className="w-3 h-3" />
-                      </Button>
-                    </div>
-                  </div>
-                ))}
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  onClick={addOption}
-                  className="w-full text-green-400 hover:text-green-300 hover:bg-green-900/20 flex items-center justify-center gap-2 p-2"
-                >
-                  <Plus className="w-3 h-3" />
-                  <span className="text-sm">Add employee type</span>
-                </Button>
-              </div>
+              {localOptions.map((option, index) => (
+                <div key={index} className="bg-gray-800 dark:bg-gray-700 rounded p-3 grid grid-cols-[1fr_1fr_auto] gap-3 items-center">
+                  <Input
+                    value={option}
+                    onChange={(e) => handleOptionChange(index, e.target.value)}
+                    onBlur={handleEmployeeTypeBlur}
+                    placeholder="Employee type"
+                    className="text-sm bg-transparent border-0 text-white placeholder-gray-400 focus:ring-0 h-8"
+                  />
+                  <Input
+                    value={option ? `${getCompanyInitials(clientInfo?.name || '')}-ET-${option.toUpperCase().replace(/\s+/g, '')}` : ''}
+                    readOnly
+                    className="text-sm bg-gray-700 border-gray-600 text-gray-300 focus:ring-0 h-8"
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => removeOption(index)}
+                    className="h-6 w-6 p-0 text-gray-400 hover:text-red-400"
+                  >
+                    <X className="w-4 h-4" />
+                  </Button>
+                </div>
+              ))}
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={addOption}
+                className="w-full text-green-400 hover:text-green-300 hover:bg-green-900/20 flex items-center justify-center gap-2 py-2"
+              >
+                <Plus className="w-4 h-4" />
+                <span className="text-sm">Add employee type</span>
+              </Button>
             </div>
           ) : (
             // Single-column layout for Department (existing behavior)
