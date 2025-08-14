@@ -3541,6 +3541,63 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // REMOVED: Global integration PUT/DELETE - All integration operations are now client-specific
 
   // REMOVED: Global audit logs endpoint - All audit logs are now client-specific
+  
+  // Client-specific audit logs endpoint
+  app.get("/api/client/:clientId/audit-logs", isAuthenticated, async (req, res) => {
+    try {
+      const clientId = parseInt(req.params.clientId);
+      console.log(`📋 Fetching audit logs for client ${clientId}`);
+      
+      // Get client database connection
+      const multiDb = MultiDatabaseManager.getInstance();
+      const clientStorage = await multiDb.getClientStorage(clientId);
+      
+      if (!clientStorage) {
+        return res.status(404).json({ error: 'Client database not found' });
+      }
+      
+      // Parse query parameters for filtering
+      const options: any = {};
+      if (req.query.userId) options.userId = parseInt(req.query.userId as string);
+      if (req.query.action) options.action = req.query.action as string;
+      if (req.query.resourceType) options.resourceType = req.query.resourceType as string;
+      if (req.query.limit) options.limit = parseInt(req.query.limit as string);
+      if (req.query.offset) options.offset = parseInt(req.query.offset as string);
+      
+      const result = await clientStorage.getAuditLogs(options);
+      
+      console.log(`✅ Found ${result.logs.length} audit logs for client ${clientId} (total: ${result.total})`);
+      res.json(result);
+    } catch (error) {
+      console.error(`Error fetching audit logs for client:`, error);
+      res.status(500).json({ error: "Failed to fetch client audit logs" });
+    }
+  });
+
+  // MSP-specific audit logs endpoint
+  app.get("/api/msp/audit-logs", isAuthenticated, requireAdmin, async (req, res) => {
+    try {
+      console.log(`📋 Fetching MSP audit logs`);
+      
+      // Parse query parameters for filtering
+      const options: any = {};
+      if (req.query.clientId) options.clientId = parseInt(req.query.clientId as string);
+      if (req.query.mspUserId) options.mspUserId = parseInt(req.query.mspUserId as string);
+      if (req.query.action) options.action = req.query.action as string;
+      if (req.query.resourceType) options.resourceType = req.query.resourceType as string;
+      if (req.query.limit) options.limit = parseInt(req.query.limit as string);
+      if (req.query.offset) options.offset = parseInt(req.query.offset as string);
+      
+      const mspStorage = storage.getMspStorage();
+      const result = await mspStorage.getMspAuditLogs(options);
+      
+      console.log(`✅ Found ${result.logs.length} MSP audit logs (total: ${result.total})`);
+      res.json(result);
+    } catch (error) {
+      console.error(`Error fetching MSP audit logs:`, error);
+      res.status(500).json({ error: "Failed to fetch MSP audit logs" });
+    }
+  });
 
   // App Mappings API endpoints
 

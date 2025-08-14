@@ -1,5 +1,6 @@
 import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useLocation } from "wouter";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
@@ -24,6 +25,12 @@ interface AuditLog {
 }
 
 export function AuditLogsSection() {
+  const [location] = useLocation();
+  
+  // Detect current client context from URL - CLIENT-AWARE
+  const currentClientId = location.startsWith('/client/') ? parseInt(location.split('/')[2]) : null;
+  const isMspContext = location === '/msp' || location.startsWith('/msp');
+  
   // Filter state
   const [searchTerm, setSearchTerm] = useState("");
   const [actionFilter, setActionFilter] = useState("all");
@@ -32,9 +39,15 @@ export function AuditLogsSection() {
   const [dateFilter, setDateFilter] = useState("all");
   const [displayLimit, setDisplayLimit] = useState(50);
 
-  // Fetch audit logs from database
-  const { data: auditLogsData, isLoading: auditLogsLoading } = useQuery<{logs: AuditLog[], pagination: any}>({
-    queryKey: ["/api/audit-logs"],
+  // Fetch audit logs from database - CLIENT-SPECIFIC or MSP-SPECIFIC
+  const auditLogsEndpoint = currentClientId 
+    ? `/api/client/${currentClientId}/audit-logs`
+    : isMspContext 
+      ? `/api/msp/audit-logs`  // TODO: Implement MSP-specific audit logs endpoint
+      : `/api/client/13/audit-logs`; // Default to ClockWerk for testing
+      
+  const { data: auditLogsData, isLoading: auditLogsLoading } = useQuery<{logs: AuditLog[], total: number}>({
+    queryKey: [auditLogsEndpoint],
     staleTime: 5 * 60 * 1000, // 5 minutes - logs don't change frequently
     refetchOnWindowFocus: false,
   });
@@ -399,9 +412,9 @@ export function AuditLogsSection() {
               </TableBody>
             </Table>
             
-            {auditLogsData?.pagination && auditLogsData.pagination.total > auditLogsData.logs.length && (
+            {auditLogsData?.total && auditLogsData.total > auditLogsData.logs.length && (
               <div className="text-sm text-muted-foreground text-center py-4">
-                Database contains {auditLogsData.pagination.total} total audit logs (showing latest {auditLogsData.logs.length})
+                Database contains {auditLogsData.total} total audit logs (showing latest {auditLogsData.logs.length})
               </div>
             )}
           </div>
