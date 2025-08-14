@@ -423,8 +423,10 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
       const newMappings = localEmployeeTypeAppMappings;
       console.log('📊 SAVE MAPPINGS:', { currentMappings, newMappings });
       
+      console.log('🔄 Starting delete loop...');
       // Remove mappings that no longer exist
       for (const employeeType in currentMappings) {
+        console.log('🔄 Processing employee type for deletion:', employeeType);
         for (const app of currentMappings[employeeType]) {
           if (!newMappings[employeeType]?.includes(app)) {
             console.log('🗑️ DELETING EMPLOYEE TYPE MAPPING:', { employeeType, app });
@@ -445,9 +447,12 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
           }
         }
       }
+      console.log('✅ Delete loop completed');
       
+      console.log('🔄 Starting add loop...');
       // Add new mappings (with duplicate prevention)
       for (const employeeType in newMappings) {
+        console.log('🔄 Processing employee type for addition:', employeeType);
         for (const app of newMappings[employeeType]) {
           if (!currentMappings[employeeType]?.includes(app)) {
             const response = await fetch(`/api/client/${currentClientId}/employee-type-app-mappings`, {
@@ -467,23 +472,28 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
           }
         }
       }
+      console.log('✅ Add loop completed');
       
+      console.log('🔄 Updating state...');
       // Update saved state and clear unsaved changes
       setEmployeeTypeAppMappings(localEmployeeTypeAppMappings);
       setHasEmployeeTypeUnsavedChanges(false);
       
+      console.log('🔄 Refetching queries...');
       // Only refresh the data once, don't invalidate cache to prevent aggressive polling
       await queryClient.refetchQueries({ 
         queryKey: [`/api/client/${currentClientId}/employee-type-app-mappings`],
         exact: true 
       });
       
+      console.log('🔄 Resetting parent state...');
       // Reset parent mapping change state
       if (setHasEmployeeTypeMappingChanges) {
         setHasEmployeeTypeMappingChanges(false);
         console.log('✅ RESET PARENT: Employee Type mapping changes cleared after save');
       }
       
+      console.log('✅ Employee type app save completed successfully');
       return true;
     } catch (error) {
       console.error('❌ Employee type app save failed:', error);
