@@ -843,34 +843,35 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
 
 
 
-  const handleOptionChange = async (index: number, newValue: string) => {
-    console.log('🟡 handleOptionChange called:', { index, newValue, fieldType });
-    const oldValue = config.options[index];
-    const newOptions = [...config.options];
-    newOptions[index] = newValue;
-    
-    console.log('🟡 About to call onUpdate - this will trigger parent state change');
-    // Update the config first
-    onUpdate({
-      ...config,
-      options: newOptions
-    });
-    console.log('🟡 onUpdate called successfully');
+  // Local state for option changes (to prevent auto-saving on every keystroke)
+  const [localOptions, setLocalOptions] = useState<string[]>(config.options || []);
+  
+  // Sync local options with config when config changes from parent
+  useEffect(() => {
+    setLocalOptions(config.options || []);
+  }, [config.options]);
 
-    // For employee types, automatically create OKTA security groups
-    if (fieldType === 'employeeType' && newValue.trim() && clientInfo?.name) {
-      const initials = getCompanyInitials(clientInfo.name);
-      const oktaGroupName = `${initials}-ET-${newValue.toUpperCase().replace(/\s+/g, '')}`;
-      
-      // Create the OKTA security group automatically (separate from email groups)
-      try {
-        console.log('🔐 Creating OKTA security group:', oktaGroupName);
-        await createGroupMutation.mutateAsync(oktaGroupName);
-        console.log('✅ OKTA security group created successfully:', oktaGroupName);
-      } catch (error) {
-        console.log('⚠️ OKTA security group creation failed (may already exist):', error);
-        // Don't show error to user since group might already exist
-      }
+  const handleOptionChange = (index: number, newValue: string) => {
+    const newOptions = [...localOptions];
+    newOptions[index] = newValue;
+    setLocalOptions(newOptions);
+    
+    // Only update config immediately for non-employee types (to preserve existing behavior)
+    if (fieldType !== 'employeeType') {
+      onUpdate({
+        ...config,
+        options: newOptions
+      });
+    }
+  };
+
+  const handleEmployeeTypeBlur = () => {
+    // Update config when user finishes editing (on blur) for employee types
+    if (fieldType === 'employeeType') {
+      onUpdate({
+        ...config,
+        options: localOptions
+      });
     }
   };
 
@@ -950,14 +951,21 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
   };
 
   const addOption = () => {
+    const newOptions = [...localOptions, ''];
+    setLocalOptions(newOptions);
+    
+    // Update config immediately for add/remove operations
     onUpdate({
       ...config,
-      options: [...config.options, '']
+      options: newOptions
     });
   };
 
   const removeOption = (index: number) => {
-    const newOptions = config.options.filter((_, i) => i !== index);
+    const newOptions = localOptions.filter((_, i) => i !== index);
+    setLocalOptions(newOptions);
+    
+    // Update config immediately for add/remove operations
     onUpdate({
       ...config,
       options: newOptions
@@ -1001,56 +1009,48 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
           </Label>
           
           {fieldType === 'employeeType' ? (
-            // Two-column layout for Employee Type with OKTA group auto-generation
+            // Compact two-column layout for Employee Type with OKTA group auto-generation
             <div className="space-y-2">
-              <div className="grid grid-cols-2 gap-4 text-sm font-medium text-gray-700 dark:text-gray-300">
+              <div className="grid grid-cols-2 gap-4 text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
                 <span>Employee Type</span>
                 <span>OKTA Security Group</span>
               </div>
-              <div className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md divide-y divide-gray-200 dark:divide-gray-600">
-                {config.options.map((option, index) => (
-                  <div key={index}>
-                    <div className="grid grid-cols-2 gap-4 px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700/50">
-                      <Input
-                        value={option}
-                        onChange={(e) => handleOptionChange(index, e.target.value)}
-                        className="text-sm border-0 bg-transparent focus:ring-0 p-0"
-                        placeholder="Employee type"
-                      />
-                      <div className="flex items-center">
-                        <Input
-                          value={option ? `${getCompanyInitials(clientInfo?.name || '')}-ET-${option.toUpperCase().replace(/\s+/g, '')}` : ''}
-                          readOnly
-                          className="text-sm border-0 bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-400 focus:ring-0 p-0"
-                          placeholder="Auto-generated group name"
-                        />
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => removeOption(index)}
-                          className="h-6 w-6 p-0 ml-2 text-gray-400 hover:text-red-500"
-                        >
-                          <X className="w-3 h-3" />
-                        </Button>
-                      </div>
+              <div className="space-y-1">
+                {localOptions.map((option, index) => (
+                  <div key={index} className="grid grid-cols-2 gap-4 bg-gray-800 dark:bg-gray-700 p-3 rounded">
+                    <Input
+                      value={option}
+                      onChange={(e) => handleOptionChange(index, e.target.value)}
+                      onBlur={handleEmployeeTypeBlur}
+                      className="text-sm bg-transparent border-0 focus:ring-0 p-0 text-white placeholder-gray-400"
+                      placeholder="Employee type"
+                    />
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-300 font-mono">
+                        {option ? `${getCompanyInitials(clientInfo?.name || '')}-ET-${option.toUpperCase().replace(/\s+/g, '')}` : ''}
+                      </span>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => removeOption(index)}
+                        className="h-6 w-6 p-0 text-gray-400 hover:text-red-400"
+                      >
+                        <X className="w-3 h-3" />
+                      </Button>
                     </div>
                   </div>
                 ))}
-                <div className="flex items-center px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700/50">
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={addOption}
-                    className="h-6 w-6 p-0 mr-2 text-green-500 hover:text-green-700 hover:bg-green-50 dark:hover:bg-green-900/20"
-                  >
-                    <Plus className="w-3 h-3" />
-                  </Button>
-                  <span className="text-sm text-gray-500 dark:text-gray-400">
-                    Add employee type
-                  </span>
-                </div>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={addOption}
+                  className="w-full text-green-400 hover:text-green-300 hover:bg-green-900/20 flex items-center justify-center gap-2 p-2"
+                >
+                  <Plus className="w-3 h-3" />
+                  <span className="text-sm">Add employee type</span>
+                </Button>
               </div>
             </div>
           ) : (
