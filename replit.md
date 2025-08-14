@@ -69,20 +69,20 @@ The dashboard uses a React frontend (TypeScript, Tailwind CSS, Wouter) and an Ex
 **Prevention:** Future OKTA sync improvements should include case-insensitive email matching when checking for existing users.
 
 ### Auto-saving Issue (Resolved: August 14, 2025)
-**Problem:** Both Department and Employee Type fields were auto-saving on every keystroke, causing excessive server requests and unwanted OKTA group creation.
+**Problem:** Both Department and Employee Type fields were auto-saving on every keystroke, causing excessive server requests and unwanted OKTA group creation. Additionally, manual saves were failing due to unstable useEffect dependencies.
 
 **Root Cause:** 
-- Employee types had local state management implemented correctly
-- Department fields were still using immediate `onUpdate` calls
-- Mixed approach caused inconsistent behavior
+- Unstable function dependencies in useEffect hooks causing repeated re-registration of save functions
+- Mixed approach between direct function references and refs for different save functions
+- useEffect hooks triggering automatic saves every time components re-rendered
 
 **Resolution Approach:**
-- Unified local state management for both field types using `localOptions`
-- Implemented `handleFieldBlur` for onBlur saving behavior
-- Removed immediate `onUpdate` calls from `handleOptionChange`
-- Both field types now save only when user finishes editing, not on every keystroke
+- Unified ALL save functions to use refs (saveDepartmentAppMappingsRef, saveEmployeeTypeAppMappingsRef, etc.)
+- Removed unstable function dependencies from ALL useEffect dependency arrays
+- Implemented consistent ref-based save function registration to prevent auto-saves
+- Both field types now save only when explicitly triggered by user actions or Save button
 
-**Prevention:** All form fields now use consistent local state management with onBlur saving patterns.
+**Prevention:** All save functions use stable ref-based patterns with clean useEffect dependencies to prevent auto-triggering.
 
 ## External Dependencies
 - **OKTA:** For enterprise user authentication and management.

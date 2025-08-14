@@ -682,20 +682,28 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
   useEffect(() => {
     if (fieldType === 'department' && setDepartmentAppSaveFunction) {
       console.log('🔧 REGISTERING Department app save function for main save button');
-      setDepartmentAppSaveFunction(() => saveDepartmentAppMappings(true));
+      setDepartmentAppSaveFunction(() => saveDepartmentAppMappingsRef.current?.(true));
     }
-  }, [fieldType, setDepartmentAppSaveFunction, saveDepartmentAppMappings]);
+  }, [fieldType, setDepartmentAppSaveFunction]);
 
   useEffect(() => {
     if (fieldType === 'employeeType' && setEmployeeTypeAppSaveFunction) {
       console.log('🔧 REGISTERING Employee type app save function for main save button');
-      setEmployeeTypeAppSaveFunction(() => saveEmployeeTypeAppMappings(true));
+      setEmployeeTypeAppSaveFunction(() => saveEmployeeTypeAppMappingsRef.current?.(true));
     }
-  }, [fieldType, setEmployeeTypeAppSaveFunction, saveEmployeeTypeAppMappings]);
+  }, [fieldType, setEmployeeTypeAppSaveFunction]);
 
 
 
-  // Store save functions in refs to prevent re-creation causing auto-saves
+  // Store ALL save functions in refs to prevent re-creation causing auto-saves
+  useEffect(() => {
+    saveDepartmentAppMappingsRef.current = saveDepartmentAppMappings;
+  }, [saveDepartmentAppMappings]);
+
+  useEffect(() => {
+    saveEmployeeTypeAppMappingsRef.current = saveEmployeeTypeAppMappings;
+  }, [saveEmployeeTypeAppMappings]);
+
   useEffect(() => {
     saveDepartmentGroupMappingsRef.current = saveDepartmentGroupMappings;
   }, [saveDepartmentGroupMappings]);
