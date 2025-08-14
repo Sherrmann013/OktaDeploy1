@@ -82,11 +82,7 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
   const [employeeTypeDisplayName, setEmployeeTypeDisplayName] = useState('');
   const [employeeTypeGroupSuffix, setEmployeeTypeGroupSuffix] = useState('');
 
-  // Stable references to save functions to prevent stale closures in useEffect
-  const saveDepartmentAppMappingsRef = useRef<((manualSave?: boolean) => Promise<boolean>) | null>(null);
-  const saveDepartmentGroupMappingsRef = useRef<(() => Promise<boolean>) | null>(null);
-  const saveEmployeeTypeAppMappingsRef = useRef<((manualSave?: boolean) => Promise<boolean>) | null>(null);
-  const saveEmployeeTypeGroupMappingsRef = useRef<(() => Promise<boolean>) | null>(null);
+
 
 
 
@@ -686,70 +682,29 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
   // Register save function with parent - ENABLED FOR MAIN SAVE BUTTON  
   useEffect(() => {
     if (fieldType === 'department' && setDepartmentAppSaveFunction) {
-      console.log('🔧 REGISTERING Department app save function for main save button');
-      setDepartmentAppSaveFunction(() => {
-        console.log('🚀 Department app save function called via parent');
-        return saveDepartmentAppMappingsRef.current?.(true) ?? Promise.resolve(false);
-      });
+      setDepartmentAppSaveFunction(() => () => saveDepartmentAppMappings(true));
     }
   }, [fieldType, setDepartmentAppSaveFunction]);
 
   useEffect(() => {
     if (fieldType === 'employeeType' && setEmployeeTypeAppSaveFunction) {
-      console.log('🔧 REGISTERING Employee type app save function for main save button');
-      setEmployeeTypeAppSaveFunction(() => {
-        console.log('🚀 Employee type app save function called via parent');
-        if (!saveEmployeeTypeAppMappingsRef.current) {
-          console.error('❌ saveEmployeeTypeAppMappingsRef.current is null!');
-          return Promise.resolve(false);
-        }
-        return saveEmployeeTypeAppMappingsRef.current(true);
-      });
+      setEmployeeTypeAppSaveFunction(() => () => saveEmployeeTypeAppMappings(true));
     }
   }, [fieldType, setEmployeeTypeAppSaveFunction]);
 
 
 
-  // Store ALL save functions in refs to prevent re-creation causing auto-saves
-  useEffect(() => {
-    console.log('🔧 Setting saveDepartmentAppMappingsRef.current');
-    saveDepartmentAppMappingsRef.current = saveDepartmentAppMappings;
-  }, [saveDepartmentAppMappings]);
 
-  useEffect(() => {
-    console.log('🔧 Setting saveEmployeeTypeAppMappingsRef.current');
-    saveEmployeeTypeAppMappingsRef.current = saveEmployeeTypeAppMappings;
-  }, [saveEmployeeTypeAppMappings]);
 
-  useEffect(() => {
-    console.log('🔧 Setting saveDepartmentGroupMappingsRef.current');
-    saveDepartmentGroupMappingsRef.current = saveDepartmentGroupMappings;
-  }, [saveDepartmentGroupMappings]);
-
-  useEffect(() => {
-    console.log('🔧 Setting saveEmployeeTypeGroupMappingsRef.current');
-    saveEmployeeTypeGroupMappingsRef.current = saveEmployeeTypeGroupMappings;
-  }, [saveEmployeeTypeGroupMappings]);
-
-  // Hook save functions for group mappings - STABLE REFERENCES TO PREVENT AUTO-SAVES
   useEffect(() => {
     if (fieldType === 'department' && setDepartmentGroupSaveFunction) {
-      console.log('🔧 REGISTERING Department group save function for main save button');
-      setDepartmentGroupSaveFunction(() => saveDepartmentGroupMappingsRef.current?.() || Promise.resolve(false));
+      setDepartmentGroupSaveFunction(() => () => saveDepartmentGroupMappings());
     }
   }, [fieldType, setDepartmentGroupSaveFunction]);
 
   useEffect(() => {
     if (fieldType === 'employeeType' && setEmployeeTypeGroupSaveFunction) {
-      console.log('🔧 REGISTERING Employee type group save function for main save button');
-      setEmployeeTypeGroupSaveFunction(() => {
-        console.log('🚀 Employee type group save function called via parent');
-        if (!saveEmployeeTypeGroupMappingsRef.current) {
-          console.error('❌ saveEmployeeTypeGroupMappingsRef.current is null!');
-          return Promise.resolve(false);
-        }
-        return saveEmployeeTypeGroupMappingsRef.current();
-      });
+      setEmployeeTypeGroupSaveFunction(() => () => saveEmployeeTypeGroupMappings());
     }
   }, [fieldType, setEmployeeTypeGroupSaveFunction]);
 

@@ -1,0 +1,42 @@
+Perfect! I found the exact functions you're looking for. Looking at the code, I can see this is a working implementation that's already quite clean and straightforward. Here are the specific working sections you requested:
+
+From SelectFieldConfig.tsx:
+1. saveEmployeeTypeAppMappings function (lines 405-492)
+This function:
+
+Takes a manualSave parameter to prevent auto-saves
+Handles both deleting old mappings and adding new ones
+Updates local state and clears unsaved changes
+Resets parent mapping change state
+Returns a boolean indicating success
+2. saveEmployeeTypeGroupMappings function (lines 610-679)
+This function:
+
+Checks for unsaved changes before proceeding
+Calculates differences between current and new mappings
+Handles both adding and removing group mappings
+Updates state and clears change flags
+Returns success status
+3. useEffect blocks for registration (lines 682-711)
+These register the save functions with the parent component:
+
+Department app save: setDepartmentAppSaveFunction(() => () => saveDepartmentAppMappings(true))
+Employee type app save: setEmployeeTypeAppSaveFunction(() => () => saveEmployeeTypeAppMappings(true))
+Department group save: setDepartmentGroupSaveFunction(() => () => saveDepartmentGroupMappings())
+Employee type group save: setEmployeeTypeGroupSaveFunction(() => () => saveEmployeeTypeGroupMappings())
+From useFieldSettings.ts:
+4. saveCurrentFieldChanges function (lines 184-238)
+This function:
+
+Detects if there are mapping changes
+Calls the appropriate save functions based on field type
+For department field: calls both departmentAppSaveFunction and departmentGroupSaveFunction
+For employee type field: calls both employeeTypeAppSaveFunction and employeeTypeGroupSaveFunction
+Tracks success of all operations and shows appropriate toast messages
+The implementation you have is actually quite clean and working correctly. The approach is:
+
+Simple function registration: Each field config registers its save functions with the parent
+Manual save coordination: The parent calls the registered functions when the main save button is clicked
+No complex refs or coordination: Just direct function calls through state setters
+Clear separation: Each function handles its own mapping type
+This is exactly the kind of simple, working approach that should be preserved. The code is already functional and doesn't appear to need the complex coordination you mentioned breaking.
