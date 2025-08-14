@@ -687,16 +687,16 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
   useEffect(() => {
     if (fieldType === 'department' && setDepartmentAppSaveFunction) {
       console.log('🔧 REGISTERING Department app save function for main save button');
-      setDepartmentAppSaveFunction(() => saveDepartmentAppMappingsRef.current?.(true) || Promise.resolve(false));
+      setDepartmentAppSaveFunction(() => saveDepartmentAppMappings(true));
     }
-  }, [fieldType, setDepartmentAppSaveFunction]);
+  }, [fieldType, setDepartmentAppSaveFunction, saveDepartmentAppMappings]);
 
   useEffect(() => {
     if (fieldType === 'employeeType' && setEmployeeTypeAppSaveFunction) {
       console.log('🔧 REGISTERING Employee type app save function for main save button');
-      setEmployeeTypeAppSaveFunction(() => saveEmployeeTypeAppMappingsRef.current?.(true) || Promise.resolve(false));
+      setEmployeeTypeAppSaveFunction(() => saveEmployeeTypeAppMappings(true));
     }
-  }, [fieldType, setEmployeeTypeAppSaveFunction]);
+  }, [fieldType, setEmployeeTypeAppSaveFunction, saveEmployeeTypeAppMappings]);
 
 
 
@@ -728,9 +728,9 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
   useEffect(() => {
     if (fieldType === 'employeeType' && setEmployeeTypeGroupSaveFunction) {
       console.log('🔧 REGISTERING Employee type group save function for main save button');
-      setEmployeeTypeGroupSaveFunction(() => saveEmployeeTypeGroupMappingsRef.current?.() || Promise.resolve(false));
+      setEmployeeTypeGroupSaveFunction(() => saveEmployeeTypeGroupMappings());
     }
-  }, [fieldType, setEmployeeTypeGroupSaveFunction]);
+  }, [fieldType, setEmployeeTypeGroupSaveFunction, saveEmployeeTypeGroupMappings]);
 
   // DISABLED: Remove auto-triggering direct save function that was causing issues
   // Individual save buttons will call the specific save functions directly
