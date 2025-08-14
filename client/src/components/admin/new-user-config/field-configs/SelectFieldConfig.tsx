@@ -608,7 +608,11 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
 
   // Employee type group save function
   const saveEmployeeTypeGroupMappings = async (): Promise<boolean> => {
-    if (!hasEmployeeTypeGroupUnsavedChanges) return true;
+    console.log('🚀 EMPLOYEE TYPE GROUP SAVE CALLED:', { hasEmployeeTypeGroupUnsavedChanges, employeeTypeGroupSaveInProgress });
+    if (!hasEmployeeTypeGroupUnsavedChanges) {
+      console.log('✅ No employee type group changes to save');
+      return true;
+    }
     
     setEmployeeTypeGroupSaveInProgress(true);
     try {
@@ -682,14 +686,14 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
   useEffect(() => {
     if (fieldType === 'department' && setDepartmentAppSaveFunction) {
       console.log('🔧 REGISTERING Department app save function for main save button');
-      setDepartmentAppSaveFunction(() => saveDepartmentAppMappingsRef.current?.(true));
+      setDepartmentAppSaveFunction(() => saveDepartmentAppMappingsRef.current?.(true) || Promise.resolve(false));
     }
   }, [fieldType, setDepartmentAppSaveFunction]);
 
   useEffect(() => {
     if (fieldType === 'employeeType' && setEmployeeTypeAppSaveFunction) {
       console.log('🔧 REGISTERING Employee type app save function for main save button');
-      setEmployeeTypeAppSaveFunction(() => saveEmployeeTypeAppMappingsRef.current?.(true));
+      setEmployeeTypeAppSaveFunction(() => saveEmployeeTypeAppMappingsRef.current?.(true) || Promise.resolve(false));
     }
   }, [fieldType, setEmployeeTypeAppSaveFunction]);
 
@@ -716,14 +720,14 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
   useEffect(() => {
     if (fieldType === 'department' && setDepartmentGroupSaveFunction) {
       console.log('🔧 REGISTERING Department group save function for main save button');
-      setDepartmentGroupSaveFunction(() => saveDepartmentGroupMappingsRef.current?.());
+      setDepartmentGroupSaveFunction(() => saveDepartmentGroupMappingsRef.current?.() || Promise.resolve(false));
     }
   }, [fieldType, setDepartmentGroupSaveFunction]);
 
   useEffect(() => {
     if (fieldType === 'employeeType' && setEmployeeTypeGroupSaveFunction) {
       console.log('🔧 REGISTERING Employee type group save function for main save button');
-      setEmployeeTypeGroupSaveFunction(() => saveEmployeeTypeGroupMappingsRef.current?.());
+      setEmployeeTypeGroupSaveFunction(() => saveEmployeeTypeGroupMappingsRef.current?.() || Promise.resolve(false));
     }
   }, [fieldType, setEmployeeTypeGroupSaveFunction]);
 
