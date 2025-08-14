@@ -1029,10 +1029,10 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
           </Label>
           
           {fieldType === 'employeeType' ? (
-            // Exact layout matching image 186
-            <div className="space-y-2">
+            // Exact match to reference image 186
+            <div className="space-y-1">
               {localOptions.map((option, index) => (
-                <div key={index} className="bg-gray-800 dark:bg-gray-700 rounded p-3 grid grid-cols-[1fr_1fr_auto] gap-3 items-center">
+                <div key={index} className="bg-slate-700 rounded p-3 grid grid-cols-[1fr_1fr_auto] gap-3 items-center">
                   <Input
                     value={option}
                     onChange={(e) => handleOptionChange(index, e.target.value)}
@@ -1043,7 +1043,7 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
                   <Input
                     value={option ? `${getCompanyInitials(clientInfo?.name || '')}-ET-${option.toUpperCase().replace(/\s+/g, '')}` : ''}
                     readOnly
-                    className="text-sm bg-gray-700 border-gray-600 text-gray-300 focus:ring-0 h-8"
+                    className="text-sm bg-slate-600 border-slate-500 text-gray-300 focus:ring-0 h-8"
                   />
                   <Button
                     type="button"
@@ -1056,16 +1056,16 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
                   </Button>
                 </div>
               ))}
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={addOption}
-                className="w-full text-green-400 hover:text-green-300 hover:bg-green-900/20 flex items-center justify-center gap-2 py-2"
-              >
-                <Plus className="w-4 h-4" />
-                <span className="text-sm">Add employee type</span>
-              </Button>
+              <div className="pt-2">
+                <button
+                  type="button"
+                  onClick={addOption}
+                  className="text-green-400 hover:text-green-300 text-sm flex items-center gap-1"
+                >
+                  <Plus className="w-3 h-3" />
+                  Add employee type
+                </button>
+              </div>
             </div>
           ) : (
             // Single-column layout for Department (existing behavior)
