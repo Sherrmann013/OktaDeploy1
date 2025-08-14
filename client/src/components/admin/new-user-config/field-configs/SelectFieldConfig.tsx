@@ -821,50 +821,48 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
   };
   
   const handleUseListChange = (checked: boolean) => {
-    onUpdate({
-      ...config,
+    setLocalConfig(prev => ({
+      ...prev,
       useList: checked
-    });
+    }));
   };
 
   const handleLinkAppsChange = (checked: boolean) => {
-    onUpdate({
-      ...config,
+    setLocalConfig(prev => ({
+      ...prev,
       linkApps: checked
-    });
+    }));
   };
 
   const handleLinkGroupsChange = (checked: boolean) => {
-    onUpdate({
-      ...config,
+    setLocalConfig(prev => ({
+      ...prev,
       linkGroups: checked
-    });
+    }));
   };
 
 
 
-  // Local state for option changes (to prevent auto-saving on every keystroke)
-  const [localOptions, setLocalOptions] = useState<string[]>(config.options || []);
+  // Local state for ALL config changes (to prevent auto-saving)
+  const [localConfig, setLocalConfig] = useState<SelectConfig>(config);
   
-  // Sync local options with config when config changes from parent
+  // Sync local config with config when config changes from parent
   useEffect(() => {
-    setLocalOptions(config.options || []);
-  }, [config.options]);
+    setLocalConfig(config);
+  }, [config]);
 
   const handleOptionChange = (index: number, newValue: string) => {
-    const newOptions = [...localOptions];
+    const newOptions = [...localConfig.options];
     newOptions[index] = newValue;
-    setLocalOptions(newOptions);
-    
-    // No immediate saving - all field types now use local state
+    setLocalConfig(prev => ({
+      ...prev,
+      options: newOptions
+    }));
   };
 
   const handleFieldBlur = () => {
     // Update config when user finishes editing (on blur) for all field types
-    onUpdate({
-      ...config,
-      options: localOptions
-    });
+    onUpdate(localConfig);
   };
 
   // Create group mutation for employee types
@@ -943,20 +941,21 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
   };
 
   const addOption = () => {
-    const newOptions = [...localOptions, ''];
-    setLocalOptions(newOptions);
-    
-    // Update config immediately for add/remove operations
-    onUpdate({
-      ...config,
+    const newOptions = [...localConfig.options, ''];
+    setLocalConfig(prev => ({
+      ...prev,
       options: newOptions
-    });
+    }));
+    // No immediate saving - wait for blur/save
   };
 
   const removeOption = (index: number) => {
-    const removedOption = localOptions[index];
-    const newOptions = localOptions.filter((_, i) => i !== index);
-    setLocalOptions(newOptions);
+    const removedOption = localConfig.options[index];
+    const newOptions = localConfig.options.filter((_, i) => i !== index);
+    setLocalConfig(prev => ({
+      ...prev,
+      options: newOptions
+    }));
     
     // Clean up any related mappings for the removed employee type
     if (fieldType === 'employeeType' && removedOption) {
@@ -976,12 +975,7 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
       });
       setHasEmployeeTypeUnsavedChanges(true);
     }
-    
-    // Update config immediately for add/remove operations
-    onUpdate({
-      ...config,
-      options: newOptions
-    });
+    // No immediate saving - wait for blur/save
   };
 
   const getDefaultOptions = () => {
@@ -994,10 +988,11 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
   };
 
   const loadDefaultOptions = () => {
-    onUpdate({
-      ...config,
+    setLocalConfig(prev => ({
+      ...prev,
       options: getDefaultOptions()
-    });
+    }));
+    // No immediate saving - wait for blur/save
   };
 
   return (
@@ -1006,7 +1001,7 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
       <div className="flex items-center space-x-2">
         <Checkbox 
           id="use-list"
-          checked={config.useList}
+          checked={localConfig.useList}
           onCheckedChange={handleUseListChange}
         />
         <Label htmlFor="use-list" className="text-sm">
@@ -1014,7 +1009,7 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
         </Label>
       </div>
 
-      {config.useList && (
+      {localConfig.useList && (
         <div className="space-y-3">
           <Label className="text-sm font-medium">
             {fieldType === 'department' ? 'Department' : 'Employee Type'} Options
@@ -1023,7 +1018,7 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
           {fieldType === 'employeeType' ? (
             // Exact match to reference image 186
             <div className="space-y-1">
-              {localOptions.map((option, index) => (
+              {localConfig.options.map((option, index) => (
                 <div key={index} className="bg-slate-700 rounded p-3 grid grid-cols-[1fr_1fr_auto] gap-3 items-center">
                   <Input
                     value={option}
@@ -1062,7 +1057,7 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
           ) : (
             // Single-column layout for Department (now with local state management)
             <div className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md divide-y divide-gray-200 dark:divide-gray-600 max-w-64">
-              {localOptions.map((option, index) => (
+              {localConfig.options.map((option, index) => (
                 <div key={index}>
                   <div className="flex items-center px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700/50">
                     <Input
@@ -1103,7 +1098,7 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
         </div>
       )}
 
-      {!config.useList && (
+      {!localConfig.useList && (
         <div className="text-sm text-gray-600 dark:text-gray-400 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg p-3">
           Users will see a free text input field for this option.
         </div>
@@ -1115,7 +1110,7 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
           <div className="flex items-center space-x-2">
             <Checkbox 
               id="link-apps"
-              checked={config.linkApps || false}
+              checked={localConfig.linkApps || false}
               onCheckedChange={handleLinkAppsChange}
             />
             <Label htmlFor="link-apps" className="text-sm font-medium">
@@ -1129,7 +1124,7 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
               : 'When enabled, specific apps will be automatically assigned when an employee type is selected.'}
           </div>
 
-          {config.linkApps && config.useList && config.options.length > 0 && (
+          {localConfig.linkApps && localConfig.useList && localConfig.options.length > 0 && (
             <div className="space-y-4">
               {/* Two-column layout: Department Selection + App Selection */}
               <div className="grid grid-cols-2 gap-4">
@@ -1146,7 +1141,7 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
                       <SelectValue placeholder={fieldType === 'department' ? 'Choose a department...' : 'Choose an employee type...'} />
                     </SelectTrigger>
                     <SelectContent className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600">
-                      {config.options.filter(option => option && option.trim() !== '').map((option) => (
+                      {localConfig.options.filter(option => option && option.trim() !== '').map((option) => (
                         <SelectItem key={option} value={option} className="bg-white dark:bg-gray-800">
                           <div className="flex items-center justify-between w-full">
                             <span>{option}</span>
@@ -1265,7 +1260,7 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
             </div>
           )}
 
-          {config.linkApps && (!config.useList || config.options.length === 0) && (
+          {localConfig.linkApps && (!localConfig.useList || localConfig.options.length === 0) && (
             <div className="text-sm text-gray-500 dark:text-gray-400 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded-lg p-3">
               {fieldType === 'department' 
                 ? 'Enable "Use predefined list" and add department options to configure app linking.'
@@ -1281,7 +1276,7 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
           <div className="flex items-center space-x-2">
             <Checkbox 
               id="link-groups"
-              checked={config.linkGroups || false}
+              checked={localConfig.linkGroups || false}
               onCheckedChange={handleLinkGroupsChange}
             />
             <Label htmlFor="link-groups" className="text-sm font-medium">
@@ -1295,7 +1290,7 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
               : 'When enabled, specific email groups will be automatically assigned when an employee type is selected. Note: OKTA security groups (format: {client-initials}-ET-{type}) are created automatically and stored separately.'}
           </div>
 
-          {config.linkGroups && config.useList && config.options.length > 0 && (
+          {localConfig.linkGroups && localConfig.useList && localConfig.options.length > 0 && (
             <div className="space-y-4">
               {/* Email Group Configuration for Department/Employee Type */}
               <div className="grid grid-cols-2 gap-4">
@@ -1312,7 +1307,7 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
                       <SelectValue placeholder={fieldType === 'department' ? 'Choose a department...' : 'Choose an employee type...'} />
                     </SelectTrigger>
                     <SelectContent className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600">
-                      {config.options.filter(option => option && option.trim() !== '').map((option) => (
+                      {localConfig.options.filter(option => option && option.trim() !== '').map((option) => (
                         <SelectItem key={option} value={option} className="bg-white dark:bg-gray-800">
                           <div className="flex items-center justify-between w-full">
                             <span>{option}</span>
@@ -1442,7 +1437,7 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
             </div>
           )}
 
-          {config.linkGroups && (!config.useList || config.options.length === 0) && (
+          {localConfig.linkGroups && (!localConfig.useList || localConfig.options.length === 0) && (
             <div className="text-sm text-gray-500 dark:text-gray-400 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded-lg p-3">
               {fieldType === 'department' 
                 ? 'Enable "Use predefined list" and add department options to configure email group linking.'
