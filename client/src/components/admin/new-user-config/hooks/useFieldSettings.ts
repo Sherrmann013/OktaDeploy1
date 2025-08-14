@@ -219,9 +219,17 @@ export function useFieldSettings() {
           // Save employee type app mappings
           if (employeeTypeAppSaveFunction) {
             console.log('🔄 Calling employeeTypeAppSaveFunction...');
-            const employeeTypeAppSuccess = await employeeTypeAppSaveFunction();
-            console.log('🔄 Employee type app save result:', employeeTypeAppSuccess);
-            allSuccessful = allSuccessful && employeeTypeAppSuccess;
+            try {
+              const employeeTypeAppSuccess = await Promise.race([
+                employeeTypeAppSaveFunction(),
+                new Promise((_, reject) => setTimeout(() => reject(new Error('Save timeout')), 10000))
+              ]);
+              console.log('🔄 Employee type app save result:', employeeTypeAppSuccess);
+              allSuccessful = allSuccessful && employeeTypeAppSuccess;
+            } catch (error) {
+              console.error('❌ Employee type app save failed/timeout:', error);
+              allSuccessful = false;
+            }
           } else {
             console.error('❌ employeeTypeAppSaveFunction is null/undefined!');
           }
@@ -229,9 +237,17 @@ export function useFieldSettings() {
           // Save employee type group mappings
           if (employeeTypeGroupSaveFunction) {
             console.log('🔄 Calling employeeTypeGroupSaveFunction...');
-            const employeeTypeGroupSuccess = await employeeTypeGroupSaveFunction();
-            console.log('🔄 Employee type group save result:', employeeTypeGroupSuccess);
-            allSuccessful = allSuccessful && employeeTypeGroupSuccess;
+            try {
+              const employeeTypeGroupSuccess = await Promise.race([
+                employeeTypeGroupSaveFunction(),
+                new Promise((_, reject) => setTimeout(() => reject(new Error('Save timeout')), 10000))
+              ]);
+              console.log('🔄 Employee type group save result:', employeeTypeGroupSuccess);
+              allSuccessful = allSuccessful && employeeTypeGroupSuccess;
+            } catch (error) {
+              console.error('❌ Employee type group save failed/timeout:', error);
+              allSuccessful = false;
+            }
           } else {
             console.log('ℹ️ No employeeTypeGroupSaveFunction (groups may not be configured)');
           }
