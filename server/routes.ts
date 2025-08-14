@@ -3548,13 +3548,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const clientId = parseInt(req.params.clientId);
       console.log(`📋 Fetching audit logs for client ${clientId}`);
       
-      // Get client database connection
+      // Get client database connection and create storage
       const multiDb = MultiDatabaseManager.getInstance();
-      const clientStorage = await multiDb.getClientStorage(clientId);
-      
-      if (!clientStorage) {
-        return res.status(404).json({ error: 'Client database not found' });
-      }
+      const clientDb = await multiDb.getClientDb(clientId);
+      const { ClientStorage } = await import("./client-storage");
+      const clientStorage = new ClientStorage(clientId);
       
       // Parse query parameters for filtering
       const options: any = {};
@@ -3781,6 +3779,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Use client-specific database connection
       const multiDb = MultiDatabaseManager.getInstance();
       const clientDb = await multiDb.getClientDb(clientId);
+      const { ClientStorage } = await import("./client-storage");
+      const clientStorage = new ClientStorage(clientId);
       
       // Check if setting already exists
       const existing = await clientDb.select()
@@ -3788,8 +3788,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         .where(eq(clientLayoutSettings.settingKey, validatedData.settingKey))
         .limit(1);
       
+      // Store old value for audit logging
+      const oldValue = existing.length > 0 ? existing[0].settingValue : null;
+      
       let result;
-      if (existing.length > 0) {
+      const isUpdate = existing.length > 0;
+      
+      if (isUpdate) {
         // Update existing setting
         [result] = await clientDb.update(clientLayoutSettings)
           .set({ 
@@ -3806,6 +3811,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
           .values({ ...validatedData, updatedBy: user.id })
           .returning();
         console.log(`✅ Created layout setting for client ${clientId}`);
+      }
+
+      // ADD AUDIT LOGGING for layout setting changes
+      try {
+        const settingDisplayName = validatedData.settingKey === 'logo_background_color' ? 'Logo Background Color' :
+                                  validatedData.settingKey === 'employeeType' ? 'Employee Type Field Configuration' :
+                                  validatedData.settingKey === 'department' ? 'Department Field Configuration' :
+                                  validatedData.settingKey === 'logo_text' ? 'Logo Text' :
+                                  validatedData.settingKey === 'logo_text_visible' ? 'Logo Text Visibility' :
+                                  `Layout Setting: ${validatedData.settingKey}`;
+
+        await clientStorage.logAudit({
+          userId: user.id,
+          userEmail: user.email,
+          action: isUpdate ? 'UPDATED' : 'CREATED',
+          resourceType: 'layout_setting',
+          resourceId: result.id.toString(),
+          resourceName: settingDisplayName,
+          details: {
+            settingKey: validatedData.settingKey,
+            action: isUpdate ? 'updated' : 'created'
+          },
+          oldValues: oldValue ? { settingValue: oldValue } : {},
+          newValues: { settingValue: validatedData.settingValue },
+          ipAddress: req.ip,
+          userAgent: req.get('User-Agent')
+        });
+
+        console.log(`📋 Audit logged: ${settingDisplayName} ${isUpdate ? 'updated' : 'created'} by ${user.email}`);
+      } catch (auditError) {
+        console.error('Failed to log audit entry for layout setting change:', auditError);
+        // Don't fail the request if audit logging fails
       }
 
       // AUTOMATIC OKTA SECURITY GROUP CREATION FOR EMPLOYEE TYPES
