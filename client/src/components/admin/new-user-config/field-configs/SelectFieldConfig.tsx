@@ -1000,6 +1000,11 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
             {fieldType === 'department' ? 'Department' : 'Employee Type'} Options
           </Label>
           
+          {/* Debug information */}
+          <div className="text-xs text-blue-500 dark:text-blue-400 p-2 bg-blue-50 dark:bg-blue-900/20 rounded">
+            Debug: fieldType = "{fieldType}", condition check = {fieldType === 'employeeType' ? 'TRUE' : 'FALSE'}
+          </div>
+          
           {fieldType === 'employeeType' ? (
             // Two-column layout for Employee Type with OKTA group auto-generation
             <div className="space-y-2">
