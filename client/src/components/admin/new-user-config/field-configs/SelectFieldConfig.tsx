@@ -856,23 +856,15 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
     newOptions[index] = newValue;
     setLocalOptions(newOptions);
     
-    // Only update config immediately for non-employee types (to preserve existing behavior)
-    if (fieldType !== 'employeeType') {
-      onUpdate({
-        ...config,
-        options: newOptions
-      });
-    }
+    // No immediate saving - all field types now use local state
   };
 
-  const handleEmployeeTypeBlur = () => {
-    // Update config when user finishes editing (on blur) for employee types
-    if (fieldType === 'employeeType') {
-      onUpdate({
-        ...config,
-        options: localOptions
-      });
-    }
+  const handleFieldBlur = () => {
+    // Update config when user finishes editing (on blur) for all field types
+    onUpdate({
+      ...config,
+      options: localOptions
+    });
   };
 
   // Create group mutation for employee types
@@ -1036,7 +1028,7 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
                   <Input
                     value={option}
                     onChange={(e) => handleOptionChange(index, e.target.value)}
-                    onBlur={handleEmployeeTypeBlur}
+                    onBlur={handleFieldBlur}
                     placeholder="Employee type"
                     className="text-sm bg-transparent border-0 text-white placeholder-gray-400 focus:ring-0 h-8"
                   />
@@ -1068,14 +1060,15 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
               </div>
             </div>
           ) : (
-            // Single-column layout for Department (existing behavior)
+            // Single-column layout for Department (now with local state management)
             <div className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md divide-y divide-gray-200 dark:divide-gray-600 max-w-64">
-              {config.options.map((option, index) => (
+              {localOptions.map((option, index) => (
                 <div key={index}>
                   <div className="flex items-center px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700/50">
                     <Input
                       value={option}
                       onChange={(e) => handleOptionChange(index, e.target.value)}
+                      onBlur={handleFieldBlur}
                       className="flex-1 text-sm border-0 bg-transparent focus:ring-0 p-0"
                       placeholder="Department name"
                     />

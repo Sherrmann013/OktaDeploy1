@@ -68,6 +68,22 @@ The dashboard uses a React frontend (TypeScript, Tailwind CSS, Wouter) and an Ex
 
 **Prevention:** Future OKTA sync improvements should include case-insensitive email matching when checking for existing users.
 
+### Auto-saving Issue (Resolved: August 14, 2025)
+**Problem:** Both Department and Employee Type fields were auto-saving on every keystroke, causing excessive server requests and unwanted OKTA group creation.
+
+**Root Cause:** 
+- Employee types had local state management implemented correctly
+- Department fields were still using immediate `onUpdate` calls
+- Mixed approach caused inconsistent behavior
+
+**Resolution Approach:**
+- Unified local state management for both field types using `localOptions`
+- Implemented `handleFieldBlur` for onBlur saving behavior
+- Removed immediate `onUpdate` calls from `handleOptionChange`
+- Both field types now save only when user finishes editing, not on every keystroke
+
+**Prevention:** All form fields now use consistent local state management with onBlur saving patterns.
+
 ## External Dependencies
 - **OKTA:** For enterprise user authentication and management.
 - **KnowBe4:** Security training platform.
