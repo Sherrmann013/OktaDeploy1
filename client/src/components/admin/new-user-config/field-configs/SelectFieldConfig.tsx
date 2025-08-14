@@ -695,20 +695,29 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
 
 
 
-  // Hook save functions for group mappings - ENABLED FOR MAIN SAVE BUTTON  
+  // Store save functions in refs to prevent re-creation causing auto-saves
+  useEffect(() => {
+    saveDepartmentGroupMappingsRef.current = saveDepartmentGroupMappings;
+  }, [saveDepartmentGroupMappings]);
+
+  useEffect(() => {
+    saveEmployeeTypeGroupMappingsRef.current = saveEmployeeTypeGroupMappings;
+  }, [saveEmployeeTypeGroupMappings]);
+
+  // Hook save functions for group mappings - STABLE REFERENCES TO PREVENT AUTO-SAVES
   useEffect(() => {
     if (fieldType === 'department' && setDepartmentGroupSaveFunction) {
       console.log('🔧 REGISTERING Department group save function for main save button');
-      setDepartmentGroupSaveFunction(() => saveDepartmentGroupMappings());
+      setDepartmentGroupSaveFunction(() => saveDepartmentGroupMappingsRef.current?.());
     }
-  }, [fieldType, setDepartmentGroupSaveFunction, saveDepartmentGroupMappings]);
+  }, [fieldType, setDepartmentGroupSaveFunction]);
 
   useEffect(() => {
     if (fieldType === 'employeeType' && setEmployeeTypeGroupSaveFunction) {
       console.log('🔧 REGISTERING Employee type group save function for main save button');
-      setEmployeeTypeGroupSaveFunction(() => saveEmployeeTypeGroupMappings());
+      setEmployeeTypeGroupSaveFunction(() => saveEmployeeTypeGroupMappingsRef.current?.());
     }
-  }, [fieldType, setEmployeeTypeGroupSaveFunction, saveEmployeeTypeGroupMappings]);
+  }, [fieldType, setEmployeeTypeGroupSaveFunction]);
 
   // DISABLED: Remove auto-triggering direct save function that was causing issues
   // Individual save buttons will call the specific save functions directly
