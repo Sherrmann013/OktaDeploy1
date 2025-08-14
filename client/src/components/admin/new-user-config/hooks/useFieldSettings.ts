@@ -45,6 +45,7 @@ export function useFieldSettings() {
   const [departmentGroupSaveFunction, setDepartmentGroupSaveFunction] = useState<(() => Promise<boolean>) | null>(null);
   const [employeeTypeGroupSaveFunction, setEmployeeTypeGroupSaveFunction] = useState<(() => Promise<boolean>) | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [saveInProgress, setSaveInProgress] = useState<Record<string, boolean>>({});
 
   // Direct state tracking for mapping changes (since auto-registration is disabled)
   const [hasDepartmentMappingChanges, setHasDepartmentMappingChanges] = useState(false);
@@ -133,32 +134,40 @@ export function useFieldSettings() {
   const saveCurrentFieldChanges = async (fieldKey: FieldKey) => {
     console.log('🔴 saveCurrentFieldChanges called for:', fieldKey);
     console.trace('🔴 SAVE STACK TRACE - WHO CALLED THIS?');
-    // Check if there are any changes to save (using new direct state tracking)
-    const hasRegularChanges = !!unsavedChanges[fieldKey];
-    const hasCurrentMappingChanges = fieldKey === 'department' ? hasDepartmentMappingChanges : 
-                                   fieldKey === 'employeeType' ? hasEmployeeTypeMappingChanges : false;
     
-    console.log('🔍 SAVE CHECK DETAILS:', {
-      fieldKey,
-      hasRegularChanges,
-      hasCurrentMappingChanges,
-      hasDepartmentMappingChanges: fieldKey === 'department' ? hasDepartmentMappingChanges : 'N/A',
-      hasEmployeeTypeMappingChanges: fieldKey === 'employeeType' ? hasEmployeeTypeMappingChanges : 'N/A'
-    });
-    
-    const hasAnyChanges = hasRegularChanges || hasCurrentMappingChanges;
-    
-    if (!hasAnyChanges) {
-      toast({ 
-        title: "No Changes", 
-        description: "No unsaved changes to save for this field" 
-      });
-      return true;
+    // Prevent concurrent saves for the same field
+    if (saveInProgress[fieldKey]) {
+      console.log('❌ Save already in progress for field:', fieldKey);
+      return false;
     }
-
-    setIsSaving(true);
+    
+    setSaveInProgress(prev => ({ ...prev, [fieldKey]: true }));
     
     try {
+      // Check if there are any changes to save (using new direct state tracking)
+      const hasRegularChanges = !!unsavedChanges[fieldKey];
+      const hasCurrentMappingChanges = fieldKey === 'department' ? hasDepartmentMappingChanges : 
+                                     fieldKey === 'employeeType' ? hasEmployeeTypeMappingChanges : false;
+    
+      console.log('🔍 SAVE CHECK DETAILS:', {
+        fieldKey,
+        hasRegularChanges,
+        hasCurrentMappingChanges,
+        hasDepartmentMappingChanges: fieldKey === 'department' ? hasDepartmentMappingChanges : 'N/A',
+        hasEmployeeTypeMappingChanges: fieldKey === 'employeeType' ? hasEmployeeTypeMappingChanges : 'N/A'
+      });
+      
+      const hasAnyChanges = hasRegularChanges || hasCurrentMappingChanges;
+      
+      if (!hasAnyChanges) {
+        toast({ 
+          title: "No Changes", 
+          description: "No unsaved changes to save for this field" 
+        });
+        return true;
+      }
+
+      setIsSaving(true);
       let allSuccessful = true;
       
       // Save regular field changes
@@ -269,6 +278,7 @@ export function useFieldSettings() {
       
       return allSuccessful;
     } catch (error) {
+      console.error('❌ Save coordination failed:', error);
       toast({ 
         title: "Error", 
         description: "Failed to save settings", 
@@ -277,6 +287,7 @@ export function useFieldSettings() {
       return false;
     } finally {
       setIsSaving(false);
+      setSaveInProgress(prev => ({ ...prev, [fieldKey]: false }));
     }
   };
 
