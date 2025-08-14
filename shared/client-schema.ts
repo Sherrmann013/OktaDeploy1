@@ -152,13 +152,24 @@ export const departmentGroupMappings = pgTable('department_group_mappings', {
   created: timestamp('created').defaultNow()
 });
 
-// Employee type group mappings for this client
+// Employee type group mappings for this client (email groups)
 export const employeeTypeGroupMappings = pgTable('employee_type_group_mappings', {
   id: serial('id').primaryKey(),
   employeeType: varchar('employee_type', { length: 100 }).notNull(),
   groupName: varchar('group_name', { length: 200 }).notNull(),
   created: timestamp('created').defaultNow()
 });
+
+// Employee type OKTA security group mappings for this client (separate from email groups)
+export const employeeTypeOktaGroupMappings = pgTable('employee_type_okta_group_mappings', {
+  id: serial('id').primaryKey(),
+  employeeType: varchar('employee_type', { length: 100 }).notNull(),
+  oktaGroupName: varchar('okta_group_name', { length: 200 }).notNull(),
+  created: timestamp('created').defaultNow()
+}, (table) => [
+  // Ensure unique combination of employee type and OKTA group
+  index('employee_type_okta_group_unique').on(table.employeeType, table.oktaGroupName)
+]);
 
 // Schema validation
 export const insertUserSchema = createInsertSchema(users).omit({
@@ -208,6 +219,31 @@ export const insertDashboardCardSchema = createInsertSchema(dashboardCards).omit
   type: z.string().min(1, "Card type is required"),
 });
 
+export const insertEmployeeTypeOktaGroupMappingSchema = createInsertSchema(employeeTypeOktaGroupMappings).omit({
+  id: true,
+  created: true,
+});
+
+export const insertEmployeeTypeGroupMappingSchema = createInsertSchema(employeeTypeGroupMappings).omit({
+  id: true,
+  created: true,
+});
+
+export const insertDepartmentGroupMappingSchema = createInsertSchema(departmentGroupMappings).omit({
+  id: true,
+  created: true,
+});
+
+export const insertEmployeeTypeAppMappingSchema = createInsertSchema(employeeTypeAppMappings).omit({
+  id: true,
+  created: true,
+});
+
+export const insertDepartmentAppMappingSchema = createInsertSchema(departmentAppMappings).omit({
+  id: true,
+  created: true,
+});
+
 export const insertCompanyLogoSchema = createInsertSchema(companyLogos).omit({
   id: true,
   uploadedAt: true,
@@ -226,25 +262,7 @@ export const insertAuditLogSchema = createInsertSchema(auditLogs).omit({
   userEmail: z.string().email("Invalid email address"),
 });
 
-export const insertDepartmentAppMappingSchema = createInsertSchema(departmentAppMappings).omit({
-  id: true,
-  created: true,
-});
 
-export const insertEmployeeTypeAppMappingSchema = createInsertSchema(employeeTypeAppMappings).omit({
-  id: true,
-  created: true,
-});
-
-export const insertDepartmentGroupMappingSchema = createInsertSchema(departmentGroupMappings).omit({
-  id: true,
-  created: true,
-});
-
-export const insertEmployeeTypeGroupMappingSchema = createInsertSchema(employeeTypeGroupMappings).omit({
-  id: true,
-  created: true,
-});
 
 // Type exports
 export type User = typeof users.$inferSelect;
@@ -282,5 +300,8 @@ export type InsertDepartmentGroupMapping = z.infer<typeof insertDepartmentGroupM
 
 export type EmployeeTypeGroupMapping = typeof employeeTypeGroupMappings.$inferSelect;
 export type InsertEmployeeTypeGroupMapping = z.infer<typeof insertEmployeeTypeGroupMappingSchema>;
+
+export type EmployeeTypeOktaGroupMapping = typeof employeeTypeOktaGroupMappings.$inferSelect;
+export type InsertEmployeeTypeOktaGroupMapping = z.infer<typeof insertEmployeeTypeOktaGroupMappingSchema>;
 
 export type AppMapping = typeof appMappings.$inferSelect;

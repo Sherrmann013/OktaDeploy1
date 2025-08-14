@@ -857,7 +857,21 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
     });
     console.log('🟡 onUpdate called successfully');
 
-    // No automatic dialog anymore - users will use inline configuration
+    // For employee types, automatically create OKTA security groups
+    if (fieldType === 'employeeType' && newValue.trim() && clientInfo?.name) {
+      const initials = getCompanyInitials(clientInfo.name);
+      const oktaGroupName = `${initials}-ET-${newValue.toUpperCase().replace(/\s+/g, '')}`;
+      
+      // Create the OKTA security group automatically (separate from email groups)
+      try {
+        console.log('🔐 Creating OKTA security group:', oktaGroupName);
+        await createGroupMutation.mutateAsync(oktaGroupName);
+        console.log('✅ OKTA security group created successfully:', oktaGroupName);
+      } catch (error) {
+        console.log('⚠️ OKTA security group creation failed (may already exist):', error);
+        // Don't show error to user since group might already exist
+      }
+    }
   };
 
   // Create group mutation for employee types
@@ -986,48 +1000,99 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
             {fieldType === 'department' ? 'Department' : 'Employee Type'} Options
           </Label>
           
-          <div className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md divide-y divide-gray-200 dark:divide-gray-600 max-w-64">
-            {config.options.map((option, index) => (
-              <div key={index}>
+          {fieldType === 'employeeType' ? (
+            // Two-column layout for Employee Type with OKTA group auto-generation
+            <div className="space-y-2">
+              <div className="grid grid-cols-2 gap-4 text-sm font-medium text-gray-700 dark:text-gray-300">
+                <span>Employee Type</span>
+                <span>OKTA Security Group</span>
+              </div>
+              <div className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md divide-y divide-gray-200 dark:divide-gray-600">
+                {config.options.map((option, index) => (
+                  <div key={index}>
+                    <div className="grid grid-cols-2 gap-4 px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                      <Input
+                        value={option}
+                        onChange={(e) => handleOptionChange(index, e.target.value)}
+                        className="text-sm border-0 bg-transparent focus:ring-0 p-0"
+                        placeholder="Employee type"
+                      />
+                      <div className="flex items-center">
+                        <Input
+                          value={option ? `${getCompanyInitials(clientInfo?.name || '')}-ET-${option.toUpperCase().replace(/\s+/g, '')}` : ''}
+                          readOnly
+                          className="text-sm border-0 bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-400 focus:ring-0 p-0"
+                          placeholder="Auto-generated group name"
+                        />
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => removeOption(index)}
+                          className="h-6 w-6 p-0 ml-2 text-gray-400 hover:text-red-500"
+                        >
+                          <X className="w-3 h-3" />
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
                 <div className="flex items-center px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700/50">
-                  <Input
-                    value={option}
-                    onChange={(e) => handleOptionChange(index, e.target.value)}
-                    className="flex-1 text-sm border-0 bg-transparent focus:ring-0 p-0"
-                    placeholder={fieldType === 'department' ? 'Department name' : 'Employee type'}
-                  />
-                  
-
-                  
                   <Button
                     type="button"
                     variant="ghost"
                     size="sm"
-                    onClick={() => removeOption(index)}
-                    className="h-6 w-6 p-0 ml-2 text-gray-400 hover:text-red-500"
+                    onClick={addOption}
+                    className="h-6 w-6 p-0 mr-2 text-green-500 hover:text-green-700 hover:bg-green-50 dark:hover:bg-green-900/20"
                   >
-                    <X className="w-3 h-3" />
+                    <Plus className="w-3 h-3" />
                   </Button>
+                  <span className="text-sm text-gray-500 dark:text-gray-400">
+                    Add employee type
+                  </span>
                 </div>
-
-
               </div>
-            ))}
-            <div className="flex items-center px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700/50">
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={addOption}
-                className="h-6 w-6 p-0 mr-2 text-green-500 hover:text-green-700 hover:bg-green-50 dark:hover:bg-green-900/20"
-              >
-                <Plus className="w-3 h-3" />
-              </Button>
-              <span className="text-sm text-gray-500 dark:text-gray-400">
-                Add {fieldType === 'department' ? 'department' : 'employee type'}
-              </span>
             </div>
-          </div>
+          ) : (
+            // Single-column layout for Department (existing behavior)
+            <div className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md divide-y divide-gray-200 dark:divide-gray-600 max-w-64">
+              {config.options.map((option, index) => (
+                <div key={index}>
+                  <div className="flex items-center px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                    <Input
+                      value={option}
+                      onChange={(e) => handleOptionChange(index, e.target.value)}
+                      className="flex-1 text-sm border-0 bg-transparent focus:ring-0 p-0"
+                      placeholder="Department name"
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => removeOption(index)}
+                      className="h-6 w-6 p-0 ml-2 text-gray-400 hover:text-red-500"
+                    >
+                      <X className="w-3 h-3" />
+                    </Button>
+                  </div>
+                </div>
+              ))}
+              <div className="flex items-center px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={addOption}
+                  className="h-6 w-6 p-0 mr-2 text-green-500 hover:text-green-700 hover:bg-green-50 dark:hover:bg-green-900/20"
+                >
+                  <Plus className="w-3 h-3" />
+                </Button>
+                <span className="text-sm text-gray-500 dark:text-gray-400">
+                  Add department
+                </span>
+              </div>
+            </div>
+          )}
         </div>
       )}
 
@@ -1220,7 +1285,7 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
           <div className="text-sm text-gray-600 dark:text-gray-400">
             {fieldType === 'department' 
               ? 'When enabled, specific email groups will be automatically assigned when a department is selected.'
-              : 'When enabled, specific email groups will be automatically assigned when an employee type is selected (in addition to automatic OKTA security groups).'}
+              : 'When enabled, specific email groups will be automatically assigned when an employee type is selected. Note: OKTA security groups (format: {client-initials}-ET-{type}) are created automatically and stored separately.'}
           </div>
 
           {config.linkGroups && config.useList && config.options.length > 0 && (
@@ -1282,10 +1347,15 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
                           {availableGroups
                             .filter((group: string) => {
                               if (!group || group.trim() === '') return false;
-                              if (fieldType === 'department') {
-                                return !localDepartmentGroupMappings[selectedDepartment]?.includes(group);
-                              } else {
+                              
+                              // For employee type, exclude OKTA security groups (pattern: {initials}-ET-{type})
+                              if (fieldType === 'employeeType') {
+                                const initials = getCompanyInitials(clientInfo?.name || '');
+                                const isOktaSecurityGroup = group.startsWith(`${initials}-ET-`);
+                                if (isOktaSecurityGroup) return false;
                                 return !localEmployeeTypeGroupMappings[selectedEmployeeType]?.includes(group);
+                              } else {
+                                return !localDepartmentGroupMappings[selectedDepartment]?.includes(group);
                               }
                             })
                             .map((group: string) => (
@@ -1294,10 +1364,16 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
                               </SelectItem>
                             ))}
                           {availableGroups.filter((group: string) => {
-                            if (fieldType === 'department') {
-                              return !localDepartmentGroupMappings[selectedDepartment]?.includes(group);
-                            } else {
+                            if (!group || group.trim() === '') return false;
+                            
+                            // For employee type, exclude OKTA security groups
+                            if (fieldType === 'employeeType') {
+                              const initials = getCompanyInitials(clientInfo?.name || '');
+                              const isOktaSecurityGroup = group.startsWith(`${initials}-ET-`);
+                              if (isOktaSecurityGroup) return false;
                               return !localEmployeeTypeGroupMappings[selectedEmployeeType]?.includes(group);
+                            } else {
+                              return !localDepartmentGroupMappings[selectedDepartment]?.includes(group);
                             }
                           }).length === 0 && (
                             <SelectItem value="no-groups" disabled className="text-gray-500">
