@@ -944,6 +944,199 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to fetch users" });
     }
   });
+            const bIsLockedOut = b.status === 'LOCKED_OUT';
+            
+            if (aIsLockedOut && !bIsLockedOut) return -1;
+            if (!aIsLockedOut && bIsLockedOut) return 1;
+            
+            let aValue, bValue;
+            
+            switch (sortBy) {
+            case 'firstName':
+              aValue = a.profile.firstName || '';
+              bValue = b.profile.firstName || '';
+              break;
+            case 'lastName':
+              aValue = a.profile.lastName || '';
+              bValue = b.profile.lastName || '';
+              break;
+            case 'email':
+              aValue = a.profile.email || '';
+              bValue = b.profile.email || '';
+              break;
+            case 'title':
+              aValue = a.profile.title || '';
+              bValue = b.profile.title || '';
+              break;
+            case 'department':
+              aValue = a.profile.department || '';
+              bValue = b.profile.department || '';
+              break;
+            case 'manager':
+              aValue = a.profile.manager || '';
+              bValue = b.profile.manager || '';
+              break;
+            case 'status':
+              aValue = a.status || '';
+              bValue = b.status || '';
+              break;
+            case 'lastLogin':
+              // Handle date sorting with null values at the end
+              if (!a.lastLogin && !b.lastLogin) return 0;
+              if (!a.lastLogin) return 1; // null values go to end
+              if (!b.lastLogin) return -1;
+              aValue = new Date(a.lastLogin).getTime();
+              bValue = new Date(b.lastLogin).getTime();
+              // Skip the empty value handling below for dates
+              if (sortOrder === 'desc') {
+                return bValue - aValue;
+              } else {
+                return aValue - bValue;
+              }
+            case 'activated':
+            case 'created':
+            case 'lastUpdated':
+            case 'passwordChanged':
+              // Handle date sorting with null values at the end
+              const aDate = a.activated || a.created || a.lastUpdated || a.passwordChanged;
+              const bDate = b.activated || b.created || b.lastUpdated || b.passwordChanged;
+              if (!aDate && !bDate) return 0;
+              if (!aDate) return 1; // null values go to end
+              if (!bDate) return -1;
+              aValue = new Date(aDate).getTime();
+              bValue = new Date(bDate).getTime();
+              // Skip the empty value handling below for dates
+              if (sortOrder === 'desc') {
+                return bValue - aValue;
+              } else {
+                return aValue - bValue;
+              }
+            default:
+              aValue = a.profile.firstName || '';
+              bValue = b.profile.firstName || '';
+          }
+          
+            // Handle empty values - put them after Z in ascending order, before A in descending order
+            if (!aValue && !bValue) return 0;
+            if (!aValue) return sortOrder === 'desc' ? -1 : 1;
+            if (!bValue) return sortOrder === 'desc' ? 1 : -1;
+            
+            // Use proper locale comparison for text sorting
+            if (sortOrder === 'desc') {
+              return bValue.localeCompare(aValue, undefined, { 
+                numeric: true, 
+                sensitivity: 'base',
+                caseFirst: 'upper'
+              });
+            } else {
+              return aValue.localeCompare(bValue, undefined, { 
+                numeric: true, 
+                sensitivity: 'base',
+                caseFirst: 'upper'
+              });
+            }
+          });
+        }
+        
+        // Pagination
+        const offset = (page - 1) * limit;
+        const paginatedUsers = filteredUsers.slice(offset, offset + limit);
+        const totalPages = Math.ceil(filteredUsers.length / limit);
+        
+        // Transform OKTA users to our format
+        // Sync OKTA users to database and return database records
+        const transformedUsers = [];
+        for (const oktaUser of paginatedUsers) {
+          // Check if user exists in database
+          let dbUser = await storage.getUserByOktaId(oktaUser.id);
+          
+          if (!dbUser) {
+            // Create user in database if doesn't exist
+            dbUser = await storage.createUser({
+              oktaId: oktaUser.id,
+              firstName: oktaUser.profile.firstName || '',
+              lastName: oktaUser.profile.lastName || '',
+              email: oktaUser.profile.email || '',
+              login: oktaUser.profile.login || '',
+              mobilePhone: oktaUser.profile.mobilePhone || null,
+              department: oktaUser.profile.department || null,
+              title: oktaUser.profile.title || null,
+              employeeType: null,
+              profileImageUrl: null,
+              status: oktaUser.status,
+              groups: [],
+              applications: []
+            });
+          } else {
+            // Update existing user with latest OKTA data
+            dbUser = await storage.updateUser(dbUser.id, {
+              firstName: oktaUser.profile.firstName || '',
+              lastName: oktaUser.profile.lastName || '',
+              email: oktaUser.profile.email || '',
+              login: oktaUser.profile.login || '',
+              mobilePhone: oktaUser.profile.mobilePhone || null,
+              department: oktaUser.profile.department || null,
+              title: oktaUser.profile.title || null,
+              status: oktaUser.status
+            });
+          }
+          
+          if (dbUser) {
+            transformedUsers.push(dbUser);
+          }
+        }
+        
+        // Disable caching for sorted results to ensure fresh data
+        res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+        res.set('Pragma', 'no-cache');
+        res.set('Expires', '0');
+        
+        res.json({
+          users: transformedUsers,
+          total: filteredUsers.length,
+          currentPage: page,
+          totalPages,
+          usersPerPage: limit,
+          source: 'okta'
+        });
+      } catch (oktaError: any) {
+        console.log("OKTA API unavailable, falling back to local storage:", oktaError.message);
+        
+        // Fallback to local storage
+        const offset = (page - 1) * limit;
+        const result = await storage.getAllUsers({
+          search: searchQuery,
+          status: statusFilter,
+          department: departmentFilter,
+          employeeType: employeeTypeFilter,
+          limit,
+          offset,
+          sortBy,
+          sortOrder,
+        });
+        
+        const totalPages = Math.ceil(result.total / limit);
+        
+        // Disable caching for sorted results to ensure fresh data
+        res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+        res.set('Pragma', 'no-cache');
+        res.set('Expires', '0');
+        
+        res.json({
+          users: result.users,
+          total: result.total,
+          currentPage: page,
+          totalPages,
+          usersPerPage: limit,
+          source: 'local_storage'
+        });
+      }
+    } catch (error) {
+      console.error("Error fetching users:", error);
+      res.status(500).json({ message: "Failed to fetch users" });
+    }
+  });
+
   // Get single user by ID
   app.get("/api/users/:id", isAuthenticated, async (req, res) => {
     try {

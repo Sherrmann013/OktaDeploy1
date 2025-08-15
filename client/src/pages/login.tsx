@@ -10,13 +10,13 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 
 export default function Login() {
   const [, setLocation] = useLocation();
-  const [username, setUsername] = useState("CW-Admin");
-  const [password, setPassword] = useState("YellowDr@g0nFly");
+  const [username, setUsername] = useState("admin@mazetx.com");
+  const [password, setPassword] = useState("admin123");
   const { toast } = useToast();
 
   const loginMutation = useMutation({
     mutationFn: async (credentials: { username: string; password: string }) => {
-      const response = await apiRequest("POST", "/api/login", credentials);
+      const response = await apiRequest("POST", "/api/auth/login", { email: credentials.username, password: credentials.password });
       return await response.json();
     },
     onSuccess: (user) => {
@@ -72,13 +72,13 @@ export default function Login() {
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="username">Username</Label>
+              <Label htmlFor="username">Email</Label>
               <Input
                 id="username"
-                type="text"
+                type="email"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                placeholder="Enter your username"
+                placeholder="Enter your email"
                 disabled={loginMutation.isPending}
               />
             </div>
