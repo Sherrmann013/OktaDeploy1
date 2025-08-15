@@ -652,7 +652,7 @@ export default function UserDetail() {
       case "SUSPENDED":
         return <Badge className="bg-yellow-100 text-yellow-800">Suspended</Badge>;
       case "DEPROVISIONED":
-        return <Badge className="bg-red-100 text-red-800">Deprovisioned</Badge>;
+        return <Badge className="bg-red-100 text-red-800">Deactivated</Badge>;
       default:
         return <Badge variant="secondary">{status}</Badge>;
     }

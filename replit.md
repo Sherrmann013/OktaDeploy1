@@ -12,6 +12,7 @@ This project is a comprehensive React-based multi-tenant enterprise security man
 - **CRITICAL RULE - MOVE COMPONENTS AS IS:** When moving components or sections (especially admin sections), NEVER modify, recreate, or take shortcuts. Move the code EXACTLY AS IS without any changes. Any attempt to "improve" or recreate during a move operation will break functionality.
 - **AS IS RULE CONSISTENCY LESSON:** If the rule works for complex cases, it MUST be applied to simple cases. No exceptions based on perceived simplicity.
 - **OKTA SECURITY POLICY:** When OKTA integration is configured for a client, user creation must fail completely if OKTA creation fails. NO local-only user creation in enterprise environments with OKTA integration.
+- **OKTA TERMINOLOGY ALIGNMENT:** User status displays use "Deactivated" instead of "DEPROVISIONED" to match OKTA's terminology, while maintaining "DEPROVISIONED" as the internal database value for consistency.
 
 ## System Architecture
 The dashboard uses a React frontend (TypeScript, Tailwind CSS, Wouter) and an Express.js backend (TypeScript, PostgreSQL).

@@ -103,6 +103,13 @@ export default function UserDetailModal({ open, onClose, userId, clientId }: Use
     }
   };
 
+  const getStatusDisplayText = (status: string) => {
+    switch (status?.toUpperCase()) {
+      case 'DEPROVISIONED': return 'Deactivated';
+      default: return status;
+    }
+  };
+
   // Get employee type badge color
   const getEmployeeTypeColor = (employeeType: string) => {
     switch (employeeType?.toUpperCase()) {
@@ -192,7 +199,7 @@ export default function UserDetailModal({ open, onClose, userId, clientId }: Use
                           {user.firstName} {user.lastName}
                         </h2>
                         <Badge className={getStatusBadgeColor(user.status || '')}>
-                          {user.status}
+                          {getStatusDisplayText(user.status || '')}
                         </Badge>
                         <Badge className={getEmployeeTypeColor(user.employeeType || '')}>
                           {user.employeeType}
@@ -333,7 +340,7 @@ export default function UserDetailModal({ open, onClose, userId, clientId }: Use
                     <div>
                       <Label>Status</Label>
                       <Badge className={getStatusBadgeColor(user.status || '')}>
-                        {user.status}
+                        {getStatusDisplayText(user.status || '')}
                       </Badge>
                     </div>
                     <div>

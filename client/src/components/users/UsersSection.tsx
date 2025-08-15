@@ -249,6 +249,13 @@ export function UsersSection() {
     }
   };
 
+  const getStatusDisplayText = (status: string) => {
+    switch (status?.toUpperCase()) {
+      case 'DEPROVISIONED': return 'Deactivated';
+      default: return status;
+    }
+  };
+
   const getEmployeeTypeColor = (employeeType: string) => {
     switch (employeeType?.toUpperCase()) {
       case 'EMPLOYEE': return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300';

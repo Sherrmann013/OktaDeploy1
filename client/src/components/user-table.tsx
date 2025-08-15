@@ -321,6 +321,13 @@ export default function UserTable({
     }
   };
 
+  const getStatusDisplayText = (status: string) => {
+    switch (status?.toUpperCase()) {
+      case 'DEPROVISIONED': return 'Deactivated';
+      default: return status;
+    }
+  };
+
   // Format date for display
   const formatDate = (date: string | null) => {
     if (!date) return '—';
@@ -357,7 +364,7 @@ export default function UserTable({
       case 'status':
         return (
           <Badge className={getStatusBadgeColor(user.status || '')}>
-            {user.status || 'UNKNOWN'}
+            {getStatusDisplayText(user.status || 'UNKNOWN')}
           </Badge>
         );
       case 'mobilePhone':
