@@ -5,6 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Plus, Edit, X, Settings, RefreshCw, Eye, EyeOff, Trash2 } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { LogoUploadModal } from "@/components/LogoUploadModal";
 import { useToast } from "@/hooks/use-toast";
 import { NewUserConfigSection } from "@/components/admin/new-user-config";
@@ -268,6 +269,32 @@ export function LayoutSection({
       toast({
         title: "Error",
         description: "Failed to update logo text visibility",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Mutation to create dashboard card directly
+  const createDashboardCardMutation = useMutation({
+    mutationFn: async (cardData: any) => {
+      const endpoint = `/api/client/${currentClientId}/dashboard-cards`;
+      const response = await apiRequest("POST", endpoint, cardData);
+      if (!response.ok) {
+        throw new Error("Failed to create dashboard card");
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      refetchDashboardCards();
+      toast({
+        title: "Success",
+        description: "Dashboard card added successfully",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to add dashboard card",
         variant: "destructive",
       });
     },
@@ -554,6 +581,23 @@ export function LayoutSection({
     // Implementation for adding monitoring card
   };
 
+  // Function to handle adding integration card directly from dropdown
+  const handleAddIntegrationCard = (integrationType: string) => {
+    const integration = integrationsData?.find((i: any) => i.name === integrationType);
+    if (!integration) return;
+
+    const cardData = {
+      name: integration.displayName || integration.name,
+      type: integrationType,
+      description: `${integration.displayName || integration.name} integration card`,
+      enabled: true,
+      clientId: currentClientId,
+      position: 999 // Will be adjusted by backend
+    };
+
+    createDashboardCardMutation.mutate(cardData);
+  };
+
   // Helper functions
   const getIntegrationLogo = (integrationType: string) => {
     // Return appropriate logo based on integration type
@@ -800,34 +844,32 @@ export function LayoutSection({
                   <div className="flex items-center justify-between mb-6">
                     <h4 className="text-lg font-semibold">Dashboard Layout</h4>
                     <div className="flex gap-2">
-                      <Button 
-                        onClick={() => {
-                          refetchDashboardCards();
-                        }}
-                        variant="outline"
-                        className="flex items-center"
-                      >
-                        <RefreshCw className="w-4 h-4 mr-2" />
-                        Refresh
-                      </Button>
-                      <Button 
-                        onClick={() => setIsAddDashboardCardOpen(true)}
-                        className="bg-blue-600 hover:bg-blue-700 text-white flex items-center"
-                      >
-                        <Plus className="w-4 h-4 mr-2" />
-                        Add Integration
-                      </Button>
+                      <Select onValueChange={(value) => handleAddIntegrationCard(value)}>
+                        <SelectTrigger className="w-48 bg-blue-600 hover:bg-blue-700 text-white border-blue-600">
+                          <div className="flex items-center">
+                            <Plus className="w-4 h-4 mr-2" />
+                            <SelectValue placeholder="Add Integration" />
+                          </div>
+                        </SelectTrigger>
+                        <SelectContent className="bg-white dark:bg-gray-800 border">
+                          {integrationsData?.filter((integration: any) => integration.status === 'active').map((integration: any) => (
+                            <SelectItem key={integration.name} value={integration.name}>
+                              {integration.displayName || integration.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
                   </div>
                   
                   <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
-                    Drag and drop cards to reorganize your dashboard. Click "Add Integration" to add new app cards.
+                    Drag and drop cards to reorganize your dashboard. Select from active integrations to add new cards.
                   </p>
 
                   {/* Dashboard Grid Preview */}
                   {dashboardCardsError && (
                     <div className="mb-4 p-3 bg-red-100 border border-red-300 text-red-700 rounded-lg">
-                      Error loading dashboard cards: {dashboardCardsError.message}. Click Refresh to try again.
+                      Error loading dashboard cards: {dashboardCardsError.message}. Please try reloading the page.
                     </div>
                   )}
                   {dashboardCardsLoading && (
