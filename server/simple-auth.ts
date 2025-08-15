@@ -20,7 +20,7 @@ export function getSession() {
     saveUninitialized: false,
     cookie: {
       httpOnly: true,
-      secure: true,
+      secure: process.env.NODE_ENV === 'production', // Only secure in production
       maxAge: sessionTtl,
     },
   });
@@ -134,6 +134,37 @@ export async function setupSimpleAuth(app: Express) {
     } catch (error) {
       console.error('Callback processing error:', error);
       res.redirect('/?error=callback_failed');
+    }
+  });
+
+  // Basic login endpoint for local development
+  app.post('/api/auth/login', async (req, res) => {
+    try {
+      const { email, password } = req.body;
+      
+      // Simple hardcoded admin login for development
+      if (email === 'admin@mazetx.com' && password === 'admin123') {
+        const sessionUser = {
+          id: 1,
+          email: 'admin@mazetx.com',
+          firstName: 'Admin',
+          lastName: 'User',
+          role: 'admin',
+          title: 'System Administrator',
+          department: 'IT'
+        };
+        
+        // Store user in session
+        (req as any).session.user = sessionUser;
+        
+        console.log('Admin logged in successfully:', email);
+        return res.json(sessionUser);
+      }
+      
+      return res.status(401).json({ message: "Invalid credentials" });
+    } catch (error) {
+      console.error('Login error:', error);
+      res.status(500).json({ message: "Login failed" });
     }
   });
 

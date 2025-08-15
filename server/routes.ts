@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import postgres from "postgres";
 import { storage } from "./storage";
 import { insertUserSchema, updateUserSchema, insertSiteAccessUserSchema, siteAccessUsers, insertIntegrationSchema, integrations, auditLogs, insertAppMappingSchema, appMappings, departmentAppMappings, insertDepartmentAppMappingSchema, employeeTypeAppMappings, insertEmployeeTypeAppMappingSchema, departmentGroupMappings, insertDepartmentGroupMappingSchema, employeeTypeGroupMappings, insertEmployeeTypeGroupMappingSchema, insertLayoutSettingSchema, layoutSettings, dashboardCards, insertDashboardCardSchema, updateDashboardCardSchema, monitoringCards, insertMonitoringCardSchema, updateMonitoringCardSchema, companyLogos, insertCompanyLogoSchema, insertMspLogoSchema, clients, clientAccess } from "@shared/schema";
-import { users as clientUsers, departmentAppMappings as clientDepartmentAppMappings, insertDepartmentAppMappingSchema as clientInsertDepartmentAppMappingSchema, employeeTypeAppMappings as clientEmployeeTypeAppMappings, insertEmployeeTypeAppMappingSchema as clientInsertEmployeeTypeAppMappingSchema, departmentGroupMappings as clientDepartmentGroupMappings, insertDepartmentGroupMappingSchema as clientInsertDepartmentGroupMappingSchema, employeeTypeGroupMappings as clientEmployeeTypeGroupMappings, insertEmployeeTypeGroupMappingSchema as clientInsertEmployeeTypeGroupMappingSchema } from "@shared/client-schema";
+
 import { db } from "./db";
 import { eq, desc, and, or, ilike, asc } from "drizzle-orm";
 import { AuditLogger, getAuditLogs } from "./audit";
@@ -894,7 +894,15 @@ import {
   companyLogos as clientCompanyLogos,
   insertCompanyLogoSchema as clientInsertCompanyLogoSchema,
   appMappings as clientAppMappings,
-  insertAppMappingSchema as clientInsertAppMappingSchema
+  insertAppMappingSchema as clientInsertAppMappingSchema,
+  departmentAppMappings as clientDepartmentAppMappings,
+  insertDepartmentAppMappingSchema as clientInsertDepartmentAppMappingSchema,
+  employeeTypeAppMappings as clientEmployeeTypeAppMappings,
+  insertEmployeeTypeAppMappingSchema as clientInsertEmployeeTypeAppMappingSchema,
+  departmentGroupMappings as clientDepartmentGroupMappings,
+  insertDepartmentGroupMappingSchema as clientInsertDepartmentGroupMappingSchema,
+  employeeTypeGroupMappings as clientEmployeeTypeGroupMappings,
+  insertEmployeeTypeGroupMappingSchema as clientInsertEmployeeTypeGroupMappingSchema
 } from "../shared/client-schema";
 import { MultiDatabaseManager } from "./multi-db";
 import { ClientStorage } from "./client-storage";
@@ -941,24 +949,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const sortOrder = z.enum(["asc", "desc"]).default("asc").parse(req.query.sortOrder);
 
       try {
-        // For stats-only requests, return minimal data quickly
-        if (statsOnly) {
-          const sampleUsers = await oktaService.getUsers(50); // Smaller sample for stats
-          res.json({
-            users: [],
-            total: sampleUsers.length,
-            currentPage: 1,
-            totalPages: 1,
-            usersPerPage: limit,
-            source: 'okta_stats'
-          });
-          return;
-        }
-
-        // Try to fetch users from OKTA first
-        const oktaUsers = await oktaService.getUsers(Math.min(500, limit * 5));
-        
-        let filteredUsers = oktaUsers;
+        // DISABLED: Global OKTA endpoint - use client-specific user endpoints instead
+        return res.status(400).json({ 
+          error: "Global user endpoint disabled - use client-specific endpoints: /api/client/:clientId/users" 
+        });
         
         // Apply search filter
         if (searchQuery) {
@@ -1400,75 +1394,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Add user to groups based on employee type, department, and selected apps
       try {
-        const groups = await oktaService.getGroups();
-        
-        // Employee type group mapping
-        if (userData.employeeType) {
-          const employeeTypeMapping: Record<string, string> = {
-            'Employee': 'MTXCW-ET-EMPLOYEE',
-            'Contractor': 'MTXCW-ET-CONTRACTOR'
-          };
-          
-          const groupName = employeeTypeMapping[userData.employeeType];
-          if (groupName) {
-            const targetGroup = groups.find(g => g.profile.name === groupName);
-            if (targetGroup) {
-              await oktaService.addUserToGroup(oktaUser.id, targetGroup.id);
-              console.log(`Added user to employee type group: ${groupName}`);
-            } else {
-              console.log(`Group not found: ${groupName}`);
-            }
-          }
-        }
-        
-        // Department group mapping
-        if (userData.department) {
-          const departmentMapping: Record<string, string> = {
-            'Finance': 'finfacit@mazetx.com',
-            'HR': 'HR@mazetx.com'
-          };
-          
-          const groupName = departmentMapping[userData.department];
-          if (groupName) {
-            const targetGroup = groups.find(g => g.profile.name === groupName);
-            if (targetGroup) {
-              await oktaService.addUserToGroup(oktaUser.id, targetGroup.id);
-              console.log(`Added user to department group: ${groupName}`);
-            } else {
-              console.log(`Group not found: ${groupName}`);
-            }
-          }
-        }
-        
-        // Add user to selected groups
-        if (userData.selectedGroups && userData.selectedGroups.length > 0) {
-          console.log('Processing selected groups:', userData.selectedGroups);
-          
-          for (const selectedGroupName of userData.selectedGroups) {
-            const targetGroup = groups.find(g => g.profile.name === selectedGroupName);
-            if (targetGroup) {
-              try {
-                await oktaService.addUserToGroup(oktaUser.id, targetGroup.id);
-                console.log(`Added user to group: ${selectedGroupName}`);
-              } catch (groupError) {
-                console.error(`Failed to add user to group ${selectedGroupName}:`, groupError);
-              }
-            } else {
-              console.log(`Group not found: ${selectedGroupName}`);
-            }
-          }
-        }
-        
-        // Legacy: Check selected apps for Zoom (for backward compatibility)
-        if (userData.selectedApps && userData.selectedApps.includes('Zoom')) {
-          console.log('Legacy Zoom app selection detected');
-          const zoomGroup = groups.find(g => g.profile.name.includes('ZOOM'));
-          if (zoomGroup) {
-            console.log(`Found Zoom group: ${zoomGroup.profile.name}`);
-            await oktaService.addUserToGroup(oktaUser.id, zoomGroup.id);
-            console.log(`Added user to Zoom group: ${zoomGroup.profile.name}`);
-          }
-        }
+        // DISABLED: Group assignment moved to client-specific endpoints with proper OKTA integration
+        console.log('User created successfully - group assignment handled by client-specific endpoints');
         
       } catch (error) {
         console.error('Error adding user to groups:', error);
@@ -1652,20 +1579,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       console.log(`Deleting user: ${user.firstName} ${user.lastName} (${user.email})`);
 
-      // Permanently delete user from OKTA first if they have an OKTA ID
-      if (user.oktaId) {
-        try {
-          console.log(`Permanently deleting user from OKTA: ${user.oktaId}`);
-          await oktaService.deleteUser(user.oktaId);
-          console.log(`Successfully deleted user from OKTA: ${user.oktaId}`);
-        } catch (oktaError) {
-          console.error(`Failed to delete user from OKTA: ${user.oktaId}`, oktaError);
-          // Don't fail the entire operation if OKTA deletion fails
-          // Continue with local deletion for data consistency
-        }
-      } else {
-        console.log('User has no OKTA ID, skipping OKTA deletion');
-      }
+      // DISABLED: Global OKTA user deletion - use client-specific endpoints instead
+      console.log(`Deleting user locally only - OKTA deletion requires client-specific integration: ${user.oktaId || 'no OKTA ID'}`);
       
       // Delete from local storage
       const deleted = await storage.deleteUser(id);
@@ -1780,76 +1695,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // OKTA sync endpoint that frontend expects
   app.post("/api/sync-okta", isAuthenticated, requireAdmin, async (req, res) => {
     try {
-      console.log("Starting OKTA sync with full pagination...");
-      const allUsers = await oktaService.getUsers(1000); // Get all users with pagination
-      console.log(`Found ${allUsers.length} users in OKTA`);
-      
-      let syncedCount = 0;
-      let updatedCount = 0;
-      
-      for (const oktaUser of allUsers) {
-        try {
-          const existingUser = await storage.getUserByOktaId(oktaUser.id);
-          
-          if (!existingUser) {
-            await storage.createUser({
-              oktaId: oktaUser.id,
-              firstName: oktaUser.profile.firstName || '',
-              lastName: oktaUser.profile.lastName || '',
-              email: oktaUser.profile.email || '',
-              login: oktaUser.profile.login || '',
-              mobilePhone: oktaUser.profile.mobilePhone || null,
-              department: oktaUser.profile.department || null,
-              title: oktaUser.profile.title || null,
-              employeeType: null,
-              profileImageUrl: null,
-              status: oktaUser.status,
-              groups: [],
-              applications: []
-            });
-            syncedCount++;
-          } else {
-            // Debug logging for specific users
-            if (oktaUser.profile.email === 'abarrow@mazetx.com' || oktaUser.profile.email === 'ejimenez@mazetx.com') {
-              console.log(`=== SYNC DEBUG FOR ${oktaUser.profile.email} ===`);
-              console.log(`OKTA created: ${oktaUser.created}`);
-              console.log(`OKTA lastLogin: ${oktaUser.lastLogin}`);
-              console.log(`Local created before update: ${existingUser.created}`);
-              console.log(`Local lastLogin before update: ${existingUser.lastLogin}`);
-              console.log(`Will update created to: ${new Date(oktaUser.created)}`);
-              console.log(`Will update lastLogin to: ${oktaUser.lastLogin ? new Date(oktaUser.lastLogin) : null}`);
-            }
-            
-            await storage.updateUser(existingUser.id, {
-              firstName: oktaUser.profile.firstName || '',
-              lastName: oktaUser.profile.lastName || '',
-              email: oktaUser.profile.email || '',
-              login: oktaUser.profile.login || '',
-              mobilePhone: oktaUser.profile.mobilePhone || null,
-              department: oktaUser.profile.department || null,
-              title: oktaUser.profile.title || null,
-              manager: oktaUser.profile.manager || null,
-              status: oktaUser.status,
-              lastLogin: oktaUser.lastLogin ? new Date(oktaUser.lastLogin) : null,
-              passwordChanged: oktaUser.passwordChanged ? new Date(oktaUser.passwordChanged) : null
-            });
-            updatedCount++;
-          }
-        } catch (userError) {
-          console.error(`Error syncing user ${oktaUser.profile.email}:`, userError);
-        }
-      }
-      
-      res.json({
-        success: true,
-        message: `OKTA sync completed successfully. ${syncedCount} new users synced, ${updatedCount} users updated.`
+      // DISABLED: Global OKTA sync removed - use client-specific sync instead
+      return res.status(400).json({
+        success: false,
+        message: "Global OKTA sync disabled - use client-specific sync endpoints",
+        error: "Use /api/client/:clientId/sync-okta for client-specific OKTA synchronization"
       });
     } catch (error) {
       console.error("OKTA sync error:", error);
       res.status(500).json({
         success: false,
-        message: "Failed to sync OKTA users",
-        error: error instanceof Error ? error.message : "Unknown error"
+        message: "Global OKTA sync not available",
+        error: "Use client-specific endpoints instead"
       });
     }
   });

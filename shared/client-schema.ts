@@ -253,6 +253,11 @@ export const insertCompanyLogoSchema = createInsertSchema(companyLogos).omit({
   logoData: z.string().min(1, "Logo data is required"),
 });
 
+export const insertAppMappingSchema = createInsertSchema(appMappings).omit({
+  id: true,
+  created: true,
+});
+
 export const insertAuditLogSchema = createInsertSchema(auditLogs).omit({
   id: true,
   timestamp: true,
