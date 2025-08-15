@@ -8,7 +8,7 @@ import { db } from "./db";
 import { eq, desc, and, or, ilike, asc } from "drizzle-orm";
 import { AuditLogger, getAuditLogs } from "./audit";
 import { z } from "zod";
-import { oktaService } from "./okta-service";
+// Note: Global oktaService removed - using client-specific OKTA integrations only
 import { syncSpecificUser } from "./okta-sync";
 import { knowBe4Service } from "./knowbe4-service";
 import { knowBe4GraphService } from "./knowbe4-graph-service";
@@ -16,20 +16,7 @@ import { syncUserGroupsAndEmployeeType, syncAllUsersGroupsAndEmployeeTypes } fro
 import { bulkSyncUserGroupsAndEmployeeTypes } from "./bulk-groups-sync";
 import { EmployeeTypeSync } from "./employee-type-sync";
 
-// Helper function to safely execute OKTA operations
-async function safeOktaOperation<T>(operation: () => Promise<T>, fallbackValue: T): Promise<T> {
-  if (!oktaService.isConfigured()) {
-    console.warn('OKTA not configured - returning fallback value');
-    return fallbackValue;
-  }
-  
-  try {
-    return await operation();
-  } catch (error) {
-    console.error('OKTA operation failed:', error);
-    return fallbackValue;
-  }
-}
+// Note: safeOktaOperation removed - client-specific OKTA integrations handle their own error checking
 
 // Helper function to determine employee type from user groups
 function determineEmployeeTypeFromGroups(userGroups: any[], employeeTypeApps: Set<string>): string | null {
@@ -924,138 +911,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Debug endpoint for troubleshooting user access issues
-  app.get('/api/debug/user-access/:email', isAuthenticated, requireAdmin, async (req, res) => {
-    try {
-      const email = req.params.email;
-      console.log(`Debugging access for user: ${email}`);
-      
-      // Check if user exists in OKTA
-      const oktaUser = await safeOktaOperation(
-        () => oktaService.getUserByEmail(email),
-        null
-      );
-      
-      if (!oktaUser) {
-        return res.json({
-          email,
-          exists: false,
-          message: "User not found in OKTA"
-        });
-      }
-      
-      // Check if user is assigned to the application
-      const appAssignmentResponse = await fetch(`${process.env.OKTA_DOMAIN}/api/v1/apps/${process.env.CLIENT_ID}/users/${oktaUser.id}`, {
-        headers: {
-          'Authorization': `SSWS ${process.env.OKTA_API_TOKEN}`,
-          'Accept': 'application/json'
-        }
-      });
-      
-      const isAssigned = appAssignmentResponse.ok;
-      let assignmentDetails = null;
-      
-      if (isAssigned) {
-        assignmentDetails = await appAssignmentResponse.json();
-      }
-      
-      // Check MFA factors
-      const factorsResponse = await fetch(`${process.env.OKTA_DOMAIN}/api/v1/users/${oktaUser.id}/factors`, {
-        headers: {
-          'Authorization': `SSWS ${process.env.OKTA_API_TOKEN}`,
-          'Accept': 'application/json'
-        }
-      });
-      
-      const factors = factorsResponse.ok ? await factorsResponse.json() : [];
-      
-      res.json({
-        email,
-        exists: true,
-        oktaUser: {
-          id: oktaUser.id,
-          status: oktaUser.status,
-          created: oktaUser.created,
-          lastLogin: oktaUser.lastLogin,
-          profile: {
-            firstName: oktaUser.profile.firstName,
-            lastName: oktaUser.profile.lastName,
-            email: oktaUser.profile.email,
-            department: oktaUser.profile.department,
-            title: oktaUser.profile.title
-          }
-        },
-        appAccess: {
-          isAssigned,
-          assignmentStatus: assignmentDetails?.status || 'NOT_ASSIGNED',
-          assignmentDetails
-        },
-        mfaFactors: factors.length,
-        activeMfaFactors: factors.filter((f: any) => f.status === 'ACTIVE').length,
-        recommendation: !isAssigned 
-          ? "User needs to be assigned to the application"
-          : oktaUser.status !== 'ACTIVE'
-          ? "User account is not active"
-          : "User appears properly configured for access"
-      });
-      
-    } catch (error) {
-      console.error("Error debugging user access:", error);
-      res.status(500).json({ 
-        message: "Failed to debug user access",
-        error: error instanceof Error ? error.message : 'Unknown error'
-      });
-    }
-  });
+  // DISABLED: Global debug endpoint removed - use client-specific OKTA integrations instead
+  // app.get('/api/debug/user-access/:email' ...)
 
   // Auth routes are handled by setupAuth
 
   // REMOVED: Global employee type counts - Each client should have their own employee counts via client-specific endpoints
 
   // Get manager suggestions for autocomplete
-  app.get("/api/managers", isAuthenticated, async (req, res) => {
-    try {
-      const query = z.string().optional().parse(req.query.q);
-      
-      try {
-        // Get unique managers from OKTA
-        const oktaUsers = await oktaService.getUsers(200);
-        const managers = new Set<string>();
-        
-        oktaUsers.forEach(user => {
-          if (user.profile.manager) {
-            managers.add(user.profile.manager);
-          }
-        });
-        
-        let managerList = Array.from(managers).sort();
-        
-        // Filter by query if provided - search anywhere in names
-        if (query && query.trim().length > 0) {
-          const searchTerm = query.trim().toLowerCase();
-          console.log(`Manager search query: "${searchTerm}", total managers: ${managerList.length}`);
-          managerList = managerList.filter(manager => {
-            const fullName = manager.toLowerCase();
-            const nameParts = fullName.split(' ');
-            // Match if query starts any part of the name OR is contained anywhere in the name
-            return nameParts.some(part => part.startsWith(searchTerm)) || 
-                   fullName.startsWith(searchTerm) ||
-                   fullName.includes(searchTerm) ||
-                   nameParts.some(part => part.includes(searchTerm));
-          });
-          console.log(`Filtered managers: ${managerList.length}`);
-        }
-        
-        // Limit to top 10 suggestions
-        res.json(managerList.slice(0, 10));
-      } catch (oktaError) {
-        console.log("OKTA API unavailable for manager suggestions, using empty list");
-        res.json([]);
-      }
-    } catch (error) {
-      console.error("Error fetching manager suggestions:", error);
-      res.status(500).json({ error: "Failed to fetch manager suggestions" });
-    }
-  });
+  // DISABLED: Global managers endpoint removed - managers should be retrieved per client
+  // app.get("/api/managers" ...)
 
   // Get all users with fallback from OKTA to local storage
   app.get("/api/users", isAuthenticated, async (req, res) => {
@@ -1474,11 +1339,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Check if user already exists in OKTA
-      try {
-        const existingOktaUser = await oktaService.getUserByEmail(userData.email);
-        if (existingOktaUser) {
-          return res.status(400).json({ message: "User with this email already exists in OKTA" });
-        }
+      // NOTE: Global OKTA user existence check removed - client-specific endpoints handle this
+      // User existence should be checked via client-specific OKTA integrations
       } catch (error) {
         // User doesn't exist in OKTA, which is expected for new users
         console.log('User not found in OKTA (expected for new user)');
@@ -1506,24 +1368,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       };
 
       // Create user in OKTA - always activate immediately
-      const oktaResponse = await fetch(`${process.env.OKTA_DOMAIN}/api/v1/users?activate=true`, {
-        method: 'POST',
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json',
-          'Authorization': `SSWS ${process.env.OKTA_API_TOKEN}`
-        },
-        body: JSON.stringify(oktaUserData)
+      // NOTE: Global OKTA user creation removed - client-specific endpoints handle OKTA integration
+      return res.status(400).json({ 
+        message: "Global user creation disabled - use client-specific endpoints instead",
+        error: "This endpoint uses global OKTA credentials which have been removed for security"
       });
-
-      if (!oktaResponse.ok) {
-        const errorData = await oktaResponse.json();
-        console.error('OKTA user creation failed:', errorData);
-        return res.status(400).json({ 
-          message: "Failed to create user in OKTA", 
-          error: errorData.errorSummary || 'Unknown OKTA error'
-        });
-      }
 
       const oktaUser = await oktaResponse.json();
       console.log('User created in OKTA:', oktaUser.id);
@@ -1930,32 +1779,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Test OKTA connection endpoint
-  app.get("/api/okta/test-connection", isAuthenticated, async (req, res) => {
-    try {
-      const result = await oktaService.testConnection();
-      
-      if (result.success) {
-        res.json({
-          success: true,
-          message: result.message,
-          details: result.details
-        });
-      } else {
-        res.status(400).json({
-          success: false,
-          message: result.message,
-          details: result.details
-        });
-      }
-    } catch (error) {
-      console.error("OKTA connection test error:", error);
-      res.status(500).json({
-        success: false,
-        message: "Failed to test OKTA connection",
-        error: error instanceof Error ? error.message : "Unknown error"
-      });
-    }
-  });
+  // DISABLED: Global OKTA test endpoint removed - use client-specific integration tests
+  // app.get("/api/okta/test-connection" ...)
 
   // OKTA sync endpoint that frontend expects
   app.post("/api/sync-okta", isAuthenticated, requireAdmin, async (req, res) => {

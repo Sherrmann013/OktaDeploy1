@@ -13,15 +13,8 @@ if (!process.env.KNOWBE4_BASE_URL) {
   process.env.KNOWBE4_BASE_URL = "https://us.api.knowbe4.com/v1";
 }
 
-// Set default OKTA environment variables if not provided (for local development)
-if (!process.env.OKTA_DOMAIN) {
-  process.env.OKTA_DOMAIN = "dev-local.okta.com";
-  console.log("OKTA_DOMAIN not set - using default for local development");
-}
-if (!process.env.OKTA_API_TOKEN) {
-  process.env.OKTA_API_TOKEN = "dev-token-placeholder";
-  console.log("OKTA_API_TOKEN not set - using placeholder for local development");
-}
+// Note: OKTA integration now uses client-specific API keys stored in database
+// No global OKTA environment variables needed
 if (!process.env.SESSION_SECRET) {
   process.env.SESSION_SECRET = "dev-session-secret-change-in-production";
   console.log("SESSION_SECRET not set - using default for local development");
