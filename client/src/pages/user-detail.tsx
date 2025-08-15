@@ -48,7 +48,7 @@ export default function UserDetail() {
   const [managerSearch, setManagerSearch] = useState("");
   const [profileSubTab, setProfileSubTab] = useState("okta");
   const [expandedSections, setExpandedSections] = useState<{[logId: string]: {[section: string]: boolean}}>({});
-  const [showPasswordModal, setShowPasswordModal] = useState<"reset" | "expire" | null>(null);
+  const [showPasswordModal, setShowPasswordModal] = useState<"reset" | "expire" | "generate" | null>(null);
   const [newPassword, setNewPassword] = useState("");
   const [generatedPassword, setGeneratedPassword] = useState("");
   const [confirmAction, setConfirmAction] = useState<{
@@ -391,8 +391,8 @@ export default function UserDetail() {
     mutationFn: async (action: "reset" | "expire" | "generate") => {
       return apiRequest("POST", `/api/client/${clientId}/users/${userId}/password/reset`, { action });
     },
-    onSuccess: (data, action) => {
-      if (action === "generate" && data.password) {
+    onSuccess: (data: any, action) => {
+      if (action === "generate" && data?.password) {
         setGeneratedPassword(data.password);
         setNewPassword(data.password);
         toast({
@@ -756,16 +756,6 @@ export default function UserDetail() {
                   >
                     <RefreshCw className="w-4 h-4" />
                     Reset Password
-                  </Button>
-                  
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setShowPasswordModal("generate")}
-                    className="flex items-center gap-2 text-green-600 dark:text-green-400 border-green-300 dark:border-green-600 hover:bg-green-50 dark:hover:bg-green-900"
-                  >
-                    <Key className="w-4 h-4" />
-                    Generate Password
                   </Button>
                   
                   <DropdownMenu>
@@ -1884,41 +1874,38 @@ export default function UserDetail() {
           <DialogHeader>
             <DialogTitle>Reset Password</DialogTitle>
             <DialogDescription>
-              Set a new password for {user?.firstName} {user?.lastName}. The user will be notified and can use this password to log in immediately.
+              Choose how to reset the password for {user?.firstName} {user?.lastName}.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
-            <div className="space-y-2">
-              <label className="text-sm font-medium">New Password</label>
-              <div className="flex gap-2">
-                <Input
-                  type="text"
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                  placeholder="Enter new password"
-                  className="flex-1"
-                />
-                <Button 
-                  variant="outline" 
-                  onClick={generatePassword}
-                  className="px-3"
-                >
-                  Generate
-                </Button>
-              </div>
-              {generatedPassword && (
-                <div className="text-xs text-muted-foreground">
-                  Generated: {generatedPassword}
+            <div className="space-y-3">
+              <Button 
+                onClick={handlePasswordReset}
+                className="w-full flex items-center gap-2 justify-start text-left"
+                variant="outline"
+              >
+                <RefreshCw className="w-4 h-4" />
+                <div>
+                  <div className="font-medium">Send Reset Email</div>
+                  <div className="text-sm text-muted-foreground">User will receive an email with reset instructions</div>
                 </div>
-              )}
+              </Button>
+              <Button 
+                onClick={() => setShowPasswordModal("generate")}
+                className="w-full flex items-center gap-2 justify-start text-left"
+                variant="outline"
+              >
+                <Key className="w-4 h-4" />
+                <div>
+                  <div className="font-medium">Generate New Password</div>
+                  <div className="text-sm text-muted-foreground">Create a temporary password using client policy</div>
+                </div>
+              </Button>
             </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowPasswordModal(null)}>
               Cancel
-            </Button>
-            <Button onClick={handlePasswordReset} disabled={!newPassword}>
-              Reset Password
             </Button>
           </DialogFooter>
         </DialogContent>
