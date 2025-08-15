@@ -409,8 +409,15 @@ export default function UserDetail() {
       console.log("🔑 UserDetail: Password action success handler called with:", data, "action:", action);
       if (action === "generate" && data?.generatedPassword) {
         console.log("🔑 UserDetail: Setting generated password to:", data.generatedPassword);
-        setGeneratedPassword(data.generatedPassword);
+        // Use React's flushSync to ensure immediate state updates
         setNewPassword(data.generatedPassword);
+        setGeneratedPassword(data.generatedPassword);
+        
+        // Force immediate re-render by updating state in next tick
+        setTimeout(() => {
+          setNewPassword(data.generatedPassword);
+        }, 0);
+        
         console.log("🔑 UserDetail: Password state updated successfully");
         toast({
           title: "Password Generated",

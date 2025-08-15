@@ -566,8 +566,13 @@ export default function CreateUserModal({ open, onClose, onSuccess, clientId }: 
       console.log("🔑 CreateUserModal: Password generation success handler called with:", result);
       if (result.success && result.generatedPassword) {
         console.log("🔑 CreateUserModal: Setting password to:", result.generatedPassword);
+        // Force form field update first, then sync local state
+        form.setValue('password', result.generatedPassword, { shouldDirty: true, shouldTouch: true });
         setPassword(result.generatedPassword);
-        form.setValue('password', result.generatedPassword);
+        
+        // Force form to trigger validation and re-render
+        form.trigger('password');
+        
         console.log("🔑 CreateUserModal: Password state updated successfully");
         toast({
           title: "Password Generated",
@@ -704,7 +709,7 @@ export default function CreateUserModal({ open, onClose, onSuccess, clientId }: 
                         <Input 
                           type="text" 
                           placeholder="Enter password" 
-                          value={password}
+                          value={field.value || ""}
                           onChange={(e) => {
                             setPassword(e.target.value);
                             field.onChange(e.target.value);
