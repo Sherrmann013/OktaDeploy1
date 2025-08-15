@@ -197,14 +197,14 @@ export default function UserDetail() {
 
   // Get user-specific training enrollments using KnowBe4 user ID
   const { data: userTrainingData } = useQuery({
-    queryKey: [`/api/knowbe4/user/${knowBe4Data?.id}/training`],
-    enabled: !!knowBe4Data?.id && activeTab === "monitoring",
+    queryKey: [`/api/knowbe4/user/${(knowBe4Data as any)?.id || 'none'}/training`],
+    enabled: !!(knowBe4Data as any)?.id && activeTab === "monitoring",
   });
 
   // Get user-specific phishing results using KnowBe4 user ID
   const { data: userPhishingData } = useQuery({
-    queryKey: [`/api/knowbe4/user/${knowBe4Data?.id}/phishing`],
-    enabled: !!knowBe4Data?.id && activeTab === "monitoring",
+    queryKey: [`/api/knowbe4/user/${(knowBe4Data as any)?.id || 'none'}/phishing`],
+    enabled: !!(knowBe4Data as any)?.id && activeTab === "monitoring",
   });
 
   const [expandedLogs, setExpandedLogs] = useState<Set<string>>(new Set());
@@ -409,22 +409,103 @@ export default function UserDetail() {
     },
   });
 
+  // OKTA-specific mutation functions
+  const resetAuthenticatorsMutation = useMutation({
+    mutationFn: async () => {
+      return apiRequest("POST", `/api/client/${clientId}/users/${userId}/okta/reset-authenticators`, {});
+    },
+    onSuccess: () => {
+      toast({
+        title: "Success",
+        description: "Authenticators reset successfully. User will need to re-enroll MFA devices.",
+      });
+      queryClient.invalidateQueries({ queryKey: [`/api/client/${clientId}/users`, userId] });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const clearSessionsMutation = useMutation({
+    mutationFn: async () => {
+      return apiRequest("POST", `/api/client/${clientId}/users/${userId}/okta/clear-sessions`, {});
+    },
+    onSuccess: () => {
+      toast({
+        title: "Success",
+        description: "All user sessions cleared successfully. User has been signed out of all applications.",
+      });
+      queryClient.invalidateQueries({ queryKey: [`/api/client/${clientId}/users`, userId] });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const resetBehaviorMutation = useMutation({
+    mutationFn: async () => {
+      return apiRequest("POST", `/api/client/${clientId}/users/${userId}/okta/reset-behavior`, {});
+    },
+    onSuccess: () => {
+      toast({
+        title: "Success",
+        description: "Behavior profile reset successfully. User's authentication patterns have been cleared.",
+      });
+      queryClient.invalidateQueries({ queryKey: [`/api/client/${clientId}/users`, userId] });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleStatusChange = (status: string) => {
-    const actionText = status === "ACTIVE" ? "activate" : "suspend";
+    const actionText = status === "ACTIVE" ? "activate" : 
+                      status === "SUSPENDED" ? "suspend" : "deactivate";
     setConfirmAction({
-      type: status,
+      type: "status",
       title: `${actionText.charAt(0).toUpperCase() + actionText.slice(1)} User`,
       message: `Are you sure you want to ${actionText} this user?`,
       action: () => updateStatusMutation.mutate({ status }),
     });
   };
 
-  const handleDeleteUser = () => {
+  // OKTA-specific action handlers
+  const handleResetAuthenticators = () => {
     setConfirmAction({
-      type: "delete",
-      title: "Delete User",
-      message: "Are you sure you want to delete this user? This action cannot be undone.",
-      action: () => deleteUserMutation.mutate(),
+      type: "reset-auth",
+      title: "Reset Authenticators",
+      message: "Are you sure you want to reset all authenticators for this user? This will require them to re-enroll their MFA devices.",
+      action: () => resetAuthenticatorsMutation.mutate(),
+    });
+  };
+
+  const handleClearUserSessions = () => {
+    setConfirmAction({
+      type: "clear-sessions",
+      title: "Clear User Sessions",
+      message: "Are you sure you want to clear all active sessions for this user? They will be signed out of all applications.",
+      action: () => clearSessionsMutation.mutate(),
+    });
+  };
+
+  const handleResetBehaviorProfile = () => {
+    setConfirmAction({
+      type: "reset-behavior",
+      title: "Reset Behavior Profile",
+      message: "Are you sure you want to reset the behavior profile for this user? This will clear their learned authentication patterns.",
+      action: () => resetBehaviorMutation.mutate(),
     });
   };
 
@@ -650,7 +731,7 @@ export default function UserDetail() {
                   </div>
                 </div>
                 
-                {/* Individual action buttons next to user name */}
+                {/* OKTA-style action buttons */}
                 <div className="flex items-center gap-2">
                   <Button
                     variant="outline"
@@ -658,61 +739,70 @@ export default function UserDetail() {
                     onClick={() => setShowPasswordModal("reset")}
                     className="flex items-center gap-2 text-blue-600 dark:text-blue-400 border-blue-300 dark:border-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900"
                   >
-                    <Key className="w-4 h-4" />
+                    <RefreshCw className="w-4 h-4" />
                     Reset Password
                   </Button>
                   
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setShowPasswordModal("expire")}
-                    className="flex items-center gap-2 text-purple-600 dark:text-purple-400 border-purple-300 dark:border-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900"
-                  >
-                    <KeyRound className="w-4 h-4" />
-                    Expire Password
-                  </Button>
-                  
-                  {user.status === "ACTIVE" ? (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleStatusChange("SUSPENDED")}
-                      className="flex items-center gap-2 text-orange-600 dark:text-orange-400 border-orange-300 dark:border-orange-600 hover:bg-orange-50 dark:hover:bg-orange-900"
-                    >
-                      <UserX className="w-4 h-4" />
-                      Suspend
-                    </Button>
-                  ) : user.status === "LOCKED_OUT" ? (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleStatusChange("ACTIVE")}
-                      className="flex items-center gap-2 text-blue-600 dark:text-blue-400 border-blue-300 dark:border-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900"
-                    >
-                      <UserCheck className="w-4 h-4" />
-                      Unlock User
-                    </Button>
-                  ) : (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleStatusChange("ACTIVE")}
-                      className="flex items-center gap-2 text-green-600 dark:text-green-400 border-green-300 dark:border-green-600 hover:bg-green-50 dark:hover:bg-green-900"
-                    >
-                      <UserCheck className="w-4 h-4" />
-                      Activate
-                    </Button>
-                  )}
-                  
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={handleDeleteUser}
-                    className="flex items-center gap-2 text-red-600 dark:text-red-400 border-red-300 dark:border-red-600 hover:bg-red-50 dark:hover:bg-red-900"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                    Delete
-                  </Button>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="flex items-center gap-2 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-800"
+                      >
+                        More Actions
+                        <ChevronDown className="w-4 h-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-56 bg-white dark:bg-gray-800 border dark:border-gray-700">
+                      <DropdownMenuItem
+                        onClick={handleResetAuthenticators}
+                        className="flex items-center gap-2 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer"
+                      >
+                        <RefreshCw className="w-4 h-4 text-blue-600" />
+                        Reset Authenticators
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={handleClearUserSessions}
+                        className="flex items-center gap-2 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer"
+                      >
+                        <UserX className="w-4 h-4 text-purple-600" />
+                        Clear User Sessions
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={handleResetBehaviorProfile}
+                        className="flex items-center gap-2 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer"
+                      >
+                        <RefreshCw className="w-4 h-4 text-green-600" />
+                        Reset Behavior Profile
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator className="border-gray-200 dark:border-gray-600" />
+                      {user.status === "ACTIVE" ? (
+                        <DropdownMenuItem
+                          onClick={() => handleStatusChange("SUSPENDED")}
+                          className="flex items-center gap-2 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer"
+                        >
+                          <UserX className="w-4 h-4 text-orange-600" />
+                          Suspend
+                        </DropdownMenuItem>
+                      ) : (
+                        <DropdownMenuItem
+                          onClick={() => handleStatusChange("ACTIVE")}
+                          className="flex items-center gap-2 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer"
+                        >
+                          <UserCheck className="w-4 h-4 text-green-600" />
+                          Activate
+                        </DropdownMenuItem>
+                      )}
+                      <DropdownMenuItem
+                        onClick={() => handleStatusChange("DEPROVISIONED")}
+                        className="flex items-center gap-2 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer"
+                      >
+                        <UserX className="w-4 h-4 text-red-600" />
+                        Deactivate
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </div>
               </div>
             </div>

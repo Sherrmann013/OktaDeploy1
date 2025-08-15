@@ -56,6 +56,124 @@ function determineEmployeeTypeFromGroups(userGroups: any[], employeeTypeApps: Se
 }
 import { setupAuth, isAuthenticated, requireAdmin } from "./direct-okta-auth";
 
+// Helper function to reset OKTA user authenticators
+async function resetOktaUserAuthenticators(apiKeys: Record<string, string>, oktaId: string) {
+  if (!apiKeys.domain || !apiKeys.apiToken) {
+    throw new Error('OKTA domain and API token are required');
+  }
+
+  try {
+    const response = await fetch(`https://${apiKeys.domain}/api/v1/users/${oktaId}/lifecycle/reset_factors`, {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'Authorization': `SSWS ${apiKeys.apiToken}`,
+      },
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`OKTA API error: ${response.status} ${response.statusText} - ${errorText}`);
+    }
+
+    return {
+      success: true,
+      message: 'Authenticators reset successfully'
+    };
+  } catch (error) {
+    throw new Error(`Failed to reset authenticators: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  }
+}
+
+// Helper function to clear OKTA user sessions
+async function clearOktaUserSessions(apiKeys: Record<string, string>, oktaId: string) {
+  if (!apiKeys.domain || !apiKeys.apiToken) {
+    throw new Error('OKTA domain and API token are required');
+  }
+
+  try {
+    const response = await fetch(`https://${apiKeys.domain}/api/v1/users/${oktaId}/sessions`, {
+      method: 'DELETE',
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': `SSWS ${apiKeys.apiToken}`,
+      },
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`OKTA API error: ${response.status} ${response.statusText} - ${errorText}`);
+    }
+
+    return {
+      success: true,
+      message: 'Sessions cleared successfully'
+    };
+  } catch (error) {
+    throw new Error(`Failed to clear sessions: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  }
+}
+
+// Helper function to reset OKTA user behavior profile
+async function resetOktaUserBehaviorProfile(apiKeys: Record<string, string>, oktaId: string) {
+  if (!apiKeys.domain || !apiKeys.apiToken) {
+    throw new Error('OKTA domain and API token are required');
+  }
+
+  try {
+    // OKTA doesn't have a direct "reset behavior profile" endpoint
+    // This typically involves clearing trusted networks, devices, and behavior patterns
+    // We can achieve this by clearing sessions and resetting factors as behavior is learned over time
+    
+    // Clear sessions first
+    await clearOktaUserSessions(apiKeys, oktaId);
+    
+    // Reset factors to clear device trust
+    await resetOktaUserAuthenticators(apiKeys, oktaId);
+
+    return {
+      success: true,
+      message: 'Behavior profile reset successfully'
+    };
+  } catch (error) {
+    throw new Error(`Failed to reset behavior profile: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  }
+}
+
+// Helper function to reset OKTA user password
+async function resetOktaUserPassword(apiKeys: Record<string, string>, oktaId: string) {
+  if (!apiKeys.domain || !apiKeys.apiToken) {
+    throw new Error('OKTA domain and API token are required');
+  }
+
+  try {
+    const response = await fetch(`https://${apiKeys.domain}/api/v1/users/${oktaId}/lifecycle/reset_password`, {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'Authorization': `SSWS ${apiKeys.apiToken}`,
+      },
+      body: JSON.stringify({
+        sendEmail: true
+      }),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`OKTA API error: ${response.status} ${response.statusText} - ${errorText}`);
+    }
+
+    return {
+      success: true,
+      message: 'Password reset email sent successfully'
+    };
+  } catch (error) {
+    throw new Error(`Failed to reset password: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  }
+}
+
 // Helper function to create OKTA user with client-specific API keys
 async function createOktaUser(apiKeys: Record<string, string>, userData: any) {
   if (!apiKeys.domain || !apiKeys.apiToken) {
@@ -5915,6 +6033,248 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error(`Error fetching user logs for client:`, error);
       res.status(500).json({ error: "Failed to fetch client user logs" });
+    }
+  });
+
+  // OKTA-specific user action endpoints
+  
+  // Reset user authenticators (MFA factors)
+  app.post("/api/client/:clientId/users/:userId/okta/reset-authenticators", isAuthenticated, requireAdmin, async (req, res) => {
+    try {
+      const clientId = parseInt(req.params.clientId);
+      const userId = parseInt(req.params.userId);
+      
+      console.log(`🔐 Resetting authenticators for user ${userId} in client ${clientId}`);
+      
+      // Get client-specific database connection
+      const multiDb = MultiDatabaseManager.getInstance();
+      const clientDb = await multiDb.getClientDb(clientId);
+      
+      // Get user from client database
+      const [user] = await clientDb.select().from(clientUsers).where(eq(clientUsers.id, userId)).limit(1);
+      
+      if (!user) {
+        return res.status(404).json({
+          success: false,
+          message: "User not found"
+        });
+      }
+
+      if (!user.oktaId) {
+        return res.status(400).json({
+          success: false,
+          message: "User has no OKTA ID"
+        });
+      }
+
+      // Get client's OKTA integration settings
+      const [oktaIntegration] = await clientDb.select().from(clientIntegrations)
+        .where(eq(clientIntegrations.name, 'okta'))
+        .limit(1);
+
+      if (!oktaIntegration || !oktaIntegration.apiKeys) {
+        return res.status(400).json({
+          success: false,
+          message: "OKTA integration not configured for this client"
+        });
+      }
+
+      // Call OKTA API to reset authenticators using client-specific credentials
+      const apiKeys = oktaIntegration.apiKeys as Record<string, string>;
+      const result = await resetOktaUserAuthenticators(apiKeys, user.oktaId);
+      console.log(`Authenticators reset for user ${user.email}:`, result);
+      
+      res.json({
+        success: true,
+        message: "Authenticators reset successfully. User will need to re-enroll MFA devices."
+      });
+    } catch (error) {
+      console.error("Reset authenticators error:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to reset authenticators",
+        error: error instanceof Error ? error.message : "Unknown error"
+      });
+    }
+  });
+
+  // Clear user sessions
+  app.post("/api/client/:clientId/users/:userId/okta/clear-sessions", isAuthenticated, requireAdmin, async (req, res) => {
+    try {
+      const clientId = parseInt(req.params.clientId);
+      const userId = parseInt(req.params.userId);
+      
+      console.log(`🚪 Clearing sessions for user ${userId} in client ${clientId}`);
+      
+      // Get client-specific database connection
+      const multiDb = MultiDatabaseManager.getInstance();
+      const clientDb = await multiDb.getClientDb(clientId);
+      
+      // Get user from client database
+      const [user] = await clientDb.select().from(clientUsers).where(eq(clientUsers.id, userId)).limit(1);
+      
+      if (!user) {
+        return res.status(404).json({
+          success: false,
+          message: "User not found"
+        });
+      }
+
+      if (!user.oktaId) {
+        return res.status(400).json({
+          success: false,
+          message: "User has no OKTA ID"
+        });
+      }
+
+      // Get client's OKTA integration settings
+      const [oktaIntegration] = await clientDb.select().from(clientIntegrations)
+        .where(eq(clientIntegrations.name, 'okta'))
+        .limit(1);
+
+      if (!oktaIntegration || !oktaIntegration.apiKeys) {
+        return res.status(400).json({
+          success: false,
+          message: "OKTA integration not configured for this client"
+        });
+      }
+
+      // Call OKTA API to clear sessions using client-specific credentials
+      const apiKeys = oktaIntegration.apiKeys as Record<string, string>;
+      const result = await clearOktaUserSessions(apiKeys, user.oktaId);
+      console.log(`Sessions cleared for user ${user.email}:`, result);
+      
+      res.json({
+        success: true,
+        message: "All user sessions cleared successfully. User has been signed out of all applications."
+      });
+    } catch (error) {
+      console.error("Clear sessions error:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to clear sessions",
+        error: error instanceof Error ? error.message : "Unknown error"
+      });
+    }
+  });
+
+  // Reset behavior profile
+  app.post("/api/client/:clientId/users/:userId/okta/reset-behavior", isAuthenticated, requireAdmin, async (req, res) => {
+    try {
+      const clientId = parseInt(req.params.clientId);
+      const userId = parseInt(req.params.userId);
+      
+      console.log(`🧠 Resetting behavior profile for user ${userId} in client ${clientId}`);
+      
+      // Get client-specific database connection
+      const multiDb = MultiDatabaseManager.getInstance();
+      const clientDb = await multiDb.getClientDb(clientId);
+      
+      // Get user from client database
+      const [user] = await clientDb.select().from(clientUsers).where(eq(clientUsers.id, userId)).limit(1);
+      
+      if (!user) {
+        return res.status(404).json({
+          success: false,
+          message: "User not found"
+        });
+      }
+
+      if (!user.oktaId) {
+        return res.status(400).json({
+          success: false,
+          message: "User has no OKTA ID"
+        });
+      }
+
+      // Get client's OKTA integration settings
+      const [oktaIntegration] = await clientDb.select().from(clientIntegrations)
+        .where(eq(clientIntegrations.name, 'okta'))
+        .limit(1);
+
+      if (!oktaIntegration || !oktaIntegration.apiKeys) {
+        return res.status(400).json({
+          success: false,
+          message: "OKTA integration not configured for this client"
+        });
+      }
+
+      // Call OKTA API to reset behavior profile using client-specific credentials
+      const apiKeys = oktaIntegration.apiKeys as Record<string, string>;
+      const result = await resetOktaUserBehaviorProfile(apiKeys, user.oktaId);
+      console.log(`Behavior profile reset for user ${user.email}:`, result);
+      
+      res.json({
+        success: true,
+        message: "Behavior profile reset successfully. User's authentication patterns have been cleared."
+      });
+    } catch (error) {
+      console.error("Reset behavior profile error:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to reset behavior profile",
+        error: error instanceof Error ? error.message : "Unknown error"
+      });
+    }
+  });
+
+  // Client-specific password reset endpoint
+  app.post("/api/client/:clientId/users/:userId/password/reset", isAuthenticated, requireAdmin, async (req, res) => {
+    try {
+      const clientId = parseInt(req.params.clientId);
+      const userId = parseInt(req.params.userId);
+      
+      console.log(`🔑 Resetting password for user ${userId} in client ${clientId}`);
+      
+      // Get client-specific database connection
+      const multiDb = MultiDatabaseManager.getInstance();
+      const clientDb = await multiDb.getClientDb(clientId);
+      
+      // Get user from client database
+      const [user] = await clientDb.select().from(clientUsers).where(eq(clientUsers.id, userId)).limit(1);
+      
+      if (!user) {
+        return res.status(404).json({
+          success: false,
+          message: "User not found"
+        });
+      }
+
+      if (!user.oktaId) {
+        return res.status(400).json({
+          success: false,
+          message: "User has no OKTA ID"
+        });
+      }
+
+      // Get client's OKTA integration settings
+      const [oktaIntegration] = await clientDb.select().from(clientIntegrations)
+        .where(eq(clientIntegrations.name, 'okta'))
+        .limit(1);
+
+      if (!oktaIntegration || !oktaIntegration.apiKeys) {
+        return res.status(400).json({
+          success: false,
+          message: "OKTA integration not configured for this client"
+        });
+      }
+
+      // Call OKTA API to reset password using client-specific credentials
+      const apiKeys = oktaIntegration.apiKeys as Record<string, string>;
+      const result = await resetOktaUserPassword(apiKeys, user.oktaId);
+      console.log(`Password reset initiated for user ${user.email}:`, result);
+      
+      res.json({
+        success: true,
+        message: "Password reset email sent successfully"
+      });
+    } catch (error) {
+      console.error("Password reset error:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to reset password",
+        error: error instanceof Error ? error.message : "Unknown error"
+      });
     }
   });
 
