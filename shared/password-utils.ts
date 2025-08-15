@@ -17,16 +17,46 @@ try {
   const randomWords = require('random-words');
   generate = randomWords.generate || randomWords;
 } catch (e) {
-  // Fallback for environments where random-words isn't available
-  generate = () => {
-    const fallbackWords = [
-      'blue', 'red', 'green', 'cat', 'dog', 'sun', 'moon', 'star', 'tree', 'bird',
-      'fish', 'car', 'book', 'key', 'box', 'cup', 'pen', 'hat', 'bag', 'run',
-      'jump', 'fast', 'slow', 'big', 'small', 'hot', 'cold', 'new', 'old', 'good',
-      'bad', 'easy', 'hard', 'soft', 'loud', 'quiet', 'dark', 'light', 'win', 'lose',
-      'open', 'close', 'start', 'stop', 'home', 'work', 'play', 'rest', 'love', 'hope'
-    ];
-    return fallbackWords[Math.floor(Math.random() * fallbackWords.length)];
+  // Enhanced fallback that respects parameters like the real random-words library
+  generate = (options?: { min?: number; max?: number; exactly?: number }) => {
+    const fallbackWordsByLength = {
+      3: ['cat', 'dog', 'sun', 'run', 'big', 'red', 'new', 'old', 'hot', 'car', 'pen', 'cup', 'key', 'box', 'hat', 'bag', 'win', 'top', 'way', 'day'],
+      4: ['blue', 'tree', 'bird', 'fish', 'book', 'home', 'work', 'play', 'love', 'hope', 'moon', 'star', 'fast', 'slow', 'good', 'hard', 'soft', 'loud', 'dark', 'open'],
+      5: ['green', 'water', 'house', 'music', 'light', 'world', 'night', 'white', 'great', 'small', 'close', 'start', 'quiet', 'right', 'wrong', 'happy', 'angry', 'quick', 'peace', 'dream'],
+      6: ['purple', 'orange', 'yellow', 'family', 'friend', 'garden', 'window', 'change', 'animal', 'strong', 'simple', 'modern', 'future', 'nature', 'search', 'health', 'energy', 'design', 'beauty', 'wonder'],
+      7: ['rainbow', 'morning', 'evening', 'freedom', 'journey', 'picture', 'kitchen', 'bedroom', 'amazing', 'awesome', 'perfect', 'special', 'holiday', 'science', 'machine', 'problem', 'service', 'history', 'reality', 'quality'],
+      8: ['mountain', 'computer', 'elephant', 'birthday', 'sunshine', 'sandwich', 'keyboard', 'password', 'platform', 'database', 'creative', 'positive', 'negative', 'feedback', 'question', 'solution', 'children', 'remember', 'together', 'business'],
+      9: ['frightens', 'wonderful', 'beautiful', 'important', 'different', 'community', 'available', 'education', 'president', 'according', 'knowledge', 'landscape', 'meanwhile', 'obviously', 'recognize', 'materials', 'marketing', 'generally', 'including', 'standards'],
+      10: ['everything', 'throughout', 'playground', 'background', 'foundation', 'generation', 'reputation', 'revolution', 'membership', 'friendship', 'leadership', 'technology', 'atmosphere', 'helicopter', 'tournament', 'investment', 'government', 'management', 'development', 'experience'],
+      11: ['independent', 'temperature', 'concentrate', 'consequence', 'performance', 'communicate', 'photography', 'perspective', 'maintenance', 'immediately', 'comfortable', 'responsible', 'information', 'environment', 'competition', 'application', 'celebration', 'explanation', 'destination', 'recognition'],
+      12: ['championship', 'contemporary', 'contribution', 'construction', 'professional', 'relationship', 'organization', 'intelligence', 'neighborhood', 'introduction', 'conversation', 'presentation', 'appreciation', 'acceleration', 'consultation', 'transformation', 'configuration', 'documentation', 'demonstration', 'refrigerator']
+    };
+
+    if (!options) {
+      // Simple call - return one random word
+      const allWords = Object.values(fallbackWordsByLength).flat();
+      return allWords[Math.floor(Math.random() * allWords.length)];
+    }
+
+    const { min = 3, max = 12, exactly = 100 } = options;
+    const result: string[] = [];
+    
+    // Get words within the specified length range
+    const availableWords: string[] = [];
+    for (let length = min; length <= max; length++) {
+      if (fallbackWordsByLength[length as keyof typeof fallbackWordsByLength]) {
+        availableWords.push(...fallbackWordsByLength[length as keyof typeof fallbackWordsByLength]);
+      }
+    }
+    
+    // Generate the requested number of words
+    for (let i = 0; i < exactly; i++) {
+      if (availableWords.length > 0) {
+        result.push(availableWords[Math.floor(Math.random() * availableWords.length)]);
+      }
+    }
+    
+    return result;
   };
 }
 
