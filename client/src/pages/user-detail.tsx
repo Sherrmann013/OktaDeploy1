@@ -77,6 +77,63 @@ export default function UserDetail() {
     message: string;
     action: () => void;
   } | null>(null);
+
+  // CSV download function for activity logs
+  const downloadLogsAsCSV = () => {
+    if (!userLogs || userLogs.length === 0) {
+      toast({
+        title: "No data to export",
+        description: "There are no activity logs to download.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Convert logs to CSV format
+    const headers = ['Time', 'Event Type', 'Display Message', 'Outcome', 'Actor Name', 'Actor Type', 'Client IP', 'User Agent', 'Target Names'];
+    const csvData = [
+      headers.join(','),
+      ...userLogs.map(log => {
+        const time = formatEventTime(log.published);
+        const eventType = log.eventType || '';
+        const displayMessage = (log.displayMessage || '').replace(/"/g, '""'); // Escape quotes
+        const outcome = log.outcome || '';
+        const actorName = log.actor?.displayName || '';
+        const actorType = log.actor?.type || '';
+        const clientIP = log.client?.ipAddress || '';
+        const userAgent = (log.client?.userAgent || '').replace(/"/g, '""'); // Escape quotes
+        const targetNames = (log.target || []).map((t: any) => t.displayName || '').join('; ');
+        
+        return [
+          `"${time}"`,
+          `"${eventType}"`,
+          `"${displayMessage}"`,
+          `"${outcome}"`,
+          `"${actorName}"`,
+          `"${actorType}"`,
+          `"${clientIP}"`,
+          `"${userAgent}"`,
+          `"${targetNames}"`
+        ].join(',');
+      })
+    ].join('\n');
+
+    // Create and download CSV file
+    const blob = new Blob([csvData], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', `user-activity-logs-${user?.firstName}-${user?.lastName}-${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    toast({
+      title: "Export successful",
+      description: `Downloaded ${userLogs.length} activity logs as CSV.`,
+    });
+  };
   
   const userId = params?.id ? parseInt(params.id) : null;
   
@@ -1565,7 +1622,7 @@ export default function UserDetail() {
                   <CardHeader className="flex flex-row items-center justify-between">
                     <CardTitle>Events: {userLogs.length}</CardTitle>
                     <div className="flex items-center gap-2">
-                      <Button variant="outline" size="sm">
+                      <Button variant="outline" size="sm" onClick={downloadLogsAsCSV}>
                         <Download className="w-4 h-4 mr-2" />
                         Download CSV
                       </Button>
