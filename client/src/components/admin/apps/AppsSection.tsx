@@ -49,6 +49,7 @@ export function AppsSection() {
   const [isClientConfigOpen, setIsClientConfigOpen] = useState(false);
   const [clientInitials, setClientInitials] = useState("");
   const [identityProvider, setIdentityProvider] = useState("");
+  const [serviceProvider, setServiceProvider] = useState("");
 
   // Fetch app mappings from database - CLIENT-AWARE for database isolation
   const { data: appMappingsData = [], isLoading: appMappingsLoading } = useQuery<AppMapping[]>({
@@ -65,6 +66,11 @@ export function AppsSection() {
 
   const { data: identityProviderData } = useQuery<LayoutSetting>({
     queryKey: [`/api/client/${currentClientId}/layout-settings/identity_provider`],
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const { data: serviceProviderData } = useQuery<LayoutSetting>({
+    queryKey: [`/api/client/${currentClientId}/layout-settings/service_provider`],
     staleTime: 5 * 60 * 1000,
   });
 
@@ -302,7 +308,9 @@ export function AppsSection() {
       queryClient.invalidateQueries({ queryKey: [`/api/client/${currentClientId}/layout-settings/${variables.setting}`] });
       toast({
         title: "Configuration updated",
-        description: `${variables.setting === 'client_initials' ? 'Client Initials' : 'Identity Provider'} updated successfully.`,
+        description: `${variables.setting === 'client_initials' ? 'Client Initials' : 
+                      variables.setting === 'identity_provider' ? 'Identity Provider' : 
+                      'Service Provider'} updated successfully.`,
       });
     },
     onError: (error: Error, variables) => {
@@ -327,6 +335,13 @@ export function AppsSection() {
         await updateClientConfigMutation.mutateAsync({
           setting: 'identity_provider', 
           value: identityProvider
+        });
+      }
+
+      if (serviceProvider !== (serviceProviderData?.settingValue || '')) {
+        await updateClientConfigMutation.mutateAsync({
+          setting: 'service_provider', 
+          value: serviceProvider
         });
       }
 
@@ -364,6 +379,12 @@ export function AppsSection() {
     }
   }, [identityProviderData?.settingValue]);
 
+  React.useEffect(() => {
+    if (serviceProviderData?.settingValue && serviceProvider === "") {
+      setServiceProvider(serviceProviderData.settingValue);
+    }
+  }, [serviceProviderData?.settingValue]);
+
   return (
     <>
       {/* Client Configuration Card */}
@@ -381,6 +402,7 @@ export function AppsSection() {
               onClick={() => {
                 setClientInitials(clientInitialsData?.settingValue || '');
                 setIdentityProvider(identityProviderData?.settingValue || '');
+                setServiceProvider(serviceProviderData?.settingValue || '');
                 setIsClientConfigOpen(true);
               }}
             >
@@ -390,7 +412,7 @@ export function AppsSection() {
           </div>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="space-y-2">
               <Label className="text-sm font-medium">Client Initials</Label>
               <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-md">
@@ -404,6 +426,14 @@ export function AppsSection() {
               <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-md">
                 <span className="text-sm text-gray-700 dark:text-gray-300">
                   {identityProviderData?.settingValue || 'Not configured'}
+                </span>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label className="text-sm font-medium">Service Provider</Label>
+              <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-md">
+                <span className="text-sm text-gray-700 dark:text-gray-300">
+                  {serviceProviderData?.settingValue || 'Not configured'}
                 </span>
               </div>
             </div>
@@ -697,7 +727,7 @@ export function AppsSection() {
           <DialogHeader>
             <DialogTitle>Client Configuration</DialogTitle>
             <DialogDescription>
-              Configure client initials and identity provider settings
+              Configure client initials, identity provider, and service provider settings
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
@@ -725,6 +755,18 @@ export function AppsSection() {
                   <SelectItem value="azure_ad">Azure Active Directory</SelectItem>
                   <SelectItem value="google_workspace">Google Workspace</SelectItem>
                   <SelectItem value="local">Local Authentication</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="serviceProvider">Service Provider</Label>
+              <Select value={serviceProvider} onValueChange={setServiceProvider}>
+                <SelectTrigger className="bg-white dark:bg-gray-800 border">
+                  <SelectValue placeholder="Select service provider" />
+                </SelectTrigger>
+                <SelectContent className="bg-white dark:bg-gray-800 border">
+                  <SelectItem value="Microsoft">Microsoft</SelectItem>
+                  <SelectItem value="Google">Google</SelectItem>
                 </SelectContent>
               </Select>
             </div>
