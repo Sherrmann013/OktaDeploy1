@@ -423,7 +423,7 @@ export function IntegrationsSection() {
       case 'knowbe4':
         return (
           <div className="grid gap-2">
-            <Label htmlFor="knowbe4ApiKey">API Key</Label>
+            <Label htmlFor="knowbe4ApiKey">GraphQL API Key</Label>
             <Input
               id="knowbe4ApiKey"
               type="password"
@@ -432,7 +432,7 @@ export function IntegrationsSection() {
                 ...prev, 
                 apiKeys: { ...prev.apiKeys, apiKey: e.target.value }
               } : null)}
-              placeholder="Enter KnowBe4 API key"
+              placeholder="Enter KnowBe4 GraphQL API key"
             />
           </div>
         );
