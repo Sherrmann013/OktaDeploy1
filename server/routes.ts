@@ -858,6 +858,7 @@ import {
   insertAppMappingSchema as clientInsertAppMappingSchema
 } from "../shared/client-schema";
 import { MultiDatabaseManager } from "./multi-db";
+import { ClientStorage } from "./client-storage";
 import * as mspRoutes from "./routes/msp";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -6527,8 +6528,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let result;
 
       if (action === "generate") {
+        // Create client storage instance
+        const clientStorage = new ClientStorage(clientId);
+        
         // Get client's password policy configuration
-        const clientStorage = MultiDatabaseManager.getClientStorage(clientId);
         const passwordSettings = await clientStorage.getLayoutSetting("password");
         
         let passwordConfig;
@@ -6543,7 +6546,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
 
         // Use client's password policy or fallback to default
-        const { generatePasswordFromPolicy, DEFAULT_PASSWORD_CONFIG } = await import('../../shared/password-utils');
+        const { generatePasswordFromPolicy, DEFAULT_PASSWORD_CONFIG } = await import('../shared/password-utils');
         const finalConfig = passwordConfig || DEFAULT_PASSWORD_CONFIG;
         
         console.log(`🔐 Generating password with client policy:`, finalConfig);
