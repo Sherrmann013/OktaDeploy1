@@ -530,30 +530,58 @@ function AdminComponent() {
         return (
           <div className="space-y-4">
             <div className="grid gap-2">
-              <Label htmlFor="oktaDomain">OKTA Domain</Label>
+              <Label htmlFor="oktaReadOnly">Read Only API Token</Label>
               <Input
-                id="oktaDomain"
-                type="text"
-                value={integration.apiKeys.domain || ""}
+                id="oktaReadOnly"
+                type="password"
+                value={integration.apiKeys.readOnly || ""}
                 onChange={(e) => setEditingIntegration(prev => prev ? { 
                   ...prev, 
-                  apiKeys: { ...prev.apiKeys, domain: e.target.value }
+                  apiKeys: { ...prev.apiKeys, readOnly: e.target.value }
                 } : null)}
-                placeholder="your-domain.okta.com"
+                placeholder="Enter OKTA Read Only API token"
                 className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700"
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="oktaToken">API Token</Label>
+              <Label htmlFor="oktaSuperAdmin">Super Admin API Token</Label>
               <Input
-                id="oktaToken"
+                id="oktaSuperAdmin"
                 type="password"
-                value={integration.apiKeys.apiToken || ""}
+                value={integration.apiKeys.superAdmin || ""}
                 onChange={(e) => setEditingIntegration(prev => prev ? { 
                   ...prev, 
-                  apiKeys: { ...prev.apiKeys, apiToken: e.target.value }
+                  apiKeys: { ...prev.apiKeys, superAdmin: e.target.value }
                 } : null)}
-                placeholder="Enter OKTA API token"
+                placeholder="Enter OKTA Super Admin API token"
+                className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700"
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="oktaUserManagement">User Management API Token</Label>
+              <Input
+                id="oktaUserManagement"
+                type="password"
+                value={integration.apiKeys.userManagement || ""}
+                onChange={(e) => setEditingIntegration(prev => prev ? { 
+                  ...prev, 
+                  apiKeys: { ...prev.apiKeys, userManagement: e.target.value }
+                } : null)}
+                placeholder="Enter OKTA User Management API token"
+                className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700"
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="oktaGroupAndApps">Group & Apps Management API Token</Label>
+              <Input
+                id="oktaGroupAndApps"
+                type="password"
+                value={integration.apiKeys.groupAndAppsManagement || ""}
+                onChange={(e) => setEditingIntegration(prev => prev ? { 
+                  ...prev, 
+                  apiKeys: { ...prev.apiKeys, groupAndAppsManagement: e.target.value }
+                } : null)}
+                placeholder="Enter OKTA Group & Apps Management API token"
                 className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700"
               />
             </div>
@@ -580,30 +608,77 @@ function AdminComponent() {
         return (
           <div className="space-y-4">
             <div className="grid gap-2">
-              <Label htmlFor="sentineloneUrl">Management URL</Label>
+              <Label htmlFor="sentineloneReadOnly">Read Only API Key</Label>
               <Input
-                id="sentineloneUrl"
-                type="text"
-                value={integration.apiKeys.managementUrl || ""}
+                id="sentineloneReadOnly"
+                type="password"
+                value={integration.apiKeys.readOnlyApiKey || ""}
                 onChange={(e) => setEditingIntegration(prev => prev ? { 
                   ...prev, 
-                  apiKeys: { ...prev.apiKeys, managementUrl: e.target.value }
+                  apiKeys: { ...prev.apiKeys, readOnlyApiKey: e.target.value }
                 } : null)}
-                placeholder="https://your-instance.sentinelone.net"
+                placeholder="Enter SentinelOne Read Only API key"
                 className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700"
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="sentineloneToken">API Token</Label>
+              <Label htmlFor="sentineloneFullAccess">Full Access API Key</Label>
               <Input
-                id="sentineloneToken"
+                id="sentineloneFullAccess"
                 type="password"
-                value={integration.apiKeys.apiToken || ""}
+                value={integration.apiKeys.fullAccessApiKey || ""}
                 onChange={(e) => setEditingIntegration(prev => prev ? { 
                   ...prev, 
-                  apiKeys: { ...prev.apiKeys, apiToken: e.target.value }
+                  apiKeys: { ...prev.apiKeys, fullAccessApiKey: e.target.value }
                 } : null)}
-                placeholder="Enter SentinelOne API token"
+                placeholder="Enter SentinelOne Full Access API key"
+                className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700"
+              />
+            </div>
+          </div>
+        );
+      case 'microsoft':
+        return (
+          <div className="space-y-4">
+            <div className="grid gap-2">
+              <Label htmlFor="msClientId">Client ID</Label>
+              <Input
+                id="msClientId"
+                type="text"
+                value={integration.apiKeys.clientId || ""}
+                onChange={(e) => setEditingIntegration(prev => prev ? { 
+                  ...prev, 
+                  apiKeys: { ...prev.apiKeys, clientId: e.target.value }
+                } : null)}
+                placeholder="Enter Microsoft Client ID"
+                className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700"
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="msTenantId">Tenant ID</Label>
+              <Input
+                id="msTenantId"
+                type="text"
+                value={integration.apiKeys.tenantId || ""}
+                onChange={(e) => setEditingIntegration(prev => prev ? { 
+                  ...prev, 
+                  apiKeys: { ...prev.apiKeys, tenantId: e.target.value }
+                } : null)}
+                placeholder="Enter Microsoft Tenant ID"
+                className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700"
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="msClientSecret">Client Secret</Label>
+              <Input
+                id="msClientSecret"
+                type="password"
+                value={integration.apiKeys.clientSecret || ""}
+                onChange={(e) => setEditingIntegration(prev => prev ? { 
+                  ...prev, 
+                  apiKeys: { ...prev.apiKeys, clientSecret: e.target.value }
+                } : null)}
+                placeholder="Enter Microsoft Client Secret"
                 className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700"
               />
             </div>
