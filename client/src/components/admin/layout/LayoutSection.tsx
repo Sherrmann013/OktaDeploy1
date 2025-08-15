@@ -852,11 +852,17 @@ export function LayoutSection({
                           </div>
                         </SelectTrigger>
                         <SelectContent className="bg-white dark:bg-gray-800 border">
-                          {integrationsData?.filter((integration: any) => integration.status === 'active').map((integration: any) => (
-                            <SelectItem key={integration.name} value={integration.name}>
-                              {integration.displayName || integration.name}
-                            </SelectItem>
-                          ))}
+                          {integrationsData?.length === 0 ? (
+                            <div className="p-2 text-sm text-gray-500">No integrations available</div>
+                          ) : integrationsData?.filter((integration: any) => integration.status === 'connected').length === 0 ? (
+                            <div className="p-2 text-sm text-gray-500">No connected integrations found</div>
+                          ) : (
+                            integrationsData?.filter((integration: any) => integration.status === 'connected').map((integration: any) => (
+                              <SelectItem key={integration.name} value={integration.name}>
+                                {integration.displayName || integration.name}
+                              </SelectItem>
+                            ))
+                          )}
                         </SelectContent>
                       </Select>
                     </div>
