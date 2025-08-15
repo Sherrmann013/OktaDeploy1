@@ -6423,28 +6423,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         console.log(`🔐 Generating password with client policy:`, finalConfig);
         const newPassword = generatePasswordFromPolicy(finalConfig);
-        console.log(`🔐 Generated password length: ${newPassword.length}`);
+        console.log(`🔐 Generated password length: ${newPassword.length} (not applied to OKTA yet)`);
 
-        // Use client-specific API keys to set password
-        result = await setOktaUserPassword(apiKeys, user.oktaId, newPassword, true);
-        
-        // Log audit action for generating password
+        // Log audit action for generating password (but not setting it)
         await clientStorage.logAudit({
           userId: user.id,
           userEmail: user.email,
-          action: 'PASSWORD_GENERATE',
-          details: `Generated password using client policy (${newPassword.length} characters)`,
+          action: 'PASSWORD_GENERATE_ONLY',
+          details: `Generated password candidate using client policy (${newPassword.length} characters) - not applied`,
           ipAddress: req.ip || 'unknown',
           userAgent: req.get('user-agent') || 'unknown',
           timestamp: new Date()
         });
 
-        console.log("Generated password result:", result);
+        console.log("Password generated for review (not set in OKTA yet)");
         return res.json({ 
           success: true,
-          message: "Password generated and set successfully",
+          message: "Password generated successfully",
           password: newPassword,
-          tempPassword: true,
+          tempPassword: false, // Not set yet
           policyUsed: finalConfig
         });
 

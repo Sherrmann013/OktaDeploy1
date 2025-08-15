@@ -131,6 +131,22 @@ The dashboard uses a React frontend (TypeScript, Tailwind CSS, Wouter) and an Ex
 
 **Prevention:** All user navigation must use client-scoped routes to maintain proper multi-tenant isolation.
 
+### Password Generation UX Workflow Bug (Resolved: August 15, 2025)
+**Problem:** "Generate" button in password reset modal immediately set password in OKTA and expired it, instead of just showing a generated password for user review before applying.
+
+**Root Cause:** 
+- Backend treated "generate" action the same as "reset" action - both generated AND applied password to OKTA
+- Expected UX: Generate → Show password → User confirms → Reset applies to OKTA
+- Actual UX: Generate → Set in OKTA → Expire → Show password (already applied)
+
+**Resolution Approach:**
+- Separated "generate" and "reset" actions in server/routes.ts
+- "generate" action now only generates password using client policy and returns it (no OKTA interaction)
+- "reset" action takes provided password and applies it to OKTA with temporary status
+- Updated audit logging to distinguish between generate-only vs actually setting password
+
+**Prevention:** Password generation should be a preview action that doesn't modify external systems until user confirms.
+
 ## External Dependencies
 - **OKTA:** For enterprise user authentication and management.
 - **KnowBe4:** Security training platform.
