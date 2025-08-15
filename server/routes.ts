@@ -3500,6 +3500,74 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Client-specific OKTA user statistics endpoint
+  app.get("/api/client/:clientId/okta/users/stats", isAuthenticated, async (req, res) => {
+    try {
+      const clientId = parseInt(req.params.clientId);
+      console.log(`📊 Fetching OKTA user statistics for client ${clientId}`);
+      
+      const multiDb = MultiDatabaseManager.getInstance();
+      const clientDb = await multiDb.getClientDb(clientId);
+      
+      // Get OKTA integration for this client
+      const [oktaIntegration] = await clientDb.select()
+        .from(clientIntegrations)
+        .where(and(
+          eq(clientIntegrations.name, 'okta'),
+          eq(clientIntegrations.status, 'connected')
+        ));
+      
+      if (!oktaIntegration) {
+        console.log(`❌ No OKTA integration found for client ${clientId}`);
+        return res.json({
+          activeUsers: 0,
+          totalUsers: 0,
+          lockedOutUsers: 0,
+          error: "OKTA integration not found or not connected"
+        });
+      }
+
+      // Fetch users from OKTA using client-specific API keys
+      const oktaUsers = await fetchOktaUsers(oktaIntegration.apiKeys as Record<string, string>);
+      
+      if (!oktaUsers.success || !oktaUsers.users) {
+        console.log(`❌ Failed to fetch OKTA users for client ${clientId}: ${oktaUsers.message}`);
+        return res.json({
+          activeUsers: 0,
+          totalUsers: 0,
+          lockedOutUsers: 0,
+          error: oktaUsers.message || "Failed to fetch OKTA users"
+        });
+      }
+
+      // Calculate user statistics
+      const totalUsers = oktaUsers.users.length;
+      const activeUsers = oktaUsers.users.filter(user => 
+        user.status === 'ACTIVE' || user.status === 'PROVISIONED'
+      ).length;
+      const lockedOutUsers = oktaUsers.users.filter(user => 
+        user.status === 'LOCKED_OUT'
+      ).length;
+
+      console.log(`📊 OKTA stats for client ${clientId}: ${activeUsers}/${totalUsers} active, ${lockedOutUsers} locked`);
+
+      res.json({
+        activeUsers,
+        totalUsers,
+        lockedOutUsers
+      });
+
+    } catch (error) {
+      console.error(`Error fetching OKTA user statistics for client ${req.params.clientId}:`, error);
+      res.status(500).json({
+        activeUsers: 0,
+        totalUsers: 0,
+        lockedOutUsers: 0,
+        error: "Failed to fetch OKTA user statistics"
+      });
+    }
+  });
+
   // Client-specific OKTA users endpoint (read-only from OKTA)
   app.get("/api/client/:clientId/okta/users", isAuthenticated, async (req, res) => {
     try {
