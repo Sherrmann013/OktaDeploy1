@@ -389,16 +389,18 @@ export default function UserDetail() {
 
   const passwordResetMutation = useMutation({
     mutationFn: async (action: "reset" | "expire" | "generate") => {
+      let response;
       if (action === "reset") {
         // For reset, send the actual password in the body
-        return apiRequest("POST", `/api/client/${clientId}/users/${userId}/password/reset`, { 
+        response = await apiRequest("POST", `/api/client/${clientId}/users/${userId}/password/reset`, { 
           action: "reset",
           password: newPassword 
         });
       } else {
         // For generate and expire, just send the action
-        return apiRequest("POST", `/api/client/${clientId}/users/${userId}/password/reset`, { action });
+        response = await apiRequest("POST", `/api/client/${clientId}/users/${userId}/password/reset`, { action });
       }
+      return await response.json();
     },
     onSuccess: (data: any, action) => {
       if (action === "generate" && data?.password) {
