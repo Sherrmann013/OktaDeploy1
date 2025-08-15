@@ -388,8 +388,7 @@ export default function UserDetail() {
   });
 
   const passwordResetMutation = useMutation({
-    mutationFn: async (action: "reset" | "expire" | "generate") => {
-      console.log("🔑 UserDetail: Starting password action:", action, "for user", userId, "in client", clientId);
+    mutationFn: async (action: "reset" | "expire") => {
       let response;
       if (action === "reset") {
         // For reset, send the actual password in the body
@@ -398,49 +397,21 @@ export default function UserDetail() {
           password: newPassword 
         });
       } else {
-        // For generate and expire, just send the action
+        // For expire, just send the action
         response = await apiRequest("POST", `/api/client/${clientId}/users/${userId}/password/reset`, { action });
       }
       const result = await response.json();
-      console.log("🔑 UserDetail: Password action response:", result);
       return result;
     },
     onSuccess: (data: any, action) => {
-      console.log("🔑 UserDetail: Password action success handler called with:", data, "action:", action);
-      if (action === "generate" && data?.generatedPassword) {
-        console.log("🔑 UserDetail: Setting generated password to:", data.generatedPassword);
-        // Use React's flushSync to ensure immediate state updates
-        setNewPassword(data.generatedPassword);
-        setGeneratedPassword(data.generatedPassword);
-        
-        // Force immediate re-render by updating state in next tick
-        setTimeout(() => {
-          setNewPassword(data.generatedPassword);
-        }, 0);
-        
-        console.log("🔑 UserDetail: Password state updated successfully");
-        toast({
-          title: "Password Generated",
-          description: `Generated password: ${data.generatedPassword}`,
-        });
-      } else if (action !== "generate") {
-        const actionText = action === "reset" ? "Password reset successful" : "Password expired successfully";
-        toast({
-          title: "Success",
-          description: actionText,
-        });
-      } else {
-        console.error("🔑 UserDetail: Invalid response format for generate action:", data);
-        toast({
-          title: "Password Generation Issue", 
-          description: "Password was generated but not returned properly",
-          variant: "destructive",
-        });
-      }
+      const actionText = action === "reset" ? "Password reset successful" : "Password expired successfully";
+      toast({
+        title: "Success",
+        description: actionText,
+      });
       queryClient.invalidateQueries({ queryKey: [`/api/client/${clientId}/users`, userId] });
     },
     onError: (error) => {
-      console.error("🔑 UserDetail: Password action error:", error);
       toast({
         title: "Error",
         description: error.message,
@@ -611,8 +582,31 @@ export default function UserDetail() {
   };
 
   const generatePassword = () => {
-    // Use server-side password generation with client policy (same as CreateUserModal)
-    passwordResetMutation.mutate("generate");
+    const words = [
+      'blue', 'red', 'green', 'cat', 'dog', 'sun', 'moon', 'star', 'tree', 'bird',
+      'fish', 'car', 'book', 'key', 'box', 'cup', 'pen', 'hat', 'bag', 'run',
+      'jump', 'fast', 'slow', 'big', 'small', 'hot', 'cold', 'new', 'old', 'good',
+      'bad', 'easy', 'hard', 'soft', 'loud', 'quiet', 'dark', 'light', 'win', 'lose',
+      'open', 'close', 'start', 'stop', 'home', 'work', 'play', 'rest', 'love', 'hope'
+    ];
+    
+    const symbols = ['!', '@', '#', '$', '%', '^', '&', '*'];
+    const numbers = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+    
+    // Generate exactly 12 characters: 2 words + 1 symbol + 2 numbers
+    const word1 = words[Math.floor(Math.random() * words.length)];
+    const word2 = words[Math.floor(Math.random() * words.length)];
+    const symbol = symbols[Math.floor(Math.random() * symbols.length)];
+    const num1 = numbers[Math.floor(Math.random() * numbers.length)];
+    const num2 = numbers[Math.floor(Math.random() * numbers.length)];
+    
+    // Capitalize first letter of each word
+    const cap1 = word1.charAt(0).toUpperCase() + word1.slice(1);
+    const cap2 = word2.charAt(0).toUpperCase() + word2.slice(1);
+    
+    const generatedPassword = cap1 + cap2 + symbol + num1 + num2;
+    setNewPassword(generatedPassword);
+    setGeneratedPassword(generatedPassword);
   };
 
   const handlePasswordReset = () => {

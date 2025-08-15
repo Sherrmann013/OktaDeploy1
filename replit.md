@@ -13,6 +13,8 @@ This project is a comprehensive React-based multi-tenant enterprise security man
 - **AS IS RULE CONSISTENCY LESSON:** If the rule works for complex cases, it MUST be applied to simple cases. No exceptions based on perceived simplicity.
 - **OKTA SECURITY POLICY:** When OKTA integration is configured for a client, user creation must fail completely if OKTA creation fails. NO local-only user creation in enterprise environments with OKTA integration.
 - **OKTA TERMINOLOGY ALIGNMENT:** System now uses "DEACTIVATED" throughout to align with OKTA's terminology. All backend and frontend references updated from "DEPROVISIONED" to "DEACTIVATED". Dropdown logic updated so "Delete User" replaces "Deactivate" option for users who are already deactivated, and delete confirmation dialog text simplified.
+- **ALGORITHM PRESERVATION RULE:** Never modify, improve, or recreate working user algorithms. If user has a working implementation, preserve it exactly as-is. Complexity and "improvements" often break simple, reliable solutions.
+- **CLIENT-SIDE PREFERENCE:** User prefers simple client-side implementations over complex server-side policy systems for core functionality like password generation.
 
 ## System Architecture
 The dashboard uses a React frontend (TypeScript, Tailwind CSS, Wouter) and an Express.js backend (TypeScript, PostgreSQL).
@@ -131,21 +133,28 @@ The dashboard uses a React frontend (TypeScript, Tailwind CSS, Wouter) and an Ex
 
 **Prevention:** All user navigation must use client-scoped routes to maintain proper multi-tenant isolation.
 
-### Password Generation UX Workflow Bug (Resolved: August 15, 2025)
-**Problem:** "Generate" button in password reset modal immediately set password in OKTA and expired it, instead of just showing a generated password for user review before applying.
+### Password Generation Algorithm Corruption and Recovery (Resolved: August 15, 2025)
+**Problem:** Server-side password generation was producing incorrect passwords ("Word82?23959") instead of the original algorithm format ("BlueTree45!"). Root cause was attempting to unify client-side and server-side generation with complex policy systems instead of preserving the original working algorithm.
 
 **Root Cause:** 
-- Backend treated "generate" action the same as "reset" action - both generated AND applied password to OKTA
-- Expected UX: Generate → Show password → User confirms → Reset applies to OKTA
-- Actual UX: Generate → Set in OKTA → Expire → Show password (already applied)
+- Original CreateUserModal had a perfect working client-side algorithm: 2 words + 1 symbol + 2 numbers = 12 characters
+- Agent moved this to server-side with complex policy configurations and fallback logic
+- Added unnecessary random-words library integration and dynamic policy parsing
+- Lost the simplicity and reliability of the original design
 
 **Resolution Approach:**
-- Separated "generate" and "reset" actions in server/routes.ts
-- "generate" action now only generates password using client policy and returns it (no OKTA interaction)
-- "reset" action takes provided password and applies it to OKTA with temporary status
-- Updated audit logging to distinguish between generate-only vs actually setting password
+- Restored original client-side algorithm exactly as originally designed to both CreateUserModal and UserDetail password reset
+- Removed server-side password generation complexity
+- Both modals now use identical simple algorithm: words array, symbols array, numbers array, direct generation
+- No policies, no server calls, no complications - just the original working code
 
-**Prevention:** Password generation should be a preview action that doesn't modify external systems until user confirms.
+**Critical Lesson Learned:** 
+- **NEVER modify working user algorithms** - if it works, leave it alone
+- User's simple, elegant solutions should not be "improved" or "unified" 
+- Policy-driven systems are not always better than direct implementation
+- When user says "use my algorithm", use their algorithm exactly as-is
+
+**Prevention:** Always preserve original working implementations instead of attempting to "improve" them with server-side unification or complex policy systems.
 
 ## External Dependencies
 - **OKTA:** For enterprise user authentication and management.

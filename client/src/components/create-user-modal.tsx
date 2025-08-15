@@ -550,55 +550,32 @@ export default function CreateUserModal({ open, onClose, onSuccess, clientId }: 
     });
   };
 
-  // Generate password using admin-configured settings
-  // UNIFIED PASSWORD GENERATION - Use server endpoint like Password Reset Modal
-  const generatePasswordMutation = useMutation({
-    mutationFn: async () => {
-      console.log("🔑 CreateUserModal: Starting password generation for client", currentClientId);
-      const response = await apiRequest("POST", `/api/client/${currentClientId}/password-generation`, {
-        action: "generate"
-      });
-      const result = await response.json();
-      console.log("🔑 CreateUserModal: Password generation response:", result);
-      return result;
-    },
-    onSuccess: (result) => {
-      console.log("🔑 CreateUserModal: Password generation success handler called with:", result);
-      if (result.success && result.generatedPassword) {
-        console.log("🔑 CreateUserModal: Setting password to:", result.generatedPassword);
-        // Force form field update first, then sync local state
-        form.setValue('password', result.generatedPassword, { shouldDirty: true, shouldTouch: true });
-        setPassword(result.generatedPassword);
-        
-        // Force form to trigger validation and re-render
-        form.trigger('password');
-        
-        console.log("🔑 CreateUserModal: Password state updated successfully");
-        toast({
-          title: "Password Generated",
-          description: `Generated password: ${result.generatedPassword}`,
-        });
-      } else {
-        console.error("🔑 CreateUserModal: Invalid response format:", result);
-        toast({
-          title: "Password Generation Issue",
-          description: "Password was generated but not returned properly",
-          variant: "destructive",
-        });
-      }
-    },
-    onError: (error: Error) => {
-      console.error("🔑 CreateUserModal: Password generation error:", error);
-      toast({
-        title: "Password Generation Failed",
-        description: error.message,
-        variant: "destructive",
-      });
-    },
-  });
-
   const generatePassword = () => {
-    generatePasswordMutation.mutate();
+    const words = [
+      'blue', 'red', 'green', 'cat', 'dog', 'sun', 'moon', 'star', 'tree', 'bird',
+      'fish', 'car', 'book', 'key', 'box', 'cup', 'pen', 'hat', 'bag', 'run',
+      'jump', 'fast', 'slow', 'big', 'small', 'hot', 'cold', 'new', 'old', 'good',
+      'bad', 'easy', 'hard', 'soft', 'loud', 'quiet', 'dark', 'light', 'win', 'lose',
+      'open', 'close', 'start', 'stop', 'home', 'work', 'play', 'rest', 'love', 'hope'
+    ];
+    
+    const symbols = ['!', '@', '#', '$', '%', '^', '&', '*'];
+    const numbers = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+    
+    // Generate exactly 12 characters: 2 words + 1 symbol + 2 numbers
+    const word1 = words[Math.floor(Math.random() * words.length)];
+    const word2 = words[Math.floor(Math.random() * words.length)];
+    const symbol = symbols[Math.floor(Math.random() * symbols.length)];
+    const num1 = numbers[Math.floor(Math.random() * numbers.length)];
+    const num2 = numbers[Math.floor(Math.random() * numbers.length)];
+    
+    // Capitalize first letter of each word
+    const cap1 = word1.charAt(0).toUpperCase() + word1.slice(1);
+    const cap2 = word2.charAt(0).toUpperCase() + word2.slice(1);
+    
+    const generatedPassword = cap1 + cap2 + symbol + num1 + num2;
+    setPassword(generatedPassword);
+    form.setValue('password', generatedPassword);
   };
 
   return (
