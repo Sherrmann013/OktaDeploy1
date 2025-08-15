@@ -174,6 +174,58 @@ async function resetOktaUserPassword(apiKeys: Record<string, string>, oktaId: st
   }
 }
 
+// Helper function to set OKTA user password
+async function setOktaUserPassword(apiKeys: Record<string, string>, oktaId: string, password: string, tempPassword: boolean = true) {
+  if (!apiKeys.domain || !apiKeys.apiToken) {
+    throw new Error('OKTA domain and API token are required');
+  }
+
+  try {
+    const response = await fetch(`https://${apiKeys.domain}/api/v1/users/${oktaId}`, {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'Authorization': `SSWS ${apiKeys.apiToken}`,
+      },
+      body: JSON.stringify({
+        credentials: {
+          password: {
+            value: password
+          }
+        }
+      }),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`OKTA API error: ${response.status} ${response.statusText} - ${errorText}`);
+    }
+
+    // If this should be a temporary password, expire it so user must change on next login
+    if (tempPassword) {
+      const expireResponse = await fetch(`https://${apiKeys.domain}/api/v1/users/${oktaId}/lifecycle/expire_password`, {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': `SSWS ${apiKeys.apiToken}`,
+        },
+      });
+
+      if (!expireResponse.ok) {
+        console.warn('Failed to expire password after setting, but password was set successfully');
+      }
+    }
+
+    return {
+      success: true,
+      message: 'Password set successfully'
+    };
+  } catch (error) {
+    throw new Error(`Failed to set password: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  }
+}
+
 // Helper function to create OKTA user with client-specific API keys
 async function createOktaUser(apiKeys: Record<string, string>, userData: any) {
   if (!apiKeys.domain || !apiKeys.apiToken) {
@@ -6553,8 +6605,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const newPassword = generatePasswordFromPolicy(finalConfig);
         console.log(`🔐 Generated password length: ${newPassword.length}`);
 
-        // Use the shared OKTA service to set password
-        result = await oktaService.setUserPassword(user.oktaId, newPassword, true);
+        // Use client-specific API keys to set password
+        result = await setOktaUserPassword(apiKeys, user.oktaId, newPassword, true);
         
         // Log audit action for generating password
         await clientStorage.createAuditLog(
@@ -6578,12 +6630,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       } else if (action === "expire") {
         // Expire password to force change on next login
-        result = await oktaService.expireUserPassword(user.oktaId);
+        const expireResponse = await fetch(`https://${apiKeys.domain}/api/v1/users/${user.oktaId}/lifecycle/expire_password`, {
+          method: 'POST',
+          headers: {
+            'Accept': 'application/json',
+            'Authorization': `SSWS ${apiKeys.apiToken}`,
+          },
+        });
+        
+        if (!expireResponse.ok) {
+          const errorText = await expireResponse.text();
+          throw new Error(`OKTA API error: ${expireResponse.status} ${expireResponse.statusText} - ${errorText}`);
+        }
+        
+        result = { success: true, message: 'Password expired successfully' };
         console.log(`Password expired for user ${user.email}:`, result);
         
       } else {
-        // Default reset action - send email
-        result = await oktaService.resetUserPassword(user.oktaId);
+        // Default reset action - send email using client-specific keys
+        result = await resetOktaUserPassword(apiKeys, user.oktaId);
         console.log(`Password reset initiated for user ${user.email}:`, result);
       }
       
