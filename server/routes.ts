@@ -126,11 +126,9 @@ async function getOktaUserDevices(apiKeys: Record<string, string>, oktaId: strin
 
       if (response.ok) {
         const data = await response.json();
-        console.log(`OKTA devices API response:`, JSON.stringify(data, null, 2));
         if (Array.isArray(data) && data.length > 0) {
           // Process devices to match OKTA's native format: Device name, Platform, Status
           data.forEach((deviceUser: any) => {
-            console.log(`Processing device:`, JSON.stringify(deviceUser, null, 2));
             const device = deviceUser.device || deviceUser;
             const profile = device.profile || {};
             
@@ -160,10 +158,8 @@ async function getOktaUserDevices(apiKeys: Record<string, string>, oktaId: strin
 
         if (factorsResponse.ok) {
           const factorsData = await factorsResponse.json();
-          console.log(`OKTA factors fallback response:`, JSON.stringify(factorsData, null, 2));
           if (Array.isArray(factorsData)) {
             factorsData.forEach((factor: any) => {
-              console.log(`Processing factor:`, JSON.stringify(factor, null, 2));
               if (factor.status === 'ACTIVE' && factor.profile) {
                 // Extract clean device name and platform from factor data
                 let deviceName = factor.profile.name || factor.profile.deviceName || 'Shield';

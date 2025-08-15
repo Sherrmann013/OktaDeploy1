@@ -1481,15 +1481,15 @@ export default function UserDetail() {
                     {userDevices.length === 0 ? (
                       <p className="text-gray-500 text-center py-8">No devices registered</p>
                     ) : (
-                      <div className="space-y-2">
+                      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
                         {userDevices.map((device, index) => (
-                          <div key={device.id || index} className="flex items-center justify-between p-2 border rounded-lg">
-                            <div className="flex items-center gap-3">
-                              <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
+                          <div key={device.id || index} className="flex items-center justify-between p-3 border rounded-lg bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                            <div className="flex items-center gap-3 flex-1">
+                              <div className="w-10 h-10 bg-gray-200 dark:bg-gray-600 rounded-lg flex items-center justify-center flex-shrink-0">
                                 <span className="text-lg">📱</span>
                               </div>
-                              <div>
-                                <h4 className="font-medium">
+                              <div className="min-w-0 flex-1">
+                                <h4 className="font-medium text-sm truncate">
                                   {device.profile?.deviceName || 
                                    device.profile?.name || 
                                    device.profile?.displayName || 
@@ -1498,7 +1498,7 @@ export default function UserDetail() {
                                    `${device.factorType || 'Device'} Factor` || 
                                    'Unknown Device'}
                                 </h4>
-                                <p className="text-sm text-gray-500">
+                                <p className="text-xs text-gray-500 uppercase tracking-wide">
                                   {device.profile?.platform || 
                                    device.profile?.deviceType || 
                                    device.platform || 
@@ -1507,7 +1507,7 @@ export default function UserDetail() {
                                    'Unknown Platform'}
                                 </p>
                                 {(device.profile?.serialNumber || device.serialNumber) && (
-                                  <p className="text-xs text-gray-400">
+                                  <p className="text-xs text-gray-400 truncate">
                                     Serial: {device.profile?.serialNumber || device.serialNumber}
                                   </p>
                                 )}
@@ -1518,13 +1518,13 @@ export default function UserDetail() {
                                 )}
                               </div>
                             </div>
-                            <div className="flex items-center gap-2">
-                              <Badge variant={device.status === 'ACTIVE' ? 'default' : 'secondary'}>
-                                {device.status || 'UNKNOWN'}
+                            <div className="flex flex-col items-end gap-1 ml-2">
+                              <Badge variant={device.status === 'ACTIVE' ? 'default' : 'secondary'} className="text-xs px-2 py-0.5">
+                                {device.status || 'ACTIVE'}
                               </Badge>
                               {(device.lastUpdated || device.created) && (
-                                <span className="text-xs text-gray-500">
-                                  Last seen: {new Date(device.lastUpdated || device.created).toLocaleDateString()}
+                                <span className="text-xs text-gray-400 text-right">
+                                  {new Date(device.lastUpdated || device.created).toLocaleDateString()}
                                 </span>
                               )}
                             </div>
