@@ -95,7 +95,7 @@ The dashboard uses a React frontend (TypeScript, Tailwind CSS, Wouter) and an Ex
 
 **Resolution Approach:**
 - Removed automatic OKTA sync from UsersSection.tsx useQuery to prevent race conditions
-- Added missing employee type group mappings ("Employee" → "CW-ET-EMPLOYEE", "Contractor" → "CW-ET-CONTRACTOR") to client-specific databases
+- Added missing employee type group mappings ("Employee" → "CW-ET-EMPLOYEE", "Contractor" → "CW-ET-CONTRACTOR") to client 13's database using direct SQL INSERT (API endpoints were failing due to authentication/schema issues)
 - OKTA sync is now only triggered manually through the sidebar sync button, preventing conflicts
 
 **Prevention:** OKTA sync should only be triggered manually by users when needed, not automatically on every data fetch to avoid race conditions with manual user creation.
