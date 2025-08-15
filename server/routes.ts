@@ -4851,7 +4851,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/client/:clientId/users", isAuthenticated, async (req, res) => {
     try {
       const clientId = parseInt(req.params.clientId);
-      const { search, limit = 20, page = 1, statsOnly = false, sortBy = 'firstName', sortOrder = 'asc', employeeTypeFilter, ...filters } = req.query;
+      const { 
+        search: searchQuery = '',
+        limit = 20, 
+        page = 1, 
+        statsOnly = false, 
+        sortBy = 'firstName', 
+        sortOrder = 'asc',
+        status: statusFilter,
+        department: departmentFilter,
+        employeeType: employeeTypeFilter,
+        ...filters 
+      } = req.query;
       
       console.log(`👥 Fetching users for client ${clientId}`);
       
@@ -4872,13 +4883,279 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
         return;
       }
+
+      // Get client's OKTA integration settings for sync capability
+      const [oktaIntegration] = await clientDb.select().from(clientIntegrations)
+        .where(eq(clientIntegrations.name, 'okta'))
+        .limit(1);
+
+      const hasOktaIntegration = oktaIntegration && oktaIntegration.apiKeys;
       
-      // Get users from client-specific database
+      // Try OKTA sync first if integration exists, then fallback to local database
+      if (hasOktaIntegration) {
+        try {
+          const apiKeys = oktaIntegration.apiKeys as Record<string, string>;
+          
+          // Fetch users from OKTA
+          const https = await import('https');
+          const domain = apiKeys.domain.replace(/^https?:\/\//, '');
+          
+          let allOktaUsers: any[] = [];
+          let nextUrl = `/api/v1/users?limit=200`;
+          
+          // Handle OKTA pagination
+          while (nextUrl) {
+            const oktaUsers = await new Promise<{users: any[], nextUrl: string | null}>((resolve, reject) => {
+              const options = {
+                hostname: domain,
+                port: 443,
+                path: nextUrl,
+                method: 'GET',
+                headers: {
+                  'Accept': 'application/json',
+                  'Authorization': `SSWS ${apiKeys.apiToken}`,
+                }
+              };
+
+              const req = https.request(options, (res) => {
+                let data = '';
+                res.on('data', (chunk) => { data += chunk; });
+                res.on('end', () => {
+                  try {
+                    const users = JSON.parse(data);
+                    const linkHeader = res.headers.link;
+                    let next = null;
+                    
+                    if (linkHeader && linkHeader.includes('rel="next"')) {
+                      const match = linkHeader.match(/<([^>]+)>;\s*rel="next"/);
+                      if (match) next = new URL(match[1]).pathname + new URL(match[1]).search;
+                    }
+                    
+                    resolve({ users, nextUrl: next });
+                  } catch (parseError) {
+                    reject(new Error(`Failed to parse OKTA response: ${data}`));
+                  }
+                });
+              });
+
+              req.on('error', reject);
+              req.end();
+            });
+
+            allOktaUsers.push(...oktaUsers.users);
+            nextUrl = oktaUsers.nextUrl;
+          }
+
+          console.log(`📡 Retrieved ${allOktaUsers.length} users from OKTA for client ${clientId}`);
+
+          // Apply search filter
+          let filteredUsers = allOktaUsers;
+          if (searchQuery && typeof searchQuery === 'string') {
+            const searchLower = searchQuery.toLowerCase();
+            filteredUsers = filteredUsers.filter(user => 
+              (user.profile?.firstName || '').toLowerCase().includes(searchLower) ||
+              (user.profile?.lastName || '').toLowerCase().includes(searchLower) ||
+              (user.profile?.email || '').toLowerCase().includes(searchLower) ||
+              (user.profile?.login || '').toLowerCase().includes(searchLower)
+            );
+          }
+
+          // Apply filters  
+          if (statusFilter && typeof statusFilter === 'string') {
+            filteredUsers = filteredUsers.filter(user => user.status === statusFilter);
+          }
+          if (departmentFilter && typeof departmentFilter === 'string') {
+            filteredUsers = filteredUsers.filter(user => user.profile?.department === departmentFilter);
+          }
+
+          // RESTORED: Complex user sorting logic with enhanced status comparison
+          if (sortBy && sortOrder) {
+            filteredUsers.sort((a: any, b: any) => {
+              // Priority sorting: locked out users first (if sorting by status or default)
+              const aIsLockedOut = a.status === 'LOCKED_OUT';
+              const bIsLockedOut = b.status === 'LOCKED_OUT';
+              
+              if (aIsLockedOut && !bIsLockedOut) return -1;
+              if (!aIsLockedOut && bIsLockedOut) return 1;
+              
+              let aValue: any, bValue: any;
+              
+              switch (sortBy) {
+                case 'firstName':
+                  aValue = a.profile?.firstName || '';
+                  bValue = b.profile?.firstName || '';
+                  break;
+                case 'lastName':
+                  aValue = a.profile?.lastName || '';
+                  bValue = b.profile?.lastName || '';
+                  break;
+                case 'email':
+                  aValue = a.profile?.email || '';
+                  bValue = b.profile?.email || '';
+                  break;
+                case 'title':
+                  aValue = a.profile?.title || '';
+                  bValue = b.profile?.title || '';
+                  break;
+                case 'department':
+                  aValue = a.profile?.department || '';
+                  bValue = b.profile?.department || '';
+                  break;
+                case 'manager':
+                  aValue = a.profile?.manager || '';
+                  bValue = b.profile?.manager || '';
+                  break;
+                case 'status':
+                  aValue = a.status || '';
+                  bValue = b.status || '';
+                  break;
+                case 'lastLogin':
+                  // Handle date sorting with null values at end
+                  if (!a.lastLogin && !b.lastLogin) return 0;
+                  if (!a.lastLogin) return 1;
+                  if (!b.lastLogin) return -1;
+                  aValue = new Date(a.lastLogin).getTime();
+                  bValue = new Date(b.lastLogin).getTime();
+                  return sortOrder === 'desc' ? bValue - aValue : aValue - bValue;
+                case 'activated':
+                case 'created':
+                case 'lastUpdated':
+                case 'passwordChanged':
+                  const aDate = a.activated || a.created || a.lastUpdated || a.passwordChanged;
+                  const bDate = b.activated || b.created || b.lastUpdated || b.passwordChanged;
+                  if (!aDate && !bDate) return 0;
+                  if (!aDate) return 1;
+                  if (!bDate) return -1;
+                  aValue = new Date(aDate).getTime();
+                  bValue = new Date(bDate).getTime();
+                  return sortOrder === 'desc' ? bValue - aValue : aValue - bValue;
+                default:
+                  aValue = a.profile?.firstName || '';
+                  bValue = b.profile?.firstName || '';
+              }
+              
+              // Handle empty values properly
+              if (!aValue && !bValue) return 0;
+              if (!aValue) return sortOrder === 'desc' ? -1 : 1;
+              if (!bValue) return sortOrder === 'desc' ? 1 : -1;
+              
+              // RESTORED: Locale-aware text comparison with enhanced Unicode support
+              if (sortOrder === 'desc') {
+                return String(bValue).localeCompare(String(aValue), undefined, { 
+                  numeric: true, 
+                  sensitivity: 'base',
+                  caseFirst: 'upper'
+                });
+              } else {
+                return String(aValue).localeCompare(String(bValue), undefined, { 
+                  numeric: true, 
+                  sensitivity: 'base',
+                  caseFirst: 'upper'
+                });
+              }
+            });
+          }
+
+          // Pagination
+          const pageNum = parseInt(page as string);
+          const limitNum = parseInt(limit as string);
+          const offset = (pageNum - 1) * limitNum;
+          const paginatedUsers = filteredUsers.slice(offset, offset + limitNum);
+          const totalPages = Math.ceil(filteredUsers.length / limitNum);
+          
+          // RESTORED: OKTA user synchronization with client-specific database
+          const transformedUsers = [];
+          const clientStorage = new ClientStorage(clientId);
+          
+          for (const oktaUser of paginatedUsers) {
+            // Check if user exists in client database
+            const [existingUser] = await clientDb.select().from(clientUsers)
+              .where(eq(clientUsers.oktaId, oktaUser.id))
+              .limit(1);
+            
+            let dbUser = existingUser;
+            
+            if (!dbUser) {
+              // Create user in client database if doesn't exist
+              try {
+                const [newUser] = await clientDb.insert(clientUsers).values({
+                  oktaId: oktaUser.id,
+                  firstName: oktaUser.profile?.firstName || '',
+                  lastName: oktaUser.profile?.lastName || '',
+                  email: oktaUser.profile?.email || '',
+                  login: oktaUser.profile?.login || '',
+                  mobilePhone: oktaUser.profile?.mobilePhone || null,
+                  department: oktaUser.profile?.department || null,
+                  title: oktaUser.profile?.title || null,
+                  employeeType: null,
+                  status: oktaUser.status,
+                }).returning();
+                dbUser = newUser;
+                console.log(`➕ Created new user ${oktaUser.profile?.email} in client ${clientId} database`);
+              } catch (insertError) {
+                console.error(`Failed to create user ${oktaUser.profile?.email}:`, insertError);
+                continue;
+              }
+            } else {
+              // Update existing user with latest OKTA data
+              try {
+                const [updatedUser] = await clientDb.update(clientUsers)
+                  .set({
+                    firstName: oktaUser.profile?.firstName || '',
+                    lastName: oktaUser.profile?.lastName || '',
+                    email: oktaUser.profile?.email || '',
+                    login: oktaUser.profile?.login || '',
+                    mobilePhone: oktaUser.profile?.mobilePhone || null,
+                    department: oktaUser.profile?.department || null,
+                    title: oktaUser.profile?.title || null,
+                    status: oktaUser.status,
+                    lastUpdated: new Date()
+                  })
+                  .where(eq(clientUsers.id, existingUser.id))
+                  .returning();
+                dbUser = updatedUser;
+              } catch (updateError) {
+                console.error(`Failed to update user ${oktaUser.profile?.email}:`, updateError);
+                dbUser = existingUser; // Use existing data if update fails
+              }
+            }
+            
+            if (dbUser) {
+              transformedUsers.push(dbUser);
+            }
+          }
+          
+          // RESTORED: Disable caching for fresh sorted data
+          res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+          res.set('Pragma', 'no-cache');
+          res.set('Expires', '0');
+          
+          console.log(`✅ Found ${transformedUsers.length} users for client ${clientId} via OKTA sync (${filteredUsers.length} total)`);
+          
+          res.json({
+            users: transformedUsers,
+            total: filteredUsers.length,
+            currentPage: pageNum,
+            totalPages,
+            usersPerPage: limitNum,
+            source: 'okta_sync'
+          });
+          return;
+          
+        } catch (oktaError: any) {
+          console.log(`⚠️ OKTA API unavailable for client ${clientId}, falling back to local database:`, oktaError.message);
+          // Continue to fallback logic below
+        }
+      }
+      
+      // RESTORED: Fallback to local client database with enhanced filtering
+      console.log(`📂 Using local database fallback for client ${clientId}`);
+      
       let query = clientDb.select().from(clientUsers);
       
       // Apply search filter if provided
-      if (search && typeof search === 'string') {
-        const searchTerm = `%${search.toLowerCase()}%`;
+      if (searchQuery && typeof searchQuery === 'string') {
+        const searchTerm = `%${searchQuery.toLowerCase()}%`;
         query = query.where(
           or(
             ilike(clientUsers.firstName, searchTerm),
@@ -4888,39 +5165,82 @@ export async function registerRoutes(app: Express): Promise<Server> {
         );
       }
       
-      // Apply employee type filter
+      // Apply filters
+      if (statusFilter && typeof statusFilter === 'string') {
+        query = query.where(eq(clientUsers.status, statusFilter));
+      }
+      if (departmentFilter && typeof departmentFilter === 'string') {
+        query = query.where(eq(clientUsers.department, departmentFilter));
+      }
       if (employeeTypeFilter && typeof employeeTypeFilter === 'string') {
         query = query.where(eq(clientUsers.employeeType, employeeTypeFilter));
       }
       
-      // Get total count for pagination
+      // Get all filtered users for sorting and pagination
       const allFilteredUsers = await query;
       const total = allFilteredUsers.length;
       
-      // Apply sorting
-      const sortField = sortBy as keyof typeof clientUsers.$inferSelect;
-      if (sortOrder === 'desc') {
-        query = query.orderBy(desc(clientUsers[sortField]));
-      } else {
-        query = query.orderBy(asc(clientUsers[sortField]));
+      // Apply enhanced sorting to local data
+      let sortedUsers = [...allFilteredUsers];
+      if (sortBy && sortOrder) {
+        sortedUsers.sort((a: any, b: any) => {
+          // Enhanced status comparison
+          const aIsLockedOut = a.status === 'LOCKED_OUT';
+          const bIsLockedOut = b.status === 'LOCKED_OUT';
+          
+          if (aIsLockedOut && !bIsLockedOut) return -1;
+          if (!aIsLockedOut && bIsLockedOut) return 1;
+          
+          let aValue: any, bValue: any;
+          const field = sortBy as keyof typeof a;
+          aValue = a[field] || '';
+          bValue = b[field] || '';
+          
+          // Handle empty values
+          if (!aValue && !bValue) return 0;
+          if (!aValue) return sortOrder === 'desc' ? -1 : 1;
+          if (!bValue) return sortOrder === 'desc' ? 1 : -1;
+          
+          // Locale-aware comparison
+          if (sortOrder === 'desc') {
+            return String(bValue).localeCompare(String(aValue), undefined, { 
+              numeric: true, 
+              sensitivity: 'base',
+              caseFirst: 'upper'
+            });
+          } else {
+            return String(aValue).localeCompare(String(bValue), undefined, { 
+              numeric: true, 
+              sensitivity: 'base',
+              caseFirst: 'upper'
+            });
+          }
+        });
       }
       
       // Apply pagination
-      const offset = (parseInt(page as string) - 1) * parseInt(limit as string);
-      const paginatedUsers = allFilteredUsers.slice(offset, offset + parseInt(limit as string));
+      const pageNum = parseInt(page as string);
+      const limitNum = parseInt(limit as string);
+      const offset = (pageNum - 1) * limitNum;
+      const paginatedUsers = sortedUsers.slice(offset, offset + limitNum);
+      const totalPages = Math.ceil(total / limitNum);
       
-      const totalPages = Math.ceil(total / parseInt(limit as string));
+      // RESTORED: Cache control for fallback data
+      res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+      res.set('Pragma', 'no-cache');
+      res.set('Expires', '0');
       
-      console.log(`✅ Found ${paginatedUsers.length} users for client ${clientId} (${total} total)`);
+      console.log(`✅ Found ${paginatedUsers.length} users for client ${clientId} via local fallback (${total} total)`);
       
       res.json({
         users: paginatedUsers,
         total,
-        currentPage: parseInt(page as string),
+        currentPage: pageNum,
         totalPages,
-        usersPerPage: parseInt(limit as string),
-        source: 'client_db'
+        usersPerPage: limitNum,
+        source: 'client_db_fallback'
       });
+      
     } catch (error) {
       console.error(`Error fetching users for client:`, error);
       res.status(500).json({ error: "Failed to fetch client users" });
@@ -5945,8 +6265,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.log("Password generated for review (not set in OKTA yet)");
         return res.json({ 
           success: true,
-          message: "Password generated successfully",
-          password: newPassword,
+          message: "Password generated for review (not set in OKTA yet)",
+          generatedPassword: newPassword,
           tempPassword: false, // Not set yet
           policyUsed: finalConfig
         });
@@ -5984,6 +6304,54 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({
         success: false,
         message: `Failed to ${req.body.action || 'reset'} password`,
+        error: error instanceof Error ? error.message : "Unknown error"
+      });
+    }
+  });
+
+  // Client-specific password generation endpoint (for new user creation)
+  app.post("/api/client/:clientId/password-generation", isAuthenticated, requireAdmin, async (req, res) => {
+    try {
+      const clientId = parseInt(req.params.clientId);
+      console.log(`🔑 Password generation requested for client ${clientId}`);
+      
+      // Create client storage instance
+      const clientStorage = new ClientStorage(clientId);
+      
+      // Get client's password policy configuration
+      const passwordSettings = await clientStorage.getLayoutSetting("password");
+      
+      let passwordConfig;
+      if (passwordSettings?.settingValue) {
+        try {
+          passwordConfig = typeof passwordSettings.settingValue === 'string' 
+            ? JSON.parse(passwordSettings.settingValue) 
+            : passwordSettings.settingValue;
+        } catch (e) {
+          console.warn("Failed to parse password config, using default:", e);
+        }
+      }
+
+      // Use client's password policy or fallback to default
+      const { generatePasswordFromPolicy, DEFAULT_PASSWORD_CONFIG } = await import('../shared/password-utils');
+      
+      const finalConfig = passwordConfig || DEFAULT_PASSWORD_CONFIG;
+      console.log(`🔐 Generating password with client policy:`, finalConfig);
+      
+      const newPassword = generatePasswordFromPolicy(finalConfig);
+      console.log(`🔐 Generated password length: ${newPassword.length} (for new user creation)`);
+
+      return res.json({ 
+        success: true,
+        message: "Password generated for new user",
+        generatedPassword: newPassword
+      });
+      
+    } catch (error) {
+      console.error("Password generation error:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to generate password",
         error: error instanceof Error ? error.message : "Unknown error"
       });
     }

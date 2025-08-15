@@ -403,9 +403,9 @@ export default function UserDetail() {
       return await response.json();
     },
     onSuccess: (data: any, action) => {
-      if (action === "generate" && data?.password) {
-        setGeneratedPassword(data.password);
-        setNewPassword(data.password);
+      if (action === "generate" && data?.generatedPassword) {
+        setGeneratedPassword(data.generatedPassword);
+        setNewPassword(data.generatedPassword);
         // No success popup for password generation (as requested)
       } else {
         const actionText = action === "reset" ? "Password reset successful" : "Password expired successfully";

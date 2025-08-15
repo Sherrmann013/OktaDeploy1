@@ -554,7 +554,7 @@ export default function CreateUserModal({ open, onClose, onSuccess, clientId }: 
   // UNIFIED PASSWORD GENERATION - Use server endpoint like Password Reset Modal
   const generatePasswordMutation = useMutation({
     mutationFn: async () => {
-      const response = await apiRequest("POST", `/api/client/${currentClientId}/password-reset`, {
+      const response = await apiRequest("POST", `/api/client/${currentClientId}/password-generation`, {
         action: "generate"
       });
       return await response.json();
