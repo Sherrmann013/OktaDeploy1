@@ -139,25 +139,7 @@ export function UsersSection() {
   const { data: usersData, isLoading, refetch, isFetching } = useQuery({
     queryKey: [`/api/client/${currentClientId}/users`, currentPage, usersPerPage, debouncedSearchQuery, sortBy, sortOrder, employeeTypeFilter, filters],
     queryFn: async () => {
-      // First try to sync from OKTA, then fetch users
-      try {
-        console.log('Auto-syncing users from OKTA...');
-        const syncResponse = await fetch(`/api/client/${currentClientId}/okta/sync-users`, {
-          method: "POST",
-          credentials: "include"
-        });
-        
-        if (syncResponse.ok) {
-          const syncData = await syncResponse.json();
-          console.log(`OKTA sync completed: ${syncData.totalUsers} total, ${syncData.newUsers} new, ${syncData.updatedUsers} updated`);
-        } else {
-          console.warn('OKTA sync failed, falling back to local users');
-        }
-      } catch (error) {
-        console.warn('OKTA sync error, falling back to local users:', error);
-      }
-
-      // Now fetch users from local database
+      // Fetch users from local database (automatic sync removed to prevent race conditions)
       const params = new URLSearchParams({
         page: currentPage.toString(),
         limit: usersPerPage.toString(),

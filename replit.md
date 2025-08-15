@@ -84,6 +84,22 @@ The dashboard uses a React frontend (TypeScript, Tailwind CSS, Wouter) and an Ex
 
 **Prevention:** All save functions use stable ref-based patterns with clean useEffect dependencies to prevent auto-triggering.
 
+### Automatic OKTA Sync Race Condition Issue (Resolved: August 15, 2025)
+**Problem:** Duplicate users were being created due to automatic OKTA sync running immediately after manual user creation, causing database constraint violations and preventing proper employee type group assignment.
+
+**Root Cause:** 
+- UsersSection.tsx had automatic OKTA sync in the useQuery queryFn that ran every time users were fetched
+- Manual user creation would invalidate queries, triggering the automatic sync
+- The sync would find the newly created user in OKTA and try to create it again locally
+- Missing employee type group mappings in client-specific databases prevented proper group assignment
+
+**Resolution Approach:**
+- Removed automatic OKTA sync from UsersSection.tsx useQuery to prevent race conditions
+- Added missing employee type group mappings ("Employee" → "CW-ET-EMPLOYEE", "Contractor" → "CW-ET-CONTRACTOR") to client-specific databases
+- OKTA sync is now only triggered manually through the sidebar sync button, preventing conflicts
+
+**Prevention:** OKTA sync should only be triggered manually by users when needed, not automatically on every data fetch to avoid race conditions with manual user creation.
+
 ## External Dependencies
 - **OKTA:** For enterprise user authentication and management.
 - **KnowBe4:** Security training platform.
