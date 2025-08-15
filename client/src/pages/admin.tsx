@@ -907,21 +907,24 @@ function AdminComponent() {
         <DialogContent className="sm:max-w-[425px] max-h-[80vh] overflow-y-auto overflow-x-hidden">
           <DialogHeader>
             <DialogTitle>Configure {editingIntegration?.displayName || editingIntegration?.name}</DialogTitle>
+            <DialogDescription>
+              Dashboard card configuration options will be added here.
+            </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
-            {renderApiKeyFields(editingIntegration)}
+            <div className="text-center text-gray-500 dark:text-gray-400">
+              Configuration options coming soon...
+            </div>
           </div>
           <div className="flex justify-end gap-3">
             <Button 
               variant="outline" 
-              onClick={() => editingIntegration && testConnectionMutation.mutate(editingIntegration.id)}
-              disabled={testConnectionMutation.isPending}
-              className="border-blue-300 text-blue-600 hover:bg-blue-50 dark:border-blue-700 dark:text-blue-400 dark:hover:bg-blue-950"
+              onClick={() => setIsConfigureIntegrationOpen(false)}
             >
-              {testConnectionMutation.isPending ? "Testing..." : "Test Connection"}
+              Cancel
             </Button>
-            <Button onClick={handleUpdateIntegration} disabled={updateIntegrationMutation.isPending}>
-              {updateIntegrationMutation.isPending ? "Saving..." : "Save Changes"}
+            <Button onClick={() => setIsConfigureIntegrationOpen(false)}>
+              Close
             </Button>
           </div>
         </DialogContent>
