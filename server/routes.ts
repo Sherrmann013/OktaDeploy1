@@ -6124,9 +6124,87 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Use client-specific database connection
       const multiDb = MultiDatabaseManager.getInstance();
       const clientDb = await multiDb.getClientDb(clientId);
+      const { ClientStorage } = await import("./client-storage");
+      const clientStorage = new ClientStorage(clientId);
       
-      // For now, return empty array - this would need proper implementation
-      res.json([]);
+      // Get the user from client database
+      const user = await clientStorage.getUser(userId);
+      
+      if (!user || !user.oktaId) {
+        return res.status(404).json({ message: "User not found or no OKTA ID" });
+      }
+      
+      // Check if client has OKTA integration
+      const [oktaIntegration] = await clientDb.select()
+        .from(clientIntegrations)
+        .where(and(
+          eq(clientIntegrations.name, 'okta'),
+          eq(clientIntegrations.status, 'connected')
+        ));
+        
+      if (!oktaIntegration || !oktaIntegration.apiKeys) {
+        console.log(`❌ No OKTA integration found for client ${clientId}`);
+        return res.json([]);
+      }
+      
+      const apiKeys = oktaIntegration.apiKeys as Record<string, string>;
+      const oktaDomain = apiKeys.domain;
+      const oktaToken = apiKeys.api_token;
+      
+      if (!oktaDomain || !oktaToken) {
+        console.log(`❌ OKTA credentials incomplete for client ${clientId}`);
+        return res.json([]);
+      }
+      
+      try {
+        // Fetch logs from OKTA using client-specific credentials
+        const logsUrl = `https://${oktaDomain}/api/v1/logs?filter=actor.id eq "${user.oktaId}"&limit=100`;
+        const response = await fetch(logsUrl, {
+          headers: {
+            'Authorization': `SSWS ${oktaToken}`,
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          }
+        });
+        
+        if (!response.ok) {
+          throw new Error(`OKTA API error: ${response.status}`);
+        }
+        
+        const logs = await response.json();
+        
+        // Transform logs to match expected format
+        const enhancedLogs = logs.map((log: any) => ({
+          id: log.uuid,
+          eventType: log.eventType,
+          displayMessage: log.displayMessage,
+          outcome: log.outcome?.result || "UNKNOWN",
+          published: log.published,
+          actor: {
+            id: log.actor?.id,
+            displayName: log.actor?.displayName,
+            type: log.actor?.type
+          },
+          client: {
+            userAgent: log.client?.userAgent?.rawUserAgent,
+            ipAddress: log.client?.ipAddress,
+            geographicalContext: log.client?.geographicalContext
+          },
+          target: log.target?.map((t: any) => ({
+            id: t.id,
+            type: t.type,
+            displayName: t.displayName
+          })) || []
+        }));
+        
+        console.log(`✅ Found ${enhancedLogs.length} logs for user ${userId} in client ${clientId}`);
+        res.json(enhancedLogs);
+        
+      } catch (oktaError) {
+        console.error(`Error fetching OKTA logs for client ${clientId}:`, oktaError);
+        res.json([]);
+      }
+      
     } catch (error) {
       console.error(`Error fetching user logs for client:`, error);
       res.status(500).json({ error: "Failed to fetch client user logs" });
