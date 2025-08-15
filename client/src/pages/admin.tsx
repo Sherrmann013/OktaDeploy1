@@ -104,6 +104,11 @@ function AdminComponent() {
   });
 
   const [isCreateUserModalOpen, setIsCreateUserModalOpen] = useState(false);
+  
+  // Integration configuration modal state
+  const [isConfigureIntegrationOpen, setIsConfigureIntegrationOpen] = useState(false);
+  const [editingIntegration, setEditingIntegration] = useState<any>(null);
+  
   // State moved to NewUserConfigSection component
 
   // Query to fetch integrations data - CLIENT-AWARE
@@ -114,6 +119,74 @@ function AdminComponent() {
   });
 
   // App mappings data query already declared above - removed duplicate
+
+  // Update integration mutation for modal
+  const updateIntegrationMutation = useMutation({
+    mutationFn: async ({ id, integrationData }: { id: number; integrationData: { name: string; displayName: string; description: string; status: string; apiKeys: Record<string, string>; config: Record<string, any> } }) => {
+      const response = await fetch(`/api/client/${currentClientId}/integrations/${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        credentials: "include",
+        body: JSON.stringify(integrationData)
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || `HTTP ${response.status}: ${response.statusText}`);
+      }
+      
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/client/${currentClientId}/integrations`] });
+      setIsConfigureIntegrationOpen(false);
+      setEditingIntegration(null);
+      toast({
+        title: "Integration updated successfully",
+        description: "The integration has been updated.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error updating integration",
+        description: error.message || "Failed to update integration",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Test connection mutation for modal
+  const testConnectionMutation = useMutation({
+    mutationFn: async (integrationId: number) => {
+      const response = await fetch(`/api/client/${currentClientId}/integrations/${integrationId}/test`, {
+        method: "POST",
+        credentials: "include"
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || `HTTP ${response.status}: ${response.statusText}`);
+      }
+      
+      return response.json();
+    },
+    onSuccess: (data) => {
+      toast({
+        title: "Connection Test Result",
+        description: data.success ? "Connection successful!" : `Connection failed: ${data.error || 'Unknown error'}`,
+        variant: data.success ? "default" : "destructive",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Connection test failed",
+        description: error.message || "Failed to test connection",
+        variant: "destructive",
+      });
+    },
+  });
 
   // Query to fetch email username settings
   const { data: emailUsernameSettings, refetch: refetchEmailSettings } = useQuery({
@@ -432,6 +505,130 @@ function AdminComponent() {
     }
   };
 
+  // Handle update integration for modal
+  const handleUpdateIntegration = () => {
+    if (editingIntegration) {
+      const integrationData = {
+        name: editingIntegration.name,
+        displayName: editingIntegration.displayName,
+        description: editingIntegration.description,
+        status: editingIntegration.status,
+        apiKeys: editingIntegration.apiKeys,
+        config: editingIntegration.config
+      };
+      
+      updateIntegrationMutation.mutate({ id: editingIntegration.id, integrationData });
+    }
+  };
+
+  // Render API key fields for modal
+  const renderApiKeyFields = (integration: any) => {
+    if (!integration) return null;
+
+    switch (integration.name) {
+      case 'okta':
+        return (
+          <div className="space-y-4">
+            <div className="grid gap-2">
+              <Label htmlFor="oktaDomain">OKTA Domain</Label>
+              <Input
+                id="oktaDomain"
+                type="text"
+                value={integration.apiKeys.domain || ""}
+                onChange={(e) => setEditingIntegration(prev => prev ? { 
+                  ...prev, 
+                  apiKeys: { ...prev.apiKeys, domain: e.target.value }
+                } : null)}
+                placeholder="your-domain.okta.com"
+                className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700"
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="oktaToken">API Token</Label>
+              <Input
+                id="oktaToken"
+                type="password"
+                value={integration.apiKeys.apiToken || ""}
+                onChange={(e) => setEditingIntegration(prev => prev ? { 
+                  ...prev, 
+                  apiKeys: { ...prev.apiKeys, apiToken: e.target.value }
+                } : null)}
+                placeholder="Enter OKTA API token"
+                className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700"
+              />
+            </div>
+          </div>
+        );
+      case 'knowbe4':
+        return (
+          <div className="grid gap-2">
+            <Label htmlFor="knowbe4ApiKey">GraphQL API Key</Label>
+            <Input
+              id="knowbe4ApiKey"
+              type="password"
+              value={integration.apiKeys.apiKey || ""}
+              onChange={(e) => setEditingIntegration(prev => prev ? { 
+                ...prev, 
+                apiKeys: { ...prev.apiKeys, apiKey: e.target.value }
+              } : null)}
+              placeholder="Enter KnowBe4 GraphQL API key"
+              className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700"
+            />
+          </div>
+        );
+      case 'sentinelone':
+        return (
+          <div className="space-y-4">
+            <div className="grid gap-2">
+              <Label htmlFor="sentineloneUrl">Management URL</Label>
+              <Input
+                id="sentineloneUrl"
+                type="text"
+                value={integration.apiKeys.managementUrl || ""}
+                onChange={(e) => setEditingIntegration(prev => prev ? { 
+                  ...prev, 
+                  apiKeys: { ...prev.apiKeys, managementUrl: e.target.value }
+                } : null)}
+                placeholder="https://your-instance.sentinelone.net"
+                className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700"
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="sentineloneToken">API Token</Label>
+              <Input
+                id="sentineloneToken"
+                type="password"
+                value={integration.apiKeys.apiToken || ""}
+                onChange={(e) => setEditingIntegration(prev => prev ? { 
+                  ...prev, 
+                  apiKeys: { ...prev.apiKeys, apiToken: e.target.value }
+                } : null)}
+                placeholder="Enter SentinelOne API token"
+                className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700"
+              />
+            </div>
+          </div>
+        );
+      default:
+        return (
+          <div className="grid gap-2">
+            <Label htmlFor="genericApiKey">API Key</Label>
+            <Input
+              id="genericApiKey"
+              type="password"
+              value={integration.apiKeys.apiKey || ""}
+              onChange={(e) => setEditingIntegration(prev => prev ? { 
+                ...prev, 
+                apiKeys: { ...prev.apiKeys, apiKey: e.target.value }
+              } : null)}
+              placeholder="Enter API key"
+              className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700"
+            />
+          </div>
+        );
+    }
+  };
+
 
 
 
@@ -549,8 +746,8 @@ function AdminComponent() {
             setSelectedApps={setSelectedApps}
             appMappingsData={appMappingsData}
             integrationsData={integrationsData}
-            setEditingIntegration={() => {}}
-            setIsConfigureIntegrationOpen={() => {}}
+            setEditingIntegration={setEditingIntegration}
+            setIsConfigureIntegrationOpen={setIsConfigureIntegrationOpen}
             setIsAddDashboardCardOpen={setIsAddDashboardCardOpen}
             setIsAddMonitoringCardOpen={setIsAddMonitoringCardOpen}
           />
@@ -629,6 +826,31 @@ function AdminComponent() {
           // Could add success notification here
         }}
       />
+
+      {/* Integration Configuration Modal */}
+      <Dialog open={isConfigureIntegrationOpen} onOpenChange={setIsConfigureIntegrationOpen}>
+        <DialogContent className="sm:max-w-[425px] max-h-[80vh] overflow-y-auto overflow-x-hidden">
+          <DialogHeader>
+            <DialogTitle>Configure {editingIntegration?.displayName || editingIntegration?.name}</DialogTitle>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            {renderApiKeyFields(editingIntegration)}
+          </div>
+          <div className="flex justify-end gap-3">
+            <Button 
+              variant="outline" 
+              onClick={() => editingIntegration && testConnectionMutation.mutate(editingIntegration.id)}
+              disabled={testConnectionMutation.isPending}
+              className="border-blue-300 text-blue-600 hover:bg-blue-50 dark:border-blue-700 dark:text-blue-400 dark:hover:bg-blue-950"
+            >
+              {testConnectionMutation.isPending ? "Testing..." : "Test Connection"}
+            </Button>
+            <Button onClick={handleUpdateIntegration} disabled={updateIntegrationMutation.isPending}>
+              {updateIntegrationMutation.isPending ? "Saving..." : "Save Changes"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
