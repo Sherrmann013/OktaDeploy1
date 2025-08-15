@@ -6484,8 +6484,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const clientId = parseInt(req.params.clientId);
       const userId = parseInt(req.params.userId);
-      
-      console.log(`🔑 Resetting password for user ${userId} in client ${clientId}`);
+      const { action } = z.object({
+        action: z.enum(["reset", "expire", "generate"]).default("reset")
+      }).parse(req.body);
+
+      console.log(`🔑 Password action '${action}' requested for user ${userId} in client ${clientId}`);
       
       // Get client-specific database connection
       const multiDb = MultiDatabaseManager.getInstance();
@@ -6520,20 +6523,76 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      // Call OKTA API to reset password using client-specific credentials
       const apiKeys = oktaIntegration.apiKeys as Record<string, string>;
-      const result = await resetOktaUserPassword(apiKeys, user.oktaId);
-      console.log(`Password reset initiated for user ${user.email}:`, result);
+      let result;
+
+      if (action === "generate") {
+        // Get client's password policy configuration
+        const clientStorage = MultiDatabaseManager.getClientStorage(clientId);
+        const passwordSettings = await clientStorage.getLayoutSetting("password");
+        
+        let passwordConfig;
+        if (passwordSettings?.settingValue) {
+          try {
+            passwordConfig = typeof passwordSettings.settingValue === 'string' 
+              ? JSON.parse(passwordSettings.settingValue) 
+              : passwordSettings.settingValue;
+          } catch (e) {
+            console.warn("Failed to parse password config, using default:", e);
+          }
+        }
+
+        // Use client's password policy or fallback to default
+        const { generatePasswordFromPolicy, DEFAULT_PASSWORD_CONFIG } = await import('../../shared/password-utils');
+        const finalConfig = passwordConfig || DEFAULT_PASSWORD_CONFIG;
+        
+        console.log(`🔐 Generating password with client policy:`, finalConfig);
+        const newPassword = generatePasswordFromPolicy(finalConfig);
+        console.log(`🔐 Generated password length: ${newPassword.length}`);
+
+        // Use the shared OKTA service to set password
+        result = await oktaService.setUserPassword(user.oktaId, newPassword, true);
+        
+        // Log audit action for generating password
+        await clientStorage.createAuditLog(
+          req,
+          'GENERATE',
+          user.id.toString(),
+          `${user.firstName} ${user.lastName}`,
+          { action: 'Generated password using client policy', passwordLength: newPassword.length },
+          { firstName: user.firstName, lastName: user.lastName, email: user.email },
+          {}
+        );
+
+        console.log("Generated password result:", result);
+        return res.json({ 
+          success: true,
+          message: "Password generated and set successfully",
+          password: newPassword,
+          tempPassword: true,
+          policyUsed: finalConfig
+        });
+
+      } else if (action === "expire") {
+        // Expire password to force change on next login
+        result = await oktaService.expireUserPassword(user.oktaId);
+        console.log(`Password expired for user ${user.email}:`, result);
+        
+      } else {
+        // Default reset action - send email
+        result = await oktaService.resetUserPassword(user.oktaId);
+        console.log(`Password reset initiated for user ${user.email}:`, result);
+      }
       
       res.json({
         success: true,
-        message: "Password reset email sent successfully"
+        message: `Password ${action} completed successfully`
       });
     } catch (error) {
-      console.error("Password reset error:", error);
+      console.error(`Password ${req.body.action || 'reset'} error:`, error);
       res.status(500).json({
         success: false,
-        message: "Failed to reset password",
+        message: `Failed to ${req.body.action || 'reset'} password`,
         error: error instanceof Error ? error.message : "Unknown error"
       });
     }

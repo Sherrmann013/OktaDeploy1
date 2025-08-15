@@ -921,6 +921,35 @@ class OktaService {
     }
   }
 
+  async setUserPassword(userId: string, newPassword: string, tempPassword: boolean = true): Promise<any> {
+    try {
+      const response = await this.makeRequest(`/users/${userId}`, {
+        method: 'POST',
+        body: JSON.stringify({
+          credentials: {
+            password: {
+              value: newPassword
+            }
+          }
+        }),
+        useEnhancedToken: true
+      });
+      
+      if (response.ok) {
+        // If setting as temporary password, expire it so user must change on next login
+        if (tempPassword) {
+          await this.expireUserPassword(userId);
+        }
+        return await response.json();
+      } else {
+        const errorText = await response.text();
+        throw new Error(`Failed to set password: ${response.status} ${response.statusText} - ${errorText}`);
+      }
+    } catch (error) {
+      throw new Error(`OKTA API error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
   async expireUserPassword(userId: string): Promise<any> {
     try {
       const response = await this.makeRequest(`/users/${userId}/lifecycle/expire_password`, {

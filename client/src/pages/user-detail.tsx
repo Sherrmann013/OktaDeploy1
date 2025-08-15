@@ -388,16 +388,25 @@ export default function UserDetail() {
   });
 
   const passwordResetMutation = useMutation({
-    mutationFn: async (action: "reset" | "expire") => {
-      const endpoint = action === "reset" ? "reset" : "expire";
-      return apiRequest("POST", `/api/client/${clientId}/users/${userId}/password/${endpoint}`, {});
+    mutationFn: async (action: "reset" | "expire" | "generate") => {
+      return apiRequest("POST", `/api/client/${clientId}/users/${userId}/password/reset`, { action });
     },
-    onSuccess: (_, action) => {
-      const actionText = action === "reset" ? "Password reset email sent" : "Password expired successfully";
-      toast({
-        title: "Success",
-        description: actionText,
-      });
+    onSuccess: (data, action) => {
+      if (action === "generate" && data.password) {
+        setGeneratedPassword(data.password);
+        setNewPassword(data.password);
+        toast({
+          title: "Success", 
+          description: `Password generated successfully using client policy (${data.password.length} characters)`,
+          duration: 5000,
+        });
+      } else {
+        const actionText = action === "reset" ? "Password reset email sent" : "Password expired successfully";
+        toast({
+          title: "Success",
+          description: actionText,
+        });
+      }
       queryClient.invalidateQueries({ queryKey: [`/api/client/${clientId}/users`, userId] });
     },
     onError: (error) => {
@@ -625,19 +634,16 @@ export default function UserDetail() {
   };
 
   const handlePasswordReset = () => {
-    if (!newPassword) {
-      toast({
-        title: "Error",
-        description: "Please enter a password or generate one",
-        variant: "destructive",
-      });
-      return;
-    }
-    
+    // Use standard OKTA reset (sends email)
     passwordResetMutation.mutate("reset");
     setShowPasswordModal(null);
     setNewPassword("");
     setGeneratedPassword("");
+  };
+
+  const handlePasswordGenerate = () => {
+    // Generate password using client's policy
+    passwordResetMutation.mutate("generate");
   };
 
   const handlePasswordExpire = () => {
@@ -750,6 +756,16 @@ export default function UserDetail() {
                   >
                     <RefreshCw className="w-4 h-4" />
                     Reset Password
+                  </Button>
+                  
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setShowPasswordModal("generate")}
+                    className="flex items-center gap-2 text-green-600 dark:text-green-400 border-green-300 dark:border-green-600 hover:bg-green-50 dark:hover:bg-green-900"
+                  >
+                    <Key className="w-4 h-4" />
+                    Generate Password
                   </Button>
                   
                   <DropdownMenu>
@@ -1942,6 +1958,68 @@ export default function UserDetail() {
             <Button onClick={handlePasswordExpire} variant="destructive">
               Expire Password
             </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Password Generate Modal */}
+      <Dialog open={showPasswordModal === "generate"} onOpenChange={(open) => {
+        if (!open) {
+          setShowPasswordModal(null);
+          setGeneratedPassword("");
+        }
+      }}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Generate Password</DialogTitle>
+            <DialogDescription>
+              Generate a new password for {user?.firstName} {user?.lastName} using your client's password policy. The password will be set as temporary and they'll need to change it on first login.
+            </DialogDescription>
+          </DialogHeader>
+          {generatedPassword && (
+            <div className="space-y-4">
+              <div className="flex flex-col gap-2">
+                <label className="text-sm font-medium">Generated Password</label>
+                <div className="flex gap-2">
+                  <Input
+                    type="text"
+                    value={generatedPassword}
+                    readOnly
+                    className="bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 font-mono flex-1"
+                  />
+                  <Button
+                    type="button"
+                    onClick={() => {
+                      navigator.clipboard.writeText(generatedPassword);
+                      toast({
+                        title: "Copied",
+                        description: "Password copied to clipboard",
+                      });
+                    }}
+                    variant="outline"
+                    className="px-3"
+                  >
+                    <Copy className="w-4 h-4" />
+                  </Button>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  This password has been set as temporary. The user will need to change it on first login.
+                </p>
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => {
+              setShowPasswordModal(null);
+              setGeneratedPassword("");
+            }}>
+              {generatedPassword ? "Close" : "Cancel"}
+            </Button>
+            {!generatedPassword && (
+              <Button onClick={handlePasswordGenerate}>
+                Generate Password
+              </Button>
+            )}
           </DialogFooter>
         </DialogContent>
       </Dialog>
