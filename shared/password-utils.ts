@@ -55,45 +55,60 @@ export function generatePasswordFromPolicy(config: PasswordConfig): string {
       switch (component.type) {
         case 'words':
           try {
-            // Generate words with exact length using random-words library
+            // Generate a broader range of words first
             const words = generate({
-              min: minWordLength,
-              max: minWordLength,
-              exactly: 50 // Generate many words to find ones with exact length
+              min: 3,
+              max: 8,
+              exactly: 200 // Generate many words to have more options
             }) as string[];
             
-            // Filter to get words of exact length
-            const exactLengthWords = words.filter(word => word.length === minWordLength);
+            // First try to find words of exact length
+            let exactLengthWords = words.filter(word => word.length === minWordLength);
             
             if (exactLengthWords.length > 0) {
               const selectedWord = exactLengthWords[Math.floor(Math.random() * exactLengthWords.length)];
               passwordParts.push(selectedWord.charAt(0).toUpperCase() + selectedWord.slice(1).toLowerCase());
             } else {
-              // If no exact length words found, try generating with broader range and pick best fit
-              const broaderWords = generate({
-                min: Math.max(3, minWordLength - 1),
-                max: minWordLength + 1,
-                exactly: 100
-              }) as string[];
+              // If no exact length found, use words that are close in length
+              const closeWords = words.filter(word => word.length >= 3 && word.length <= minWordLength + 2);
               
-              const bestFit = broaderWords.find(word => word.length === minWordLength);
-              if (bestFit) {
-                passwordParts.push(bestFit.charAt(0).toUpperCase() + bestFit.slice(1).toLowerCase());
-              } else {
-                // Last resort: truncate a longer word to exact length (match CreateUserModal logic)
-                const longerWords = broaderWords.filter(word => word.length > minWordLength);
-                if (longerWords.length > 0) {
-                  const selectedWord = longerWords[Math.floor(Math.random() * longerWords.length)]
-                    .substring(0, minWordLength);
-                  passwordParts.push(selectedWord.charAt(0).toUpperCase() + selectedWord.slice(1).toLowerCase());
-                } else {
-                  passwordParts.push('Word'.substring(0, minWordLength));
+              if (closeWords.length > 0) {
+                let selectedWord = closeWords[Math.floor(Math.random() * closeWords.length)];
+                
+                // Truncate or pad the word to fit
+                if (selectedWord.length > minWordLength) {
+                  selectedWord = selectedWord.substring(0, minWordLength);
                 }
+                
+                passwordParts.push(selectedWord.charAt(0).toUpperCase() + selectedWord.slice(1).toLowerCase());
+              } else {
+                // Fallback to built-in word list instead of just "Word"
+                const fallbackWords = [
+                  'blue', 'red', 'green', 'cat', 'dog', 'sun', 'moon', 'star', 'tree', 'bird',
+                  'fish', 'car', 'book', 'key', 'box', 'cup', 'pen', 'hat', 'bag', 'run',
+                  'jump', 'fast', 'slow', 'big', 'small', 'hot', 'cold', 'new', 'old', 'good',
+                  'bad', 'easy', 'hard', 'soft', 'loud', 'dark', 'light', 'win', 'home', 'work'
+                ];
+                let fallbackWord = fallbackWords[Math.floor(Math.random() * fallbackWords.length)];
+                
+                // Adjust length
+                if (fallbackWord.length > minWordLength) {
+                  fallbackWord = fallbackWord.substring(0, minWordLength);
+                }
+                
+                passwordParts.push(fallbackWord.charAt(0).toUpperCase() + fallbackWord.slice(1).toLowerCase());
               }
             }
           } catch (error) {
-            // Match CreateUserModal's fallback logic exactly
-            passwordParts.push('Word'.substring(0, minWordLength));
+            // Final fallback with random word from built-in list
+            const fallbackWords = ['Blue', 'Red', 'Green', 'Cat', 'Dog', 'Sun', 'Moon', 'Star', 'Tree', 'Bird'];
+            let fallbackWord = fallbackWords[Math.floor(Math.random() * fallbackWords.length)];
+            
+            if (fallbackWord.length > minWordLength) {
+              fallbackWord = fallbackWord.substring(0, minWordLength);
+            }
+            
+            passwordParts.push(fallbackWord);
           }
           break;
           
