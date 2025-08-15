@@ -126,16 +126,21 @@ async function getOktaUserDevices(apiKeys: Record<string, string>, oktaId: strin
 
       if (response.ok) {
         const data = await response.json();
+        console.log(`OKTA devices API response:`, JSON.stringify(data, null, 2));
         if (Array.isArray(data) && data.length > 0) {
           // Process devices to match OKTA's native format: Device name, Platform, Status
-          data.forEach((device: any) => {
+          data.forEach((deviceUser: any) => {
+            console.log(`Processing device:`, JSON.stringify(deviceUser, null, 2));
+            const device = deviceUser.device || deviceUser;
+            const profile = device.profile || {};
+            
             devices.push({
-              id: device.id,
-              name: device.name || device.displayName || 'Unknown Device',
-              platform: device.platform || device.deviceType || 'Unknown',
+              id: device.id || deviceUser.deviceUserId,
+              name: profile.displayName || device.displayName || 'Unknown Device',
+              platform: profile.platform || device.platform || 'Unknown',
               status: device.status || 'Active',
-              lastUsed: device.lastUpdated || device.created,
-              managementStatus: device.managementStatus || 'NOT_MANAGED'
+              lastUsed: device.lastUpdated || device.created || deviceUser.created,
+              managementStatus: profile.managed ? 'MANAGED' : 'NOT_MANAGED'
             });
           });
         }
@@ -155,8 +160,10 @@ async function getOktaUserDevices(apiKeys: Record<string, string>, oktaId: strin
 
         if (factorsResponse.ok) {
           const factorsData = await factorsResponse.json();
+          console.log(`OKTA factors fallback response:`, JSON.stringify(factorsData, null, 2));
           if (Array.isArray(factorsData)) {
             factorsData.forEach((factor: any) => {
+              console.log(`Processing factor:`, JSON.stringify(factor, null, 2));
               if (factor.status === 'ACTIVE' && factor.profile) {
                 // Extract clean device name and platform from factor data
                 let deviceName = factor.profile.name || factor.profile.deviceName || 'Shield';
