@@ -277,21 +277,16 @@ export function LayoutSection({
   // Mutation to create dashboard card directly
   const createDashboardCardMutation = useMutation({
     mutationFn: async (cardData: any) => {
-      console.log('Making API request to create card:', cardData);
       const endpoint = `/api/client/${currentClientId}/dashboard-cards`;
       const response = await apiRequest("POST", endpoint, cardData);
       if (!response.ok) {
         const errorText = await response.text();
-        console.log('API error response:', errorText);
         throw new Error(`Failed to create dashboard card: ${errorText}`);
       }
-      const result = await response.json();
-      console.log('API success response:', result);
-      return result;
+      return response.json();
     },
     onSuccess: (data) => {
-      console.log('Mutation success, invalidating cache and refetching');
-      // Invalidate multiple cache keys to ensure refresh
+      // Invalidate cache and refetch to show new card
       queryClient.invalidateQueries({ queryKey: [`/api/client/${currentClientId}/dashboard-cards`] });
       refetchDashboardCards();
       toast({
@@ -300,7 +295,6 @@ export function LayoutSection({
       });
     },
     onError: (error: any) => {
-      console.log('Mutation error:', error);
       toast({
         title: "Error",
         description: error.message || "Failed to add dashboard card",
@@ -592,15 +586,8 @@ export function LayoutSection({
 
   // Function to handle adding integration card directly from dropdown
   const handleAddIntegrationCard = (integrationType: string) => {
-    console.log('Adding integration card for:', integrationType);
-    
     const integration = integrationsData?.find((i: any) => i.name === integrationType);
-    if (!integration) {
-      console.log('Integration not found:', integrationType);
-      return;
-    }
-
-    console.log('Integration found:', integration);
+    if (!integration) return;
 
     // Check if card already exists
     const existingCard = dashboardCards.find(card => card.type === integrationType);
@@ -622,7 +609,6 @@ export function LayoutSection({
       position: 999 // Will be adjusted by backend
     };
 
-    console.log('Creating card with data:', cardData);
     createDashboardCardMutation.mutate(cardData);
   };
 

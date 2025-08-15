@@ -3986,7 +3986,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // REMOVED: Global dashboard cards POST - Client-specific endpoint exists at /api/client/:clientId/dashboard-cards
+  // Client-specific dashboard cards POST route
+  app.post("/api/client/:clientId/dashboard-cards", isAuthenticated, requireAdmin, async (req, res) => {
+    try {
+      const clientId = parseInt(req.params.clientId);
+      console.log(`📊 Creating dashboard card for client ${clientId}:`, req.body);
+      
+      // Use client-specific database connection
+      const multiDb = MultiDatabaseManager.getInstance();
+      const clientDb = await multiDb.getClientDb(clientId);
+      
+      const cardData = {
+        name: req.body.name,
+        type: req.body.type,
+        description: req.body.description,
+        enabled: req.body.enabled !== false,
+        position: req.body.position || 999
+      };
+      
+      const [result] = await clientDb
+        .insert(clientDashboardCards)
+        .values(cardData)
+        .returning();
+      
+      console.log(`✅ Created dashboard card for client ${clientId}:`, result);
+      res.json(result);
+    } catch (error) {
+      console.error("Error creating client dashboard card:", error);
+      res.status(500).json({ error: "Failed to create dashboard card" });
+    }
+  });
 
   // Client-specific bulk update dashboard card positions (for drag and drop)
   app.patch("/api/client/:clientId/dashboard-cards/positions", isAuthenticated, requireAdmin, async (req, res) => {
