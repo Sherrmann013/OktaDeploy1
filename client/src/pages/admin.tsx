@@ -911,9 +911,38 @@ function AdminComponent() {
               Dashboard card configuration options will be added here.
             </DialogDescription>
           </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="text-center text-gray-500 dark:text-gray-400">
-              Configuration options coming soon...
+          <div className="grid gap-6 py-4">
+            {/* User Statistics Section */}
+            <div className="space-y-4">
+              <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100">User Statistics</h3>
+              
+              {/* Active Users / Total Users */}
+              <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div className="flex flex-col">
+                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Active Users / Total Users</span>
+                  <span className="text-xs text-gray-500 dark:text-gray-400">Currently active user accounts</span>
+                </div>
+                <div className="text-right">
+                  <div className="text-2xl font-bold text-green-600 dark:text-green-400">
+                    -- / --
+                  </div>
+                  <div className="text-xs text-gray-500 dark:text-gray-400">Loading...</div>
+                </div>
+              </div>
+
+              {/* Locked Out Users */}
+              <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div className="flex flex-col">
+                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Locked Out Users</span>
+                  <span className="text-xs text-gray-500 dark:text-gray-400">Users currently locked out</span>
+                </div>
+                <div className="text-right">
+                  <div className="text-2xl font-bold text-red-600 dark:text-red-400">
+                    --
+                  </div>
+                  <div className="text-xs text-gray-500 dark:text-gray-400">Loading...</div>
+                </div>
+              </div>
             </div>
           </div>
           <div className="flex justify-end gap-3">
