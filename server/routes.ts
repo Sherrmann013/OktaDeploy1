@@ -6149,7 +6149,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const apiKeys = oktaIntegration.apiKeys as Record<string, string>;
       const oktaDomain = apiKeys.domain;
-      const oktaToken = apiKeys.api_token;
+      const oktaToken = apiKeys.apiToken;
       
       if (!oktaDomain || !oktaToken) {
         console.log(`❌ OKTA credentials incomplete for client ${clientId}`);
