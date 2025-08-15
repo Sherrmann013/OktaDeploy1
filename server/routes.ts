@@ -102,6 +102,99 @@ async function clearOktaUserSessions(apiKeys: Record<string, string>, oktaId: st
   }
 }
 
+// Helper function to get OKTA user devices
+async function getOktaUserDevices(apiKeys: Record<string, string>, oktaId: string) {
+  if (!apiKeys.domain || !apiKeys.apiToken) {
+    throw new Error('OKTA domain and API token are required');
+  }
+
+  try {
+    const devices: any[] = [];
+    
+    // Try multiple OKTA endpoints to get device information
+    const endpoints = [
+      `/api/v1/users/${oktaId}/factors`, // MFA factors/devices
+      `/api/v1/users/${oktaId}/clients`, // Trusted clients/browsers
+      `/api/v1/users/${oktaId}/sessions`  // Active sessions
+    ];
+
+    for (const endpoint of endpoints) {
+      try {
+        const response = await fetch(`https://${apiKeys.domain}${endpoint}`, {
+          method: 'GET',
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'Authorization': `SSWS ${apiKeys.apiToken}`,
+          },
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          if (Array.isArray(data) && data.length > 0) {
+            // Process different endpoint types
+            if (endpoint.includes('factors')) {
+              // MFA factors (authenticator devices)
+              data.forEach((factor: any) => {
+                if (factor.factorType && factor.status === 'ACTIVE') {
+                  devices.push({
+                    id: factor.id,
+                    name: factor.profile?.deviceName || factor.factorType,
+                    type: 'MFA Device',
+                    factorType: factor.factorType,
+                    status: factor.status,
+                    created: factor.created,
+                    lastUpdated: factor.lastUpdated,
+                    vendor: factor.vendor || 'Unknown'
+                  });
+                }
+              });
+            } else if (endpoint.includes('clients')) {
+              // Trusted clients/browsers
+              data.forEach((client: any) => {
+                devices.push({
+                  id: client.id,
+                  name: client.clientName || client.userAgent || 'Unknown Client',
+                  type: 'Trusted Client',
+                  userAgent: client.userAgent,
+                  status: 'ACTIVE',
+                  created: client.created,
+                  lastUpdated: client.lastUpdated,
+                  ipAddress: client.clientIpAddress
+                });
+              });
+            } else if (endpoint.includes('sessions')) {
+              // Active sessions (devices currently logged in)
+              data.forEach((session: any) => {
+                if (session.status === 'ACTIVE') {
+                  devices.push({
+                    id: session.id,
+                    name: session.clientName || 'Active Session',
+                    type: 'Active Session',
+                    status: session.status,
+                    created: session.createdAt,
+                    lastUpdated: session.lastPasswordVerification,
+                    ipAddress: session.clientIpAddress,
+                    userAgent: session.clientUserAgent
+                  });
+                }
+              });
+            }
+          }
+        }
+      } catch (endpointError) {
+        // Continue to next endpoint if this one fails
+        console.log(`OKTA device endpoint ${endpoint} failed:`, endpointError);
+        continue;
+      }
+    }
+
+    return devices;
+  } catch (error) {
+    throw new Error(`Failed to fetch user devices: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  }
+}
+
 // Helper function to reset OKTA user behavior profile
 async function resetOktaUserBehaviorProfile(apiKeys: Record<string, string>, oktaId: string) {
   if (!apiKeys.domain || !apiKeys.apiToken) {
@@ -5968,8 +6061,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       console.log(`💻 Fetching devices for user ${userId} in client ${clientId}`);
       
-      // For now, return empty array - this would need proper implementation
-      res.json([]);
+      // Get client-specific database connection
+      const multiDb = MultiDatabaseManager.getInstance();
+      const clientDb = await multiDb.getClientDb(clientId);
+      
+      // Get user from client database
+      const [user] = await clientDb.select().from(clientUsers).where(eq(clientUsers.id, userId)).limit(1);
+      
+      if (!user) {
+        return res.status(404).json({
+          error: "User not found"
+        });
+      }
+
+      if (!user.oktaId) {
+        console.log(`User ${userId} has no OKTA ID, returning empty devices list`);
+        return res.json([]);
+      }
+
+      // Get client's OKTA integration settings
+      const [oktaIntegration] = await clientDb.select().from(clientIntegrations)
+        .where(eq(clientIntegrations.name, 'okta'))
+        .limit(1);
+
+      if (!oktaIntegration || !oktaIntegration.apiKeys) {
+        console.log(`No OKTA integration found for client ${clientId}, returning empty devices list`);
+        return res.json([]);
+      }
+
+      // Call OKTA API to get user devices using client-specific credentials
+      const apiKeys = oktaIntegration.apiKeys as Record<string, string>;
+      const devices = await getOktaUserDevices(apiKeys, user.oktaId);
+      
+      console.log(`Found ${devices.length} devices for user ${user.email}`);
+      res.json(devices);
     } catch (error) {
       console.error(`Error fetching user devices for client:`, error);
       res.status(500).json({ error: "Failed to fetch client user devices" });
