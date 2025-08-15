@@ -6429,15 +6429,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         result = await setOktaUserPassword(apiKeys, user.oktaId, newPassword, true);
         
         // Log audit action for generating password
-        await clientStorage.createAuditLog(
-          req,
-          'GENERATE',
-          user.id.toString(),
-          `${user.firstName} ${user.lastName}`,
-          { action: 'Generated password using client policy', passwordLength: newPassword.length },
-          { firstName: user.firstName, lastName: user.lastName, email: user.email },
-          {}
-        );
+        await clientStorage.logAudit({
+          userId: user.id,
+          userEmail: user.email,
+          action: 'PASSWORD_GENERATE',
+          details: `Generated password using client policy (${newPassword.length} characters)`,
+          ipAddress: req.ip || 'unknown',
+          userAgent: req.get('user-agent') || 'unknown',
+          timestamp: new Date()
+        });
 
         console.log("Generated password result:", result);
         return res.json({ 
