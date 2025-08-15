@@ -55,60 +55,89 @@ export function generatePasswordFromPolicy(config: PasswordConfig): string {
       switch (component.type) {
         case 'words':
           try {
-            // Generate a broader range of words first
+            let selectedWord = '';
+            
+            // Generate words with broader range to accommodate any required length
+            const maxRange = Math.max(15, minWordLength + 3); // Ensure we can find longer words
             const words = generate({
               min: 3,
-              max: 8,
-              exactly: 200 // Generate many words to have more options
+              max: maxRange,
+              exactly: 500 // Generate more words for better selection
             }) as string[];
             
-            // First try to find words of exact length
-            let exactLengthWords = words.filter(word => word.length === minWordLength);
+            // First try to find words of exact required length
+            const exactLengthWords = words.filter(word => word.length === minWordLength);
             
             if (exactLengthWords.length > 0) {
-              const selectedWord = exactLengthWords[Math.floor(Math.random() * exactLengthWords.length)];
-              passwordParts.push(selectedWord.charAt(0).toUpperCase() + selectedWord.slice(1).toLowerCase());
+              selectedWord = exactLengthWords[Math.floor(Math.random() * exactLengthWords.length)];
             } else {
-              // If no exact length found, use words that are close in length
-              const closeWords = words.filter(word => word.length >= 3 && word.length <= minWordLength + 2);
+              // If no exact length found, try multiple generations
+              let attempts = 0;
+              while (attempts < 3 && !selectedWord) {
+                const moreWords = generate({
+                  min: Math.max(3, minWordLength - 1),
+                  max: minWordLength + 1,
+                  exactly: 300
+                }) as string[];
+                
+                const exactWords = moreWords.filter(word => word.length === minWordLength);
+                if (exactWords.length > 0) {
+                  selectedWord = exactWords[Math.floor(Math.random() * exactWords.length)];
+                  break;
+                }
+                attempts++;
+              }
               
-              if (closeWords.length > 0) {
-                let selectedWord = closeWords[Math.floor(Math.random() * closeWords.length)];
-                
-                // Truncate or pad the word to fit
-                if (selectedWord.length > minWordLength) {
-                  selectedWord = selectedWord.substring(0, minWordLength);
-                }
-                
-                passwordParts.push(selectedWord.charAt(0).toUpperCase() + selectedWord.slice(1).toLowerCase());
-              } else {
-                // Fallback to built-in word list instead of just "Word"
+              // If still no exact match, use fallback with exact length words
+              if (!selectedWord) {
                 const fallbackWords = [
-                  'blue', 'red', 'green', 'cat', 'dog', 'sun', 'moon', 'star', 'tree', 'bird',
-                  'fish', 'car', 'book', 'key', 'box', 'cup', 'pen', 'hat', 'bag', 'run',
-                  'jump', 'fast', 'slow', 'big', 'small', 'hot', 'cold', 'new', 'old', 'good',
-                  'bad', 'easy', 'hard', 'soft', 'loud', 'dark', 'light', 'win', 'home', 'work'
+                  'wonderful', 'beautiful', 'important', 'different', 'following', 'community', 
+                  'available', 'education', 'president', 'something', 'according', 'questions',
+                  'frightens', 'buildings', 'standards', 'materials', 'marketing', 'generally',
+                  'including', 'knowledge', 'landscape', 'meanwhile', 'obviously', 'recognize'
                 ];
-                let fallbackWord = fallbackWords[Math.floor(Math.random() * fallbackWords.length)];
                 
-                // Adjust length
-                if (fallbackWord.length > minWordLength) {
-                  fallbackWord = fallbackWord.substring(0, minWordLength);
+                const exactFallbacks = fallbackWords.filter(word => word.length === minWordLength);
+                if (exactFallbacks.length > 0) {
+                  selectedWord = exactFallbacks[Math.floor(Math.random() * exactFallbacks.length)];
+                } else {
+                  // Generate a word of exact length by padding/truncating
+                  let baseWord = fallbackWords[Math.floor(Math.random() * fallbackWords.length)];
+                  if (baseWord.length > minWordLength) {
+                    selectedWord = baseWord.substring(0, minWordLength);
+                  } else if (baseWord.length < minWordLength) {
+                    // Extend word with common suffixes
+                    const suffixes = ['ing', 'ed', 'er', 'est', 'ly', 'tion', 'ness'];
+                    selectedWord = baseWord;
+                    while (selectedWord.length < minWordLength && suffixes.length > 0) {
+                      const suffix = suffixes.shift()!;
+                      if (selectedWord.length + suffix.length <= minWordLength) {
+                        selectedWord += suffix;
+                      }
+                    }
+                    // If still not long enough, pad with vowels
+                    while (selectedWord.length < minWordLength) {
+                      selectedWord += 'aeiou'[Math.floor(Math.random() * 5)];
+                    }
+                  } else {
+                    selectedWord = baseWord;
+                  }
                 }
-                
-                passwordParts.push(fallbackWord.charAt(0).toUpperCase() + fallbackWord.slice(1).toLowerCase());
               }
             }
-          } catch (error) {
-            // Final fallback with random word from built-in list
-            const fallbackWords = ['Blue', 'Red', 'Green', 'Cat', 'Dog', 'Sun', 'Moon', 'Star', 'Tree', 'Bird'];
-            let fallbackWord = fallbackWords[Math.floor(Math.random() * fallbackWords.length)];
             
+            // Capitalize first letter only
+            passwordParts.push(selectedWord.charAt(0).toUpperCase() + selectedWord.slice(1).toLowerCase());
+          } catch (error) {
+            // Final fallback - generate word of exact length
+            let fallbackWord = 'word';
+            while (fallbackWord.length < minWordLength) {
+              fallbackWord += 'aeiou'[Math.floor(Math.random() * 5)];
+            }
             if (fallbackWord.length > minWordLength) {
               fallbackWord = fallbackWord.substring(0, minWordLength);
             }
-            
-            passwordParts.push(fallbackWord);
+            passwordParts.push(fallbackWord.charAt(0).toUpperCase() + fallbackWord.slice(1).toLowerCase());
           }
           break;
           
@@ -127,16 +156,7 @@ export function generatePasswordFromPolicy(config: PasswordConfig): string {
   // Join all parts (NO SHUFFLING - match CreateUserModal exactly)
   let password = passwordParts.join('');
   
-  // CRITICAL: Ensure exact target length compliance (match CreateUserModal logic)
-  if (password.length > targetLength) {
-    password = password.substring(0, targetLength);
-  } else if (password.length < targetLength) {
-    // Pad with random numbers to reach exact target length
-    const deficit = targetLength - password.length;
-    for (let i = 0; i < deficit; i++) {
-      password += numbers[Math.floor(Math.random() * numbers.length)];
-    }
-  }
+
   
   return password;
 }
