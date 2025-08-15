@@ -10,7 +10,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from "@/components/ui/input";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { ArrowLeft, ChevronDown, ChevronRight, ChevronUp, Smartphone, Monitor, Shield, Eye, RefreshCw, KeyRound, Edit, Play, Pause, Trash2, Search, UserX, Save, X, Download, Copy, UserCheck, Plus, Key, CheckCircle, BookOpen } from "lucide-react";
+import { ArrowLeft, ChevronDown, ChevronRight, ChevronUp, Smartphone, Monitor, Laptop, Tablet, Shield, Eye, RefreshCw, KeyRound, Edit, Play, Pause, Trash2, Search, UserX, Save, X, Download, Copy, UserCheck, Plus, Key, CheckCircle, BookOpen } from "lucide-react";
 import { DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -34,6 +34,26 @@ const editUserSchema = z.object({
   manager: z.string().optional(),
   employeeType: z.enum(["EMPLOYEE", "CONTRACTOR", "PART_TIME", "INTERN", ""]).optional(),
 });
+
+// Helper function to get device icon based on platform
+const getDeviceIcon = (platform: string) => {
+  const platformLower = platform?.toLowerCase() || '';
+  
+  if (platformLower.includes('ios') || platformLower.includes('iphone') || platformLower.includes('ipad')) {
+    return Smartphone;
+  } else if (platformLower.includes('android')) {
+    return Smartphone;
+  } else if (platformLower.includes('windows') || platformLower.includes('win')) {
+    return Monitor;
+  } else if (platformLower.includes('mac') || platformLower.includes('osx') || platformLower.includes('macos')) {
+    return Laptop;
+  } else if (platformLower.includes('tablet') || platformLower.includes('ipad')) {
+    return Tablet;
+  } else {
+    // Default fallback for unknown platforms
+    return Monitor;
+  }
+};
 
 export default function UserDetail() {
   const [, params] = useRoute("/client/:clientId/users/:id");
@@ -1486,7 +1506,11 @@ export default function UserDetail() {
                           <div key={device.id || index} className="flex items-center justify-between p-3 border rounded-lg bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
                             <div className="flex items-center gap-3 flex-1">
                               <div className="w-10 h-10 bg-gray-200 dark:bg-gray-600 rounded-lg flex items-center justify-center flex-shrink-0">
-                                <span className="text-lg">📱</span>
+                                {(() => {
+                                  const platform = device.profile?.platform || device.platform || device.deviceType || device.provider || 'Unknown Platform';
+                                  const DeviceIcon = getDeviceIcon(platform);
+                                  return <DeviceIcon className="w-5 h-5 text-gray-600 dark:text-gray-300" />;
+                                })()}
                               </div>
                               <div className="min-w-0 flex-1">
                                 <h4 className="font-medium text-sm truncate">
