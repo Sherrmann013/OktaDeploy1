@@ -6132,20 +6132,86 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const clientId = parseInt(req.params.clientId);
       const userId = parseInt(req.params.userId);
       
-      console.log(`👤 Deleting user ${userId} for client ${clientId}`);
+      console.log(`🗑️  Permanently deleting user ${userId} for client ${clientId}`);
       
       // Use client-specific database connection
       const multiDb = MultiDatabaseManager.getInstance();
       const clientDb = await multiDb.getClientDb(clientId);
       
+      // Get user from client database first to check OKTA ID and status
+      const [existingUser] = await clientDb.select().from(clientUsers).where(eq(clientUsers.id, userId)).limit(1);
+      if (!existingUser) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      // OKTA requires users to be deactivated before deletion
+      if (existingUser.status !== "DEPROVISIONED") {
+        return res.status(400).json({ 
+          error: "User must be deactivated before deletion",
+          details: "OKTA requires users to be deactivated (DEPROVISIONED status) before they can be permanently deleted."
+        });
+      }
+
+      // Delete from OKTA first if user has OKTA ID
+      if (existingUser.oktaId) {
+        try {
+          // Get client's OKTA integration settings
+          const [oktaIntegration] = await clientDb.select().from(clientIntegrations)
+            .where(eq(clientIntegrations.name, 'okta'))
+            .limit(1);
+
+          if (oktaIntegration && oktaIntegration.apiKeys) {
+            const apiKeys = oktaIntegration.apiKeys as Record<string, string>;
+            
+            console.log(`🔄 Permanently deleting user ${existingUser.email} from OKTA using client ${clientId} credentials`);
+            
+            // Call OKTA delete API
+            const deleteResponse = await fetch(`https://${apiKeys.domain}/api/v1/users/${existingUser.oktaId}`, {
+              method: 'DELETE',
+              headers: {
+                'Accept': 'application/json',
+                'Authorization': `SSWS ${apiKeys.apiToken}`,
+              },
+            });
+            
+            if (deleteResponse.ok) {
+              console.log(`✅ Successfully deleted user ${existingUser.email} from OKTA`);
+            } else {
+              const errorText = await deleteResponse.text();
+              console.error(`❌ Failed to delete user from OKTA: ${deleteResponse.status} ${errorText}`);
+              
+              // Check if it's a "user must be deactivated first" error
+              if (deleteResponse.status === 400) {
+                return res.status(400).json({ 
+                  error: "Cannot delete active user from OKTA",
+                  details: "User must be deactivated in OKTA before deletion. Please deactivate the user first."
+                });
+              }
+              
+              throw new Error(`OKTA deletion failed: ${deleteResponse.status} ${deleteResponse.statusText}`);
+            }
+          } else {
+            console.log(`⚠️  No OKTA integration found for client ${clientId}, deleting local user only`);
+          }
+        } catch (oktaError) {
+          console.error("OKTA deletion error:", oktaError);
+          return res.status(500).json({ 
+            error: "Failed to delete user from OKTA",
+            details: oktaError instanceof Error ? oktaError.message : "Unknown OKTA error"
+          });
+        }
+      } else {
+        console.log(`ℹ️  User has no OKTA ID, deleting from local database only`);
+      }
+      
       // Delete user from client-specific database
       const result = await clientDb.delete(clientUsers).where(eq(clientUsers.id, userId)).returning();
       
       if (result.length === 0) {
-        return res.status(404).json({ error: "User not found" });
+        return res.status(404).json({ error: "User not found in database" });
       }
       
-      console.log(`✅ Deleted user ${userId} for client ${clientId}`);
+      console.log(`✅ Successfully deleted user ${existingUser.email} (ID: ${userId}) for client ${clientId}`);
       res.status(204).send();
     } catch (error) {
       console.error(`Error deleting user for client:`, error);

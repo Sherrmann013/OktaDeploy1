@@ -481,6 +481,15 @@ export default function UserDetail() {
     });
   };
 
+  const handleDelete = () => {
+    setConfirmAction({
+      type: "delete",
+      title: "Delete User",
+      message: "Are you sure you want to permanently delete this user? This will remove the user from both OKTA and the local database. This action cannot be undone.",
+      action: () => deleteUserMutation.mutate(),
+    });
+  };
+
   // OKTA-specific action handlers
   const handleResetAuthenticators = () => {
     setConfirmAction({
@@ -801,6 +810,19 @@ export default function UserDetail() {
                         <UserX className="w-4 h-4 text-red-600" />
                         Deactivate
                       </DropdownMenuItem>
+                      {/* Only show Delete option for deactivated users (OKTA requirement) */}
+                      {user.status === "DEPROVISIONED" && (
+                        <>
+                          <DropdownMenuSeparator className="border-gray-200 dark:border-gray-600" />
+                          <DropdownMenuItem
+                            onClick={handleDelete}
+                            className="flex items-center gap-2 hover:bg-red-50 dark:hover:bg-red-900/20 cursor-pointer text-red-600 dark:text-red-400"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                            Delete User
+                          </DropdownMenuItem>
+                        </>
+                      )}
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </div>
