@@ -2,7 +2,7 @@ import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { AlertTriangle, Shield, Monitor, Ticket, RefreshCw } from "lucide-react";
+import { AlertTriangle, Shield, Monitor, Ticket, RefreshCw, Users } from "lucide-react";
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip } from 'recharts';
 import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
@@ -23,6 +23,22 @@ export function DashboardSection() {
     queryKey: [dashboardCardsEndpoint],
     staleTime: 10 * 60 * 1000, // 10 minutes - dashboard layout rarely changes
     refetchOnWindowFocus: false,
+  });
+
+  // Fetch OKTA user statistics at component level
+  const oktaUsersEndpoint = currentClientId 
+    ? `/api/client/${currentClientId}/okta/users/stats`
+    : `/api/okta/users/stats`;
+    
+  const { data: oktaStats, isLoading: oktaStatsLoading } = useQuery<{
+    activeUsers: number;
+    totalUsers: number;
+    lockedOutUsers: number;
+  }>({
+    queryKey: [oktaUsersEndpoint],
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    refetchInterval: 5 * 60 * 1000, // Auto-refresh every 5 minutes
+    enabled: dashboardCards.some(card => card.type === 'integration' || card.name === 'OKTA'), // Only fetch if OKTA card exists
   });
 
   // KnowBe4 campaign data
@@ -292,12 +308,64 @@ export function DashboardSection() {
     </Card>
   );
 
+  const renderOKTACard = () => (
+    <Card className="border-2 border-purple-200 dark:border-purple-800">
+      <CardHeader className="pb-3">
+        <div className="flex items-center space-x-2">
+          <Users className="w-5 h-5 text-purple-600" />
+          <CardTitle className="text-purple-700 dark:text-purple-300">OKTA User Management</CardTitle>
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {/* Active Users / Total Users */}
+        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+          <div className="flex flex-col">
+            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Active Users / Total Users</span>
+            <span className="text-xs text-gray-500 dark:text-gray-400">Currently active user accounts</span>
+          </div>
+          <div className="text-right">
+            {oktaStatsLoading ? (
+              <div className="animate-pulse">
+                <div className="h-8 w-16 bg-gray-200 dark:bg-gray-700 rounded"></div>
+              </div>
+            ) : (
+              <div className="text-2xl font-bold text-green-600 dark:text-green-400">
+                {oktaStats?.activeUsers || 0} / {oktaStats?.totalUsers || 0}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Locked Out Users */}
+        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+          <div className="flex flex-col">
+            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Locked Out Users</span>
+            <span className="text-xs text-gray-500 dark:text-gray-400">Users currently locked out</span>
+          </div>
+          <div className="text-right">
+            {oktaStatsLoading ? (
+              <div className="animate-pulse">
+                <div className="h-8 w-12 bg-gray-200 dark:bg-gray-700 rounded"></div>
+              </div>
+            ) : (
+              <div className="text-2xl font-bold text-red-600 dark:text-red-400">
+                {oktaStats?.lockedOutUsers || 0}
+              </div>
+            )}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+
   // Card renderer mapping
   const cardComponents = {
     knowbe4: renderKnowBe4Card,
     sentinelone: renderSentinelOneCard,
     device_management: renderDeviceManagementCard,
     jira: renderJiraCard,
+    integration: renderOKTACard, // Maps to OKTA integration cards
+    okta: renderOKTACard,
   };
 
   if (!Array.isArray(dashboardCards) || dashboardCards.length === 0) {
