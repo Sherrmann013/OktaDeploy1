@@ -102,7 +102,7 @@ async function clearOktaUserSessions(apiKeys: Record<string, string>, oktaId: st
   }
 }
 
-// Helper function to get OKTA user devices
+// Helper function to get OKTA user devices (matching native OKTA device interface)
 async function getOktaUserDevices(apiKeys: Record<string, string>, oktaId: string) {
   if (!apiKeys.domain || !apiKeys.apiToken) {
     throw new Error('OKTA domain and API token are required');
@@ -110,88 +110,97 @@ async function getOktaUserDevices(apiKeys: Record<string, string>, oktaId: strin
 
   try {
     const devices: any[] = [];
-    
-    // Try multiple OKTA endpoints to get device information
-    const endpoints = [
-      `/api/v1/users/${oktaId}/factors`, // MFA factors/devices
-      `/api/v1/users/${oktaId}/clients`, // Trusted clients/browsers
-      `/api/v1/users/${oktaId}/sessions`  // Active sessions
-    ];
 
-    for (const endpoint of endpoints) {
-      try {
-        const response = await fetch(`https://${apiKeys.domain}${endpoint}`, {
+    // Query OKTA's primary devices endpoint - this matches what's shown in the native OKTA interface
+    const url = `https://${apiKeys.domain}/api/v1/users/${oktaId}/devices`;
+    
+    try {
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          'Authorization': `SSWS ${apiKeys.apiToken}`
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (Array.isArray(data) && data.length > 0) {
+          // Process devices to match OKTA's native format: Device name, Platform, Status
+          data.forEach((device: any) => {
+            devices.push({
+              id: device.id,
+              name: device.name || device.displayName || 'Unknown Device',
+              platform: device.platform || device.deviceType || 'Unknown',
+              status: device.status || 'Active',
+              lastUsed: device.lastUpdated || device.created,
+              managementStatus: device.managementStatus || 'NOT_MANAGED'
+            });
+          });
+        }
+      } else {
+        console.log(`OKTA devices API call failed:`, response.status, response.statusText);
+        
+        // Fallback to factors endpoint if devices endpoint is not available
+        const factorsUrl = `https://${apiKeys.domain}/api/v1/users/${oktaId}/factors`;
+        const factorsResponse = await fetch(factorsUrl, {
           method: 'GET',
           headers: {
             'Accept': 'application/json',
             'Content-Type': 'application/json',
-            'Authorization': `SSWS ${apiKeys.apiToken}`,
-          },
+            'Authorization': `SSWS ${apiKeys.apiToken}`
+          }
         });
 
-        if (response.ok) {
-          const data = await response.json();
-          if (Array.isArray(data) && data.length > 0) {
-            // Process different endpoint types
-            if (endpoint.includes('factors')) {
-              // MFA factors (authenticator devices)
-              data.forEach((factor: any) => {
-                if (factor.factorType && factor.status === 'ACTIVE') {
-                  devices.push({
-                    id: factor.id,
-                    name: factor.profile?.deviceName || factor.factorType,
-                    type: 'MFA Device',
-                    factorType: factor.factorType,
-                    status: factor.status,
-                    created: factor.created,
-                    lastUpdated: factor.lastUpdated,
-                    vendor: factor.vendor || 'Unknown'
-                  });
+        if (factorsResponse.ok) {
+          const factorsData = await factorsResponse.json();
+          if (Array.isArray(factorsData)) {
+            factorsData.forEach((factor: any) => {
+              if (factor.status === 'ACTIVE' && factor.profile) {
+                // Extract clean device name and platform from factor data
+                let deviceName = factor.profile.name || factor.profile.deviceName || 'Shield';
+                let platform = 'Unknown';
+                
+                // Determine platform from factor type
+                if (factor.factorType === 'push' || factor.factorType === 'token:software:totp') {
+                  if (factor.profile.deviceType) {
+                    platform = factor.profile.deviceType;
+                  } else if (factor.profile.name && factor.profile.name.toLowerCase().includes('ios')) {
+                    platform = 'iOS';
+                  } else if (factor.profile.name && factor.profile.name.toLowerCase().includes('android')) {
+                    platform = 'Android';
+                  } else {
+                    platform = 'Mobile';
+                  }
+                } else if (factor.factorType === 'web') {
+                  platform = 'Windows';
+                  deviceName = factor.profile.name || 'MSI';
                 }
-              });
-            } else if (endpoint.includes('clients')) {
-              // Trusted clients/browsers
-              data.forEach((client: any) => {
+
                 devices.push({
-                  id: client.id,
-                  name: client.clientName || client.userAgent || 'Unknown Client',
-                  type: 'Trusted Client',
-                  userAgent: client.userAgent,
-                  status: 'ACTIVE',
-                  created: client.created,
-                  lastUpdated: client.lastUpdated,
-                  ipAddress: client.clientIpAddress
+                  id: factor.id,
+                  name: deviceName,
+                  platform: platform,
+                  status: 'Active',
+                  lastUsed: factor.lastVerification,
+                  managementStatus: 'MANAGED'
                 });
-              });
-            } else if (endpoint.includes('sessions')) {
-              // Active sessions (devices currently logged in)
-              data.forEach((session: any) => {
-                if (session.status === 'ACTIVE') {
-                  devices.push({
-                    id: session.id,
-                    name: session.clientName || 'Active Session',
-                    type: 'Active Session',
-                    status: session.status,
-                    created: session.createdAt,
-                    lastUpdated: session.lastPasswordVerification,
-                    ipAddress: session.clientIpAddress,
-                    userAgent: session.clientUserAgent
-                  });
-                }
-              });
-            }
+              }
+            });
           }
         }
-      } catch (endpointError) {
-        // Continue to next endpoint if this one fails
-        console.log(`OKTA device endpoint ${endpoint} failed:`, endpointError);
-        continue;
       }
+    } catch (endpointError) {
+      console.error(`Error querying OKTA devices:`, endpointError);
     }
 
+    console.log(`Found ${devices.length} devices for user ${oktaId}`);
     return devices;
+
   } catch (error) {
-    throw new Error(`Failed to fetch user devices: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    console.error('Error fetching OKTA user devices:', error);
+    throw new Error(`Failed to fetch OKTA user devices: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
 }
 
