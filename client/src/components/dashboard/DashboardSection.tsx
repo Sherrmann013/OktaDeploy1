@@ -354,6 +354,19 @@ export function DashboardSection() {
             )}
           </div>
         </div>
+
+        {/* Pending Actions */}
+        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+          <div className="flex flex-col">
+            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Pending Actions</span>
+            <span className="text-xs text-gray-500 dark:text-gray-400">Scheduled user actions</span>
+          </div>
+          <div className="text-right">
+            <div className="text-2xl font-bold text-orange-600 dark:text-orange-400">
+              -
+            </div>
+          </div>
+        </div>
       </CardContent>
     </Card>
   );
