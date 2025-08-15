@@ -612,10 +612,139 @@ export function LayoutSection({
     createDashboardCardMutation.mutate(cardData);
   };
 
-  // Helper functions
-  const getIntegrationLogo = (integrationType: string) => {
-    // Return appropriate logo based on integration type
-    return <div className="w-6 h-6 bg-gray-300 rounded"></div>;
+  // Helper functions - Integration logos (copied from IntegrationsSection)
+  const getIntegrationLogo = (name: string) => {
+    const logoClass = "w-6 h-6 flex-shrink-0";
+    
+    switch (name) {
+      case 'okta':
+        return (
+          <div className={logoClass}>
+            <svg viewBox="0 0 24 24" className="w-full h-full">
+              <circle cx="12" cy="12" r="12" fill="#007DC1"/>
+              <path d="M12 6c3.3 0 6 2.7 6 6s-2.7 6-6 6-6-2.7-6-6 2.7-6 6-6z" fill="white"/>
+              <circle cx="12" cy="12" r="2" fill="#007DC1"/>
+            </svg>
+          </div>
+        );
+      case 'knowbe4':
+        return (
+          <div className={logoClass}>
+            <svg viewBox="0 0 24 24" className="w-full h-full">
+              <circle cx="12" cy="12" r="12" fill="#FF6B35"/>
+              <text x="12" y="16" textAnchor="middle" fill="white" fontSize="8" fontWeight="bold">KB4</text>
+            </svg>
+          </div>
+        );
+      case 'sentinelone':
+        return (
+          <div className={logoClass}>
+            <svg viewBox="0 0 24 24" className="w-full h-full">
+              <rect width="24" height="24" rx="4" fill="#4A1A4A"/>
+              <path d="M6 8l6 4 6-4v8l-6 4-6-4V8z" fill="#8B5FBF"/>
+              <path d="M6 8l6-4 6 4-6 4-6-4z" fill="#A855F7"/>
+            </svg>
+          </div>
+        );
+      case 'addigy':
+        return (
+          <div className={logoClass}>
+            <svg viewBox="0 0 24 24" className="w-full h-full">
+              <rect width="24" height="24" rx="4" fill="#10B981"/>
+              <path d="M8 6h8l-2 6h2l-4 6-4-6h2l-2-6z" fill="white"/>
+            </svg>
+          </div>
+        );
+      case 'microsoft':
+        return (
+          <div className={logoClass}>
+            <svg viewBox="0 0 24 24" className="w-full h-full">
+              <rect x="2" y="2" width="9" height="9" fill="#F35325"/>
+              <rect x="13" y="2" width="9" height="9" fill="#81BC06"/>
+              <rect x="2" y="13" width="9" height="9" fill="#05A6F0"/>
+              <rect x="13" y="13" width="9" height="9" fill="#FFBA08"/>
+            </svg>
+          </div>
+        );
+      case 'jira':
+        return (
+          <div className={logoClass}>
+            <svg viewBox="0 0 24 24" className="w-full h-full">
+              <rect width="24" height="24" rx="4" fill="#0052CC"/>
+              <path d="M12 3l-6 6 3 3 3-3 3 3 3-3-6-6z" fill="white"/>
+              <path d="M12 9l-3 3 3 3 3-3-3-3z" fill="#0052CC"/>
+            </svg>
+          </div>
+        );
+      case 'screenconnect':
+      case 'ninjaone':
+        return (
+          <div className={logoClass}>
+            <svg viewBox="0 0 24 24" className="w-full h-full">
+              <rect width="24" height="24" rx="4" fill="#FF5722"/>
+              <path d="M8 6h8v2H8V6zm0 4h8v2H8v-2zm0 4h6v2H8v-2z" fill="white"/>
+            </svg>
+          </div>
+        );
+      case 'zendesk':
+        return (
+          <div className={logoClass}>
+            <svg viewBox="0 0 24 24" className="w-full h-full">
+              <circle cx="12" cy="12" r="12" fill="#03363D"/>
+              <path d="M6 6h12l-6 6-6-6z" fill="#78A300"/>
+              <path d="M6 18h12l-6-6-6 6z" fill="#78A300"/>
+            </svg>
+          </div>
+        );
+      case 'meshai':
+      case 'abnormal':
+        return (
+          <div className={logoClass}>
+            <svg viewBox="0 0 24 24" className="w-full h-full">
+              <rect width="24" height="24" rx="4" fill="#9C27B0"/>
+              <circle cx="12" cy="12" r="6" fill="white"/>
+              <circle cx="12" cy="12" r="3" fill="#9C27B0"/>
+            </svg>
+          </div>
+        );
+      case 'arcticwolf':
+        return (
+          <div className={logoClass}>
+            <svg viewBox="0 0 24 24" className="w-full h-full">
+              <rect width="24" height="24" rx="4" fill="#2196F3"/>
+              <path d="M12 4l4 4-4 4-4-4 4-4zm0 8l4 4-4 4-4-4 4-4z" fill="white"/>
+            </svg>
+          </div>
+        );
+      case 'msdefender':
+        return (
+          <div className={logoClass}>
+            <svg viewBox="0 0 24 24" className="w-full h-full">
+              <rect width="24" height="24" rx="4" fill="#00BCF2"/>
+              <path d="M12 3l7 4v6c0 4-3 8-7 8s-7-4-7-8V7l7-4z" fill="white"/>
+              <path d="M12 6l4 2v4c0 2-2 4-4 4s-4-2-4-4V8l4-2z" fill="#00BCF2"/>
+            </svg>
+          </div>
+        );
+      case 'hexnode':
+        return (
+          <div className={logoClass}>
+            <svg viewBox="0 0 24 24" className="w-full h-full">
+              <rect width="24" height="24" rx="4" fill="#4CAF50"/>
+              <path d="M6 6h6l3 6-3 6H6l3-6-3-6z" fill="white"/>
+            </svg>
+          </div>
+        );
+      default:
+        return (
+          <div className={logoClass}>
+            <svg viewBox="0 0 24 24" className="w-full h-full">
+              <rect width="24" height="24" rx="4" fill="#6B7280"/>
+              <path d="M8 8h8v2H8V8zm0 4h8v2H8v-2zm0 4h6v2H8v-2z" fill="white"/>
+            </svg>
+          </div>
+        );
+    }
   };
 
   const mapCardTypeToIntegrationType = (cardType: string) => {
