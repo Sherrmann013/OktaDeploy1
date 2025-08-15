@@ -277,14 +277,22 @@ export function LayoutSection({
   // Mutation to create dashboard card directly
   const createDashboardCardMutation = useMutation({
     mutationFn: async (cardData: any) => {
+      console.log('Making API request to create card:', cardData);
       const endpoint = `/api/client/${currentClientId}/dashboard-cards`;
       const response = await apiRequest("POST", endpoint, cardData);
       if (!response.ok) {
-        throw new Error("Failed to create dashboard card");
+        const errorText = await response.text();
+        console.log('API error response:', errorText);
+        throw new Error(`Failed to create dashboard card: ${errorText}`);
       }
-      return response.json();
+      const result = await response.json();
+      console.log('API success response:', result);
+      return result;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      console.log('Mutation success, invalidating cache and refetching');
+      // Invalidate multiple cache keys to ensure refresh
+      queryClient.invalidateQueries({ queryKey: [`/api/client/${currentClientId}/dashboard-cards`] });
       refetchDashboardCards();
       toast({
         title: "Success",
@@ -292,6 +300,7 @@ export function LayoutSection({
       });
     },
     onError: (error: any) => {
+      console.log('Mutation error:', error);
       toast({
         title: "Error",
         description: error.message || "Failed to add dashboard card",
@@ -583,8 +592,26 @@ export function LayoutSection({
 
   // Function to handle adding integration card directly from dropdown
   const handleAddIntegrationCard = (integrationType: string) => {
+    console.log('Adding integration card for:', integrationType);
+    
     const integration = integrationsData?.find((i: any) => i.name === integrationType);
-    if (!integration) return;
+    if (!integration) {
+      console.log('Integration not found:', integrationType);
+      return;
+    }
+
+    console.log('Integration found:', integration);
+
+    // Check if card already exists
+    const existingCard = dashboardCards.find(card => card.type === integrationType);
+    if (existingCard) {
+      toast({
+        title: "Card Already Exists",
+        description: `${integration.displayName || integration.name} card already exists on the dashboard`,
+        variant: "destructive",
+      });
+      return;
+    }
 
     const cardData = {
       name: integration.displayName || integration.name,
@@ -595,6 +622,7 @@ export function LayoutSection({
       position: 999 // Will be adjusted by backend
     };
 
+    console.log('Creating card with data:', cardData);
     createDashboardCardMutation.mutate(cardData);
   };
 
@@ -844,7 +872,7 @@ export function LayoutSection({
                   <div className="flex items-center justify-between mb-6">
                     <h4 className="text-lg font-semibold">Dashboard Layout</h4>
                     <div className="flex gap-2">
-                      <Select onValueChange={(value) => handleAddIntegrationCard(value)}>
+                      <Select onValueChange={(value) => handleAddIntegrationCard(value)} value="">
                         <SelectTrigger className="w-48 bg-blue-600 hover:bg-blue-700 text-white border-blue-600">
                           <div className="flex items-center">
                             <Plus className="w-4 h-4 mr-2" />
