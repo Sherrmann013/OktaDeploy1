@@ -80,71 +80,50 @@ export function generatePasswordFromPolicy(config: PasswordConfig): string {
               if (bestFit) {
                 passwordParts.push(bestFit.charAt(0).toUpperCase() + bestFit.slice(1).toLowerCase());
               } else {
-                // Final fallback: use closest length word and pad/trim
-                const closestWord = broaderWords[0] || 'Word';
-                let adjustedWord = closestWord.charAt(0).toUpperCase() + closestWord.slice(1).toLowerCase();
-                
-                if (adjustedWord.length < minWordLength) {
-                  // Pad with numbers
-                  while (adjustedWord.length < minWordLength) {
-                    adjustedWord += numbers[Math.floor(Math.random() * numbers.length)];
-                  }
-                } else if (adjustedWord.length > minWordLength) {
-                  // Trim to length
-                  adjustedWord = adjustedWord.substring(0, minWordLength);
+                // Last resort: truncate a longer word to exact length (match CreateUserModal logic)
+                const longerWords = broaderWords.filter(word => word.length > minWordLength);
+                if (longerWords.length > 0) {
+                  const selectedWord = longerWords[Math.floor(Math.random() * longerWords.length)]
+                    .substring(0, minWordLength);
+                  passwordParts.push(selectedWord.charAt(0).toUpperCase() + selectedWord.slice(1).toLowerCase());
+                } else {
+                  passwordParts.push('Word'.substring(0, minWordLength));
                 }
-                passwordParts.push(adjustedWord);
               }
             }
           } catch (error) {
-            // Fallback if random-words fails
-            const fallbackWord = generate() as string;
-            let adjustedWord = fallbackWord.charAt(0).toUpperCase() + fallbackWord.slice(1).toLowerCase();
-            
-            // Adjust to target length
-            if (adjustedWord.length < minWordLength) {
-              while (adjustedWord.length < minWordLength) {
-                adjustedWord += numbers[Math.floor(Math.random() * numbers.length)];
-              }
-            } else if (adjustedWord.length > minWordLength) {
-              adjustedWord = adjustedWord.substring(0, minWordLength);
-            }
-            passwordParts.push(adjustedWord);
+            // Match CreateUserModal's fallback logic exactly
+            passwordParts.push('Word'.substring(0, minWordLength));
           }
           break;
           
         case 'numbers':
-          passwordParts.push(numbers[Math.floor(Math.random() * numbers.length)]);
+          const singleDigit = numbers[Math.floor(Math.random() * numbers.length)];
+          passwordParts.push(singleDigit);
           break;
-          
         case 'symbols':
-          passwordParts.push(symbols[Math.floor(Math.random() * symbols.length)]);
+          const selectedSymbol = symbols[Math.floor(Math.random() * symbols.length)];
+          passwordParts.push(selectedSymbol);
           break;
       }
     }
   });
   
-  // Shuffle the password parts for better randomness
-  for (let i = passwordParts.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [passwordParts[i], passwordParts[j]] = [passwordParts[j], passwordParts[i]];
-  }
+  // Join all parts (NO SHUFFLING - match CreateUserModal exactly)
+  let password = passwordParts.join('');
   
-  let generatedPassword = passwordParts.join('');
-  
-  // Ensure we meet the target length exactly
-  if (generatedPassword.length < targetLength) {
-    // Add numbers to reach target
-    const needed = targetLength - generatedPassword.length;
-    for (let i = 0; i < needed; i++) {
-      generatedPassword += numbers[Math.floor(Math.random() * numbers.length)];
+  // CRITICAL: Ensure exact target length compliance (match CreateUserModal logic)
+  if (password.length > targetLength) {
+    password = password.substring(0, targetLength);
+  } else if (password.length < targetLength) {
+    // Pad with random numbers to reach exact target length
+    const deficit = targetLength - password.length;
+    for (let i = 0; i < deficit; i++) {
+      password += numbers[Math.floor(Math.random() * numbers.length)];
     }
-  } else if (generatedPassword.length > targetLength) {
-    // Trim to exact target
-    generatedPassword = generatedPassword.substring(0, targetLength);
   }
   
-  return generatedPassword;
+  return password;
 }
 
 // Default password policy fallback
