@@ -567,10 +567,6 @@ export default function CreateUserModal({ open, onClose, onSuccess, clientId }: 
         setPassword(result.generatedPassword);
         form.setValue('password', result.generatedPassword);
         console.log("🔑 CreateUserModal: Password state updated successfully");
-        toast({
-          title: "Password Generated",
-          description: `Generated password: ${result.generatedPassword}`,
-        });
       } else {
         console.error("🔑 CreateUserModal: Invalid response format:", result);
         toast({

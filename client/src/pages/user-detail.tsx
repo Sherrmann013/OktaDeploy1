@@ -407,10 +407,6 @@ export default function UserDetail() {
       if (action === "generate" && data?.generatedPassword) {
         setNewPassword(data.generatedPassword);
         setGeneratedPassword(data.generatedPassword);
-        toast({
-          title: "Password Generated",
-          description: `Generated password: ${data.generatedPassword}`,
-        });
       } else if (action !== "generate") {
         const actionText = action === "reset" ? "Password reset successful" : "Password expired successfully";
         toast({
@@ -1860,18 +1856,13 @@ export default function UserDetail() {
                   Generate
                 </Button>
               </div>
-              {generatedPassword && (
-                <div className="text-xs text-muted-foreground">
-                  Generated: {generatedPassword}
-                </div>
-              )}
             </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowPasswordModal(null)}>
               Cancel
             </Button>
-            <Button onClick={handlePasswordReset} disabled={!newPassword}>
+            <Button onClick={handlePasswordReset} disabled={!newPassword} className="bg-blue-600 hover:bg-blue-700">
               Reset Password
             </Button>
           </DialogFooter>
