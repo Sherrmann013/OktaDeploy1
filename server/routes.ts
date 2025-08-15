@@ -41,7 +41,7 @@ function determineEmployeeTypeFromGroups(userGroups: any[], employeeTypeApps: Se
   // This would require additional logic to check user's app assignments
   return null;
 }
-import { setupAuth, isAuthenticated, requireAdmin } from "./direct-okta-auth";
+import { setupSimpleAuth as setupAuth, isAuthenticated, requireAdmin } from "./simple-auth";
 
 // Helper function to reset OKTA user authenticators
 async function resetOktaUserAuthenticators(apiKeys: Record<string, string>, oktaId: string) {
@@ -1338,13 +1338,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "User with this login already exists" });
       }
 
-      // Check if user already exists in OKTA
       // NOTE: Global OKTA user existence check removed - client-specific endpoints handle this
       // User existence should be checked via client-specific OKTA integrations
-      } catch (error) {
-        // User doesn't exist in OKTA, which is expected for new users
-        console.log('User not found in OKTA (expected for new user)');
-      }
 
       // Create user in OKTA first
       console.log('Creating user in OKTA:', userData.email);

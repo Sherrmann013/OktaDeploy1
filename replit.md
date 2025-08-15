@@ -101,6 +101,23 @@ The dashboard uses a React frontend (TypeScript, Tailwind CSS, Wouter) and an Ex
 
 **Prevention:** OKTA sync should only be triggered manually by users when needed, not automatically on every data fetch to avoid race conditions with manual user creation.
 
+### Global OKTA Keys Security Cleanup (Resolved: August 15, 2025)
+**Problem:** Both global and client-specific OKTA keys existed simultaneously, creating confusion and potential security risks where wrong credentials could be used accidentally.
+
+**Root Cause:**
+- Legacy global OKTA environment variables (OKTA_DOMAIN, OKTA_API_TOKEN) still existed
+- Global oktaService class used environment variables instead of client-specific database credentials
+- Multiple endpoints had mixed approaches using both global and client-specific authentication
+
+**Resolution Approach:**
+- Completely removed server/okta-service.ts, server/okta-auth.ts, server/direct-okta-auth.ts files
+- Removed global OKTA environment variable defaults from server/index.ts
+- Disabled all endpoints that used global oktaService methods
+- Password reset functionality now uses only client-specific API keys from clientIntegrations table
+- Created dedicated client-specific OKTA helper functions (setOktaUserPassword, resetOktaUserPassword)
+
+**Prevention:** All OKTA operations now use client-specific credentials exclusively, eliminating risk of credential confusion.
+
 ### User Routing Bug (Resolved: August 15, 2025)
 **Problem:** User clicks in the users list were navigating to `/users/${userId}` instead of client-scoped routes `/client/${clientId}/users/${userId}`, causing routing errors and inability to view user details properly.
 

@@ -1,5 +1,6 @@
 import { storage } from './storage';
-import { oktaService } from './okta-service';
+// NOTE: Global oktaService removed - client-specific OKTA integrations should be used
+// import { oktaService } from './okta-service';
 
 interface EmployeeTypeMapping {
   [key: string]: string;
