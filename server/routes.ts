@@ -5878,6 +5878,103 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: "User not found" });
       }
       
+      // If this is a status update, redirect to the status-specific endpoint logic
+      if (updates.status) {
+        console.log(`🔄 Status update detected, processing OKTA status change for user ${userId}`);
+        
+        // Handle OKTA status changes using client-specific credentials
+        if (existingUser.oktaId) {
+          try {
+            // Get client's OKTA integration settings
+            const [oktaIntegration] = await clientDb.select().from(clientIntegrations)
+              .where(eq(clientIntegrations.name, 'okta'))
+              .limit(1);
+
+            if (oktaIntegration && oktaIntegration.apiKeys) {
+              const apiKeys = oktaIntegration.apiKeys as Record<string, string>;
+              const status = updates.status;
+              
+              console.log(`🔄 Checking current OKTA status for user ${existingUser.oktaId} using client ${clientId} credentials`);
+              
+              try {
+                const response = await fetch(`https://${apiKeys.domain}/api/v1/users/${existingUser.oktaId}`, {
+                  method: 'GET',
+                  headers: {
+                    'Accept': 'application/json',
+                    'Authorization': `SSWS ${apiKeys.apiToken}`,
+                  },
+                });
+
+                if (response.ok) {
+                  const oktaUser = await response.json();
+                  const currentOktaStatus = oktaUser.status;
+                  console.log(`Current OKTA status: ${currentOktaStatus}, Requested status: ${status}`);
+                  
+                  const normalizedOktaStatus = currentOktaStatus === "PROVISIONED" ? "ACTIVE" : currentOktaStatus;
+                  
+                  if (normalizedOktaStatus !== status) {
+                    console.log(`🔄 Updating OKTA user ${existingUser.oktaId} status from ${currentOktaStatus} to ${status}`);
+                    
+                    if (status === "SUSPENDED" || status === "DEPROVISIONED") {
+                      // Deactivate user in OKTA
+                      const deactivateResponse = await fetch(`https://${apiKeys.domain}/api/v1/users/${existingUser.oktaId}/lifecycle/deactivate`, {
+                        method: 'POST',
+                        headers: {
+                          'Accept': 'application/json',
+                          'Authorization': `SSWS ${apiKeys.apiToken}`,
+                        },
+                      });
+                      
+                      if (deactivateResponse.ok) {
+                        console.log(`✅ Successfully deactivated user ${existingUser.email} in OKTA`);
+                      } else {
+                        const errorText = await deactivateResponse.text();
+                        console.error(`❌ Failed to deactivate user in OKTA: ${deactivateResponse.status} ${errorText}`);
+                        throw new Error(`OKTA deactivation failed: ${deactivateResponse.status} ${deactivateResponse.statusText}`);
+                      }
+                    } else if (status === "ACTIVE") {
+                      // Activate user in OKTA
+                      const activateResponse = await fetch(`https://${apiKeys.domain}/api/v1/users/${existingUser.oktaId}/lifecycle/activate`, {
+                        method: 'POST',
+                        headers: {
+                          'Accept': 'application/json',
+                          'Authorization': `SSWS ${apiKeys.apiToken}`,
+                        },
+                      });
+                      
+                      if (activateResponse.ok) {
+                        console.log(`✅ Successfully activated user ${existingUser.email} in OKTA`);
+                      } else {
+                        const errorText = await activateResponse.text();
+                        console.error(`❌ Failed to activate user in OKTA: ${activateResponse.status} ${errorText}`);
+                        throw new Error(`OKTA activation failed: ${activateResponse.status} ${activateResponse.statusText}`);
+                      }
+                    }
+                  } else {
+                    console.log(`ℹ️  User already has equivalent status ${currentOktaStatus} in OKTA, skipping API call`);
+                  }
+                } else {
+                  console.warn(`⚠️  Could not get current OKTA status: ${response.status}`);
+                }
+              } catch (oktaStatusError) {
+                console.error("OKTA status check error:", oktaStatusError);
+                // Continue with local update even if OKTA status check fails
+              }
+            } else {
+              console.log(`⚠️  No OKTA integration found for client ${clientId}, updating local status only`);
+            }
+          } catch (oktaError) {
+            console.error("OKTA API error:", oktaError);
+            return res.status(500).json({ 
+              error: "Failed to update user status in OKTA",
+              details: oktaError instanceof Error ? oktaError.message : "Unknown OKTA error"
+            });
+          }
+        } else {
+          console.log(`ℹ️  User has no OKTA ID, updating local status only`);
+        }
+      }
+      
       // Update user in client-specific database
       const [updatedUser] = await clientDb.update(clientUsers)
         .set({ ...updates, lastUpdated: new Date() })
@@ -5909,6 +6006,104 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Use client-specific database connection
       const multiDb = MultiDatabaseManager.getInstance();
       const clientDb = await multiDb.getClientDb(clientId);
+      
+      // Get user from client database first
+      const [existingUser] = await clientDb.select().from(clientUsers).where(eq(clientUsers.id, userId)).limit(1);
+      if (!existingUser) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      // Handle OKTA status changes using client-specific credentials
+      if (existingUser.oktaId) {
+        try {
+          // Get client's OKTA integration settings
+          const [oktaIntegration] = await clientDb.select().from(clientIntegrations)
+            .where(eq(clientIntegrations.name, 'okta'))
+            .limit(1);
+
+          if (oktaIntegration && oktaIntegration.apiKeys) {
+            const apiKeys = oktaIntegration.apiKeys as Record<string, string>;
+            
+            console.log(`🔄 Checking current OKTA status for user ${existingUser.oktaId} using client ${clientId} credentials`);
+            
+            // Get current OKTA status to avoid unnecessary API calls
+            try {
+              const response = await fetch(`https://${apiKeys.domain}/api/v1/users/${existingUser.oktaId}`, {
+                method: 'GET',
+                headers: {
+                  'Accept': 'application/json',
+                  'Authorization': `SSWS ${apiKeys.apiToken}`,
+                },
+              });
+
+              if (response.ok) {
+                const oktaUser = await response.json();
+                const currentOktaStatus = oktaUser.status;
+                console.log(`Current OKTA status: ${currentOktaStatus}, Requested status: ${status}`);
+                
+                const normalizedOktaStatus = currentOktaStatus === "PROVISIONED" ? "ACTIVE" : currentOktaStatus;
+                
+                if (normalizedOktaStatus !== status) {
+                  console.log(`🔄 Updating OKTA user ${existingUser.oktaId} status from ${currentOktaStatus} to ${status}`);
+                  
+                  if (status === "SUSPENDED" || status === "DEPROVISIONED") {
+                    // Deactivate user in OKTA
+                    const deactivateResponse = await fetch(`https://${apiKeys.domain}/api/v1/users/${existingUser.oktaId}/lifecycle/deactivate`, {
+                      method: 'POST',
+                      headers: {
+                        'Accept': 'application/json',
+                        'Authorization': `SSWS ${apiKeys.apiToken}`,
+                      },
+                    });
+                    
+                    if (deactivateResponse.ok) {
+                      console.log(`✅ Successfully deactivated user ${existingUser.email} in OKTA`);
+                    } else {
+                      const errorText = await deactivateResponse.text();
+                      console.error(`❌ Failed to deactivate user in OKTA: ${deactivateResponse.status} ${errorText}`);
+                      throw new Error(`OKTA deactivation failed: ${deactivateResponse.status} ${deactivateResponse.statusText}`);
+                    }
+                  } else if (status === "ACTIVE") {
+                    // Activate user in OKTA
+                    const activateResponse = await fetch(`https://${apiKeys.domain}/api/v1/users/${existingUser.oktaId}/lifecycle/activate`, {
+                      method: 'POST',
+                      headers: {
+                        'Accept': 'application/json',
+                        'Authorization': `SSWS ${apiKeys.apiToken}`,
+                      },
+                    });
+                    
+                    if (activateResponse.ok) {
+                      console.log(`✅ Successfully activated user ${existingUser.email} in OKTA`);
+                    } else {
+                      const errorText = await activateResponse.text();
+                      console.error(`❌ Failed to activate user in OKTA: ${activateResponse.status} ${errorText}`);
+                      throw new Error(`OKTA activation failed: ${activateResponse.status} ${activateResponse.statusText}`);
+                    }
+                  }
+                } else {
+                  console.log(`ℹ️  User already has equivalent status ${currentOktaStatus} in OKTA, skipping API call`);
+                }
+              } else {
+                console.warn(`⚠️  Could not get current OKTA status: ${response.status}`);
+              }
+            } catch (oktaStatusError) {
+              console.error("OKTA status check error:", oktaStatusError);
+              // Continue with local update even if OKTA status check fails
+            }
+          } else {
+            console.log(`⚠️  No OKTA integration found for client ${clientId}, updating local status only`);
+          }
+        } catch (oktaError) {
+          console.error("OKTA API error:", oktaError);
+          return res.status(500).json({ 
+            error: "Failed to update user status in OKTA",
+            details: oktaError instanceof Error ? oktaError.message : "Unknown OKTA error"
+          });
+        }
+      } else {
+        console.log(`ℹ️  User has no OKTA ID, updating local status only`);
+      }
       
       // Update status in client-specific database
       const [updatedUser] = await clientDb.update(clientUsers)
