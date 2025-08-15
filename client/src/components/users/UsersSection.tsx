@@ -182,7 +182,7 @@ export function UsersSection() {
   const [, setLocation] = useLocation();
   
   const handleUserClick = (userId: number) => {
-    setLocation(`/users/${userId}`);
+    setLocation(`/client/${currentClientId}/users/${userId}`);
   };
 
   const handleCreateSuccess = () => {

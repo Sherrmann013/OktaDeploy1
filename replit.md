@@ -100,6 +100,19 @@ The dashboard uses a React frontend (TypeScript, Tailwind CSS, Wouter) and an Ex
 
 **Prevention:** OKTA sync should only be triggered manually by users when needed, not automatically on every data fetch to avoid race conditions with manual user creation.
 
+### User Routing Bug (Resolved: August 15, 2025)
+**Problem:** User clicks in the users list were navigating to `/users/${userId}` instead of client-scoped routes `/client/${clientId}/users/${userId}`, causing routing errors and inability to view user details properly.
+
+**Root Cause:** 
+- `handleUserClick` function in `UsersSection.tsx` was using hardcoded `/users/` path instead of client-scoped routing
+- This broke the multi-tenant architecture where all routes should be scoped to specific clients
+
+**Resolution Approach:**
+- Fixed `handleUserClick` to use `/client/${currentClientId}/users/${userId}` pattern
+- Ensures all user navigation respects client-specific context and database isolation
+
+**Prevention:** All user navigation must use client-scoped routes to maintain proper multi-tenant isolation.
+
 ## External Dependencies
 - **OKTA:** For enterprise user authentication and management.
 - **KnowBe4:** Security training platform.
