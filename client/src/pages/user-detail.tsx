@@ -485,7 +485,7 @@ export default function UserDetail() {
     setConfirmAction({
       type: "delete",
       title: "Delete User",
-      message: "Are you sure you want to permanently delete this user? This will remove the user from both OKTA and the local database. This action cannot be undone.",
+      message: "Are you sure you want to permanently delete this user? This action cannot be undone.",
       action: () => deleteUserMutation.mutate(),
     });
   };
@@ -651,7 +651,7 @@ export default function UserDetail() {
         return <Badge className="bg-green-600 text-white">Active</Badge>;
       case "SUSPENDED":
         return <Badge className="bg-yellow-100 text-yellow-800">Suspended</Badge>;
-      case "DEPROVISIONED":
+      case "DEACTIVATED":
         return <Badge className="bg-red-100 text-red-800">Deactivated</Badge>;
       default:
         return <Badge variant="secondary">{status}</Badge>;
@@ -787,14 +787,40 @@ export default function UserDetail() {
                       </DropdownMenuItem>
                       <DropdownMenuSeparator className="border-gray-200 dark:border-gray-600" />
                       {user.status === "ACTIVE" ? (
-                        <DropdownMenuItem
-                          onClick={() => handleStatusChange("SUSPENDED")}
-                          className="flex items-center gap-2 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer"
-                        >
-                          <UserX className="w-4 h-4 text-orange-600" />
-                          Suspend
-                        </DropdownMenuItem>
-                      ) : (
+                        <>
+                          <DropdownMenuItem
+                            onClick={() => handleStatusChange("SUSPENDED")}
+                            className="flex items-center gap-2 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer"
+                          >
+                            <UserX className="w-4 h-4 text-orange-600" />
+                            Suspend
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => handleStatusChange("DEACTIVATED")}
+                            className="flex items-center gap-2 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer"
+                          >
+                            <UserX className="w-4 h-4 text-red-600" />
+                            Deactivate
+                          </DropdownMenuItem>
+                        </>
+                      ) : user.status === "SUSPENDED" ? (
+                        <>
+                          <DropdownMenuItem
+                            onClick={() => handleStatusChange("ACTIVE")}
+                            className="flex items-center gap-2 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer"
+                          >
+                            <UserCheck className="w-4 h-4 text-green-600" />
+                            Activate
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => handleStatusChange("DEACTIVATED")}
+                            className="flex items-center gap-2 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer"
+                          >
+                            <UserX className="w-4 h-4 text-red-600" />
+                            Deactivate
+                          </DropdownMenuItem>
+                        </>
+                      ) : user.status === "DEACTIVATED" ? (
                         <DropdownMenuItem
                           onClick={() => handleStatusChange("ACTIVE")}
                           className="flex items-center gap-2 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer"
@@ -802,16 +828,9 @@ export default function UserDetail() {
                           <UserCheck className="w-4 h-4 text-green-600" />
                           Activate
                         </DropdownMenuItem>
-                      )}
-                      <DropdownMenuItem
-                        onClick={() => handleStatusChange("DEPROVISIONED")}
-                        className="flex items-center gap-2 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer"
-                      >
-                        <UserX className="w-4 h-4 text-red-600" />
-                        Deactivate
-                      </DropdownMenuItem>
+                      ) : null}
                       {/* Only show Delete option for deactivated users (OKTA requirement) */}
-                      {user.status === "DEPROVISIONED" && (
+                      {user.status === "DEACTIVATED" && (
                         <>
                           <DropdownMenuSeparator className="border-gray-200 dark:border-gray-600" />
                           <DropdownMenuItem

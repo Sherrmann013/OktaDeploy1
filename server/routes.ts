@@ -1811,7 +1811,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const id = z.coerce.number().parse(req.params.id);
       const { status } = z.object({
-        status: z.enum(["ACTIVE", "SUSPENDED", "DEPROVISIONED"])
+        status: z.enum(["ACTIVE", "SUSPENDED", "DEACTIVATED"])
       }).parse(req.body);
 
       // Get user to find OKTA ID
@@ -1840,7 +1840,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             } else if (status === "ACTIVE") {
               const result = await oktaService.activateUser(user.oktaId);
               console.log("OKTA activate result:", result);
-            } else if (status === "DEPROVISIONED") {
+            } else if (status === "DEACTIVATED") {
               const result = await oktaService.deactivateUser(user.oktaId);
               console.log("OKTA deactivate result:", result);
             }
@@ -5915,7 +5915,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                   if (normalizedOktaStatus !== status) {
                     console.log(`🔄 Updating OKTA user ${existingUser.oktaId} status from ${currentOktaStatus} to ${status}`);
                     
-                    if (status === "SUSPENDED" || status === "DEPROVISIONED") {
+                    if (status === "SUSPENDED" || status === "DEACTIVATED") {
                       // Deactivate user in OKTA
                       const deactivateResponse = await fetch(`https://${apiKeys.domain}/api/v1/users/${existingUser.oktaId}/lifecycle/deactivate`, {
                         method: 'POST',
@@ -5998,7 +5998,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const clientId = parseInt(req.params.clientId);
       const userId = parseInt(req.params.userId);
       const { status } = z.object({
-        status: z.enum(["ACTIVE", "SUSPENDED", "DEPROVISIONED"])
+        status: z.enum(["ACTIVE", "SUSPENDED", "DEACTIVATED"])
       }).parse(req.body);
       
       console.log(`👤 Updating status for user ${userId} in client ${clientId} to ${status}`);
@@ -6046,7 +6046,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 if (normalizedOktaStatus !== status) {
                   console.log(`🔄 Updating OKTA user ${existingUser.oktaId} status from ${currentOktaStatus} to ${status}`);
                   
-                  if (status === "SUSPENDED" || status === "DEPROVISIONED") {
+                  if (status === "SUSPENDED" || status === "DEACTIVATED") {
                     // Deactivate user in OKTA
                     const deactivateResponse = await fetch(`https://${apiKeys.domain}/api/v1/users/${existingUser.oktaId}/lifecycle/deactivate`, {
                       method: 'POST',
@@ -6145,10 +6145,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // OKTA requires users to be deactivated before deletion
-      if (existingUser.status !== "DEPROVISIONED") {
+      if (existingUser.status !== "DEACTIVATED") {
         return res.status(400).json({ 
           error: "User must be deactivated before deletion",
-          details: "OKTA requires users to be deactivated (DEPROVISIONED status) before they can be permanently deleted."
+          details: "OKTA requires users to be deactivated before they can be permanently deleted."
         });
       }
 

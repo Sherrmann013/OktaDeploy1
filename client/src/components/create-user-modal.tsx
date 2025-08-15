@@ -305,7 +305,7 @@ export default function CreateUserModal({ open, onClose, onSuccess, clientId }: 
         : z.string().optional(),
       mobilePhone: z.string().optional(),
       managerId: z.number().optional(),
-      status: z.enum(["ACTIVE", "SUSPENDED", "DEPROVISIONED"]).default("ACTIVE"),
+      status: z.enum(["ACTIVE", "SUSPENDED", "DEACTIVATED"]).default("ACTIVE"),
       groups: z.array(z.string()).default([]),
       applications: z.array(z.string()).default([]),
     });

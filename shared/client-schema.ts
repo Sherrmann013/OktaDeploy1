@@ -181,7 +181,7 @@ export const insertUserSchema = createInsertSchema(users).omit({
   lastName: z.string().min(1, "Last name is required"),
   email: z.string().email("Invalid email address"),
   login: z.string().min(1, "Login is required"),
-  status: z.enum(["ACTIVE", "SUSPENDED", "DEPROVISIONED"], { required_error: "Status is required" }).default("ACTIVE"),
+  status: z.enum(["ACTIVE", "SUSPENDED", "DEACTIVATED"], { required_error: "Status is required" }).default("ACTIVE"),
 });
 
 export const insertSiteAccessUserSchema = createInsertSchema(siteAccessUsers).omit({

@@ -72,7 +72,7 @@ export const users = pgTable("users", {
   profileImageUrl: text("profile_image_url"),
   managerId: integer("manager_id"),
   manager: text("manager"), // Manager's name from OKTA
-  status: text("status").notNull().default("ACTIVE"), // ACTIVE, SUSPENDED, DEPROVISIONED
+  status: text("status").notNull().default("ACTIVE"), // ACTIVE, SUSPENDED, DEACTIVATED
   groups: text("groups").array().default([]),
   applications: text("applications").array().default([]),
   userType: text("user_type").notNull().default("CLIENT"), // MSP, CLIENT

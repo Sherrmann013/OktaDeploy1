@@ -244,14 +244,14 @@ export function UsersSection() {
       case 'ACTIVE': return 'bg-green-100 text-green-800';
       case 'STAGED': return 'bg-yellow-100 text-yellow-800';
       case 'SUSPENDED': return 'bg-red-100 text-red-800';
-      case 'DEPROVISIONED': return 'bg-gray-100 text-gray-800';
+      case 'DEACTIVATED': return 'bg-gray-100 text-gray-800';
       default: return 'bg-gray-100 text-gray-800';
     }
   };
 
   const getStatusDisplayText = (status: string) => {
     switch (status?.toUpperCase()) {
-      case 'DEPROVISIONED': return 'Deactivated';
+      case 'DEACTIVATED': return 'Deactivated';
       default: return status;
     }
   };

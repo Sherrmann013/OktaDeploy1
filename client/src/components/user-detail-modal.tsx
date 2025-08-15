@@ -98,14 +98,14 @@ export default function UserDetailModal({ open, onClose, userId, clientId }: Use
     switch (status?.toUpperCase()) {
       case 'ACTIVE': return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300';
       case 'SUSPENDED': return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300';
-      case 'DEPROVISIONED': return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300';
+      case 'DEACTIVATED': return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300';
       default: return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300';
     }
   };
 
   const getStatusDisplayText = (status: string) => {
     switch (status?.toUpperCase()) {
-      case 'DEPROVISIONED': return 'Deactivated';
+      case 'DEACTIVATED': return 'Deactivated';
       default: return status;
     }
   };
