@@ -389,6 +389,7 @@ export default function UserDetail() {
 
   const passwordResetMutation = useMutation({
     mutationFn: async (action: "reset" | "expire" | "generate") => {
+      console.log("🔑 UserDetail: Starting password action:", action, "for user", userId, "in client", clientId);
       let response;
       if (action === "reset") {
         // For reset, send the actual password in the body
@@ -400,23 +401,39 @@ export default function UserDetail() {
         // For generate and expire, just send the action
         response = await apiRequest("POST", `/api/client/${clientId}/users/${userId}/password/reset`, { action });
       }
-      return await response.json();
+      const result = await response.json();
+      console.log("🔑 UserDetail: Password action response:", result);
+      return result;
     },
     onSuccess: (data: any, action) => {
+      console.log("🔑 UserDetail: Password action success handler called with:", data, "action:", action);
       if (action === "generate" && data?.generatedPassword) {
+        console.log("🔑 UserDetail: Setting generated password to:", data.generatedPassword);
         setGeneratedPassword(data.generatedPassword);
         setNewPassword(data.generatedPassword);
-        // No success popup for password generation (as requested)
-      } else {
+        console.log("🔑 UserDetail: Password state updated successfully");
+        toast({
+          title: "Password Generated",
+          description: `Generated password: ${data.generatedPassword}`,
+        });
+      } else if (action !== "generate") {
         const actionText = action === "reset" ? "Password reset successful" : "Password expired successfully";
         toast({
           title: "Success",
           description: actionText,
         });
+      } else {
+        console.error("🔑 UserDetail: Invalid response format for generate action:", data);
+        toast({
+          title: "Password Generation Issue", 
+          description: "Password was generated but not returned properly",
+          variant: "destructive",
+        });
       }
       queryClient.invalidateQueries({ queryKey: [`/api/client/${clientId}/users`, userId] });
     },
     onError: (error) => {
+      console.error("🔑 UserDetail: Password action error:", error);
       toast({
         title: "Error",
         description: error.message,

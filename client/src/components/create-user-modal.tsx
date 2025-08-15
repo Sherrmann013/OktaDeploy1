@@ -554,18 +554,36 @@ export default function CreateUserModal({ open, onClose, onSuccess, clientId }: 
   // UNIFIED PASSWORD GENERATION - Use server endpoint like Password Reset Modal
   const generatePasswordMutation = useMutation({
     mutationFn: async () => {
+      console.log("🔑 CreateUserModal: Starting password generation for client", currentClientId);
       const response = await apiRequest("POST", `/api/client/${currentClientId}/password-generation`, {
         action: "generate"
       });
-      return await response.json();
+      const result = await response.json();
+      console.log("🔑 CreateUserModal: Password generation response:", result);
+      return result;
     },
     onSuccess: (result) => {
+      console.log("🔑 CreateUserModal: Password generation success handler called with:", result);
       if (result.success && result.generatedPassword) {
+        console.log("🔑 CreateUserModal: Setting password to:", result.generatedPassword);
         setPassword(result.generatedPassword);
         form.setValue('password', result.generatedPassword);
+        console.log("🔑 CreateUserModal: Password state updated successfully");
+        toast({
+          title: "Password Generated",
+          description: `Generated password: ${result.generatedPassword}`,
+        });
+      } else {
+        console.error("🔑 CreateUserModal: Invalid response format:", result);
+        toast({
+          title: "Password Generation Issue",
+          description: "Password was generated but not returned properly",
+          variant: "destructive",
+        });
       }
     },
     onError: (error: Error) => {
+      console.error("🔑 CreateUserModal: Password generation error:", error);
       toast({
         title: "Password Generation Failed",
         description: error.message,
