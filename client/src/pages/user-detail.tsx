@@ -388,7 +388,7 @@ export default function UserDetail() {
   });
 
   const passwordResetMutation = useMutation({
-    mutationFn: async (action: "reset" | "expire") => {
+    mutationFn: async (action: "reset" | "expire" | "generate") => {
       let response;
       if (action === "reset") {
         // For reset, send the actual password in the body
@@ -397,18 +397,27 @@ export default function UserDetail() {
           password: newPassword 
         });
       } else {
-        // For expire, just send the action
+        // For generate and expire, just send the action
         response = await apiRequest("POST", `/api/client/${clientId}/users/${userId}/password/reset`, { action });
       }
       const result = await response.json();
       return result;
     },
     onSuccess: (data: any, action) => {
-      const actionText = action === "reset" ? "Password reset successful" : "Password expired successfully";
-      toast({
-        title: "Success",
-        description: actionText,
-      });
+      if (action === "generate" && data?.generatedPassword) {
+        setNewPassword(data.generatedPassword);
+        setGeneratedPassword(data.generatedPassword);
+        toast({
+          title: "Password Generated",
+          description: `Generated password: ${data.generatedPassword}`,
+        });
+      } else if (action !== "generate") {
+        const actionText = action === "reset" ? "Password reset successful" : "Password expired successfully";
+        toast({
+          title: "Success",
+          description: actionText,
+        });
+      }
       queryClient.invalidateQueries({ queryKey: [`/api/client/${clientId}/users`, userId] });
     },
     onError: (error) => {
@@ -582,31 +591,7 @@ export default function UserDetail() {
   };
 
   const generatePassword = () => {
-    const words = [
-      'blue', 'red', 'green', 'cat', 'dog', 'sun', 'moon', 'star', 'tree', 'bird',
-      'fish', 'car', 'book', 'key', 'box', 'cup', 'pen', 'hat', 'bag', 'run',
-      'jump', 'fast', 'slow', 'big', 'small', 'hot', 'cold', 'new', 'old', 'good',
-      'bad', 'easy', 'hard', 'soft', 'loud', 'quiet', 'dark', 'light', 'win', 'lose',
-      'open', 'close', 'start', 'stop', 'home', 'work', 'play', 'rest', 'love', 'hope'
-    ];
-    
-    const symbols = ['!', '@', '#', '$', '%', '^', '&', '*'];
-    const numbers = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
-    
-    // Generate exactly 12 characters: 2 words + 1 symbol + 2 numbers
-    const word1 = words[Math.floor(Math.random() * words.length)];
-    const word2 = words[Math.floor(Math.random() * words.length)];
-    const symbol = symbols[Math.floor(Math.random() * symbols.length)];
-    const num1 = numbers[Math.floor(Math.random() * numbers.length)];
-    const num2 = numbers[Math.floor(Math.random() * numbers.length)];
-    
-    // Capitalize first letter of each word
-    const cap1 = word1.charAt(0).toUpperCase() + word1.slice(1);
-    const cap2 = word2.charAt(0).toUpperCase() + word2.slice(1);
-    
-    const generatedPassword = cap1 + cap2 + symbol + num1 + num2;
-    setNewPassword(generatedPassword);
-    setGeneratedPassword(generatedPassword);
+    passwordResetMutation.mutate("generate");
   };
 
   const handlePasswordReset = () => {

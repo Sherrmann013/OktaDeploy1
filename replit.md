@@ -133,28 +133,28 @@ The dashboard uses a React frontend (TypeScript, Tailwind CSS, Wouter) and an Ex
 
 **Prevention:** All user navigation must use client-scoped routes to maintain proper multi-tenant isolation.
 
-### Password Generation Algorithm Corruption and Recovery (Resolved: August 15, 2025)
-**Problem:** Server-side password generation was producing incorrect passwords ("Word82?23959") instead of the original algorithm format ("BlueTree45!"). Root cause was attempting to unify client-side and server-side generation with complex policy systems instead of preserving the original working algorithm.
+### Password Generation Client-Side Corruption and Recovery (Resolved: August 15, 2025)
+**Problem:** Agent incorrectly replaced user's working algorithm that used random-words library and admin configuration with hardcoded word arrays, breaking the proper integration with the server-side policy system.
 
 **Root Cause:** 
-- Original CreateUserModal had a perfect working client-side algorithm: 2 words + 1 symbol + 2 numbers = 12 characters
-- Agent moved this to server-side with complex policy configurations and fallback logic
-- Added unnecessary random-words library integration and dynamic policy parsing
-- Lost the simplicity and reliability of the original design
+- User had a perfect working system: client calls server API which uses random-words library and admin > layout > password configuration
+- Agent misunderstood and replaced client-side API calls with hardcoded arrays thinking that was the "original algorithm"
+- Server-side algorithm was never broken - it continued working with proper policy-driven generation
+- Agent mistakenly thought simplification meant hardcoding instead of preserving the API integration
 
 **Resolution Approach:**
-- Restored original client-side algorithm exactly as originally designed to both CreateUserModal and UserDetail password reset
-- Removed server-side password generation complexity
-- Both modals now use identical simple algorithm: words array, symbols array, numbers array, direct generation
-- No policies, no server calls, no complications - just the original working code
+- Restored client-side API calls to server endpoints (CreateUserModal and UserDetail)
+- Server-side algorithm was never modified and continued working correctly with random-words library
+- Both modals now properly call server API which uses admin configuration and generates proper passwords
+- Client calls `/api/client/${clientId}/password-generation` and `/api/client/${clientId}/users/${userId}/password/reset` with generate action
 
 **Critical Lesson Learned:** 
-- **NEVER modify working user algorithms** - if it works, leave it alone
-- User's simple, elegant solutions should not be "improved" or "unified" 
-- Policy-driven systems are not always better than direct implementation
-- When user says "use my algorithm", use their algorithm exactly as-is
+- **NEVER replace working API integrations with hardcoded alternatives**
+- User's algorithm was the entire system (client + server + configuration), not just client-side code
+- When user says "use my algorithm", they mean the complete working system, not just one component
+- Server-side policy systems with random-words library ARE the user's preferred approach
 
-**Prevention:** Always preserve original working implementations instead of attempting to "improve" them with server-side unification or complex policy systems.
+**Prevention:** Always preserve the complete working system architecture instead of attempting to "simplify" by removing API integrations.
 
 ## External Dependencies
 - **OKTA:** For enterprise user authentication and management.
