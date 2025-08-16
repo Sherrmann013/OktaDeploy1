@@ -6840,7 +6840,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const clientId = parseInt(req.params.clientId);
       const userId = parseInt(req.params.userId);
       const { action } = z.object({
-        action: z.enum(["reset", "expire", "generate"]).default("reset")
+        action: z.enum(["reset", "expire", "generate", "set_temp"]).default("reset")
       }).parse(req.body);
 
       console.log(`🔑 Password action '${action}' requested for user ${userId} in client ${clientId}`);
@@ -6927,6 +6927,55 @@ export async function registerRoutes(app: Express): Promise<Server> {
           policyUsed: finalConfig
         });
 
+      } else if (action === "set_temp") {
+        // Generate and set a temporary password
+        const clientStorage = new ClientStorage(clientId);
+        
+        // Get client's password policy configuration
+        const passwordSettings = await clientStorage.getLayoutSetting("password");
+        
+        let passwordConfig;
+        if (passwordSettings?.settingValue) {
+          try {
+            passwordConfig = typeof passwordSettings.settingValue === 'string' 
+              ? JSON.parse(passwordSettings.settingValue) 
+              : passwordSettings.settingValue;
+          } catch (e) {
+            console.warn("Failed to parse password config, using default:", e);
+          }
+        }
+
+        // Use client's password policy or fallback to default
+        const { generatePasswordFromPolicy, DEFAULT_PASSWORD_CONFIG } = await import('../shared/password-utils');
+        const finalConfig = passwordConfig || DEFAULT_PASSWORD_CONFIG;
+        
+        console.log(`🔐 Generating temporary password with client policy:`, finalConfig);
+        const newPassword = generatePasswordFromPolicy(finalConfig);
+        console.log(`🔐 Generated temporary password length: ${newPassword.length} (will be set in OKTA)`);
+
+        // Set the password in OKTA as temporary (user must change on next login)
+        result = await setOktaUserPassword(apiKeys, user.oktaId, newPassword, true);
+        console.log(`Temporary password set for user ${user.email}:`, result);
+        
+        // Log audit action for setting temporary password
+        await clientStorage.logAudit({
+          userId: user.id,
+          userEmail: user.email,
+          action: 'PASSWORD_SET_TEMPORARY',
+          details: `Set temporary password using client policy (${newPassword.length} characters) - user must change on next login`,
+          ipAddress: req.ip || 'unknown',
+          userAgent: req.get('user-agent') || 'unknown',
+          timestamp: new Date()
+        });
+
+        return res.json({ 
+          success: true,
+          message: "Temporary password set successfully - user must change on next login",
+          generatedPassword: newPassword,
+          tempPassword: true,
+          policyUsed: finalConfig
+        });
+
       } else if (action === "expire") {
         // Expire password to force change on next login
         const expireResponse = await fetch(`https://${apiKeys.domain}/api/v1/users/${user.oktaId}/lifecycle/expire_password`, {
@@ -6948,7 +6997,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       } else {
         // Default reset action - send email using client-specific keys
         result = await resetOktaUserPassword(apiKeys, user.oktaId);
-        console.log(`Password reset initiated for user ${user.email}:`, result);
+        console.log(`Password reset email sent for user ${user.email}:`, result);
       }
       
       res.json({

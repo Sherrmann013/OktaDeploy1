@@ -532,27 +532,18 @@ export default function UserDetail() {
   });
 
   const passwordResetMutation = useMutation({
-    mutationFn: async (action: "reset" | "expire" | "generate") => {
-      let response;
-      if (action === "reset") {
-        // For reset, send the actual password in the body
-        response = await apiRequest("POST", `/api/client/${clientId}/users/${userId}/password/reset`, { 
-          action: "reset",
-          password: newPassword 
-        });
-      } else {
-        // For generate and expire, just send the action
-        response = await apiRequest("POST", `/api/client/${clientId}/users/${userId}/password/reset`, { action });
-      }
+    mutationFn: async (action: "set_temp" | "expire" | "generate") => {
+      // All actions now just send the action type
+      const response = await apiRequest("POST", `/api/client/${clientId}/users/${userId}/password/reset`, { action });
       const result = await response.json();
       return result;
     },
     onSuccess: (data: any, action) => {
-      if (action === "generate" && data?.generatedPassword) {
+      if ((action === "generate" || action === "set_temp") && data?.generatedPassword) {
         setNewPassword(data.generatedPassword);
         setGeneratedPassword(data.generatedPassword);
-      } else if (action !== "generate") {
-        const actionText = action === "reset" ? "Password reset successful" : "Password expired successfully";
+      } else if (action !== "generate" && action !== "set_temp") {
+        const actionText = action === "expire" ? "Password expired successfully" : "Password action completed";
         toast({
           title: "Success",
           description: actionText,
@@ -832,16 +823,8 @@ export default function UserDetail() {
   };
 
   const handlePasswordReset = () => {
-    if (!newPassword) {
-      toast({
-        title: "Error",
-        description: "Please enter a password or generate one",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    passwordResetMutation.mutate("reset");
+    // No longer requires manual password entry - generates temporary password automatically
+    passwordResetMutation.mutate("set_temp");
     setShowPasswordModal(null);
     setNewPassword("");
     setGeneratedPassword("");
@@ -2202,38 +2185,59 @@ export default function UserDetail() {
       <Dialog open={showPasswordModal === "reset"} onOpenChange={() => setShowPasswordModal(null)}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Reset Password</DialogTitle>
+            <DialogTitle>Generate Temporary Password</DialogTitle>
             <DialogDescription>
-              Set a new password for {user?.firstName} {user?.lastName}. The user will be notified and can use this password to log in immediately.
+              Generate a temporary password for {user?.firstName} {user?.lastName}. They will need to change it on first login.
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <label className="text-sm font-medium">New Password</label>
-              <div className="flex gap-2">
-                <Input
-                  type="text"
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                  placeholder="Enter new password"
-                  className="flex-1"
-                />
-                <Button 
-                  variant="outline" 
-                  onClick={() => passwordResetMutation.mutate("generate")}
-                  className="px-3"
-                >
-                  Generate
-                </Button>
-              </div>
+          <div className="space-y-3 text-sm">
+            <div className="flex items-start gap-2">
+              <div className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-2 flex-shrink-0"></div>
+              <span>A temporary password will be generated automatically</span>
             </div>
+            <div className="flex items-start gap-2">
+              <div className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-2 flex-shrink-0"></div>
+              <span>User must change password on first login</span>
+            </div>
+            <div className="flex items-start gap-2">
+              <div className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-2 flex-shrink-0"></div>
+              <span>Password follows your organization's policy</span>
+            </div>
+            <div className="flex items-start gap-2">
+              <div className="w-1.5 h-1.5 rounded-full bg-green-500 mt-2 flex-shrink-0"></div>
+              <span className="text-green-600 dark:text-green-400">You'll receive the temporary password to share with the user</span>
+            </div>
+            
+            {generatedPassword && (
+              <div className="mt-4 p-3 bg-gray-50 dark:bg-gray-800 rounded border">
+                <label className="text-sm font-medium">Generated Password</label>
+                <div className="flex gap-2 mt-1">
+                  <Input
+                    type="text"
+                    value={generatedPassword}
+                    readOnly
+                    className="flex-1 font-mono"
+                  />
+                  <Button 
+                    variant="outline" 
+                    onClick={() => {
+                      navigator.clipboard.writeText(generatedPassword);
+                      toast({ title: "Copied", description: "Password copied to clipboard" });
+                    }}
+                    className="px-3"
+                  >
+                    Copy
+                  </Button>
+                </div>
+              </div>
+            )}
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowPasswordModal(null)}>
               Cancel
             </Button>
-            <Button onClick={handlePasswordReset} disabled={!newPassword} className="bg-blue-600 hover:bg-blue-700">
-              Reset Password
+            <Button onClick={handlePasswordReset} className="bg-blue-600 hover:bg-blue-700">
+              Generate Password
             </Button>
           </DialogFooter>
         </DialogContent>
