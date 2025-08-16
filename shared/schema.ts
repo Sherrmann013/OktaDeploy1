@@ -210,11 +210,12 @@ export const appMappings = pgTable('app_mappings', {
   oktaGroupName: varchar('okta_group_name', { length: 200 }).notNull(),
   description: text('description'),
   status: varchar('status', { length: 20 }).notNull().default('active'), // active, inactive
+  clientId: integer("client_id").notNull(), // Link app mappings to specific clients
   created: timestamp('created').defaultNow().notNull(),
   lastUpdated: timestamp('last_updated').defaultNow().notNull(),
 }, (table) => [
-  // Unique constraint on combination of appName and oktaGroupName
-  index('app_group_unique').on(table.appName, table.oktaGroupName)
+  // Unique constraint on combination of appName, oktaGroupName, and clientId
+  index('app_group_client_unique').on(table.appName, table.oktaGroupName, table.clientId)
 ]);
 
 export const insertAppMappingSchema = createInsertSchema(appMappings).omit({
@@ -225,6 +226,7 @@ export const insertAppMappingSchema = createInsertSchema(appMappings).omit({
   appName: z.string().min(1, "App name is required"),
   oktaGroupName: z.string().min(1, "OKTA group name is required"),
   status: z.enum(["active", "inactive"], { required_error: "Status is required" }).default("active"),
+  clientId: z.number().min(1, "Client ID is required"),
 });
 
 export type InsertAppMapping = z.infer<typeof insertAppMappingSchema>;
