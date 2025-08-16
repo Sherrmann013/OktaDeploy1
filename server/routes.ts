@@ -1605,6 +1605,131 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Remove applications from user - CLIENT-AWARE
+  app.delete("/api/client/:clientId/users/:userId/remove-applications", isAuthenticated, async (req, res) => {
+    try {
+      const clientId = parseInt(req.params.clientId);
+      const userId = parseInt(req.params.userId);
+      const { appNames } = req.body;
+      
+      if (!Array.isArray(appNames) || appNames.length === 0) {
+        return res.status(400).json({ message: "App names array is required" });
+      }
+      
+      console.log(`🗑️ Processing app removal for user ${userId} in client ${clientId}:`, appNames);
+      
+      // Use client-specific database connection
+      const multiDb = MultiDatabaseManager.getInstance();
+      const clientDb = await multiDb.getClientDb(clientId);
+      
+      // Get user from database to ensure they exist and get their OKTA ID
+      const [user] = await clientDb.select().from(clientUsers).where(eq(clientUsers.id, userId)).limit(1);
+      
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      if (!user.oktaId) {
+        return res.status(400).json({ message: "User has no OKTA ID - cannot remove from OKTA groups" });
+      }
+      
+      console.log(`✅ Found user ${userId} with OKTA ID: ${user.oktaId}`);
+      
+      // Get app mappings from client database for the requested applications
+      const appMappings = await clientDb.select().from(clientAppMappings)
+        .where(inArray(clientAppMappings.appName, appNames));
+      
+      if (appMappings.length === 0) {
+        return res.status(400).json({ message: "No valid app mappings found for selected applications" });
+      }
+      
+      console.log(`📋 Found ${appMappings.length} app mappings to remove from`);
+      
+      // Get client's OKTA integration
+      const [oktaIntegration] = await clientDb.select().from(clientIntegrations)
+        .where(eq(clientIntegrations.name, 'okta'))
+        .limit(1);
+        
+      if (!oktaIntegration || !oktaIntegration.apiKeys) {
+        return res.status(400).json({ message: "OKTA integration not found or not configured" });
+      }
+      
+      console.log(`✅ Found active OKTA integration for client ${clientId}`);
+      
+      const apiKeys = oktaIntegration.apiKeys as Record<string, string>;
+      const results = {
+        success: [],
+        errors: []
+      } as { success: string[]; errors: string[] };
+      
+      for (const mapping of appMappings) {
+        try {
+          console.log(`🗑️ Removing user ${user.oktaId} from OKTA group ${mapping.oktaGroupName}`);
+          
+          // First, find the group ID by searching for the group by name
+          console.log(`🔍 Finding OKTA group ID for group name: ${mapping.oktaGroupName}`);
+          const searchResponse = await fetch(`https://${apiKeys.domain}/api/v1/groups?q=${encodeURIComponent(mapping.oktaGroupName)}&filter=type+eq+"OKTA_GROUP"`, {
+            method: 'GET',
+            headers: {
+              'Authorization': `SSWS ${apiKeys.apiToken}`,
+              'Accept': 'application/json'
+            }
+          });
+
+          if (!searchResponse.ok) {
+            const searchError = await searchResponse.text();
+            console.error(`❌ Failed to search for group ${mapping.oktaGroupName}:`, searchError);
+            results.errors.push(`${mapping.appName}: Failed to find group - ${searchError}`);
+            continue;
+          }
+
+          const groups = await searchResponse.json();
+          const targetGroup = groups.find((g: any) => g.profile.name === mapping.oktaGroupName);
+          
+          if (!targetGroup) {
+            console.error(`❌ Group ${mapping.oktaGroupName} not found in OKTA`);
+            results.errors.push(`${mapping.appName}: Group ${mapping.oktaGroupName} not found in OKTA`);
+            continue;
+          }
+
+          console.log(`✅ Found group ${mapping.oktaGroupName} with ID: ${targetGroup.id}`);
+
+          // Remove user from OKTA group using the group ID
+          const removeResponse = await fetch(`https://${apiKeys.domain}/api/v1/groups/${targetGroup.id}/users/${user.oktaId}`, {
+            method: 'DELETE',
+            headers: {
+              'Authorization': `SSWS ${apiKeys.apiToken}`,
+              'Accept': 'application/json'
+            }
+          });
+
+          const responseText = await removeResponse.text();
+          
+          if (removeResponse.ok) {
+            console.log(`✅ Successfully removed user from group ${mapping.oktaGroupName}`);
+            results.success.push(mapping.appName);
+          } else {
+            console.error(`❌ Failed to remove user from group ${mapping.oktaGroupName} (${removeResponse.status}):`, responseText);
+            results.errors.push(`${mapping.appName}: HTTP ${removeResponse.status} - ${responseText}`);
+          }
+        } catch (error) {
+          console.error(`❌ Error removing user from group ${mapping.oktaGroupName}:`, error);
+          results.errors.push(`${mapping.appName}: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        }
+      }
+      
+      console.log(`✅ App removal completed for user ${userId} in client ${clientId}:`, results);
+      res.json({
+        message: "Application removal completed",
+        success: results.success,
+        errors: results.errors
+      });
+    } catch (error) {
+      console.error("Error removing applications:", error);
+      res.status(500).json({ message: "Failed to remove applications" });
+    }
+  });
+
   // Test OKTA connection endpoint
   // DISABLED: Global OKTA test endpoint removed - use client-specific integration tests
   // app.get("/api/okta/test-connection" ...)

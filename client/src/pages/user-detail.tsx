@@ -653,6 +653,39 @@ export default function UserDetail() {
     },
   });
 
+  // Application removal mutation
+  const removeAppMutation = useMutation({
+    mutationFn: async (appNames: string[]) => {
+      return apiRequest("DELETE", `/api/client/${clientId}/users/${userId}/remove-applications`, { 
+        appNames 
+      });
+    },
+    onSuccess: (result: any) => {
+      const response = result;
+      if (response.success?.length > 0) {
+        toast({
+          title: "Success",
+          description: `Removed access to: ${response.success.join(', ')}`,
+        });
+      }
+      if (response.errors?.length > 0) {
+        toast({
+          title: "Partial Success",
+          description: `Some errors occurred: ${response.errors.join(', ')}`,
+          variant: "destructive",
+        });
+      }
+      queryClient.invalidateQueries({ queryKey: [`/api/client/${clientId}/users`, userId, "applications"] });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleStatusChange = (status: string) => {
     const actionText = status === "ACTIVE" ? "activate" : 
                       status === "SUSPENDED" ? "suspend" : "deactivate";
@@ -734,6 +767,15 @@ export default function UserDetail() {
   const handleSaveAppAssignments = () => {
     assignAppsMutation.mutate(selectedAppMappings);
     setIsAppSelectorOpen(false);
+  };
+
+  const handleRemoveApplication = (appName: string) => {
+    setConfirmAction({
+      type: "remove-app",
+      title: "Remove Application Access",
+      message: `Are you sure you want to remove ${appName} access for ${user?.firstName} ${user?.lastName}? This will remove them from the corresponding OKTA group.`,
+      action: () => removeAppMutation.mutate([appName]),
+    });
   };
 
   const toggleSection = (logId: string, section: string) => {
@@ -1697,24 +1739,18 @@ export default function UserDetail() {
                         {appSearchTerm ? `No applications found matching "${appSearchTerm}"` : 'No applications assigned'}
                       </p>
                     ) : (
-                      <div className="space-y-2">
-                        {filteredApps.map((app) => (
-                          <div key={app.id} className="flex items-center justify-between p-2 border rounded-lg">
-                            <div className="flex items-center gap-3">
-                              {app.logo && (
-                                <img src={app.logo} alt={app.label} className="w-8 h-8 rounded" />
-                              )}
-                              <div>
-                                <h4 className="font-medium">{app.label || app.name || 'Unknown Application'}</h4>
-                                <p className="text-sm text-gray-500">{app.description || app.settings?.app?.authURL || ''}</p>
-                              </div>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <Badge variant={app.status === 'ACTIVE' ? 'default' : 'secondary'}>
-                                {app.status}
-                              </Badge>
-                              <Badge variant="outline">{app.signOnMode}</Badge>
-                            </div>
+                      <div className="space-y-1">
+                        {filteredApps.map((app, index) => (
+                          <div key={app.id || index} className="flex items-center justify-between py-2 px-3 hover:bg-gray-50 dark:hover:bg-gray-800 rounded">
+                            <span className="text-sm font-medium">{app.label || app.name || 'Unknown Application'}</span>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleRemoveApplication(app.label || app.name)}
+                              className="h-8 w-8 p-0 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20"
+                            >
+                              <X className="w-4 h-4" />
+                            </Button>
                           </div>
                         ))}
                       </div>
