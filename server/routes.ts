@@ -1471,13 +1471,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const oktaIntegration = await db.query.integrations.findFirst({
         where: and(
           eq(integrations.clientId, clientId),
-          eq(integrations.integrationType, "okta")
+          eq(integrations.name, "okta")
         )
       });
 
-      if (!oktaIntegration || !oktaIntegration.isActive) {
-        console.error(`❌ OKTA integration not found or inactive for client ${clientId}`);
-        return res.status(400).json({ message: "OKTA integration not found or inactive for this client" });
+      if (!oktaIntegration || oktaIntegration.status !== "connected") {
+        console.error(`❌ OKTA integration not found or not connected for client ${clientId}`);
+        return res.status(400).json({ message: "OKTA integration not found or not connected for this client" });
       }
 
       console.log(`✅ Found active OKTA integration for client ${clientId}`);
