@@ -754,13 +754,17 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
 
   // Process department app mappings data - set both saved and local state
   useEffect(() => {
-    if (Array.isArray(departmentAppMappingsData) && departmentAppMappingsData.length > 0) {
+    if (Array.isArray(departmentAppMappingsData)) {
       const mappingsByDepartment: Record<string, string[]> = {};
       departmentAppMappingsData.forEach((mapping: any) => {
         if (!mappingsByDepartment[mapping.departmentName]) {
           mappingsByDepartment[mapping.departmentName] = [];
         }
         mappingsByDepartment[mapping.departmentName].push(mapping.appName);
+      });
+      console.log('🔄 INITIALIZING DEPARTMENT APP MAPPINGS:', { 
+        rawData: departmentAppMappingsData, 
+        processed: mappingsByDepartment 
       });
       setDepartmentAppMappings(mappingsByDepartment);
       setLocalDepartmentAppMappings(mappingsByDepartment);
@@ -770,13 +774,17 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
 
   // Process employee type app mappings data - set both saved and local state
   useEffect(() => {
-    if (Array.isArray(employeeTypeAppMappingsData) && employeeTypeAppMappingsData.length > 0) {
+    if (Array.isArray(employeeTypeAppMappingsData)) {
       const mappingsByEmployeeType: Record<string, string[]> = {};
       employeeTypeAppMappingsData.forEach((mapping: any) => {
         if (!mappingsByEmployeeType[mapping.employeeType]) {
           mappingsByEmployeeType[mapping.employeeType] = [];
         }
         mappingsByEmployeeType[mapping.employeeType].push(mapping.appName);
+      });
+      console.log('🔄 INITIALIZING EMPLOYEE TYPE APP MAPPINGS:', { 
+        rawData: employeeTypeAppMappingsData, 
+        processed: mappingsByEmployeeType 
       });
       setEmployeeTypeAppMappings(mappingsByEmployeeType);
       setLocalEmployeeTypeAppMappings(mappingsByEmployeeType);
@@ -786,13 +794,17 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
 
   // Process department group mappings data - set both saved and local state
   useEffect(() => {
-    if (Array.isArray(departmentGroupMappingsData) && departmentGroupMappingsData.length > 0) {
+    if (Array.isArray(departmentGroupMappingsData)) {
       const mappingsByDepartment: Record<string, string[]> = {};
       departmentGroupMappingsData.forEach((mapping: any) => {
         if (!mappingsByDepartment[mapping.departmentName]) {
           mappingsByDepartment[mapping.departmentName] = [];
         }
         mappingsByDepartment[mapping.departmentName].push(mapping.groupName);
+      });
+      console.log('🔄 INITIALIZING DEPARTMENT GROUP MAPPINGS:', { 
+        rawData: departmentGroupMappingsData, 
+        processed: mappingsByDepartment 
       });
       setDepartmentGroupMappings(mappingsByDepartment);
       setLocalDepartmentGroupMappings(mappingsByDepartment);
@@ -802,13 +814,17 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
 
   // Process employee type group mappings data - set both saved and local state
   useEffect(() => {
-    if (Array.isArray(employeeTypeGroupMappingsData) && employeeTypeGroupMappingsData.length > 0) {
+    if (Array.isArray(employeeTypeGroupMappingsData)) {
       const mappingsByEmployeeType: Record<string, string[]> = {};
       employeeTypeGroupMappingsData.forEach((mapping: any) => {
         if (!mappingsByEmployeeType[mapping.employeeType]) {
           mappingsByEmployeeType[mapping.employeeType] = [];
         }
         mappingsByEmployeeType[mapping.employeeType].push(mapping.groupName);
+      });
+      console.log('🔄 INITIALIZING EMPLOYEE TYPE GROUP MAPPINGS:', { 
+        rawData: employeeTypeGroupMappingsData, 
+        processed: mappingsByEmployeeType 
       });
       setEmployeeTypeGroupMappings(mappingsByEmployeeType);
       setLocalEmployeeTypeGroupMappings(mappingsByEmployeeType);
