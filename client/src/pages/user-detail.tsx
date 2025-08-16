@@ -532,26 +532,26 @@ export default function UserDetail() {
   });
 
   const passwordResetMutation = useMutation({
-    mutationFn: async (action: "set_temp" | "expire" | "generate", variables?: { password?: string }) => {
+    mutationFn: async (data: { action: "set_temp" | "expire" | "generate"; password?: string }) => {
       // Send action type and optionally the password to use
-      const payload = { action };
-      if (variables?.password) {
-        payload.password = variables.password;
+      const payload: { action: string; password?: string } = { action: data.action };
+      if (data.password) {
+        payload.password = data.password;
       }
       const response = await apiRequest("POST", `/api/client/${clientId}/users/${userId}/password/reset`, payload);
       const result = await response.json();
       return result;
     },
-    onSuccess: (data: any, action) => {
-      if (action === "generate" && data?.generatedPassword) {
+    onSuccess: (data: any, variables) => {
+      if (variables.action === "generate" && data?.generatedPassword) {
         setNewPassword(data.generatedPassword);
         setGeneratedPassword(data.generatedPassword);
-      } else if (action === "set_temp") {
+      } else if (variables.action === "set_temp") {
         toast({
           title: "Success",
           description: "Password reset successfully. User can now log in with the new password.",
         });
-      } else if (action === "expire") {
+      } else if (variables.action === "expire") {
         toast({
           title: "Success",
           description: "Password expired successfully",
@@ -827,7 +827,7 @@ export default function UserDetail() {
   };
 
   const generatePassword = () => {
-    passwordResetMutation.mutate("generate");
+    passwordResetMutation.mutate({ action: "generate" });
   };
 
   const handlePasswordReset = () => {
@@ -840,14 +840,14 @@ export default function UserDetail() {
       return;
     }
     
-    passwordResetMutation.mutate("set_temp", { password: newPassword });
+    passwordResetMutation.mutate({ action: "set_temp", password: newPassword });
     setShowPasswordModal(null);
     setNewPassword("");
     setGeneratedPassword("");
   };
 
   const handlePasswordExpire = () => {
-    passwordResetMutation.mutate("expire");
+    passwordResetMutation.mutate({ action: "expire" });
     setShowPasswordModal(null);
   };
 
@@ -2219,7 +2219,7 @@ export default function UserDetail() {
                 />
                 <Button 
                   variant="outline" 
-                  onClick={() => passwordResetMutation.mutate("generate")}
+                  onClick={() => passwordResetMutation.mutate({ action: "generate" })}
                   className="px-3"
                 >
                   Generate
