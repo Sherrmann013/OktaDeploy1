@@ -569,7 +569,7 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
   };
 
   // Department group save function
-  const saveDepartmentGroupMappings = async (): Promise<boolean> => {
+  const saveDepartmentGroupMappings = useCallback(async (): Promise<boolean> => {
     // Check for actual changes by comparing current vs local mappings
     const hasActualChanges = JSON.stringify(departmentGroupMappings) !== JSON.stringify(localDepartmentGroupMappings);
     console.log('🔍 DEPARTMENT GROUP MAPPING COMPARISON:', { 
@@ -645,10 +645,10 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
     } finally {
       setDepartmentGroupSaveInProgress(false);
     }
-  };
+  }, [departmentGroupMappings, localDepartmentGroupMappings, currentClientId, departmentGroupSaveInProgress, hasDepartmentGroupUnsavedChanges, toast, setHasDepartmentMappingChanges]);
 
   // Employee type group save function
-  const saveEmployeeTypeGroupMappings = async (): Promise<boolean> => {
+  const saveEmployeeTypeGroupMappings = useCallback(async (): Promise<boolean> => {
     // Check for actual changes by comparing current vs local mappings
     const hasActualChanges = JSON.stringify(employeeTypeGroupMappings) !== JSON.stringify(localEmployeeTypeGroupMappings);
     console.log('🔍 EMPLOYEE TYPE GROUP MAPPING COMPARISON:', { 
@@ -725,7 +725,7 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
     } finally {
       setEmployeeTypeGroupSaveInProgress(false);
     }
-  };
+  }, [employeeTypeGroupMappings, localEmployeeTypeGroupMappings, currentClientId, employeeTypeGroupSaveInProgress, hasEmployeeTypeGroupUnsavedChanges, toast, setHasEmployeeTypeMappingChanges]);
 
   // Register save function with parent - ENABLED FOR MAIN SAVE BUTTON  
   useEffect(() => {
