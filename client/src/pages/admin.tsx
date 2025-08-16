@@ -55,13 +55,28 @@ function AdminComponent() {
   // Detect current client context from URL - CLIENT-AWARE  
   const currentClientId = location.startsWith('/client/') ? parseInt(location.split('/')[2]) : 13; // Default to ClockWerk for testing
   
-  const [activeTab, setActiveTab] = useState("site-access");
+  // Handle URL-based routing for admin sub-pages
+  const getInitialTab = () => {
+    if (location.includes('/admin/new-user')) {
+      return "layout";
+    }
+    return "site-access";
+  };
+  
+  const getInitialLayoutTab = () => {
+    if (location.includes('/admin/new-user')) {
+      return "new-user";
+    }
+    return "new-user";
+  };
+  
+  const [activeTab, setActiveTab] = useState(getInitialTab());
   const [isNewUserOpen, setIsNewUserOpen] = useState(false);
   const [isEditUserOpen, setIsEditUserOpen] = useState(false);
 
   const [isDeleteUserOpen, setIsDeleteUserOpen] = useState(false);
   const [userToDelete, setUserToDelete] = useState<SiteUser | null>(null);
-  const [layoutTab, setLayoutTab] = useState("new-user");
+  const [layoutTab, setLayoutTab] = useState(getInitialLayoutTab());
   const [isLogoUploadOpen, setIsLogoUploadOpen] = useState(false);
   const [isAddDashboardCardOpen, setIsAddDashboardCardOpen] = useState(false);
   const [isAddMonitoringCardOpen, setIsAddMonitoringCardOpen] = useState(false);

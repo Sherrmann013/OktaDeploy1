@@ -56,6 +56,7 @@ function Router() {
         <Route path="/client/:id/applications" component={Applications} />
         <Route path="/client/:id/security" component={Security} />
         <Route path="/client/:id/settings" component={Settings} />
+        <Route path="/client/:id/admin/new-user" component={Admin} />
         <Route path="/client/:id/admin" component={Admin} />
         <Route path="/client/:id" component={Dashboard} />
         <Route path="/" component={() => { window.location.href = "/msp"; return null; }} />
