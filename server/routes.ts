@@ -1451,20 +1451,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
         appNames: z.array(z.string())
       }).parse(req.body);
 
-      // Connect to client-specific database
-      const clientDb = await storage.getClientDatabase(clientId);
-      if (!clientDb) {
-        return res.status(400).json({ message: "Client database not found" });
-      }
+      console.log(`🔄 Processing app assignments for user ${userId} in client ${clientId}:`, appNames);
 
-      // Get user from client database to find OKTA ID
-      const user = await clientDb.query.users.findFirst({
-        where: eq(users.id, userId)
-      });
+      // Connect to client-specific database using MultiDatabaseManager
+      const multiDb = MultiDatabaseManager.getInstance();
+      const clientDb = await multiDb.getClientDb(clientId);
+
+      // Get user from client database to find OKTA ID  
+      const [user] = await clientDb.select().from(clientUsers).where(eq(clientUsers.id, userId)).limit(1);
       
       if (!user || !user.oktaId) {
+        console.error(`❌ User ${userId} not found or no OKTA ID in client ${clientId} database`);
         return res.status(404).json({ message: "User not found or no OKTA ID" });
       }
+
+      console.log(`✅ Found user ${userId} with OKTA ID: ${user.oktaId}`);
 
       // Get client integrations for OKTA access from MSP database
       const oktaIntegration = await db.query.integrations.findFirst({
@@ -1475,8 +1476,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
       if (!oktaIntegration || !oktaIntegration.isActive) {
+        console.error(`❌ OKTA integration not found or inactive for client ${clientId}`);
         return res.status(400).json({ message: "OKTA integration not found or inactive for this client" });
       }
+
+      console.log(`✅ Found active OKTA integration for client ${clientId}`);
 
       // Get app mappings for this client to find OKTA group names from MSP database
       const clientAppMappings = await db.query.appMappings.findMany({
