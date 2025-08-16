@@ -306,6 +306,10 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
   // Save department app mappings to database (MANUAL SAVE ONLY)
   const saveDepartmentAppMappings = useCallback(async (manualSave = false) => {
     console.log('🔍 DEPARTMENT APP SAVE START:', { manualSave, departmentSaveInProgress, hasDepartmentUnsavedChanges });
+    console.log('🔍 CURRENT STATE VALUES:', { 
+      departmentAppMappings, 
+      localDepartmentAppMappings 
+    });
     
     // Prevent auto-save - only allow manual saves
     if (!manualSave) {
@@ -773,8 +777,11 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
         rawData: departmentAppMappingsData, 
         processed: mappingsByDepartment 
       });
+      console.log('⚠️ DEPARTMENT APP: OVERWRITING LOCAL STATE - this may reset user changes!');
+      console.log('📊 CURRENT LOCAL STATE BEFORE OVERWRITE:', localDepartmentAppMappings);
       setDepartmentAppMappings(mappingsByDepartment);
       setLocalDepartmentAppMappings(mappingsByDepartment);
+      console.log('📊 NEW LOCAL STATE AFTER OVERWRITE:', mappingsByDepartment);
       // DON'T automatically clear unsaved changes when data loads - only clear when explicitly saved
     }
   }, [departmentAppMappingsData]);
