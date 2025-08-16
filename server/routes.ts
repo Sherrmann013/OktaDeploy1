@@ -6123,8 +6123,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const limit = parseInt(req.query.limit?.toString() || "20");
       const offset = parseInt(req.query.offset?.toString() || "0");
       
-      console.log(`📜 Fetching logs for user ${userId} (${user.email}) with OKTA ID ${user.oktaId} in client ${clientId} (limit: ${limit}, offset: ${offset})`);
-      
       // Use client-specific database connection
       const multiDb = MultiDatabaseManager.getInstance();
       const clientDb = await multiDb.getClientDb(clientId);
@@ -6133,6 +6131,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Get the user from client database
       const user = await clientStorage.getUser(userId);
+      
+      console.log(`📜 Fetching logs for user ${userId} (${user?.email}) with OKTA ID ${user?.oktaId} in client ${clientId} (limit: ${limit}, offset: ${offset})`);
       
       if (!user || !user.oktaId) {
         return res.status(404).json({ message: "User not found or no OKTA ID" });
