@@ -419,7 +419,7 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
     } finally {
       setDepartmentSaveInProgress(false);
     }
-  }, [currentClientId, queryClient]);
+  }, [departmentAppMappings, localDepartmentAppMappings, currentClientId, queryClient, departmentSaveInProgress, hasDepartmentUnsavedChanges, toast, setHasDepartmentMappingChanges]);
 
   // Save employee type app mappings to database
   const saveEmployeeTypeAppMappings = useCallback(async (manualSave = false) => {
@@ -522,7 +522,7 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
     } finally {
       setEmployeeTypeSaveInProgress(false);
     }
-  }, [currentClientId, queryClient]);
+  }, [employeeTypeAppMappings, localEmployeeTypeAppMappings, currentClientId, queryClient, employeeTypeSaveInProgress, hasEmployeeTypeUnsavedChanges, toast, setHasEmployeeTypeMappingChanges]);
 
   // Helper function to calculate differences for department mappings
   const calculateDifferences = (currentMappings: Record<string, string[]>, newMappings: Record<string, string[]>) => {
