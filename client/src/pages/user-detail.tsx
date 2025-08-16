@@ -403,6 +403,7 @@ export default function UserDetail() {
   // Set form values when user data loads
   useEffect(() => {
     if (user && !isEditing) {
+      console.log('Setting form values for user:', { employeeType: user.employeeType, user });
       form.reset({
         firstName: user.firstName || "",
         lastName: user.lastName || "",
@@ -412,7 +413,7 @@ export default function UserDetail() {
         department: user.department || "",
         mobilePhone: user.mobilePhone || "",
         manager: user.manager || "",
-        employeeType: (user.employeeType as "EMPLOYEE" | "CONTRACTOR" | "PART_TIME" | "INTERN" | "") || "",
+        employeeType: user.employeeType || "",
       });
     }
   }, [user, form, isEditing]);

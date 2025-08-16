@@ -6102,7 +6102,65 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
       
-      // Update user in client-specific database
+      // Handle OKTA profile updates FIRST (if not a status-only update)
+      if (!updates.status && existingUser.oktaId) {
+        try {
+          // Get client's OKTA integration settings
+          const [oktaIntegration] = await clientDb.select().from(clientIntegrations)
+            .where(eq(clientIntegrations.name, 'okta'))
+            .limit(1);
+
+          if (oktaIntegration && oktaIntegration.apiKeys) {
+            const apiKeys = oktaIntegration.apiKeys as Record<string, string>;
+            
+            // Prepare OKTA profile update payload - only include fields that can be updated in OKTA
+            const oktaProfileUpdates: any = {};
+            
+            if (updates.firstName !== undefined) oktaProfileUpdates.firstName = updates.firstName;
+            if (updates.lastName !== undefined) oktaProfileUpdates.lastName = updates.lastName;
+            if (updates.email !== undefined) oktaProfileUpdates.email = updates.email;
+            if (updates.login !== undefined) oktaProfileUpdates.login = updates.login;
+            if (updates.mobilePhone !== undefined) oktaProfileUpdates.mobilePhone = updates.mobilePhone;
+            
+            // Only update OKTA if there are profile changes that need to be synced
+            if (Object.keys(oktaProfileUpdates).length > 0) {
+              console.log(`🔄 Updating OKTA profile for user ${existingUser.oktaId} in client ${clientId}:`, oktaProfileUpdates);
+              
+              const oktaResponse = await fetch(`https://${apiKeys.domain}/api/v1/users/${existingUser.oktaId}`, {
+                method: 'POST',
+                headers: {
+                  'Accept': 'application/json',
+                  'Content-Type': 'application/json',
+                  'Authorization': `SSWS ${apiKeys.apiToken}`,
+                },
+                body: JSON.stringify({
+                  profile: oktaProfileUpdates
+                })
+              });
+
+              if (!oktaResponse.ok) {
+                const errorText = await oktaResponse.text();
+                console.error(`❌ OKTA profile update failed: ${oktaResponse.status} ${errorText}`);
+                throw new Error(`OKTA profile update failed: ${oktaResponse.status} ${oktaResponse.statusText} - ${errorText}`);
+              }
+              
+              console.log(`✅ Successfully updated OKTA profile for user ${existingUser.email}`);
+            } else {
+              console.log(`ℹ️  No OKTA-syncable profile changes detected for user ${userId}`);
+            }
+          } else {
+            console.log(`⚠️  No OKTA integration found for client ${clientId}, updating local profile only`);
+          }
+        } catch (oktaError) {
+          console.error("OKTA profile update error:", oktaError);
+          return res.status(500).json({ 
+            error: "Failed to update user profile in OKTA",
+            details: oktaError instanceof Error ? oktaError.message : "Unknown OKTA error"
+          });
+        }
+      }
+      
+      // Only update local database AFTER successful OKTA update (or if no OKTA integration)
       const [updatedUser] = await clientDb.update(clientUsers)
         .set({ ...updates, lastUpdated: new Date() })
         .where(eq(clientUsers.id, userId))
