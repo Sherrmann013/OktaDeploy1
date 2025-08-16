@@ -77,6 +77,7 @@ export default function UserDetail() {
   // Pagination state for activity logs
   const [logsPageSize, setLogsPageSize] = useState(20);
   const [logsCurrentPage, setLogsCurrentPage] = useState(1);
+  const [outcomeFilter, setOutcomeFilter] = useState("ALL");
   const [confirmAction, setConfirmAction] = useState<{
     type: string;
     title: string;
@@ -303,7 +304,7 @@ export default function UserDetail() {
     staleTime: 0,
   });
 
-  // Enhanced safety checks with debugging
+  // Enhanced safety checks with debugging and outcome filtering
   const userLogs = React.useMemo(() => {
     if (!userLogsResponse) {
       console.log('No logs response yet');
@@ -313,9 +314,17 @@ export default function UserDetail() {
       console.error('userLogsResponse.logs is not an array:', userLogsResponse.logs);
       return [];
     }
-    console.log('userLogs array length:', userLogsResponse.logs.length);
-    return userLogsResponse.logs;
-  }, [userLogsResponse]);
+    
+    let filteredLogs = userLogsResponse.logs;
+    
+    // Apply outcome filter if not "ALL"
+    if (outcomeFilter !== "ALL") {
+      filteredLogs = userLogsResponse.logs.filter((log: any) => log.outcome === outcomeFilter);
+    }
+    
+    console.log('userLogs array length:', filteredLogs.length, 'outcome filter:', outcomeFilter);
+    return filteredLogs;
+  }, [userLogsResponse, outcomeFilter]);
   
   const totalLogs = userLogsResponse?.total || 0;
   const totalPages = userLogsResponse?.totalPages || 1;
@@ -1677,6 +1686,27 @@ export default function UserDetail() {
                     <div className="flex items-center gap-4">
                       <CardTitle>Activity Events</CardTitle>
                       <div className="flex items-center gap-2">
+                        <span className="text-sm text-gray-600 dark:text-gray-400">Filter:</span>
+                        <Select
+                          value={outcomeFilter}
+                          onValueChange={(value) => {
+                            setOutcomeFilter(value);
+                            setLogsCurrentPage(1); // Reset to first page when changing filter
+                          }}
+                        >
+                          <SelectTrigger className="w-32 bg-white dark:bg-gray-800">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent className="bg-white dark:bg-gray-800">
+                            <SelectItem value="ALL">All Events</SelectItem>
+                            <SelectItem value="SUCCESS">Success</SelectItem>
+                            <SelectItem value="FAILURE">Failure</SelectItem>
+                            <SelectItem value="CHALLENGE">Challenge</SelectItem>
+                            <SelectItem value="UNKNOWN">Unknown</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="flex items-center gap-2">
                         <span className="text-sm text-gray-600 dark:text-gray-400">Show:</span>
                         <Select
                           value={logsPageSize.toString()}
@@ -1696,7 +1726,7 @@ export default function UserDetail() {
                           </SelectContent>
                         </Select>
                         <span className="text-sm text-gray-600 dark:text-gray-400">
-                          of {totalLogs} events
+                          of {userLogs.length} events
                         </span>
                       </div>
                     </div>

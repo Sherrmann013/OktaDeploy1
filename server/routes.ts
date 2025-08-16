@@ -6215,8 +6215,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         console.log(`🎯 After user filtering: ${userSpecificLogs.length} logs remain (filtered out ${logs.length - userSpecificLogs.length} logs for other users)`);
         
-        // Transform logs to match expected format
-        const allEnhancedLogs = userSpecificLogs.map((log: any) => ({
+        // Transform logs to match expected format and sort by published date (most recent first)
+        const allEnhancedLogs = userSpecificLogs
+          .map((log: any) => ({
           id: log.uuid,
           eventType: log.eventType,
           displayMessage: log.displayMessage,
@@ -6237,7 +6238,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
             type: t.type,
             displayName: t.displayName
           })) || []
-        }));
+        }))
+        .sort((a, b) => new Date(b.published).getTime() - new Date(a.published).getTime());
         
         // Apply pagination client-side
         const totalLogs = allEnhancedLogs.length;
