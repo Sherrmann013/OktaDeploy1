@@ -1507,6 +1507,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       for (const mapping of selectedMappings) {
         try {
+          console.log(`🔄 Adding user ${user.oktaId} to OKTA group ${mapping.oktaGroupName}`);
+          
           // Add user to OKTA group
           const addResponse = await fetch(`https://${oktaApiKeys.domain}/api/v1/groups/${mapping.oktaGroupName}/users/${user.oktaId}`, {
             method: 'PUT',
@@ -1517,15 +1519,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
             }
           });
 
+          const responseText = await addResponse.text();
+          
           if (addResponse.ok) {
+            console.log(`✅ Successfully added user to group ${mapping.oktaGroupName}`);
             results.success.push(mapping.appName);
           } else {
-            const errorText = await addResponse.text();
-            console.error(`Failed to add user to group ${mapping.oktaGroupName}:`, errorText);
-            results.errors.push(`${mapping.appName}: ${errorText}`);
+            console.error(`❌ Failed to add user to group ${mapping.oktaGroupName} (${addResponse.status}):`, responseText);
+            results.errors.push(`${mapping.appName}: HTTP ${addResponse.status} - ${responseText}`);
           }
         } catch (error) {
-          console.error(`Error adding user to group ${mapping.oktaGroupName}:`, error);
+          console.error(`❌ Error adding user to group ${mapping.oktaGroupName}:`, error);
           results.errors.push(`${mapping.appName}: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
       }
