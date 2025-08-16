@@ -84,60 +84,78 @@ export default function UserDetail() {
   } | null>(null);
 
   // CSV download function for activity logs
-  const downloadLogsAsCSV = () => {
-    if (!userLogs || userLogs.length === 0) {
+  const downloadLogsAsCSV = async () => {
+    // For CSV export, we need to fetch ALL logs, not just the current page
+    try {
+      const response = await fetch(`/api/client/${clientId}/users/${userId}/logs?limit=1000&offset=0`, {
+        credentials: 'include'
+      });
+      if (!response.ok) throw new Error('Failed to fetch logs');
+      
+      const allLogsResponse = await response.json();
+      const allLogs = Array.isArray(allLogsResponse?.logs) ? allLogsResponse.logs : [];
+      
+      if (allLogs.length === 0) {
+        toast({
+          title: "No data to export",
+          description: "There are no activity logs to download.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Convert logs to CSV format
+      const headers = ['Time', 'Event Type', 'Display Message', 'Outcome', 'Actor Name', 'Actor Type', 'Client IP', 'User Agent', 'Target Names'];
+      const csvData = [
+        headers.join(','),
+        ...allLogs.map(log => {
+          const time = formatEventTime(log.published);
+          const eventType = log.eventType || '';
+          const displayMessage = (log.displayMessage || '').replace(/"/g, '""'); // Escape quotes
+          const outcome = log.outcome || '';
+          const actorName = log.actor?.displayName || '';
+          const actorType = log.actor?.type || '';
+          const clientIP = log.client?.ipAddress || '';
+          const userAgent = (log.client?.userAgent || '').replace(/"/g, '""'); // Escape quotes
+          const targetNames = (log.target || []).map((t: any) => t.displayName || '').join('; ');
+          
+          return [
+            `"${time}"`,
+            `"${eventType}"`,
+            `"${displayMessage}"`,
+            `"${outcome}"`,
+            `"${actorName}"`,
+            `"${actorType}"`,
+            `"${clientIP}"`,
+            `"${userAgent}"`,
+            `"${targetNames}"`
+          ].join(',');
+        })
+      ].join('\n');
+
+      // Create and download CSV file
+      const blob = new Blob([csvData], { type: 'text/csv;charset-utf-8;' });
+      const link = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      link.setAttribute('href', url);
+      link.setAttribute('download', `user-activity-logs-${user?.firstName}-${user?.lastName}-${new Date().toISOString().split('T')[0]}.csv`);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
       toast({
-        title: "No data to export",
-        description: "There are no activity logs to download.",
+        title: "Export successful",
+        description: `Downloaded ${allLogs.length} activity logs as CSV.`,
+      });
+    } catch (error) {
+      console.error('Error downloading CSV:', error);
+      toast({
+        title: "Export failed",
+        description: "Failed to download activity logs. Please try again.",
         variant: "destructive",
       });
-      return;
     }
-
-    // Convert logs to CSV format
-    const headers = ['Time', 'Event Type', 'Display Message', 'Outcome', 'Actor Name', 'Actor Type', 'Client IP', 'User Agent', 'Target Names'];
-    const csvData = [
-      headers.join(','),
-      ...userLogs.map(log => {
-        const time = formatEventTime(log.published);
-        const eventType = log.eventType || '';
-        const displayMessage = (log.displayMessage || '').replace(/"/g, '""'); // Escape quotes
-        const outcome = log.outcome || '';
-        const actorName = log.actor?.displayName || '';
-        const actorType = log.actor?.type || '';
-        const clientIP = log.client?.ipAddress || '';
-        const userAgent = (log.client?.userAgent || '').replace(/"/g, '""'); // Escape quotes
-        const targetNames = (log.target || []).map((t: any) => t.displayName || '').join('; ');
-        
-        return [
-          `"${time}"`,
-          `"${eventType}"`,
-          `"${displayMessage}"`,
-          `"${outcome}"`,
-          `"${actorName}"`,
-          `"${actorType}"`,
-          `"${clientIP}"`,
-          `"${userAgent}"`,
-          `"${targetNames}"`
-        ].join(',');
-      })
-    ].join('\n');
-
-    // Create and download CSV file
-    const blob = new Blob([csvData], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    const url = URL.createObjectURL(blob);
-    link.setAttribute('href', url);
-    link.setAttribute('download', `user-activity-logs-${user?.firstName}-${user?.lastName}-${new Date().toISOString().split('T')[0]}.csv`);
-    link.style.visibility = 'hidden';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-
-    toast({
-      title: "Export successful",
-      description: `Downloaded ${userLogs.length} activity logs as CSV.`,
-    });
   };
   
   const userId = params?.id ? parseInt(params.id) : null;
@@ -279,7 +297,7 @@ export default function UserDetail() {
     enabled: !!userId && activeTab === "activity",
   });
 
-  const userLogs = userLogsResponse?.logs || [];
+  const userLogs = Array.isArray(userLogsResponse?.logs) ? userLogsResponse.logs : [];
   const totalLogs = userLogsResponse?.total || 0;
   const totalPages = userLogsResponse?.totalPages || 1;
 
