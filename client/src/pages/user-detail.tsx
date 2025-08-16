@@ -642,7 +642,10 @@ export default function UserDetail() {
         title: "Success",
         description: "User applications updated successfully",
       });
-      queryClient.invalidateQueries({ queryKey: [`/api/client/${clientId}/users`, userId, "applications"] });
+      // Invalidate all user-related queries to refresh the UI
+      queryClient.invalidateQueries({ queryKey: [`/api/client/${clientId}/users/${userId}/applications`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/client/${clientId}/users/${userId}/groups`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/client/${clientId}/users/${userId}`] });
     },
     onError: (error) => {
       toast({
@@ -675,7 +678,10 @@ export default function UserDetail() {
           variant: "destructive",
         });
       }
-      queryClient.invalidateQueries({ queryKey: [`/api/client/${clientId}/users`, userId, "applications"] });
+      // Invalidate all user-related queries to refresh the UI
+      queryClient.invalidateQueries({ queryKey: [`/api/client/${clientId}/users/${userId}/applications`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/client/${clientId}/users/${userId}/groups`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/client/${clientId}/users/${userId}`] });
     },
     onError: (error) => {
       toast({
