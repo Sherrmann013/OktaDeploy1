@@ -649,24 +649,38 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
 
   // Employee type group save function
   const saveEmployeeTypeGroupMappings = useCallback(async (): Promise<boolean> => {
-    // Check for actual changes by comparing current vs local mappings
-    const hasActualChanges = JSON.stringify(employeeTypeGroupMappings) !== JSON.stringify(localEmployeeTypeGroupMappings);
-    console.log('🔍 EMPLOYEE TYPE GROUP MAPPING COMPARISON:', { 
-      employeeTypeGroupMappings, 
-      localEmployeeTypeGroupMappings, 
+    // CRITICAL FIX: Don't delete automatic OKTA security groups
+    // Filter out automatic OKTA security groups from deletion process
+    const initials = getCompanyInitials(clientInfo?.name || '');
+    const filterOktaSecurityGroups = (mappings: Record<string, string[]>) => {
+      const filtered: Record<string, string[]> = {};
+      Object.entries(mappings).forEach(([employeeType, groups]) => {
+        filtered[employeeType] = groups.filter(group => !group.startsWith(`${initials}-ET-`));
+      });
+      return filtered;
+    };
+    
+    // Only compare non-automatic groups for changes
+    const serverManualGroups = filterOktaSecurityGroups(employeeTypeGroupMappings);
+    const localManualGroups = filterOktaSecurityGroups(localEmployeeTypeGroupMappings);
+    
+    const hasActualChanges = JSON.stringify(serverManualGroups) !== JSON.stringify(localManualGroups);
+    console.log('🔍 EMPLOYEE TYPE GROUP MAPPING COMPARISON (EXCLUDING AUTO GROUPS):', { 
+      serverManualGroups, 
+      localManualGroups, 
       hasActualChanges,
       hasEmployeeTypeGroupUnsavedChanges 
     });
     
     if (!hasActualChanges) {
-      console.log('✅ No employee type group changes to save - mappings are identical');
+      console.log('✅ No employee type group changes to save - manual mappings are identical');
       return true;
     }
     
     setEmployeeTypeGroupSaveInProgress(true);
     try {
-      // Calculate differences
-      const differences = calculateEmployeeTypeDifferences(employeeTypeGroupMappings, localEmployeeTypeGroupMappings);
+      // Calculate differences using only manual groups (exclude automatic OKTA security groups)
+      const differences = calculateEmployeeTypeDifferences(serverManualGroups, localManualGroups);
       
       // Apply changes
       for (const { employeeType, added, removed } of differences) {
