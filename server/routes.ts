@@ -6123,7 +6123,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const limit = parseInt(req.query.limit?.toString() || "20");
       const offset = parseInt(req.query.offset?.toString() || "0");
       
-      console.log(`📜 Fetching logs for user ${userId} in client ${clientId} (limit: ${limit}, offset: ${offset})`);
+      console.log(`📜 Fetching logs for user ${userId} (${user.email}) with OKTA ID ${user.oktaId} in client ${clientId} (limit: ${limit}, offset: ${offset})`);
       
       // Use client-specific database connection
       const multiDb = MultiDatabaseManager.getInstance();
@@ -6178,7 +6178,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Fetch more logs than needed from OKTA to handle pagination client-side
         // OKTA doesn't support offset, so we fetch a large batch and paginate locally
         const fetchLimit = Math.max(500, offset + limit); // Fetch at least 500 or enough for the requested page
-        const logsUrl = `https://${oktaDomain}/api/v1/logs?filter=actor.id eq "${user.oktaId}"&limit=${fetchLimit}`;
+        const logsUrl = `https://${oktaDomain}/api/v1/logs?filter=target.id eq "${user.oktaId}"&limit=${fetchLimit}`;
+        console.log(`🔍 OKTA API URL: ${logsUrl}`);
+        
         const response = await fetch(logsUrl, {
           headers: {
             'Authorization': `SSWS ${oktaToken}`,
@@ -6192,9 +6194,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
         
         const logs = await response.json();
+        console.log(`📊 Raw OKTA response: Found ${logs.length} total logs from API`);
+        
+        // Server-side verification: Filter out any logs that aren't for this user (extra safety)
+        const userSpecificLogs = logs.filter((log: any) => {
+          // Check if this user is in any of the targets
+          const isForThisUser = log.target && Array.isArray(log.target) && 
+            log.target.some((target: any) => target.id === user.oktaId);
+          if (!isForThisUser) {
+            const targetIds = log.target?.map((t: any) => t.id).join(', ') || 'none';
+            console.log(`⚠️ Found log not targeting this user. Targets: ${targetIds} - filtering out`);
+          }
+          return isForThisUser;
+        });
+        
+        console.log(`🎯 After user filtering: ${userSpecificLogs.length} logs remain (filtered out ${logs.length - userSpecificLogs.length} logs for other users)`);
         
         // Transform logs to match expected format
-        const allEnhancedLogs = logs.map((log: any) => ({
+        const allEnhancedLogs = userSpecificLogs.map((log: any) => ({
           id: log.uuid,
           eventType: log.eventType,
           displayMessage: log.displayMessage,
@@ -6223,7 +6240,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const totalPages = Math.ceil(totalLogs / limit);
         const currentPage = Math.floor(offset / limit) + 1;
         
-        console.log(`✅ Found ${totalLogs} total logs, returning ${paginatedLogs.length} logs (page ${currentPage}/${totalPages}) for user ${userId} in client ${clientId}`);
+        console.log(`✅ Found ${totalLogs} total logs for user ${user.email} (${user.oktaId}), returning ${paginatedLogs.length} logs (page ${currentPage}/${totalPages}) for user ${userId} in client ${clientId}`);
         
         // Return paginated response format
         res.json({
