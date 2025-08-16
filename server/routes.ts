@@ -1509,8 +1509,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
         try {
           console.log(`🔄 Adding user ${user.oktaId} to OKTA group ${mapping.oktaGroupName}`);
           
-          // Add user to OKTA group
-          const addResponse = await fetch(`https://${oktaApiKeys.domain}/api/v1/groups/${mapping.oktaGroupName}/users/${user.oktaId}`, {
+          // First, find the group ID by searching for the group by name
+          console.log(`🔍 Finding OKTA group ID for group name: ${mapping.oktaGroupName}`);
+          const searchResponse = await fetch(`https://${oktaApiKeys.domain}/api/v1/groups?q=${encodeURIComponent(mapping.oktaGroupName)}&filter=type+eq+"OKTA_GROUP"`, {
+            method: 'GET',
+            headers: {
+              'Authorization': `SSWS ${oktaApiKeys.apiToken}`,
+              'Accept': 'application/json'
+            }
+          });
+
+          if (!searchResponse.ok) {
+            const searchError = await searchResponse.text();
+            console.error(`❌ Failed to search for group ${mapping.oktaGroupName}:`, searchError);
+            results.errors.push(`${mapping.appName}: Failed to find group - ${searchError}`);
+            continue;
+          }
+
+          const groups = await searchResponse.json();
+          const targetGroup = groups.find((g: any) => g.profile.name === mapping.oktaGroupName);
+          
+          if (!targetGroup) {
+            console.error(`❌ Group ${mapping.oktaGroupName} not found in OKTA`);
+            results.errors.push(`${mapping.appName}: Group ${mapping.oktaGroupName} not found in OKTA`);
+            continue;
+          }
+
+          console.log(`✅ Found group ${mapping.oktaGroupName} with ID: ${targetGroup.id}`);
+
+          // Add user to OKTA group using the group ID
+          const addResponse = await fetch(`https://${oktaApiKeys.domain}/api/v1/groups/${targetGroup.id}/users/${user.oktaId}`, {
             method: 'PUT',
             headers: {
               'Authorization': `SSWS ${oktaApiKeys.apiToken}`,
