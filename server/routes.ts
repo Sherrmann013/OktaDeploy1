@@ -6178,7 +6178,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Fetch more logs than needed from OKTA to handle pagination client-side
         // OKTA doesn't support offset, so we fetch a large batch and paginate locally
         const fetchLimit = Math.max(500, offset + limit); // Fetch at least 500 or enough for the requested page
-        const logsUrl = `https://${oktaDomain}/api/v1/logs?filter=target.id eq "${user.oktaId}"&limit=${fetchLimit}`;
+        const logsUrl = `https://${oktaDomain}/api/v1/logs?filter=actor.id eq "${user.oktaId}" or target.id eq "${user.oktaId}"&limit=${fetchLimit}`;
         console.log(`🔍 OKTA API URL: ${logsUrl}`);
         
         const response = await fetch(logsUrl, {
@@ -6198,12 +6198,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         // Server-side verification: Filter out any logs that aren't for this user (extra safety)
         const userSpecificLogs = logs.filter((log: any) => {
-          // Check if this user is in any of the targets
-          const isForThisUser = log.target && Array.isArray(log.target) && 
+          // Check if this user is either the actor OR in any of the targets
+          const isActor = log.actor?.id === user.oktaId;
+          const isTarget = log.target && Array.isArray(log.target) && 
             log.target.some((target: any) => target.id === user.oktaId);
+          
+          const isForThisUser = isActor || isTarget;
+          
           if (!isForThisUser) {
+            const actorId = log.actor?.id || 'none';
             const targetIds = log.target?.map((t: any) => t.id).join(', ') || 'none';
-            console.log(`⚠️ Found log not targeting this user. Targets: ${targetIds} - filtering out`);
+            console.log(`⚠️ Found log not for this user. Actor: ${actorId}, Targets: ${targetIds} - filtering out`);
           }
           return isForThisUser;
         });
