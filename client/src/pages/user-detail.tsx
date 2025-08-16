@@ -1696,7 +1696,9 @@ export default function UserDetail() {
                               />
                               <CommandEmpty>No applications found.</CommandEmpty>
                               <CommandGroup className="max-h-64 overflow-auto bg-white dark:bg-gray-800">
-                                {appMappings.map((mapping: any) => (
+                                {appMappings
+                                  .filter((mapping: any) => !userApps.includes(mapping.appName))
+                                  .map((mapping: any) => (
                                   <CommandItem
                                     key={mapping.id}
                                     className="flex items-center space-x-2 bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700"
