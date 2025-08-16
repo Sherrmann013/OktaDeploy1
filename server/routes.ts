@@ -5727,18 +5727,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
             console.log(`⚠️  Could not fetch OKTA groups for group assignment: ${oktaUsers.message}`);
           } else {
             // Get client-specific group mappings
+            console.log(`🔍 Looking for employee type groups for employeeType: "${userData.employeeType}"`);
             const employeeTypeGroups = await clientDb.select().from(clientEmployeeTypeGroupMappings)
               .where(eq(clientEmployeeTypeGroupMappings.employeeType, userData.employeeType || ''));
+            console.log(`🔍 Found ${employeeTypeGroups.length} employee type groups:`, employeeTypeGroups);
             
             // Get department-specific apps
+            console.log(`🔍 Looking for department apps for department: "${userData.department}"`);
             const departmentApps = await clientDb.select()
               .from(clientDepartmentAppMappings)
               .where(eq(clientDepartmentAppMappings.departmentName, userData.department || ''));
+            console.log(`🔍 Found ${departmentApps.length} department apps:`, departmentApps.map(a => a.appName));
             
             // Get employee type-specific apps
+            console.log(`🔍 Looking for employee type apps for employeeType: "${userData.employeeType}"`);
             const employeeTypeApps = await clientDb.select()
               .from(clientEmployeeTypeAppMappings)
               .where(eq(clientEmployeeTypeAppMappings.employeeType, userData.employeeType || ''));
+            console.log(`🔍 Found ${employeeTypeApps.length} employee type apps:`, employeeTypeApps.map(a => a.appName));
             
             // Employee type group assignment
             if (employeeTypeGroups.length > 0) {
