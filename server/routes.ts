@@ -6953,8 +6953,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const newPassword = generatePasswordFromPolicy(finalConfig);
         console.log(`🔐 Generated temporary password length: ${newPassword.length} (will be set in OKTA)`);
 
-        // Set the password in OKTA as temporary (user must change on next login)
-        result = await setOktaUserPassword(apiKeys, user.oktaId, newPassword, true);
+        // Set the password in OKTA as permanent (user can use immediately without forced change)
+        result = await setOktaUserPassword(apiKeys, user.oktaId, newPassword, false);
         console.log(`Temporary password set for user ${user.email}:`, result);
         
         // Log audit action for setting temporary password
@@ -6962,7 +6962,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           userId: user.id,
           userEmail: user.email,
           action: 'PASSWORD_SET_TEMPORARY',
-          details: `Set temporary password using client policy (${newPassword.length} characters) - user must change on next login`,
+          details: `Set permanent password using client policy (${newPassword.length} characters) - user can log in immediately`,
           ipAddress: req.ip || 'unknown',
           userAgent: req.get('user-agent') || 'unknown',
           timestamp: new Date()
