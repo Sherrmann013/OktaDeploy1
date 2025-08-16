@@ -777,14 +777,19 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
         rawData: departmentAppMappingsData, 
         processed: mappingsByDepartment 
       });
-      console.log('⚠️ DEPARTMENT APP: OVERWRITING LOCAL STATE - this may reset user changes!');
-      console.log('📊 CURRENT LOCAL STATE BEFORE OVERWRITE:', localDepartmentAppMappings);
+      
+      // Only set saved state - don't override local state if user has unsaved changes
       setDepartmentAppMappings(mappingsByDepartment);
-      setLocalDepartmentAppMappings(mappingsByDepartment);
-      console.log('📊 NEW LOCAL STATE AFTER OVERWRITE:', mappingsByDepartment);
-      // DON'T automatically clear unsaved changes when data loads - only clear when explicitly saved
+      
+      // Only set local state if we don't have unsaved changes
+      if (!hasDepartmentUnsavedChanges) {
+        console.log('📊 SETTING LOCAL STATE (no unsaved changes):', mappingsByDepartment);
+        setLocalDepartmentAppMappings(mappingsByDepartment);
+      } else {
+        console.log('⚠️ PRESERVING LOCAL STATE (has unsaved changes):', localDepartmentAppMappings);
+      }
     }
-  }, [departmentAppMappingsData]);
+  }, [departmentAppMappingsData, hasDepartmentUnsavedChanges]);
 
   // Process employee type app mappings data - set both saved and local state
   useEffect(() => {
@@ -820,12 +825,19 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
         rawData: departmentGroupMappingsData, 
         processed: mappingsByDepartment 
       });
-      console.log('⚠️ OVERWRITING LOCAL STATE - this may reset user changes!');
+      
+      // Only set saved state - don't override local state if user has unsaved changes
       setDepartmentGroupMappings(mappingsByDepartment);
-      setLocalDepartmentGroupMappings(mappingsByDepartment);
-      // DON'T automatically clear unsaved changes when data loads - only clear when explicitly saved
+      
+      // Only set local state if we don't have unsaved changes
+      if (!hasDepartmentGroupUnsavedChanges) {
+        console.log('📊 SETTING LOCAL GROUP STATE (no unsaved changes):', mappingsByDepartment);
+        setLocalDepartmentGroupMappings(mappingsByDepartment);
+      } else {
+        console.log('⚠️ PRESERVING LOCAL GROUP STATE (has unsaved changes):', localDepartmentGroupMappings);
+      }
     }
-  }, [departmentGroupMappingsData]);
+  }, [departmentGroupMappingsData, hasDepartmentGroupUnsavedChanges]);
 
   // Process employee type group mappings data - set both saved and local state
   useEffect(() => {
