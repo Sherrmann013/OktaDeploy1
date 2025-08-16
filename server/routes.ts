@@ -6198,9 +6198,61 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const multiDb = MultiDatabaseManager.getInstance();
       const clientDb = await multiDb.getClientDb(clientId);
       
-      // For now, return empty array - this would need proper implementation
-      // based on client-specific application assignments
-      res.json([]);
+      // Get user from database to get their OKTA ID
+      const [user] = await clientDb.select().from(clientUsers).where(eq(clientUsers.id, userId)).limit(1);
+      
+      if (!user || !user.oktaId) {
+        console.log(`📱 User ${userId} not found or has no OKTA ID`);
+        return res.json([]);
+      }
+      
+      // Get client's OKTA integration
+      const [oktaIntegration] = await clientDb.select().from(clientIntegrations)
+        .where(eq(clientIntegrations.name, 'okta'))
+        .limit(1);
+        
+      if (!oktaIntegration || !oktaIntegration.apiKeys) {
+        console.log(`📱 No OKTA integration found for client ${clientId}`);
+        return res.json([]);
+      }
+      
+      try {
+        // Get user's OKTA groups
+        const apiKeys = oktaIntegration.apiKeys as Record<string, string>;
+        const groupsResponse = await fetch(`https://${apiKeys.domain}/api/v1/users/${user.oktaId}/groups`, {
+          method: 'GET',
+          headers: {
+            'Authorization': `SSWS ${apiKeys.apiToken}`,
+            'Accept': 'application/json'
+          }
+        });
+        
+        if (!groupsResponse.ok) {
+          console.error(`📱 Failed to fetch OKTA groups for user ${user.oktaId}: ${groupsResponse.status}`);
+          return res.json([]);
+        }
+        
+        const oktaGroups = await groupsResponse.json();
+        const groupNames = oktaGroups.map((g: any) => g.profile?.name).filter(Boolean);
+        
+        console.log(`📱 User ${user.email} is in OKTA groups:`, groupNames);
+        
+        // Get app mappings from client database
+        const appMappings = await clientDb.select().from(clientAppMappings);
+        console.log(`📱 Found ${appMappings.length} app mappings for client ${clientId}`);
+        
+        // Find which applications the user has access to based on their groups
+        const userApplications = appMappings.filter(mapping => 
+          groupNames.includes(mapping.oktaGroupName)
+        ).map(mapping => mapping.appName);
+        
+        console.log(`📱 User ${user.email} has access to applications:`, userApplications);
+        
+        res.json(userApplications);
+      } catch (oktaError) {
+        console.error(`📱 Error fetching OKTA groups for user ${user.oktaId}:`, oktaError);
+        return res.json([]);
+      }
     } catch (error) {
       console.error(`Error fetching user applications for client:`, error);
       res.status(500).json({ error: "Failed to fetch client user applications" });
