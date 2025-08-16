@@ -6113,13 +6113,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // Get user logs for specific client
+  // Get user logs for specific client with pagination
   app.get("/api/client/:clientId/users/:userId/logs", isAuthenticated, async (req, res) => {
     try {
       const clientId = parseInt(req.params.clientId);
       const userId = parseInt(req.params.userId);
       
-      console.log(`📜 Fetching logs for user ${userId} in client ${clientId}`);
+      // Extract pagination parameters
+      const limit = parseInt(req.query.limit?.toString() || "20");
+      const offset = parseInt(req.query.offset?.toString() || "0");
+      
+      console.log(`📜 Fetching logs for user ${userId} in client ${clientId} (limit: ${limit}, offset: ${offset})`);
       
       // Use client-specific database connection
       const multiDb = MultiDatabaseManager.getInstance();
@@ -6144,7 +6148,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
       if (!oktaIntegration || !oktaIntegration.apiKeys) {
         console.log(`❌ No OKTA integration found for client ${clientId}`);
-        return res.json([]);
+        return res.json({
+          logs: [],
+          total: 0,
+          currentPage: 1,
+          totalPages: 0,
+          limit: limit,
+          offset: offset
+        });
       }
       
       const apiKeys = oktaIntegration.apiKeys as Record<string, string>;
@@ -6153,12 +6164,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       if (!oktaDomain || !oktaToken) {
         console.log(`❌ OKTA credentials incomplete for client ${clientId}`);
-        return res.json([]);
+        return res.json({
+          logs: [],
+          total: 0,
+          currentPage: 1,
+          totalPages: 0,
+          limit: limit,
+          offset: offset
+        });
       }
       
       try {
-        // Fetch logs from OKTA using client-specific credentials
-        const logsUrl = `https://${oktaDomain}/api/v1/logs?filter=actor.id eq "${user.oktaId}"&limit=100`;
+        // Fetch more logs than needed from OKTA to handle pagination client-side
+        // OKTA doesn't support offset, so we fetch a large batch and paginate locally
+        const fetchLimit = Math.max(500, offset + limit); // Fetch at least 500 or enough for the requested page
+        const logsUrl = `https://${oktaDomain}/api/v1/logs?filter=actor.id eq "${user.oktaId}"&limit=${fetchLimit}`;
         const response = await fetch(logsUrl, {
           headers: {
             'Authorization': `SSWS ${oktaToken}`,
@@ -6174,7 +6194,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const logs = await response.json();
         
         // Transform logs to match expected format
-        const enhancedLogs = logs.map((log: any) => ({
+        const allEnhancedLogs = logs.map((log: any) => ({
           id: log.uuid,
           eventType: log.eventType,
           displayMessage: log.displayMessage,
@@ -6197,12 +6217,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
           })) || []
         }));
         
-        console.log(`✅ Found ${enhancedLogs.length} logs for user ${userId} in client ${clientId}`);
-        res.json(enhancedLogs);
+        // Apply pagination client-side
+        const totalLogs = allEnhancedLogs.length;
+        const paginatedLogs = allEnhancedLogs.slice(offset, offset + limit);
+        const totalPages = Math.ceil(totalLogs / limit);
+        const currentPage = Math.floor(offset / limit) + 1;
+        
+        console.log(`✅ Found ${totalLogs} total logs, returning ${paginatedLogs.length} logs (page ${currentPage}/${totalPages}) for user ${userId} in client ${clientId}`);
+        
+        // Return paginated response format
+        res.json({
+          logs: paginatedLogs,
+          total: totalLogs,
+          currentPage: currentPage,
+          totalPages: totalPages,
+          limit: limit,
+          offset: offset
+        });
         
       } catch (oktaError) {
         console.error(`Error fetching OKTA logs for client ${clientId}:`, oktaError);
-        res.json([]);
+        res.json({
+          logs: [],
+          total: 0,
+          currentPage: 1,
+          totalPages: 0,
+          limit: limit,
+          offset: offset
+        });
       }
       
     } catch (error) {

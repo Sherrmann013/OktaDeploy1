@@ -9,8 +9,9 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { ArrowLeft, ChevronDown, ChevronRight, ChevronUp, Smartphone, Monitor, Laptop, Tablet, Shield, Eye, RefreshCw, KeyRound, Edit, Play, Pause, Trash2, Search, UserX, Save, X, Download, Copy, UserCheck, Plus, Key, CheckCircle, BookOpen } from "lucide-react";
+import { ArrowLeft, ChevronDown, ChevronRight, ChevronUp, Smartphone, Monitor, Laptop, Tablet, Shield, Eye, RefreshCw, KeyRound, Edit, Play, Pause, Trash2, Search, UserX, Save, X, Download, Copy, UserCheck, Plus, Key, CheckCircle, BookOpen, ChevronLeft } from "lucide-react";
 import { DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -71,6 +72,10 @@ export default function UserDetail() {
   const [showPasswordModal, setShowPasswordModal] = useState<"reset" | "expire" | "generate" | null>(null);
   const [newPassword, setNewPassword] = useState("");
   const [generatedPassword, setGeneratedPassword] = useState("");
+  
+  // Pagination state for activity logs
+  const [logsPageSize, setLogsPageSize] = useState(20);
+  const [logsCurrentPage, setLogsCurrentPage] = useState(1);
   const [confirmAction, setConfirmAction] = useState<{
     type: string;
     title: string;
@@ -261,10 +266,22 @@ export default function UserDetail() {
     enabled: !!userId,
   });
 
-  const { data: userLogs = [] } = useQuery<any[]>({
-    queryKey: [`/api/client/${clientId}/users/${userId}/logs`],
+  // Fetch user logs from OKTA with pagination - CLIENT-AWARE
+  const { data: userLogsResponse } = useQuery<{logs: any[], total: number, currentPage: number, totalPages: number}>({
+    queryKey: [`/api/client/${clientId}/users/${userId}/logs`, logsPageSize, logsCurrentPage],
+    queryFn: async () => {
+      const response = await fetch(`/api/client/${clientId}/users/${userId}/logs?limit=${logsPageSize}&offset=${(logsCurrentPage - 1) * logsPageSize}`, {
+        credentials: 'include'
+      });
+      if (!response.ok) throw new Error('Failed to fetch logs');
+      return response.json();
+    },
     enabled: !!userId && activeTab === "activity",
   });
+
+  const userLogs = userLogsResponse?.logs || [];
+  const totalLogs = userLogsResponse?.total || 0;
+  const totalPages = userLogsResponse?.totalPages || 1;
 
   // KnowBe4 data queries
   const { data: knowBe4Data } = useQuery({
@@ -1620,7 +1637,32 @@ export default function UserDetail() {
               <TabsContent value="activity" className="space-y-4 mt-0">
                 <Card>
                   <CardHeader className="flex flex-row items-center justify-between">
-                    <CardTitle>Events: {userLogs.length}</CardTitle>
+                    <div className="flex items-center gap-4">
+                      <CardTitle>Activity Events</CardTitle>
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm text-gray-600 dark:text-gray-400">Show:</span>
+                        <Select
+                          value={logsPageSize.toString()}
+                          onValueChange={(value) => {
+                            setLogsPageSize(parseInt(value));
+                            setLogsCurrentPage(1); // Reset to first page when changing page size
+                          }}
+                        >
+                          <SelectTrigger className="w-20 bg-white dark:bg-gray-800">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent className="bg-white dark:bg-gray-800">
+                            <SelectItem value="10">10</SelectItem>
+                            <SelectItem value="20">20</SelectItem>
+                            <SelectItem value="50">50</SelectItem>
+                            <SelectItem value="100">100</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <span className="text-sm text-gray-600 dark:text-gray-400">
+                          of {totalLogs} events
+                        </span>
+                      </div>
+                    </div>
                     <div className="flex items-center gap-2">
                       <Button variant="outline" size="sm" onClick={downloadLogsAsCSV}>
                         <Download className="w-4 h-4 mr-2" />
@@ -1891,6 +1933,35 @@ export default function UserDetail() {
                             )}
                           </div>
                         ))}
+                      </div>
+                    )}
+                    
+                    {/* Pagination Controls */}
+                    {totalPages > 1 && (
+                      <div className="flex items-center justify-between mt-4 pt-4 border-t">
+                        <div className="flex items-center gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setLogsCurrentPage(prev => Math.max(1, prev - 1))}
+                            disabled={logsCurrentPage === 1}
+                          >
+                            <ChevronLeft className="w-4 h-4 mr-1" />
+                            Previous
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setLogsCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                            disabled={logsCurrentPage === totalPages}
+                          >
+                            Next
+                            <ChevronRight className="w-4 h-4 ml-1" />
+                          </Button>
+                        </div>
+                        <div className="text-sm text-gray-600 dark:text-gray-400">
+                          Page {logsCurrentPage} of {totalPages}
+                        </div>
                       </div>
                     )}
                   </CardContent>
