@@ -864,7 +864,19 @@ export default function UserDetail() {
     return etGroup ? etGroup.profile.name.replace('MTX-ET-', '').replace('_', ' ') : 'Not specified';
   };
 
-  const filteredApps = (userApps || []).filter(app => {
+  const filteredApps = (userApps || []).map(app => {
+    // Transform string applications to objects for consistent display
+    if (typeof app === 'string') {
+      return {
+        id: app,
+        name: app,
+        label: app,
+        status: 'ACTIVE',
+        signOnMode: 'SSO'
+      };
+    }
+    return app;
+  }).filter(app => {
     if (!app) return false;
     
     const appName = app.label || app.name || '';
