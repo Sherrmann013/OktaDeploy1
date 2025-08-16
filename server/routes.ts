@@ -5,7 +5,7 @@ import { storage } from "./storage";
 import { insertUserSchema, updateUserSchema, insertSiteAccessUserSchema, siteAccessUsers, insertIntegrationSchema, integrations, auditLogs, insertAppMappingSchema, appMappings, departmentAppMappings, insertDepartmentAppMappingSchema, employeeTypeAppMappings, insertEmployeeTypeAppMappingSchema, departmentGroupMappings, insertDepartmentGroupMappingSchema, employeeTypeGroupMappings, insertEmployeeTypeGroupMappingSchema, insertLayoutSettingSchema, layoutSettings, dashboardCards, insertDashboardCardSchema, updateDashboardCardSchema, monitoringCards, insertMonitoringCardSchema, updateMonitoringCardSchema, companyLogos, insertCompanyLogoSchema, insertMspLogoSchema, clients, clientAccess, users } from "@shared/schema";
 
 import { db } from "./db";
-import { eq, desc, and, or, ilike, asc } from "drizzle-orm";
+import { eq, desc, and, or, ilike, asc, inArray } from "drizzle-orm";
 import { AuditLogger, getAuditLogs } from "./audit";
 import { z } from "zod";
 // Note: Global oktaService removed - using client-specific OKTA integrations only
