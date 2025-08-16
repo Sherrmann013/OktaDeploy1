@@ -311,16 +311,27 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
       return false;
     }
     
-    if (!hasDepartmentUnsavedChanges) {
-      console.log('✅ No department app changes to save');
+    // Check for actual changes by comparing current vs local mappings
+    const currentMappings = departmentAppMappings;
+    const newMappings = localDepartmentAppMappings;
+    const hasActualChanges = JSON.stringify(currentMappings) !== JSON.stringify(newMappings);
+    
+    console.log('🔍 MAPPING COMPARISON:', { 
+      currentMappings, 
+      newMappings, 
+      hasActualChanges,
+      hasDepartmentUnsavedChanges 
+    });
+    
+    if (!hasActualChanges) {
+      console.log('✅ No department app changes to save - mappings are identical');
       return true;
     }
     setDepartmentSaveInProgress(true);
+    console.log('🚀 STARTING DEPARTMENT APP SAVE PROCESS');
     
     try {
-      // Calculate changes needed
-      const currentMappings = departmentAppMappings;
-      const newMappings = localDepartmentAppMappings;
+      // Use the already calculated mappings
       
       // Remove mappings that no longer exist
       for (const department in currentMappings) {
@@ -542,7 +553,19 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
 
   // Department group save function
   const saveDepartmentGroupMappings = async (): Promise<boolean> => {
-    if (!hasDepartmentGroupUnsavedChanges) return true;
+    // Check for actual changes by comparing current vs local mappings
+    const hasActualChanges = JSON.stringify(departmentGroupMappings) !== JSON.stringify(localDepartmentGroupMappings);
+    console.log('🔍 DEPARTMENT GROUP MAPPING COMPARISON:', { 
+      departmentGroupMappings, 
+      localDepartmentGroupMappings, 
+      hasActualChanges,
+      hasDepartmentGroupUnsavedChanges 
+    });
+    
+    if (!hasActualChanges) {
+      console.log('✅ No department group changes to save - mappings are identical');
+      return true;
+    }
     
     setDepartmentGroupSaveInProgress(true);
     try {
@@ -609,9 +632,17 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
 
   // Employee type group save function
   const saveEmployeeTypeGroupMappings = async (): Promise<boolean> => {
-    console.log('🚀 EMPLOYEE TYPE GROUP SAVE CALLED:', { hasEmployeeTypeGroupUnsavedChanges, employeeTypeGroupSaveInProgress });
-    if (!hasEmployeeTypeGroupUnsavedChanges) {
-      console.log('✅ No employee type group changes to save');
+    // Check for actual changes by comparing current vs local mappings
+    const hasActualChanges = JSON.stringify(employeeTypeGroupMappings) !== JSON.stringify(localEmployeeTypeGroupMappings);
+    console.log('🔍 EMPLOYEE TYPE GROUP MAPPING COMPARISON:', { 
+      employeeTypeGroupMappings, 
+      localEmployeeTypeGroupMappings, 
+      hasActualChanges,
+      hasEmployeeTypeGroupUnsavedChanges 
+    });
+    
+    if (!hasActualChanges) {
+      console.log('✅ No employee type group changes to save - mappings are identical');
       return true;
     }
     
