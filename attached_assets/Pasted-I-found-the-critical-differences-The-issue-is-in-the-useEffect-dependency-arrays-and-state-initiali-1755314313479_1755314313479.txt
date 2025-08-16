@@ -1,0 +1,78 @@
+I found the critical differences! The issue is in the useEffect dependency arrays and state initialization logic. Here's the comparison:
+
+Critical Issue #1: Missing Dependencies in useEffect
+Working Code:
+
+useEffect(() => {
+  if (fieldType === 'department' && setDepartmentAppSaveFunction) {
+    setDepartmentAppSaveFunction(() => () => saveDepartmentAppMappings(true));
+  }
+}, [fieldType, setDepartmentAppSaveFunction, saveDepartmentAppMappings]); // ✅ Includes function
+Broken Code:
+
+useEffect(() => {
+  if (fieldType === 'department' && setDepartmentAppSaveFunction) {
+    setDepartmentAppSaveFunction(() => () => saveDepartmentAppMappings(true));
+  }
+}, [fieldType, setDepartmentAppSaveFunction]); // ❌ Missing saveDepartmentAppMappings
+Critical Issue #2: State Initialization Logic
+Working Code:
+
+useEffect(() => {
+  if (Array.isArray(departmentAppMappingsData) && departmentAppMappingsData.length > 0) {
+    // ... process data
+    // ALWAYS set both states - no conditional logic
+    setDepartmentAppMappings(mappingsByDepartment);
+    setLocalDepartmentAppMappings(mappingsByDepartment);
+    // DON'T automatically clear unsaved changes when data loads
+  }
+}, [departmentAppMappingsData]);
+Broken Code:
+
+useEffect(() => {
+  if (Array.isArray(departmentAppMappingsData)) { // ❌ Missing length check
+    // ... process data
+    setDepartmentAppMappings(mappingsByDepartment);
+    
+    // ❌ PROBLEMATIC: Conditional local state setting
+    if (!hasDepartmentUnsavedChanges) {
+      setLocalDepartmentAppMappings(mappingsByDepartment);
+    }
+  }
+}, [departmentAppMappingsData, hasDepartmentUnsavedChanges]); // ❌ Extra dependency
+Critical Issue #3: Stale Closures
+The missing dependencies in the useEffect registration are causing stale closures. When the save functions are registered, they capture old versions of the state variables that are still empty {}.
+
+Root Cause Analysis
+The broken version has conditional state initialization that prevents localDepartmentAppMappings from being set when there are unsaved changes. This creates a race condition where:
+
+Data loads from API
+hasDepartmentUnsavedChanges might be true from previous interactions
+Local state doesn't get initialized properly
+Save function sees empty objects because of stale closures
+The Fix
+Update the broken code's useEffect dependencies and remove conditional state logic:
+
+// Fix 1: Add missing dependencies
+useEffect(() => {
+  if (fieldType === 'department' && setDepartmentAppSaveFunction) {
+    setDepartmentAppSaveFunction(() => () => saveDepartmentAppMappings(true));
+  }
+}, [fieldType, setDepartmentAppSaveFunction, saveDepartmentAppMappings]);
+// Fix 2: Simplify state initialization
+useEffect(() => {
+  if (Array.isArray(departmentAppMappingsData) && departmentAppMappingsData.length > 0) {
+    const mappingsByDepartment = {};
+    departmentAppMappingsData.forEach((mapping) => {
+      if (!mappingsByDepartment[mapping.departmentName]) {
+        mappingsByDepartment[mapping.departmentName] = [];
+      }
+      mappingsByDepartment[mapping.departmentName].push(mapping.appName);
+    });
+    
+    // Always set both states - no conditional logic
+    setDepartmentAppMappings(mappingsByDepartment);
+    setLocalDepartmentAppMappings(mappingsByDepartment);
+  }
+}, [departmentAppMappingsData]); // Remove hasDepartmentUnsavedChanges dependency
+The conditional state initialization was the main culprit - it prevented proper state synchronization and created the empty object issue you're seeing in the save functions.

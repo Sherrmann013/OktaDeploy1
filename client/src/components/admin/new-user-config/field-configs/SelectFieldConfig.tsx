@@ -732,13 +732,13 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
     if (fieldType === 'department' && setDepartmentAppSaveFunction) {
       setDepartmentAppSaveFunction(() => () => saveDepartmentAppMappings(true));
     }
-  }, [fieldType, setDepartmentAppSaveFunction]);
+  }, [fieldType, setDepartmentAppSaveFunction, saveDepartmentAppMappings]);
 
   useEffect(() => {
     if (fieldType === 'employeeType' && setEmployeeTypeAppSaveFunction) {
       setEmployeeTypeAppSaveFunction(() => () => saveEmployeeTypeAppMappings(true));
     }
-  }, [fieldType, setEmployeeTypeAppSaveFunction]);
+  }, [fieldType, setEmployeeTypeAppSaveFunction, saveEmployeeTypeAppMappings]);
 
 
 
@@ -748,13 +748,13 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
     if (fieldType === 'department' && setDepartmentGroupSaveFunction) {
       setDepartmentGroupSaveFunction(() => () => saveDepartmentGroupMappings());
     }
-  }, [fieldType, setDepartmentGroupSaveFunction]);
+  }, [fieldType, setDepartmentGroupSaveFunction, saveDepartmentGroupMappings]);
 
   useEffect(() => {
     if (fieldType === 'employeeType' && setEmployeeTypeGroupSaveFunction) {
       setEmployeeTypeGroupSaveFunction(() => () => saveEmployeeTypeGroupMappings());
     }
-  }, [fieldType, setEmployeeTypeGroupSaveFunction]);
+  }, [fieldType, setEmployeeTypeGroupSaveFunction, saveEmployeeTypeGroupMappings]);
 
   // DISABLED: Remove auto-triggering direct save function that was causing issues
   // Individual save buttons will call the specific save functions directly
@@ -771,7 +771,7 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
 
   // Process department app mappings data - set both saved and local state
   useEffect(() => {
-    if (Array.isArray(departmentAppMappingsData)) {
+    if (Array.isArray(departmentAppMappingsData) && departmentAppMappingsData.length > 0) {
       const mappingsByDepartment: Record<string, string[]> = {};
       departmentAppMappingsData.forEach((mapping: any) => {
         if (!mappingsByDepartment[mapping.departmentName]) {
@@ -784,22 +784,16 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
         processed: mappingsByDepartment 
       });
       
-      // Only set saved state - don't override local state if user has unsaved changes
+      // Always set both states - no conditional logic
       setDepartmentAppMappings(mappingsByDepartment);
-      
-      // Only set local state if we don't have unsaved changes
-      if (!hasDepartmentUnsavedChanges) {
-        console.log('📊 SETTING LOCAL STATE (no unsaved changes):', mappingsByDepartment);
-        setLocalDepartmentAppMappings(mappingsByDepartment);
-      } else {
-        console.log('⚠️ PRESERVING LOCAL STATE (has unsaved changes):', localDepartmentAppMappings);
-      }
+      setLocalDepartmentAppMappings(mappingsByDepartment);
+      console.log('📊 SETTING BOTH STATES:', mappingsByDepartment);
     }
-  }, [departmentAppMappingsData, hasDepartmentUnsavedChanges]);
+  }, [departmentAppMappingsData]);
 
   // Process employee type app mappings data - set both saved and local state
   useEffect(() => {
-    if (Array.isArray(employeeTypeAppMappingsData)) {
+    if (Array.isArray(employeeTypeAppMappingsData) && employeeTypeAppMappingsData.length > 0) {
       const mappingsByEmployeeType: Record<string, string[]> = {};
       employeeTypeAppMappingsData.forEach((mapping: any) => {
         if (!mappingsByEmployeeType[mapping.employeeType]) {
@@ -811,15 +805,15 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
         rawData: employeeTypeAppMappingsData, 
         processed: mappingsByEmployeeType 
       });
+      // Always set both states - no conditional logic
       setEmployeeTypeAppMappings(mappingsByEmployeeType);
       setLocalEmployeeTypeAppMappings(mappingsByEmployeeType);
-      // DON'T automatically clear unsaved changes when data loads - only clear when explicitly saved
     }
   }, [employeeTypeAppMappingsData]);
 
   // Process department group mappings data - set both saved and local state
   useEffect(() => {
-    if (Array.isArray(departmentGroupMappingsData)) {
+    if (Array.isArray(departmentGroupMappingsData) && departmentGroupMappingsData.length > 0) {
       const mappingsByDepartment: Record<string, string[]> = {};
       departmentGroupMappingsData.forEach((mapping: any) => {
         if (!mappingsByDepartment[mapping.departmentName]) {
@@ -832,22 +826,16 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
         processed: mappingsByDepartment 
       });
       
-      // Only set saved state - don't override local state if user has unsaved changes
+      // Always set both states - no conditional logic
       setDepartmentGroupMappings(mappingsByDepartment);
-      
-      // Only set local state if we don't have unsaved changes
-      if (!hasDepartmentGroupUnsavedChanges) {
-        console.log('📊 SETTING LOCAL GROUP STATE (no unsaved changes):', mappingsByDepartment);
-        setLocalDepartmentGroupMappings(mappingsByDepartment);
-      } else {
-        console.log('⚠️ PRESERVING LOCAL GROUP STATE (has unsaved changes):', localDepartmentGroupMappings);
-      }
+      setLocalDepartmentGroupMappings(mappingsByDepartment);
+      console.log('📊 SETTING BOTH GROUP STATES:', mappingsByDepartment);
     }
-  }, [departmentGroupMappingsData, hasDepartmentGroupUnsavedChanges]);
+  }, [departmentGroupMappingsData]);
 
   // Process employee type group mappings data - set both saved and local state
   useEffect(() => {
-    if (Array.isArray(employeeTypeGroupMappingsData)) {
+    if (Array.isArray(employeeTypeGroupMappingsData) && employeeTypeGroupMappingsData.length > 0) {
       const mappingsByEmployeeType: Record<string, string[]> = {};
       employeeTypeGroupMappingsData.forEach((mapping: any) => {
         if (!mappingsByEmployeeType[mapping.employeeType]) {
