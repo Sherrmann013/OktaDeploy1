@@ -532,9 +532,13 @@ export default function UserDetail() {
   });
 
   const passwordResetMutation = useMutation({
-    mutationFn: async (action: "set_temp" | "expire" | "generate") => {
-      // All actions now just send the action type
-      const response = await apiRequest("POST", `/api/client/${clientId}/users/${userId}/password/reset`, { action });
+    mutationFn: async (action: "set_temp" | "expire" | "generate", variables?: { password?: string }) => {
+      // Send action type and optionally the password to use
+      const payload = { action };
+      if (variables?.password) {
+        payload.password = variables.password;
+      }
+      const response = await apiRequest("POST", `/api/client/${clientId}/users/${userId}/password/reset`, payload);
       const result = await response.json();
       return result;
     },
@@ -836,7 +840,7 @@ export default function UserDetail() {
       return;
     }
     
-    passwordResetMutation.mutate("set_temp");
+    passwordResetMutation.mutate("set_temp", { password: newPassword });
     setShowPasswordModal(null);
     setNewPassword("");
     setGeneratedPassword("");

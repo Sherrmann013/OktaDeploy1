@@ -6928,41 +6928,50 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
 
       } else if (action === "set_temp") {
-        // Generate and set a temporary password
+        // Set the specified password or generate one if not provided
         const clientStorage = new ClientStorage(clientId);
         
-        // Get client's password policy configuration
-        const passwordSettings = await clientStorage.getLayoutSetting("password");
+        let newPassword;
         
-        let passwordConfig;
-        if (passwordSettings?.settingValue) {
-          try {
-            passwordConfig = typeof passwordSettings.settingValue === 'string' 
-              ? JSON.parse(passwordSettings.settingValue) 
-              : passwordSettings.settingValue;
-          } catch (e) {
-            console.warn("Failed to parse password config, using default:", e);
+        // Check if a specific password was provided in the request
+        if (req.body.password) {
+          newPassword = req.body.password;
+          console.log(`🔐 Using provided password for user ${user.email} (length: ${newPassword.length})`);
+        } else {
+          // Generate a new password using client's policy
+          const passwordSettings = await clientStorage.getLayoutSetting("password");
+          
+          let passwordConfig;
+          if (passwordSettings?.settingValue) {
+            try {
+              passwordConfig = typeof passwordSettings.settingValue === 'string' 
+                ? JSON.parse(passwordSettings.settingValue) 
+                : passwordSettings.settingValue;
+            } catch (e) {
+              console.warn("Failed to parse password config, using default:", e);
+            }
           }
-        }
 
-        // Use client's password policy or fallback to default
-        const { generatePasswordFromPolicy, DEFAULT_PASSWORD_CONFIG } = await import('../shared/password-utils');
-        const finalConfig = passwordConfig || DEFAULT_PASSWORD_CONFIG;
-        
-        console.log(`🔐 Generating temporary password with client policy:`, finalConfig);
-        const newPassword = generatePasswordFromPolicy(finalConfig);
-        console.log(`🔐 Generated temporary password length: ${newPassword.length} (will be set in OKTA)`);
+          // Use client's password policy or fallback to default
+          const { generatePasswordFromPolicy, DEFAULT_PASSWORD_CONFIG } = await import('../shared/password-utils');
+          const finalConfig = passwordConfig || DEFAULT_PASSWORD_CONFIG;
+          
+          console.log(`🔐 Generating password with client policy:`, finalConfig);
+          newPassword = generatePasswordFromPolicy(finalConfig);
+          console.log(`🔐 Generated password length: ${newPassword.length} (will be set in OKTA)`);
+        }
 
         // Set the password in OKTA as permanent (user can use immediately without forced change)
         result = await setOktaUserPassword(apiKeys, user.oktaId, newPassword, false);
-        console.log(`Temporary password set for user ${user.email}:`, result);
+        console.log(`Password set for user ${user.email}:`, result);
         
-        // Log audit action for setting temporary password
+        // Log audit action for setting password
+        const passwordSource = req.body.password ? "provided by admin" : "generated using client policy";
         await clientStorage.logAudit({
           userId: user.id,
           userEmail: user.email,
           action: 'PASSWORD_SET_TEMPORARY',
-          details: `Set permanent password using client policy (${newPassword.length} characters) - user can log in immediately`,
+          details: `Set permanent password (${passwordSource}, ${newPassword.length} characters) - user can log in immediately`,
           ipAddress: req.ip || 'unknown',
           userAgent: req.get('user-agent') || 'unknown',
           timestamp: new Date()
@@ -6970,10 +6979,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         return res.json({ 
           success: true,
-          message: "Temporary password set successfully - user must change on next login",
-          generatedPassword: newPassword,
-          tempPassword: true,
-          policyUsed: finalConfig
+          message: "Password set successfully - user can log in immediately",
+          passwordSet: true,
+          passwordSource: passwordSource
         });
 
       } else if (action === "expire") {
