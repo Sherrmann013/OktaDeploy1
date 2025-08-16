@@ -15,6 +15,7 @@ This project is a comprehensive React-based multi-tenant enterprise security man
 - **OKTA TERMINOLOGY ALIGNMENT:** System now uses "DEACTIVATED" throughout to align with OKTA's terminology. All backend and frontend references updated from "DEPROVISIONED" to "DEACTIVATED". Dropdown logic updated so "Delete User" replaces "Deactivate" option for users who are already deactivated, and delete confirmation dialog text simplified.
 - **ALGORITHM PRESERVATION RULE:** Never modify, improve, or recreate working user algorithms. If user has a working implementation, preserve it exactly as-is. Complexity and "improvements" often break simple, reliable solutions.
 - **CLIENT-SIDE PREFERENCE:** User prefers simple client-side implementations over complex server-side policy systems for core functionality like password generation.
+- **APP MAPPINGS ARCHITECTURE:** App mappings (application-to-OKTA-group relationships) are stored ONLY in client databases, not in the MSP database. Each client has their own isolated app mappings for complete data sovereignty.
 
 ## System Architecture
 The dashboard uses a React frontend (TypeScript, Tailwind CSS, Wouter) and an Express.js backend (TypeScript, PostgreSQL).

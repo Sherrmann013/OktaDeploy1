@@ -1479,16 +1479,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       console.log(`✅ Found active OKTA integration for client ${clientId}`);
 
-      // Get app mappings for this client to find OKTA group names from MSP database
-      const clientAppMappings = await db.query.appMappings.findMany({
-        where: and(
-          eq(appMappings.clientId, clientId),
-          eq(appMappings.status, "active")
-        )
-      });
+      // Get app mappings for this client from CLIENT database
+      const appMappingsData = await clientDb.select().from(clientAppMappings)
+        .where(eq(clientAppMappings.status, 'active'));
 
       // Filter mappings to only include selected apps
-      const selectedMappings = clientAppMappings.filter(mapping => 
+      const selectedMappings = appMappingsData.filter(mapping => 
         appNames.includes(mapping.appName)
       );
 
