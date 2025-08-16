@@ -1531,7 +1531,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Also remove user from groups that are NOT in the selected apps
-      const unselectedMappings = clientAppMappings.filter(mapping => 
+      const unselectedMappings = appMappingsData.filter(mapping => 
         !appNames.includes(mapping.appName)
       );
 
