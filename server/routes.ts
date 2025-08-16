@@ -3873,6 +3873,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
                         } else {
                           console.log(`✅ Created OKTA security group '${securityGroupName}' (${employeeType})`);
                         }
+                        
+                        // Store the group mapping in the database for user assignment
+                        const { employeeTypeGroupMappings } = await import('../shared/client-schema');
+                        
+                        try {
+                          // Check if mapping already exists
+                          const existingMapping = await clientDb.select()
+                            .from(employeeTypeGroupMappings)
+                            .where(
+                              and(
+                                eq(employeeTypeGroupMappings.employeeType, employeeType),
+                                eq(employeeTypeGroupMappings.groupName, securityGroupName)
+                              )
+                            )
+                            .limit(1);
+                          
+                          if (existingMapping.length === 0) {
+                            await clientDb.insert(employeeTypeGroupMappings).values({
+                              employeeType: employeeType,
+                              groupName: securityGroupName,
+                              created: new Date()
+                            });
+                            console.log(`✅ Stored employee type group mapping: ${employeeType} → ${securityGroupName}`);
+                          } else {
+                            console.log(`ℹ️ Employee type group mapping already exists: ${employeeType} → ${securityGroupName}`);
+                          }
+                        } catch (dbError) {
+                          console.error(`⚠️ Failed to store employee type group mapping: ${employeeType} → ${securityGroupName}:`, dbError);
+                        }
                       } else {
                         console.log(`⚠️ Failed to create OKTA security group '${securityGroupName}' (${employeeType}): ${oktaGroupResult.message}`);
                       }
@@ -5766,33 +5795,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
               }
             }
             
-            // 2. Add to automatic OKTA security group (format: {initials}-ET-{employeeType})
-            if (userData.employeeType) {
-              const client = await db.select().from(clients).where(eq(clients.id, parseInt(clientId))).limit(1);
-              if (client.length > 0) {
-                const companyInitials = client[0].companyInitials || client[0].name?.substring(0, 2).toUpperCase() || 'CL';
-                const securityGroupName = `${companyInitials}-ET-${userData.employeeType.toUpperCase()}`;
-                
-                try {
-                  const groupResult = await addUserToOktaGroup(
-                    oktaIntegration.apiKeys as Record<string, string>,
-                    oktaId,
-                    securityGroupName
-                  );
-                  
-                  if (groupResult.success) {
-                    console.log(`✅ Added user to automatic OKTA security group: ${securityGroupName}`);
-                    groupAssignments.push({ type: 'employeeTypeSecurity', group: securityGroupName, success: true });
-                  } else {
-                    console.log(`⚠️  Failed to add user to automatic OKTA security group ${securityGroupName}: ${groupResult.message}`);
-                    groupAssignments.push({ type: 'employeeTypeSecurity', group: securityGroupName, success: false, error: groupResult.message });
-                  }
-                } catch (error) {
-                  console.error(`Error adding user to automatic OKTA security group ${securityGroupName}:`, error);
-                  groupAssignments.push({ type: 'employeeTypeSecurity', group: securityGroupName, success: false, error: 'Exception occurred' });
-                }
-              }
-            }
+            // Note: No need for hardcoded security group logic anymore
+            // All employee type groups (including automatic OKTA security groups) 
+            // are now properly stored in the database by the automatic group creation process
             
             // Department app-based group assignment
             if (departmentApps.length > 0) {
