@@ -1467,13 +1467,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       console.log(`✅ Found user ${userId} with OKTA ID: ${user.oktaId}`);
 
-      // Get client integrations for OKTA access from MSP database
-      const oktaIntegration = await db.query.integrations.findFirst({
-        where: and(
-          eq(integrations.clientId, clientId),
-          eq(integrations.name, "okta")
-        )
-      });
+      // Get client integrations for OKTA access from CLIENT database
+      const [oktaIntegration] = await clientDb.select().from(clientIntegrations)
+        .where(eq(clientIntegrations.name, 'okta'))
+        .limit(1);
 
       if (!oktaIntegration || oktaIntegration.status !== "connected") {
         console.error(`❌ OKTA integration not found or not connected for client ${clientId}`);
