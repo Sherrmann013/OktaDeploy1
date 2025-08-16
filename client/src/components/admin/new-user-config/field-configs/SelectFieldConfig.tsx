@@ -310,6 +310,12 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
       departmentAppMappings, 
       localDepartmentAppMappings 
     });
+    console.log('🔍 STATE CHECK - Empty object detection:', {
+      savedIsEmpty: Object.keys(departmentAppMappings).length === 0,
+      localIsEmpty: Object.keys(localDepartmentAppMappings).length === 0,
+      savedKeys: Object.keys(departmentAppMappings),
+      localKeys: Object.keys(localDepartmentAppMappings)
+    });
     
     // Prevent auto-save - only allow manual saves
     if (!manualSave) {
