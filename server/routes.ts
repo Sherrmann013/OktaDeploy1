@@ -1451,8 +1451,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         appNames: z.array(z.string())
       }).parse(req.body);
 
-      // Get user to find OKTA ID
-      const user = await db.query.users.findFirst({
+      // Connect to client-specific database
+      const clientDb = await storage.getClientDatabase(clientId);
+      if (!clientDb) {
+        return res.status(400).json({ message: "Client database not found" });
+      }
+
+      // Get user from client database to find OKTA ID
+      const user = await clientDb.query.users.findFirst({
         where: eq(users.id, userId)
       });
       
@@ -1460,7 +1466,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "User not found or no OKTA ID" });
       }
 
-      // Get client integrations for OKTA access
+      // Get client integrations for OKTA access from MSP database
       const oktaIntegration = await db.query.integrations.findFirst({
         where: and(
           eq(integrations.clientId, clientId),
@@ -1472,7 +1478,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "OKTA integration not found or inactive for this client" });
       }
 
-      // Get app mappings for this client to find OKTA group names
+      // Get app mappings for this client to find OKTA group names from MSP database
       const clientAppMappings = await db.query.appMappings.findMany({
         where: and(
           eq(appMappings.clientId, clientId),
