@@ -216,6 +216,12 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
 
   // Department group management functions
   const handleLinkDepartmentGroup = (department: string, groupName: string) => {
+    console.log('🔗 LINK DEPARTMENT GROUP CALLED:', { department, groupName });
+    console.log('🔗 CURRENT STATE BEFORE UPDATE:', { 
+      departmentGroupMappings, 
+      localDepartmentGroupMappings 
+    });
+    
     setLocalDepartmentGroupMappings(prev => {
       const updated = { ...prev };
       if (!updated[department]) {
@@ -224,6 +230,7 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
       if (!updated[department].includes(groupName)) {
         updated[department] = [...updated[department], groupName];
       }
+      console.log('🔗 UPDATED LOCAL STATE:', { prev, updated });
       return updated;
     });
     setHasDepartmentGroupUnsavedChanges(true);
@@ -806,6 +813,7 @@ export function SelectFieldConfig({ config, onUpdate, fieldType, setDepartmentAp
         rawData: departmentGroupMappingsData, 
         processed: mappingsByDepartment 
       });
+      console.log('⚠️ OVERWRITING LOCAL STATE - this may reset user changes!');
       setDepartmentGroupMappings(mappingsByDepartment);
       setLocalDepartmentGroupMappings(mappingsByDepartment);
       // DON'T automatically clear unsaved changes when data loads - only clear when explicitly saved
