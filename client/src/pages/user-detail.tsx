@@ -539,14 +539,18 @@ export default function UserDetail() {
       return result;
     },
     onSuccess: (data: any, action) => {
-      if ((action === "generate" || action === "set_temp") && data?.generatedPassword) {
+      if (action === "generate" && data?.generatedPassword) {
         setNewPassword(data.generatedPassword);
         setGeneratedPassword(data.generatedPassword);
-      } else if (action !== "generate" && action !== "set_temp") {
-        const actionText = action === "expire" ? "Password expired successfully" : "Password action completed";
+      } else if (action === "set_temp") {
         toast({
           title: "Success",
-          description: actionText,
+          description: "Password reset successfully. User can now log in with the new password.",
+        });
+      } else if (action === "expire") {
+        toast({
+          title: "Success",
+          description: "Password expired successfully",
         });
       }
       queryClient.invalidateQueries({ queryKey: [`/api/client/${clientId}/users`, userId] });
