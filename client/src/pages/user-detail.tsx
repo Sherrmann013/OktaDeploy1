@@ -823,7 +823,15 @@ export default function UserDetail() {
   };
 
   const handlePasswordReset = () => {
-    // No longer requires manual password entry - generates temporary password automatically
+    if (!newPassword) {
+      toast({
+        title: "Error",
+        description: "Please enter a password or generate one",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     passwordResetMutation.mutate("set_temp");
     setShowPasswordModal(null);
     setNewPassword("");
@@ -2185,59 +2193,38 @@ export default function UserDetail() {
       <Dialog open={showPasswordModal === "reset"} onOpenChange={() => setShowPasswordModal(null)}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Generate Temporary Password</DialogTitle>
+            <DialogTitle>Reset Password</DialogTitle>
             <DialogDescription>
-              Generate a temporary password for {user?.firstName} {user?.lastName}. They will need to change it on first login.
+              Set a new password for {user?.firstName} {user?.lastName}. The user will be notified and can use this password to log in immediately.
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-3 text-sm">
-            <div className="flex items-start gap-2">
-              <div className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-2 flex-shrink-0"></div>
-              <span>A temporary password will be generated automatically</span>
-            </div>
-            <div className="flex items-start gap-2">
-              <div className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-2 flex-shrink-0"></div>
-              <span>User must change password on first login</span>
-            </div>
-            <div className="flex items-start gap-2">
-              <div className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-2 flex-shrink-0"></div>
-              <span>Password follows your organization's policy</span>
-            </div>
-            <div className="flex items-start gap-2">
-              <div className="w-1.5 h-1.5 rounded-full bg-green-500 mt-2 flex-shrink-0"></div>
-              <span className="text-green-600 dark:text-green-400">You'll receive the temporary password to share with the user</span>
-            </div>
-            
-            {generatedPassword && (
-              <div className="mt-4 p-3 bg-gray-50 dark:bg-gray-800 rounded border">
-                <label className="text-sm font-medium">Generated Password</label>
-                <div className="flex gap-2 mt-1">
-                  <Input
-                    type="text"
-                    value={generatedPassword}
-                    readOnly
-                    className="flex-1 font-mono"
-                  />
-                  <Button 
-                    variant="outline" 
-                    onClick={() => {
-                      navigator.clipboard.writeText(generatedPassword);
-                      toast({ title: "Copied", description: "Password copied to clipboard" });
-                    }}
-                    className="px-3"
-                  >
-                    Copy
-                  </Button>
-                </div>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">New Password</label>
+              <div className="flex gap-2">
+                <Input
+                  type="text"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  placeholder="Enter new password"
+                  className="flex-1"
+                />
+                <Button 
+                  variant="outline" 
+                  onClick={() => passwordResetMutation.mutate("generate")}
+                  className="px-3"
+                >
+                  Generate
+                </Button>
               </div>
-            )}
+            </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowPasswordModal(null)}>
               Cancel
             </Button>
-            <Button onClick={handlePasswordReset} className="bg-blue-600 hover:bg-blue-700">
-              Generate Password
+            <Button onClick={handlePasswordReset} disabled={!newPassword} className="bg-blue-600 hover:bg-blue-700">
+              Reset Password
             </Button>
           </DialogFooter>
         </DialogContent>
