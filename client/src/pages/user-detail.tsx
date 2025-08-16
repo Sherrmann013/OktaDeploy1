@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import React from "react";
 import { ArrowLeft, ChevronDown, ChevronRight, ChevronUp, Smartphone, Monitor, Laptop, Tablet, Shield, Eye, RefreshCw, KeyRound, Edit, Play, Pause, Trash2, Search, UserX, Save, X, Download, Copy, UserCheck, Plus, Key, CheckCircle, BookOpen, ChevronLeft } from "lucide-react";
 import { DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -108,7 +109,7 @@ export default function UserDetail() {
       const headers = ['Time', 'Event Type', 'Display Message', 'Outcome', 'Actor Name', 'Actor Type', 'Client IP', 'User Agent', 'Target Names'];
       const csvData = [
         headers.join(','),
-        ...allLogs.map(log => {
+        ...allLogs.map((log: any) => {
           const time = formatEventTime(log.published);
           const eventType = log.eventType || '';
           const displayMessage = (log.displayMessage || '').replace(/"/g, '""'); // Escape quotes
@@ -285,19 +286,37 @@ export default function UserDetail() {
   });
 
   // Fetch user logs from OKTA with pagination - CLIENT-AWARE
-  const { data: userLogsResponse } = useQuery<{logs: any[], total: number, currentPage: number, totalPages: number}>({
+  const { data: userLogsResponse, isLoading: logsLoading, error: logsError } = useQuery<{logs: any[], total: number, currentPage: number, totalPages: number}>({
     queryKey: [`/api/client/${clientId}/users/${userId}/logs`, logsPageSize, logsCurrentPage],
     queryFn: async () => {
+      console.log('Fetching logs with pagination:', { logsPageSize, logsCurrentPage });
       const response = await fetch(`/api/client/${clientId}/users/${userId}/logs?limit=${logsPageSize}&offset=${(logsCurrentPage - 1) * logsPageSize}`, {
         credentials: 'include'
       });
       if (!response.ok) throw new Error('Failed to fetch logs');
-      return response.json();
+      const result = await response.json();
+      console.log('Logs response:', result);
+      return result;
     },
     enabled: !!userId && activeTab === "activity",
+    retry: 1,
+    staleTime: 0,
   });
 
-  const userLogs = Array.isArray(userLogsResponse?.logs) ? userLogsResponse.logs : [];
+  // Enhanced safety checks with debugging
+  const userLogs = React.useMemo(() => {
+    if (!userLogsResponse) {
+      console.log('No logs response yet');
+      return [];
+    }
+    if (!Array.isArray(userLogsResponse.logs)) {
+      console.error('userLogsResponse.logs is not an array:', userLogsResponse.logs);
+      return [];
+    }
+    console.log('userLogs array length:', userLogsResponse.logs.length);
+    return userLogsResponse.logs;
+  }, [userLogsResponse]);
+  
   const totalLogs = userLogsResponse?.total || 0;
   const totalPages = userLogsResponse?.totalPages || 1;
 
@@ -1689,7 +1708,14 @@ export default function UserDetail() {
                     </div>
                   </CardHeader>
                   <CardContent>
-                    {userLogs.length === 0 ? (
+                    {logsLoading ? (
+                      <div className="text-center py-8">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600 mx-auto"></div>
+                        <p className="text-gray-500 mt-2">Loading activity logs...</p>
+                      </div>
+                    ) : logsError ? (
+                      <p className="text-red-500 text-center py-8">Failed to load activity logs</p>
+                    ) : !Array.isArray(userLogs) || userLogs.length === 0 ? (
                       <p className="text-gray-500 text-center py-8">No recent activity found</p>
                     ) : (
                       <div className="space-y-0 border rounded-lg">
@@ -1700,7 +1726,7 @@ export default function UserDetail() {
                           <div className="col-span-2">Targets</div>
                           <div className="col-span-1"></div>
                         </div>
-                        {userLogs.map((log, index) => (
+                        {Array.isArray(userLogs) && userLogs.map((log: any, index: number) => (
                           <div key={log.id} className={`${index % 2 === 0 ? 'bg-white dark:bg-gray-900' : 'bg-gray-50 dark:bg-gray-800'}`}>
                             <div 
                               className="grid grid-cols-12 gap-4 p-3 border-b border-gray-200 dark:border-gray-700 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors cursor-pointer"
