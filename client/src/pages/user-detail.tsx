@@ -360,12 +360,7 @@ export default function UserDetail() {
   };
 
   const getEventIcon = (eventType: string) => {
-    if (eventType.includes('user.authentication')) return '🔐';
-    if (eventType.includes('user.session')) return '🔗';
-    if (eventType.includes('app.oauth2')) return '🔑';
-    if (eventType.includes('user.account')) return '👤';
-    if (eventType.includes('application')) return '📱';
-    return '📋';
+    return ''; // Icons removed per user request
   };
 
   const getOutcomeColor = (outcome: string) => {
@@ -1769,12 +1764,7 @@ export default function UserDetail() {
                               }}
                             >
                               <div className="col-span-2 text-sm">
-                                <div className="flex items-center gap-2">
-                                  <span className="text-lg">{getEventIcon(log.eventType)}</span>
-                                  <div>
-                                    <div className="font-medium">{formatEventTime(log.published)}</div>
-                                  </div>
-                                </div>
+                                <div className="font-medium">{formatEventTime(log.published)}</div>
                               </div>
                               <div className="col-span-3 text-sm">
                                 <div className="font-medium">{log.actor?.displayName || 'Unknown Actor'}</div>
