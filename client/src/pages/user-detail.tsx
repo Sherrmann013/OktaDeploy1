@@ -1885,6 +1885,15 @@ export default function UserDetail() {
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={() => queryClient.invalidateQueries({ queryKey: [`/api/client/${clientId}/users/${userId}/logs`] })}
+                        disabled={logsLoading}
+                      >
+                        <RefreshCw className={`w-4 h-4 mr-2 ${logsLoading ? 'animate-spin' : ''}`} />
+                        Refresh
+                      </Button>
                       <Button variant="outline" size="sm" onClick={downloadLogsAsCSV}>
                         <Download className="w-4 h-4 mr-2" />
                         Download CSV
