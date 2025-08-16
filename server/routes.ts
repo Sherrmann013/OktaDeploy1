@@ -5740,7 +5740,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
               .from(clientEmployeeTypeAppMappings)
               .where(eq(clientEmployeeTypeAppMappings.employeeType, userData.employeeType || ''));
             
-            // Employee type group assignment
+            // Employee type group assignment - both manual and automatic OKTA security groups
+            
+            // 1. Add to manual employee type groups (from database)
             if (employeeTypeGroups.length > 0) {
               for (const mapping of employeeTypeGroups) {
                 try {
@@ -5760,6 +5762,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 } catch (error) {
                   console.error(`Error adding user to employee type group ${mapping.groupName}:`, error);
                   groupAssignments.push({ type: 'employeeType', group: mapping.groupName, success: false, error: 'Exception occurred' });
+                }
+              }
+            }
+            
+            // 2. Add to automatic OKTA security group (format: {initials}-ET-{employeeType})
+            if (userData.employeeType) {
+              const client = await db.select().from(clients).where(eq(clients.id, parseInt(clientId))).limit(1);
+              if (client.length > 0) {
+                const companyInitials = client[0].companyInitials || client[0].name?.substring(0, 2).toUpperCase() || 'CL';
+                const securityGroupName = `${companyInitials}-ET-${userData.employeeType.toUpperCase()}`;
+                
+                try {
+                  const groupResult = await addUserToOktaGroup(
+                    oktaIntegration.apiKeys as Record<string, string>,
+                    oktaId,
+                    securityGroupName
+                  );
+                  
+                  if (groupResult.success) {
+                    console.log(`✅ Added user to automatic OKTA security group: ${securityGroupName}`);
+                    groupAssignments.push({ type: 'employeeTypeSecurity', group: securityGroupName, success: true });
+                  } else {
+                    console.log(`⚠️  Failed to add user to automatic OKTA security group ${securityGroupName}: ${groupResult.message}`);
+                    groupAssignments.push({ type: 'employeeTypeSecurity', group: securityGroupName, success: false, error: groupResult.message });
+                  }
+                } catch (error) {
+                  console.error(`Error adding user to automatic OKTA security group ${securityGroupName}:`, error);
+                  groupAssignments.push({ type: 'employeeTypeSecurity', group: securityGroupName, success: false, error: 'Exception occurred' });
                 }
               }
             }
