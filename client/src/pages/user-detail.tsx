@@ -1739,18 +1739,18 @@ export default function UserDetail() {
                         {appSearchTerm ? `No applications found matching "${appSearchTerm}"` : 'No applications assigned'}
                       </p>
                     ) : (
-                      <div className="space-y-1">
+                      <div className="space-y-1 max-w-md">
                         {filteredApps.map((app, index) => (
-                          <div key={app.id || index} className="flex items-center justify-between py-2 px-3 hover:bg-gray-50 dark:hover:bg-gray-800 rounded">
-                            <span className="text-sm font-medium">{app.label || app.name || 'Unknown Application'}</span>
+                          <div key={app.id || index} className="flex items-center gap-2 py-2 px-3 hover:bg-gray-50 dark:hover:bg-gray-800 rounded">
                             <Button
                               variant="ghost"
                               size="sm"
                               onClick={() => handleRemoveApplication(app.label || app.name)}
-                              className="h-8 w-8 p-0 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20"
+                              className="h-6 w-6 p-0 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 flex-shrink-0"
                             >
                               <X className="w-4 h-4" />
                             </Button>
+                            <span className="text-sm font-medium">{app.label || app.name || 'Unknown Application'}</span>
                           </div>
                         ))}
                       </div>
