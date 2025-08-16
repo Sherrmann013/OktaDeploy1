@@ -1613,8 +1613,8 @@ export default function UserDetail() {
               <TabsContent value="applications" className="space-y-4 mt-0">
                 <Card>
                   <CardHeader className="flex flex-row items-center justify-between">
-                    <CardTitle>Applications ({userApps.length})</CardTitle>
                     <div className="flex items-center gap-3">
+                      <CardTitle>Applications ({userApps.length})</CardTitle>
                       <Popover open={isAppSelectorOpen} onOpenChange={setIsAppSelectorOpen}>
                         <PopoverTrigger asChild>
                           <Button 
@@ -1626,17 +1626,20 @@ export default function UserDetail() {
                             <ChevronDown className="ml-2 h-4 w-4" />
                           </Button>
                         </PopoverTrigger>
-                        <PopoverContent className="w-80 p-4">
+                        <PopoverContent className="w-80 p-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
                           <div className="space-y-4">
                             <h4 className="font-medium leading-none mb-3">Select Applications</h4>
-                            <Command className="border rounded-md">
-                              <CommandInput placeholder="Search applications..." />
+                            <Command className="border rounded-md bg-white dark:bg-gray-800">
+                              <CommandInput 
+                                placeholder="Search applications..." 
+                                className="bg-white dark:bg-gray-800"
+                              />
                               <CommandEmpty>No applications found.</CommandEmpty>
-                              <CommandGroup className="max-h-64 overflow-auto">
+                              <CommandGroup className="max-h-64 overflow-auto bg-white dark:bg-gray-800">
                                 {appMappings.map((mapping: any) => (
                                   <CommandItem
                                     key={mapping.id}
-                                    className="flex items-center space-x-2"
+                                    className="flex items-center space-x-2 bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700"
                                     onSelect={() => {}} // Prevent default selection behavior
                                   >
                                     <Checkbox
@@ -1674,15 +1677,6 @@ export default function UserDetail() {
                           </div>
                         </PopoverContent>
                       </Popover>
-                      <div className="relative w-64">
-                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                        <Input
-                          placeholder="Search applications..."
-                          value={appSearchTerm}
-                          onChange={(e) => setAppSearchTerm(e.target.value)}
-                          className="pl-10"
-                        />
-                      </div>
                     </div>
                   </CardHeader>
                   <CardContent>
