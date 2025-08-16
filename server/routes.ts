@@ -2,7 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import postgres from "postgres";
 import { storage } from "./storage";
-import { insertUserSchema, updateUserSchema, insertSiteAccessUserSchema, siteAccessUsers, insertIntegrationSchema, integrations, auditLogs, insertAppMappingSchema, appMappings, departmentAppMappings, insertDepartmentAppMappingSchema, employeeTypeAppMappings, insertEmployeeTypeAppMappingSchema, departmentGroupMappings, insertDepartmentGroupMappingSchema, employeeTypeGroupMappings, insertEmployeeTypeGroupMappingSchema, insertLayoutSettingSchema, layoutSettings, dashboardCards, insertDashboardCardSchema, updateDashboardCardSchema, monitoringCards, insertMonitoringCardSchema, updateMonitoringCardSchema, companyLogos, insertCompanyLogoSchema, insertMspLogoSchema, clients, clientAccess } from "@shared/schema";
+import { insertUserSchema, updateUserSchema, insertSiteAccessUserSchema, siteAccessUsers, insertIntegrationSchema, integrations, auditLogs, insertAppMappingSchema, appMappings, departmentAppMappings, insertDepartmentAppMappingSchema, employeeTypeAppMappings, insertEmployeeTypeAppMappingSchema, departmentGroupMappings, insertDepartmentGroupMappingSchema, employeeTypeGroupMappings, insertEmployeeTypeGroupMappingSchema, insertLayoutSettingSchema, layoutSettings, dashboardCards, insertDashboardCardSchema, updateDashboardCardSchema, monitoringCards, insertMonitoringCardSchema, updateMonitoringCardSchema, companyLogos, insertCompanyLogoSchema, insertMspLogoSchema, clients, clientAccess, users } from "@shared/schema";
 
 import { db } from "./db";
 import { eq, desc, and, or, ilike, asc } from "drizzle-orm";
@@ -1439,6 +1439,134 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       console.error("Error updating user status:", error);
       res.status(500).json({ message: "Failed to update user status" });
+    }
+  });
+
+  // Assign applications to user - CLIENT-AWARE
+  app.post("/api/client/:clientId/users/:userId/assign-applications", isAuthenticated, async (req, res) => {
+    try {
+      const clientId = parseInt(req.params.clientId);
+      const userId = parseInt(req.params.userId);
+      const { appNames } = z.object({
+        appNames: z.array(z.string())
+      }).parse(req.body);
+
+      // Get user to find OKTA ID
+      const user = await db.query.users.findFirst({
+        where: eq(users.id, userId)
+      });
+      
+      if (!user || !user.oktaId) {
+        return res.status(404).json({ message: "User not found or no OKTA ID" });
+      }
+
+      // Get client integrations for OKTA access
+      const oktaIntegration = await db.query.integrations.findFirst({
+        where: and(
+          eq(integrations.clientId, clientId),
+          eq(integrations.integrationType, "okta")
+        )
+      });
+
+      if (!oktaIntegration || !oktaIntegration.isActive) {
+        return res.status(400).json({ message: "OKTA integration not found or inactive for this client" });
+      }
+
+      // Get app mappings for this client to find OKTA group names
+      const clientAppMappings = await db.query.appMappings.findMany({
+        where: and(
+          eq(appMappings.clientId, clientId),
+          eq(appMappings.status, "active")
+        )
+      });
+
+      // Filter mappings to only include selected apps
+      const selectedMappings = clientAppMappings.filter(mapping => 
+        appNames.includes(mapping.appName)
+      );
+
+      if (selectedMappings.length === 0) {
+        return res.status(400).json({ message: "No valid app mappings found for selected applications" });
+      }
+
+      // Create OKTA client service for this specific client
+      const oktaApiKeys = oktaIntegration.apiKeys as Record<string, string>;
+      if (!oktaApiKeys.domain || !oktaApiKeys.apiToken) {
+        return res.status(400).json({ message: "OKTA configuration incomplete for this client" });
+      }
+
+      // Import the OKTA service - this needs to be adapted for client-specific usage
+      // For now, we'll create a simple implementation
+      const results = {
+        success: [],
+        errors: []
+      } as { success: string[]; errors: string[] };
+
+      for (const mapping of selectedMappings) {
+        try {
+          // Add user to OKTA group
+          const addResponse = await fetch(`https://${oktaApiKeys.domain}/api/v1/groups/${mapping.oktaGroupName}/users/${user.oktaId}`, {
+            method: 'PUT',
+            headers: {
+              'Authorization': `SSWS ${oktaApiKeys.apiToken}`,
+              'Accept': 'application/json',
+              'Content-Type': 'application/json'
+            }
+          });
+
+          if (addResponse.ok) {
+            results.success.push(mapping.appName);
+          } else {
+            const errorText = await addResponse.text();
+            console.error(`Failed to add user to group ${mapping.oktaGroupName}:`, errorText);
+            results.errors.push(`${mapping.appName}: ${errorText}`);
+          }
+        } catch (error) {
+          console.error(`Error adding user to group ${mapping.oktaGroupName}:`, error);
+          results.errors.push(`${mapping.appName}: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        }
+      }
+
+      // Also remove user from groups that are NOT in the selected apps
+      const unselectedMappings = clientAppMappings.filter(mapping => 
+        !appNames.includes(mapping.appName)
+      );
+
+      for (const mapping of unselectedMappings) {
+        try {
+          // Remove user from OKTA group
+          const removeResponse = await fetch(`https://${oktaApiKeys.domain}/api/v1/groups/${mapping.oktaGroupName}/users/${user.oktaId}`, {
+            method: 'DELETE',
+            headers: {
+              'Authorization': `SSWS ${oktaApiKeys.apiToken}`,
+              'Accept': 'application/json'
+            }
+          });
+
+          // Don't treat 404 as an error (user wasn't in group anyway)
+          if (!removeResponse.ok && removeResponse.status !== 404) {
+            const errorText = await removeResponse.text();
+            console.warn(`Failed to remove user from group ${mapping.oktaGroupName}:`, errorText);
+          }
+        } catch (error) {
+          console.warn(`Error removing user from group ${mapping.oktaGroupName}:`, error);
+        }
+      }
+
+      res.json({
+        message: "Application assignments updated",
+        results
+      });
+
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ 
+          message: "Validation error", 
+          errors: error.errors 
+        });
+      }
+      console.error("Error assigning applications:", error);
+      res.status(500).json({ message: "Failed to assign applications" });
     }
   });
 

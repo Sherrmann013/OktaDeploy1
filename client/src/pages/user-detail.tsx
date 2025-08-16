@@ -17,8 +17,10 @@ import { DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import ConfirmationModal from "@/components/confirmation-modal";
-import AssignAppModal from "@/components/assign-app-modal";
 import KnowBe4UserDisplay from "@/components/knowbe4-user-display";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "@/components/ui/command";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useState, useEffect, useMemo } from "react";
 import type { User } from "@shared/schema";
 import { useForm } from "react-hook-form";
@@ -248,7 +250,8 @@ export default function UserDetail() {
   
   const [activeTab, setActiveTab] = useState("profile");
   const [appSearchTerm, setAppSearchTerm] = useState("");
-  const [showAssignAppModal, setShowAssignAppModal] = useState(false);
+  const [selectedAppMappings, setSelectedAppMappings] = useState<string[]>([]);
+  const [isAppSelectorOpen, setIsAppSelectorOpen] = useState(false);
 
   // Clear problematic cache entries on mount - CLIENT-AWARE
   useEffect(() => {
@@ -284,6 +287,12 @@ export default function UserDetail() {
   const { data: userDevices = [] } = useQuery<any[]>({
     queryKey: [`/api/client/${clientId}/users/${userId}/devices`],
     enabled: !!userId,
+  });
+
+  // Fetch app mappings for the multi-select dropdown - CLIENT-AWARE
+  const { data: appMappings = [] } = useQuery<any[]>({
+    queryKey: [`/api/client/${clientId}/app-mappings`],
+    staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
   // Fetch user logs from OKTA with pagination - CLIENT-AWARE
@@ -621,6 +630,29 @@ export default function UserDetail() {
     },
   });
 
+  // Application assignment mutation
+  const assignAppsMutation = useMutation({
+    mutationFn: async (appNames: string[]) => {
+      return apiRequest("POST", `/api/client/${clientId}/users/${userId}/assign-applications`, { 
+        appNames 
+      });
+    },
+    onSuccess: () => {
+      toast({
+        title: "Success",
+        description: "User applications updated successfully",
+      });
+      queryClient.invalidateQueries({ queryKey: [`/api/client/${clientId}/users`, userId, "applications"] });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleStatusChange = (status: string) => {
     const actionText = status === "ACTIVE" ? "activate" : 
                       status === "SUSPENDED" ? "suspend" : "deactivate";
@@ -676,6 +708,32 @@ export default function UserDetail() {
   const handleCancelEdit = () => {
     setIsEditing(false);
     form.reset();
+  };
+
+  // Initialize selected apps based on user's current applications
+  React.useEffect(() => {
+    if (userApps.length > 0 && appMappings.length > 0) {
+      const currentAppNames = userApps.map(app => app.label || app.name).filter(Boolean);
+      const matchingMappings = appMappings
+        .filter((mapping: any) => currentAppNames.includes(mapping.appName))
+        .map((mapping: any) => mapping.appName);
+      setSelectedAppMappings(matchingMappings);
+    }
+  }, [userApps, appMappings]);
+
+  const handleAppSelectionChange = (appName: string, checked: boolean) => {
+    setSelectedAppMappings(prev => {
+      if (checked) {
+        return [...prev, appName];
+      } else {
+        return prev.filter(name => name !== appName);
+      }
+    });
+  };
+
+  const handleSaveAppAssignments = () => {
+    assignAppsMutation.mutate(selectedAppMappings);
+    setIsAppSelectorOpen(false);
   };
 
   const toggleSection = (logId: string, section: string) => {
@@ -1557,13 +1615,65 @@ export default function UserDetail() {
                   <CardHeader className="flex flex-row items-center justify-between">
                     <CardTitle>Applications ({userApps.length})</CardTitle>
                     <div className="flex items-center gap-3">
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        onClick={() => setShowAssignAppModal(true)}
-                      >
-                        Assign App
-                      </Button>
+                      <Popover open={isAppSelectorOpen} onOpenChange={setIsAppSelectorOpen}>
+                        <PopoverTrigger asChild>
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            className="justify-between min-w-[200px]"
+                          >
+                            Manage Applications
+                            <ChevronDown className="ml-2 h-4 w-4" />
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-80 p-4">
+                          <div className="space-y-4">
+                            <h4 className="font-medium leading-none mb-3">Select Applications</h4>
+                            <Command className="border rounded-md">
+                              <CommandInput placeholder="Search applications..." />
+                              <CommandEmpty>No applications found.</CommandEmpty>
+                              <CommandGroup className="max-h-64 overflow-auto">
+                                {appMappings.map((mapping: any) => (
+                                  <CommandItem
+                                    key={mapping.id}
+                                    className="flex items-center space-x-2"
+                                    onSelect={() => {}} // Prevent default selection behavior
+                                  >
+                                    <Checkbox
+                                      checked={selectedAppMappings.includes(mapping.appName)}
+                                      onCheckedChange={(checked) => 
+                                        handleAppSelectionChange(mapping.appName, !!checked)
+                                      }
+                                    />
+                                    <span className="flex-1">{mapping.appName}</span>
+                                    {mapping.description && (
+                                      <span className="text-sm text-gray-500 truncate">
+                                        {mapping.description}
+                                      </span>
+                                    )}
+                                  </CommandItem>
+                                ))}
+                              </CommandGroup>
+                            </Command>
+                            <div className="flex justify-between pt-2">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setIsAppSelectorOpen(false)}
+                              >
+                                Cancel
+                              </Button>
+                              <Button
+                                size="sm"
+                                onClick={handleSaveAppAssignments}
+                                disabled={assignAppsMutation.isPending}
+                              >
+                                {assignAppsMutation.isPending ? "Saving..." : "Save Changes"}
+                              </Button>
+                            </div>
+                          </div>
+                        </PopoverContent>
+                      </Popover>
                       <div className="relative w-64">
                         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                         <Input
@@ -2036,13 +2146,7 @@ export default function UserDetail() {
         </div>
       </div>
 
-      <AssignAppModal
-        open={showAssignAppModal}
-        onClose={() => setShowAssignAppModal(false)}
-        userId={userId?.toString() || ""}
-        userApps={userApps}
-        clientId={clientId} // CLIENT-AWARE - Pass client context
-      />
+
 
       {/* Password Reset Modal */}
       <Dialog open={showPasswordModal === "reset"} onOpenChange={() => setShowPasswordModal(null)}>
