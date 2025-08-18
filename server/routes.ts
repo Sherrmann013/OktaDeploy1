@@ -813,12 +813,19 @@ async function testSentinelOneConnection(apiKeys: Record<string, string>): Promi
 
 async function testJiraConnection(apiKeys: Record<string, string>): Promise<{ success: boolean; message: string }> {
   try {
-    if (!apiKeys.baseUrl || !apiKeys.username || !apiKeys.apiToken) {
-      return { success: false, message: "Missing Jira configuration (baseUrl, username, or API token)" };
+    // Handle both field name variations: jiraUrl/baseUrl and email/username
+    const baseUrl = apiKeys.baseUrl || apiKeys.jiraUrl;
+    const username = apiKeys.username || apiKeys.email;
+    const apiToken = apiKeys.apiToken;
+    
+    console.log(`🔍 Testing Jira connection with:`, { baseUrl, username: username?.substring(0, 5) + '...', hasToken: !!apiToken });
+    
+    if (!baseUrl || !username || !apiToken) {
+      return { success: false, message: "Missing Jira configuration (baseUrl/jiraUrl, username/email, or API token)" };
     }
 
-    const auth = Buffer.from(`${apiKeys.username}:${apiKeys.apiToken}`).toString('base64');
-    const response = await fetch(`${apiKeys.baseUrl}/rest/api/2/myself`, {
+    const auth = Buffer.from(`${username}:${apiToken}`).toString('base64');
+    const response = await fetch(`${baseUrl}/rest/api/2/myself`, {
       headers: {
         'Authorization': `Basic ${auth}`,
         'Accept': 'application/json'
