@@ -382,9 +382,9 @@ export function DashboardSection() {
               <div className="space-y-2 max-h-64 overflow-y-auto">
                 {tickets.map((ticket: any, index: number) => (
                   <div key={ticket.key} className="border rounded-lg p-3 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="flex items-center gap-2 flex-1 min-w-0">
                           <a 
                             href={ticket.url}
                             target="_blank"
@@ -402,21 +402,20 @@ export function DashboardSection() {
                           }`}>
                             {ticket.priority}
                           </span>
+                          <span className="text-sm text-gray-900 dark:text-gray-100 truncate">
+                            {ticket.summary}
+                          </span>
                         </div>
                         
-                        <p className="text-sm text-gray-900 dark:text-gray-100 mb-2 line-clamp-2">
-                          {ticket.summary}
-                        </p>
-                        
-                        <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                          <span>Status: {ticket.status}</span>
-                          <span>Assignee: {ticket.assignee}</span>
-                          <span>Created: {new Date(ticket.created).toLocaleDateString()}</span>
+                        <div className="text-xs text-muted-foreground">
+                          #{index + 1}
                         </div>
                       </div>
                       
-                      <div className="text-xs text-muted-foreground text-right">
-                        #{index + 1}
+                      <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                        <span>Status: {ticket.status}</span>
+                        <span>Assignee: {ticket.assignee}</span>
+                        <span>Created: {new Date(ticket.created).toLocaleDateString()}</span>
                       </div>
                     </div>
                   </div>
