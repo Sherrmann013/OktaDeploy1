@@ -3357,25 +3357,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
 
-      // If still no gadgets, create mock gadgets to demonstrate the functionality
+      // Return actual results only - no demo data
       if (formattedGadgets.length === 0) {
-        console.log(`🔧 No gadgets found via API, creating demo gadgets for dashboard ${dashboardId}`);
-        formattedGadgets = [
-          {
-            id: `demo-${dashboardId}-1`,
-            title: 'Activity Stream',
-            gadgetUrl: `${baseUrl}/secure/Dashboard.jspa?selectPageId=${dashboardId}`,
-            position: 0,
-            moduleKey: 'com.atlassian.jira.gadgets:activity-stream-gadget'
-          },
-          {
-            id: `demo-${dashboardId}-2`, 
-            title: 'Issue Statistics',
-            gadgetUrl: `${baseUrl}/secure/Dashboard.jspa?selectPageId=${dashboardId}`,
-            position: 1,
-            moduleKey: 'com.atlassian.jira.gadgets:issue-table-gadget'
-          }
-        ];
+        console.log(`⚠️ No gadgets found in dashboard ${dashboardId} via any API method`);
       }
 
       console.log(`✅ Found ${formattedGadgets.length} gadgets in dashboard ${dashboardId} for client ${clientId}:`, formattedGadgets);
