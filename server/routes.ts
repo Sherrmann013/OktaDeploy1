@@ -3295,6 +3295,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Fetch dashboard details with gadgets
       const auth = Buffer.from(`${username}:${apiToken}`).toString('base64');
+      console.log(`🔍 Calling JIRA API: ${baseUrl}/rest/api/2/dashboard/${dashboardId}`);
+      
       const response = await fetch(`${baseUrl}/rest/api/2/dashboard/${dashboardId}`, {
         headers: {
           'Authorization': `Basic ${auth}`,
@@ -3303,24 +3305,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
       if (!response.ok) {
+        const errorText = await response.text();
+        console.error(`❌ JIRA API error for dashboard ${dashboardId}: ${response.status} ${response.statusText} - ${errorText}`);
         return res.status(response.status).json({ 
           error: `JIRA API error: ${response.status} ${response.statusText}` 
         });
       }
 
       const dashboard = await response.json();
-      const gadgets = dashboard.gadgets || [];
+      console.log(`📊 JIRA dashboard response:`, JSON.stringify(dashboard, null, 2));
+      
+      // Check different possible locations for gadgets in the response
+      const gadgets = dashboard.gadgets || dashboard.items || [];
+      console.log(`🔧 Found gadgets array:`, gadgets);
       
       // Transform gadgets to expected format
       const formattedGadgets = gadgets.map((gadget: any) => ({
-        id: gadget.id,
-        title: gadget.title,
-        gadgetUrl: gadget.gadgetUrl,
-        position: gadget.position,
-        moduleKey: gadget.moduleKey
+        id: gadget.id || gadget.gadgetId,
+        title: gadget.title || gadget.name,
+        gadgetUrl: gadget.gadgetUrl || gadget.url,
+        position: gadget.position || gadget.col || 0,
+        moduleKey: gadget.moduleKey || gadget.gadgetKey
       }));
 
-      console.log(`✅ Found ${formattedGadgets.length} gadgets in dashboard ${dashboardId} for client ${clientId}`);
+      console.log(`✅ Found ${formattedGadgets.length} gadgets in dashboard ${dashboardId} for client ${clientId}:`, formattedGadgets);
       res.json(formattedGadgets);
 
     } catch (error) {
