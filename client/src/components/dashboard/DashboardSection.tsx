@@ -299,10 +299,10 @@ export function DashboardSection() {
 
     // Fetch JIRA tickets based on dashboard configuration
     const { data: jiraTicketData, isLoading: loadingTickets } = useQuery({
-      queryKey: ['/api/client', clientId, 'jira', 'tickets', jiraCardId],
+      queryKey: ['/api/client', currentClientId, 'jira', 'tickets', jiraCardId],
       queryFn: async () => {
-        if (!jiraCardId || !clientId) return null;
-        const response = await fetch(`/api/client/${clientId}/jira/tickets?cardId=${jiraCardId}`);
+        if (!jiraCardId || !currentClientId) return null;
+        const response = await fetch(`/api/client/${currentClientId}/jira/tickets?cardId=${jiraCardId}`);
         if (!response.ok) {
           if (response.status === 400) {
             const error = await response.json();
@@ -312,7 +312,7 @@ export function DashboardSection() {
         }
         return response.json();
       },
-      enabled: isConnected && !!jiraCardId && !!clientId,
+      enabled: isConnected && !!jiraCardId && !!currentClientId,
       refetchInterval: 5 * 60 * 1000, // Refresh every 5 minutes
     });
 
