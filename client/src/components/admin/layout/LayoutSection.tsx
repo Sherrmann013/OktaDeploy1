@@ -4,8 +4,11 @@ import { apiRequest } from "@/lib/queryClient";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Plus, Edit, X, Settings, RefreshCw, Eye, EyeOff, Trash2 } from "lucide-react";
+import { Plus, Edit, X, Settings, RefreshCw, Eye, EyeOff, Trash2, ChevronDown, ChevronRight, Ticket, BarChart3, Filter } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import { LogoUploadModal } from "@/components/LogoUploadModal";
 import { useToast } from "@/hooks/use-toast";
 import { NewUserConfigSection } from "@/components/admin/new-user-config";
@@ -51,6 +54,29 @@ export function LayoutSection({
   const [dragOverItem, setDragOverItem] = useState<number | null>(null);
   const [draggedMonitoringItem, setDraggedMonitoringItem] = useState<number | null>(null);
   const [dragOverMonitoringItem, setDragOverMonitoringItem] = useState<number | null>(null);
+  
+  // JIRA dashboard configuration states
+  const [isJiraConfigOpen, setIsJiraConfigOpen] = useState(false);
+  const [editingJiraCard, setEditingJiraCard] = useState<any>(null);
+  const [expandedJiraSection, setExpandedJiraSection] = useState<string | null>(null);
+  const [jiraConfig, setJiraConfig] = useState({
+    ticketQueue: {
+      enabled: false,
+      project: '',
+      slaTrackers: {
+        firstResponse: false,
+        timeToResolution: false
+      }
+    },
+    dashboard: {
+      enabled: false,
+      widgets: []
+    },
+    filter: {
+      enabled: false,
+      customFilters: []
+    }
+  });
 
   // Fetch dashboard cards for current client - ONLY when Layout > Dashboard tab is active
   const dashboardCardsEndpoint = `/api/client/${currentClientId}/dashboard-cards`;
@@ -1071,11 +1097,17 @@ export function LayoutSection({
                               variant="ghost"
                               size="sm"
                               onClick={() => {
-                                // Find matching integration and open configure dialog
-                                const integration = integrationsData.find((i: any) => i.name === card.type);
-                                if (integration) {
-                                  setEditingIntegration(integration);
-                                  setIsConfigureIntegrationOpen(true);
+                                // Handle JIRA dashboard configuration differently
+                                if (card.type === 'jira') {
+                                  setEditingJiraCard(card);
+                                  setIsJiraConfigOpen(true);
+                                } else {
+                                  // Find matching integration and open configure dialog
+                                  const integration = integrationsData.find((i: any) => i.name === card.type);
+                                  if (integration) {
+                                    setEditingIntegration(integration);
+                                    setIsConfigureIntegrationOpen(true);
+                                  }
                                 }
                               }}
                               className={`
@@ -1305,6 +1337,248 @@ export function LayoutSection({
           </div>
         </div>
       </CardContent>
+
+      {/* JIRA Dashboard Configuration Modal */}
+      <Dialog open={isJiraConfigOpen} onOpenChange={setIsJiraConfigOpen}>
+        <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Ticket className="w-5 h-5 text-blue-600" />
+              JIRA Dashboard Configuration
+            </DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            {/* Ticket Queue Section */}
+            <div className="border rounded-lg">
+              <button
+                onClick={() => setExpandedJiraSection(expandedJiraSection === 'ticketQueue' ? null : 'ticketQueue')}
+                className="w-full p-4 flex items-center justify-between text-left hover:bg-gray-50 dark:hover:bg-gray-800/50 rounded-t-lg"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2">
+                    <Ticket className="w-4 h-4 text-blue-600" />
+                    <span className="font-medium">Ticket Queue</span>
+                  </div>
+                  <Plus className="w-4 h-4 text-gray-400" />
+                </div>
+                {expandedJiraSection === 'ticketQueue' ? 
+                  <ChevronDown className="w-4 h-4" /> : 
+                  <ChevronRight className="w-4 h-4" />
+                }
+              </button>
+              
+              {expandedJiraSection === 'ticketQueue' && (
+                <div className="p-4 border-t bg-gray-50 dark:bg-gray-800/30">
+                  <div className="space-y-4">
+                    <div className="flex items-center space-x-2">
+                      <Checkbox 
+                        id="ticketQueueEnabled"
+                        checked={jiraConfig.ticketQueue.enabled}
+                        onCheckedChange={(checked) => 
+                          setJiraConfig(prev => ({
+                            ...prev,
+                            ticketQueue: { ...prev.ticketQueue, enabled: !!checked }
+                          }))
+                        }
+                      />
+                      <Label htmlFor="ticketQueueEnabled">Enable Ticket Queue</Label>
+                    </div>
+                    
+                    {jiraConfig.ticketQueue.enabled && (
+                      <>
+                        <div className="space-y-2">
+                          <Label htmlFor="projectSelector">Project Selector</Label>
+                          <Select 
+                            value={jiraConfig.ticketQueue.project}
+                            onValueChange={(value) => 
+                              setJiraConfig(prev => ({
+                                ...prev,
+                                ticketQueue: { ...prev.ticketQueue, project: value }
+                              }))
+                            }
+                          >
+                            <SelectTrigger className="bg-white dark:bg-gray-800">
+                              <SelectValue placeholder="Select JIRA project" />
+                            </SelectTrigger>
+                            <SelectContent className="bg-white dark:bg-gray-800">
+                              <SelectItem value="SUPPORT">Support</SelectItem>
+                              <SelectItem value="IT">IT Services</SelectItem>
+                              <SelectItem value="HELPDESK">Help Desk</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        
+                        <div className="space-y-3">
+                          <Label>SLA Trackers</Label>
+                          <div className="space-y-2">
+                            <div className="flex items-center space-x-2">
+                              <Checkbox 
+                                id="firstResponse"
+                                checked={jiraConfig.ticketQueue.slaTrackers.firstResponse}
+                                onCheckedChange={(checked) => 
+                                  setJiraConfig(prev => ({
+                                    ...prev,
+                                    ticketQueue: { 
+                                      ...prev.ticketQueue, 
+                                      slaTrackers: { 
+                                        ...prev.ticketQueue.slaTrackers, 
+                                        firstResponse: !!checked 
+                                      }
+                                    }
+                                  }))
+                                }
+                              />
+                              <Label htmlFor="firstResponse">First Response Time</Label>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <Checkbox 
+                                id="timeToResolution"
+                                checked={jiraConfig.ticketQueue.slaTrackers.timeToResolution}
+                                onCheckedChange={(checked) => 
+                                  setJiraConfig(prev => ({
+                                    ...prev,
+                                    ticketQueue: { 
+                                      ...prev.ticketQueue, 
+                                      slaTrackers: { 
+                                        ...prev.ticketQueue.slaTrackers, 
+                                        timeToResolution: !!checked 
+                                      }
+                                    }
+                                  }))
+                                }
+                              />
+                              <Label htmlFor="timeToResolution">Time to Resolution</Label>
+                            </div>
+                          </div>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Dashboard Section */}
+            <div className="border rounded-lg">
+              <button
+                onClick={() => setExpandedJiraSection(expandedJiraSection === 'dashboard' ? null : 'dashboard')}
+                className="w-full p-4 flex items-center justify-between text-left hover:bg-gray-50 dark:hover:bg-gray-800/50 rounded-t-lg"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2">
+                    <BarChart3 className="w-4 h-4 text-green-600" />
+                    <span className="font-medium">Dashboard</span>
+                  </div>
+                  <Plus className="w-4 h-4 text-gray-400" />
+                </div>
+                {expandedJiraSection === 'dashboard' ? 
+                  <ChevronDown className="w-4 h-4" /> : 
+                  <ChevronRight className="w-4 h-4" />
+                }
+              </button>
+              
+              {expandedJiraSection === 'dashboard' && (
+                <div className="p-4 border-t bg-gray-50 dark:bg-gray-800/30">
+                  <div className="space-y-4">
+                    <div className="flex items-center space-x-2">
+                      <Checkbox 
+                        id="dashboardEnabled"
+                        checked={jiraConfig.dashboard.enabled}
+                        onCheckedChange={(checked) => 
+                          setJiraConfig(prev => ({
+                            ...prev,
+                            dashboard: { ...prev.dashboard, enabled: !!checked }
+                          }))
+                        }
+                      />
+                      <Label htmlFor="dashboardEnabled">Enable Dashboard Widgets</Label>
+                    </div>
+                    
+                    {jiraConfig.dashboard.enabled && (
+                      <div className="text-sm text-muted-foreground bg-blue-50 dark:bg-blue-900/20 p-3 rounded">
+                        Dashboard widget configuration will be available here. This will include options for:
+                        <ul className="list-disc list-inside mt-2 space-y-1">
+                          <li>Issue statistics widgets</li>
+                          <li>Project progress charts</li>
+                          <li>Team performance metrics</li>
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Filter Section */}
+            <div className="border rounded-lg">
+              <button
+                onClick={() => setExpandedJiraSection(expandedJiraSection === 'filter' ? null : 'filter')}
+                className="w-full p-4 flex items-center justify-between text-left hover:bg-gray-50 dark:hover:bg-gray-800/50 rounded-t-lg"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2">
+                    <Filter className="w-4 h-4 text-purple-600" />
+                    <span className="font-medium">Filter</span>
+                  </div>
+                  <Plus className="w-4 h-4 text-gray-400" />
+                </div>
+                {expandedJiraSection === 'filter' ? 
+                  <ChevronDown className="w-4 h-4" /> : 
+                  <ChevronRight className="w-4 h-4" />
+                }
+              </button>
+              
+              {expandedJiraSection === 'filter' && (
+                <div className="p-4 border-t bg-gray-50 dark:bg-gray-800/30">
+                  <div className="space-y-4">
+                    <div className="flex items-center space-x-2">
+                      <Checkbox 
+                        id="filterEnabled"
+                        checked={jiraConfig.filter.enabled}
+                        onCheckedChange={(checked) => 
+                          setJiraConfig(prev => ({
+                            ...prev,
+                            filter: { ...prev.filter, enabled: !!checked }
+                          }))
+                        }
+                      />
+                      <Label htmlFor="filterEnabled">Enable Custom Filters</Label>
+                    </div>
+                    
+                    {jiraConfig.filter.enabled && (
+                      <div className="text-sm text-muted-foreground bg-purple-50 dark:bg-purple-900/20 p-3 rounded">
+                        Custom filter configuration will be available here. This will include options for:
+                        <ul className="list-disc list-inside mt-2 space-y-1">
+                          <li>Saved JQL filters</li>
+                          <li>Quick filter presets</li>
+                          <li>Dynamic filter conditions</li>
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="flex justify-end gap-3 pt-4">
+            <Button variant="outline" onClick={() => setIsJiraConfigOpen(false)}>
+              Cancel
+            </Button>
+            <Button 
+              onClick={() => {
+                // Save JIRA configuration logic would go here
+                setIsJiraConfigOpen(false);
+                // Show success message
+              }}
+              className="bg-blue-600 hover:bg-blue-700 text-white"
+            >
+              Save Configuration
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 }
