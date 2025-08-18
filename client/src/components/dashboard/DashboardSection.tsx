@@ -277,36 +277,53 @@ export function DashboardSection() {
     </Card>
   );
 
-  const renderJiraCard = () => (
-    <Card className="border-2 border-blue-200 dark:border-blue-800">
-      <CardHeader className="pb-3">
-        <div className="flex items-center space-x-2">
-          <Ticket className="w-5 h-5 text-blue-600" />
-          <CardTitle className="text-blue-700 dark:text-blue-300">Jira Service Management</CardTitle>
-        </div>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <p className="text-sm font-medium text-muted-foreground">Open Issues</p>
-            <p className="text-2xl font-bold text-blue-600">7</p>
+  const renderJiraCard = () => {
+    // Check if JIRA integration is connected
+    const jiraIntegration = integrations?.find(integration => integration.name === 'jira');
+    const isConnected = jiraIntegration?.status === 'connected';
+
+    return (
+      <Card className="border-2 border-blue-200 dark:border-blue-800">
+        <CardHeader className="pb-3">
+          <div className="flex items-center space-x-2">
+            <Ticket className="w-5 h-5 text-blue-600" />
+            <CardTitle className="text-blue-700 dark:text-blue-300">Jira Service Management</CardTitle>
           </div>
-          <div>
-            <p className="text-sm font-medium text-muted-foreground">Escalated Issues</p>
-            <p className="text-2xl font-bold text-green-600">0</p>
-          </div>
-        </div>
-        
-        <div className="bg-red-900/20 border border-red-700 rounded-lg p-3">
-          <div className="flex items-center gap-2">
-            <AlertTriangle className="w-4 h-4 text-red-500" />
-            <span className="text-sm font-medium text-red-300">SLA Violations</span>
-            <span className="text-lg font-bold text-red-400 ml-auto">1</span>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  );
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {!isConnected ? (
+            <div className="text-center py-8">
+              <div className="flex flex-col items-center space-y-3">
+                <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center">
+                  <Ticket className="w-6 h-6 text-blue-600" />
+                </div>
+                <div className="space-y-1">
+                  <p className="font-medium text-gray-900 dark:text-gray-100">JIRA Integration Required</p>
+                  <p className="text-sm text-muted-foreground">
+                    Connect your JIRA instance to view service management metrics
+                  </p>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="text-center py-8">
+              <div className="flex flex-col items-center space-y-3">
+                <div className="w-12 h-12 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center">
+                  <Ticket className="w-6 h-6 text-green-600" />
+                </div>
+                <div className="space-y-1">
+                  <p className="font-medium text-gray-900 dark:text-gray-100">JIRA Connected</p>
+                  <p className="text-sm text-muted-foreground">
+                    Service management data will be displayed here
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    );
+  };
 
   const renderOKTACard = () => (
     <Card className="border-2 border-purple-200 dark:border-purple-800">
