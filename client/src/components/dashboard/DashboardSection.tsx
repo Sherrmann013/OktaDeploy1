@@ -293,12 +293,45 @@ export function DashboardSection() {
     const jiraIntegration = integrations?.find(integration => integration.name === 'jira');
     const isConnected = jiraIntegration?.status === 'connected';
 
+    // Find the JIRA dashboard card
+    const jiraCard = dashboardCards?.find(card => card.type === 'jira');
+    const jiraCardId = jiraCard?.id;
+
+    // Fetch JIRA tickets based on dashboard configuration
+    const { data: jiraTicketData, isLoading: loadingTickets } = useQuery({
+      queryKey: ['/api/client', clientId, 'jira', 'tickets', jiraCardId],
+      queryFn: async () => {
+        if (!jiraCardId || !clientId) return null;
+        const response = await fetch(`/api/client/${clientId}/jira/tickets?cardId=${jiraCardId}`);
+        if (!response.ok) {
+          if (response.status === 400) {
+            const error = await response.json();
+            throw new Error(error.error || 'Configuration error');
+          }
+          throw new Error('Failed to fetch JIRA tickets');
+        }
+        return response.json();
+      },
+      enabled: isConnected && !!jiraCardId && !!clientId,
+      refetchInterval: 5 * 60 * 1000, // Refresh every 5 minutes
+    });
+
+    const tickets = jiraTicketData?.tickets || [];
+    const totalFound = jiraTicketData?.totalFound || 0;
+
     return (
       <Card className="border-2 border-blue-200 dark:border-blue-800">
         <CardHeader className="pb-3">
-          <div className="flex items-center space-x-2">
-            <Ticket className="w-5 h-5 text-blue-600" />
-            <CardTitle className="text-blue-700 dark:text-blue-300">Jira Service Management</CardTitle>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <Ticket className="w-5 h-5 text-blue-600" />
+              <CardTitle className="text-blue-700 dark:text-blue-300">Jira Service Management</CardTitle>
+            </div>
+            {isConnected && tickets.length > 0 && (
+              <div className="text-sm text-muted-foreground">
+                {totalFound} SLA breached tickets
+              </div>
+            )}
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -316,19 +349,89 @@ export function DashboardSection() {
                 </div>
               </div>
             </div>
-          ) : (
+          ) : loadingTickets ? (
+            <div className="text-center py-8">
+              <div className="flex flex-col items-center space-y-3">
+                <div className="w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                <p className="text-sm text-muted-foreground">Loading JIRA tickets...</p>
+              </div>
+            </div>
+          ) : tickets.length === 0 ? (
             <div className="text-center py-8">
               <div className="flex flex-col items-center space-y-3">
                 <div className="w-12 h-12 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center">
                   <Ticket className="w-6 h-6 text-green-600" />
                 </div>
                 <div className="space-y-1">
-                  <p className="font-medium text-gray-900 dark:text-gray-100">JIRA Connected</p>
+                  <p className="font-medium text-gray-900 dark:text-gray-100">No SLA Breaches</p>
                   <p className="text-sm text-muted-foreground">
-                    Service management data will be displayed here
+                    {jiraTicketData?.message || 'No tickets found matching your SLA criteria'}
                   </p>
                 </div>
               </div>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                  Oldest SLA Breached Tickets
+                </h3>
+                <span className="text-xs text-blue-600 font-medium">
+                  {tickets[0]?.slaType}
+                </span>
+              </div>
+              
+              <div className="space-y-2 max-h-64 overflow-y-auto">
+                {tickets.map((ticket: any, index: number) => (
+                  <div key={ticket.key} className="border rounded-lg p-3 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1">
+                          <a 
+                            href={ticket.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="font-medium text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 text-sm"
+                          >
+                            {ticket.key}
+                          </a>
+                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                            ticket.priority === 'Highest' || ticket.priority === 'High' 
+                              ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
+                              : ticket.priority === 'Medium'
+                              ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
+                              : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200'
+                          }`}>
+                            {ticket.priority}
+                          </span>
+                        </div>
+                        
+                        <p className="text-sm text-gray-900 dark:text-gray-100 mb-2 line-clamp-2">
+                          {ticket.summary}
+                        </p>
+                        
+                        <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                          <span>Status: {ticket.status}</span>
+                          <span>Assignee: {ticket.assignee}</span>
+                          <span>Created: {new Date(ticket.created).toLocaleDateString()}</span>
+                        </div>
+                      </div>
+                      
+                      <div className="text-xs text-muted-foreground text-right">
+                        #{index + 1}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              
+              {totalFound > tickets.length && (
+                <div className="text-center pt-2">
+                  <p className="text-xs text-muted-foreground">
+                    Showing {tickets.length} of {totalFound} tickets
+                  </p>
+                </div>
+              )}
             </div>
           )}
         </CardContent>

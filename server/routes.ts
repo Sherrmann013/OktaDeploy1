@@ -3193,6 +3193,154 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Integrations routes - REMOVED: All integration operations are now client-specific
 
   // Fetch JIRA projects for a specific client
+  // Client-specific JIRA tickets endpoint based on dashboard configuration
+  app.get("/api/client/:clientId/jira/tickets", isAuthenticated, async (req, res) => {
+    try {
+      const clientId = parseInt(req.params.clientId);
+      const { cardId } = req.query;
+      
+      if (!cardId) {
+        return res.status(400).json({ error: "Card ID is required" });
+      }
+      
+      console.log(`🎫 Fetching JIRA tickets for client ${clientId}, card ${cardId}`);
+      
+      const multiDb = MultiDatabaseManager.getInstance();
+      const clientDb = await multiDb.getClientDb(clientId);
+      
+      // Get JIRA dashboard configuration
+      const components = await clientDb.select()
+        .from(jiraDashboardComponents)
+        .where(eq(jiraDashboardComponents.cardId, parseInt(cardId as string)))
+        .orderBy(jiraDashboardComponents.position);
+      
+      if (components.length === 0) {
+        return res.json({ tickets: [], message: "No JIRA components configured" });
+      }
+      
+      // Get JIRA integration settings
+      const [jiraIntegration] = await clientDb.select()
+        .from(clientIntegrations)
+        .where(and(
+          eq(clientIntegrations.name, 'jira'),
+          eq(clientIntegrations.status, 'connected')
+        ));
+      
+      if (!jiraIntegration) {
+        return res.status(400).json({ error: "JIRA integration not connected" });
+      }
+      
+      const apiKeys = jiraIntegration.apiKeys as Record<string, string>;
+      const baseUrl = apiKeys.baseUrl || apiKeys.jiraUrl;
+      const username = apiKeys.username || apiKeys.email;
+      const apiToken = apiKeys.apiToken;
+      
+      if (!baseUrl || !username || !apiToken) {
+        return res.status(400).json({ error: "JIRA API credentials not configured" });
+      }
+      
+      // Process each component to fetch relevant tickets
+      let allTickets: any[] = [];
+      
+      for (const component of components) {
+        if (component.componentType === 'ticketQueue') {
+          const config = component.config as any;
+          const projectKey = config.project;
+          const slaTrackers = config.slaTrackers || {};
+          
+          if (projectKey) {
+            try {
+              console.log(`🔍 Fetching tickets for project ${projectKey} with SLA tracking:`, slaTrackers);
+              
+              // Build JIRA JQL query for SLA breached tickets
+              let jql = `project = ${projectKey} AND status != Done AND status != Resolved`;
+              
+              if (slaTrackers.timeToResolution) {
+                console.log(`📊 Filtering for Time to Resolution SLA breaches`);
+                // For Time to Resolution SLA - look for tickets that are overdue
+                jql += ` AND (priority = Highest OR priority = High OR createdDate < -7d)`;
+              }
+              
+              if (slaTrackers.firstResponse) {
+                console.log(`📊 Filtering for First Response SLA breaches`);
+                jql += ` AND (assignee is EMPTY OR updated < -2h)`;
+              }
+              
+              // Order by oldest first (created date ascending)
+              jql += ` ORDER BY created ASC`;
+              
+              console.log(`📝 JIRA JQL Query: ${jql}`);
+              
+              const auth = Buffer.from(`${username}:${apiToken}`).toString('base64');
+              const jiraResponse = await fetch(`${baseUrl}/rest/api/2/search`, {
+                method: 'POST',
+                headers: {
+                  'Authorization': `Basic ${auth}`,
+                  'Accept': 'application/json',
+                  'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                  jql: jql,
+                  maxResults: 10, // Limit to 10 oldest tickets
+                  fields: [
+                    'summary',
+                    'status',
+                    'priority',
+                    'created',
+                    'assignee',
+                    'updated'
+                  ]
+                })
+              });
+              
+              if (jiraResponse.ok) {
+                const jiraData = await jiraResponse.json();
+                const tickets = jiraData.issues.map((issue: any) => ({
+                  key: issue.key,
+                  summary: issue.fields.summary,
+                  status: issue.fields.status.name,
+                  priority: issue.fields.priority?.name || 'None',
+                  created: issue.fields.created,
+                  updated: issue.fields.updated,
+                  assignee: issue.fields.assignee?.displayName || 'Unassigned',
+                  component: component.componentName,
+                  slaType: slaTrackers.timeToResolution ? 'Time to Resolution' : 'First Response',
+                  url: `${baseUrl}/browse/${issue.key}`
+                }));
+                
+                allTickets.push(...tickets);
+                console.log(`✅ Found ${tickets.length} SLA breached tickets for ${projectKey}`);
+              } else {
+                const errorText = await jiraResponse.text();
+                console.error(`❌ JIRA API error for ${projectKey}:`, jiraResponse.status, errorText);
+              }
+            } catch (error) {
+              console.error(`❌ Error fetching JIRA tickets for ${projectKey}:`, error);
+            }
+          }
+        }
+      }
+      
+      // Sort all tickets by creation date (oldest first)
+      allTickets.sort((a, b) => new Date(a.created).getTime() - new Date(b.created).getTime());
+      
+      console.log(`🎫 Returning ${allTickets.length} JIRA tickets for client ${clientId}`);
+      res.json({ 
+        tickets: allTickets.slice(0, 10), // Ensure max 10 tickets
+        totalFound: allTickets.length,
+        configuration: components.map(c => ({
+          type: c.componentType,
+          name: c.componentName,
+          config: c.config
+        }))
+      });
+      
+    } catch (error) {
+      console.error(`Error fetching JIRA tickets for client ${req.params.clientId}:`, error);
+      res.status(500).json({ error: "Failed to fetch JIRA tickets" });
+    }
+  });
+
   app.get("/api/client/:clientId/jira/projects", isAuthenticated, async (req, res) => {
     try {
       const clientId = parseInt(req.params.clientId);
