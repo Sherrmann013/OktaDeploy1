@@ -18,6 +18,35 @@ This project is a comprehensive React-based multi-tenant enterprise security man
 - **CLIENT-SIDE PREFERENCE:** User prefers simple client-side implementations over complex server-side policy systems for core functionality like password generation.
 - **APP MAPPINGS ARCHITECTURE:** App mappings (application-to-OKTA-group relationships) are stored ONLY in client databases, not in the MSP database. Each client has their own isolated app mappings for complete data sovereignty.
 
+## Integration Development Framework
+
+**Consistent Pattern for New Integrations:**
+
+**Database Schema Pattern:**
+- Always create `[integration]DashboardComponents` table in `client-schema.ts` (never MSP database)
+- Standard fields: `id`, `cardId`, `componentType`, `componentName`, `config` (JSONB), `position`, `created`, `updated`
+- Store integration config in existing `integrations.config` JSONB field
+- Store API keys in `integrations.apiKeys` JSONB field with encryption
+
+**API Endpoint Standards:**
+- Follow pattern: `/api/client/:clientId/[integration]/` for all integration endpoints
+- Standard endpoints: `/config`, `/dashboard/:cardId`, `/[resource]`, `/[action]`
+- Always use client database connections via MultiDatabaseManager
+- Consistent error responses with integration status awareness
+
+**Frontend Component Structure:**
+- `[Integration]Card.tsx` - Integration-specific card component
+- `[Integration]ConfigModal.tsx` - Configuration modal  
+- `[Integration]DashboardEdit.tsx` - Dashboard component editor
+- Add to `IntegrationsSection.tsx` main list
+
+**Implementation Checklist:**
+1. Add dashboard components table to client-schema.ts with validation schemas
+2. Implement API routes following `/api/client/:clientId/[integration]/` pattern
+3. Create frontend card, config modal, and dashboard editor components
+4. Store configuration in existing integrations table JSONB fields
+5. Document endpoints and add integration description to replit.md
+
 ## System Architecture
 The dashboard uses a React frontend (TypeScript, Tailwind CSS, Wouter) and an Express.js backend (TypeScript, PostgreSQL).
 
