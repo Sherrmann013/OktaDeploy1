@@ -160,6 +160,18 @@ export const employeeTypeGroupMappings = pgTable('employee_type_group_mappings',
   created: timestamp('created').defaultNow()
 });
 
+// JIRA Dashboard Components for this client - store component configurations
+export const jiraDashboardComponents = pgTable('jira_dashboard_components', {
+  id: serial('id').primaryKey(),
+  cardId: integer('card_id').notNull(), // Reference to dashboard card
+  componentType: varchar('component_type', { length: 50 }).notNull(), // 'ticketQueue', 'dashboard', 'filter'
+  componentName: varchar('component_name', { length: 100 }).notNull(),
+  config: jsonb('config').notNull().default('{}'), // Component-specific configuration
+  position: integer('position').notNull().default(0), // Order of components
+  created: timestamp('created').defaultNow().notNull(),
+  updated: timestamp('updated').defaultNow().notNull(),
+});
+
 // Employee type OKTA security group mappings for this client (separate from email groups)
 export const employeeTypeOktaGroupMappings = pgTable('employee_type_okta_group_mappings', {
   id: serial('id').primaryKey(),
@@ -223,6 +235,18 @@ export const insertEmployeeTypeOktaGroupMappingSchema = createInsertSchema(emplo
   id: true,
   created: true,
 });
+
+export const insertJiraDashboardComponentSchema = createInsertSchema(jiraDashboardComponents).omit({
+  id: true,
+  created: true,
+  updated: true,
+}).extend({
+  componentType: z.string().min(1, "Component type is required"),
+  componentName: z.string().min(1, "Component name is required"),
+});
+
+export type InsertJiraDashboardComponent = z.infer<typeof insertJiraDashboardComponentSchema>;
+export type JiraDashboardComponent = typeof jiraDashboardComponents.$inferSelect;
 
 export const insertEmployeeTypeGroupMappingSchema = createInsertSchema(employeeTypeGroupMappings).omit({
   id: true,

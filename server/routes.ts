@@ -2,7 +2,8 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import postgres from "postgres";
 import { storage } from "./storage";
-import { insertUserSchema, updateUserSchema, insertSiteAccessUserSchema, siteAccessUsers, insertIntegrationSchema, integrations, auditLogs, insertAppMappingSchema, appMappings, departmentAppMappings, insertDepartmentAppMappingSchema, employeeTypeAppMappings, insertEmployeeTypeAppMappingSchema, departmentGroupMappings, insertDepartmentGroupMappingSchema, employeeTypeGroupMappings, insertEmployeeTypeGroupMappingSchema, insertLayoutSettingSchema, layoutSettings, dashboardCards, insertDashboardCardSchema, updateDashboardCardSchema, monitoringCards, insertMonitoringCardSchema, updateMonitoringCardSchema, companyLogos, insertCompanyLogoSchema, insertMspLogoSchema, clients, clientAccess, users, jiraDashboardComponents, insertJiraDashboardComponentSchema } from "@shared/schema";
+import { insertUserSchema, updateUserSchema, insertSiteAccessUserSchema, siteAccessUsers, insertIntegrationSchema, integrations, auditLogs, insertAppMappingSchema, appMappings, departmentAppMappings, insertDepartmentAppMappingSchema, employeeTypeAppMappings, insertEmployeeTypeAppMappingSchema, departmentGroupMappings, insertDepartmentGroupMappingSchema, employeeTypeGroupMappings, insertEmployeeTypeGroupMappingSchema, insertLayoutSettingSchema, layoutSettings, dashboardCards, insertDashboardCardSchema, updateDashboardCardSchema, monitoringCards, insertMonitoringCardSchema, updateMonitoringCardSchema, companyLogos, insertCompanyLogoSchema, insertMspLogoSchema, clients, clientAccess, users } from "@shared/schema";
+import { jiraDashboardComponents, insertJiraDashboardComponentSchema } from "@shared/client-schema";
 
 import { db } from "./db";
 import { eq, desc, and, or, ilike, asc, inArray } from "drizzle-orm";
@@ -3268,10 +3269,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Delete existing components for this card
       await clientDb.delete(jiraDashboardComponents)
-        .where(and(
-          eq(jiraDashboardComponents.cardId, cardId),
-          eq(jiraDashboardComponents.clientId, clientId)
-        ));
+        .where(eq(jiraDashboardComponents.cardId, cardId));
       
       // Insert new components
       if (components && components.length > 0) {
@@ -3280,8 +3278,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           componentType: component.type,
           componentName: component.name,
           config: component.config,
-          position: index,
-          clientId
+          position: index
         }));
         
         await clientDb.insert(jiraDashboardComponents)
@@ -3310,10 +3307,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const components = await clientDb.select()
         .from(jiraDashboardComponents)
-        .where(and(
-          eq(jiraDashboardComponents.cardId, cardId),
-          eq(jiraDashboardComponents.clientId, clientId)
-        ))
+        .where(eq(jiraDashboardComponents.cardId, cardId))
         .orderBy(jiraDashboardComponents.position);
       
       // Transform to frontend format
