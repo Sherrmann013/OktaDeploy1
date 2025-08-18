@@ -3189,6 +3189,72 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Integrations routes - REMOVED: All integration operations are now client-specific
 
+  // Fetch JIRA projects for a specific client
+  app.get("/api/client/:clientId/jira/projects", isAuthenticated, async (req, res) => {
+    try {
+      const clientId = parseInt(req.params.clientId);
+      console.log(`🎫 Fetching JIRA projects for client ${clientId}`);
+      
+      const multiDb = MultiDatabaseManager.getInstance();
+      const clientDb = await multiDb.getClientDb(clientId);
+      
+      // Get JIRA integration for this client
+      const [jiraIntegration] = await clientDb.select()
+        .from(clientIntegrations)
+        .where(and(
+          eq(clientIntegrations.name, 'jira'),
+          eq(clientIntegrations.status, 'connected')
+        ));
+      
+      if (!jiraIntegration) {
+        console.log(`❌ No JIRA integration found for client ${clientId}`);
+        return res.status(404).json({ error: "JIRA integration not found or not connected" });
+      }
+
+      // Get JIRA API credentials
+      const apiKeys = jiraIntegration.apiKeys as Record<string, string>;
+      const baseUrl = apiKeys.baseUrl || apiKeys.jiraUrl;
+      const username = apiKeys.username || apiKeys.email;
+      const apiToken = apiKeys.apiToken;
+      
+      if (!baseUrl || !username || !apiToken) {
+        console.log(`❌ Missing JIRA credentials for client ${clientId}`);
+        return res.status(400).json({ error: "Missing JIRA configuration" });
+      }
+
+      // Fetch projects from JIRA API
+      const auth = Buffer.from(`${username}:${apiToken}`).toString('base64');
+      const response = await fetch(`${baseUrl}/rest/api/2/project`, {
+        headers: {
+          'Authorization': `Basic ${auth}`,
+          'Accept': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        console.log(`❌ JIRA API error for client ${clientId}: ${response.status} ${response.statusText}`);
+        return res.status(response.status).json({ 
+          error: `JIRA API error: ${response.status} ${response.statusText}` 
+        });
+      }
+
+      const projects = await response.json();
+      
+      // Transform to expected format (key and name)
+      const formattedProjects = projects.map((project: any) => ({
+        key: project.key,
+        name: project.name
+      }));
+
+      console.log(`✅ Found ${formattedProjects.length} JIRA projects for client ${clientId}`);
+      res.json(formattedProjects);
+
+    } catch (error) {
+      console.error(`Error fetching JIRA projects for client ${req.params.clientId}:`, error);
+      res.status(500).json({ error: "Failed to fetch JIRA projects" });
+    }
+  });
+
   // Client-specific integrations endpoint
   app.get("/api/client/:clientId/integrations", isAuthenticated, async (req, res) => {
     try {

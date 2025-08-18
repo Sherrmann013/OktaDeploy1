@@ -66,6 +66,15 @@ export function LayoutSection({
   }>>([]);
   const [expandedComponent, setExpandedComponent] = useState<string | null>(null);
 
+  // Fetch JIRA projects when modal opens
+  const jiraProjectsEndpoint = `/api/client/${currentClientId}/jira/projects`;
+  const { data: jiraProjects = [], isLoading: jiraProjectsLoading } = useQuery<Array<{key: string, name: string}>>({
+    queryKey: [jiraProjectsEndpoint],
+    enabled: isJiraConfigOpen, // Only fetch when modal is open
+    staleTime: 10 * 60 * 1000, // 10 minutes
+    retry: 1,
+  });
+
   // Fetch dashboard cards for current client - ONLY when Layout > Dashboard tab is active
   const dashboardCardsEndpoint = `/api/client/${currentClientId}/dashboard-cards`;
   const { data: dashboardCardsData, refetch: refetchDashboardCards, error: dashboardCardsError, isLoading: dashboardCardsLoading } = useQuery({
@@ -1461,14 +1470,29 @@ export function LayoutSection({
                                       : c
                                   ))
                                 }
+                                disabled={jiraProjectsLoading}
                               >
                                 <SelectTrigger className="bg-white dark:bg-gray-800">
-                                  <SelectValue placeholder="Select JIRA project" />
+                                  <SelectValue placeholder={
+                                    jiraProjectsLoading 
+                                      ? "Loading projects..." 
+                                      : jiraProjects.length === 0 
+                                        ? "No projects available" 
+                                        : "Select JIRA project"
+                                  } />
                                 </SelectTrigger>
                                 <SelectContent className="bg-white dark:bg-gray-800">
-                                  <SelectItem value="SUPPORT">Support</SelectItem>
-                                  <SelectItem value="IT">IT Services</SelectItem>
-                                  <SelectItem value="HELPDESK">Help Desk</SelectItem>
+                                  {jiraProjects.length === 0 && !jiraProjectsLoading ? (
+                                    <SelectItem value="no-projects" disabled>
+                                      No projects found - check JIRA connection
+                                    </SelectItem>
+                                  ) : (
+                                    jiraProjects.map((project) => (
+                                      <SelectItem key={project.key} value={project.key}>
+                                        {project.name} ({project.key})
+                                      </SelectItem>
+                                    ))
+                                  )}
                                 </SelectContent>
                               </Select>
                             </div>
