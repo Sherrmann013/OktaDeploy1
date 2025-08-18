@@ -314,6 +314,19 @@ export class MultiDatabaseManager {
             uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
           )`;
 
+        console.log(`🔧 Creating jira_dashboard_components table...`);
+        await sql`
+          CREATE TABLE IF NOT EXISTS jira_dashboard_components (
+            id SERIAL PRIMARY KEY,
+            card_id INTEGER NOT NULL,
+            component_type VARCHAR(50) NOT NULL,
+            component_name VARCHAR(100) NOT NULL,
+            config JSONB NOT NULL DEFAULT '{}',
+            position INTEGER NOT NULL DEFAULT 0,
+            created TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+            updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
+          )`;
+
         console.log(`✅ Successfully created all tables in database ${databaseName} for client ${clientId}`);
       } finally {
         await sql.end();

@@ -2458,6 +2458,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+
+
   // Debug endpoint to check OKTA data vs local data
   app.get('/api/debug/user/:email', isAuthenticated, requireAdmin, async (req, res) => {
     try {
