@@ -316,6 +316,15 @@ export function DashboardSection() {
   const renderJiraCard = () => {
     const tickets = jiraTicketData?.tickets || [];
     const totalFound = jiraTicketData?.totalFound || 0;
+    const configuration = jiraTicketData?.configuration || [];
+    
+    // Check if we have dashboard widgets configured
+    const hasDashboardWidgets = configuration.some((config: any) => config.type === 'dashboard');
+    const hasTicketQueue = configuration.some((config: any) => config.type === 'ticketQueue');
+    
+    // Separate dashboard widgets from tickets
+    const dashboardWidgets = tickets.filter((ticket: any) => ticket.key?.startsWith('dashboard-'));
+    const actualTickets = tickets.filter((ticket: any) => !ticket.key?.startsWith('dashboard-'));
 
     return (
       <Card className="border-2 border-blue-200 dark:border-blue-800">
@@ -325,9 +334,11 @@ export function DashboardSection() {
               <Ticket className="w-5 h-5 text-blue-600" />
               <CardTitle className="text-blue-700 dark:text-blue-300">Jira Service Management</CardTitle>
             </div>
-            {isJiraConnected && tickets.length > 0 && (
+            {isJiraConnected && (actualTickets.length > 0 || dashboardWidgets.length > 0) && (
               <div className="text-sm text-muted-foreground">
-                {totalFound} SLA breached tickets
+                {actualTickets.length > 0 && `${totalFound} SLA breached tickets`}
+                {actualTickets.length > 0 && dashboardWidgets.length > 0 && ' • '}
+                {dashboardWidgets.length > 0 && `${dashboardWidgets.length} dashboard widgets`}
               </div>
             )}
           </div>
@@ -354,33 +365,84 @@ export function DashboardSection() {
                 <p className="text-sm text-muted-foreground">Loading JIRA tickets...</p>
               </div>
             </div>
-          ) : tickets.length === 0 ? (
+          ) : actualTickets.length === 0 && dashboardWidgets.length === 0 ? (
             <div className="text-center py-8">
               <div className="flex flex-col items-center space-y-3">
                 <div className="w-12 h-12 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center">
                   <Ticket className="w-6 h-6 text-green-600" />
                 </div>
                 <div className="space-y-1">
-                  <p className="font-medium text-gray-900 dark:text-gray-100">No SLA Breaches</p>
+                  <p className="font-medium text-gray-900 dark:text-gray-100">No Data Available</p>
                   <p className="text-sm text-muted-foreground">
-                    {jiraTicketData?.message || 'No tickets found matching your SLA criteria'}
+                    {jiraTicketData?.message || 'No tickets or dashboard widgets configured'}
                   </p>
                 </div>
               </div>
             </div>
           ) : (
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                  Oldest SLA Breached Tickets
-                </h3>
-                <span className="text-xs text-blue-600 font-medium">
-                  {tickets[0]?.slaType}
-                </span>
-              </div>
-              
-              <div className="space-y-2 max-h-64 overflow-y-auto">
-                {tickets.map((ticket: any, index: number) => (
+            <div className="space-y-4">
+              {/* Dashboard Widgets Section */}
+              {dashboardWidgets.length > 0 && (
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                      Dashboard Widgets
+                    </h3>
+                    <span className="text-xs text-green-600 font-medium">
+                      {dashboardWidgets.length} widget{dashboardWidgets.length !== 1 ? 's' : ''}
+                    </span>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    {dashboardWidgets.map((widget: any, index: number) => (
+                      <div key={widget.key} className="border rounded-lg p-3 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between gap-3">
+                            <div className="flex items-center gap-2 flex-1 min-w-0">
+                              <a 
+                                href={widget.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="font-medium text-green-600 hover:text-green-800 dark:text-green-400 dark:hover:text-green-300 text-sm"
+                              >
+                                📊 {widget.summary}
+                              </a>
+                              <span className="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                                {widget.widgetType || 'Widget'}
+                              </span>
+                            </div>
+                            
+                            <div className="text-xs text-muted-foreground">
+                              #{index + 1}
+                            </div>
+                          </div>
+                          
+                          <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                            <span>Type: Dashboard Widget</span>
+                            <span>Dashboard ID: {widget.dashboardId}</span>
+                            <span>Status: Active</span>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* SLA Breached Tickets Section */}
+              {actualTickets.length > 0 && (
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                      Oldest SLA Breached Tickets
+                    </h3>
+                    <span className="text-xs text-blue-600 font-medium">
+                      {actualTickets[0]?.slaType}
+                    </span>
+                  </div>
+                  
+                  <div className="space-y-2 max-h-64 overflow-y-auto">
+                    {actualTickets.map((ticket: any, index: number) => (
                   <div key={ticket.key} className="border rounded-lg p-3 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
                     <div className="space-y-2">
                       <div className="flex items-center justify-between gap-3">
@@ -419,13 +481,32 @@ export function DashboardSection() {
                       </div>
                     </div>
                   </div>
-                ))}
-              </div>
+                    ))}
+                  </div>
+                  
+                  {totalFound > actualTickets.length && (
+                    <div className="text-center pt-2">
+                      <p className="text-xs text-muted-foreground">
+                        Showing {actualTickets.length} of {totalFound} tickets
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
               
-              {totalFound > tickets.length && (
+              {/* Combined summary if both exist */}
+              {actualTickets.length > 0 && dashboardWidgets.length > 0 && (
+                <div className="text-center pt-2 border-t">
+                  <p className="text-xs text-muted-foreground">
+                    {dashboardWidgets.length} dashboard widgets • {actualTickets.length} SLA tickets displayed
+                  </p>
+                </div>
+              )}
+              
+              {totalFound > actualTickets.length && actualTickets.length > 0 && dashboardWidgets.length === 0 && (
                 <div className="text-center pt-2">
                   <p className="text-xs text-muted-foreground">
-                    Showing {tickets.length} of {totalFound} tickets
+                    Showing {actualTickets.length} of {totalFound} tickets
                   </p>
                 </div>
               )}

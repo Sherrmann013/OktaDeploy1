@@ -75,6 +75,27 @@ export function LayoutSection({
     retry: 1,
   });
 
+  // Fetch JIRA dashboards when modal opens
+  const jiraDashboardsEndpoint = `/api/client/${currentClientId}/jira/dashboards`;
+  const { data: jiraDashboards = [], isLoading: jiraDashboardsLoading } = useQuery<Array<{id: string, name: string, view: string}>>({
+    queryKey: [jiraDashboardsEndpoint],
+    enabled: isJiraConfigOpen, // Only fetch when modal is open
+    staleTime: 10 * 60 * 1000, // 10 minutes
+    retry: 1,
+  });
+
+  // Track selected dashboard for fetching gadgets
+  const [selectedDashboard, setSelectedDashboard] = useState<string | null>(null);
+  
+  // Fetch gadgets for selected dashboard
+  const jiraGadgetsEndpoint = `/api/client/${currentClientId}/jira/dashboard/${selectedDashboard}/gadgets`;
+  const { data: jiraGadgets = [], isLoading: jiraGadgetsLoading } = useQuery<Array<{id: string, title: string, moduleKey: string, position: any}>>({
+    queryKey: [jiraGadgetsEndpoint, selectedDashboard],
+    enabled: isJiraConfigOpen && !!selectedDashboard, // Only fetch when modal is open and dashboard is selected
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    retry: 1,
+  });
+
   // Load existing JIRA configuration when modal opens
   const jiraConfigEndpoint = `/api/client/${currentClientId}/jira/dashboard-config/${editingJiraCard?.id}`;
   const { data: existingJiraConfig = [] } = useQuery<Array<{
@@ -1402,7 +1423,8 @@ export function LayoutSection({
                     type: 'dashboard' as const,
                     name: 'Dashboard',
                     config: {
-                      widgets: []
+                      dashboardId: '',
+                      gadgets: []
                     }
                   };
                   setJiraComponents(prev => [...prev, newComponent]);
@@ -1574,13 +1596,99 @@ export function LayoutSection({
                         )}
 
                         {component.type === 'dashboard' && (
-                          <div className="text-sm text-muted-foreground bg-blue-50 dark:bg-blue-900/20 p-3 rounded">
-                            Dashboard widget configuration will be available here. This will include options for:
-                            <ul className="list-disc list-inside mt-2 space-y-1">
-                              <li>Issue statistics widgets</li>
-                              <li>Project progress charts</li>
-                              <li>Team performance metrics</li>
-                            </ul>
+                          <div className="space-y-4">
+                            <div className="space-y-2">
+                              <Label htmlFor={`dashboard-${component.id}`}>JIRA Dashboard</Label>
+                              <Select 
+                                value={component.config.dashboardId}
+                                onValueChange={(value) => {
+                                  setJiraComponents(prev => prev.map(c => 
+                                    c.id === component.id 
+                                      ? { ...c, config: { ...c.config, dashboardId: value, gadgets: [] } }
+                                      : c
+                                  ));
+                                  setSelectedDashboard(value);
+                                }}
+                                disabled={jiraDashboardsLoading}
+                              >
+                                <SelectTrigger className="bg-white dark:bg-gray-800">
+                                  <SelectValue placeholder={
+                                    jiraDashboardsLoading 
+                                      ? "Loading dashboards..." 
+                                      : jiraDashboards.length === 0 
+                                        ? "No dashboards available" 
+                                        : "Select JIRA dashboard"
+                                  } />
+                                </SelectTrigger>
+                                <SelectContent className="bg-white dark:bg-gray-800">
+                                  {jiraDashboards.length === 0 && !jiraDashboardsLoading ? (
+                                    <SelectItem value="no-dashboards" disabled>
+                                      No dashboards found - check JIRA connection
+                                    </SelectItem>
+                                  ) : (
+                                    jiraDashboards.map((dashboard) => (
+                                      <SelectItem key={dashboard.id} value={dashboard.id}>
+                                        {dashboard.name} ({dashboard.view})
+                                      </SelectItem>
+                                    ))
+                                  )}
+                                </SelectContent>
+                              </Select>
+                            </div>
+
+                            {component.config.dashboardId && (
+                              <div className="space-y-3">
+                                <Label>Available Gadgets</Label>
+                                {jiraGadgetsLoading ? (
+                                  <div className="text-sm text-muted-foreground">Loading gadgets...</div>
+                                ) : jiraGadgets.length === 0 ? (
+                                  <div className="text-sm text-muted-foreground">No gadgets found in this dashboard</div>
+                                ) : (
+                                  <div className="space-y-2 max-h-48 overflow-y-auto">
+                                    {jiraGadgets.map((gadget) => (
+                                      <div key={gadget.id} className="flex items-center space-x-2">
+                                        <Checkbox 
+                                          id={`gadget-${gadget.id}-${component.id}`}
+                                          checked={component.config.gadgets.some((g: any) => g.id === gadget.id)}
+                                          onCheckedChange={(checked) => {
+                                            setJiraComponents(prev => prev.map(c => 
+                                              c.id === component.id 
+                                                ? { 
+                                                    ...c, 
+                                                    config: { 
+                                                      ...c.config, 
+                                                      gadgets: checked 
+                                                        ? [...c.config.gadgets, gadget]
+                                                        : c.config.gadgets.filter((g: any) => g.id !== gadget.id)
+                                                    }
+                                                  }
+                                                : c
+                                            ));
+                                          }}
+                                        />
+                                        <Label htmlFor={`gadget-${gadget.id}-${component.id}`} className="text-sm">
+                                          {gadget.title}
+                                          <span className="text-xs text-muted-foreground ml-2">
+                                            ({gadget.moduleKey})
+                                          </span>
+                                        </Label>
+                                      </div>
+                                    ))}
+                                  </div>
+                                )}
+                                
+                                {component.config.gadgets.length > 0 && (
+                                  <div className="mt-3 p-3 bg-green-50 dark:bg-green-900/20 rounded">
+                                    <div className="text-sm font-medium text-green-800 dark:text-green-200">
+                                      Selected Gadgets ({component.config.gadgets.length})
+                                    </div>
+                                    <div className="text-xs text-green-600 dark:text-green-300 mt-1">
+                                      {component.config.gadgets.map((g: any) => g.title).join(', ')}
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            )}
                           </div>
                         )}
 

@@ -3192,6 +3192,143 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Integrations routes - REMOVED: All integration operations are now client-specific
 
+  // Fetch JIRA dashboards for a specific client
+  app.get("/api/client/:clientId/jira/dashboards", isAuthenticated, async (req, res) => {
+    try {
+      const clientId = parseInt(req.params.clientId);
+      
+      console.log(`📊 Fetching JIRA dashboards for client ${clientId}`);
+      
+      const multiDb = MultiDatabaseManager.getInstance();
+      const clientDb = await multiDb.getClientDb(clientId);
+      
+      // Get JIRA integration settings
+      const [jiraIntegration] = await clientDb.select()
+        .from(clientIntegrations)
+        .where(and(
+          eq(clientIntegrations.name, 'jira'),
+          eq(clientIntegrations.status, 'connected')
+        ));
+      
+      if (!jiraIntegration) {
+        console.log(`❌ JIRA integration not found for client ${clientId}`);
+        return res.status(400).json({ error: "JIRA integration not connected" });
+      }
+
+      // Get JIRA API credentials
+      const apiKeys = jiraIntegration.apiKeys as Record<string, string>;
+      const baseUrl = apiKeys.baseUrl || apiKeys.jiraUrl;
+      const username = apiKeys.username || apiKeys.email;
+      const apiToken = apiKeys.apiToken;
+      
+      if (!baseUrl || !username || !apiToken) {
+        console.log(`❌ Missing JIRA credentials for client ${clientId}`);
+        return res.status(400).json({ error: "Missing JIRA configuration" });
+      }
+
+      // Fetch dashboards from JIRA API
+      const auth = Buffer.from(`${username}:${apiToken}`).toString('base64');
+      const response = await fetch(`${baseUrl}/rest/api/2/dashboard`, {
+        headers: {
+          'Authorization': `Basic ${auth}`,
+          'Accept': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        console.log(`❌ JIRA API error for client ${clientId}: ${response.status} ${response.statusText}`);
+        return res.status(response.status).json({ 
+          error: `JIRA API error: ${response.status} ${response.statusText}` 
+        });
+      }
+
+      const dashboardsData = await response.json();
+      const dashboards = dashboardsData.dashboards || [];
+      
+      // Transform to expected format
+      const formattedDashboards = dashboards.map((dashboard: any) => ({
+        id: dashboard.id,
+        name: dashboard.name,
+        view: dashboard.view || dashboard.sharePermissions?.global?.type || 'private'
+      }));
+
+      console.log(`✅ Found ${formattedDashboards.length} JIRA dashboards for client ${clientId}`);
+      res.json(formattedDashboards);
+
+    } catch (error) {
+      console.error(`Error fetching JIRA dashboards for client ${req.params.clientId}:`, error);
+      res.status(500).json({ error: "Failed to fetch JIRA dashboards" });
+    }
+  });
+
+  // Fetch JIRA dashboard gadgets for a specific dashboard
+  app.get("/api/client/:clientId/jira/dashboard/:dashboardId/gadgets", isAuthenticated, async (req, res) => {
+    try {
+      const clientId = parseInt(req.params.clientId);
+      const dashboardId = req.params.dashboardId;
+      
+      console.log(`🔧 Fetching JIRA dashboard gadgets for client ${clientId}, dashboard ${dashboardId}`);
+      
+      const multiDb = MultiDatabaseManager.getInstance();
+      const clientDb = await multiDb.getClientDb(clientId);
+      
+      // Get JIRA integration settings
+      const [jiraIntegration] = await clientDb.select()
+        .from(clientIntegrations)
+        .where(and(
+          eq(clientIntegrations.name, 'jira'),
+          eq(clientIntegrations.status, 'connected')
+        ));
+      
+      if (!jiraIntegration) {
+        return res.status(400).json({ error: "JIRA integration not connected" });
+      }
+
+      const apiKeys = jiraIntegration.apiKeys as Record<string, string>;
+      const baseUrl = apiKeys.baseUrl || apiKeys.jiraUrl;
+      const username = apiKeys.username || apiKeys.email;
+      const apiToken = apiKeys.apiToken;
+      
+      if (!baseUrl || !username || !apiToken) {
+        return res.status(400).json({ error: "Missing JIRA configuration" });
+      }
+
+      // Fetch dashboard details with gadgets
+      const auth = Buffer.from(`${username}:${apiToken}`).toString('base64');
+      const response = await fetch(`${baseUrl}/rest/api/2/dashboard/${dashboardId}`, {
+        headers: {
+          'Authorization': `Basic ${auth}`,
+          'Accept': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        return res.status(response.status).json({ 
+          error: `JIRA API error: ${response.status} ${response.statusText}` 
+        });
+      }
+
+      const dashboard = await response.json();
+      const gadgets = dashboard.gadgets || [];
+      
+      // Transform gadgets to expected format
+      const formattedGadgets = gadgets.map((gadget: any) => ({
+        id: gadget.id,
+        title: gadget.title,
+        gadgetUrl: gadget.gadgetUrl,
+        position: gadget.position,
+        moduleKey: gadget.moduleKey
+      }));
+
+      console.log(`✅ Found ${formattedGadgets.length} gadgets in dashboard ${dashboardId} for client ${clientId}`);
+      res.json(formattedGadgets);
+
+    } catch (error) {
+      console.error(`Error fetching JIRA dashboard gadgets for client ${req.params.clientId}:`, error);
+      res.status(500).json({ error: "Failed to fetch JIRA dashboard gadgets" });
+    }
+  });
+
   // Fetch JIRA projects for a specific client
   // Client-specific JIRA tickets endpoint based on dashboard configuration
   app.get("/api/client/:clientId/jira/tickets", isAuthenticated, async (req, res) => {
@@ -3316,6 +3453,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
               }
             } catch (error) {
               console.error(`❌ Error fetching JIRA tickets for ${projectKey}:`, error);
+            }
+          }
+        } else if (component.componentType === 'dashboard') {
+          const config = component.config as any;
+          const dashboardId = config.dashboardId;
+          const selectedGadgets = config.gadgets || [];
+          
+          if (dashboardId && selectedGadgets.length > 0) {
+            try {
+              console.log(`📊 Fetching dashboard widgets for dashboard ${dashboardId}, gadgets:`, selectedGadgets.map((g: any) => g.title));
+              
+              const auth = Buffer.from(`${username}:${apiToken}`).toString('base64');
+              
+              // Fetch each selected gadget's data
+              for (const gadget of selectedGadgets) {
+                try {
+                  // For now, we'll create dashboard widget entries that can be displayed
+                  // Note: JIRA gadget data requires specific API calls depending on gadget type
+                  const dashboardWidget = {
+                    key: `dashboard-${dashboardId}-${gadget.id}`,
+                    summary: gadget.title,
+                    status: 'Dashboard Widget',
+                    priority: 'Information',
+                    created: new Date().toISOString(),
+                    updated: new Date().toISOString(),
+                    assignee: 'System',
+                    component: component.componentName,
+                    slaType: 'Dashboard',
+                    url: `${baseUrl}/secure/Dashboard.jspa?selectPageId=${dashboardId}`,
+                    widgetType: gadget.moduleKey || 'Unknown',
+                    dashboardId: dashboardId
+                  };
+                  
+                  allTickets.push(dashboardWidget);
+                } catch (gadgetError) {
+                  console.error(`❌ Error fetching gadget ${gadget.title}:`, gadgetError);
+                }
+              }
+              
+              console.log(`✅ Added ${selectedGadgets.length} dashboard widgets for dashboard ${dashboardId}`);
+            } catch (error) {
+              console.error(`❌ Error fetching dashboard widgets for ${dashboardId}:`, error);
             }
           }
         }
