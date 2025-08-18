@@ -41,6 +41,17 @@ export function DashboardSection() {
     enabled: dashboardCards.some(card => card.type === 'integration' || card.name === 'OKTA'), // Only fetch if OKTA card exists
   });
 
+  // Fetch integrations data for checking connection status
+  const integrationsEndpoint = currentClientId 
+    ? `/api/client/${currentClientId}/integrations`
+    : `/api/integrations`;
+    
+  const { data: integrations = [] } = useQuery<any[]>({
+    queryKey: [integrationsEndpoint],
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    enabled: dashboardCards.some(card => card.type === 'jira'), // Only fetch if JIRA card exists
+  });
+
   // KnowBe4 campaign data
   const knowBe4Data = [
     { name: 'Completed', value: 75, color: '#22c55e' },
