@@ -3289,6 +3289,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const username = apiKeys.username || apiKeys.email;
       const apiToken = apiKeys.apiToken;
       
+      console.log(`🔐 JIRA Debug - URL: ${baseUrl}, Username: ${username}, Token: ${apiToken?.substring(0, 10)}...`);
+      
       if (!baseUrl || !username || !apiToken) {
         return res.status(400).json({ error: "Missing JIRA configuration" });
       }
