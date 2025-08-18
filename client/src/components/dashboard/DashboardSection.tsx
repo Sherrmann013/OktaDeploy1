@@ -394,37 +394,72 @@ export function DashboardSection() {
                   </div>
                   
                   <div className="space-y-2">
-                    {dashboardWidgets.map((widget: any, index: number) => (
-                      <div key={widget.key} className="border rounded-lg p-3 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
-                        <div className="space-y-2">
-                          <div className="flex items-center justify-between gap-3">
-                            <div className="flex items-center gap-2 flex-1 min-w-0">
-                              <a 
-                                href={widget.url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="font-medium text-green-600 hover:text-green-800 dark:text-green-400 dark:hover:text-green-300 text-sm"
-                              >
-                                📊 {widget.summary}
-                              </a>
-                              <span className="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
-                                {widget.widgetType || 'Widget'}
-                              </span>
+                    {dashboardWidgets.map((widget: any, index: number) => {
+                      // Handle JIRA Cloud API limitation message
+                      if (widget.id === 'jira_cloud_limitation' || widget.type === 'info') {
+                        return (
+                          <div key={widget.id} className="border-2 border-orange-200 dark:border-orange-800 rounded-lg p-4 bg-orange-50 dark:bg-orange-950">
+                            <div className="space-y-3">
+                              <div className="flex items-center gap-2">
+                                <div className="w-5 h-5 rounded-full bg-orange-100 dark:bg-orange-900 flex items-center justify-center">
+                                  <span className="text-orange-600 text-xs">ℹ️</span>
+                                </div>
+                                <h4 className="font-medium text-orange-900 dark:text-orange-100">
+                                  {widget.title}
+                                </h4>
+                              </div>
+                              <p className="text-sm text-orange-800 dark:text-orange-200">
+                                {widget.description}
+                              </p>
+                              {widget.dashboardUrl && (
+                                <a 
+                                  href={widget.dashboardUrl}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="inline-flex items-center gap-2 text-sm font-medium text-orange-700 hover:text-orange-900 dark:text-orange-300 dark:hover:text-orange-100"
+                                >
+                                  View Dashboard in JIRA
+                                  <span className="text-xs">↗</span>
+                                </a>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      }
+                      
+                      // Handle normal dashboard widgets
+                      return (
+                        <div key={widget.key} className="border rounded-lg p-3 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+                          <div className="space-y-2">
+                            <div className="flex items-center justify-between gap-3">
+                              <div className="flex items-center gap-2 flex-1 min-w-0">
+                                <a 
+                                  href={widget.url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="font-medium text-green-600 hover:text-green-800 dark:text-green-400 dark:hover:text-green-300 text-sm"
+                                >
+                                  📊 {widget.summary}
+                                </a>
+                                <span className="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                                  {widget.widgetType || 'Widget'}
+                                </span>
+                              </div>
+                              
+                              <div className="text-xs text-muted-foreground">
+                                #{index + 1}
+                              </div>
                             </div>
                             
-                            <div className="text-xs text-muted-foreground">
-                              #{index + 1}
+                            <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                              <span>Type: Dashboard Widget</span>
+                              <span>Dashboard ID: {widget.dashboardId}</span>
+                              <span>Status: Active</span>
                             </div>
                           </div>
-                          
-                          <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                            <span>Type: Dashboard Widget</span>
-                            <span>Dashboard ID: {widget.dashboardId}</span>
-                            <span>Status: Active</span>
-                          </div>
                         </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 </div>
               )}

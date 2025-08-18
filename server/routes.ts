@@ -3289,8 +3289,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const username = apiKeys.username || apiKeys.email;
       const apiToken = apiKeys.apiToken;
       
-      console.log(`🔐 JIRA Debug - URL: ${baseUrl}, Username: ${username}, Token: ${apiToken?.substring(0, 10)}...`);
-      
       if (!baseUrl || !username || !apiToken) {
         return res.status(400).json({ error: "Missing JIRA configuration" });
       }
@@ -3361,7 +3359,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Return actual results only - no demo data
       if (formattedGadgets.length === 0) {
-        console.log(`⚠️ No gadgets found in dashboard ${dashboardId} via any API method`);
+        console.log(`⚠️ No gadgets found in dashboard ${dashboardId} - JIRA Cloud no longer exposes gadgets via REST API`);
+        
+        // Return helpful info about the API limitation
+        const dashboardInfo = [{
+          id: 'jira_cloud_limitation',
+          title: 'JIRA Cloud API Limitation',
+          description: 'Dashboard gadgets are not available via JIRA Cloud REST API. View your dashboard directly in JIRA.',
+          type: 'info',
+          dashboardUrl: `${baseUrl.replace(/\/+$/, '')}/jira/dashboards/${dashboardId}`,
+          gadgetUrl: null,
+          position: 0,
+          moduleKey: 'info'
+        }];
+        
+        console.log(`ℹ️ Returning API limitation info for dashboard ${dashboardId}`);
+        return res.json(dashboardInfo);
       }
 
       console.log(`✅ Found ${formattedGadgets.length} gadgets in dashboard ${dashboardId} for client ${clientId}:`, formattedGadgets);
