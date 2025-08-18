@@ -392,6 +392,34 @@ export type InsertDashboardCard = z.infer<typeof insertDashboardCardSchema>;
 export type UpdateDashboardCard = z.infer<typeof updateDashboardCardSchema>;
 export type DashboardCard = typeof dashboardCards.$inferSelect;
 
+// JIRA Dashboard Components table to store individual JIRA dashboard component configurations
+export const jiraDashboardComponents = pgTable("jira_dashboard_components", {
+  id: serial("id").primaryKey(),
+  cardId: integer("card_id").notNull(), // Reference to the dashboard card
+  componentType: text("component_type").notNull(), // 'ticketQueue', 'dashboard', 'filter'
+  componentName: text("component_name").notNull(),
+  config: jsonb("config").notNull(), // Store component-specific configuration
+  position: integer("position").notNull().default(0), // Order of components
+  clientId: integer("client_id").notNull(), // Scope to specific client
+  created: timestamp("created").defaultNow(),
+  updated: timestamp("updated").defaultNow(),
+});
+
+export const insertJiraDashboardComponentSchema = createInsertSchema(jiraDashboardComponents).omit({
+  id: true,
+  created: true,
+  updated: true,
+});
+
+export const updateJiraDashboardComponentSchema = createInsertSchema(jiraDashboardComponents).partial().omit({
+  id: true,
+  created: true,
+});
+
+export type InsertJiraDashboardComponent = z.infer<typeof insertJiraDashboardComponentSchema>;
+export type UpdateJiraDashboardComponent = z.infer<typeof updateJiraDashboardComponentSchema>;
+export type JiraDashboardComponent = typeof jiraDashboardComponents.$inferSelect;
+
 // Monitoring cards table for the monitoring/security page layout
 export const monitoringCards = pgTable("monitoring_cards", {
   id: serial("id").primaryKey(),

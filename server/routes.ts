@@ -2,7 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import postgres from "postgres";
 import { storage } from "./storage";
-import { insertUserSchema, updateUserSchema, insertSiteAccessUserSchema, siteAccessUsers, insertIntegrationSchema, integrations, auditLogs, insertAppMappingSchema, appMappings, departmentAppMappings, insertDepartmentAppMappingSchema, employeeTypeAppMappings, insertEmployeeTypeAppMappingSchema, departmentGroupMappings, insertDepartmentGroupMappingSchema, employeeTypeGroupMappings, insertEmployeeTypeGroupMappingSchema, insertLayoutSettingSchema, layoutSettings, dashboardCards, insertDashboardCardSchema, updateDashboardCardSchema, monitoringCards, insertMonitoringCardSchema, updateMonitoringCardSchema, companyLogos, insertCompanyLogoSchema, insertMspLogoSchema, clients, clientAccess, users } from "@shared/schema";
+import { insertUserSchema, updateUserSchema, insertSiteAccessUserSchema, siteAccessUsers, insertIntegrationSchema, integrations, auditLogs, insertAppMappingSchema, appMappings, departmentAppMappings, insertDepartmentAppMappingSchema, employeeTypeAppMappings, insertEmployeeTypeAppMappingSchema, departmentGroupMappings, insertDepartmentGroupMappingSchema, employeeTypeGroupMappings, insertEmployeeTypeGroupMappingSchema, insertLayoutSettingSchema, layoutSettings, dashboardCards, insertDashboardCardSchema, updateDashboardCardSchema, monitoringCards, insertMonitoringCardSchema, updateMonitoringCardSchema, companyLogos, insertCompanyLogoSchema, insertMspLogoSchema, clients, clientAccess, users, jiraDashboardComponents, insertJiraDashboardComponentSchema } from "@shared/schema";
 
 import { db } from "./db";
 import { eq, desc, and, or, ilike, asc, inArray } from "drizzle-orm";
@@ -3252,6 +3252,84 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error(`Error fetching JIRA projects for client ${req.params.clientId}:`, error);
       res.status(500).json({ error: "Failed to fetch JIRA projects" });
+    }
+  });
+
+  // Save JIRA dashboard component configuration for a specific client
+  app.post("/api/client/:clientId/jira/dashboard-config", isAuthenticated, requireAdmin, async (req, res) => {
+    try {
+      const clientId = parseInt(req.params.clientId);
+      const { cardId, components } = req.body;
+      
+      console.log(`💾 Saving JIRA dashboard config for client ${clientId}, card ${cardId}`);
+      
+      const multiDb = MultiDatabaseManager.getInstance();
+      const clientDb = await multiDb.getClientDb(clientId);
+      
+      // Delete existing components for this card
+      await clientDb.delete(jiraDashboardComponents)
+        .where(and(
+          eq(jiraDashboardComponents.cardId, cardId),
+          eq(jiraDashboardComponents.clientId, clientId)
+        ));
+      
+      // Insert new components
+      if (components && components.length > 0) {
+        const componentsToInsert = components.map((component: any, index: number) => ({
+          cardId,
+          componentType: component.type,
+          componentName: component.name,
+          config: component.config,
+          position: index,
+          clientId
+        }));
+        
+        await clientDb.insert(jiraDashboardComponents)
+          .values(componentsToInsert);
+      }
+      
+      console.log(`✅ Saved ${components?.length || 0} JIRA components for client ${clientId}`);
+      res.json({ success: true, message: "JIRA dashboard configuration saved successfully" });
+      
+    } catch (error) {
+      console.error(`Error saving JIRA dashboard config for client ${req.params.clientId}:`, error);
+      res.status(500).json({ error: "Failed to save JIRA dashboard configuration" });
+    }
+  });
+
+  // Load JIRA dashboard component configuration for a specific client
+  app.get("/api/client/:clientId/jira/dashboard-config/:cardId", isAuthenticated, async (req, res) => {
+    try {
+      const clientId = parseInt(req.params.clientId);
+      const cardId = parseInt(req.params.cardId);
+      
+      console.log(`📋 Loading JIRA dashboard config for client ${clientId}, card ${cardId}`);
+      
+      const multiDb = MultiDatabaseManager.getInstance();
+      const clientDb = await multiDb.getClientDb(clientId);
+      
+      const components = await clientDb.select()
+        .from(jiraDashboardComponents)
+        .where(and(
+          eq(jiraDashboardComponents.cardId, cardId),
+          eq(jiraDashboardComponents.clientId, clientId)
+        ))
+        .orderBy(jiraDashboardComponents.position);
+      
+      // Transform to frontend format
+      const formattedComponents = components.map(component => ({
+        id: `${component.componentType}-${component.id}`,
+        type: component.componentType,
+        name: component.componentName,
+        config: component.config
+      }));
+      
+      console.log(`✅ Loaded ${formattedComponents.length} JIRA components for client ${clientId}`);
+      res.json(formattedComponents);
+      
+    } catch (error) {
+      console.error(`Error loading JIRA dashboard config for client ${req.params.clientId}:`, error);
+      res.status(500).json({ error: "Failed to load JIRA dashboard configuration" });
     }
   });
 

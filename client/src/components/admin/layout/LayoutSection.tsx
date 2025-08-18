@@ -75,6 +75,28 @@ export function LayoutSection({
     retry: 1,
   });
 
+  // Load existing JIRA configuration when modal opens
+  const jiraConfigEndpoint = `/api/client/${currentClientId}/jira/dashboard-config/${editingJiraCard?.id}`;
+  const { data: existingJiraConfig = [] } = useQuery<Array<{
+    id: string;
+    type: 'ticketQueue' | 'dashboard' | 'filter';
+    name: string;
+    config: any;
+  }>>({
+    queryKey: [jiraConfigEndpoint],
+    enabled: isJiraConfigOpen && !!editingJiraCard?.id,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+
+  // Load existing config into state when modal opens
+  useEffect(() => {
+    if (isJiraConfigOpen && existingJiraConfig.length > 0) {
+      setJiraComponents(existingJiraConfig);
+    } else if (isJiraConfigOpen && existingJiraConfig.length === 0) {
+      setJiraComponents([]); // Reset if no existing config
+    }
+  }, [isJiraConfigOpen, existingJiraConfig]);
+
   // Fetch dashboard cards for current client - ONLY when Layout > Dashboard tab is active
   const dashboardCardsEndpoint = `/api/client/${currentClientId}/dashboard-cards`;
   const { data: dashboardCardsData, refetch: refetchDashboardCards, error: dashboardCardsError, isLoading: dashboardCardsLoading } = useQuery({
@@ -1585,10 +1607,38 @@ export function LayoutSection({
               Cancel
             </Button>
             <Button 
-              onClick={() => {
-                // Save JIRA configuration logic would go here
-                setIsJiraConfigOpen(false);
-                // Show success message
+              onClick={async () => {
+                try {
+                  console.log('💾 Saving JIRA configuration:', jiraComponents);
+                  
+                  const response = await fetch(`/api/client/${currentClientId}/jira/dashboard-config`, {
+                    method: 'POST',
+                    headers: {
+                      'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                      cardId: editingJiraCard?.id,
+                      components: jiraComponents.map(comp => ({
+                        type: comp.type,
+                        name: comp.name,
+                        config: comp.config
+                      }))
+                    }),
+                  });
+                  
+                  if (response.ok) {
+                    console.log('✅ JIRA configuration saved successfully');
+                    setIsJiraConfigOpen(false);
+                    // Invalidate cache to refresh data
+                    queryClient.invalidateQueries({ 
+                      queryKey: [`/api/client/${currentClientId}/jira/dashboard-config/${editingJiraCard?.id}`] 
+                    });
+                  } else {
+                    console.error('❌ Failed to save JIRA configuration');
+                  }
+                } catch (error) {
+                  console.error('❌ Error saving JIRA configuration:', error);
+                }
               }}
               className="bg-blue-600 hover:bg-blue-700 text-white"
             >
