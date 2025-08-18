@@ -52,6 +52,31 @@ export function DashboardSection() {
     enabled: dashboardCards.some(card => card.type === 'jira'), // Only fetch if JIRA card exists
   });
 
+  // Find the JIRA dashboard card and fetch tickets
+  const jiraCard = dashboardCards?.find(card => card.type === 'jira');
+  const jiraCardId = jiraCard?.id;
+  const jiraIntegration = integrations?.find(integration => integration.name === 'jira');
+  const isJiraConnected = jiraIntegration?.status === 'connected';
+
+  // Fetch JIRA tickets based on dashboard configuration
+  const { data: jiraTicketData, isLoading: loadingJiraTickets } = useQuery({
+    queryKey: ['/api/client', currentClientId, 'jira', 'tickets', jiraCardId],
+    queryFn: async () => {
+      if (!jiraCardId || !currentClientId) return null;
+      const response = await fetch(`/api/client/${currentClientId}/jira/tickets?cardId=${jiraCardId}`);
+      if (!response.ok) {
+        if (response.status === 400) {
+          const error = await response.json();
+          throw new Error(error.error || 'Configuration error');
+        }
+        throw new Error('Failed to fetch JIRA tickets');
+      }
+      return response.json();
+    },
+    enabled: isJiraConnected && !!jiraCardId && !!currentClientId,
+    refetchInterval: 5 * 60 * 1000, // Refresh every 5 minutes
+  });
+
   // KnowBe4 campaign data
   const knowBe4Data = [
     { name: 'Completed', value: 75, color: '#22c55e' },
@@ -289,33 +314,6 @@ export function DashboardSection() {
   );
 
   const renderJiraCard = () => {
-    // Check if JIRA integration is connected
-    const jiraIntegration = integrations?.find(integration => integration.name === 'jira');
-    const isConnected = jiraIntegration?.status === 'connected';
-
-    // Find the JIRA dashboard card
-    const jiraCard = dashboardCards?.find(card => card.type === 'jira');
-    const jiraCardId = jiraCard?.id;
-
-    // Fetch JIRA tickets based on dashboard configuration
-    const { data: jiraTicketData, isLoading: loadingTickets } = useQuery({
-      queryKey: ['/api/client', currentClientId, 'jira', 'tickets', jiraCardId],
-      queryFn: async () => {
-        if (!jiraCardId || !currentClientId) return null;
-        const response = await fetch(`/api/client/${currentClientId}/jira/tickets?cardId=${jiraCardId}`);
-        if (!response.ok) {
-          if (response.status === 400) {
-            const error = await response.json();
-            throw new Error(error.error || 'Configuration error');
-          }
-          throw new Error('Failed to fetch JIRA tickets');
-        }
-        return response.json();
-      },
-      enabled: isConnected && !!jiraCardId && !!currentClientId,
-      refetchInterval: 5 * 60 * 1000, // Refresh every 5 minutes
-    });
-
     const tickets = jiraTicketData?.tickets || [];
     const totalFound = jiraTicketData?.totalFound || 0;
 
@@ -327,7 +325,7 @@ export function DashboardSection() {
               <Ticket className="w-5 h-5 text-blue-600" />
               <CardTitle className="text-blue-700 dark:text-blue-300">Jira Service Management</CardTitle>
             </div>
-            {isConnected && tickets.length > 0 && (
+            {isJiraConnected && tickets.length > 0 && (
               <div className="text-sm text-muted-foreground">
                 {totalFound} SLA breached tickets
               </div>
@@ -335,7 +333,7 @@ export function DashboardSection() {
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
-          {!isConnected ? (
+          {!isJiraConnected ? (
             <div className="text-center py-8">
               <div className="flex flex-col items-center space-y-3">
                 <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center">
@@ -349,7 +347,7 @@ export function DashboardSection() {
                 </div>
               </div>
             </div>
-          ) : loadingTickets ? (
+          ) : loadingJiraTickets ? (
             <div className="text-center py-8">
               <div className="flex flex-col items-center space-y-3">
                 <div className="w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
