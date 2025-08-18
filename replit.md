@@ -31,6 +31,12 @@ The dashboard uses a React frontend (TypeScript, Tailwind CSS, Wouter) and an Ex
 - **Dynamic Connection Routing:** A multi-database manager dynamically connects to the correct client database.
 - **Security Compliance:** Achieves maximum data isolation through separate database instances.
 
+**Critical Data Storage Rule:**
+- **99% Client-Specific:** Nearly all functional data belongs in individual client databases, not the MSP database
+- **MSP Database Only For:** Client metadata, MSP user management, and cross-client access controls
+- **Client Database For:** All integrations, configurations, users, settings, dashboard customizations, and operational data
+- **Default Assumption:** Unless explicitly managing MSP-level functionality, always use client databases
+
 **Self-Hosting Package:**
 - Docker containerization with `docker-compose`.
 - PostgreSQL with automated backup/restore.
