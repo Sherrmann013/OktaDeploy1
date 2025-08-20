@@ -1419,32 +1419,15 @@ export function LayoutSection({
                 variant="outline"
                 onClick={() => {
                   const newComponent = {
-                    id: `dashboard-${Date.now()}`,
-                    type: 'dashboard' as const,
-                    name: 'Dashboard',
-                    config: {
-                      dashboardId: '',
-                      gadgets: []
-                    }
-                  };
-                  setJiraComponents(prev => [...prev, newComponent]);
-                }}
-                className="flex items-center gap-2"
-              >
-                <BarChart3 className="w-4 h-4 text-green-600" />
-                <span>Dashboard</span>
-                <Plus className="w-4 h-4" />
-              </Button>
-
-              <Button
-                variant="outline"
-                onClick={() => {
-                  const newComponent = {
                     id: `filter-${Date.now()}`,
                     type: 'filter' as const,
                     name: 'Filter',
                     config: {
-                      customFilters: []
+                      project: '',
+                      issueTypes: [],
+                      statuses: [],
+                      priorities: [],
+                      jql: ''
                     }
                   };
                   setJiraComponents(prev => [...prev, newComponent]);
@@ -1475,7 +1458,6 @@ export function LayoutSection({
                       <div className="flex items-center gap-3">
                         <div className="flex items-center gap-2">
                           {component.type === 'ticketQueue' && <Ticket className="w-4 h-4 text-blue-600" />}
-                          {component.type === 'dashboard' && <BarChart3 className="w-4 h-4 text-green-600" />}
                           {component.type === 'filter' && <Filter className="w-4 h-4 text-purple-600" />}
                           <span className="font-medium">{component.name}</span>
                         </div>
@@ -1693,13 +1675,160 @@ export function LayoutSection({
                         )}
 
                         {component.type === 'filter' && (
-                          <div className="text-sm text-muted-foreground bg-purple-50 dark:bg-purple-900/20 p-3 rounded">
-                            Custom filter configuration will be available here. This will include options for:
-                            <ul className="list-disc list-inside mt-2 space-y-1">
-                              <li>Saved JQL filters</li>
-                              <li>Quick filter presets</li>
-                              <li>Dynamic filter conditions</li>
-                            </ul>
+                          <div className="space-y-4">
+                            <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                              Filter Configuration
+                            </div>
+                            
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              {/* Project Selection */}
+                              <div className="space-y-2">
+                                <Label className="text-sm font-medium">Project</Label>
+                                <Select
+                                  value={component.config.project || ''}
+                                  onValueChange={(value) => {
+                                    setJiraComponents(prev => 
+                                      prev.map(c => c.id === component.id 
+                                        ? { ...c, config: { ...c.config, project: value } }
+                                        : c
+                                      )
+                                    );
+                                  }}
+                                >
+                                  <SelectTrigger className="bg-white dark:bg-gray-800">
+                                    <SelectValue placeholder="Select project" />
+                                  </SelectTrigger>
+                                  <SelectContent className="bg-white dark:bg-gray-800">
+                                    {jiraProjects.map((project) => (
+                                      <SelectItem key={project.key} value={project.key}>
+                                        {project.name} ({project.key})
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                              </div>
+
+                              {/* Issue Types */}
+                              <div className="space-y-2">
+                                <Label className="text-sm font-medium">Issue Types</Label>
+                                <div className="border rounded-md p-2 bg-white dark:bg-gray-800 max-h-24 overflow-y-auto">
+                                  {['Bug', 'Task', 'Story', 'Epic', 'Sub-task'].map((type) => (
+                                    <div key={type} className="flex items-center space-x-2 mb-1">
+                                      <Checkbox
+                                        id={`${component.id}-${type}`}
+                                        checked={component.config.issueTypes?.includes(type) || false}
+                                        onCheckedChange={(checked) => {
+                                          const current = component.config.issueTypes || [];
+                                          const updated = checked 
+                                            ? [...current, type]
+                                            : current.filter((t: string) => t !== type);
+                                          setJiraComponents(prev => 
+                                            prev.map(c => c.id === component.id 
+                                              ? { ...c, config: { ...c.config, issueTypes: updated } }
+                                              : c
+                                            )
+                                          );
+                                        }}
+                                      />
+                                      <Label htmlFor={`${component.id}-${type}`} className="text-sm">{type}</Label>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+
+                              {/* Status */}
+                              <div className="space-y-2">
+                                <Label className="text-sm font-medium">Status</Label>
+                                <div className="border rounded-md p-2 bg-white dark:bg-gray-800 max-h-24 overflow-y-auto">
+                                  {['To Do', 'In Progress', 'In Review', 'Done', 'Blocked'].map((status) => (
+                                    <div key={status} className="flex items-center space-x-2 mb-1">
+                                      <Checkbox
+                                        id={`${component.id}-${status}`}
+                                        checked={component.config.statuses?.includes(status) || false}
+                                        onCheckedChange={(checked) => {
+                                          const current = component.config.statuses || [];
+                                          const updated = checked 
+                                            ? [...current, status]
+                                            : current.filter((s: string) => s !== status);
+                                          setJiraComponents(prev => 
+                                            prev.map(c => c.id === component.id 
+                                              ? { ...c, config: { ...c.config, statuses: updated } }
+                                              : c
+                                            )
+                                          );
+                                        }}
+                                      />
+                                      <Label htmlFor={`${component.id}-${status}`} className="text-sm">{status}</Label>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+
+                              {/* Priority */}
+                              <div className="space-y-2">
+                                <Label className="text-sm font-medium">Priority</Label>
+                                <div className="border rounded-md p-2 bg-white dark:bg-gray-800 max-h-24 overflow-y-auto">
+                                  {['Highest', 'High', 'Medium', 'Low', 'Lowest'].map((priority) => (
+                                    <div key={priority} className="flex items-center space-x-2 mb-1">
+                                      <Checkbox
+                                        id={`${component.id}-${priority}`}
+                                        checked={component.config.priorities?.includes(priority) || false}
+                                        onCheckedChange={(checked) => {
+                                          const current = component.config.priorities || [];
+                                          const updated = checked 
+                                            ? [...current, priority]
+                                            : current.filter((p: string) => p !== priority);
+                                          setJiraComponents(prev => 
+                                            prev.map(c => c.id === component.id 
+                                              ? { ...c, config: { ...c.config, priorities: updated } }
+                                              : c
+                                            )
+                                          );
+                                        }}
+                                      />
+                                      <Label htmlFor={`${component.id}-${priority}`} className="text-sm">{priority}</Label>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Advanced JQL */}
+                            <div className="space-y-2">
+                              <Label className="text-sm font-medium">Advanced JQL Query (Optional)</Label>
+                              <textarea
+                                value={component.config.jql || ''}
+                                onChange={(e) => {
+                                  setJiraComponents(prev => 
+                                    prev.map(c => c.id === component.id 
+                                      ? { ...c, config: { ...c.config, jql: e.target.value } }
+                                      : c
+                                    )
+                                  );
+                                }}
+                                placeholder="project = CWEX AND status = 'In Progress'"
+                                className="w-full h-20 px-3 py-2 border rounded-md bg-white dark:bg-gray-800 text-sm font-mono"
+                              />
+                              <div className="text-xs text-muted-foreground">
+                                Custom JQL will override the filter selections above
+                              </div>
+                            </div>
+
+                            {/* Filter Summary */}
+                            {(component.config.project || component.config.issueTypes?.length || component.config.statuses?.length || component.config.priorities?.length || component.config.jql) && (
+                              <div className="mt-3 p-3 bg-purple-50 dark:bg-purple-900/20 rounded">
+                                <div className="text-sm font-medium text-purple-800 dark:text-purple-200">
+                                  Filter Summary
+                                </div>
+                                <div className="text-xs text-purple-600 dark:text-purple-300 mt-1 space-y-1">
+                                  {component.config.project && <div>Project: {component.config.project}</div>}
+                                  {component.config.issueTypes?.length > 0 && <div>Types: {component.config.issueTypes.join(', ')}</div>}
+                                  {component.config.statuses?.length > 0 && <div>Status: {component.config.statuses.join(', ')}</div>}
+                                  {component.config.priorities?.length > 0 && <div>Priority: {component.config.priorities.join(', ')}</div>}
+                                  {component.config.jql && <div>Custom JQL: {component.config.jql}</div>}
+                                </div>
+                              </div>
+                            )}
                           </div>
                         )}
                       </div>
