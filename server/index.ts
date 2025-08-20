@@ -34,6 +34,16 @@ const app = express();
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: false, limit: '10mb' }));
 
+// Public health check endpoint for Railway deployment (must be before other routes)
+app.get("/health", (req, res) => {
+  res.status(200).json({ 
+    status: "ok", 
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV || "development",
+    port: process.env.PORT || "5000"
+  });
+});
+
 app.use((req, res, next) => {
   const start = Date.now();
   const path = req.path;
