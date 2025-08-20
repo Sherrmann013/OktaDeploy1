@@ -1031,6 +1031,15 @@ import { ClientStorage } from "./client-storage";
 import * as mspRoutes from "./routes/msp";
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Public health check endpoint for Railway deployment
+  app.get("/health", (req, res) => {
+    res.status(200).json({ 
+      status: "ok", 
+      timestamp: new Date().toISOString(),
+      environment: process.env.NODE_ENV || "development"
+    });
+  });
+
   // Setup OKTA authentication
   await setupAuth(app);
 

@@ -1,0 +1,114 @@
+npm notice
+npm notice New major version of npm available! 10.8.2 -> 11.5.2
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.5.2
+npm notice To update run: npm install -g npm@11.5.2
+npm notice
+
+[4/7] RUN npm ci  ✔ 8 sec
+
+[5/7] COPY . .
+
+[5/7] COPY . .  ✔ 195 ms
+
+[6/7] RUN npm run build
+
+
+> rest-express@1.0.0 build
+> vite build && esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist
+
+
+vite v5.4.14 building for production...
+
+transforming...
+
+Browserslist: browsers data (caniuse-lite) is 10 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+
+✓ 3016 modules transformed.
+
+rendering chunks...
+
+computing gzip size...
+
+../dist/public/index.html                     0.63 kB │ gzip:   0.38 kB
+
+../dist/public/assets/index-DjFRC8N7.css     95.99 kB │ gzip:  15.15 kB
+
+../dist/public/assets/index-BXsFmyf3.js   1,360.84 kB │ gzip: 367.39 kB
+
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+
+✓ built in 8.05s
+
+
+  dist/index.js  411.1kb
+
+⚡ Done in 21ms
+
+[6/7] RUN npm run build  ✔ 8 sec
+
+[7/7] RUN npm prune --production
+
+npm warn config production Use `--omit=dev` instead.
+
+
+up to date, audited 450 packages in 1s
+
+
+61 packages are looking for funding
+
+  run `npm fund` for details
+
+
+3 low severity vulnerabilities
+
+To address all issues, run:
+  npm audit fix
+
+Run `npm audit` for details.
+
+[7/7] RUN npm prune --production  ✔ 1 sec
+
+exporting to docker image format
+
+exporting to image
+
+importing to docker
+
+[auth] sharing credentials for production-us-west2.railway-registry.com
+
+[auth] sharing credentials for production-us-west2.railway-registry.com  ✔ 0 ms
+
+importing to docker  ✔ 7 sec
+
+Build time: 77.29 seconds
+
+ 
+
+====================
+
+Starting Healthcheck
+
+====================
+
+
+Path: /api/admin/health
+
+Retry window: 5m0s
+
+ 
+
+Attempt #1 failed with service unavailable. Continuing to retry for 4m59s
+
+Attempt #2 failed with service unavailable. Continuing to retry for 4m48s
+
+Attempt #3 failed with service unavailable. Continuing to retry for 4m46s
+
+Attempt #4 failed with service unavailable. Continuing to retry for 4m32s
+
+Attempt #5 failed with service unavailable. Continuing to retry for 4m21s
