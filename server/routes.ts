@@ -43,6 +43,15 @@ function determineEmployeeTypeFromGroups(userGroups: any[], employeeTypeApps: Se
   return null;
 }
 import { setupSimpleAuth as setupAuth, isAuthenticated, requireAdmin } from "./simple-auth";
+import { validateAdminApiKey, logAdminOperation, adminErrorHandler } from "./admin-middleware";
+import { 
+  performSystemHealthCheck, 
+  deployIntegrationToClients, 
+  executeMigration, 
+  getSystemInfo,
+  type IntegrationDeployment,
+  type MigrationOperation 
+} from "./admin-operations";
 
 // Helper function to reset OKTA user authenticators
 async function resetOktaUserAuthenticators(apiKeys: Record<string, string>, oktaId: string) {
@@ -7470,6 +7479,153 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     }
   });
+
+  // ===== ADMIN API ENDPOINTS =====
+  // These endpoints provide system-wide management capabilities for both current multi-tenant
+  // setup and future distributed deployment architectures
+
+  // System health check
+  app.get("/api/admin/health", validateAdminApiKey, logAdminOperation, async (req, res) => {
+    try {
+      console.log('🏥 Admin API: Performing system health check');
+      const healthData = await performSystemHealthCheck();
+      res.json({
+        status: 'success',
+        data: healthData,
+        timestamp: new Date().toISOString()
+      });
+    } catch (error) {
+      console.error('❌ Admin API: Health check failed:', error);
+      res.status(500).json({
+        status: 'error',
+        message: 'Health check failed',
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
+  // System information
+  app.get("/api/admin/info", validateAdminApiKey, logAdminOperation, async (req, res) => {
+    try {
+      console.log('📊 Admin API: Gathering system information');
+      const systemInfo = await getSystemInfo();
+      res.json({
+        status: 'success',
+        data: systemInfo,
+        timestamp: new Date().toISOString()
+      });
+    } catch (error) {
+      console.error('❌ Admin API: System info failed:', error);
+      res.status(500).json({
+        status: 'error',
+        message: 'Failed to gather system information',
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
+  // Deploy integration to clients
+  app.post("/api/admin/integrations/deploy", validateAdminApiKey, logAdminOperation, async (req, res) => {
+    try {
+      const deployment: IntegrationDeployment = req.body;
+      console.log(`🚀 Admin API: Deploying integration ${deployment.integrationName} v${deployment.version}`);
+      
+      // Validate required fields
+      if (!deployment.integrationName || !deployment.version) {
+        return res.status(400).json({
+          status: 'error',
+          message: 'Integration name and version are required'
+        });
+      }
+      
+      const result = await deployIntegrationToClients(deployment);
+      
+      res.json({
+        status: result.success ? 'success' : 'partial',
+        data: result,
+        timestamp: new Date().toISOString()
+      });
+    } catch (error) {
+      console.error('❌ Admin API: Integration deployment failed:', error);
+      res.status(500).json({
+        status: 'error',
+        message: 'Integration deployment failed',
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
+  // Execute database migration
+  app.post("/api/admin/migrations/execute", validateAdminApiKey, logAdminOperation, async (req, res) => {
+    try {
+      const migration: MigrationOperation = req.body;
+      console.log(`🔄 Admin API: Executing migration ${migration.migrationId}`);
+      
+      // Validate required fields
+      if (!migration.migrationId || !migration.sqlStatements || migration.sqlStatements.length === 0) {
+        return res.status(400).json({
+          status: 'error',
+          message: 'Migration ID and SQL statements are required'
+        });
+      }
+      
+      const result = await executeMigration(migration);
+      
+      res.json({
+        status: result.success ? 'success' : 'partial',
+        data: result,
+        timestamp: new Date().toISOString()
+      });
+    } catch (error) {
+      console.error('❌ Admin API: Migration execution failed:', error);
+      res.status(500).json({
+        status: 'error',
+        message: 'Migration execution failed',
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
+  // Test admin API connection
+  app.get("/api/admin/ping", validateAdminApiKey, logAdminOperation, async (req, res) => {
+    console.log('🏓 Admin API: Ping received');
+    res.json({
+      status: 'success',
+      message: 'Admin API is accessible',
+      timestamp: new Date().toISOString(),
+      version: process.env.npm_package_version || '1.0.0'
+    });
+  });
+
+  // Get admin operation logs (last 100 operations)
+  app.get("/api/admin/logs", validateAdminApiKey, logAdminOperation, async (req, res) => {
+    try {
+      const limit = parseInt(req.query.limit as string) || 100;
+      console.log(`📋 Admin API: Fetching last ${limit} admin operations`);
+      
+      // This would typically fetch from a dedicated admin logs table
+      // For now, return a placeholder response
+      res.json({
+        status: 'success',
+        data: {
+          logs: [],
+          message: 'Admin logging system ready for implementation',
+          totalLogs: 0
+        },
+        timestamp: new Date().toISOString()
+      });
+    } catch (error) {
+      console.error('❌ Admin API: Failed to fetch logs:', error);
+      res.status(500).json({
+        status: 'error',
+        message: 'Failed to fetch admin logs',
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
+  // Admin error handler (should be after all admin routes)
+  app.use('/api/admin/*', adminErrorHandler);
 
   const httpServer = createServer(app);
   return httpServer;

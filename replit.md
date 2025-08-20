@@ -50,6 +50,13 @@ This project is a comprehensive React-based multi-tenant enterprise security man
 ## System Architecture
 The dashboard uses a React frontend (TypeScript, Tailwind CSS, Wouter) and an Express.js backend (TypeScript, PostgreSQL).
 
+**Admin API System:**
+- Comprehensive remote management capabilities for distributed deployment model
+- Secure authentication via ADMIN_API_KEY environment variable
+- System health monitoring, integration deployment, and database migration execution
+- Designed for both current multi-tenant usage and future platform-as-a-product AWS deployments
+- All operations logged with IP tracking and audit trails for security compliance
+
 **Authentication:**
 - Supports local admin and OKTA SSO (OAuth2).
 - Secure server-side session management.
