@@ -129,8 +129,9 @@ app.use((req, res, next) => {
     });
   }
 
-  // Use Railway's assigned port 3000, fallback to 5000 for local development
-  const port = parseInt(process.env.PORT || (process.env.NODE_ENV === "production" ? "3000" : "5000"), 10);
+  // Railway port configuration: Use Railway's PORT env var, fallback to 3000 for Railway deployment
+  const port = process.env.PORT ? parseInt(process.env.PORT, 10) : 
+               process.env.NODE_ENV === "production" ? 3000 : 5000;
   log(`🔍 Environment PORT: ${process.env.PORT}`);
   log(`🔍 Using port: ${port}`);
   log(`🔍 Node ENV: ${process.env.NODE_ENV}`);
