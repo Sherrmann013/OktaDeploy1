@@ -2,7 +2,7 @@
 builder = "nixpacks"
 
 [deploy]
-startCommand = "echo 'DATABASE_URL: '\"$DATABASE_URL\" && npm run db:push && npm start"
+startCommand = "echo 'Starting app directly...' && npm start"
 healthcheckPath = "/health"
 healthcheckTimeout = 300
 restartPolicyType = "always"
