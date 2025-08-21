@@ -19,12 +19,14 @@ RUN npm run build
 # Keep devDependencies for drizzle-kit database setup
 # RUN npm prune --production
 
-# Expose port
-EXPOSE 3000
+# Note: Database setup will happen automatically when app starts
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD curl -f http://localhost:3000/health || exit 1
+# Expose port (Railway will assign dynamically)
+EXPOSE $PORT
 
-# Start the application with database setup
-CMD ["sh", "-c", "npm run db:push && npm start"]
+# Health check (use Railway's dynamic port)
+HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
+  CMD curl -f http://localhost:$PORT/health || exit 1
+
+# Start the application (skip db setup to avoid hanging)
+CMD ["npm", "start"]
