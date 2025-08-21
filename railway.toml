@@ -2,9 +2,9 @@
 builder = "nixpacks"
 
 [deploy]
-startCommand = "echo 'Starting app directly...' && npm start"
+startCommand = "echo 'Starting app...' && echo 'PORT: '$PORT && npm start"
 healthcheckPath = "/health"
-healthcheckTimeout = 300
+healthcheckTimeout = 600
 restartPolicyType = "always"
 
 [variables]
