@@ -131,11 +131,32 @@ app.use((req, res, next) => {
 
   // Use PORT environment variable for cloud deployments, fallback to 5000 for local development
   const port = parseInt(process.env.PORT || "5000", 10);
-  server.listen({
-    port,
-    host: "0.0.0.0",
-    reusePort: true,
-  }, () => {
-    log(`serving on port ${port}`);
+  log(`Environment PORT: ${process.env.PORT}`);
+  log(`Using port: ${port}`);
+  log(`Node ENV: ${process.env.NODE_ENV}`);
+  
+  try {
+    server.listen({
+      port,
+      host: "0.0.0.0",
+      reusePort: true,
+    }, () => {
+      log(`✅ Server successfully started on port ${port}`);
+      log(`✅ Health endpoint available at http://0.0.0.0:${port}/health`);
+    });
+  } catch (error) {
+    log(`❌ Server startup failed: ${error}`);
+    process.exit(1);
+  }
+  
+  // Handle uncaught errors
+  process.on('uncaughtException', (error) => {
+    log(`❌ Uncaught exception: ${error.message}`);
+    process.exit(1);
+  });
+  
+  process.on('unhandledRejection', (reason) => {
+    log(`❌ Unhandled rejection: ${reason}`);
+    process.exit(1);
   });
 })();
