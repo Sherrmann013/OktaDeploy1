@@ -13,9 +13,6 @@ RUN npm ci
 # Copy source code
 COPY . .
 
-# Make startup script executable
-RUN chmod +x start-production.sh
-
 # Build the application
 RUN npm run build
 
