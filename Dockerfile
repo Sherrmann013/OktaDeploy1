@@ -16,8 +16,8 @@ COPY . .
 # Build the application
 RUN npm run build
 
-# Remove devDependencies to reduce image size
-RUN npm prune --production
+# Keep devDependencies for drizzle-kit database setup
+# RUN npm prune --production
 
 # Expose port
 EXPOSE 3000
