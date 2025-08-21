@@ -3,8 +3,8 @@ builder = "nixpacks"
 
 [deploy]
 startCommand = "echo 'Starting app...' && echo 'PORT: '$PORT && npm start"
-healthcheckPath = "/health"
-healthcheckTimeout = 600
+# healthcheckPath = "/health"
+# healthcheckTimeout = 600
 restartPolicyType = "always"
 
 [variables]

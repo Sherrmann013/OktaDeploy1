@@ -131,9 +131,11 @@ app.use((req, res, next) => {
 
   // Use PORT environment variable for cloud deployments, fallback to 5000 for local development
   const port = parseInt(process.env.PORT || "5000", 10);
-  log(`Environment PORT: ${process.env.PORT}`);
-  log(`Using port: ${port}`);
-  log(`Node ENV: ${process.env.NODE_ENV}`);
+  log(`🔍 Environment PORT: ${process.env.PORT}`);
+  log(`🔍 Using port: ${port}`);
+  log(`🔍 Node ENV: ${process.env.NODE_ENV}`);
+  log(`🔍 Database URL configured: ${process.env.DATABASE_URL ? 'YES' : 'NO'}`);
+  log(`🔍 Starting server binding...`);
   
   try {
     server.listen({
