@@ -3,8 +3,8 @@ builder = "nixpacks"
 
 [deploy]
 startCommand = "echo 'Starting app...' && echo 'PORT: '$PORT && echo 'DATABASE_URL: '$DATABASE_URL && npm run db:push --force && npm start"
-# healthcheckPath = "/health"
-# healthcheckTimeout = 600
+healthcheckPath = "/health"
+healthcheckTimeout = 300
 restartPolicyType = "always"
 
 [variables]
