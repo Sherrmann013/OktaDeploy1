@@ -13,6 +13,9 @@ RUN npm ci
 # Copy source code
 COPY . .
 
+# Make startup script executable
+RUN chmod +x start-production.sh
+
 # Build the application
 RUN npm run build
 
@@ -26,5 +29,5 @@ EXPOSE 3000
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
   CMD curl -f http://localhost:3000/health || exit 1
 
-# Start the application
-CMD ["npm", "start"]
+# Start the application with database setup
+CMD ["./start-production.sh"]
